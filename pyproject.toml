@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "csia-trust-layer"
+version = "0.6.0"
+description = "SWORT LLC Cross-Sensor Intelligence Architecture (CSIA) Trust Layer — research prototype / desktop simulation. NOT flight software."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "networkx>=3.2",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+mavlink = ["pymavlink>=2.4"]
+logs = ["pyulog>=1.0"]
+
+[project.scripts]
+csia = "csia.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["csia*"]
+
+[tool.setuptools.package-data]
+"csia.dashboard" = ["web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

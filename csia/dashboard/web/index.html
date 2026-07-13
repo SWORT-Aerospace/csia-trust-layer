@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CSIA Trust Layer — live dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --edge: #30363d; --text: #e6edf3;
+    --dim: #8b949e; --accent: #58a6ff; --warn: #f0883e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 13px/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px;
+           border-bottom: 1px solid var(--edge); flex-wrap: wrap; }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  header h1 span { color: var(--dim); font-weight: 400; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { background: var(--panel); color: var(--text);
+                 border: 1px solid var(--edge); border-radius: 6px;
+                 padding: 5px 10px; cursor: pointer; font-size: 12px; }
+  .tabs button.active { border-color: var(--accent); color: var(--accent); }
+  .controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .controls button { background: var(--panel); color: var(--text);
+                     border: 1px solid var(--edge); border-radius: 6px;
+                     padding: 5px 12px; cursor: pointer; }
+  #time { font-variant-numeric: tabular-nums; color: var(--accent); min-width: 66px; }
+  #scrub { width: 220px; }
+  .banner { background: #3d1d00; color: var(--warn); text-align: center;
+            padding: 4px 8px; font-size: 11.5px; letter-spacing: .04em; }
+  main { display: grid; grid-template-columns: minmax(380px, 44%) 1fr;
+         gap: 10px; padding: 10px 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--edge);
+           border-radius: 8px; padding: 8px 10px; }
+  .panel h2 { font-size: 11.5px; margin: 0 0 6px; color: var(--dim);
+              text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  canvas { width: 100%; display: block; }
+  #callout { font-size: 14px; padding: 8px 2px 2px; min-height: 24px; }
+  #callout b { color: var(--warn); }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px;
+            color: var(--dim); padding-top: 4px; }
+  .legend i { display: inline-block; width: 10px; height: 10px;
+              border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  footer { color: var(--dim); font-size: 11px; padding: 4px 16px 14px; }
+</style>
+</head>
+<body>
+<div class="banner">SIMULATION / RESEARCH PROTOTYPE — SYNTHETIC DATA — NOT FLIGHT SOFTWARE</div>
+<header>
+  <h1>CSIA Trust Layer <span>· SWORT LLC · Dynamic Trust Graph replay</span></h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="controls">
+    <button id="play">▶ Play</button>
+    <select id="speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select>
+    <input id="scrub" type="range" min="0" max="1" value="0" step="1">
+    <span id="time">t=0.00s</span>
+  </div>
+</header>
+<main>
+  <div class="col">
+    <div class="panel">
+      <h2>Dynamic Trust Graph — node fill = Trust Coefficient, edge = gated consistency</h2>
+      <canvas id="graph" height="430"></canvas>
+      <div id="callout">loading…</div>
+    </div>
+    <div class="panel">
+      <h2>Causal diagnosis — P(cause | consistency signature)</h2>
+      <canvas id="diag" height="170"></canvas>
+      <div class="legend" id="diagLegend"></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h2>Trust Coefficients (click a chart to scrub, click a node to inspect)</h2>
+      <canvas id="trust" height="240"></canvas>
+      <div class="legend" id="trustLegend"></div>
+    </div>
+    <div class="panel">
+      <h2 id="compTitle">Evidence sub-scores</h2>
+      <canvas id="comp" height="170"></canvas>
+      <div class="legend" id="compLegend"></div>
+    </div>
+    <div class="panel">
+      <h2>heading_course speed gate (COG constrains heading only in translation)</h2>
+      <canvas id="gate" height="110"></canvas>
+    </div>
+  </div>
+</main>
+<footer id="foot"></footer>
+<script>
+"use strict";
+window.addEventListener("error", ev => {
+  const el = document.getElementById("callout");
+  if (el) el.innerHTML = `<b>dashboard error:</b> ${ev.message} — reload the page`;
+});
+// Rendering strategy: each time-series chart is rendered ONCE per scenario
+// (or on resize / selection change) onto an offscreen layer; per animation
+// frame we only blit that layer and draw the time cursor. Playback uses a
+// fractional tick clock so speed is independent of display refresh rate.
+// (The original implementation advanced >=1 tick per FRAME and re-allocated
+// every canvas every frame — on a 120 Hz display "1x" ran ~5x too fast and
+// stuttered: the "play is bugged" bug.)
+const $ = id => document.getElementById(id);
+const SENSOR_COLORS = ["#58a6ff","#f78166","#56d364","#d2a8ff","#e3b341",
+                       "#ff7b72","#79c0ff","#f0883e"];
+const CAUSE_COLORS  = ["#3fb950","#ff7b72","#58a6ff","#79c0ff","#d2a8ff",
+                       "#e3b341","#f0883e","#8b949e"];
+const COMP_COLORS = { nbr:"#58a6ff", phys:"#ff7b72", temp:"#56d364", stat:"#e3b341" };
+
+let scenarios = [], data = null;
+let k = 0, kf = 0.0, playing = false, lastTs = null;
+let selected = "gps";
+let liveMode = false, liveTimer = null;
+
+function trustColor(v) { // red -> yellow -> green
+  v = Math.max(0, Math.min(1, v));
+  const stops = [[0,[214,57,57]], [0.5,[227,179,65]], [1,[63,185,80]]];
+  let lo = stops[0], hi = stops[stops.length-1];
+  for (let i = 0; i + 1 < stops.length; i++)
+    if (v >= stops[i][0] && v <= stops[i+1][0]) { lo = stops[i]; hi = stops[i+1]; }
+  const f = (v - lo[0]) / (hi[0] - lo[0] || 1);
+  const c = lo[1].map((a, i) => Math.round(a + f * (hi[1][i] - a)));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+class TimeChart {
+  constructor(id, opts = {}) {
+    this.cv = $(id);
+    this.opts = opts;
+    this.pad = { l: 30, r: 6, t: 6, b: 16 };
+    this.series = [];
+    this.cv.addEventListener("pointerdown", ev => {
+      if (!data) return;
+      this.cv.setPointerCapture(ev.pointerId);
+      const move = e => {
+        const fx = (e.offsetX - this.pad.l) / (this.w - this.pad.l - this.pad.r);
+        setCursor(Math.round(Math.max(0, Math.min(1, fx)) * (data.t.length - 1)));
+      };
+      move(ev);
+      this.cv.onpointermove = move;
+      this.cv.onpointerup = () => { this.cv.onpointermove = null; };
+    });
+  }
+  setSeries(series) { this.series = series; this.render(); }
+  x(i) {
+    return this.pad.l
+      + (data.t[i] / data.t[data.t.length - 1]) * (this.w - this.pad.l - this.pad.r);
+  }
+  render() {  // heavy path: offscreen layer with axes + bands + all series
+    const dpr = window.devicePixelRatio || 1;
+    this.w = this.cv.clientWidth;
+    this.h = parseInt(this.cv.getAttribute("height"));
+    if (this.w < 20 || !data) {
+      // panel not laid out yet (hidden pane / mid-reflow / zero width):
+      // rendering now would create a 0x0 layer and drawImage would THROW,
+      // killing the page. The ResizeObserver re-renders when size arrives.
+      this.layer = null;
+      return;
+    }
+    this.dpr = dpr;
+    this.cv.width = this.w * dpr; this.cv.height = this.h * dpr;
+    this.cv.style.height = this.h + "px";
+    this.layer = document.createElement("canvas");
+    this.layer.width = this.w * dpr; this.layer.height = this.h * dpr;
+    const g = this.layer.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const { pad, w, h } = this;
+    const tEnd = data.t[data.t.length - 1];
+    const ymin = this.opts.ymin ?? 0, ymax = this.opts.ymax ?? 1;
+    const y = v => pad.t + (1 - (v - ymin) / (ymax - ymin)) * (h - pad.t - pad.b);
+    g.fillStyle = "rgba(248,81,73,0.10)";
+    for (const f of data.faults) {
+      const x0 = pad.l + (f.start / tEnd) * (w - pad.l - pad.r);
+      const x1 = pad.l + ((f.start + f.duration) / tEnd) * (w - pad.l - pad.r);
+      g.fillRect(x0, pad.t, x1 - x0, h - pad.t - pad.b);
+    }
+    g.strokeStyle = "#30363d"; g.fillStyle = "#8b949e"; g.font = "10px sans-serif";
+    for (const gv of this.opts.grid ?? [0, 0.5, 1]) {
+      g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(w - pad.r, y(gv)); g.stroke();
+      g.fillText(gv.toFixed(1), 4, y(gv) + 3);
+    }
+    for (let s = 0; s <= tEnd; s += 10) {
+      const xx = pad.l + (s / tEnd) * (w - pad.l - pad.r);
+      g.fillText(s + "s", xx - 6, h - 4);
+    }
+    if (this.opts.stacked) {
+      let base = new Float64Array(data.t.length);
+      for (const s of this.series) {
+        g.beginPath();
+        for (let i = 0; i < data.t.length; i++) g.lineTo(this.x(i), y(base[i] + s.v[i]));
+        for (let i = data.t.length - 1; i >= 0; i--) g.lineTo(this.x(i), y(base[i]));
+        g.closePath(); g.fillStyle = s.color + "cc"; g.fill();
+        for (let i = 0; i < data.t.length; i++) base[i] += s.v[i];
+      }
+    } else {
+      for (const s of this.series) {
+        g.strokeStyle = s.color; g.lineWidth = s.w ?? 1.4; g.beginPath();
+        let pen = false;
+        for (let i = 0; i < data.t.length; i++) {
+          if (s.v[i] < (this.opts.skipBelow ?? -Infinity)) { pen = false; continue; }
+          const yy = y(Math.max(ymin, Math.min(ymax, s.v[i])));
+          pen ? g.lineTo(this.x(i), yy) : g.moveTo(this.x(i), yy); pen = true;
+        }
+        g.stroke();
+      }
+    }
+    this.draw();
+  }
+  draw() {  // cheap per-frame path: blit layer + cursor line
+    if (!this.layer || this.layer.width === 0) return;
+    const g = this.cv.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, this.cv.width, this.cv.height);
+    g.drawImage(this.layer, 0, 0);
+    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    g.strokeStyle = "#e6edf3"; g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(this.x(k), this.pad.t);
+    g.lineTo(this.x(k), this.h - this.pad.b);
+    g.stroke();
+  }
+}
+
+const charts = {
+  trust: new TimeChart("trust", { ymin: 0.4, ymax: 1.0, grid: [0.4, 0.6, 0.8, 1.0] }),
+  diag: new TimeChart("diag", { stacked: true }),
+  comp: new TimeChart("comp", { skipBelow: -0.5 }),
+  gate: new TimeChart("gate", {}),
+};
+
+const NODE_R = 26;
+let nodePix = {}, graphGeom = null;
+function sizeGraph() {
+  const cv = $("graph");
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = parseInt(cv.getAttribute("height"));
+  if (w < 20) { graphGeom = null; return; }
+  cv.width = w * dpr; cv.height = h * dpr; cv.style.height = h + "px";
+  graphGeom = { w, h, dpr };
+  const pad = 46;
+  const xs = Object.values(data.layout).map(p => p[0]);
+  const ys = Object.values(data.layout).map(p => p[1]);
+  const [x0, x1] = [Math.min(...xs), Math.max(...xs)];
+  const [y0, y1] = [Math.min(...ys), Math.max(...ys)];
+  nodePix = {};
+  for (const [n, p] of Object.entries(data.layout))
+    nodePix[n] = [pad + (p[0] - x0) / (x1 - x0) * (w - 2 * pad),
+                  pad + (p[1] - y0) / (y1 - y0) * (h - 2 * pad)];
+}
+function drawGraph() {
+  if (!graphGeom) return;
+  const cv = $("graph"), { w, h, dpr } = graphGeom;
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  for (const e of data.edges) {
+    const [ax, ay] = nodePix[e.a], [bx, by] = nodePix[e.b];
+    g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by);
+    if (e.gate[k] < 0.05) {
+      g.strokeStyle = "rgba(139,148,158,0.3)"; g.lineWidth = 1; g.setLineDash([4, 5]);
+    } else {
+      g.strokeStyle = trustColor(e.c[k]); g.lineWidth = 1 + 3.4 * e.gate[k]; g.setLineDash([]);
+    }
+    g.stroke(); g.setLineDash([]);
+  }
+  for (const n of data.sensors) {
+    const [xx, yy] = nodePix[n], tr = data.trust[n][k];
+    g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);
+    g.fillStyle = trustColor(tr); g.fill();
+    g.lineWidth = n === selected ? 3 : 1.2;
+    g.strokeStyle = n === selected ? "#e6edf3" : "#0d1117"; g.stroke();
+    g.fillStyle = "#0d1117"; g.font = "bold 10px sans-serif"; g.textAlign = "center";
+    g.fillText(n, xx, yy - 2);
+    g.fillText(tr.toFixed(2), xx, yy + 11);
+  }
+  g.textAlign = "left";
+}
+$("graph").addEventListener("click", ev => {
+  if (!data) return;
+  for (const [n, [xx, yy]] of Object.entries(nodePix))
+    if ((ev.offsetX - xx) ** 2 + (ev.offsetY - yy) ** 2 < NODE_R ** 2) {
+      selected = n;
+      charts.comp.setSeries(compSeries());
+      $("compTitle").textContent =
+        `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+      drawDynamic();
+      return;
+    }
+});
+
+function compSeries() {
+  return Object.entries(data.components).map(([cn, per]) =>
+    ({ v: per[selected], color: COMP_COLORS[cn] }));
+}
+
+function legend(el, items) {
+  el.innerHTML = items.map(([label, color]) =>
+    `<span><i style="background:${color}"></i>${label}</span>`).join("");
+}
+
+function drawDynamic() {  // everything that changes with the cursor
+  if (!data) return;
+  $("scrub").value = k;
+  $("time").textContent = "t=" + data.t[k].toFixed(2) + "s";
+  drawGraph();
+  for (const c of Object.values(charts)) c.draw();
+  const post = data.diagnosis.posterior[k]
+    .map((p, i) => [data.diagnosis.causes[i], p])
+    .sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([c, p]) => `${(100 * p).toFixed(0)}% ${c}`).join(" · ");
+  $("callout").innerHTML = `<b>diagnosis:</b> ${post}` +
+    ` &nbsp;·&nbsp; ${selected} trust ${data.trust[selected][k].toFixed(3)}`;
+}
+
+function setCursor(newK) {
+  k = Math.max(0, Math.min(data.t.length - 1, newK));
+  kf = k;
+  drawDynamic();
+}
+
+function renderAll() {  // heavy path: scenario load or window resize only
+  sizeGraph();
+  charts.trust.setSeries(data.sensors.map((n, i) =>
+    ({ v: data.trust[n], color: SENSOR_COLORS[i] })));
+  charts.diag.setSeries(data.diagnosis.causes.map((c, i) =>
+    ({ v: data.diagnosis.posterior.map(r => r[i]), color: CAUSE_COLORS[i] })));
+  charts.comp.setSeries(compSeries());
+  charts.gate.setSeries([{ v: data.aux.speed_gate, color: "#56d364" }]);
+  drawDynamic();
+}
+
+function advance(now) {  // wall-clock playback: rate-correct on any display
+  if (lastTs === null) { lastTs = now; return; }
+  const dt = Math.min((now - lastTs) / 1000, 0.5);  // clamp long gaps
+  lastTs = now;
+  if (!playing || !data) return;
+  const dtData = data.t[1] - data.t[0];
+  kf += dt * parseFloat($("speed").value) / dtData;
+  if (kf >= data.t.length) kf = 0;  // loop the replay
+  const nk = Math.floor(kf);
+  if (nk !== k) { k = nk; drawDynamic(); }
+}
+
+let lastRaf = 0;
+function tick(ts) {
+  requestAnimationFrame(tick);
+  lastRaf = performance.now();
+  advance(ts);
+}
+// requestAnimationFrame is suspended on hidden/embedded surfaces (background
+// tabs, preview panes) — without this fallback, Play silently does nothing
+// there. The interval only takes over when RAF is starved.
+setInterval(() => {
+  if (performance.now() - lastRaf > 300) advance(performance.now());
+}, 250);
+
+async function load(name) {
+  liveMode = name === "live";
+  clearTimeout(liveTimer);
+  const resp = await fetch(`/data/${name}.json`);
+  if (resp.status === 503) {   // live feed warming up
+    $("callout").textContent = "live feed warming up…";
+    liveTimer = setTimeout(() => load(name), 1000);
+    return;
+  }
+  data = await resp.json();
+  k = liveMode ? data.t.length - 1 : 0; kf = k;
+  $("scrub").max = data.t.length - 1;
+  document.querySelectorAll(".tabs button").forEach(b =>
+    b.classList.toggle("active", b.dataset.name === name));
+  legend($("trustLegend"), data.sensors.map((n, i) => [n, SENSOR_COLORS[i]]));
+  legend($("diagLegend"), data.diagnosis.causes.map((c, i) => [c, CAUSE_COLORS[i]]));
+  legend($("compLegend"), Object.entries(COMP_COLORS).map(([n, c]) => [`C_${n}`, c]));
+  $("compTitle").textContent =
+    `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+  $("foot").textContent = `${data.title} — trust-core latency mean ` +
+    `${data.latency_us.mean} µs / p95 ${data.latency_us.p95} µs per tick ` +
+    `(desktop Python; not embedded timing). Reference HW context: STM32H743 FC, ` +
+    `dual ICM-42688-P, MS5611, RM3100, Pi 5 companion / MAVLink.`;
+  renderAll();
+  if (liveMode) liveTimer = setTimeout(refreshLive, 1000);
+}
+
+async function refreshLive() {
+  if (!liveMode) return;
+  try {
+    const resp = await fetch("/data/live.json");
+    if (resp.ok) {
+      const fresh = await resp.json();
+      const pinned = k >= data.t.length - 3;   // follow the feed unless scrubbed
+      data = fresh;
+      $("scrub").max = data.t.length - 1;
+      if (pinned) { k = data.t.length - 1; kf = k; }
+      else { k = Math.min(k, data.t.length - 1); }
+      renderAll();
+      $("foot").textContent = data.title + " — live feed, refreshing 1 Hz";
+    }
+  } catch (e) { /* server briefly away; keep retrying */ }
+  liveTimer = setTimeout(refreshLive, 1000);
+}
+
+// Re-render whenever any canvas actually changes layout size — a window
+// "resize" event misses grid reflow, maximize animations, and moves between
+// monitors with different devicePixelRatio. Coalesce bursts into one
+// re-render per animation frame so dragging the window edge stays smooth.
+let resizePending = false;
+function requestRerender() {
+  if (resizePending || !data) return;
+  resizePending = true;
+  requestAnimationFrame(() => {
+    resizePending = false;
+    if (data) renderAll();
+  });
+}
+const ro = new ResizeObserver(requestRerender);
+for (const id of ["graph", "trust", "diag", "comp", "gate"])
+  ro.observe($(id));
+(function watchDpr() {
+  matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+    .addEventListener("change", () => { requestRerender(); watchDpr(); },
+                      { once: true });
+})();
+
+async function init() {
+  try {
+    scenarios = await (await fetch("/data/index.json")).json();
+  } catch (e) {
+    document.getElementById("callout").textContent =
+      "waiting for server… retrying";
+    setTimeout(init, 1500);
+    return;
+  }
+  $("tabs").innerHTML = scenarios.map(n =>
+    `<button data-name="${n}">${n.replace(/_/g, " ")}</button>`).join("");
+  document.querySelectorAll(".tabs button").forEach(b =>
+    b.onclick = () => load(b.dataset.name));
+  $("play").onclick = () => {
+    playing = !playing;
+    $("play").textContent = playing ? "⏸ Pause" : "▶ Play";
+  };
+  $("scrub").oninput = e => setCursor(parseInt(e.target.value));
+  await load(scenarios.includes("gps_spoof") ? "gps_spoof" : scenarios[0]);
+  requestAnimationFrame(tick);
+}
+init();
+</script>
+</body>
+</html>
