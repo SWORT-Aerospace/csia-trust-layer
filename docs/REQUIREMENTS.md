@@ -20,6 +20,27 @@ test suite; UNVERIFIED items are open engineering, not claims.
 | R13 | Trust-core latency shall be <2 ms/tick (ref. Python) / <10 µs (native, desktop) | test_latency_budget; campaigns/bench |
 | R14 | Detection/false-alarm figures shall be produced from a single frozen configuration | csia bench (campaigns/bench.json) |
 | R15 | GPS integrity shall be evaluated from the raw receiver stream, not EKF output | SITL injection PASS (tools/sitl_validate.py) |
-| R16 | UNVERIFIED: field configuration shall detect slow IMU bias drift | **OPEN — bench shows NOT MET (see FMEA F3)** |
+| R16 | Field configuration shall detect slow IMU bias drift | **NOT MET — Monte Carlo (150 runs) TPR=0.00, 95% CI [0.00, 0.30] on n=9. Tracked issue #1 (dual-timescale CUSUM). Claim withdrawn until fixed.** |
 | R17 | UNVERIFIED: WCET on target hardware (STM32H7/Pi 5) characterized | OPEN — needs hardware |
 | R18 | UNVERIFIED: MAVLink command path authenticated (signing) | OPEN — security backlog |
+
+
+## Measured campaign (frozen config, `csia mc --runs 150`, field_mode=True)
+
+Single configuration, one seed set, reported verbatim from
+`campaigns/monte_carlo.json` — no cherry-picking, CIs included:
+
+| fault class | n | TPR | 95% CI (Wilson) | latency p50 | p95 |
+|---|---|---|---|---|---|
+| gps_spoof | 25 | 1.00 | [0.87, 1.00] | 3.0 s | 7.9 s |
+| mag_emi | 25 | 1.00 | [0.87, 1.00] | 1.9 s | 2.5 s |
+| power_sag | 18 | 1.00 | [0.82, 1.00] | 1.7 s | 2.5 s |
+| vibration | 23 | 1.00 | [0.86, 1.00] | 2.0 s | 2.5 s |
+| **imu_bias (slow)** | 9 | **0.00** | [0.00, 0.30] | — | — |
+| clean false alarms | 50 flt / 0.8 h | 0 events | 0.0/hr, Poisson 95% [0.0, 4.4] | — | — |
+
+Interpretation: four fault classes detect with high confidence and no
+false-alarm cost; slow IMU bias is a **known, quantified blind spot** of the
+adaptive-normalization field configuration (FMEA F3, issue #1), not a
+surprise. This table is the honest performance baseline for SBIR evidence.
+Larger n (issue: scale to 1000 runs) will tighten the CIs.
