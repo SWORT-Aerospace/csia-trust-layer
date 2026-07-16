@@ -121,7 +121,31 @@ def map_mavlink(msg, ctx: dict) -> list:
             "altitude": float(pressure_to_altitude(
                 _np.array([msg.press_abs]))[0]),
             "temp_c": msg.temperature / 100.0, "valid": True}))
-    elif k == "GLOBAL_POSITION_INT":
+    elif k == "GPS_RAW_INT":
+        # RAW receiver output — the correct thing for an integrity monitor
+        # to watch. The EKF innovation-gates faults out of its fused output
+        # (GLOBAL_POSITION_INT), hiding exactly what we exist to detect.
+        import numpy as _np
+        ctx["has_raw_gps"] = True
+        if msg.fix_type < 3:
+            out.append(("gps", t, {"pos": _np.zeros(3), "vel": _np.zeros(3),
+                                   "valid": False}))
+            return out
+        if "origin" not in ctx:
+            ctx["origin"] = (msg.lat, msg.lon, msg.alt / 10)
+        o = ctx["origin"]
+        coslat = _np.cos(_np.deg2rad(o[0] * 1e-7))
+        cog = _np.deg2rad(msg.cog / 100.0)
+        spd = msg.vel / 100.0
+        out.append(("gps", t, {
+            "pos": _np.array([(msg.lat - o[0]) * 1e-7 * 111_320.0,
+                              -(msg.lon - o[1]) * 1e-7 * 111_320.0 * coslat,
+                              (msg.alt / 10 - o[2]) / 1e2]),
+            "vel": _np.array([spd * _np.cos(cog), -spd * _np.sin(cog), 0.0]),
+            "valid": True}))
+    elif k == "GLOBAL_POSITION_INT" and not ctx.get("has_raw_gps"):
+        # fallback when the raw stream is unavailable (fused EKF output;
+        # weaker for integrity monitoring — documented limitation)
         import numpy as _np
         if "origin" not in ctx:
             ctx["origin"] = (msg.lat, msg.lon, msg.alt)

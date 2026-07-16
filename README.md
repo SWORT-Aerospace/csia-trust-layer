@@ -30,13 +30,15 @@ python3.13 -m venv .venv
 .venv/bin/python -m pytest    # full test suite (39 tests, ~4 s)
 ```
 
-## Validation status (v0.6.0)
+## Validation status (v0.7.0)
 
 | Evidence | Result |
 |---|---|
 | Simulated fault harness (39 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
 | **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
+| **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
+| **Native core** (`csia/native/csia_core.c`, C, zero-alloc, pinned to Python at 1e-12) | trust kernel **247 ns** + diagnosis **427 ns** per tick on desktop → est. 7–15 µs on the STM32H743 itself ≈ 0.04% FC CPU at 25 Hz |
 
 Plug YOUR data in:
 ```sh
@@ -102,8 +104,16 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
 - **Actuators**: `LoggingActuator` (default — ADVISORY output) and
   `MavlinkActuator` (opt-in `enable_commands=True`, maps
   CONTROLLED_DESCENT/LAND_NOW → autopilot LAND, etc.; SITL-validate first).
-  Runtime cost: ~140 µs per tick for trust + diagnosis + failsafe
-  (desktop Python; the Pi 5 target has margin of ~250× at 25 Hz).
+  Runtime cost: ~140 µs/tick in reference Python (0.35% of the 40 ms tick
+  budget at 25 Hz — detection latency is set by evidence statistics, not
+  code speed). The **native C core** (`csia/native/`, same algorithm,
+  test-pinned to 1e-12) runs the trust+diagnosis math in **674 ns/tick**,
+  sized for the STM32H743 flight controller itself, not just the Pi.
+- **Raw-sensor monitoring**: the GPS node consumes GPS_RAW_INT, not the
+  EKF's fused output — the autopilot's estimator innovation-gates faults
+  out of its own output stream, hiding exactly what an integrity monitor
+  exists to catch (proven in SITL: a 55 m glitch is invisible in fused
+  output, caught from the raw stream).
 - **State log**: `--log run.jsonl` streams one JSON line per tick
   (trust, level, diagnosis, actions) for the GCS or post-flight analysis.
 - **Silence watchdog**: a sensor that stops producing samples is declared

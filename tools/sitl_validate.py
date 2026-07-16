@@ -28,11 +28,12 @@ DEFAULT_PARAMS = "/tmp/ardupilot/Tools/autotest/default_params/copter.parm"
 
 STREAMS = {  # message -> interval us
     "SCALED_IMU": 20_000, "SCALED_IMU2": 20_000, "SCALED_PRESSURE": 50_000,
-    "GLOBAL_POSITION_INT": 100_000, "BATTERY_STATUS": 200_000,
-    "VIBRATION": 100_000,
+    "GLOBAL_POSITION_INT": 100_000, "GPS_RAW_INT": 100_000,
+    "BATTERY_STATUS": 200_000, "VIBRATION": 100_000,
 }
 MSG_IDS = {"SCALED_IMU": 26, "SCALED_IMU2": 116, "SCALED_PRESSURE": 29,
-           "GLOBAL_POSITION_INT": 33, "BATTERY_STATUS": 147, "VIBRATION": 241}
+           "GLOBAL_POSITION_INT": 33, "GPS_RAW_INT": 24,
+           "BATTERY_STATUS": 147, "VIBRATION": 241}
 
 
 def main():
@@ -40,6 +41,9 @@ def main():
     ap.add_argument("--binary", default=DEFAULT_BINARY)
     ap.add_argument("--params", default=DEFAULT_PARAMS)
     ap.add_argument("--speedup", type=int, default=4)
+    ap.add_argument("--inject", choices=("none", "gps_glitch"), default="none",
+                    help="inject a fault into the REAL autopilot mid-flight "
+                         "and require the trust layer to catch it")
     args = ap.parse_args()
 
     sitl = subprocess.Popen(
@@ -78,6 +82,9 @@ def run_mission(args):
     phase = "warmup"
     phase_t0 = time.time()
     armed_sent = takeoff_sent = False
+    inject_t0 = None
+    inject_wall = None
+    inject2 = False
     landed = False
     wall_deadline = time.time() + 240
 
@@ -113,13 +120,32 @@ def run_mission(args):
             print("SITL: at altitude, flying square")
             phase = "fly"; phase_t0 = time.time()
         elif phase == "fly":
+            if args.inject == "gps_glitch" and not inject_t0 and \
+                    time.time() - phase_t0 > 10:
+                # ~55 m instantaneous position glitch in the SIM GPS driver
+                for pname in (b"SIM_GPS_GLITCH_X", b"SIM_GPS1_GLTCH_X"):
+                    m.mav.param_set_send(m.target_system, m.target_component,
+                                         pname, 0.0005,
+                                         mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+                inject_t0 = ctx["t0"] + 0  # marker; sample time recorded below
+                inject_wall = time.time()
+                print("SITL: GPS GLITCH INJECTED (+55 m)")
+            if args.inject == "gps_glitch" and inject_wall and \
+                    not inject2 and time.time() - inject_wall > 12:
+                for pname, val in ((b"SIM_GPS_DISABLE", 1.0),
+                                   (b"SIM_GPS1_ENABLE", 0.0)):
+                    m.mav.param_set_send(m.target_system, m.target_component,
+                                         pname, val,
+                                         mavutil.mavlink.MAV_PARAM_TYPE_INT8)
+                inject2 = True
+                print("SITL: GPS FIX KILLED")
             leg = int((time.time() - phase_t0) / 6) % 4
             vn, ve = [(4, 0), (0, 4), (-4, 0), (0, -4)][leg]
             m.mav.set_position_target_local_ned_send(
                 0, m.target_system, m.target_component,
                 mavutil.mavlink.MAV_FRAME_LOCAL_NED,
                 0b0000111111000111, 0, 0, 0, vn, ve, 0, 0, 0, 0, 0, 0)
-            if time.time() - phase_t0 > 30:
+            if time.time() - phase_t0 > (45 if args.inject != "none" else 30):
                 m.set_mode("LAND"); phase = "land"; print("SITL: landing")
         elif phase == "land" and hb and not \
                 (hb.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED):
@@ -136,11 +162,18 @@ def run_mission(args):
     alarms = [tr for tr in policy.transitions if tr.level.name != "NORMAL"]
     for tr in alarms:
         print(f"  alarm t={tr.t:.1f}s {tr.level.name}: {tr.reasons}")
-    ok = (landed and len(fresh_sensors) >= 5
-          and all(v > 0.5 for v in min_trust.values()) and not alarms)
-    print("mission landed:", landed)
-    print("VERDICT:", "PASS — MAVLink mapping SITL-validated"
-          if ok else "FAIL — inspect above")
+    if args.inject == "gps_glitch":
+        nav_alarms = [tr for tr in alarms
+                      if any("GPS" in r or "gps" in r for r in tr.reasons)]
+        ok = len(nav_alarms) >= 1
+        print("VERDICT:", "PASS — injected GPS fault on a REAL autopilot "
+              "detected live" if ok else "FAIL — glitch not detected")
+    else:
+        ok = (landed and len(fresh_sensors) >= 5
+              and all(v > 0.5 for v in min_trust.values()) and not alarms)
+        print("mission landed:", landed)
+        print("VERDICT:", "PASS — MAVLink mapping SITL-validated"
+              if ok else "FAIL — inspect above")
     sys.exit(0 if ok else 1)
 
 

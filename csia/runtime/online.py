@@ -213,6 +213,7 @@ class OnlineTrustLayer:
         self._gps_prev = None          # (t, pos, vel)
         self._gps_fd_vel = np.zeros(3)
         self._gps_fd_dvel = np.zeros(3)
+        self._gps_step_peak = 0.0      # peak |fd - vel| since last decay
         self._mag_heading = 0.0
 
         # tick-rate smoother states (match comparator's tick-level EWs)
@@ -324,6 +325,11 @@ class OnlineTrustLayer:
                 dt = max(t - pt, 1e-6)
                 self._gps_fd_vel = (pos - ppos) / dt
                 self._gps_fd_dvel = (vel - pvel) / dt
+                # step detector: position must not jump beyond what the
+                # reported velocity can explain (spoof/glitch step signature)
+                self._gps_step_peak = max(
+                    self._gps_step_peak,
+                    float(np.linalg.norm(self._gps_fd_vel - vel)))
             self._gps_prev = (t, pos, vel)
             slot.latest["pos"], slot.latest["vel"] = pos, vel
         elif sensor == "mag":
@@ -494,8 +500,13 @@ class OnlineTrustLayer:
 
         P = {}
         r_gps = self._rgps_s.update(self._gps_fd_vel - vel)
-        P["gps"] = (self._lam_upd("phys_gps", np.linalg.norm(r_gps),
-                                  0.45, df=3),
+        lam_gps = self._lam_upd("phys_gps", np.linalg.norm(r_gps),
+                                0.45, df=3)
+        # absolute step check, NOT adaptively normalized: no vehicle
+        # teleports — sigma 20 m/s of unexplained instantaneous motion
+        lam_step = (self._gps_step_peak / 20.0) ** 2
+        self._gps_step_peak *= 0.85   # hold the alarm a few seconds
+        P["gps"] = (max(lam_gps, lam_step),
                     gvalid * (1.0 if tau > 3.0 else 0.0))
         ocv = float(self._ocv.update(batt_v + batt_i * PACK_R_INTERNAL))
         P["battery"] = (self._lam_upd(
