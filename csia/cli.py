@@ -261,6 +261,18 @@ def main(argv=None) -> int:
     al.add_argument("logs", nargs="+", help=".ulg files or globs")
     al.add_argument("--out", default=None, help="JSON report path")
     al.set_defaults(fn=_analyze_logs)
+    bp = sub.add_parser("bench", help="C1 truth table: detection under "
+                        "sim vs field configurations")
+    bp.add_argument("--out", default="campaigns/bench.json")
+    bp.set_defaults(fn=lambda a: __import__("csia.validation",
+        fromlist=["bench"]).bench(a.out) and 0 or 0)
+    mp = sub.add_parser("mc", help="Monte Carlo detection/false-alarm campaign")
+    mp.add_argument("--runs", type=int, default=150)
+    mp.add_argument("--seed", type=int, default=0)
+    mp.add_argument("--out", default="campaigns/monte_carlo.json")
+    mp.set_defaults(fn=lambda a: __import__("csia.validation",
+        fromlist=["monte_carlo"]).monte_carlo(a.runs, True, a.seed, a.out)
+        and 0 or 0)
     sub.add_parser("info", help="package info").set_defaults(fn=_info)
     args = ap.parse_args(argv)
     logging.basicConfig(
