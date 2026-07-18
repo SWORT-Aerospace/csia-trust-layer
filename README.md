@@ -54,6 +54,7 @@ minimum-rate channel screening, and monitored-sensor-aware failsafe rules —
 all of it forced into existence by real logs, all of it tested.
 
 Commercial/SBIR readiness: [docs/COMMERCIALIZATION.md](docs/COMMERCIALIZATION.md).
+Engineering review (adversarial, scored): [docs/ARCHITECTURE_REVIEW.md](docs/ARCHITECTURE_REVIEW.md). Org-level 10-year blueprint: [docs/ORG_BLUEPRINT.md](docs/ORG_BLUEPRINT.md).
 
 **Deploying on hardware?** See [docs/HARDWARE.md](docs/HARDWARE.md): the
 SOW001 wiring/telemetry/commissioning guide, systemd service, the mandatory
