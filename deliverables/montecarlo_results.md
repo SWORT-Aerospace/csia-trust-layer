@@ -8,10 +8,10 @@ Config: warmup 2.5 s (excluded from metrics), fault onset 8.0 s, actionable trus
 
 | scenario | detection rate | latency mean / median / p95 (s) | attribution acc | mean min-trust (faulted) |
 |---|---|---|---|---|
-| ir_decoy | 1.00 (50/50) | 0.433 / 0.44 / 0.48 | 1.00 | 0.26 |
-| rf_jam | 1.00 (50/50) | 0.231 / 0.25 / 0.32 | 1.00 | 0.04 |
+| ir_decoy | 1.00 (50/50) | 0.436 / 0.44 / 0.49 | 1.00 | 0.26 |
+| rf_jam | 1.00 (50/50) | 0.242 / 0.24 / 0.351 | 1.00 | 0.04 |
 
-**clean_engagement:** 0/50 runs raised any alarm (false-alarm rate 0.00).
+**clean_engagement:** 1/50 runs raised any alarm (false-alarm rate 0.02).
 
 ## ir_decoy magnitude sweep (20 runs/magnitude) — detection floor
 

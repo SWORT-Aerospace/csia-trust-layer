@@ -38,9 +38,9 @@ IR intensity), `phys_ins` (INS velocity vs windowed position rate).
 
 | scenario | detection rate | latency mean / p95 (s) | attribution acc | mean min-trust (faulted) |
 |---|---|---|---|---|
-| ir_decoy (6° bearing pull) | **50/50 (1.00)** | 0.43 / 0.48 | **1.00** | 0.26 |
-| rf_jam (4° az + 40 m/s rr bias) | **50/50 (1.00)** | 0.23 / 0.32 | **1.00** | 0.045 |
-| clean_engagement | **0/50 false alarms** | — | — | — |
+| ir_decoy (6° bearing pull) | **50/50 (1.00)** | 0.44 / 0.49 | **1.00** | 0.26 |
+| rf_jam (4° az + 40 m/s rr bias) | **50/50 (1.00)** | 0.24 / 0.35 | **1.00** | 0.044 |
+| clean_engagement | **1/50 alarms (0.02)** | — | — | 1 brief CAUTION, endgame |
 
 Per-tick trust+diagnosis latency: ~57 µs (reference Python, desktop).
 
@@ -96,6 +96,17 @@ unmodified-core check, detection-floor bracket).
 6. **"INS-derived closing velocity" uses the known target velocity**, valid
    in this synthetic setup; on a real system that term comes from a track
    filter. This is the single biggest fidelity gap vs a real deployment.
+7. **1/50 clean runs (seed 3038) raised a brief CAUTION** near intercept
+   (t≈10–13 s), where the closing geometry becomes extreme; channels dipped
+   to ~0.70 (never reaching the 0.55 CRITICAL threshold) and self-cleared.
+   Reported as-is: false-alarm rate 0.02, all CAUTION-level, all in the
+   terminal endgame. Not tuned away.
+8. **Reproducibility bug found and fixed during the sanity re-run:** the
+   Monte Carlo previously seeded from `hash(scenario_name)`, which Python
+   randomizes per process — so numbers were not bit-reproducible across runs.
+   Replaced with fixed per-scenario seed bases; two consecutive runs are now
+   byte-identical. (The earlier "0/50 clean" figure was an artifact of the
+   non-reproducible seeding; the reproducible figure is 1/50.)
 
 ## Reproduce every number
 
@@ -106,5 +117,6 @@ python tools/interceptor_plots.py          # -> the 3 PNG plots
 python -m pytest                           # full suite, 48 tests
 ```
 
-All runs are deterministic (seed = run index); re-running reproduces the
-tables above bit-for-bit.
+All runs are deterministic (fixed per-scenario seed bases: ir_decoy 1000+i,
+rf_jam 2000+i, clean 3000+i; sweep 50000+…); re-running reproduces the
+tables above bit-for-bit (verified: two consecutive runs byte-identical).

@@ -77,9 +77,12 @@ def main():
               "scenarios": {}, "magnitude_sweep": {}}
 
     # --- item 1-2: 50 runs each of ir_decoy, rf_jam, clean ------------------
+    # Fixed per-scenario seed bases (NOT hash(name), which Python randomizes
+    # per process via PYTHONHASHSEED — that broke bit-for-bit reproducibility).
+    seed_base = {"ir_decoy": 1000, "rf_jam": 2000, "clean_engagement": 3000}
     for name in ("ir_decoy", "rf_jam", "clean_engagement"):
         faults = scenario_faults(name)
-        runs = [_analyze(name, faults, seed=1000 * (hash(name) % 7) + i)
+        runs = [_analyze(name, faults, seed=seed_base[name] + i)
                 for i in range(50)]
         if name == "clean_engagement":
             fa = sum(r["alarm"] for r in runs)
