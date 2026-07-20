@@ -1,18 +1,37 @@
 # CSIA interceptor_seeker — consolidated white-paper handoff
 
-**SYNTHETIC first-pass results.** Every number below is copied verbatim from the repo deliverables (no recomputation, no re-rounding). All runs are seeded and reproducible bit-for-bit. Source of record: SWORT-Aerospace/csia-trust-layer @ commit 329bc93.
+**SYNTHETIC first-pass results.** Every number below is copied verbatim from
+the repo deliverables (no recomputation, no re-rounding). All runs are seeded
+and reproducible bit-for-bit. Source of record: SWORT-Aerospace/csia-trust-
+layer @ commit 329bc93.
 
 ## ===== SECTION: FLAGS (read first) =====
 
 Ambiguities / gaps in the source deliverables, surfaced not resolved:
 
-- **Exonerated-channel aggregated min-trust is NOT tabulated** in any source deliverable. The Monte Carlo JSON records `min_trust_others` per run but the summary does not aggregate it across the 50-run batch. Representative single-run values from SUMMARY.md are noted in HEADLINE_NUMBERS; the aggregate is intentionally left blank rather than recomputed here (per the no-recomputation rule).
-- **clean false-alarm rate is 1/50 (0.02)**, not 0/50. The 0/50 figure that appeared in an earlier draft came from non-reproducible hash-based seeding (fixed in commit 329bc93). The reproducible number is 1/50 — a single brief endgame CAUTION (see LIMITATIONS_AND_FINDINGS #7).
-- **Latency values are the corrected reproducible set** (ir_decoy mean 0.436 s, rf_jam mean 0.242 s). Any earlier draft citing 0.43/0.23 predates the seed fix.
+- **Exonerated-channel aggregated min-trust is NOT tabulated** in any source
+  deliverable. The Monte Carlo JSON records `min_trust_others` per run but the
+  summary does not aggregate it across the 50-run batch. Representative
+  single-run values from SUMMARY.md are noted in HEADLINE_NUMBERS; the
+  aggregate is intentionally left blank rather than recomputed here (per the
+  no-recomputation rule).
+- **clean false-alarm rate is 1/50 (0.02)**, not 0/50. The 0/50 figure that
+  appeared in an earlier draft came from non-reproducible hash-based seeding
+  (fixed in commit 329bc93). The reproducible number is 1/50 — a single brief
+  endgame CAUTION (see LIMITATIONS_AND_FINDINGS #7).
+- **Latency values are the corrected reproducible set** (ir_decoy mean 0.436
+  s, rf_jam mean 0.242 s). Any earlier draft citing 0.43/0.23 predates the
+  seed fix.
 
 ## ===== SECTION: HEADLINE_NUMBERS =====
 
-Tick rate 100 Hz. 50 seeded runs per scenario. All synthetic. Detection rate, latency (mean/median/p95), attribution accuracy, and faulted-channel min-trust are verbatim from montecarlo_results.md; clean false alarms too. Exonerated-channel aggregate min-trust: NOT in deliverables (see FLAGS); representative single-run (seed 0) values from SUMMARY.md — ir_decoy: INS >0.80 (exonerated), RF sags via shared bearing edge; rf_jam: INS stays high, IR sags to ~0.27 via shared bearing edge (documented coupling).
+Tick rate 100 Hz. 50 seeded runs per scenario. All synthetic. Detection rate,
+latency (mean/median/p95), attribution accuracy, and faulted-channel min-trust
+are verbatim from montecarlo_results.md; clean false alarms too. Exonerated-
+channel aggregate min-trust: NOT in deliverables (see FLAGS); representative
+single-run (seed 0) values from SUMMARY.md — ir_decoy: INS >0.80 (exonerated),
+RF sags via shared bearing edge; rf_jam: INS stays high, IR sags to ~0.27 via
+shared bearing edge (documented coupling).
 
 ## Detection & attribution (50 runs each)
 
@@ -36,7 +55,9 @@ Tick rate 100 Hz. 50 seeded runs per scenario. All synthetic. Detection rate, la
 | 1.5deg | 1.00 (20/20) | 0.789 |
 | 4.0deg | 1.00 (20/20) | 0.499 |
 
-The detection floor is the smallest offset with a detection rate below 1.0; below it the decoy is within the combined bearing noise budget and is (correctly) not separable from noise.
+The detection floor is the smallest offset with a detection rate below 1.0;
+below it the decoy is within the combined bearing noise budget and is
+(correctly) not separable from noise.
 
 ## ===== SECTION: TRUST_GRAPH_CATALOG =====
 
