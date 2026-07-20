@@ -67,7 +67,23 @@ SOW001_QUAD_STRICT = VehicleProfile(
     hardware="docs/HARDWARE.md#tier-1--sow001-baseline",
 )
 
-PROFILES = {p.name: p for p in (SOW001_QUAD, SOW001_QUAD_STRICT)}
+# interceptor_seeker: a synthetic first-pass seeker profile (IR + RF + INS).
+# Its edge library and runtime live in csia/seeker/ (it does NOT use the quad
+# OnlineTrustLayer). 100 Hz seeker-representative tick rate; 25 Hz runnable.
+# SYNTHETIC — not validated against seeker hardware. See csia/seeker/.
+INTERCEPTOR_SEEKER = VehicleProfile(
+    name="interceptor_seeker",
+    description="Missile-seeker engagement (SYNTHETIC first pass): IR seeker "
+                "(bearing+intensity), RF seeker (range/range-rate/azimuth), "
+                "INS. Closing intercept vs subsonic target. Runs the "
+                "unmodified CSIA cores via csia/seeker/.",
+    sensors=("ir_seeker", "rf_seeker", "ins"),
+    tick_hz=100.0,
+    hardware="SYNTHETIC — no hardware; see csia/seeker/ and deliverables/",
+)
+
+PROFILES = {p.name: p for p in (SOW001_QUAD, SOW001_QUAD_STRICT,
+                                INTERCEPTOR_SEEKER)}
 
 
 def get_profile(name: str) -> VehicleProfile:
