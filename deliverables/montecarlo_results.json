@@ -1,0 +1,79 @@
+{
+ "config": {
+  "tick_hz": 100.0,
+  "warmup_s": 2.5,
+  "onset_s": 8.0,
+  "detect_trust": 0.85,
+  "runs_per_scenario": 50,
+  "note": "SYNTHETIC first-pass; not validated against seeker hardware"
+ },
+ "scenarios": {
+  "ir_decoy": {
+   "runs": 50,
+   "detections": 50,
+   "detection_rate": 1.0,
+   "latency_s": {
+    "mean": 0.433,
+    "median": 0.44,
+    "p95": 0.48
+   },
+   "attribution_accuracy": 1.0,
+   "mean_min_trust_faulted": 0.26
+  },
+  "rf_jam": {
+   "runs": 50,
+   "detections": 50,
+   "detection_rate": 1.0,
+   "latency_s": {
+    "mean": 0.231,
+    "median": 0.25,
+    "p95": 0.32
+   },
+   "attribution_accuracy": 1.0,
+   "mean_min_trust_faulted": 0.045
+  },
+  "clean_engagement": {
+   "runs": 50,
+   "false_alarm_runs": 0,
+   "false_alarm_rate": 0.0
+  }
+ },
+ "magnitude_sweep": {
+  "0.1deg": {
+   "runs": 20,
+   "detections": 0,
+   "detection_rate": 0.0,
+   "mean_latency_s": null
+  },
+  "0.2deg": {
+   "runs": 20,
+   "detections": 10,
+   "detection_rate": 0.5,
+   "mean_latency_s": 5.072
+  },
+  "0.35deg": {
+   "runs": 20,
+   "detections": 20,
+   "detection_rate": 1.0,
+   "mean_latency_s": 2.616
+  },
+  "0.6deg": {
+   "runs": 20,
+   "detections": 20,
+   "detection_rate": 1.0,
+   "mean_latency_s": 1.419
+  },
+  "1.5deg": {
+   "runs": 20,
+   "detections": 20,
+   "detection_rate": 1.0,
+   "mean_latency_s": 0.789
+  },
+  "4.0deg": {
+   "runs": 20,
+   "detections": 20,
+   "detection_rate": 1.0,
+   "mean_latency_s": 0.499
+  }
+ }
+}
