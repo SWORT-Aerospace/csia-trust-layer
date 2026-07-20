@@ -9,12 +9,13 @@ layer @ commit 329bc93.
 
 Ambiguities / gaps in the source deliverables, surfaced not resolved:
 
-- **Exonerated-channel aggregated min-trust is NOT tabulated** in any source
-  deliverable. The Monte Carlo JSON records `min_trust_others` per run but the
-  summary does not aggregate it across the 50-run batch. Representative
-  single-run values from SUMMARY.md are noted in HEADLINE_NUMBERS; the
-  aggregate is intentionally left blank rather than recomputed here (per the
-  no-recomputation rule).
+- **Exonerated-channel aggregated min-trust is now tabulated** (this update)
+  in HEADLINE_NUMBERS, over the armed window (t > 2.5 s), across all 50 runs.
+  Finding: only INS-under-ir_decoy is cleanly *trust*-exonerated (min 0.752),
+  because INS shares no graph edge with the IR channel. Under rf_jam INS
+  shares Edge B with RF and sags (min 0.272) — exonerated there by the
+  diagnosis posterior, not by trust value. An earlier draft's "rf_jam: INS
+  stays high" was a loose single-run read and is corrected by this aggregate.
 - **clean false-alarm rate is 1/50 (0.02)**, not 0/50. The 0/50 figure that
   appeared in an earlier draft came from non-reproducible hash-based seeding
   (fixed in commit 329bc93). The reproducible number is 1/50 — a single brief
@@ -26,12 +27,9 @@ Ambiguities / gaps in the source deliverables, surfaced not resolved:
 ## ===== SECTION: HEADLINE_NUMBERS =====
 
 Tick rate 100 Hz. 50 seeded runs per scenario. All synthetic. Detection rate,
-latency (mean/median/p95), attribution accuracy, and faulted-channel min-trust
-are verbatim from montecarlo_results.md; clean false alarms too. Exonerated-
-channel aggregate min-trust: NOT in deliverables (see FLAGS); representative
-single-run (seed 0) values from SUMMARY.md — ir_decoy: INS >0.80 (exonerated),
-RF sags via shared bearing edge; rf_jam: INS stays high, IR sags to ~0.27 via
-shared bearing edge (documented coupling).
+latency (mean/median/p95), attribution accuracy, faulted-channel min-trust,
+and the exoneration table below are all verbatim from montecarlo_results.md;
+clean false alarms too.
 
 ## Detection & attribution (50 runs each)
 
@@ -41,6 +39,27 @@ shared bearing edge (documented coupling).
 | rf_jam | 1.00 (50/50) | 0.242 / 0.24 / 0.351 | 1.00 | 0.04 |
 
 **clean_engagement:** 1/50 runs raised any alarm (false-alarm rate 0.02).
+
+## Exonerated-channel trust (unfaulted channels, 50 runs each)
+
+Minimum trust of each *unfaulted* channel over the armed window (t > 2.5 s
+warmup), across all 50 runs. `min across runs` = the single lowest value any
+run reached; `mean of per-run min` = average of each run's minimum.
+
+| faulted scenario | unfaulted channel | min across runs | mean of per-run min |
+|---|---|---|---|
+| ir_decoy | rf_seeker | 0.494 | 0.687 |
+| ir_decoy | ins | 0.752 | 0.935 |
+| rf_jam | ir_seeker | 0.214 | 0.260 |
+| rf_jam | ins | 0.272 | 0.386 |
+
+Reading: a channel is cleanly *trust*-exonerated only when it shares no graph
+edge with the faulted channel. INS shares no edge with the IR channel, so
+under ir_decoy it stays high (min 0.752). INS shares Edge B (rangerate_ins)
+with the RF channel, so under rf_jam it sags (min 0.272) — there it is
+exonerated by the diagnosis posterior (no INS hypothesis fires), not by trust
+value. Likewise the shared-bearing partner sags in both cases. This is the
+documented shared-edge coupling (see limitations).
 
 ## ===== SECTION: DETECTION_FLOOR =====
 

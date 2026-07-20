@@ -13,6 +13,19 @@ Config: warmup 2.5 s (excluded from metrics), fault onset 8.0 s, actionable trus
 
 **clean_engagement:** 1/50 runs raised any alarm (false-alarm rate 0.02).
 
+## Exonerated-channel trust (unfaulted channels, 50 runs each)
+
+Minimum trust of each *unfaulted* channel over the armed window (t > 2.5 s warmup), across all 50 runs. `min across runs` = the single lowest value any run reached; `mean of per-run min` = average of each run's minimum.
+
+| faulted scenario | unfaulted channel | min across runs | mean of per-run min |
+|---|---|---|---|
+| ir_decoy | rf_seeker | 0.494 | 0.687 |
+| ir_decoy | ins | 0.752 | 0.935 |
+| rf_jam | ir_seeker | 0.214 | 0.260 |
+| rf_jam | ins | 0.272 | 0.386 |
+
+Reading: a channel is cleanly *trust*-exonerated only when it shares no graph edge with the faulted channel. INS shares no edge with the IR channel, so under ir_decoy it stays high (min 0.752). INS shares Edge B (rangerate_ins) with the RF channel, so under rf_jam it sags (min 0.272) — there it is exonerated by the diagnosis posterior (no INS hypothesis fires), not by trust value. Likewise the shared-bearing partner sags in both cases. This is the documented shared-edge coupling (see limitations).
+
 ## ir_decoy magnitude sweep (20 runs/magnitude) — detection floor
 
 | decoy offset | detection rate | mean latency (s) |

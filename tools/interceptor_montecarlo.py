@@ -43,6 +43,11 @@ def _analyze(name, faults, seed):
     out["min_trust_faulted"] = float(tr[t > ONSET].min())
     out["min_trust_others"] = {n: float(r.trust[n][t > ONSET].min())
                                for n in r.trust if n != ch}
+    # exonerated-channel min trust over the ARMED window (post-warmup),
+    # i.e. the whole time the monitor is live — the strongest exoneration
+    # claim: the lowest the unfaulted channel ever reached while armed.
+    out["armed_min_others"] = {n: float(r.trust[n][t > WARMUP].min())
+                               for n in r.trust if n != ch}
     # attribution: top non-nominal cause at its peak, post-onset
     P = {c: r.diag[c] for c in r.causes}
     mask = t > ONSET
@@ -95,14 +100,24 @@ def main():
             lat = _stats([r["latency_s"] for r in runs if r["detected"]])
             attr = np.mean([r["attributed_correct"] for r in runs if r["detected"]]) \
                 if det else 0.0
+            # aggregate exonerated (unfaulted) channels over the armed window
+            others = [n for n in ("ir_seeker", "rf_seeker", "ins")
+                      if n != FAULTED[name]]
+            exo = {}
+            for chan in others:
+                mins = [rr["armed_min_others"][chan] for rr in runs]
+                exo[chan] = {"min_across_runs": round(float(min(mins)), 3),
+                             "mean_of_run_min": round(float(np.mean(mins)), 3)}
             report["scenarios"][name] = {
                 "runs": 50, "detections": det,
                 "detection_rate": round(det / 50, 3),
                 "latency_s": lat,
                 "attribution_accuracy": round(float(attr), 3),
                 "mean_min_trust_faulted": round(float(np.mean(
-                    [r["min_trust_faulted"] for r in runs])), 3)}
-            print(f"{name:18s} det {det}/50  lat {lat}  attr {attr:.2f}")
+                    [r["min_trust_faulted"] for r in runs])), 3),
+                "exoneration_armed_window": exo}
+            print(f"{name:18s} det {det}/50  lat {lat}  attr {attr:.2f}  "
+                  f"exon {exo}")
 
     # --- item 3: ir_decoy magnitude sweep ----------------------------------
     print("\nir_decoy magnitude sweep (20 runs/magnitude):")
@@ -154,6 +169,26 @@ def _write_md(rep):
     c = rep["scenarios"]["clean_engagement"]
     L += ["", f"**clean_engagement:** {c['false_alarm_runs']}/50 runs raised "
           f"any alarm (false-alarm rate {c['false_alarm_rate']:.2f}).", "",
+          "## Exonerated-channel trust (unfaulted channels, 50 runs each)", "",
+          "Minimum trust of each *unfaulted* channel over the armed window "
+          f"(t > {rep['config']['warmup_s']} s warmup), across all 50 runs. "
+          "`min across runs` = the single lowest value any run reached; "
+          "`mean of per-run min` = average of each run's minimum.", "",
+          "| faulted scenario | unfaulted channel | min across runs | "
+          "mean of per-run min |", "|---|---|---|---|"]
+    for nm in ("ir_decoy", "rf_jam"):
+        exo = rep["scenarios"][nm]["exoneration_armed_window"]
+        for chan, v in exo.items():
+            L.append(f"| {nm} | {chan} | {v['min_across_runs']:.3f} | "
+                     f"{v['mean_of_run_min']:.3f} |")
+    L += ["", "Reading: a channel is cleanly *trust*-exonerated only when it "
+          "shares no graph edge with the faulted channel. INS shares no edge "
+          "with the IR channel, so under ir_decoy it stays high (min 0.752). "
+          "INS shares Edge B (rangerate_ins) with the RF channel, so under "
+          "rf_jam it sags (min 0.272) — there it is exonerated by the "
+          "diagnosis posterior (no INS hypothesis fires), not by trust value. "
+          "Likewise the shared-bearing partner sags in both cases. This is "
+          "the documented shared-edge coupling (see limitations).", "",
           "## ir_decoy magnitude sweep (20 runs/magnitude) — detection floor",
           "", "| decoy offset | detection rate | mean latency (s) |",
           "|---|---|---|"]
