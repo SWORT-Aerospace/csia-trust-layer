@@ -8,5 +8,6 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]" pyulog pymavlink
+      - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run
       - run: python -m pytest -q
       - run: csia report

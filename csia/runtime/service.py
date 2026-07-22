@@ -80,6 +80,7 @@ class RunSummary:
     actions: list
     mean_latency_us: float
     states: list = field(default_factory=list, repr=False)
+    errors: int = 0    # samples whose processing raised (contained, logged)
 
 
 class TrustLayerRuntime:
@@ -108,6 +109,7 @@ class TrustLayerRuntime:
         states_kept = []
         min_trust = {}
         n_ticks = 0
+        n_errors = 0
         lat_sum = 0.0
         wall0 = time.monotonic()
         t_last = 0.0
@@ -118,20 +120,41 @@ class TrustLayerRuntime:
                     lag = t / self.speed - (time.monotonic() - wall0)
                     if lag > 0:
                         time.sleep(lag)
-                for state in self.layer.ingest(sensor, t, channels):
+                # The monitor dying is itself a failure mode: an exception in
+                # the trust math must not take the whole integrity monitor
+                # down mid-flight. Contain it per sample, count it, surface
+                # it in the summary; the stream keeps being processed.
+                try:
+                    for state in self.layer.ingest(sensor, t, channels):
+                        self._handle(state, min_trust, states_kept, fh)
+                        n_ticks += 1
+                        lat_sum += state.latency_us
+                except Exception:
+                    n_errors += 1
+                    if n_errors == 1:
+                        log.exception(
+                            "trust-layer error on %s sample at t=%.2fs "
+                            "(contained; monitoring continues)", sensor, t)
+                    elif n_errors % 500 == 0:
+                        log.error("trust-layer errors: %d contained so far "
+                                  "(latest: %s at t=%.2fs)", n_errors, sensor, t)
+                t_last = t
+            try:
+                for state in self.layer.flush(t_last):
                     self._handle(state, min_trust, states_kept, fh)
                     n_ticks += 1
                     lat_sum += state.latency_us
-                t_last = t
-            for state in self.layer.flush(t_last):
-                self._handle(state, min_trust, states_kept, fh)
-                n_ticks += 1
-                lat_sum += state.latency_us
+            except Exception:
+                n_errors += 1
+                log.exception("trust-layer error during flush (contained)")
         finally:
             if fh:
                 fh.close()
             self.source.stop()
 
+        if n_errors:
+            log.error("run finished with %d contained trust-layer errors "
+                      "(%d ticks emitted)", n_errors, n_ticks)
         return RunSummary(
             scenario=getattr(self.source, "scenario", "live"),
             ticks=n_ticks,
@@ -142,7 +165,8 @@ class TrustLayerRuntime:
                      if isinstance(act, LoggingActuator)
                      for t, a in act.executed],
             mean_latency_us=lat_sum / max(n_ticks, 1),
-            states=states_kept)
+            states=states_kept,
+            errors=n_errors)
 
     def _handle(self, state: TrustState, min_trust, states_kept, fh):
         actions = self.policy.update(state)

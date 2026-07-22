@@ -150,6 +150,51 @@ def test_stale_sensor_watchdog(truth):
     assert "invalid" in " ".join(caution.reasons)
 
 
+def test_field_mode_withdrawn_plus_stale_holds_trust(truth):
+    """Regression: in field mode, a chronically-noisy channel has its
+    temporal evidence withdrawn (adapt_level > 25); if that sensor then
+    goes stale, every edge and physics gate zeroes out and the node has NO
+    evidence source left. This used to crash the whole runtime with
+    ZeroDivisionError — it must instead hold trust and keep monitoring."""
+    src = SimulatedFlightSource("clean", truth=truth)
+    layer = OnlineTrustLayer(field_mode=True)
+    last_t = 0.0
+    states = []
+    for sensor, t, ch in src.samples():
+        if sensor == "gps" and t > 5.0:
+            continue                          # gps goes silent -> stale
+        layer.slots["gps"].adapt_level = 30.0  # chronic-noise withdrawal
+        states.extend(layer.ingest(sensor, t, ch))
+        last_t = t
+        if t > 12.0:
+            break
+    states.extend(layer.flush(last_t))
+    after = [s for s in states if s.t > 6.0]
+    assert after, "runtime died after gps lost all evidence sources"
+    assert not any(s.fresh["gps"] for s in after)
+    t_ref = after[0].trust["gps"]
+    assert all(abs(s.trust["gps"] - t_ref) < 1e-9 for s in after), \
+        "trust must hold, not drift, with no evidence"
+
+
+def test_runtime_contains_layer_errors(truth):
+    """The monitor dying is itself a failure mode: an exception inside the
+    trust math must be contained, counted, and surfaced — not kill the
+    integrity monitor mid-flight."""
+    class BombLayer(OnlineTrustLayer):
+        def ingest(self, sensor, t, channels):
+            if 20.0 < t < 21.0:
+                raise RuntimeError("injected trust-math fault")
+            return super().ingest(sensor, t, channels)
+
+    runtime = TrustLayerRuntime(SimulatedFlightSource("clean", truth=truth),
+                                layer=BombLayer())
+    s = runtime.run()
+    assert s.errors > 0, "injected faults were not counted"
+    assert s.ticks > 1200, "runtime stopped monitoring after the fault window"
+    assert s.final_level == "NORMAL"
+
+
 def test_profiles_registry_and_validation(truth):
     from csia.profiles import PROFILES, get_profile
     import pytest as _pytest

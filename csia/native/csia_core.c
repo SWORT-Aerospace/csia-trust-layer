@@ -69,7 +69,10 @@ void csia_trust_step(
         double d = navail > 1 ? (cmax - cmin) : 0.0;
         double rho = rho_max - (rho_max - rho_min) * d;
 
-        if (fresh[i]) {
+        /* no evidence sources at all -> hold the Beta belief (absence of
+         * evidence is absence, not 0.5-consistent); 0.5 is only the
+         * reported placeholder. Mirrors engine.py::TrustCore.step. */
+        if (fresh[i] && wsum > 0.0) {
             alpha[i] = rho * alpha[i] + evidence;
             beta[i]  = rho * beta[i] + (1.0 - evidence);
         }

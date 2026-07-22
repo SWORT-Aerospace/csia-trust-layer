@@ -59,6 +59,35 @@ def test_native_trust_matches_python():
             assert abs(res[n]["evidence"] - nat.out_ev[i]) < 1e-12
 
 
+def test_native_trust_no_evidence_parity():
+    """Both implementations must agree on the no-evidence branch: hold the
+    belief, report the 0.5 placeholder (regression: Python divided by zero
+    while C updated the belief with fabricated 0.5 evidence)."""
+    cfg = EngineConfig()
+    py = TrustCore(["a", "b"], cfg)
+    nat = native.NativeTrustState(2, 1, [0], [1], cfg)
+    steps = [
+        (1.4, 1.0),   # normal evidence tick
+        (5.0, 0.0),   # everything gated out -> no evidence anywhere
+        (0.8, 1.0),   # evidence returns
+    ]
+    for lam, gate in steps:
+        res = py.step({"e": ("a", "b", lam, gate)},
+                      {"a": (lam, gate), "b": (lam, gate)},
+                      {"a": None, "b": None}, {"a": None, "b": None},
+                      {"a": True, "b": True})
+        nat.elam[:], nat.egate[:] = [lam], [gate]
+        nat.plam[:], nat.pgate[:] = [lam, lam], [gate, gate]
+        nat.phas[:] = 1
+        nat.hist_has[:] = 0
+        nat.vr_has[:] = 0
+        nat.fresh[:] = 1
+        nat.step()
+        for i, n in enumerate(("a", "b")):
+            assert abs(res[n]["trust"] - nat.out_trust[i]) < 1e-12
+            assert abs(res[n]["evidence"] - nat.out_ev[i]) < 1e-12
+
+
 def test_native_diag_matches_python():
     py = DiagnosisCore()
     feats = sorted({f for lows in CAUSES.values() for f in lows}

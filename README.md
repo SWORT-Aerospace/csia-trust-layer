@@ -27,14 +27,14 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (39 tests, ~4 s)
+.venv/bin/python -m pytest    # full test suite (52 tests)
 ```
 
 ## Validation status (v0.7.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (39 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
+| Simulated fault harness (52 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
 | **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |

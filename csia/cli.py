@@ -97,6 +97,9 @@ def _run(args) -> int:
 
     print(f"\n=== run complete: {summary.ticks} ticks, "
           f"trust-core+failsafe mean {summary.mean_latency_us:.0f} us/tick ===")
+    if summary.errors:
+        print(f"WARNING: {summary.errors} trust-layer errors were contained "
+              "during this run — inspect the log")
     print(f"final failsafe level: {summary.final_level}")
     for tr in summary.transitions:
         print(f"  t={tr.t:5.1f}s  {tr.previous.name} -> {tr.level.name}: "
@@ -214,6 +217,18 @@ def _service(args) -> int:
     return 0
 
 
+def _bench(args) -> int:
+    from .validation import bench
+    bench(args.out)
+    return 0
+
+
+def _mc(args) -> int:
+    from .validation import monte_carlo
+    monte_carlo(args.runs, True, args.seed, args.out)
+    return 0
+
+
 def _info(args) -> int:
     from . import __version__
     from .scenarios import SCENARIOS
@@ -264,15 +279,12 @@ def main(argv=None) -> int:
     bp = sub.add_parser("bench", help="C1 truth table: detection under "
                         "sim vs field configurations")
     bp.add_argument("--out", default="campaigns/bench.json")
-    bp.set_defaults(fn=lambda a: __import__("csia.validation",
-        fromlist=["bench"]).bench(a.out) and 0 or 0)
+    bp.set_defaults(fn=_bench)
     mp = sub.add_parser("mc", help="Monte Carlo detection/false-alarm campaign")
     mp.add_argument("--runs", type=int, default=150)
     mp.add_argument("--seed", type=int, default=0)
     mp.add_argument("--out", default="campaigns/monte_carlo.json")
-    mp.set_defaults(fn=lambda a: __import__("csia.validation",
-        fromlist=["monte_carlo"]).monte_carlo(a.runs, True, a.seed, a.out)
-        and 0 or 0)
+    mp.set_defaults(fn=_mc)
     sub.add_parser("info", help="package info").set_defaults(fn=_info)
     args = ap.parse_args(argv)
     logging.basicConfig(

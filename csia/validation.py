@@ -89,7 +89,8 @@ def bench(out_path=None):
         print(f"{'clean':10s} {'field' if fm else 'sim':6s} "
               f"false alarms: {alarms}")
     if out_path:
-        json.dump(rows, open(out_path, "w"), indent=1)
+        with open(out_path, "w") as fh:
+            json.dump(rows, fh, indent=1)
         print(f"-> {out_path}")
     return rows
 
@@ -170,6 +171,7 @@ def monte_carlo(runs=150, field_mode=True, seed=0, out_path=None):
               f"{clean['alarms']} alarms -> {rate:.1f}/hr "
               f"[{lo:.1f}, {hi:.1f}] 95% CI")
     if out_path:
-        json.dump(report, open(out_path, "w"), indent=1)
+        with open(out_path, "w") as fh:
+            json.dump(report, fh, indent=1)
         print(f"-> {out_path}")
     return report

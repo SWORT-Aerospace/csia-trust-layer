@@ -19,6 +19,22 @@ def test_engine_config_validation():
         EngineConfig(alpha0=0.0)
 
 
+def test_no_evidence_holds_trust():
+    """A node can lose every evidence source at once (edges gated out or
+    endpoints stale, physics gated, temporal evidence withdrawn in field
+    mode). That must HOLD the belief — not crash (regression: this divided
+    by zero) and not fabricate 0.5-consistency into the Beta update."""
+    from csia.trust_engine.engine import TrustCore
+    core = TrustCore(["gps"])
+    t0 = core.trust["gps"]
+    for fresh in (True, False):
+        res = core.step(edges={}, phys={}, hist={"gps": None},
+                        var_ratio={"gps": None}, fresh={"gps": fresh})
+        assert res["gps"]["trust"] == t0, "trust must hold with no evidence"
+        assert core.alpha["gps"] == core.cfg.alpha0, "belief must not update"
+        assert res["gps"]["evidence"] == 0.5  # neutral placeholder only
+
+
 def test_trust_bounded_and_clean_floor(clean_run):
     _, _, _, hist, _ = clean_run
     assert (hist.trust >= 0.0).all() and (hist.trust <= 1.0).all()
