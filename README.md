@@ -53,6 +53,7 @@ anti-alias downsampling, mag-aided yaw, self-calibrated field magnitude,
 minimum-rate channel screening, and monitored-sensor-aware failsafe rules —
 all of it forced into existence by real logs, all of it tested.
 
+Held-out validation protocol (C2): [docs/VALIDATION_PROTOCOL.md](docs/VALIDATION_PROTOCOL.md); `tools/fetch_real_logs.py` re-downloads the 26-log campaign by UUID and re-runs it in one command.
 Commercial/SBIR readiness: [docs/COMMERCIALIZATION.md](docs/COMMERCIALIZATION.md).
 Engineering review (adversarial, scored): [docs/ARCHITECTURE_REVIEW.md](docs/ARCHITECTURE_REVIEW.md). Org-level 10-year blueprint: [docs/ORG_BLUEPRINT.md](docs/ORG_BLUEPRINT.md).
 
