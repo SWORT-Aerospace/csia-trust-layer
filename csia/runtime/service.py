@@ -82,6 +82,7 @@ class RunSummary:
     mean_latency_us: float
     states: list = field(default_factory=list, repr=False)
     errors: int = 0    # samples whose processing raised (contained, logged)
+    bad_samples: int = 0   # malformed samples the layer rejected pre-filter
 
 
 class TrustLayerRuntime:
@@ -110,7 +111,7 @@ class TrustLayerRuntime:
         states_kept = []
         min_trust = {}
         n_ticks = 0
-        n_errors = 0
+        self._n_errors = 0
         lat_sum = 0.0
         wall0 = time.monotonic()
         t_last = 0.0
@@ -140,14 +141,15 @@ class TrustLayerRuntime:
                         n_ticks += 1
                         lat_sum += state.latency_us
                 except Exception:
-                    n_errors += 1
-                    if n_errors == 1:
+                    self._n_errors += 1
+                    if self._n_errors == 1:
                         log.exception(
                             "trust-layer error on %s sample at t=%.2fs "
                             "(contained; monitoring continues)", sensor, t)
-                    elif n_errors % 500 == 0:
+                    elif self._n_errors % 500 == 0:
                         log.error("trust-layer errors: %d contained so far "
-                                  "(latest: %s at t=%.2fs)", n_errors, sensor, t)
+                                  "(latest: %s at t=%.2fs)",
+                                  self._n_errors, sensor, t)
                 t_last = t
             try:
                 for state in self.layer.flush(t_last):
@@ -155,16 +157,16 @@ class TrustLayerRuntime:
                     n_ticks += 1
                     lat_sum += state.latency_us
             except Exception:
-                n_errors += 1
+                self._n_errors += 1
                 log.exception("trust-layer error during flush (contained)")
         finally:
             if fh:
                 fh.close()
             self.source.stop()
 
-        if n_errors:
+        if self._n_errors:
             log.error("run finished with %d contained trust-layer errors "
-                      "(%d ticks emitted)", n_errors, n_ticks)
+                      "(%d ticks emitted)", self._n_errors, n_ticks)
         return RunSummary(
             scenario=getattr(self.source, "scenario", "live"),
             ticks=n_ticks,
@@ -176,7 +178,8 @@ class TrustLayerRuntime:
                      for t, a in act.executed],
             mean_latency_us=lat_sum / max(n_ticks, 1),
             states=states_kept,
-            errors=n_errors)
+            errors=self._n_errors,
+            bad_samples=getattr(self.layer, "bad_samples", 0))
 
     def _handle(self, state: TrustState, min_trust, states_kept, fh):
         actions = self.policy.update(state)
@@ -198,6 +201,10 @@ class TrustLayerRuntime:
                 "diagnosis": {k: round(v, 4) for k, v in
                               state.posterior.items() if v > 0.01},
                 "actions": [asdict(a) for a in actions],
+                # the monitor's own health: who watches the watchman
+                "health": {
+                    "contained_errors": getattr(self, "_n_errors", 0),
+                    "bad_samples": getattr(self.layer, "bad_samples", 0)},
             }) + "\n")
 
 

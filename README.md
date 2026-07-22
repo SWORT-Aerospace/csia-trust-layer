@@ -8,11 +8,18 @@ Trust Graph** whose edges encode physical relationships between sensors, and
 whose anomaly output is a **probability distribution over causes** — never a
 binary fault flag.
 
-> **Status: research prototype / desktop simulation — NOT flight software.**
-> This code validates the trust-scoring concept and supports investor and
-> technical demos. A flight-certified implementation would require a separate
-> DO-178C/DO-254 qualification effort on embedded hardware. No certification
-> claims are made or implied anywhere in this repository.
+> **Status: deployable companion-computer ADVISORY software — validated in
+> simulation, on real flight logs, and against a live SITL autopilot; not
+> yet flown in the loop, and NOT certified flight-critical software.**
+> The runtime path is engineered for real deployment: armed-state gating,
+> MAVLink stream reconnection, FC-reboot recovery, per-sample crash
+> containment, monitor self-health reporting, soak-tested state stability,
+> and a systemd deployment package (`deploy/`). Every failsafe output is
+> advisory by default; nothing commands the vehicle unless explicitly and
+> separately enabled. See **Path to flight** below for the exact gates
+> between this repository and the airframe. Certified flight-critical use
+> (DO-178C/DO-254 on qualified hardware) is a separate program this
+> repository does not claim.
 
 ## Quick start
 
@@ -27,14 +34,16 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (61 tests)
+.venv/bin/python -m pytest    # full test suite (62 tests)
 ```
 
-## Validation status (v0.7.0)
+## Validation status (v0.8.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (61 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
+| Simulated fault harness (62 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
+| **Campaign reproducibility** — `csia bench`, `csia mc` (150 runs), seeker Monte Carlo regenerated after the 2026-07 live-path hardening | **bit-identical** to the committed `campaigns/*.json` and `deliverables/montecarlo_results.*` — the hardening changed no validated behavior |
+| **Soak** — looped runtime through the reset path (`tools/soak.py`) | 185 passes / 3.1 h flight-equivalent: 277,500 ticks, 0 errors, +0.0 MB RSS, latency ratio 1.01x |
 | **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
@@ -136,6 +145,16 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
   discontinuity resets the trust layer and failsafe dwell timers instead
   of integrating a negative dt (tested; `tools/soak.py` loops hours of
   flight time through the reset path and watches RSS/latency).
+- **Stream resilience**: `MavlinkSource` reconnects with capped backoff on
+  timeout or connection error, preserving the time epoch and GPS origin
+  across the gap — an in-flight monitor never gives up on its stream; the
+  stale watchdog + failsafe report the outage while it retries.
+- **Self-health**: every JSONL state line carries the monitor's own health
+  (contained errors, rejected malformed samples), and `RunSummary` reports
+  the same — "who watches the watchman" is answered in the log (tested).
+- **Deployment package**: `sudo deploy/install.sh` installs the hardened
+  systemd unit (`deploy/csia.service` — advisory only, `Restart=always`,
+  no privileges, logs to `/var/log/csia/`) on the companion computer.
 - **`csia service`**: runtime + dashboard in one process; the dashboard's
   LIVE tab renders the runtime's trust/diagnosis feed at 1 Hz refresh while
   replay tabs remain available for analysis.
@@ -201,6 +220,36 @@ telemetry (`HIGHRES_IMU`, `ESC_STATUS`, `GPS_RAW_INT`, `BATTERY_STATUS`, …),
 publishing per-sensor trust and diagnosis for the ground station and, later,
 for fusion-weight adaptation. The causality guarantee above is what makes
 that port mechanical rather than a rewrite.
+
+## Path to flight
+
+The runtime runs on the vehicle today — in an ADVISORY role on the
+companion computer. The gates between this repository and the airframe, in
+order; each is a measurement campaign, not a rewrite:
+
+1. **Re-run SITL on current code** (`tools/sitl_validate.py`, then
+   `--inject gps_glitch`). The SITL rows in the table above were measured
+   before the 2026-07 armed-state/vz/reboot hardening and must be
+   refreshed before any new claim.
+2. **Commissioning calibration on the actual airframe** — the mandatory
+   sigma-calibration procedure in docs/HARDWARE.md
+   (`OnlineTrustLayer(auto_baseline_s=...)`).
+3. **Overnight soak on the Pi 5 itself**:
+   `python tools/soak.py --minutes 480`. Desktop reference: 3.1 h
+   flight-equivalent, zero errors, zero growth.
+4. **Advisory-only supervised flights**: `deploy/install.sh`, service
+   consumes live MAVLink, logs `state.jsonl`, commands nothing. Compare
+   post-flight logs against expectations before trusting a single number.
+5. **Held-out real-log campaign** (docs/VALIDATION_PROTOCOL.md) for a
+   false-alarm rate an evaluator can't dismiss.
+6. Only after all of the above: consider `MavlinkActuator` with
+   `enable_commands=True` — SITL-validated first, range-safety rules
+   apply, and it remains uncertified.
+
+Certified flight-critical operation (DO-178C/DO-254, qualified toolchain,
+target-hardware verification) is a separate, funded program — see
+docs/COMMERCIALIZATION.md. This repository provides the algorithm,
+evidence, and deployment path; it does not provide certification.
 
 ## Known limitations (read before demoing)
 

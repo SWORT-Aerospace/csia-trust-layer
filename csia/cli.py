@@ -176,14 +176,14 @@ def _analyze_logs(args) -> int:
             "transitions": [{"t": tr.t, "level": tr.level.name,
                              "reasons": tr.reasons}
                             for tr in summary.transitions],
-            "bad_samples": layer._bad_samples,
+            "bad_samples": layer.bad_samples,
             "excluded_channels": getattr(src, "excluded", {}),
         })
         print(f"{os.path.basename(path)[:38]:38s} {src.duration:5.0f}s "
               f"{len(src.sensors_present):7d} {worst[1]:5.2f} "
               f"{n_alarm:6d}  {worst[0]}"
-              + (f" | {layer._bad_samples} bad samples rejected"
-                 if layer._bad_samples else ""))
+              + (f" | {layer.bad_samples} bad samples rejected"
+                 if layer.bad_samples else ""))
 
     if total_hours > 0:
         rate = total_transitions / total_hours

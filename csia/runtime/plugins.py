@@ -13,6 +13,7 @@ origin; the trust layer neither knows nor cares which one is attached:
 """
 
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import Iterator
 
@@ -231,7 +232,8 @@ class MavlinkSource(SourcePlugin):
     against MAVLink common.xml; validate against the actual FC stream
     (units and frames!) before trusting the numbers."""
 
-    def __init__(self, conn: str = "udp:0.0.0.0:14550", timeout_s: float = 5.0):
+    def __init__(self, conn: str = "udp:0.0.0.0:14550", timeout_s: float = 5.0,
+                 reconnect: bool = True, max_backoff_s: float = 10.0):
         try:
             from pymavlink import mavutil
         except ImportError as exc:  # pragma: no cover - optional dependency
@@ -241,20 +243,45 @@ class MavlinkSource(SourcePlugin):
         self._mavutil = mavutil
         self.conn_str = conn
         self.timeout_s = timeout_s
+        self.reconnect = reconnect
+        self.max_backoff_s = max_backoff_s
         self._running = False
 
     def samples(self) -> Iterator[Sample]:  # pragma: no cover - needs hardware
-        m = self._mavutil.mavlink_connection(self.conn_str)
-        log.info("MAVLink: waiting for heartbeat on %s", self.conn_str)
-        m.wait_heartbeat(timeout=self.timeout_s)
+        # An in-flight monitor must never give up on a dropped stream:
+        # reconnect with capped backoff, keeping ctx (time epoch, GPS
+        # origin) so the layer's state and timeline survive the gap — the
+        # stale watchdog + failsafe report the outage meanwhile. FC reboots
+        # across the gap are handled by map_mavlink's epoch re-anchor.
         self._running = True
         ctx = {"t0": None}
+        backoff = 1.0
         while self._running:
-            msg = m.recv_match(blocking=True, timeout=self.timeout_s)
-            if msg is None:
-                log.warning("MAVLink: stream timed out")
+            m = None
+            try:
+                m = self._mavutil.mavlink_connection(self.conn_str)
+                log.info("MAVLink: waiting for heartbeat on %s", self.conn_str)
+                m.wait_heartbeat(timeout=self.timeout_s)
+                backoff = 1.0
+                while self._running:
+                    msg = m.recv_match(blocking=True, timeout=self.timeout_s)
+                    if msg is None:
+                        log.warning("MAVLink: stream timed out")
+                        break
+                    yield from map_mavlink(msg, ctx)
+            except Exception as exc:
+                log.warning("MAVLink: connection error: %s", exc)
+            finally:
+                if m is not None:
+                    try:
+                        m.close()
+                    except Exception:
+                        pass
+            if not self._running or not self.reconnect:
                 return
-            yield from map_mavlink(msg, ctx)
+            log.warning("MAVLink: reconnecting in %.0f s", backoff)
+            time.sleep(backoff)
+            backoff = min(backoff * 2.0, self.max_backoff_s)
 
     def stop(self):
         self._running = False

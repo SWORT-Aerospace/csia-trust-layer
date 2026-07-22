@@ -266,6 +266,30 @@ def test_runtime_resets_on_source_time_jump(truth):
         f"expected ~750 ticks across the reboot, got {s.ticks}"
 
 
+def test_bad_samples_counted_and_health_logged(truth, tmp_path):
+    """Monitor self-health: malformed (NaN) telemetry is rejected before
+    the filters, counted, surfaced in RunSummary, and written into every
+    JSONL state line — the monitor reports on itself."""
+    import json
+
+    class CorruptBaro(SimulatedFlightSource):
+        def samples(self):
+            for s, t, ch in super().samples():
+                if s == "baro" and 30.0 < t < 30.5:
+                    ch = dict(ch, altitude=float("nan"))
+                yield s, t, ch
+
+    log_path = tmp_path / "run.jsonl"
+    rt = TrustLayerRuntime(CorruptBaro("clean", truth=truth),
+                           log_path=str(log_path))
+    s = rt.run()
+    assert s.bad_samples > 0, "NaN samples were not rejected/counted"
+    assert s.errors == 0
+    last = json.loads(log_path.read_text().strip().splitlines()[-1])
+    assert last["health"]["bad_samples"] == s.bad_samples
+    assert last["health"]["contained_errors"] == 0
+
+
 def test_field_mode_withdrawn_plus_stale_holds_trust(truth):
     """Regression: in field mode, a chronically-noisy channel has its
     temporal evidence withdrawn (adapt_level > 25); if that sensor then

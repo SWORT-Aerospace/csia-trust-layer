@@ -262,6 +262,11 @@ class OnlineTrustLayer:
         all restart from zero. Trust re-converges from the prior."""
         OnlineTrustLayer.__init__(self, *self._init_args)
 
+    @property
+    def bad_samples(self) -> int:
+        """Malformed (non-finite) samples rejected before the filters."""
+        return self._bad_samples
+
     # --- ingest ---------------------------------------------------------------
 
     def ingest(self, sensor: str, t: float, channels: dict) -> list:
