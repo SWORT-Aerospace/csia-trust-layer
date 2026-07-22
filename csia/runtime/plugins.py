@@ -87,15 +87,41 @@ def map_mavlink(msg, ctx: dict) -> list:
     Validated against ArduPilot SITL (tools/sitl_validate.py)."""
     k = msg.get_type()
     t_us = getattr(msg, "time_usec", None)
-    t = (t_us / 1e6) if t_us else getattr(msg, "time_boot_ms", 0) / 1e3
-    if ctx.get("t0") is None and t > 0:
-        ctx["t0"] = t
-    if ctx.get("t0") is None:
-        return []
-    t = t - ctx["t0"]
-    if t < 0:
-        return []
+    t_ms = getattr(msg, "time_boot_ms", None)
+    t_raw = (t_us / 1e6) if t_us else ((t_ms / 1e3) if t_ms else None)
+    if t_raw is not None:
+        last_raw = ctx.get("raw_last")
+        if last_raw is not None and t_raw < last_raw - 5.0:
+            # FC reboot: the boot-time epoch restarted. Re-anchor so
+            # downstream time stays monotonic (resume 1 s after the last
+            # sample); the data gap itself is the stale watchdog's job.
+            log.warning("MAVLink time went backwards (%.1f -> %.1f s): "
+                        "re-anchoring epoch (FC reboot?)", last_raw, t_raw)
+            ctx["t0"] = t_raw - (ctx.get("t_last", 0.0) + 1.0)
+        ctx["raw_last"] = t_raw
+        if ctx.get("t0") is None and t_raw > 0:
+            ctx["t0"] = t_raw
+        if ctx.get("t0") is None:
+            return []
+        t = t_raw - ctx["t0"]
+        if t < 0:
+            return []
+        ctx["t_last"] = t
+    else:
+        # untimestamped message (HEARTBEAT): stamp with last stream time
+        t = ctx.get("t_last")
+        if t is None:
+            return []
     out = []
+    if k == "HEARTBEAT":
+        # Armed flag (MAV_MODE_FLAG_SAFETY_ARMED) gates the motor edges and
+        # the failsafe on ACTUAL vehicle state, not a time-since-start
+        # proxy. Ignore GCS heartbeats (MAV_TYPE_GCS=6) — only the
+        # autopilot's own state counts.
+        if getattr(msg, "type", 6) != 6:
+            out.append(("vehicle_status", t, {
+                "armed": bool(getattr(msg, "base_mode", 0) & 128)}))
+        return out
     if k == "HIGHRES_IMU":  # PX4 primary IMU, SI units
         out.append(("imu0", t, {
             "accel": _frd([msg.xacc, msg.yacc, msg.zacc]),
@@ -129,7 +155,7 @@ def map_mavlink(msg, ctx: dict) -> list:
         ctx["has_raw_gps"] = True
         if msg.fix_type < 3:
             out.append(("gps", t, {"pos": _np.zeros(3), "vel": _np.zeros(3),
-                                   "valid": False}))
+                                   "vz_valid": False, "valid": False}))
             return out
         if "origin" not in ctx:
             ctx["origin"] = (msg.lat, msg.lon, msg.alt / 10)
@@ -141,7 +167,11 @@ def map_mavlink(msg, ctx: dict) -> list:
             "pos": _np.array([(msg.lat - o[0]) * 1e-7 * 111_320.0,
                               -(msg.lon - o[1]) * 1e-7 * 111_320.0 * coslat,
                               (msg.alt / 10 - o[2]) / 1e2]),
+            # GPS_RAW_INT has no vertical rate: the 0.0 is a placeholder,
+            # and vz_valid=False tells the layer to judge horizontal only
+            # rather than read every climb as a spoof-like z-residual.
             "vel": _np.array([spd * _np.cos(cog), -spd * _np.sin(cog), 0.0]),
+            "vz_valid": False,
             "valid": True}))
     elif k == "GLOBAL_POSITION_INT" and not ctx.get("has_raw_gps"):
         # fallback when the raw stream is unavailable (fused EKF output;
@@ -183,6 +213,8 @@ def map_mavlink(msg, ctx: dict) -> list:
 # Documented here even when pymavlink is absent, so the integration
 # contract is reviewable without installing it.
 MAVLINK_MESSAGE_MAP = {
+    "HEARTBEAT":     "vehicle_status (armed flag -> motor-edge/failsafe gate)",
+    "GPS_RAW_INT":   "gps pos/vel (raw receiver; no vertical rate -> vz_valid=False)",
     "HIGHRES_IMU":   "imu0 (accel m/s^2, gyro rad/s)",
     "SCALED_IMU2":   "imu1 (accel mG -> m/s^2, gyro mrad/s -> rad/s)",
     "SCALED_PRESSURE": "baro (press_abs hPa -> ISA altitude, temperature)",

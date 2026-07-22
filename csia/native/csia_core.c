@@ -13,6 +13,12 @@
 
 #include <math.h>
 
+/* Hard caps on caller-supplied counts: internal scratch is stack-sized to
+ * these. Exceeding them returns -1 (no work done) instead of corrupting
+ * the stack — mandatory before compiling this into a flight computer. */
+#define CSIA_MAX_NODES 64
+#define CSIA_MAX_CAUSES 32
+
 static double consistency(double lam) {
     double ex = lam - 1.0;
     return ex > 0.0 ? exp(-0.5 * ex) : 1.0;
@@ -20,8 +26,9 @@ static double consistency(double lam) {
 
 /* One trust tick. Arrays sized: nodes n, edges m.
  * comps out layout: [nbr, phys, temp, stat] per node, -1.0 = unavailable.
- * Returns nothing; alpha/beta/trust are state carried between ticks. */
-void csia_trust_step(
+ * Returns 0, or -1 if n is out of bounds (state untouched);
+ * alpha/beta/trust are state carried between ticks. */
+int csia_trust_step(
     int n, int m,
     const int *ea, const int *eb,
     const double *elam, const double *egate,
@@ -34,7 +41,8 @@ void csia_trust_step(
     double *alpha, double *beta, double *trust,
     double *out_trust, double *out_evidence, double *out_comps)
 {
-    double new_trust[64];
+    double new_trust[CSIA_MAX_NODES];
+    if (n < 0 || n > CSIA_MAX_NODES) return -1;
     for (int i = 0; i < n; i++) {
         double num = 0.0, den = 0.0;
         for (int e = 0; e < m; e++) {
@@ -86,12 +94,14 @@ void csia_trust_step(
     }
     /* synchronous update: all nodes saw last tick's trust during this step */
     for (int i = 0; i < n; i++) trust[i] = new_trust[i];
+    return 0;
 }
 
 /* One diagnosis tick. nf features, nc causes.
  * low: nc x nf, 1 where the cause expects that feature LOW.
- * smoothed: nc state carried between ticks (init flag via *initialized). */
-void csia_diag_step(
+ * smoothed: nc state carried between ticks (init flag via *initialized).
+ * Returns 0, or -1 if nc/nf is out of bounds (state untouched). */
+int csia_diag_step(
     int nf, int nc,
     const double *c, const double *gate,
     const unsigned char *low,
@@ -99,7 +109,8 @@ void csia_diag_step(
     double *smoothed, int *initialized,
     double *out_post)
 {
-    double ll[32];
+    double ll[CSIA_MAX_CAUSES];
+    if (nc < 0 || nc > CSIA_MAX_CAUSES || nf < 0) return -1;
     for (int k = 0; k < nc; k++) ll[k] = 0.0;
     for (int f = 0; f < nf; f++) {
         if (gate[f] <= 1e-9) continue;
@@ -125,4 +136,5 @@ void csia_diag_step(
     for (int k = 0; k < nc; k++) { out_post[k] = exp(out_post[k] - best);
                                    sum += out_post[k]; }
     for (int k = 0; k < nc; k++) out_post[k] /= sum;
+    return 0;
 }

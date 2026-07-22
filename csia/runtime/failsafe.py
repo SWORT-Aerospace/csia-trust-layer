@@ -188,6 +188,13 @@ class FailsafePolicy:
         for n, ok in state.fresh.items():
             if ok:
                 self._ever_fresh.add(n)
+        if getattr(state, "armed", None) is False:
+            # vehicle known-DISARMED (real state from the source, not a time
+            # proxy): failsafe actions are meaningless on the ground — hold,
+            # and drop dwell bookkeeping so a pre-disarm onset can't
+            # instantly escalate at the next arming.
+            self.reset_timers()
+            return []
         if t < cfg.arm_time:   # not armed: calibration + prior convergence
             return []
         conds = self._conditions(state)
@@ -232,6 +239,15 @@ class FailsafePolicy:
             if a.name == "SELECT_IMU":
                 self._selected_imu = a.params["use"]
         return issued
+
+    def reset_timers(self):
+        """Drop dwell/hysteresis bookkeeping (level and the transition audit
+        trail persist). Called on disarm and on source time discontinuities
+        (FC reboot, looped replay) where stale onset times would otherwise
+        allow instant escalation."""
+        self._cond_since.clear()
+        self._issued.clear()
+        self._below_since = None
 
     def _transition(self, t, level, reasons, actions):
         prev = self.level

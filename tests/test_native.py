@@ -88,6 +88,17 @@ def test_native_trust_no_evidence_parity():
             assert abs(res[n]["evidence"] - nat.out_ev[i]) < 1e-12
 
 
+def test_native_bounds_rejected():
+    """Caller-supplied counts beyond the stack-sized scratch buffers must
+    be rejected (-1 -> ValueError), not corrupt the stack."""
+    cfg = EngineConfig()
+    with pytest.raises(ValueError, match="CSIA_MAX_NODES"):
+        native.NativeTrustState(65, 0, [], [], cfg).step()
+    with pytest.raises(ValueError, match="CSIA_MAX_CAUSES"):
+        native.NativeDiagState(1, 33, np.zeros((33, 1), np.uint8),
+                               np.zeros(33), 0.06, 1.5, 0.02).step()
+
+
 def test_native_diag_matches_python():
     py = DiagnosisCore()
     feats = sorted({f for lows in CAUSES.values() for f in lows}

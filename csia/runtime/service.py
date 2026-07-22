@@ -30,10 +30,11 @@ class Actuator(ABC):
 
 
 class LoggingActuator(Actuator):
-    """Default: advisory only. Records and logs every action."""
+    """Default: advisory only. Records and logs every action.
+    Bounded so a long-running service can't grow it without limit."""
 
     def __init__(self):
-        self.executed: list[tuple[float, Action]] = []
+        self.executed: deque = deque(maxlen=10_000)  # (t, Action)
 
     def execute(self, action: Action, state: TrustState):
         self.executed.append((state.t, action))
@@ -116,6 +117,15 @@ class TrustLayerRuntime:
         fh = open(self.log_path, "w") if self.log_path else None
         try:
             for sensor, t, channels in self.source.samples():
+                if t < t_last - 1.0:
+                    # source time discontinuity (FC reboot / looped replay):
+                    # every filter and dwell timer is stale — restart the
+                    # layer from scratch; trust re-converges from the prior.
+                    log.warning("source time jumped backwards "
+                                "(%.2f -> %.2f s): resetting trust layer",
+                                t_last, t)
+                    self.layer.reset()
+                    self.policy.reset_timers()
                 if self.realtime:
                     lag = t / self.speed - (time.monotonic() - wall0)
                     if lag > 0:

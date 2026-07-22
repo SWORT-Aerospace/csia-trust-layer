@@ -27,14 +27,14 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (52 tests)
+.venv/bin/python -m pytest    # full test suite (61 tests)
 ```
 
 ## Validation status (v0.7.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (52 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
+| Simulated fault harness (61 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
 | **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
@@ -120,6 +120,21 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
 - **Silence watchdog**: a sensor that stops producing samples is declared
   not-fresh within ~5 sample periods and handled by the failsafe — stale
   values are never silently held (tested).
+- **Armed-state gating**: the motor edges and the failsafe key on the
+  vehicle's ACTUAL armed flag (MAVLink HEARTBEAT / ULog `vehicle_status`)
+  when the source provides it — a vehicle idling disarmed on the ground
+  cannot poison its motor edges with gravity-vs-zero-thrust evidence, and
+  the failsafe never acts on a disarmed vehicle. The t>5 s proxy remains
+  only as the simulator bench fallback (both behaviors tested).
+- **No fabricated measurements**: `GPS_RAW_INT` carries no vertical
+  velocity, so the mapping marks `vz_valid=False` and every GPS check
+  judges horizontal components only (df adjusted) — a steady climb no
+  longer reads as a spoof-like vertical residual (tested).
+- **Reboot/time-jump hardened**: an FC reboot re-anchors the MAVLink epoch
+  monotonically instead of dropping all post-reboot data; any source time
+  discontinuity resets the trust layer and failsafe dwell timers instead
+  of integrating a negative dt (tested; `tools/soak.py` loops hours of
+  flight time through the reset path and watches RSS/latency).
 - **`csia service`**: runtime + dashboard in one process; the dashboard's
   LIVE tab renders the runtime's trust/diagnosis feed at 1 Hz refresh while
   replay tabs remain available for analysis.
