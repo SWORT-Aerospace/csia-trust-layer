@@ -125,6 +125,49 @@
                  letter-spacing: .06em; border: 1px solid var(--line); padding: 2px 7px 2px 6px; }
   .legend i { display: inline-block; width: 8px; height: 8px; flex: none; }
 
+  /* --- Autonomous Remediation panel: the failsafe RESPONSE loop --------- */
+  /* the level badge in the panel header reuses the annunciator color scale */
+  #remedLevel[data-level="NORMAL"]   { color: var(--good); }
+  #remedLevel[data-level="CAUTION"]  { color: var(--warn); }
+  #remedLevel[data-level="CRITICAL"] { color: var(--crit); }
+  #remedLevel[data-level="EMERGENCY"]{ color: var(--crit); animation: blink 1s steps(2,end) infinite; }
+  /* SCAN -> ANALYZE -> FIX -> STABILIZE recovery loop */
+  .remed-loop { display: flex; align-items: center; gap: 4px; margin: 2px 0 9px; }
+  .phase { flex: 1; display: flex; align-items: center; justify-content: center;
+           gap: 6px; padding: 6px 4px; border: 1px solid var(--line);
+           font: 600 9.5px var(--mono); letter-spacing: .1em; color: var(--faint);
+           text-transform: uppercase; transition: color .15s, border-color .15s,
+           background .15s; }
+  .phase .ph-dot { width: 6px; height: 6px; flex: none; border-radius: 50%;
+                   background: var(--faint); transition: background .15s, box-shadow .15s; }
+  .phase.active { color: var(--text); border-color: var(--line-hi);
+                  background: rgba(255,255,255,0.04); }
+  .phase.active .ph-dot { background: var(--accent, var(--good));
+                          box-shadow: 0 0 7px var(--accent, var(--good)); }
+  .phase-arrow { flex: none; color: var(--faint); font-size: 11px; }
+  .remed-posture { font: 500 10.5px var(--mono); letter-spacing: .04em;
+                   color: var(--dim); text-transform: uppercase; padding: 0 1px 8px;
+                   border-bottom: 1px solid var(--line); }
+  .remed-log { display: flex; flex-direction: column; gap: 0; margin-top: 8px;
+               max-height: 132px; overflow-y: auto; }
+  .remed-log:empty::before { content: "no remediation actions at this time";
+               color: var(--faint); font: 500 10px var(--mono);
+               text-transform: uppercase; letter-spacing: .06em; }
+  .log-row { display: grid; grid-template-columns: 52px auto; gap: 2px 10px;
+             padding: 5px 2px 5px 9px; border-left: 2px solid var(--faint);
+             align-items: baseline; }
+  .log-row + .log-row { border-top: 1px solid var(--line); }
+  .log-row.lvl-1 { border-left-color: var(--warn); }
+  .log-row.lvl-2 { border-left-color: var(--crit); }
+  .log-row.lvl-3 { border-left-color: var(--crit); }
+  .log-row.lvl-0 { border-left-color: var(--good); }
+  .log-t { font: 700 10.5px var(--mono); color: var(--hot);
+           font-variant-numeric: tabular-nums; }
+  .log-act { font: 700 10.5px var(--mono); letter-spacing: .06em;
+             text-transform: uppercase; color: var(--text); }
+  .log-why { grid-column: 2; font: 400 9.5px var(--mono); color: var(--dim);
+             letter-spacing: .02em; }
+
   footer { color: var(--faint); font: 10px/1.7 var(--mono); padding: 10px 16px 16px;
            max-width: 120ch; text-transform: uppercase; letter-spacing: .05em; }
 
@@ -165,6 +208,20 @@
       <h2>Fault Attribution — Bayes Posterior<span class="code">08 HYPOTH</span></h2>
       <canvas id="diag" height="170"></canvas>
       <div class="legend" id="diagLegend"></div>
+    </div>
+    <div class="panel" id="remedPanel">
+      <h2>Autonomous Remediation — Failsafe Response<span class="code" id="remedLevel" data-level="NORMAL">NORMAL</span></h2>
+      <div class="remed-loop" id="remedLoop">
+        <div class="phase" data-phase="scan"><span class="ph-dot"></span>Scan</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="analyze"><span class="ph-dot"></span>Analyze</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="fix"><span class="ph-dot"></span>Fix</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="stabilize"><span class="ph-dot"></span>Stabilize</div>
+      </div>
+      <div class="remed-posture" id="remedPosture">monitoring 8 nodes · all nominal</div>
+      <div class="remed-log" id="remedLog"></div>
     </div>
   </div>
   <div class="col">
@@ -215,6 +272,18 @@ const SENSOR_COLORS = ["#E4EAF0","#FF5C5C","#46D08A","#B98CE0","#FFB020",
 const CAUSE_COLORS  = ["#46D08A","#FF5C5C","#E4EAF0","#5BC7DE","#B98CE0",
                        "#FFB020","#F0913C","#6B7480"];
 const COMP_COLORS = { nbr:"#9DB4C6", phys:"#FF5C5C", temp:"#46D08A", stat:"#FFB020" };
+// Autonomous remediation: failsafe level -> loop phase + operator posture.
+// The failsafe RESPONSE (from the shipping FailsafePolicy) is what the
+// vehicle DOES about each fault — the recovery half of the loop.
+const FS_LEVELS  = ["NORMAL", "CAUTION", "CRITICAL", "EMERGENCY"];
+const FS_ACCENT  = ["#46D08A", "#FFB020", "#FF4D4D", "#FF4D4D"];
+const FS_PHASES  = { 0: ["scan"], 1: ["analyze", "fix"],
+                     2: ["analyze", "fix", "stabilize"], 3: ["stabilize"] };
+const FS_POSTURE = {
+  0: "monitoring 8 nodes · all nominal",
+  1: "degraded capability isolated · reconfiguring around it",
+  2: "critical fault · ending flight on our terms",
+  3: "attitude reference lost · autonomous controlled descent" };
 const INK = "#04060A", GRIDLINE = "rgba(226,232,240,0.08)",
       AXIS = "#6B7480", CURSOR = "rgba(255,255,255,0.92)",
       TICK = "rgba(226,232,240,0.4)",
@@ -477,6 +546,33 @@ function legend(el, items) {
     `<span><i style="background:${color}"></i>${label}</span>`).join("");
 }
 
+function renderRemediation(k) {  // the failsafe RESPONSE at the cursor
+  const fs = data.failsafe;
+  const panel = $("remedPanel");
+  if (!fs) { panel.style.display = "none"; return; }  // pre-failsafe replay JSON
+  panel.style.display = "";
+  const lvl = fs.level[k] || 0;
+  const badge = $("remedLevel");
+  badge.textContent = FS_LEVELS[lvl]; badge.dataset.level = FS_LEVELS[lvl];
+  const active = FS_PHASES[lvl], accent = FS_ACCENT[lvl];
+  for (const ph of $("remedLoop").querySelectorAll(".phase")) {
+    ph.classList.toggle("active", active.includes(ph.dataset.phase));
+    ph.style.setProperty("--accent", accent);
+  }
+  $("remedPosture").textContent = FS_POSTURE[lvl];
+  // action log: every remediation action issued up to the cursor, newest first
+  const rows = [];
+  for (const e of fs.events) {
+    if (e.k > k) break;
+    for (const a of e.actions)
+      rows.push(`<div class="log-row lvl-${e.level}">`
+        + `<span class="log-t">t=${e.t.toFixed(1)}</span>`
+        + `<span class="log-act">${a.name}</span>`
+        + `<span class="log-why">${a.reason}</span></div>`);
+  }
+  $("remedLog").innerHTML = rows.reverse().join("");
+}
+
 function drawDynamic() {  // everything that changes with the cursor
   if (!data) return;
   $("scrub").value = k;
@@ -489,12 +585,13 @@ function drawDynamic() {  // everything that changes with the cursor
     .map(([c, p]) => `${(100 * p).toFixed(0)}% ${c}`).join(" · ");
   $("callout").innerHTML = `<b>diagnosis:</b> ${post}` +
     ` &nbsp;·&nbsp; ${selected} trust ${data.trust[selected][k].toFixed(3)}`;
-  // velocity readout (vertical velocity from telemetry)
+  // velocity readout (vh = horizontal ground speed, hypot(vx, vy))
   const vel = (data.aux.vh ? data.aux.vh[k] : 0) || 0;
   $("velocityValue").textContent = Math.abs(vel).toFixed(1);
   const gateActive = data.aux.speed_gate[k] > 0.5;
   $("velocityGate").textContent = "gate: " + (gateActive ? "ACTIVE" : "off");
   $("velocityGate").style.color = gateActive ? "var(--good)" : "var(--faint)";
+  renderRemediation(k);
   // annunciator: worst sensor trust at this instant -> operator posture.
   // A summary readout of true state (min over the 8 Trust Coefficients),
   // not the full per-class failsafe machine — labeled MIN T accordingly.
