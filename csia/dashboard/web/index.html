@@ -4,117 +4,132 @@
 <meta charset="utf-8">
 <title>CSIA Trust Layer — live dashboard</title>
 <style>
-  /* CSIA Mission Integrity Console — deliberate dark instrument aesthetic.
-     Accent (steel azure) = interactive only. Trust semantics (emerald/
-     amber/red) are a SEPARATE scale, never used as brand accent. */
+  /* CSIA — Tactical C2 / HUD console. Near-monochrome by intent: white/grey
+     hairline chrome on pure black; interactive state reads through BRIGHTNESS,
+     not a brand hue. Saturated color is reserved STRICTLY for trust status
+     (green/amber/red) so color always means state, never decoration. */
   :root {
-    --bg: #070A0F; --bg2: #0A0F17;
-    --panel: #0E141E; --panel-hi: #131B28;
-    --edge: #1B2432; --edge-hi: #29384C;
-    --text: #EAF1FA; --dim: #8493A8; --faint: #52627A;
-    --accent: #4C9BE6; --accent-dim: #2C4A6B;
-    --good: #35C98A; --warn: #E9A93A; --crit: #E5484D;
-    --grid: rgba(120,150,190,0.09);
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg: #04060A; --ink: #04060A;
+    --line: rgba(226,232,240,0.13);    /* hairline chrome */
+    --line-hi: rgba(226,232,240,0.42);  /* corner brackets / active edges */
+    --text: #E4EAF0; --hot: #FFFFFF;    /* bright = active/emphasis */
+    --dim: #7A8494; --faint: #49515D;
+    --good: #46D08A; --warn: #FFB020; --crit: #FF4D4D;
     --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
-    --r: 9px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background:
-           radial-gradient(1200px 600px at 78% -10%, #0C1420 0%, var(--bg) 60%);
-         color: var(--text); font: 13px/1.5 var(--sans);
-         -webkit-font-smoothing: antialiased; }
+  body { margin: 0; color: var(--text);
+         font: 12px/1.5 var(--mono); letter-spacing: .01em;
+         -webkit-font-smoothing: antialiased;
+         background:
+           repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.010) 2px 3px),
+           radial-gradient(1500px 760px at 50% -25%, #0A0F16 0%, var(--bg) 68%); }
 
-  /* caution strip — kept verbatim for honesty, restyled as an annunciator */
-  .banner { display: flex; align-items: center; justify-content: center;
-            gap: 8px; background: linear-gradient(#1A130A, #140F08);
-            color: var(--warn); border-bottom: 1px solid #2A2010;
-            padding: 4px 8px; font: 600 10.5px/1 var(--mono);
-            letter-spacing: .14em; text-transform: uppercase; }
-  .banner::before { content: "▲"; font-size: 9px; opacity: .9; }
+  /* classification / caution strip — text kept verbatim for honesty */
+  .banner { display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #0A0704; color: var(--warn);
+            border-bottom: 1px solid rgba(255,176,32,0.28);
+            padding: 4px 8px; font: 700 10px/1 var(--mono);
+            letter-spacing: .26em; text-transform: uppercase; }
+  .banner::before, .banner::after { content: "// CAUTION //"; color: rgba(255,176,32,0.55);
+            letter-spacing: .18em; }
 
-  /* command bar */
-  header { display: flex; align-items: center; gap: 14px 18px; padding: 11px 18px;
-           background: linear-gradient(var(--bg2), var(--bg));
-           border-bottom: 1px solid var(--edge);
-           box-shadow: 0 1px 0 rgba(76,155,230,0.06); flex-wrap: wrap; }
-  .brand { display: flex; align-items: baseline; gap: 9px; }
-  .brand .mark { width: 9px; height: 9px; border-radius: 2px;
-                 background: var(--accent);
-                 box-shadow: 0 0 9px rgba(76,155,230,0.7); align-self: center; }
-  header h1 { font-size: 14px; margin: 0; font-weight: 650; letter-spacing: .01em; }
-  header h1 span { color: var(--dim); font-weight: 400; font-size: 12px; }
+  /* command strip */
+  header { display: flex; align-items: center; gap: 12px 18px; padding: 10px 16px;
+           background: linear-gradient(#070B11, var(--bg));
+           border-bottom: 1px solid var(--line-hi); flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .mark { width: 15px; height: 15px; flex: none; position: relative;
+                 border: 1px solid var(--hot); }
+  .brand .mark::before { content: ""; position: absolute; inset: 3px;
+                 background: var(--good); box-shadow: 0 0 8px var(--good); }
+  header h1 { font: 700 13px/1 var(--mono); margin: 0; letter-spacing: .1em;
+              text-transform: uppercase; color: var(--hot); }
+  header h1 span { color: var(--dim); font-weight: 400; letter-spacing: .06em; }
 
-  .tabs { display: flex; gap: 3px; flex-wrap: wrap;
-          background: var(--panel); border: 1px solid var(--edge);
-          border-radius: var(--r); padding: 3px; }
+  .tabs { display: flex; gap: 0; flex-wrap: wrap;
+          border: 1px solid var(--line); }
   .tabs button { background: transparent; color: var(--dim);
-                 border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer;
-                 font: 500 11.5px/1 var(--sans); letter-spacing: .01em;
-                 transition: background .15s, color .15s; }
-  .tabs button:hover { color: var(--text); background: var(--panel-hi); }
-  .tabs button.active { color: var(--bg); background: var(--accent);
-                        font-weight: 600; }
+                 border: 0; border-right: 1px solid var(--line);
+                 padding: 6px 11px; cursor: pointer; text-transform: uppercase;
+                 font: 500 10.5px/1 var(--mono); letter-spacing: .1em;
+                 transition: background .12s, color .12s; }
+  .tabs button:last-child { border-right: 0; }
+  .tabs button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .tabs button.active { color: var(--ink); background: var(--hot); font-weight: 700; }
 
-  .controls { display: flex; align-items: center; gap: 8px; margin-left: auto;
-              background: var(--panel); border: 1px solid var(--edge);
-              border-radius: var(--r); padding: 5px 8px; }
+  .controls { display: flex; align-items: center; gap: 7px; margin-left: auto;
+              border: 1px solid var(--line); padding: 4px 7px; }
   .controls button, .controls select {
-      background: var(--panel-hi); color: var(--text);
-      border: 1px solid var(--edge); border-radius: 6px;
-      padding: 5px 11px; cursor: pointer; font: 500 12px var(--sans); }
-  .controls button:hover { border-color: var(--edge-hi); }
-  #time { font: 600 12px var(--mono); font-variant-numeric: tabular-nums;
-          color: var(--accent); min-width: 64px; text-align: right; }
-  #scrub { width: 200px; accent-color: var(--accent); }
+      background: #0A0F16; color: var(--text); border: 1px solid var(--line);
+      padding: 5px 10px; cursor: pointer; text-transform: uppercase;
+      font: 600 11px var(--mono); letter-spacing: .08em; }
+  .controls button:hover, .controls select:hover { border-color: var(--line-hi);
+      color: var(--hot); }
+  #time { color: var(--hot); font-weight: 700; min-width: 66px; text-align: right;
+          font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+  #scrub { width: 190px; accent-color: var(--hot); }
 
-  /* annunciator — live posture from min trust at the cursor (true state) */
-  .annun { display: flex; align-items: center; gap: 9px; padding-left: 4px; }
-  .annun .lab { font: 600 9.5px/1 var(--mono); letter-spacing: .16em;
+  /* annunciator — live posture from the worst Trust Coefficient at the cursor */
+  .annun { display: flex; align-items: center; gap: 8px; padding-left: 2px; }
+  .annun .lab { font: 700 9px/1 var(--mono); letter-spacing: .22em;
                 color: var(--faint); text-transform: uppercase; }
-  #annun { font: 700 11px/1 var(--mono); letter-spacing: .1em;
-           padding: 5px 10px; border-radius: 6px; text-transform: uppercase;
-           border: 1px solid; transition: color .2s, background .2s, border-color .2s; }
-  #annun[data-level="NOMINAL"]  { color: var(--good);
-      background: rgba(53,201,138,0.10); border-color: rgba(53,201,138,0.35); }
-  #annun[data-level="CAUTION"]  { color: var(--warn);
-      background: rgba(233,169,58,0.12); border-color: rgba(233,169,58,0.4); }
-  #annun[data-level="CRITICAL"] { color: var(--crit);
-      background: rgba(229,72,77,0.13); border-color: rgba(229,72,77,0.45); }
-  #annunVal { font: 600 12px var(--mono); font-variant-numeric: tabular-nums;
-              color: var(--dim); }
+  #annun { font: 700 11px/1 var(--mono); letter-spacing: .18em; padding: 5px 11px;
+           text-transform: uppercase; border: 1px solid; position: relative; }
+  #annun::before { content: "●"; margin-right: 7px; font-size: 8px; vertical-align: 1px; }
+  #annun[data-level="NOMINAL"]  { color: var(--good); border-color: rgba(70,208,138,0.5);
+      background: rgba(70,208,138,0.07); }
+  #annun[data-level="CAUTION"]  { color: var(--warn); border-color: rgba(255,176,32,0.6);
+      background: rgba(255,176,32,0.09); }
+  #annun[data-level="CRITICAL"] { color: var(--crit); border-color: var(--crit);
+      background: rgba(255,77,77,0.12); animation: blink 1s steps(2,end) infinite; }
+  @keyframes blink { 50% { opacity: .4; } }
+  #annunVal { font: 700 12px var(--mono); font-variant-numeric: tabular-nums;
+              color: var(--text); letter-spacing: .04em; }
 
   main { display: grid; grid-template-columns: minmax(380px, 43%) 1fr;
-         gap: 12px; padding: 14px 18px 6px; }
-  .col { display: flex; flex-direction: column; gap: 12px; }
-  .panel { position: relative; background:
-             linear-gradient(var(--panel), var(--bg2));
-           border: 1px solid var(--edge); border-radius: var(--r);
-           padding: 11px 13px 12px; }
-  .panel h2 { display: flex; align-items: center; gap: 7px;
-              font: 600 10.5px/1.3 var(--sans); margin: 0 0 9px; color: var(--dim);
-              text-transform: uppercase; letter-spacing: .09em; }
-  .panel h2::before { content: ""; width: 3px; height: 11px; border-radius: 2px;
-                      background: var(--accent); opacity: .85; flex: none; }
+         gap: 14px; padding: 14px 16px 6px; }
+  .col { display: flex; flex-direction: column; gap: 14px; }
+
+  /* HUD panel: hairline frame + four amber-white corner brackets */
+  .panel { position: relative; padding: 12px 14px 13px;
+           border: 1px solid var(--line); background: rgba(255,255,255,0.008);
+           --al: 13px;
+           background-image:
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi));
+           background-repeat: no-repeat;
+           background-size: var(--al) 1px, 1px var(--al), var(--al) 1px, 1px var(--al),
+                            var(--al) 1px, 1px var(--al), var(--al) 1px, 1px var(--al);
+           background-position: left top, left top, right top, right top,
+                                left bottom, left bottom, right bottom, right bottom; }
+  .panel h2 { display: flex; align-items: center; gap: 8px;
+              font: 700 10px/1.3 var(--mono); margin: 0 0 10px; color: var(--text);
+              text-transform: uppercase; letter-spacing: .14em; }
+  .panel h2::before { content: "▚"; color: var(--dim); font-size: 10px; flex: none; }
+  .panel h2 .code { margin-left: auto; color: var(--faint); font-weight: 500;
+                    letter-spacing: .1em; }
   canvas { width: 100%; display: block; }
 
-  #callout { font: 13px/1.5 var(--mono); padding: 10px 2px 2px; min-height: 24px;
-             color: var(--dim); font-variant-numeric: tabular-nums; }
-  #callout b { color: var(--text); font-weight: 600; letter-spacing: .04em; }
+  #callout { font: 12px/1.6 var(--mono); padding: 11px 2px 2px; min-height: 24px;
+             color: var(--dim); font-variant-numeric: tabular-nums;
+             text-transform: uppercase; letter-spacing: .04em; }
+  #callout b { color: var(--hot); font-weight: 700; letter-spacing: .1em; }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 5px 8px; padding-top: 9px; }
-  .legend span { display: inline-flex; align-items: center; gap: 5px;
-                 font: 500 10.5px var(--mono); color: var(--dim);
-                 background: var(--panel-hi); border: 1px solid var(--edge);
-                 border-radius: 5px; padding: 2px 7px 2px 5px; }
-  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px;
-              flex: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 5px 7px; padding-top: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px;
+                 font: 500 10px var(--mono); color: var(--dim); text-transform: uppercase;
+                 letter-spacing: .06em; border: 1px solid var(--line); padding: 2px 7px 2px 6px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; flex: none; }
 
-  footer { color: var(--faint); font: 10.5px/1.6 var(--mono); padding: 8px 18px 16px;
-           max-width: 118ch; }
+  footer { color: var(--faint); font: 10px/1.7 var(--mono); padding: 10px 16px 16px;
+           max-width: 120ch; text-transform: uppercase; letter-spacing: .05em; }
 
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  :focus-visible { outline: 1px solid var(--hot); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
@@ -122,12 +137,12 @@
 <header>
   <div class="brand">
     <i class="mark"></i>
-    <h1>CSIA Trust Layer <span>· SWORT LLC · sensor-integrity console</span></h1>
+    <h1>CSIA<span>&nbsp;// CROSS-SENSOR INTEGRITY · SWORT</span></h1>
   </div>
   <div class="annun">
-    <span class="lab">System</span>
+    <span class="lab">SYS</span>
     <span id="annun" data-level="NOMINAL">NOMINAL</span>
-    <span class="lab">min&nbsp;T</span>
+    <span class="lab">MIN&nbsp;T</span>
     <span id="annunVal">1.00</span>
   </div>
   <div class="tabs" id="tabs"></div>
@@ -141,29 +156,29 @@
 <main>
   <div class="col">
     <div class="panel">
-      <h2>Dynamic Trust Graph — node fill = Trust Coefficient, edge = gated consistency</h2>
+      <h2>Node Integrity Matrix — Dynamic Trust Graph<span class="code">08 NODES · 11 EDGES</span></h2>
       <canvas id="graph" height="430"></canvas>
       <div id="callout">loading…</div>
     </div>
     <div class="panel">
-      <h2>Causal diagnosis — P(cause | consistency signature)</h2>
+      <h2>Fault Attribution — Bayes Posterior<span class="code">08 HYPOTH</span></h2>
       <canvas id="diag" height="170"></canvas>
       <div class="legend" id="diagLegend"></div>
     </div>
   </div>
   <div class="col">
     <div class="panel">
-      <h2>Trust Coefficients (click a chart to scrub, click a node to inspect)</h2>
+      <h2>Trust Coefficients — Per Sensor<span class="code">SCRUB / SELECT</span></h2>
       <canvas id="trust" height="240"></canvas>
       <div class="legend" id="trustLegend"></div>
     </div>
     <div class="panel">
-      <h2 id="compTitle">Evidence sub-scores</h2>
+      <h2 id="compTitle">Evidence Decomposition</h2>
       <canvas id="comp" height="170"></canvas>
       <div class="legend" id="compLegend"></div>
     </div>
     <div class="panel">
-      <h2>heading_course speed gate (COG constrains heading only in translation)</h2>
+      <h2>Regime Gate — Heading × Course<span class="code">SPEED-GATED</span></h2>
       <canvas id="gate" height="110"></canvas>
     </div>
   </div>
@@ -183,15 +198,17 @@ window.addEventListener("error", ev => {
 // every canvas every frame — on a 120 Hz display "1x" ran ~5x too fast and
 // stuttered: the "play is bugged" bug.)
 const $ = id => document.getElementById(id);
-// instrument series palette — distinguishable on the deep ground, tuned to
-// harmonize with the steel-azure accent and the trust semantic scale
-const SENSOR_COLORS = ["#4C9BE6","#E86A5C","#35C98A","#B78BEA","#E9B84A",
-                       "#EC6F9B","#56C7D6","#E8863C"];
-const CAUSE_COLORS  = ["#35C98A","#E5484D","#4C9BE6","#56C7D6","#B78BEA",
-                       "#E9A93A","#E8863C","#6B7C93"];
-const COMP_COLORS = { nbr:"#4C9BE6", phys:"#E86A5C", temp:"#35C98A", stat:"#E9B84A" };
-const INK = "#070A0F", GRIDLINE = "rgba(120,150,190,0.10)",
-      AXIS = "#52627A", CURSOR = "rgba(234,241,250,0.8)",
+// tactical series palette — legible tracks on pure black; cohesive, not
+// rainbow. Trust STATUS (nodes/annunciator) uses the green/amber/red scale;
+// these hues only identify which trace is which.
+const SENSOR_COLORS = ["#E4EAF0","#FF5C5C","#46D08A","#B98CE0","#FFB020",
+                       "#E07AA8","#5BC7DE","#F0913C"];
+const CAUSE_COLORS  = ["#46D08A","#FF5C5C","#E4EAF0","#5BC7DE","#B98CE0",
+                       "#FFB020","#F0913C","#6B7480"];
+const COMP_COLORS = { nbr:"#9DB4C6", phys:"#FF5C5C", temp:"#46D08A", stat:"#FFB020" };
+const INK = "#04060A", GRIDLINE = "rgba(226,232,240,0.08)",
+      AXIS = "#6B7480", CURSOR = "rgba(255,255,255,0.92)",
+      TICK = "rgba(226,232,240,0.4)",
       MONO = "ui-monospace, Menlo, Consolas, monospace";
 
 let scenarios = [], data = null;
@@ -201,7 +218,7 @@ let liveMode = false, liveTimer = null;
 
 function trustColor(v) { // red -> yellow -> green
   v = Math.max(0, Math.min(1, v));
-  const stops = [[0,[229,72,77]], [0.5,[233,169,58]], [1,[53,201,138]]];
+  const stops = [[0,[255,77,77]], [0.5,[255,176,32]], [1,[70,208,138]]];
   let lo = stops[0], hi = stops[stops.length-1];
   for (let i = 0; i + 1 < stops.length; i++)
     if (v >= stops[i][0] && v <= stops[i+1][0]) { lo = stops[i]; hi = stops[i+1]; }
@@ -255,25 +272,33 @@ class TimeChart {
     const tEnd = data.t[data.t.length - 1];
     const ymin = this.opts.ymin ?? 0, ymax = this.opts.ymax ?? 1;
     const y = v => pad.t + (1 - (v - ymin) / (ymax - ymin)) * (h - pad.t - pad.b);
-    g.fillStyle = "rgba(229,72,77,0.09)";
+    // fault window: red wash with bright vertical rails (HUD threat band)
     for (const f of data.faults) {
       const x0 = pad.l + (f.start / tEnd) * (w - pad.l - pad.r);
       const x1 = pad.l + ((f.start + f.duration) / tEnd) * (w - pad.l - pad.r);
+      g.fillStyle = "rgba(255,77,77,0.08)";
       g.fillRect(x0, pad.t, x1 - x0, h - pad.t - pad.b);
-      g.fillStyle = "rgba(229,72,77,0.35)";
+      g.fillStyle = "rgba(255,77,77,0.45)";
       g.fillRect(x0, pad.t, 1, h - pad.t - pad.b);
       g.fillRect(x1 - 1, pad.t, 1, h - pad.t - pad.b);
-      g.fillStyle = "rgba(229,72,77,0.09)";
     }
-    g.strokeStyle = GRIDLINE; g.fillStyle = AXIS; g.font = "10px " + MONO;
-    g.lineWidth = 1;
+    // grid lines + horizontal-axis value ticks
+    g.fillStyle = AXIS; g.font = "9px " + MONO;
+    const xR = w - pad.r, yB = h - pad.b;
     for (const gv of this.opts.grid ?? [0, 0.5, 1]) {
-      g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(w - pad.r, y(gv)); g.stroke();
-      g.fillText(gv.toFixed(1), 4, y(gv) + 3);
+      g.strokeStyle = GRIDLINE; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(xR, y(gv)); g.stroke();
+      g.strokeStyle = TICK;   // brighter axis tick stub
+      g.beginPath(); g.moveTo(pad.l - 3, y(gv)); g.lineTo(pad.l, y(gv)); g.stroke();
+      g.fillText(gv.toFixed(1), 3, y(gv) + 3);
     }
-    for (let s = 0; s <= tEnd; s += 10) {
+    // time ruler: major tick + label every 10 s, minor tick every 5 s
+    g.strokeStyle = TICK; g.lineWidth = 1;
+    for (let s = 0; s <= tEnd; s += 5) {
       const xx = pad.l + (s / tEnd) * (w - pad.l - pad.r);
-      g.fillText(s + "s", xx - 6, h - 4);
+      const major = s % 10 === 0;
+      g.beginPath(); g.moveTo(xx, yB); g.lineTo(xx, yB + (major ? 4 : 2)); g.stroke();
+      if (major) g.fillText(s.toString().padStart(2, "0"), xx - 6, h - 2);
     }
     if (this.opts.stacked) {
       let base = new Float64Array(data.t.length);
@@ -358,9 +383,13 @@ function drawGraph() {
   for (const n of data.sensors) {
     const [xx, yy] = nodePix[n], tr = data.trust[n][k], col = trustColor(tr);
     const sel = n === selected;
-    if (sel) {                       // accent halo on the inspected node
+    if (sel) {                       // bright reticle ring on the inspected node
       g.beginPath(); g.arc(xx, yy, NODE_R + 5, 0, 7);
-      g.strokeStyle = "#4C9BE6"; g.lineWidth = 1.5; g.stroke();
+      g.strokeStyle = "#FFFFFF"; g.lineWidth = 1.5; g.stroke();
+      g.setLineDash([2, 3]);
+      g.beginPath(); g.arc(xx, yy, NODE_R + 9, 0, 7);
+      g.strokeStyle = "rgba(255,255,255,0.45)"; g.lineWidth = 1; g.stroke();
+      g.setLineDash([]);
     }
     g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);
     g.fillStyle = col; g.fill();
@@ -382,7 +411,7 @@ $("graph").addEventListener("click", ev => {
       selected = n;
       charts.comp.setSeries(compSeries());
       $("compTitle").textContent =
-        `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+        `Evidence Decomposition — ${selected.toUpperCase()} · NBR / PHYS / TEMP / STAT`;
       drawDynamic();
       return;
     }
@@ -480,7 +509,7 @@ async function load(name) {
   legend($("diagLegend"), data.diagnosis.causes.map((c, i) => [c, CAUSE_COLORS[i]]));
   legend($("compLegend"), Object.entries(COMP_COLORS).map(([n, c]) => [`C_${n}`, c]));
   $("compTitle").textContent =
-    `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+    `Evidence Decomposition — ${selected.toUpperCase()} · NBR / PHYS / TEMP / STAT`;
   $("foot").textContent = `${data.title} — trust-core latency mean ` +
     `${data.latency_us.mean} µs / p95 ${data.latency_us.p95} µs per tick ` +
     `(desktop Python; not embedded timing). Reference HW context: STM32H743 FC, ` +
