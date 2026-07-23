@@ -4,51 +4,132 @@
 <meta charset="utf-8">
 <title>CSIA Trust Layer — live dashboard</title>
 <style>
+  /* CSIA Mission Integrity Console — deliberate dark instrument aesthetic.
+     Accent (steel azure) = interactive only. Trust semantics (emerald/
+     amber/red) are a SEPARATE scale, never used as brand accent. */
   :root {
-    --bg: #0d1117; --panel: #161b22; --edge: #30363d; --text: #e6edf3;
-    --dim: #8b949e; --accent: #58a6ff; --warn: #f0883e;
+    --bg: #070A0F; --bg2: #0A0F17;
+    --panel: #0E141E; --panel-hi: #131B28;
+    --edge: #1B2432; --edge-hi: #29384C;
+    --text: #EAF1FA; --dim: #8493A8; --faint: #52627A;
+    --accent: #4C9BE6; --accent-dim: #2C4A6B;
+    --good: #35C98A; --warn: #E9A93A; --crit: #E5484D;
+    --grid: rgba(120,150,190,0.09);
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --r: 9px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 13px/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
-  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px;
-           border-bottom: 1px solid var(--edge); flex-wrap: wrap; }
-  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
-  header h1 span { color: var(--dim); font-weight: 400; }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tabs button { background: var(--panel); color: var(--text);
-                 border: 1px solid var(--edge); border-radius: 6px;
-                 padding: 5px 10px; cursor: pointer; font-size: 12px; }
-  .tabs button.active { border-color: var(--accent); color: var(--accent); }
-  .controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  .controls button { background: var(--panel); color: var(--text);
-                     border: 1px solid var(--edge); border-radius: 6px;
-                     padding: 5px 12px; cursor: pointer; }
-  #time { font-variant-numeric: tabular-nums; color: var(--accent); min-width: 66px; }
-  #scrub { width: 220px; }
-  .banner { background: #3d1d00; color: var(--warn); text-align: center;
-            padding: 4px 8px; font-size: 11.5px; letter-spacing: .04em; }
-  main { display: grid; grid-template-columns: minmax(380px, 44%) 1fr;
-         gap: 10px; padding: 10px 16px; }
-  .panel { background: var(--panel); border: 1px solid var(--edge);
-           border-radius: 8px; padding: 8px 10px; }
-  .panel h2 { font-size: 11.5px; margin: 0 0 6px; color: var(--dim);
-              text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  body { margin: 0; background:
+           radial-gradient(1200px 600px at 78% -10%, #0C1420 0%, var(--bg) 60%);
+         color: var(--text); font: 13px/1.5 var(--sans);
+         -webkit-font-smoothing: antialiased; }
+
+  /* caution strip — kept verbatim for honesty, restyled as an annunciator */
+  .banner { display: flex; align-items: center; justify-content: center;
+            gap: 8px; background: linear-gradient(#1A130A, #140F08);
+            color: var(--warn); border-bottom: 1px solid #2A2010;
+            padding: 4px 8px; font: 600 10.5px/1 var(--mono);
+            letter-spacing: .14em; text-transform: uppercase; }
+  .banner::before { content: "▲"; font-size: 9px; opacity: .9; }
+
+  /* command bar */
+  header { display: flex; align-items: center; gap: 14px 18px; padding: 11px 18px;
+           background: linear-gradient(var(--bg2), var(--bg));
+           border-bottom: 1px solid var(--edge);
+           box-shadow: 0 1px 0 rgba(76,155,230,0.06); flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 9px; }
+  .brand .mark { width: 9px; height: 9px; border-radius: 2px;
+                 background: var(--accent);
+                 box-shadow: 0 0 9px rgba(76,155,230,0.7); align-self: center; }
+  header h1 { font-size: 14px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  header h1 span { color: var(--dim); font-weight: 400; font-size: 12px; }
+
+  .tabs { display: flex; gap: 3px; flex-wrap: wrap;
+          background: var(--panel); border: 1px solid var(--edge);
+          border-radius: var(--r); padding: 3px; }
+  .tabs button { background: transparent; color: var(--dim);
+                 border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer;
+                 font: 500 11.5px/1 var(--sans); letter-spacing: .01em;
+                 transition: background .15s, color .15s; }
+  .tabs button:hover { color: var(--text); background: var(--panel-hi); }
+  .tabs button.active { color: var(--bg); background: var(--accent);
+                        font-weight: 600; }
+
+  .controls { display: flex; align-items: center; gap: 8px; margin-left: auto;
+              background: var(--panel); border: 1px solid var(--edge);
+              border-radius: var(--r); padding: 5px 8px; }
+  .controls button, .controls select {
+      background: var(--panel-hi); color: var(--text);
+      border: 1px solid var(--edge); border-radius: 6px;
+      padding: 5px 11px; cursor: pointer; font: 500 12px var(--sans); }
+  .controls button:hover { border-color: var(--edge-hi); }
+  #time { font: 600 12px var(--mono); font-variant-numeric: tabular-nums;
+          color: var(--accent); min-width: 64px; text-align: right; }
+  #scrub { width: 200px; accent-color: var(--accent); }
+
+  /* annunciator — live posture from min trust at the cursor (true state) */
+  .annun { display: flex; align-items: center; gap: 9px; padding-left: 4px; }
+  .annun .lab { font: 600 9.5px/1 var(--mono); letter-spacing: .16em;
+                color: var(--faint); text-transform: uppercase; }
+  #annun { font: 700 11px/1 var(--mono); letter-spacing: .1em;
+           padding: 5px 10px; border-radius: 6px; text-transform: uppercase;
+           border: 1px solid; transition: color .2s, background .2s, border-color .2s; }
+  #annun[data-level="NOMINAL"]  { color: var(--good);
+      background: rgba(53,201,138,0.10); border-color: rgba(53,201,138,0.35); }
+  #annun[data-level="CAUTION"]  { color: var(--warn);
+      background: rgba(233,169,58,0.12); border-color: rgba(233,169,58,0.4); }
+  #annun[data-level="CRITICAL"] { color: var(--crit);
+      background: rgba(229,72,77,0.13); border-color: rgba(229,72,77,0.45); }
+  #annunVal { font: 600 12px var(--mono); font-variant-numeric: tabular-nums;
+              color: var(--dim); }
+
+  main { display: grid; grid-template-columns: minmax(380px, 43%) 1fr;
+         gap: 12px; padding: 14px 18px 6px; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .panel { position: relative; background:
+             linear-gradient(var(--panel), var(--bg2));
+           border: 1px solid var(--edge); border-radius: var(--r);
+           padding: 11px 13px 12px; }
+  .panel h2 { display: flex; align-items: center; gap: 7px;
+              font: 600 10.5px/1.3 var(--sans); margin: 0 0 9px; color: var(--dim);
+              text-transform: uppercase; letter-spacing: .09em; }
+  .panel h2::before { content: ""; width: 3px; height: 11px; border-radius: 2px;
+                      background: var(--accent); opacity: .85; flex: none; }
   canvas { width: 100%; display: block; }
-  #callout { font-size: 14px; padding: 8px 2px 2px; min-height: 24px; }
-  #callout b { color: var(--warn); }
-  .col { display: flex; flex-direction: column; gap: 10px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px;
-            color: var(--dim); padding-top: 4px; }
-  .legend i { display: inline-block; width: 10px; height: 10px;
-              border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-  footer { color: var(--dim); font-size: 11px; padding: 4px 16px 14px; }
+
+  #callout { font: 13px/1.5 var(--mono); padding: 10px 2px 2px; min-height: 24px;
+             color: var(--dim); font-variant-numeric: tabular-nums; }
+  #callout b { color: var(--text); font-weight: 600; letter-spacing: .04em; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 5px 8px; padding-top: 9px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px;
+                 font: 500 10.5px var(--mono); color: var(--dim);
+                 background: var(--panel-hi); border: 1px solid var(--edge);
+                 border-radius: 5px; padding: 2px 7px 2px 5px; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+              flex: none; }
+
+  footer { color: var(--faint); font: 10.5px/1.6 var(--mono); padding: 8px 18px 16px;
+           max-width: 118ch; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="banner">SIMULATION / RESEARCH PROTOTYPE — SYNTHETIC DATA — NOT FLIGHT SOFTWARE</div>
+<div class="banner">Simulation / Research Prototype — Synthetic Data — Not Flight Software</div>
 <header>
-  <h1>CSIA Trust Layer <span>· SWORT LLC · Dynamic Trust Graph replay</span></h1>
+  <div class="brand">
+    <i class="mark"></i>
+    <h1>CSIA Trust Layer <span>· SWORT LLC · sensor-integrity console</span></h1>
+  </div>
+  <div class="annun">
+    <span class="lab">System</span>
+    <span id="annun" data-level="NOMINAL">NOMINAL</span>
+    <span class="lab">min&nbsp;T</span>
+    <span id="annunVal">1.00</span>
+  </div>
   <div class="tabs" id="tabs"></div>
   <div class="controls">
     <button id="play">▶ Play</button>
@@ -102,11 +183,16 @@ window.addEventListener("error", ev => {
 // every canvas every frame — on a 120 Hz display "1x" ran ~5x too fast and
 // stuttered: the "play is bugged" bug.)
 const $ = id => document.getElementById(id);
-const SENSOR_COLORS = ["#58a6ff","#f78166","#56d364","#d2a8ff","#e3b341",
-                       "#ff7b72","#79c0ff","#f0883e"];
-const CAUSE_COLORS  = ["#3fb950","#ff7b72","#58a6ff","#79c0ff","#d2a8ff",
-                       "#e3b341","#f0883e","#8b949e"];
-const COMP_COLORS = { nbr:"#58a6ff", phys:"#ff7b72", temp:"#56d364", stat:"#e3b341" };
+// instrument series palette — distinguishable on the deep ground, tuned to
+// harmonize with the steel-azure accent and the trust semantic scale
+const SENSOR_COLORS = ["#4C9BE6","#E86A5C","#35C98A","#B78BEA","#E9B84A",
+                       "#EC6F9B","#56C7D6","#E8863C"];
+const CAUSE_COLORS  = ["#35C98A","#E5484D","#4C9BE6","#56C7D6","#B78BEA",
+                       "#E9A93A","#E8863C","#6B7C93"];
+const COMP_COLORS = { nbr:"#4C9BE6", phys:"#E86A5C", temp:"#35C98A", stat:"#E9B84A" };
+const INK = "#070A0F", GRIDLINE = "rgba(120,150,190,0.10)",
+      AXIS = "#52627A", CURSOR = "rgba(234,241,250,0.8)",
+      MONO = "ui-monospace, Menlo, Consolas, monospace";
 
 let scenarios = [], data = null;
 let k = 0, kf = 0.0, playing = false, lastTs = null;
@@ -115,7 +201,7 @@ let liveMode = false, liveTimer = null;
 
 function trustColor(v) { // red -> yellow -> green
   v = Math.max(0, Math.min(1, v));
-  const stops = [[0,[214,57,57]], [0.5,[227,179,65]], [1,[63,185,80]]];
+  const stops = [[0,[229,72,77]], [0.5,[233,169,58]], [1,[53,201,138]]];
   let lo = stops[0], hi = stops[stops.length-1];
   for (let i = 0; i + 1 < stops.length; i++)
     if (v >= stops[i][0] && v <= stops[i+1][0]) { lo = stops[i]; hi = stops[i+1]; }
@@ -169,13 +255,18 @@ class TimeChart {
     const tEnd = data.t[data.t.length - 1];
     const ymin = this.opts.ymin ?? 0, ymax = this.opts.ymax ?? 1;
     const y = v => pad.t + (1 - (v - ymin) / (ymax - ymin)) * (h - pad.t - pad.b);
-    g.fillStyle = "rgba(248,81,73,0.10)";
+    g.fillStyle = "rgba(229,72,77,0.09)";
     for (const f of data.faults) {
       const x0 = pad.l + (f.start / tEnd) * (w - pad.l - pad.r);
       const x1 = pad.l + ((f.start + f.duration) / tEnd) * (w - pad.l - pad.r);
       g.fillRect(x0, pad.t, x1 - x0, h - pad.t - pad.b);
+      g.fillStyle = "rgba(229,72,77,0.35)";
+      g.fillRect(x0, pad.t, 1, h - pad.t - pad.b);
+      g.fillRect(x1 - 1, pad.t, 1, h - pad.t - pad.b);
+      g.fillStyle = "rgba(229,72,77,0.09)";
     }
-    g.strokeStyle = "#30363d"; g.fillStyle = "#8b949e"; g.font = "10px sans-serif";
+    g.strokeStyle = GRIDLINE; g.fillStyle = AXIS; g.font = "10px " + MONO;
+    g.lineWidth = 1;
     for (const gv of this.opts.grid ?? [0, 0.5, 1]) {
       g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(w - pad.r, y(gv)); g.stroke();
       g.fillText(gv.toFixed(1), 4, y(gv) + 3);
@@ -214,7 +305,7 @@ class TimeChart {
     g.clearRect(0, 0, this.cv.width, this.cv.height);
     g.drawImage(this.layer, 0, 0);
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    g.strokeStyle = "#e6edf3"; g.lineWidth = 1;
+    g.strokeStyle = CURSOR; g.lineWidth = 1;
     g.beginPath();
     g.moveTo(this.x(k), this.pad.t);
     g.lineTo(this.x(k), this.h - this.pad.b);
@@ -258,20 +349,28 @@ function drawGraph() {
     const [ax, ay] = nodePix[e.a], [bx, by] = nodePix[e.b];
     g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by);
     if (e.gate[k] < 0.05) {
-      g.strokeStyle = "rgba(139,148,158,0.3)"; g.lineWidth = 1; g.setLineDash([4, 5]);
+      g.strokeStyle = "rgba(120,140,170,0.22)"; g.lineWidth = 1; g.setLineDash([3, 5]);
     } else {
       g.strokeStyle = trustColor(e.c[k]); g.lineWidth = 1 + 3.4 * e.gate[k]; g.setLineDash([]);
     }
     g.stroke(); g.setLineDash([]);
   }
   for (const n of data.sensors) {
-    const [xx, yy] = nodePix[n], tr = data.trust[n][k];
+    const [xx, yy] = nodePix[n], tr = data.trust[n][k], col = trustColor(tr);
+    const sel = n === selected;
+    if (sel) {                       // accent halo on the inspected node
+      g.beginPath(); g.arc(xx, yy, NODE_R + 5, 0, 7);
+      g.strokeStyle = "#4C9BE6"; g.lineWidth = 1.5; g.stroke();
+    }
     g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);
-    g.fillStyle = trustColor(tr); g.fill();
-    g.lineWidth = n === selected ? 3 : 1.2;
-    g.strokeStyle = n === selected ? "#e6edf3" : "#0d1117"; g.stroke();
-    g.fillStyle = "#0d1117"; g.font = "bold 10px sans-serif"; g.textAlign = "center";
+    g.fillStyle = col; g.fill();
+    g.lineWidth = 2; g.strokeStyle = INK; g.stroke();
+    g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);   // subtle inner rim
+    g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,0.14)"; g.stroke();
+    g.fillStyle = INK; g.textAlign = "center";
+    g.font = "600 9.5px " + MONO;
     g.fillText(n, xx, yy - 2);
+    g.font = "700 11px " + MONO;
     g.fillText(tr.toFixed(2), xx, yy + 11);
   }
   g.textAlign = "left";
@@ -311,6 +410,14 @@ function drawDynamic() {  // everything that changes with the cursor
     .map(([c, p]) => `${(100 * p).toFixed(0)}% ${c}`).join(" · ");
   $("callout").innerHTML = `<b>diagnosis:</b> ${post}` +
     ` &nbsp;·&nbsp; ${selected} trust ${data.trust[selected][k].toFixed(3)}`;
+  // annunciator: worst sensor trust at this instant -> operator posture.
+  // A summary readout of true state (min over the 8 Trust Coefficients),
+  // not the full per-class failsafe machine — labeled MIN T accordingly.
+  let mn = 1.0;
+  for (const n of data.sensors) mn = Math.min(mn, data.trust[n][k]);
+  const lvl = mn < 0.60 ? "CRITICAL" : mn < 0.75 ? "CAUTION" : "NOMINAL";
+  const a = $("annun"); a.textContent = lvl; a.dataset.level = lvl;
+  $("annunVal").textContent = mn.toFixed(2);
 }
 
 function setCursor(newK) {
