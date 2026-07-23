@@ -5,7 +5,7 @@ Working demonstration of SWORT LLC's **Cross-Sensor Intelligence Architecture
 continuously updated **Trust Coefficient** to each sensor on an autonomous
 aircraft, replacing naive weighted-average sensor fusion with a **Dynamic
 Trust Graph** whose edges encode physical relationships between sensors, and
-whose anomaly output is a **probability distribution over causes** — never a
+whose anomaly output is a **probability distribution over causes**. never a
 binary fault flag.
 
 > **Status: research prototype / desktop simulation — NOT flight software.**
