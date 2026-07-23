@@ -18,15 +18,21 @@ import numpy as np
 
 def _build(args) -> int:
     from .dashboard import export_replay
-    from .scenarios import SCENARIOS, run_scenario
+    from .scenarios import SCENARIO_PROFILE, SCENARIOS, run_scenario
     from .sensors import generate_flight
     from .trust_graph import build_trust_graph
 
     replay_dir = os.path.join(args.data_dir, "replay")
     os.makedirs(replay_dir, exist_ok=True)
-    truth = generate_flight()
+    base = generate_flight()                      # shared baseline flight
+    profile_truth = {}                            # cache non-default profiles
     graph = build_trust_graph()
     for name in SCENARIOS:
+        prof = SCENARIO_PROFILE.get(name)
+        if prof:
+            truth = profile_truth.setdefault(prof, generate_flight(profile=prof))
+        else:
+            truth = base
         title, faults, td, hist, diag = run_scenario(name, truth=truth)
         export_replay(name, title, td, hist, diag, graph, faults, replay_dir)
         print(f"built {name}")
