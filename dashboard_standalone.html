@@ -90,13 +90,16 @@
   #annunVal { font: 700 12px var(--mono); font-variant-numeric: tabular-nums;
               color: var(--text); letter-spacing: .04em; }
 
-  main { display: grid; grid-template-columns: minmax(380px, 43%) 1fr;
+  /* minmax(0, …) + min-width:0 below stop a canvas's (Retina-doubled)
+     intrinsic width from inflating its grid/flex track — the "screen keeps
+     getting larger, graphs mis-scaled" bug on devicePixelRatio>1 displays. */
+  main { display: grid; grid-template-columns: minmax(380px, 43%) minmax(0, 1fr);
          gap: 14px; padding: 14px 16px 6px; align-items: start; }
-  .col { display: flex; flex-direction: column; gap: 14px; }
+  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .col:first-child { align-self: start; }
 
   /* HUD panel: hairline frame + four amber-white corner brackets */
-  .panel { position: relative; padding: 12px 14px 13px;
+  .panel { position: relative; padding: 12px 14px 13px; min-width: 0;
            border: 1px solid var(--line); background: rgba(255,255,255,0.008);
            --al: 13px;
            background-image:
@@ -115,7 +118,9 @@
   .panel h2::before { content: "▚"; color: var(--dim); font-size: 10px; flex: none; }
   .panel h2 .code { margin-left: auto; color: var(--faint); font-weight: 500;
                     letter-spacing: .1em; }
-  canvas { width: 100%; display: block; }
+  /* max-width:100% is a hard cap so a canvas can never exceed its container,
+     regardless of its (device-pixel) backing-store width attribute. */
+  canvas { width: 100%; max-width: 100%; display: block; }
 
   #callout { font: 12px/1.6 var(--mono); padding: 11px 2px 2px; min-height: 24px;
              color: var(--dim); font-variant-numeric: tabular-nums;
@@ -315,6 +320,11 @@ class TimeChart {
     this.opts = opts;
     this.pad = { l: 30, r: 6, t: 6, b: 16 };
     this.series = [];
+    // Logical (CSS-px) height captured ONCE from the initial HTML attribute.
+    // render() overwrites cv.height with device pixels (h*dpr); on a Retina
+    // display re-reading getAttribute('height') would feed that doubled value
+    // back in and grow the canvas every frame ("screen keeps getting larger").
+    this.baseH = parseInt(this.cv.getAttribute("height")) || 200;
     this.cv.addEventListener("pointerdown", ev => {
       if (!data) return;
       this.cv.setPointerCapture(ev.pointerId);
@@ -343,7 +353,7 @@ class TimeChart {
   render() {  // heavy path: offscreen layer with axes + bands + all series
     const dpr = window.devicePixelRatio || 1;
     this.w = this.cv.clientWidth;
-    this.h = parseInt(this.cv.getAttribute("height"));
+    this.h = this.baseH;   // logical height (NOT the device-px attribute we set)
     if (this.w < 20 || !data) {
       // panel not laid out yet (hidden pane / mid-reflow / zero width):
       // rendering now would create a 0x0 layer and drawImage would THROW,
@@ -442,10 +452,14 @@ const charts = {
 
 const NODE_R = 26;
 let nodePix = {}, nodePrev = {}, graphGeom = null, hoveredEdge = null;
+// Logical (CSS-px) height captured ONCE — same Retina self-doubling guard as
+// TimeChart.baseH: cv.height is later set to h*dpr, so re-reading the attribute
+// would compound every render on devicePixelRatio>1 displays.
+const GRAPH_BASE_H = parseInt($("graph").getAttribute("height")) || 430;
 function sizeGraph() {
   const cv = $("graph");
   const dpr = window.devicePixelRatio || 1;
-  const w = cv.clientWidth, h = parseInt(cv.getAttribute("height"));
+  const w = cv.clientWidth, h = GRAPH_BASE_H;
   if (w < 20) { graphGeom = null; return; }
   cv.width = w * dpr; cv.height = h * dpr; cv.style.height = h + "px";
   graphGeom = { w, h, dpr };
