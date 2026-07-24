@@ -9,21 +9,24 @@
      not a brand hue. Saturated color is reserved STRICTLY for trust status
      (green/amber/red) so color always means state, never decoration. */
   :root {
-    --bg: #04060A; --ink: #04060A;
-    --line: rgba(226,232,240,0.13);    /* hairline chrome */
-    --line-hi: rgba(226,232,240,0.42);  /* corner brackets / active edges */
-    --text: #E4EAF0; --hot: #FFFFFF;    /* bright = active/emphasis */
-    --dim: #7A8494; --faint: #49515D;
+    /* Pure neutral black — NO blue cast. Greys are true greys (R=G=B). */
+    --bg: #000000; --ink: #000000;
+    --line: rgba(255,255,255,0.11);    /* hairline chrome (neutral white) */
+    --line-hi: rgba(255,255,255,0.44);  /* corner brackets / active edges */
+    --text: #ECECEE; --hot: #FFFFFF;    /* bright = active/emphasis */
+    --dim: #8C8C90; --faint: #4A4A4E;
     --good: #46D08A; --warn: #FFB020; --crit: #FF4D4D;
+    --scan: #46D08A;                    /* futuristic accent = status green */
     --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
   body { margin: 0; color: var(--text);
          font: 12px/1.5 var(--mono); letter-spacing: .01em;
-         -webkit-font-smoothing: antialiased;
+         -webkit-font-smoothing: antialiased; background-color: #000;
          background:
-           repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.010) 2px 3px),
-           radial-gradient(1500px 760px at 50% -25%, #0A0F16 0%, var(--bg) 68%); }
+           linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px) 0 0 / 100% 34px,
+           linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px) 0 0 / 34px 100%,
+           radial-gradient(1200px 620px at 50% -16%, #0E0E10 0%, #000000 72%); }
 
   /* classification / caution strip — text kept verbatim for honesty */
   .banner { display: flex; align-items: center; justify-content: center; gap: 10px;
