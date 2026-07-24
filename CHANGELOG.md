@@ -5,6 +5,38 @@ this project versions the **software and its evidence**, not just code.
 Validated scientific results (trust model, diagnosis, campaigns) are
 preserved across releases — campaign artifacts regenerate byte-identical.
 
+## [Unreleased] — 2026-07 — Dashboard: tactical console + high-speed envelope
+
+### Added (dashboard / demo only — no algorithm, engine, or sensor change)
+- **Tactical cross-sensor HUD**: pure-black C2/HUD dashboard theme (neutral
+  greys, no color cast; saturated color reserved strictly for trust status).
+- **Ground-velocity readout** on the right column, below the regime gate.
+- **Autonomous-remediation response panel**: SCAN→ANALYZE→FIX→STABILIZE loop
+  surfacing the failsafe posture and advisory action log at the cursor.
+- **`high_speed_dash` scenario** + `fast_cruise` flight profile (peak 52.0 m/s
+  ground speed) exercising the velocity readout and speed-gated heading edge
+  at an elevated envelope. Trust layer flies it clean (min trust 0.89,
+  failsafe NORMAL). Kinematic only — aerodynamic drag not modeled, sensor
+  tolerances quad-tuned; labeled as such in the scenario title and README.
+- **Self-contained `dashboard_standalone.html`** (all nine replays embedded,
+  zero network fetches) via `tools/build_standalone_dashboard.py`.
+- Dashboard screenshots in `deliverables/` (`dashboard_gps_spoof.png`,
+  `dashboard_high_speed_dash.png`).
+
+### Fixed (dashboard rendering)
+- **Playback stutter**: cursor now interpolates on a fractional index every
+  animation frame (smooth glide) while data updates stay at the 25 Hz tick
+  rate, instead of snapping only on integer tick changes.
+- **Column misalignment**: remediation log locked to a fixed height and chart
+  heights retuned so both columns bottom-align identically across scenarios.
+- **Blue color cast**: background moved from a blue-tinted gradient
+  (#04060A / #0A0F16) to pure neutral black (#000000) with true greys.
+
+### Preserved / verified unchanged
+- Trust model, diagnosis engine, sensor models, runtime, and all eight
+  original scenarios are byte-for-byte untouched; the existing test corpus
+  and committed campaign artifacts are unaffected.
+
 ## [0.8.0] — 2026-07 — Deployment-grade runtime + engineering hardening
 
 ### Fixed (demonstrable bugs)

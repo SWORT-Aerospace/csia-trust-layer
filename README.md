@@ -211,6 +211,35 @@ GPS checks gate on fix validity; motor edges gate on armed state.
 | mag_emi | mag | 0.28 | 1.5 s | 100% mag_interference |
 | power_sag | battery | 0.40 | 1.6 s | 100% power_fault |
 | vibration_anomaly | vibration | 0.17 | 2.6 s | 100% vibration_anomaly |
+| dual_imu_failure | imu0/imu1 | 0.44 | 6.4 s | 99% imu0_bias_drift, 1% imu1 (failsafe → stabilize + descent) |
+| high_speed_dash† | — | 0.89 (no false alarm) | — | 100% nominal |
+
+† `high_speed_dash` flies a **different truth profile** (`fast_cruise`,
+peak ground speed **52.0 m/s**) instead of the shared hover/circle baseline.
+Its purpose is to exercise the velocity readout and the speed-gated
+Mag-Heading↔GPS-Course edge at an elevated envelope; the trust layer flies it
+**clean** (min trust 0.89, failsafe NORMAL throughout). **Caveat:** the flight
+is *kinematic only* — aerodynamic drag is not modeled and sensor tolerances
+remain quad-tuned, so this is a regime-envelope demo, not a validated
+high-speed flight-dynamics model. Because `csia report` deliberately runs
+every scenario against the shared baseline truth for apples-to-apples
+comparison, the 0.89 figure above comes from the scenario's own profile (as
+rendered in the dashboard replay), not from the `csia report` shared-truth
+row.
+
+### Dashboard (tactical cross-sensor console)
+
+The web dashboard renders the live trust graph, per-sensor trust
+coefficients, Bayesian fault attribution, the regime gate, ground velocity,
+and the autonomous-remediation response loop. A fully self-contained,
+zero-dependency build embedding all nine scenario replays is committed at
+[`dashboard_standalone.html`](dashboard_standalone.html) — open it directly in
+any browser, no server required (rebuild with
+`python tools/build_standalone_dashboard.py`).
+
+| GPS spoof (fault detected) | High-speed dash (52 m/s, clean) |
+|---|---|
+| ![GPS spoof scenario](deliverables/dashboard_gps_spoof.png) | ![High-speed dash scenario](deliverables/dashboard_high_speed_dash.png) |
 
 ## Hardware context & integration path
 
