@@ -20,6 +20,7 @@ import time
 
 import numpy as np
 
+from .metrics import alert_episodes
 from .runtime import (FailsafePolicy, OnlineTrustLayer, SimulatedFlightSource,
                       TrustLayerRuntime)
 from .sensors import Fault, generate_flight
@@ -81,10 +82,11 @@ def bench(out_path=None):
                   f"{'YES' if det else 'NO':>4s} "
                   f"{lat if lat is not None else float('nan'):7.1f} "
                   f"{tmin:5.2f} {'YES' if alarmed else 'no':>5s}")
-    # clean-run false alarms under both configs
+    # clean-run false alarms under both configs. An alarm is an ALERT EPISODE
+    # (csia.metrics) — one incident, however many state-machine edges it took.
     for fm in (False, True):
         s = _run_one(truth, [], fm)
-        alarms = sum(1 for tr in s.transitions if tr.level.name != "NORMAL")
+        alarms = len(alert_episodes(s.transitions))
         rows.append({"fault": "clean", "field_mode": fm, "alarms": alarms})
         print(f"{'clean':10s} {'field' if fm else 'sim':6s} "
               f"false alarms: {alarms}")
@@ -118,8 +120,7 @@ def monte_carlo(runs=150, field_mode=True, seed=0, out_path=None):
             s = _run_one(truth, [], field_mode)
             clean["n"] += 1
             clean["hours"] += 60.0 / 3600.0
-            clean["alarms"] += sum(1 for tr in s.transitions
-                                   if tr.level.name != "NORMAL")
+            clean["alarms"] += len(alert_episodes(s.transitions))
             continue
         cls = classes[int(rng.integers(len(classes)))]
         target, mk = FAULTS[cls]

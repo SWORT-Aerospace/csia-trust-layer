@@ -44,7 +44,7 @@ python3.13 -m venv .venv
 | Simulated fault harness (62 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
 | **Campaign reproducibility** — `csia bench`, `csia mc` (150 runs), seeker Monte Carlo regenerated after the 2026-07 live-path hardening | **bit-identical** to the committed `campaigns/*.json` and `deliverables/montecarlo_results.*` — the hardening changed no validated behavior |
 | **Soak** — looped runtime through the reset path (`tools/soak.py`) | 185 passes / 3.1 h flight-equivalent: 277,500 ticks, 0 errors, +0.0 MB RSS, latency ratio 1.01x |
-| **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
+| **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **2 candidate false alarms → 3.0 alert episodes/flight-hour (95% CI 0.4–10.9)**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels). Supersedes a previously published 4.5/h, which counted failsafe *recovery* edges as alarms — see [METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md). At 2 events the interval is wide; the point estimate should not be quoted alone. |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
 | **Native core** (`csia/native/csia_core.c`, C, zero-alloc, pinned to Python at 1e-12) | trust kernel **247 ns** + diagnosis **427 ns** per tick on desktop → est. 7–15 µs on the STM32H743 itself ≈ 0.04% FC CPU at 25 Hz |
@@ -198,11 +198,20 @@ GPS checks gate on fix validity; motor edges gate on armed state.
 - **No magic numbers in the loop.** Engine tunables live in `EngineConfig`;
   comparator σ's are documented noise budgets per check.
 - **Measured, honestly labeled latency.** ~85 µs/tick trust core (mean, 8
-  nodes / 12 edges, desktop Python). This is **not** embedded timing.
+  nodes / 11 edges, desktop Python). This is **not** embedded timing, and the
+  measured window currently includes replay marshalling as well as the trust
+  core itself (audit F-08).
 
 ## Scenario results (fixed seeds, `csia report`)
 
-| scenario | target | min trust | detection | peak diagnosis |
+The **detection** column is *time-to-trust-threshold*: the first tick after
+onset where the target's trust crosses 0.85. It is a detector-internal
+measure — nothing in the system acts at 0.85. *Time-to-alert* (onset → first
+failsafe alert episode, which additionally requires the per-class threshold,
+`dwell_up` and `arm_time`) is the operator-facing latency and is **not yet
+implemented**; see [METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md) §3.
+
+| scenario | target | min trust | detection (to trust<0.85) | peak diagnosis |
 |---|---|---|---|---|
 | clean | — | 0.92 (no false alarm) | — | 98% nominal |
 | gps_spoof | gps | 0.59 | 2.2 s | 89% gps_fault |

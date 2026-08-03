@@ -8,8 +8,10 @@ SWORT LLC · SAM-registered · operating avionics business with revenue.
    detected in 2.2 s at 89% attributed confidence; IMU drift isolated to the
    correct unit at 99%/0%; mag/power/vibration faults at 100%, 1.5–2.6 s.
 2. **Real-data validation** (26 public PX4 quadrotor flights, 0.66 flight
-   hours, `csia analyze-logs`): **3 candidate false alarms → 4.5/flight-hour**
-   in offline-validation posture; 24/26 flights alarm-free. Public logs carry
+   hours, `csia analyze-logs`): **2 candidate false alarms → 3.0 alert
+   episodes/flight-hour (95% CI 0.4–10.9)** in offline-validation posture;
+   24/26 flights alarm-free. (Supersedes "3 → 4.5/hr", which counted a
+   failsafe recovery edge as an alarm; see docs/validation/METRIC_DEFINITIONS.md.) Public logs carry
    only 5 of 8 monitored channels at usable rates — the SOW001 vehicle
    provides all 8 by design.
 3. **SITL-validated live path** (`tools/sitl_validate.py`): full autonomous

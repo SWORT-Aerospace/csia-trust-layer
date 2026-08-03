@@ -128,6 +128,7 @@ def _analyze_logs(args) -> int:
     import glob
     import json as _json
 
+    from .metrics import alert_episodes, alert_summary
     from .runtime import FailsafePolicy, OnlineTrustLayer, TrustLayerRuntime
     from .runtime.failsafe import FailsafeConfig
     from .runtime.ulog_source import UlogSource
@@ -141,8 +142,9 @@ def _analyze_logs(args) -> int:
     results = []
     total_hours = 0.0
     total_transitions = 0
+    all_episodes = 0
     print(f"{'log':38s} {'dur':>6s} {'sensors':>7s} {'minT':>5s} "
-          f"{'alarms':>6s}  worst sensor / notes")
+          f"{'alerts':>6s}  worst sensor / notes")
     for path in files:
         try:
             src = UlogSource(path)
@@ -171,8 +173,13 @@ def _analyze_logs(args) -> int:
             continue
         hours = src.duration / 3600.0
         total_hours += hours
-        n_alarm = len(summary.transitions)
-        total_transitions += n_alarm
+        # An operator alert is an ALERT EPISODE, not a state-machine edge:
+        # a CAUTION->NORMAL recovery is not an alarm. Counting raw transitions
+        # over-counted this corpus by 1.50x (audit F-01); see csia/metrics.
+        episodes = alert_episodes(summary.transitions)
+        n_alarm = len(episodes)
+        all_episodes += n_alarm
+        total_transitions += len(summary.transitions)   # legacy, for compare
         present = ",".join(n[:3] for n in src.sensors_present)
         worst = min(summary.min_trust.items(), key=lambda kv: kv[1])             if summary.min_trust else ("-", 1.0)
         results.append({
@@ -184,6 +191,7 @@ def _analyze_logs(args) -> int:
                             for tr in summary.transitions],
             "bad_samples": layer.bad_samples,
             "excluded_channels": getattr(src, "excluded", {}),
+            "alerts": alert_summary(summary.transitions, max(hours, 1e-9)),
         })
         print(f"{os.path.basename(path)[:38]:38s} {src.duration:5.0f}s "
               f"{len(src.sensors_present):7d} {worst[1]:5.2f} "
@@ -191,19 +199,38 @@ def _analyze_logs(args) -> int:
               + (f" | {layer.bad_samples} bad samples rejected"
                  if layer.bad_samples else ""))
 
+    corpus = None
     if total_hours > 0:
-        rate = total_transitions / total_hours
+        from .metrics import poisson_ci
+        rate = all_episodes / total_hours
+        lo, hi = poisson_ci(all_episodes, total_hours)
+        corpus = {"flights": len(results),
+                  "hours": round(total_hours, 3),
+                  "alert_episodes": all_episodes,
+                  "episodes_per_hour": round(rate, 3),
+                  "episodes_per_hour_ci95": [round(lo, 3), round(hi, 3)],
+                  "transitions_legacy": total_transitions}
         print(f"\n=== REAL-DATA VALIDATION: {len(results)} flights, "
               f"{total_hours:.2f} flight hours ===")
-        print(f"failsafe activations: {total_transitions}  ->  "
-              f"{rate:.2f} activations per flight hour")
-        print("(on presumed-healthy public logs every activation is a "
-              "candidate false alarm — inspect reasons in the JSON report)")
+        print(f"alert episodes: {all_episodes}  ->  "
+              f"{rate:.2f} per flight hour  "
+              f"(95% CI {lo:.2f}-{hi:.2f})")
+        print(f"  (raw state-machine transitions: {total_transitions} — "
+              "includes recoveries; NOT operator alerts)")
+        print("(on presumed-healthy public logs every episode is a candidate "
+              "false alarm — inspect reasons in the JSON report)")
+        if all_episodes < 5:
+            print("  NOTE: interval is wide at this event count — the point "
+                  "estimate should not be quoted without its CI.")
     if args.out:
         with open(args.out, "w") as fh:
             _json.dump({"flights": results,
                         "total_hours": round(total_hours, 3),
-                        "total_transitions": total_transitions}, fh, indent=1)
+                        "total_transitions": total_transitions,
+                        "corpus_alerts": corpus,
+                        "metric_definitions": "docs/validation/"
+                                              "METRIC_DEFINITIONS.md"},
+                       fh, indent=1)
         print(f"report -> {args.out}")
     return 0
 
