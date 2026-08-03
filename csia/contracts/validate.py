@@ -11,11 +11,17 @@ Verdicts:
 """
 
 import json
-import os
 from enum import Enum
+from importlib import resources
 
-SCHEMA = os.path.join(os.path.dirname(__file__), "..", "..",
-                      "specifications", "csia_trust_contract_schema_v0.1.json")
+#: shipped as package data so an installed wheel validates without a checkout
+SCHEMA_RESOURCE = "csia_trust_contract_schema_v0.1.json"
+
+
+def load_schema() -> dict:
+    with resources.files("csia.contracts").joinpath(
+            SCHEMA_RESOURCE).open() as fh:
+        return json.load(fh)
 
 
 class ContractVerdict(str, Enum):
@@ -26,8 +32,7 @@ class ContractVerdict(str, Enum):
 
 def validate_contract(doc: dict) -> dict:
     import jsonschema
-    with open(SCHEMA) as fh:
-        schema = json.load(fh)
+    schema = load_schema()
     problems, gaps = [], []
     v = jsonschema.Draft202012Validator(schema)
     for err in sorted(v.iter_errors(doc), key=lambda e: list(e.path)):

@@ -9,7 +9,8 @@ shadow-only, `active_action_prohibited: true` is REQUIRED by schema).
 
 Files: `specifications/csia_trust_contract_v0.1.yaml` (reference instance —
 the simulation GPS, the one component we fully know),
-`specifications/csia_trust_contract_schema_v0.1.json`,
+schema `csia/contracts/csia_trust_contract_schema_v0.1.json` (ships inside
+the package so an installed wheel validates without a checkout),
 validator `csia/contracts/validate.py` with verdicts
 CSIA_CONTRACT_VALID / INCOMPLETE / INVALID.
 

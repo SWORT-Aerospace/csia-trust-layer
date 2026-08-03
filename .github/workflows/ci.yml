@@ -7,7 +7,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -e ".[dev]" pyulog pymavlink
+      # Every third-party package the suite imports must come from a declared
+      # extra (tests/test_ci_env.py enforces the same invariant from inside
+      # the suite, so a new undeclared import fails even locally).
+      - run: pip install -e ".[dev,data,logs,mavlink]"
+      - name: dependency smoke — fail at install time, not mid-collection
+        run: python -c "import duckdb, jsonschema, polars, pymavlink, pyulog, yaml"
       # Strict compile + ASan/UBSan negative-input harness. The C core is the
       # deployment-path implementation, so an out-of-bounds access here is a
       # flight hazard: this gate runs BEFORE the Python suite.
@@ -32,5 +37,21 @@ jobs:
                             "datasets/schemas/result_v1.schema.json")):
               jsonschema.validate(json.load(open(doc)), json.load(open(sch)))
               print("schema OK:", doc)
+          PYEOF
+      # The package must work INSTALLED, not just from a checkout: build a
+      # wheel, install it into a scratch venv, and validate a contract from
+      # a foreign cwd — this is where missing package data fails.
+      - name: packaged wheel — schema accessible after install
+        run: |
+          python -m build --wheel
+          python -m venv /tmp/wheel-venv
+          /tmp/wheel-venv/bin/pip install --quiet "$(ls dist/*.whl)[dev]"
+          cd /tmp && /tmp/wheel-venv/bin/python - <<'PYEOF'
+          from csia.contracts import validate_contract
+          from csia.contracts.validate import load_schema
+          assert load_schema()["title"] == "CSIA Trust Contract v0.1"
+          verdict = validate_contract({})["verdict"]
+          assert verdict == "CSIA_CONTRACT_INVALID", verdict
+          print("wheel OK: packaged schema found; empty contract ->", verdict)
           PYEOF
       - run: csia report
