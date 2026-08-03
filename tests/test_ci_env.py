@@ -58,7 +58,8 @@ def _ci_installed_distributions() -> set:
         assert extra in proj["optional-dependencies"], \
             f"ci.yml references extra '{extra}' missing from pyproject.toml"
         reqs += proj["optional-dependencies"][extra]
-    return {_norm(re.split(r"[><=!~;\[ ]", r, 1)[0]) for r in reqs}
+    # maxsplit is keyword-only in practice from 3.13 (positional deprecated)
+    return {_norm(re.split(r"[><=!~;\[ ]", r, maxsplit=1)[0]) for r in reqs}
 
 
 def _imported_third_party_modules() -> set:

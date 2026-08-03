@@ -1,24 +1,30 @@
 name: ci
 on: [push, pull_request]
 jobs:
+  # Python matrix. The Mac operator host runs 3.13, so 3.13 is a first-class
+  # gate, not an afterthought: install, dependency smoke, the full suite
+  # (including the mocked Hugging Face acquisition tests) and the packaged
+  # wheel all run on both interpreters.
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    name: test (py${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with: { python-version: "${{ matrix.python-version }}" }
       # Every third-party package the suite imports must come from a declared
       # extra (tests/test_ci_env.py enforces the same invariant from inside
       # the suite, so a new undeclared import fails even locally).
       - run: pip install -e ".[dev,data,logs,mavlink]"
       - name: dependency smoke — fail at install time, not mid-collection
         run: python -c "import duckdb, huggingface_hub, jsonschema, polars, pyarrow, pymavlink, pyulog, yaml"
-      # Strict compile + ASan/UBSan negative-input harness. The C core is the
-      # deployment-path implementation, so an out-of-bounds access here is a
-      # flight hazard: this gate runs BEFORE the Python suite.
-      - name: native core — strict warnings + sanitizers
-        run: bash csia/native/build.sh --check
       - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run
+      # The acquisition suite runs entirely against a mocked Hub: CI never
+      # downloads the real dataset.
       - run: python -m pytest -q
       # Dataset/provenance gates. The MANIFEST is content-addressed and must
       # regenerate byte-identically; the exposure REPORT embeds a timestamped
@@ -55,3 +61,18 @@ jobs:
           print("wheel OK: packaged schema found; empty contract ->", verdict)
           PYEOF
       - run: csia report
+      # Frozen CSIA v1: bench.json must regenerate bit-identically.
+      - name: frozen v1 benchmark reproducibility
+        run: |
+          git diff --exit-code campaigns/bench.json \
+            || (echo "::error::frozen CSIA v1 benchmark changed" && exit 1)
+
+  # The C core is the deployment-path implementation, so an out-of-bounds
+  # access is a flight hazard. The sanitizer harness is interpreter-agnostic,
+  # so it runs once rather than being duplicated across the matrix.
+  native:
+    runs-on: ubuntu-latest
+    name: native core — strict warnings + sanitizers
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash csia/native/build.sh --check
