@@ -63,17 +63,27 @@ pwd
 ## 4. Update the code
 
 ```bash
+cd /Users/ZINTRAX-5/swort/csia-trust-layer
 git status --short
 ```
 
-Empty output means nothing local is half-edited — good. If it prints file
-names, see [dirty Git tree](#dirty-git-tree) before continuing.
+**Empty output is required to continue.** If it prints anything at all,
+**stop here** and see [dirty Git tree](#dirty-git-tree). Do not stash, reset,
+checkout, or delete anything to make it empty — those commands destroy work,
+and whatever is uncommitted may matter.
+
+With a clean tree:
 
 ```bash
-git checkout claude/code-reviewer-repo-export-zicovg
-git pull origin claude/code-reviewer-repo-export-zicovg
+git fetch origin
+git switch claude/code-reviewer-repo-export-zicovg
+git pull --ff-only origin claude/code-reviewer-repo-export-zicovg
 git log --oneline -1
 ```
+
+`--ff-only` means the pull either fast-forwards cleanly or fails outright —
+it will never invent a merge commit or start a conflict you would have to
+resolve. If it fails, stop and report the message.
 
 ## 5. Turn on the Python environment and install
 
@@ -162,25 +172,35 @@ without it the tool refuses and downloads nothing.
 
 ## 10. Watch progress from a second window
 
-Open a **second** Terminal window (`Command` + `N`) and run:
+Open a **second** Terminal window (`Command` + `N`), then:
 
 ```bash
-watch -n 30 'cat /Volumes/CSIA_DATA/CSIA_DATA_LAKE/reports/uav_sead_progress.json; echo; df -h /Volumes/CSIA_DATA'
+cd /Users/ZINTRAX-5/swort/csia-trust-layer
+source .venv/bin/activate
+python tools/run_uav_sead_mac_pipeline.py \
+  --stage monitor \
+  --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE
 ```
 
-If `watch` is not installed:
+This refreshes every 30 seconds and shows state, pinned commit, files and
+`.ulg` files completed, bytes vs expected, percent complete, cache size, free
+SSD space, last completed file, retries, last error, start time, elapsed
+time, transfer rate and — only once enough has transferred for the estimate
+to mean anything — estimated time remaining.
+
+It needs no Homebrew and no `watch` command, which stock macOS does not ship.
+
+Change the refresh rate with `--interval-seconds`, or take a single reading:
 
 ```bash
-while true; do
-  clear
-  cat /Volumes/CSIA_DATA/CSIA_DATA_LAKE/reports/uav_sead_progress.json
-  df -h /Volumes/CSIA_DATA
-  sleep 30
-done
+python tools/run_uav_sead_mac_pipeline.py \
+  --stage monitor --once \
+  --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE
 ```
 
-Stop watching with `Control` + `C` — that only stops the *watcher*, not the
-download in the other window.
+Stop watching with `Control` + `C`. That stops only the *watcher* — the
+download in the other window keeps running, and the monitor never changes
+acquisition state.
 
 ### Stopping the download on purpose
 
@@ -256,10 +276,34 @@ python tools/run_uav_sead_mac_pipeline.py \
   --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE
 ```
 
-This splits the flights into DEVELOPMENT / CALIBRATION / VALIDATION /
-BLIND_TEST, grouped so that all flights of the same aircraft stay on the same
-side. It writes
+First it runs a **grouping audit**: it looks for real aircraft, campaign,
+session or lineage identity in `mapping.json`, the directory layout, the file
+names, and the ULog *header* fields (never flight signals). It writes
+`/Volumes/CSIA_DATA/CSIA_DATA_LAKE/reports/uav_sead_grouping_audit.json`.
+
+Then it splits the flights into DEVELOPMENT / CALIBRATION / VALIDATION and a
+protected holdout, grouped so related flights stay on the same side, and
+writes
 `/Volumes/CSIA_DATA/CSIA_DATA_LAKE/manifests/uav_sead/partition_manifest_v1.json`.
+
+**Read `partition_quality` in the output.** It decides what may honestly be
+claimed later:
+
+| `partition_quality` | Holdout is called | Aircraft-level claims |
+| --- | --- | --- |
+| `AIRCRAFT_GROUPED` | `BLIND_TEST` | allowed |
+| `CAMPAIGN_GROUPED` / `SESSION_GROUPED` / `SOURCE_LINEAGE_GROUPED` | `BLIND_TEST` | **not allowed** |
+| `FILE_GROUPED` | `FILE_LEVEL_HOLDOUT` | **not allowed** |
+| `UNGROUPED_FLIGHT_HASH` | `UNGROUPED_HOLDOUT` | **not allowed** |
+
+This is not a formality. Without per-aircraft identity, the same airframe can
+land on both sides of the split, so results cannot show the system works on
+an aircraft it has never seen. The tool renames the partition itself so
+nobody downstream reads "BLIND_TEST" and claims more than the data supports.
+
+If the audit finds files that look related but would be grouped apart, the
+partition step **refuses** and prints the collisions. That is the correct
+outcome — report it rather than forcing it through.
 
 **This must happen before anybody runs CSIA, picks a threshold, or looks at
 any fault signal.** Choosing the split after seeing results — even honestly —
@@ -364,12 +408,13 @@ drive, then re-run step 7.
 Record it in the certificate and report it. Do not edit `mapping.json`.
 
 ### Dirty Git tree
-`git status --short` lists files. Do not delete anything. Report what it
-shows. Recover the published state with:
-```bash
-git stash
-```
-Your changes are recoverable later with `git stash pop`.
+`git status --short` lists files. **Stop.** Do not stash, reset, checkout, or
+delete anything — those commands can destroy work that has not been saved
+anywhere else.
+
+Copy the exact output and report it. Whoever knows what those edits were
+decides what happens to them. Acquisition can wait; unrecoverable work
+cannot.
 
 ### Failed hash verification
 The strongest possible stop signal: the bytes on disk are not the bytes that

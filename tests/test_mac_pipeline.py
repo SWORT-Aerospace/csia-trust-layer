@@ -18,8 +18,8 @@ import sys
 import pytest
 
 from csia.data.partition import (POLICY_VERSION, TIER_AIRCRAFT,
-                                 TIER_CAMPAIGN, TIER_FLIGHT, derive_group,
-                                 freeze_partitions)
+                                 TIER_CAMPAIGN, TIER_FLIGHT, TIER_SESSION,
+                                 derive_group, freeze_partitions)
 from csia.data.paths import REPO_ROOT, DataRoot
 from csia.data.snapshot import aggregate_hash, build_manifest, materialize
 
@@ -354,11 +354,14 @@ def test_partition_refuses_without_successful_mapping(lake):
     assert "refusing to partition" in res["error"]
 
 
-def test_grouping_prefers_aircraft_then_campaign_then_flight():
+def test_grouping_prefers_aircraft_then_campaign_then_session_then_flight():
     g = derive_group("f1.ulg", {"aircraft_id": "AC7", "session": "S1"})
     assert g["tier"] == TIER_AIRCRAFT and g["value"] == "AC7"
+    g = derive_group("f1.ulg", {"campaign": "C2", "session_id": "S1"})
+    assert g["tier"] == TIER_CAMPAIGN and g["value"] == "C2"
+    # session is its own tier: it is weaker evidence than a campaign
     g = derive_group("f1.ulg", {"session_id": "S1"})
-    assert g["tier"] == TIER_CAMPAIGN and g["value"] == "S1"
+    assert g["tier"] == TIER_SESSION and g["value"] == "S1"
     g = derive_group("solitary.ulg", {})
     assert g["tier"] == TIER_FLIGHT
 

@@ -3,8 +3,9 @@
     python tools/run_uav_sead_mac_pipeline.py --stage environment \
         --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE
 
-Stages: environment, preflight, dry-run, acquire, verify, mapping,
-partition, certificate, all.
+Stages: environment, preflight, dry-run, acquire, monitor, verify, mapping,
+partition, certificate, all. `monitor` is a read-only watcher run from a
+second Terminal; `all` never enters it.
 
 Everything the pipeline writes lands under the data root. Nothing is written
 into the Git working tree, and the real dataset is never downloaded without
@@ -25,6 +26,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from csia.data import hub  # noqa: E402
+from csia.data.grouping import audit_grouping  # noqa: E402
 from csia.data.mapping import analyze_mapping  # noqa: E402
 from csia.data.partition import freeze_partitions  # noqa: E402
 from csia.data.paths import (REPO_ROOT, DataRootError,  # noqa: E402
@@ -40,8 +42,9 @@ from csia.data.snapshot import (aggregate_hash, build_manifest,  # noqa: E402
 DATASET_ID = "uav_sead"
 CONFIRM_TOKEN = "UAV-SEAD"
 TOOL_VERSION = "1.0.0"
-STAGES = ("environment", "preflight", "dry-run", "acquire", "verify",
-          "mapping", "partition", "certificate", "all")
+STAGES = ("environment", "preflight", "dry-run", "acquire", "monitor",
+          "verify", "mapping", "partition", "certificate", "all")
+GROUPING_AUDIT = "uav_sead_grouping_audit.json"
 
 ENV_REPORT = "mac_environment_check.json"
 PREFLIGHT_REPORT = "uav_sead_preflight.json"
@@ -470,6 +473,169 @@ def stage_acquire(root, args, dry_run=False) -> dict:
             "bytes_completed": sum(e["size"] for e in done), "log": logf}
 
 
+# --- stage: monitor -----------------------------------------------------------
+
+def dir_size(path):
+    total = 0
+    for dirpath, _, filenames in os.walk(path):
+        for fn in filenames:
+            try:
+                total += os.path.getsize(os.path.join(dirpath, fn))
+            except OSError:
+                pass
+    return total
+
+
+def human(n):
+    if n is None:
+        return "unknown"
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
+        if abs(n) < 1024 or unit == "TiB":
+            return f"{n:.1f} {unit}" if unit != "B" else f"{int(n)} B"
+        n /= 1024.0
+
+
+def human_seconds(s):
+    if s is None or s < 0:
+        return "unknown"
+    s = int(s)
+    if s < 60:
+        return f"{s}s"
+    if s < 3600:
+        return f"{s // 60}m {s % 60}s"
+    return f"{s // 3600}h {(s % 3600) // 60}m"
+
+
+def monitor_snapshot(root) -> dict:
+    """One read-only sample of acquisition state. Writes nothing."""
+    prog = read_json(root.report(PROGRESS_REPORT)) or {}
+    pre = read_json(root.report(PREFLIGHT_REPORT)) or {}
+    sha = prog.get("resolved_commit_sha") or pre.get("resolved_commit_sha")
+    staging = prog.get("staging") or (
+        os.path.join(root.cache, DATASET_ID, sha) if sha else None)
+
+    files_done, ulg_done, bytes_done, last_file = 0, 0, 0, None
+    if staging and os.path.isdir(staging):
+        newest = (None, -1.0)
+        for dirpath, _, filenames in os.walk(staging):
+            for fn in filenames:
+                if fn.endswith(".incomplete"):
+                    continue
+                p = os.path.join(dirpath, fn)
+                try:
+                    st = os.stat(p)
+                except OSError:
+                    continue
+                files_done += 1
+                bytes_done += st.st_size
+                if fn.lower().endswith(".ulg"):
+                    ulg_done += 1
+                if st.st_mtime > newest[1]:
+                    newest = (os.path.relpath(p, staging), st.st_mtime)
+        last_file = newest[0]
+
+    expected_files = prog.get("expected_files") or pre.get("file_count")
+    expected_bytes = (prog.get("expected_bytes")
+                      or pre.get("expected_total_bytes"))
+    pct = (round(100.0 * bytes_done / expected_bytes, 2)
+           if expected_bytes else None)
+
+    started = prog.get("started_utc")
+    elapsed = rate = remaining = None
+    if started:
+        try:
+            t0 = time.mktime(time.strptime(started, "%Y-%m-%dT%H:%M:%SZ"))
+            elapsed = max(0.0, time.mktime(time.gmtime()) - t0)
+        except Exception:
+            elapsed = None
+    if elapsed and elapsed > 30 and bytes_done > 0:
+        rate = bytes_done / elapsed
+        # Only project a finish time when the total is known AND enough of
+        # the transfer has happened for the rate to mean anything.
+        if expected_bytes and pct is not None and pct >= 5 and rate > 0:
+            remaining = max(0.0, (expected_bytes - bytes_done) / rate)
+
+    return {
+        "state": prog.get("state", "NOT_STARTED"),
+        "pinned_commit": sha,
+        "files_completed": files_done,
+        "expected_files": expected_files,
+        "ulg_completed": ulg_done,
+        "bytes_completed": bytes_done,
+        "expected_bytes": expected_bytes,
+        "percent_complete": pct,
+        "cache_size_bytes": dir_size(staging) if staging and os.path.isdir(
+            staging) else 0,
+        "free_bytes": root.free_bytes(),
+        "last_completed_file": last_file,
+        "retries": prog.get("retries", 0),
+        "last_error": (prog.get("errors") or [None])[-1],
+        "started_utc": started,
+        "elapsed_seconds": elapsed,
+        "rate_bytes_per_second": rate,
+        "estimated_remaining_seconds": remaining,
+        "sampled_utc": now(),
+    }
+
+
+def render_monitor(s) -> str:
+    pct = (f"{s['percent_complete']}%" if s["percent_complete"] is not None
+           else "not computable")
+    rate = (human(s["rate_bytes_per_second"]) + "/s"
+            if s["rate_bytes_per_second"] else "not yet measurable")
+    lines = [
+        f"UAV-SEAD acquisition monitor        {s['sampled_utc']}",
+        "=" * 62,
+        f"  state                  {s['state']}",
+        f"  pinned commit          {s['pinned_commit'] or 'not yet resolved'}",
+        f"  files completed        {s['files_completed']}"
+        f" / {s['expected_files'] if s['expected_files'] else 'unknown'}",
+        f"  .ulg completed         {s['ulg_completed']}",
+        f"  bytes completed        {human(s['bytes_completed'])}"
+        f" / {human(s['expected_bytes'])}",
+        f"  percent complete       {pct}",
+        f"  cache size             {human(s['cache_size_bytes'])}",
+        f"  free on SSD            {human(s['free_bytes'])}",
+        f"  last completed file    {s['last_completed_file'] or '-'}",
+        f"  retries                {s['retries']}",
+        f"  last error             {s['last_error'] or 'none'}",
+        f"  started                {s['started_utc'] or '-'}",
+        f"  elapsed                {human_seconds(s['elapsed_seconds'])}",
+        f"  rate                   {rate}",
+        f"  est. remaining         "
+        f"{human_seconds(s['estimated_remaining_seconds'])}",
+        "",
+        "  read-only view — press Control+C to stop watching "
+        "(the download keeps running)",
+    ]
+    return "\n".join(lines)
+
+
+def stage_monitor(root, args) -> dict:
+    """Refresh a read-only view on a timer. No external commands, no writes.
+
+    Deliberately implemented with time.sleep and plain stdout rather than
+    watch(1): watch is not present on a stock macOS install.
+    """
+    interval = max(1, int(args.interval_seconds))
+    once = bool(getattr(args, "once", False))
+    last = None
+    try:
+        while True:
+            last = monitor_snapshot(root)
+            if not args.json:
+                print("\033[2J\033[H", end="")     # clear + home
+                print(render_monitor(last))
+            else:
+                print(json.dumps(last, sort_keys=True))
+            if once:
+                break
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        print("\nmonitor stopped. Acquisition state was not modified.")
+    return dict(last or {}, ok=True, stage="monitor")
+
+
 # --- stage: verify ------------------------------------------------------------
 
 def stage_verify(root, args) -> dict:
@@ -597,7 +763,7 @@ def stage_partition(root, args) -> dict:
     entries = (doc.items() if isinstance(doc, dict)
                else enumerate(doc) if isinstance(doc, list) else [])
 
-    flights = {}
+    flights, labels = {}, {}
     for key, value in entries:
         meta = value if isinstance(value, dict) else {}
         ref = None
@@ -612,13 +778,36 @@ def stage_partition(root, args) -> dict:
         rec = next((v for p, v in by_path.items()
                     if os.path.basename(p) == base), None)
         flights[base] = {"sha256": (rec or {}).get("sha256"),
-                         "metadata": meta}
+                         "metadata": meta, "relative_path": ref}
+        labels[base] = (value if not isinstance(value, dict)
+                        else next((v for kk, v in value.items()
+                                   if str(kk).lower() in
+                                   ("label", "anomaly", "anomaly_type",
+                                    "class", "category", "fault", "type")),
+                                  None))
+
+    # Recover the strongest legitimate identity available BEFORE assigning.
+    audit = audit_grouping(flights, os.path.join(snap, "ulg_files"),
+                           read_ulog=not args.no_ulog_metadata)
+    audit.update(stage="grouping-audit", snapshot=snap, generated_utc=now())
+    atomic_write_json(root.report(GROUPING_AUDIT), audit)
+
+    if not audit["safe_to_partition"]:
+        return {"stage": "partition", "ok": False,
+                "error": f"grouping audit found "
+                         f"{audit['collisions']['collision_count']} unresolved "
+                         f"related-file collision(s) likely to leak across "
+                         f"partitions — refusing to partition",
+                "grouping_audit": root.report(GROUPING_AUDIT),
+                "collisions": audit["collisions"]["related_file_collisions"]}
 
     man = freeze_partitions(flights, os.path.basename(snap),
                             git("rev-parse", "HEAD"), now(),
-                            external_replication_groups=args.external_group)
+                            external_replication_groups=args.external_group,
+                            labels=labels, grouping_audit=audit)
     man.update(stage="partition", dataset_id=DATASET_ID, snapshot=snap,
-               mapping_report=root.report(MAPPING_REPORT))
+               mapping_report=root.report(MAPPING_REPORT),
+               grouping_audit_report=root.report(GROUPING_AUDIT))
     out = os.path.join(root.manifests, DATASET_ID, PARTITION_MANIFEST)
     atomic_write_json(out, man)
     man["manifest_path"] = out
@@ -640,6 +829,7 @@ def stage_certificate(root, args) -> dict:
                                   f"{digest}.json")) or {}
     part = read_json(os.path.join(root.manifests, DATASET_ID,
                                   PARTITION_MANIFEST)) or {}
+    audit = read_json(root.report(GROUPING_AUDIT)) or {}
 
     missing = [n for n, d in (("preflight", pre), ("mapping", mapres),
                               ("partition", part), ("provenance", prov))
@@ -686,11 +876,37 @@ def stage_certificate(root, args) -> dict:
         "partitions": {
             "counts": part.get("partition_counts"),
             "group_count": part.get("group_count"),
+            "group_size_distribution": part.get("group_size_distribution"),
             "grouping_tiers_used": part.get("grouping_tiers_used"),
+            "grouping_fields_used": part.get("grouping_fields_used"),
+            "partition_quality": part.get("partition_quality"),
+            "protected_partition_label":
+                part.get("protected_partition_label"),
+            "label_distribution_by_partition":
+                part.get("label_distribution_by_partition"),
+            "anomaly_family_distribution_by_partition":
+                part.get("anomaly_family_distribution_by_partition"),
+            "potential_leakage_risks": part.get("potential_leakage_risks"),
             "leakage_free": part.get("leakage_free"),
             "leakage": part.get("leakage"),
             "policy_version": part.get("policy_version"),
             "seed": part.get("seed"),
+        },
+        # Fail closed: absent an explicit True from the partition manifest,
+        # aircraft-level claims are prohibited.
+        "aircraft_level_blind_claim_permitted": bool(
+            part.get("aircraft_level_blind_claim_permitted")),
+        "blind_test_label_permitted": bool(
+            part.get("blind_test_label_permitted")),
+        "permitted_evaluation_claims":
+            part.get("permitted_evaluation_claims", []),
+        "prohibited_claims": part.get("prohibited_claims", []),
+        "claim_rationale": part.get("claim_rationale"),
+        "grouping_audit": {
+            "report": root.report(GROUPING_AUDIT),
+            "selected_rule": (audit or {}).get("selected_grouping_rule"),
+            "scientific_limitations": (audit or {}).get(
+                "scientific_limitations", []),
         },
         "repository_commit": pre.get("repository_commit"),
         "python_version": env.get("checks", {}).get("python_version"),
@@ -736,14 +952,30 @@ def stage_certificate(root, args) -> dict:
     ]
     if cert["mapping"]["discrepancy"]:
         md += ["", f"> **Discrepancy:** {cert['mapping']['discrepancy']}"]
+    p = cert["partitions"]
     md += [
         "", "## Partitions (frozen before any signal inspection)", "",
-        f"- Counts: `{cert['partitions']['counts']}`",
-        f"- Groups: {cert['partitions']['group_count']} "
-        f"via `{cert['partitions']['grouping_tiers_used']}`",
-        f"- Leakage-free: **{cert['partitions']['leakage_free']}**",
-        f"- Policy `{cert['partitions']['policy_version']}`, "
-        f"seed `{cert['partitions']['seed']}`", "",
+        f"- Partition quality: **`{p['partition_quality']}`**",
+        f"- Protected split is called: **`{p['protected_partition_label']}`**",
+        f"- Counts: `{p['counts']}`",
+        f"- Groups: {p['group_count']} via `{p['grouping_tiers_used']}`",
+        f"- Leakage-free: **{p['leakage_free']}**",
+        f"- Policy `{p['policy_version']}`, seed `{p['seed']}`", "",
+        "### Claims this grouping permits", "",
+        f"- `aircraft_level_blind_claim_permitted: "
+        f"{str(cert['aircraft_level_blind_claim_permitted']).lower()}`",
+        f"- `blind_test_label_permitted: "
+        f"{str(cert['blind_test_label_permitted']).lower()}`",
+        f"- Rationale: {cert['claim_rationale']}", "",
+        "Permitted: " + (", ".join(cert["permitted_evaluation_claims"])
+                         or "none"),
+        "", "**Prohibited:** " + (", ".join(cert["prohibited_claims"])
+                                  or "none"), "",]
+    if cert["grouping_audit"]["scientific_limitations"]:
+        md += ["### Grouping limitations", ""] + [
+            f"- {x}" for x in
+            cert["grouping_audit"]["scientific_limitations"]] + [""]
+    md += [
         "## Environment", "",
         f"- Repository commit: `{cert['repository_commit']}`",
         f"- Python: `{cert['python_version']}`",
@@ -782,6 +1014,12 @@ def build_parser():
                     help="group id to hold back as EXTERNAL_REPLICATION")
     ap.add_argument("--hf-token", default=None)
     ap.add_argument("--retries", type=int, default=3)
+    ap.add_argument("--interval-seconds", type=int, default=30,
+                    help="monitor refresh interval (default 30)")
+    ap.add_argument("--once", action="store_true",
+                    help="monitor: print one sample and exit")
+    ap.add_argument("--no-ulog-metadata", action="store_true",
+                    help="skip ULog header identity extraction")
     ap.add_argument("--json", action="store_true")
     return ap
 
@@ -791,6 +1029,7 @@ def run_stage(name, root, args):
         "environment": lambda: stage_environment(root, args),
         "preflight": lambda: stage_preflight(root, args),
         "dry-run": lambda: stage_acquire(root, args, dry_run=True),
+        "monitor": lambda: stage_monitor(root, args),
         "acquire": lambda: stage_acquire(root, args, dry_run=False),
         "verify": lambda: stage_verify(root, args),
         "mapping": lambda: stage_mapping(root, args),
@@ -805,6 +1044,8 @@ def summarize(name, res):
     for key in ("error", "hint", "resolved_commit_sha", "aggregate_sha256",
                 "raw_path", "file_count", "ulg_count", "total_bytes",
                 "annotated_entries", "annotated_count_matches_claim",
+                "partition_quality", "protected_partition_label",
+                "aircraft_level_blind_claim_permitted",
                 "partition_counts", "leakage_free", "certificate_md",
                 "would_download_files", "would_download_bytes"):
         if key in res and res[key] is not None:
@@ -829,7 +1070,7 @@ def main(argv=None) -> int:
 
     order = (["environment", "preflight", "dry-run", "acquire", "verify",
               "mapping", "partition", "certificate"]
-             if args.stage == "all" else [args.stage])
+             if args.stage == "all" else [args.stage])   # monitor is manual
 
     results, rc = {}, 0
     for name in order:
