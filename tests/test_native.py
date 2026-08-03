@@ -120,3 +120,59 @@ def test_native_diag_matches_python():
         post_c = nat.step()
         for k, cause in enumerate(py.names):
             assert abs(post_py[cause] - post_c[k]) < 1e-12, f"step {step}"
+
+
+# --- production-topology parity (audit F-03) ---------------------------------
+# The fixture above pins C<->Python on a 4-node / 3-edge graph. Production is
+# 8 nodes / 11 edges, so equivalence was previously unverified at the topology
+# that actually ships.
+
+def test_native_parity_on_production_topology():
+    """C and Python must agree on the REAL trust graph, not just a toy one."""
+    from csia.trust_graph import build_trust_graph
+
+    graph = build_trust_graph()
+    nodes = list(graph.nodes)
+    edges = [(f"e{i}", a, b) for i, (a, b) in enumerate(graph.edges)]
+    assert (len(nodes), len(edges)) == (8, 11), "production topology changed"
+
+    cfg = EngineConfig()
+    py = TrustCore(nodes, cfg)
+    idx = {n: i for i, n in enumerate(nodes)}
+    nat = native.NativeTrustState(
+        len(nodes), len(edges),
+        [idx[a] for _, a, _ in edges], [idx[b] for _, _, b in edges], cfg)
+
+    rng = np.random.default_rng(7)
+    for step in range(300):
+        elam = rng.exponential(1.0, len(edges)) * (1 + 15 * (step % 80 > 60))
+        egate = (rng.random(len(edges)) > 0.25).astype(float)
+        plam = rng.exponential(1.0, len(nodes))
+        pgate = (rng.random(len(nodes)) > 0.3).astype(float)
+        hist = rng.exponential(1.0, len(nodes))
+        vr = rng.exponential(1.0, len(nodes))
+        has = rng.random(len(nodes)) > 0.2
+        fresh = rng.random(len(nodes)) > 0.1
+
+        res = py.step(
+            {k: (a, b, float(elam[e]), float(egate[e]))
+             for e, (k, a, b) in enumerate(edges)},
+            {n: (float(plam[i]), float(pgate[i])) for i, n in enumerate(nodes)},
+            {n: (float(hist[i]) if has[i] else None)
+             for i, n in enumerate(nodes)},
+            {n: (float(vr[i]) if has[i] else None) for i, n in enumerate(nodes)},
+            {n: bool(fresh[i]) for i, n in enumerate(nodes)})
+
+        nat.elam[:], nat.egate[:] = elam, egate
+        nat.plam[:], nat.pgate[:] = plam, pgate
+        nat.phas[:] = 1
+        nat.hist[:], nat.vr[:] = hist, vr
+        nat.hist_has[:] = has
+        nat.vr_has[:] = has
+        nat.fresh[:] = fresh
+        nat.step()
+
+        for i, n in enumerate(nodes):
+            assert abs(res[n]["trust"] - nat.out_trust[i]) < 1e-12, \
+                f"step {step} node {n}"
+            assert abs(res[n]["evidence"] - nat.out_ev[i]) < 1e-12

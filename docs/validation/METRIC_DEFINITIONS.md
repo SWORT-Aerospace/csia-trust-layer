@@ -65,19 +65,144 @@ that threshold.
 
 ---
 
-## 3. Detection metrics
+## 3. Latency metrics
 
-> **Open gap (audit F-02).** Two distinct quantities are currently conflated
-> and only the first is implemented. Published detection latencies
-> (2.2 s / 13.0 s / 1.5 s) are **time-to-trust-threshold**, not time-to-alert.
+**Implementation:** `csia/metrics/latency.py` — the single owner. Latency logic
+must not be duplicated in CLI commands, validation scripts, Monte Carlo tooling,
+report generation, or scenario tests.
 
-| Metric | Definition | Status |
+**The term "detection latency" is retired.** It conflated stages that differ by
+1.9×–2.7× in measurement, and in one scenario differed between "13 seconds" and
+"never". Each stage below names itself and its threshold.
+
+### 3.1 Fault onset — four distinct timestamps
+
+They are **not** assumed equal. `OnsetBasis` carries all four; every result
+records which one it used in `onset_basis`.
+
+| Basis | Definition | Status |
 |---|---|---|
-| **Time-to-trust-threshold** | First tick after fault onset where the target node's trust crosses a fixed value (currently hard-coded `0.85` in `validation.py:_detection` and `cli.py:_report`). | Implemented. Detector-internal; nothing in the system acts at 0.85. |
-| **Time-to-alert** | Fault onset → first *alert episode* opening. Includes the per-class threshold, `dwell_up`, and `arm_time`. | **NOT YET IMPLEMENTED.** This is the number comparable to a PX4/ArduPilot health flag, and the one a baseline comparison requires. |
+| `configured` | The injection/annotation start time (`Fault.start`). | Always available. Default. |
+| `first_corrupted_sample` | First sample that differs from a clean reference run. | Available only when a clean reference is supplied. |
+| `first_observable_effect` | First sample where the corruption is visible in any comparator residual. | Not implemented — reported `None`. |
+| `first_theoretically_detectable_effect` | First point where the corruption exceeds the noise floor of some check. | Not implemented — requires a per-check detectability model CSIA does not have. Estimating it would fabricate precision. |
 
-Until time-to-alert exists, every published latency must be labelled
-*time-to-trust-threshold (0.85)*.
+### 3.2 Time to trust threshold — **ANALYSIS ONLY**
+
+Onset → target source's trust first crosses a named analysis threshold.
+**Must always name the threshold**, e.g. `time_to_trust_threshold_0_85`.
+
+**This is not operator-facing detection latency and must never be labelled as
+such.** The analysis threshold has no operational effect: no `FailsafeConfig`
+field equals it and no condition compares trust against it to raise a level.
+
+> A numerically identical literal `0.85` *does* appear operationally at
+> `csia/runtime/failsafe.py:130`, as a guard inside the `imu_isolated`
+> condition. The two are equal by coincidence and semantically unrelated. The
+> production literal remains un-named and is tracked as an open item
+> (`docs/audit/CSIA_LATENCY_PATH_AUDIT.md` §2).
+
+### 3.3 Time to alert event
+
+Onset → first qualifying **non-recovery** operator-facing alert event. The
+event must satisfy *all* of: the per-class production threshold, `arm_time`,
+`dwell_up`, the failsafe-policy conditions, and the suppression rules
+(disarmed hold, `reset_timers()`). This is the number comparable to a
+PX4/ArduPilot health flag.
+
+### 3.4 Time to alert episode
+
+Onset → opening of the alert **episode** that owns the first event. Equal to
+§3.3 when the episode opens with that event; they diverge only when an episode
+is merged across a flap. `alert_escalations` reports further escalations inside
+the episode (a `CAUTION→CRITICAL` step is a new *event*, not a new *episode*).
+
+### 3.5 Time to classification
+
+Onset → first tick where any non-`nominal` cause reaches the classification
+confidence threshold. **Always report the threshold** —
+`classification_confidence_threshold`, default 0.90.
+
+### 3.6 Time to correct isolation
+
+Onset → first tick where the *leading* cause accuses the faulted source at or
+above the isolation confidence threshold (default 0.90). Cause→source mapping
+is `CAUSE_TO_SOURCE`. Outcomes are mutually exclusive:
+
+| Outcome | Meaning |
+|---|---|
+| `CORRECT` | Leading cause names the faulted source. |
+| `INCORRECT` | Leading cause reached confidence but named a different source. |
+| `AMBIGUOUS` | Confidence reached by a cause naming no single source (`unexpected_maneuver`). |
+| `NONE` | No cause reached the threshold. |
+
+*Common-cause* and *multiple-source* isolation are not yet representable: the
+cause set is single-source by construction. Recorded as a gap, not simulated.
+
+### 3.7 Time to arbitration recommendation
+
+Onset → first bounded operational recommendation (`ARBITRATION_ACTIONS`:
+`SWITCH_NAV_INERTIAL`, `INHIBIT_GPS_MODES`, `SELECT_IMU`, `HEADING_HOLD_GYRO`,
+`LIMIT_THROTTLE`, `REDUCE_POWER`, `PREPARE_LANDING`, `LAND_SOON`, `LAND_NOW`,
+`STABILIZE`, `CONTROLLED_DESCENT`, `BROADCAST_MAYDAY`, `LIMIT_MANEUVERS`).
+`RESUME_NORMAL` is a recovery notice, **not** a recommendation.
+
+Usually equal to §3.3, but not by definition: a second condition dwelling
+inside an ongoing episode issues actions without a level change.
+
+### 3.8 Time to applied mitigation — **UNAVAILABLE**
+
+Onset → the receiving system confirms the recommendation was applied.
+**Always `None`.** CSIA is advisory; no actuator reports back. Reported as
+unavailable with a reason string, never simulated.
+
+### 3.9 Time to recovery
+
+Fault removal → posture leaves the degraded state (episode closes). `None` if
+the episode never closed. Requires `dwell_down` of sustained health.
+
+### 3.10 Time to trusted re-entry
+
+Fault removal → the recovered source's trust returns to or above its production
+threshold, i.e. it may contribute again.
+
+**Recovery and trusted re-entry are not simultaneous and must not be assumed
+so.** The Beta recursion recovers gradually (ρ ≤ 0.998), so posture can return
+to NORMAL while the source is still below its re-trigger value.
+
+### 3.11 Fault ↔ alert association
+
+Deterministic, tested, and shared across tools (`associate_episode`):
+
+1. Candidate episodes are those opening in `[onset, fault_end + grace_s]`
+   (`grace_s` default 15 s, covering dwell plus trust-recovery lag).
+   **An episode opening before onset is never attributed to the fault** — it is
+   pre-existing state or a false alert.
+2. Among candidates, the **earliest-opening** episode wins.
+
+With overlapping faults, association is evaluated per fault: one episode may
+legitimately be attributed to two faults, and that is *reported* rather than
+arbitrated, because a single posture genuinely can be supported by both.
+`unassociated_episodes()` returns episodes owned by no fault — the false-alert
+set during healthy operation.
+
+### 3.12 Measured stage gap (sim posture, onset 20 s, ×1.0)
+
+| scenario | to trust<0.85 | to alert | ratio |
+|---|---|---|---|
+| gps_spoof | 2.16 s | 4.40 s | 2.0× |
+| mag_emi | 1.52 s | 3.88 s | 2.6× |
+| power_sag | 1.36 s | 3.40 s | 2.5× |
+| vibration | 2.16 s | 5.76 s | 2.7× |
+| imu_bias | 13.00 s | **no alert** | — |
+
+The constant component is exactly `dwell_up + 1 tick` = 1.04 s; the variable
+component is the distance from 0.85 down to the sensor's own threshold.
+
+`imu_bias` raises **no operator alert at any time**: `max(imu0, imu1)` stays
+above `att_caution` because `imu1` remains healthy. Redundancy behaving
+correctly — but the previously published "13.0 s detection" described no
+operator-visible event.
 
 ---
 

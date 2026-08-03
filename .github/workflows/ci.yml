@@ -8,6 +8,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]" pyulog pymavlink
+      # Strict compile + ASan/UBSan negative-input harness. The C core is the
+      # deployment-path implementation, so an out-of-bounds access here is a
+      # flight hazard: this gate runs BEFORE the Python suite.
+      - name: native core — strict warnings + sanitizers
+        run: bash csia/native/build.sh --check
       - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run
       - run: python -m pytest -q
       - run: csia report

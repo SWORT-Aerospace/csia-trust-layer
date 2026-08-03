@@ -34,20 +34,20 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (62 tests)
+.venv/bin/python -m pytest    # full test suite (77 tests)
 ```
 
 ## Validation status (v0.8.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (62 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
+| Simulated fault harness (77 tests, CI) | spoof: 2.2 s to trust<0.85 / **4.4 s to operator alert** @ 89%; IMU isolation 99%/0%; mag/power/vib 100%. Both latencies reported — they are not the same quantity ([§3](docs/validation/METRIC_DEFINITIONS.md)) |
 | **Campaign reproducibility** — `csia bench`, `csia mc` (150 runs), seeker Monte Carlo regenerated after the 2026-07 live-path hardening | **bit-identical** to the committed `campaigns/*.json` and `deliverables/montecarlo_results.*` — the hardening changed no validated behavior |
 | **Soak** — looped runtime through the reset path (`tools/soak.py`) | 185 passes / 3.1 h flight-equivalent: 277,500 ticks, 0 errors, +0.0 MB RSS, latency ratio 1.01x |
 | **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **2 candidate false alarms → 3.0 alert episodes/flight-hour (95% CI 0.4–10.9)**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels). Supersedes a previously published 4.5/h, which counted failsafe *recovery* edges as alarms — see [METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md). At 2 events the interval is wide; the point estimate should not be quoted alone. |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
-| **Native core** (`csia/native/csia_core.c`, C, zero-alloc, pinned to Python at 1e-12) | trust kernel **247 ns** + diagnosis **427 ns** per tick on desktop → est. 7–15 µs on the STM32H743 itself ≈ 0.04% FC CPU at 25 Hz |
+| **Native core** (`csia/native/csia_core.c`, C, zero-alloc, parity-pinned to Python at 1e-12 on the **production 8-node/11-edge graph**) | **Host benchmark:** trust kernel 247 ns + diagnosis 427 ns per tick on desktop. The 7–15 µs STM32H743 figure and 0.04% CPU are **estimates, not target measurements**. The C core is **not on any production execution path** — the Python runtime is what executes. See [NATIVE_RUNTIME_STATUS](docs/embedded/NATIVE_RUNTIME_STATUS.md) |
 
 Plug YOUR data in:
 ```sh
@@ -119,10 +119,14 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
   `MavlinkActuator` (opt-in `enable_commands=True`, maps
   CONTROLLED_DESCENT/LAND_NOW → autopilot LAND, etc.; SITL-validate first).
   Runtime cost: ~140 µs/tick in reference Python (0.35% of the 40 ms tick
-  budget at 25 Hz — detection latency is set by evidence statistics, not
-  code speed). The **native C core** (`csia/native/`, same algorithm,
-  test-pinned to 1e-12) runs the trust+diagnosis math in **674 ns/tick**,
-  sized for the STM32H743 flight controller itself, not just the Pi.
+  budget at 25 Hz — alert latency is set by evidence statistics and the
+  dwell/threshold policy, not by code speed). The **native C core**
+  (`csia/native/`, same algorithm, parity-pinned to 1e-12 on the production
+  8-node/11-edge graph) runs the trust+diagnosis math in **674 ns/tick on a
+  desktop host**. It is sized for the STM32H743 but is **not currently on any
+  production execution path and has never been measured on target** — the
+  Python runtime is what executes. See
+  [NATIVE_RUNTIME_STATUS](docs/embedded/NATIVE_RUNTIME_STATUS.md).
 - **Raw-sensor monitoring**: the GPS node consumes GPS_RAW_INT, not the
   EKF's fused output — the autopilot's estimator innovation-gates faults
   out of its own output stream, hiding exactly what an integrity monitor
@@ -204,26 +208,36 @@ GPS checks gate on fix validity; motor edges gate on armed state.
 
 ## Scenario results (fixed seeds, `csia report`)
 
-The **detection** column is *time-to-trust-threshold*: the first tick after
-onset where the target's trust crosses 0.85. It is a detector-internal
-measure — nothing in the system acts at 0.85. *Time-to-alert* (onset → first
-failsafe alert episode, which additionally requires the per-class threshold,
-`dwell_up` and `arm_time`) is the operator-facing latency and is **not yet
-implemented**; see [METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md) §3.
+Two latencies are reported because they differ by 2-2.7x and must not be
+conflated ([METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md) §3,
+[latency path audit](docs/audit/CSIA_LATENCY_PATH_AUDIT.md)):
 
-| scenario | target | min trust | detection (to trust<0.85) | peak diagnosis |
-|---|---|---|---|---|
-| clean | — | 0.92 (no false alarm) | — | 98% nominal |
-| gps_spoof | gps | 0.59 | 2.2 s | 89% gps_fault |
-| gps_dropout | gps | 0.89 (trust holds) | n/a | 98% nominal (absence of data ≠ fault) |
-| imu0_bias_drift | imu0 | 0.77 (imu1 stays 0.86) | 13.0 s (slow ramp) | 99% imu0_bias_drift, 0% imu1 |
-| mag_emi | mag | 0.28 | 1.5 s | 100% mag_interference |
-| power_sag | battery | 0.40 | 1.6 s | 100% power_fault |
-| vibration_anomaly | vibration | 0.17 | 2.6 s | 100% vibration_anomaly |
-| dual_imu_failure | imu0/imu1 | 0.44 | 6.4 s | 99% imu0_bias_drift, 1% imu1 (failsafe → stabilize + descent) |
-| high_speed_dash† | — | 0.89 (no false alarm) | — | 100% nominal |
+- **to trust<0.85** — *analysis only.* Detector-internal; the analysis
+  threshold triggers nothing. Retained for historical continuity.
+- **to alert** — *operator-facing.* Onset to the first failsafe alert episode,
+  which additionally requires the per-class production threshold, `dwell_up`
+  and `arm_time`. This is the number comparable to a PX4/ArduPilot health flag.
 
-† `high_speed_dash` flies a **different truth profile** (`fast_cruise`,
+| scenario | target | min trust | to trust<0.85 (analysis) | **to alert (operator)** | peak diagnosis |
+|---|---|---|---|---|---|
+| clean | — | 0.92 (no false alarm) | — | — | 98% nominal |
+| gps_spoof | gps | 0.59 | 2.2 s | **4.4 s** (CAUTION) | 89% gps_fault |
+| gps_dropout | gps | 0.89 (trust holds) | n/a | n/a | 98% nominal (absence of data ≠ fault) |
+| imu0_bias_drift | imu0 | 0.77 (imu1 stays 0.86) | 13.0 s (slow ramp) | **never alerts** † | 99% imu0_bias_drift, 0% imu1 |
+| mag_emi | mag | 0.28 | 1.5 s | **3.9 s** (CAUTION) | 100% mag_interference |
+| power_sag | battery | 0.40 | 1.4 s | **3.4 s** (CRITICAL) | 100% power_fault |
+| vibration_anomaly | vibration | 0.17 | 2.2 s | **5.8 s** (CRITICAL) | 100% vibration_anomaly |
+| dual_imu_failure | imu0/imu1 | 0.44 | 6.4 s | (see scenario) | 99% imu0_bias_drift, 1% imu1 (failsafe → stabilize + descent) |
+| high_speed_dash‡ | — | 0.89 (no false alarm) | — | — | 100% nominal |
+
+† **`imu0_bias_drift` raises no operator alert at any time.** `imu0` degrades,
+but the attitude condition reads `max(imu0, imu1)` and `imu1` stays healthy at
+≈0.86, above `att_caution` 0.82 — redundancy working as designed. The 13.0 s
+figure is a trust crossing with no operator-visible consequence; diagnosis
+still isolates `imu0` correctly (at 15.1 s). It is **not** a detection event
+and was previously published as if it were.
+
+‡ `high_speed_dash` flies a **different truth profile** (`fast_cruise`,
 peak ground speed **52.0 m/s**) instead of the shared hover/circle baseline.
 Its purpose is to exercise the velocity readout and the speed-gated
 Mag-Heading↔GPS-Course edge at an elevated envelope; the trust layer flies it

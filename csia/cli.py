@@ -55,8 +55,12 @@ def _report(args) -> int:
     from .sensors import generate_flight
 
     truth = generate_flight()
+    # NOTE: the latency column is TIME-TO-TRUST-THRESHOLD(0.85) — an internal
+    # analysis measure, not the operator-facing alert latency (which also needs
+    # the per-class production threshold, dwell_up and arm_time). They differ by
+    # 2-2.7x. See docs/validation/METRIC_DEFINITIONS.md section 3.
     print(f"{'scenario':20s} {'target':10s} {'min trust':>9s} "
-          f"{'detect [s]':>10s} {'peak diagnosis':40s} {'lat us':>7s}")
+          f"{'t<0.85 [s]':>10s} {'peak diagnosis':40s} {'lat us':>7s}")
     for name in SCENARIOS:
         title, faults, td, hist, diag = run_scenario(name, truth=truth)
         target = faults[0].target if faults else "-"
@@ -76,6 +80,8 @@ def _report(args) -> int:
         print(f"{name:20s} {target:10s} {tmin:9.2f} {detect:>10s} "
               f"{diag.callout(kk, 2):40s} "
               f"{float(hist.latency_us[10:].mean()):7.1f}")
+    print("\n(t<0.85 is the internal ANALYSIS threshold, NOT operator-alert "
+          "latency — see docs/validation/METRIC_DEFINITIONS.md section 3)")
     return 0
 
 

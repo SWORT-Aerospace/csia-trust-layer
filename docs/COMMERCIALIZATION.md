@@ -5,8 +5,14 @@ SWORT LLC · SAM-registered · operating avionics business with revenue.
 ## The pitch in three measured numbers
 
 1. **Detection** (deterministic sim harness, 39 automated tests): GPS spoof
-   detected in 2.2 s at 89% attributed confidence; IMU drift isolated to the
-   correct unit at 99%/0%; mag/power/vibration faults at 100%, 1.5–2.6 s.
+   detected at 89% attributed confidence in 2.2 s to the internal analysis
+   threshold (trust<0.85) and **4.4 s to the operator-facing alert**; IMU drift
+   isolated to the correct unit at 99%/0%; mag/power/vibration faults at 100%,
+   1.4–2.2 s to analysis threshold and **3.4–5.8 s to alert**. The two are
+   different quantities and differ by 2–2.7x
+   (docs/validation/METRIC_DEFINITIONS.md §3). Slow single-IMU bias drift
+   crosses the analysis threshold at 13.0 s but raises **no operator alert** —
+   redundancy holds `max(imu0,imu1)` above the attitude threshold.
 2. **Real-data validation** (26 public PX4 quadrotor flights, 0.66 flight
    hours, `csia analyze-logs`): **2 candidate false alarms → 3.0 alert
    episodes/flight-hour (95% CI 0.4–10.9)** in offline-validation posture;

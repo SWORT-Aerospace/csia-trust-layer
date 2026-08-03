@@ -20,7 +20,7 @@ evidence, weaker wording is recommended.
 |---|---|---|---|---|---|---|
 | C1 | Per-sensor Trust Coefficient in [0,1], recursive Beta-Bayesian, adaptive forgetting | Bounds/convergence tests pass across suite | `test_engine.py` | `trust_engine/engine.py` | High | **Validated** |
 | C2 | Diagnosis outputs a probability distribution over causes, never a binary flag | Posterior-is-distribution test; scenario attribution | `test_diagnosis.py`, scenario harness | `diagnosis/bayes.py` | High | **Validated** |
-| C3 | Detection: gps_spoof 2.2 s, mag/power/vib fast, latencies per table | 150-run MC, single frozen config, CIs reported | `campaigns/monte_carlo.json` | `validation.py` | High | **Validated** (4 classes) |
+| C3 | Detection latency per table — **now reported as two distinct metrics**: time-to-trust-threshold(0.85) 1.4–2.2 s and **time-to-operator-alert 3.4–5.8 s** | 150-run MC, single frozen config, CIs reported; latency stages measured by `csia/metrics/latency.py` | `campaigns/monte_carlo.json` | `validation.py`, `metrics/latency.py` | High | **Validated, restated** — the previously published figures were time-to-trust-threshold and were labelled "detection". imu0_bias_drift is now recorded as raising **no alert at all** (audit F-02) |
 | C4 | "IMU isolation 99%/0%" / slow bias-drift handled | MC shows **imu_bias TPR 0.00 [0,0.30]** | `campaigns/monte_carlo.json` | comparator | — | **Unsupported for slow-drift detection** — the isolation *test* (which IMU) passes on the fast scripted case, but *detection* of slow bias fails. See wording note W1. |
 | C5 | Zero false alarms in clean flight | Clean MC 0 alarms / 0.8 h; bench clean=0 both configs | `campaigns/monte_carlo.json`, `bench.json` | validation | High (Poisson CI [0,4.4]/hr) | **Supported** (CI is wide; not "zero rate") |
 | C6 | Native C core matches Python to 1e-12 | Parity tests (trust + diag + no-evidence + bounds) | `test_native.py` | `csia/native/` | High | **Validated** |
@@ -36,7 +36,7 @@ evidence, weaker wording is recommended.
 | C16 | Determinism / bit-for-bit reproducible results | Determinism tests; campaigns regenerate byte-identical | `test_sensors.py`, `campaigns/*.json` | sensors, validation | High | **Validated** |
 | C17 | Armed-state gating from real vehicle state | Unit tests both directions + MAVLink map | `test_runtime.py`, `test_mavlink_map.py` | online/failsafe/plugins | Medium-High | **Supported** — live armed/disarm on hardware not yet observed |
 | C18 | Interceptor seeker: 100% detection, 0.44 s / 0.24 s latency, 100% attribution | 50-run/scenario seeker MC | `deliverables/montecarlo_results.json` | seeker/ | Medium | **Supported (SYNTHETIC)** — clearly labeled synthetic; not seeker hardware. See W6 |
-| C19 | 62-test suite, CI-gated | pytest suite green; CI builds native core | `.github/workflows/ci.yml` | tests/ | High | **Validated** |
+| C19 | 77-test suite, CI-gated (adds metrics/latency + native guard coverage) | pytest suite green; CI builds native core | `.github/workflows/ci.yml` | tests/ | High | **Validated** |
 | C20 | Advisory by default; commands nothing unless opted in | LoggingActuator default; MavlinkActuator gated | (code) | `service.py` | High | **Validated** |
 
 ## Recommended wording changes (claim stronger than evidence)
