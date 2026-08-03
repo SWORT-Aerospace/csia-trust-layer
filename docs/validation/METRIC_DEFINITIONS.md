@@ -224,3 +224,42 @@ exclusion is part of the metric.
   no previously validated simulation result changed. Records F-02 as an
   explicit open gap rather than silently continuing to publish
   time-to-trust-threshold as "detection latency".
+
+---
+
+## 4. Isolation taxonomy (slice 3B)
+
+Normative. Implemented by `csia.diagnosis.classify_isolation`; scored against
+ground-truth affected sources plus, where applicable, a shared resource.
+
+| Outcome | Definition |
+|---|---|
+| `CORRECT_SINGLE_SOURCE` | Named set equals a single-source truth set. |
+| `CORRECT_MULTI_SOURCE` | Named set equals a multi-source truth set, no shared resource claimed. |
+| `CORRECT_COMMON_CAUSE` | Named set equals truth **and** the winning hypothesis names the correct shared resource. |
+| `CORRECT_ESTIMATOR_CAUSE` | Named set equals truth and the cause is an estimator failure. |
+| `PARTIAL_ISOLATION` | Named set is a strict **subset** of truth — two faulty, one identified. |
+| `OVER_ISOLATION` | Named set is a strict **superset** — two faulty, three blamed. |
+| `UNDER_ISOLATION` | Named set overlaps truth but is neither subset nor superset. |
+| `INCORRECT_ISOLATION` | Named set is disjoint from truth — e.g. one shared cause corrupts two sensors and a third is blamed. |
+| `AMBIGUOUS` | No hypothesis reached ACTIVE, but one or more reached EMERGING. |
+| `UNKNOWN_DETECTED` | Inconsistency detected; the winning hypothesis is `UNKNOWN_CROSS_SENSOR_INCONSISTENCY`. Distinct from `NONE`. |
+| `NONE` | Nothing reached even EMERGING. |
+
+Backward compatibility: existing single-source scenarios continue to score
+`CORRECT_SINGLE_SOURCE` / `INCORRECT` / `AMBIGUOUS` / `NONE` exactly as before
+(`csia.metrics.latency.time_to_correct_isolation` is unchanged).
+
+### 4.1 Confidence concepts — never collapsed into one score
+
+| Concept | Field | Meaning |
+|---|---|---|
+| Source usability | `source_usability` | Per source **and function** (`gps:position` vs `gps:timing`). A source may be usable for one function and not another. |
+| Source fault confidence | `source_fault_confidence` | Confidence that the source itself is faulty. |
+| Hypothesis confidence | `Hypothesis.confidence` | Confidence that a cause explains the evidence. |
+| Isolation confidence | `Hypothesis.isolation_confidence` | Confidence the affected set / shared cause is correctly identified. |
+| Diagnostic ambiguity | `diagnostic_ambiguity` | How much several explanations remain plausible. |
+| Unexplained evidence | `residual_unexplained_evidence` | Inconsistency no supported hypothesis claims. |
+
+**These are heuristic scores, not calibrated probabilities.** No calibration
+has been demonstrated for the hypothesis layer and none may be claimed.

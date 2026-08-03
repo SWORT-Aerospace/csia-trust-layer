@@ -93,3 +93,30 @@ rejected count. Every rejection remains `< 0`, so callers testing `rc != 0` or
 
 Until 1–3 close, external material must not describe CSIA as running natively
 or as measured on flight hardware.
+
+---
+
+## Hypothesis layer (slice 3B) — Python only
+
+**No native C implementation exists, and none may be claimed.**
+
+| Property | Status |
+|---|---|
+| C implementation | **None.** `csia_diag_step` implements only the legacy 1-of-K softmax over a flat `low[nc][nf]` matrix; it has no concept of affected-source sets, shared resources, hierarchy, or per-function usability. |
+| Parity testing | **Not applicable** — nothing to compare against. |
+| Measured Python cost | **≈ 196 µs/tick** (desktop, 4 hypotheses × 23 features, includes evidence-record construction). Compare: legacy trust core ≈ 85 µs/tick. |
+| Intended fixed bounds | `MAX_HYPOTHESES = 32`, `MAX_SOURCES_PER_HYPOTHESIS = 8`, static registry, no runtime allocation |
+| Determinism | Stable registry ordering, tie-break by registry index, no floating-point reduction order dependence |
+| Serialization | `HypothesisReport.to_dict()` is stable and JSON-round-trippable (tested) |
+
+### Native backlog
+
+1. Port scoring (support / topology / temporal factors) with fixed-size arrays.
+2. Port evidence records, or emit a reduced fixed-size trail — the current
+   record set is the dominant allocation cost and is unsuitable as-is.
+3. Establish C↔Python parity on the registry at production size.
+4. Measure on target; the 196 µs figure is a **host** number for a
+   **Python** implementation and must not be extrapolated.
+
+Until all four close, external material must describe the hypothesis layer as
+**Python-only, shadow-mode, not embedded**.

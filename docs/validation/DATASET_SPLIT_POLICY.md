@@ -57,3 +57,26 @@ was chosen against them.
 This is not a defect in the split policy; it is the honest state of the
 evidence. Every future acquisition must be assigned *before* inspection, and
 a portion reserved untouched.
+
+## External evidence protection (slice 3B rule)
+
+**Any newly acquired real-flight log MUST receive a `dataset_id`,
+`content_sha256`, `split_group_id` and `dataset_partition` BEFORE its signal
+content or any CSIA output over it is inspected.**
+
+Assignment operates on **metadata and stable hashes only** — never on CSIA
+performance. Selecting a partition after seeing how CSIA scores on it is
+exactly how the current corpus became 100% contaminated.
+
+Recommended automatic assignment on acquisition:
+
+| Share | Partition |
+|---|---|
+| ≥ 30% (grouped by `split_group_id`) | `HELD_OUT_EVALUATION` — untouched |
+| A separate reserved subset | `BLIND_EXTERNAL` — labels withheld |
+| Remainder | `DEVELOPMENT` / `REGRESSION` |
+
+Held-out CSIA outputs must not be inspected while tuning the model. The
+hypothesis layer developed in slice 3B was built entirely on simulation and
+the already-contaminated development corpus, precisely so that future
+acquisitions remain clean.

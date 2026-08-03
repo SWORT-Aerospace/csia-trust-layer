@@ -1,0 +1,511 @@
+{
+ "evidence_environment": "SIMULATION",
+ "experiment_manifest": {
+  "command": "tools/hypothesis_campaign.py",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "csia_config_hash": "25c2a143b244f1c2",
+  "dataset_aggregate_hash": null,
+  "dataset_id": null,
+  "dataset_partition": null,
+  "dependency_lock_sha256": "b81a0101de46835a",
+  "evidence_environment": "SIMULATION",
+  "exclusions": [],
+  "experiment_id": "hypothesis_campaign-20260803T043636Z",
+  "experiment_type": "hypothesis_campaign",
+  "failsafe_config_hash": "2d636a3f7e9c2438",
+  "failures": [],
+  "git_commit": "9d506710c822e861a5ef5e524791043df40c9198",
+  "git_dirty": true,
+  "git_remote": "http://local_proxy@127.0.0.1:41729/git/SWORT-Aerospace/csia-trust-layer",
+  "input_logs": [],
+  "manifest_schema_version": "1.0.0",
+  "metric_definitions_version": "1.1.0",
+  "native_flags": "-std=c11 -Wall -Wextra -Wpedantic -Werror -O2",
+  "os_platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+  "output_paths": [
+   "experiments/results/hypothesis_campaign.json"
+  ],
+  "processor_arch": "x86_64",
+  "python_version": "3.11.15",
+  "random_seed": null,
+  "result_schema_version": "1.0.0",
+  "runtime_duration_s": null,
+  "threshold_config_hash": "2d636a3f7e9c2438",
+  "timestamp_utc": "2026-08-03T04:36:36Z",
+  "trust_graph_config_hash": "534f4a31eed1a792",
+  "warnings": []
+ },
+ "payload": {
+  "ablation": {
+   "full_architecture": {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "ambiguity": 0.898,
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.04,
+    "peak_independent": 0.215,
+    "peak_shared": 0.79,
+    "peak_unknown": 0.0,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "tick_cost_us": 198.8
+   },
+   "legacy_single_source": {
+    "affected": [
+     "battery"
+    ],
+    "ambiguity": null,
+    "isolation": "CORRECT_SINGLE_SOURCE (cannot express a source SET)",
+    "latency_s": null,
+    "note": "legacy posterior is 1-of-K; no affected-source set, no shared-resource concept",
+    "peak_independent": null,
+    "peak_shared": null,
+    "peak_unknown": null,
+    "root": "power_fault",
+    "tick_cost_us": null
+   },
+   "no_arm_time": {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "ambiguity": 0.898,
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.04,
+    "peak_independent": 0.244,
+    "peak_shared": 0.79,
+    "peak_unknown": 0.0,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "tick_cost_us": 174.1
+   },
+   "no_dwell": {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "ambiguity": 0.898,
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 0.12,
+    "peak_independent": 0.215,
+    "peak_shared": 0.79,
+    "peak_unknown": 0.0,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "tick_cost_us": 189.8
+   },
+   "shared_cause_disabled": {
+    "affected": [],
+    "ambiguity": 0.72,
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 3.2,
+    "peak_independent": 0.215,
+    "peak_shared": 0.0,
+    "peak_unknown": 0.99,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "tick_cost_us": 190.3
+   },
+   "temporal_evidence_removed": {
+    "affected": [],
+    "ambiguity": 0.845,
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 3.2,
+    "peak_independent": 0.215,
+    "peak_shared": 0.237,
+    "peak_unknown": 0.99,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "tick_cost_us": 165.7
+   },
+   "topology_evidence_removed": {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "ambiguity": 0.898,
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.04,
+    "peak_independent": 0.32,
+    "peak_shared": 0.79,
+    "peak_unknown": 0.0,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "tick_cost_us": 187.7
+   }
+  },
+  "authorization": "SHADOW_ONLY",
+  "discrimination": {
+   "A_shared_cause": {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "ambiguity": 0.898,
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.04,
+    "peak_independent": 0.215,
+    "peak_shared": 0.79,
+    "peak_unknown": 0.0,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "tick_cost_us": 185.6
+   },
+   "B_independent_faults": {
+    "affected": [
+     "imu0",
+     "imu1"
+    ],
+    "ambiguity": 0.699,
+    "isolation": "CORRECT_MULTI_SOURCE",
+    "latency_s": 6.56,
+    "peak_independent": 0.775,
+    "peak_shared": 0.204,
+    "peak_unknown": 0.737,
+    "root": "H_MULTI_INDEPENDENT_IMU",
+    "tick_cost_us": 201.7
+   },
+   "B_prime_near_simultaneous": {
+    "affected": [
+     "imu0",
+     "imu1"
+    ],
+    "ambiguity": 0.697,
+    "isolation": "CORRECT_MULTI_SOURCE",
+    "latency_s": 5.32,
+    "peak_independent": 0.775,
+    "peak_shared": 0.313,
+    "peak_unknown": 0.759,
+    "root": "H_MULTI_INDEPENDENT_IMU",
+    "tick_cost_us": 261.5
+   },
+   "C_clean": {
+    "affected": [],
+    "ambiguity": 0.0,
+    "isolation": "NONE",
+    "latency_s": null,
+    "peak_independent": 0.0,
+    "peak_shared": 0.018,
+    "peak_unknown": 0.0,
+    "root": null,
+    "tick_cost_us": 270.9
+   }
+  },
+  "summary": {
+   "development_correct_common_cause": "14/16",
+   "held_out_correct_common_cause": "1/4"
+  },
+  "sweep": {
+   "development_range": [
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.926,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "depth_v",
+     "peak_independent": 0.316,
+     "peak_shared": 0.721,
+     "peak_unknown": 0.484,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 184.3,
+     "value": 0.6
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "depth_v",
+     "peak_independent": 0.216,
+     "peak_shared": 0.78,
+     "peak_unknown": 0.932,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 203.2,
+     "value": 0.9
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "depth_v",
+     "peak_independent": 0.215,
+     "peak_shared": 0.79,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 178.0,
+     "value": 1.2
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "depth_v",
+     "peak_independent": 0.203,
+     "peak_shared": 0.792,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 225.3,
+     "value": 1.8
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "depth_v",
+     "peak_independent": 0.203,
+     "peak_shared": 0.792,
+     "peak_unknown": 0.553,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 214.4,
+     "value": 2.4
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.718,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.08,
+     "param": "onset",
+     "peak_independent": 0.211,
+     "peak_shared": 0.782,
+     "peak_unknown": 0.568,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 190.1,
+     "value": 20.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.811,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.08,
+     "param": "onset",
+     "peak_independent": 0.216,
+     "peak_shared": 0.787,
+     "peak_unknown": 0.792,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 209.5,
+     "value": 25.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "onset",
+     "peak_independent": 0.215,
+     "peak_shared": 0.79,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 211.0,
+     "value": 30.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.769,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.08,
+     "param": "onset",
+     "peak_independent": 0.21,
+     "peak_shared": 0.782,
+     "peak_unknown": 0.994,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 178.9,
+     "value": 40.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "duration",
+     "peak_independent": 0.203,
+     "peak_shared": 0.791,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 187.5,
+     "value": 3.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "duration",
+     "peak_independent": 0.215,
+     "peak_shared": 0.79,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 206.3,
+     "value": 6.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.991,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "duration",
+     "peak_independent": 0.312,
+     "peak_shared": 0.775,
+     "peak_unknown": 0.975,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 179.2,
+     "value": 12.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.898,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.04,
+     "param": "second_source_delay",
+     "peak_independent": 0.215,
+     "peak_shared": 0.79,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 197.3,
+     "value": 0.0
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.698,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.12,
+     "param": "second_source_delay",
+     "peak_independent": 0.215,
+     "peak_shared": 0.786,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "tick_cost_us": 199.4,
+     "value": 1.0
+    },
+    {
+     "affected": [],
+     "ambiguity": 0.871,
+     "isolation": "NONE",
+     "latency_s": null,
+     "param": "second_source_delay",
+     "peak_independent": 0.21,
+     "peak_shared": 0.511,
+     "peak_unknown": 0.806,
+     "root": null,
+     "tick_cost_us": 177.3,
+     "value": 3.0
+    },
+    {
+     "affected": [],
+     "ambiguity": 0.891,
+     "isolation": "UNKNOWN_DETECTED",
+     "latency_s": 7.0,
+     "param": "second_source_delay",
+     "peak_independent": 0.21,
+     "peak_shared": 0.399,
+     "peak_unknown": 0.977,
+     "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+     "tick_cost_us": 200.8,
+     "value": 6.0
+    }
+   ],
+   "synthetic_held_out": [
+    {
+     "affected": [],
+     "ambiguity": 0.737,
+     "depth_v": 0.75,
+     "isolation": "NONE",
+     "latency_s": null,
+     "onset": 22.0,
+     "peak_independent": 0.177,
+     "peak_shared": 0.615,
+     "peak_unknown": 0.642,
+     "root": null,
+     "rpm_loss": 200.0,
+     "tick_cost_us": 196.7
+    },
+    {
+     "affected": [
+      "battery",
+      "motor_esc"
+     ],
+     "ambiguity": 0.919,
+     "depth_v": 1.5,
+     "isolation": "CORRECT_COMMON_CAUSE",
+     "latency_s": 1.0,
+     "onset": 35.0,
+     "peak_independent": 0.293,
+     "peak_shared": 0.799,
+     "peak_unknown": 0.0,
+     "root": "H_SHARED_POWER_DEGRADATION",
+     "rpm_loss": 500.0,
+     "tick_cost_us": 173.3
+    },
+    {
+     "affected": [],
+     "ambiguity": 0.685,
+     "depth_v": 2.1,
+     "isolation": "NONE",
+     "latency_s": null,
+     "onset": 27.5,
+     "peak_independent": 0.0,
+     "peak_shared": 0.499,
+     "peak_unknown": 0.0,
+     "root": null,
+     "rpm_loss": 120.0,
+     "tick_cost_us": 208.5
+    },
+    {
+     "affected": [],
+     "ambiguity": 0.933,
+     "depth_v": 0.5,
+     "isolation": "NONE",
+     "latency_s": null,
+     "onset": 44.0,
+     "peak_independent": 0.333,
+     "peak_shared": 0.681,
+     "peak_unknown": 0.667,
+     "root": null,
+     "rpm_loss": 620.0,
+     "tick_cost_us": 203.2
+    }
+   ]
+  }
+ },
+ "result_schema_version": "1.0.0",
+ "result_type": "SCENARIO"
+}
