@@ -5,28 +5,54 @@
 registry_version: "1.0.0"
 datasets:
   uav_sead:
-    title: "UAV-SEAD: UAV Sensor and Estimator Anomaly Dataset (PX4)"
-    official_source: "https://zenodo.org/ (record id to confirm on unrestricted host)"
+    # Corrected 2026-08-03: the earlier Zenodo endpoint was wrong and was
+    # never resolvable. The dataset is published on the Hugging Face Hub.
+    title: "UAV Flight Anomaly Dataset (PX4 ULog) — CSIA id retained as uav_sead"
+    official_source: "https://huggingface.co/datasets/aykutkabaoglu/uav-flight-anomaly-dataset"
+    source:
+      provider: huggingface
+      repo_type: dataset
+      repo_id: aykutkabaoglu/uav-flight-anomaly-dataset
+      doi: "10.57967/hf/7772"
+      revision_policy: pin_resolved_commit
+      paths: ["ulg_files/", "mapping.json", "README.md", ".gitattributes"]
+      allow_patterns: ["ulg_files/**", "mapping.json", "README.md",
+                       ".gitattributes"]
     published_specification:
       autopilot: PX4
-      archive_files: ["uav-sead-logs.zip (expected; verify on host)"]
-      approx_size_gb: 15
-      aircraft_count: "multiple (spec: >5)"
-      flight_count: "hundreds"
-      approx_duration_h: ">60"
-      sensors: [imu, gps, mag, baro, battery]
-      estimator_outputs: [estimator_status, innovations (firmware-dependent)]
-      label_structure: "per-flight anomaly class + anomaly REGION"
-      label_precision: "REGION-LEVEL, not onset/offset ground truth"
-    licensing: {license: "to verify", commercial_use: UNKNOWN,
-                redistribution: UNKNOWN, citation_required: true}
+      log_format: "ULog (.ulg)"
+      annotated_flight_count: 1396
+      raw_flight_count: 3196
+      annotated_duration: "52:20:05"
+      annotated_duration_h: 52.335
+      px4_topics_populated: 81
+      px4_topics_superset: 84
+      archive_files: ["ulg_files/ (directory)", "mapping.json", "README.md"]
+      size_note: "total download size is NOT published; resolved from the Hub
+        API at preflight, which is why no approx_size_gb is asserted here"
+      label_structure: "per-flight annotation via mapping.json — structure
+        NOT assumed; parsed and verified after acquisition
+        (csia/data/mapping.py)"
+      label_precision: "UNVERIFIED until mapping.json is read; whether labels
+        are onset-accurate or region-level is a post-acquisition finding"
+    licensing: {license: "CC-BY-4.0", commercial_use: PERMITTED_WITH_ATTRIBUTION,
+                redistribution: PERMITTED_WITH_ATTRIBUTION,
+                citation_required: true,
+                attribution_requirement: "CC-BY-4.0 attribution is mandatory:
+                  credit the dataset authors and cite DOI 10.57967/hf/7772 in
+                  any artifact derived from this data"}
     intended_csia_use: "primary real-PX4 anomaly benchmark; event-level
       detection; false-alert characterization"
-    prohibited_claims: ["millisecond-accurate latency (labels are regions)"]
+    prohibited_claims: ["latency precision beyond what mapping.json's label
+        granularity supports — granularity is UNVERIFIED until parsed",
+      "any count claim (1396 annotated / 3196 raw) before the acquired
+        snapshot reproduces it"]
     acquisition: {status: BLOCKED_NETWORK_POLICY,
-      error: "proxy CONNECT 403 to zenodo.org (2026-08-03)",
+      error: "proxy CONNECT 403 to huggingface.co (2026-08-03); the Hub API
+        is unreachable from the CSIA build environment",
       unrestricted_host_command:
-        "python tools/acquire_public_datasets.py --dataset uav_sead"}
+        "python tools/acquire_public_datasets.py --dataset uav_sead
+         --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE"}
     locally_verified: {present: false, files: [], hashes: []}
   alfa:
     title: "ALFA: AIR Lab Fault Detection Dataset (fixed-wing, CMU)"

@@ -9,8 +9,11 @@ from .paths import (ENV_VAR, REPO_FALLBACK, REPO_ROOT, DataRoot, DataRootError,
 from .px4_topics import (PX4_ASSURANCE_TOPICS, TOPIC_INDEX, TopicAvailability,
                          survey_ulog)
 from .registry import (RegistryError, UnknownDatasetError,
-                       acknowledgement_required, dataset_ids, get_dataset,
-                       load_registry, select_datasets)
+                       acknowledgement_required, dataset_ids, declared_license,
+                       doi, get_dataset, load_registry, provider,
+                       select_datasets, source_block)
+from .snapshot import (aggregate_hash, build_manifest, materialize,
+                       provenance_record, write_provenance)
 from .store import (CROSS_DATASET_PARTITIONS, NormalizedStore, RawStore,
                     assign_partition, check_group_leakage, duckdb_summary,
                     flight_quality, sha256_file)
@@ -28,4 +31,7 @@ __all__ = [
     "ENV_VAR", "REPO_ROOT", "REPO_FALLBACK",
     "load_registry", "dataset_ids", "get_dataset", "select_datasets",
     "acknowledgement_required", "RegistryError", "UnknownDatasetError",
+    "provider", "source_block", "doi", "declared_license",
+    "build_manifest", "aggregate_hash", "materialize", "provenance_record",
+    "write_provenance",
 ]

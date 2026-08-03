@@ -12,7 +12,7 @@ jobs:
       # the suite, so a new undeclared import fails even locally).
       - run: pip install -e ".[dev,data,logs,mavlink]"
       - name: dependency smoke — fail at install time, not mid-collection
-        run: python -c "import duckdb, jsonschema, polars, pyarrow, pymavlink, pyulog, yaml"
+        run: python -c "import duckdb, huggingface_hub, jsonschema, polars, pyarrow, pymavlink, pyulog, yaml"
       # Strict compile + ASan/UBSan negative-input harness. The C core is the
       # deployment-path implementation, so an out-of-bounds access here is a
       # flight hazard: this gate runs BEFORE the Python suite.

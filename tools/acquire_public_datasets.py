@@ -34,10 +34,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from csia.data.paths import (DataRootError, assert_outside_repo,  # noqa: E402
                              require_external_data_root, resolve_data_root)
+from csia.data import hub  # noqa: E402
 from csia.data.registry import (RegistryError,  # noqa: E402
-                                acknowledgement_required, expected_inventory,
-                                expected_size_bytes, get_dataset, licensing,
-                                load_registry, select_datasets)
+                                acknowledgement_required, declared_license,
+                                doi, expected_inventory, expected_size_bytes,
+                                get_dataset, licensing, load_registry,
+                                provider, select_datasets, source_block)
+from csia.data.snapshot import (aggregate_hash, build_manifest,  # noqa: E402
+                                materialize, provenance_record,
+                                write_provenance)
 from csia.data.store import RawStore  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -47,8 +52,10 @@ STATUS_REPORT_NAME = "acquisition_status_v1.json"
 #: finalized on the unrestricted host from the official source pages recorded
 #: in the registry; the tool treats a TO_CONFIRM URL as "resolve manually".
 #: Keys are validated against the registry (tests/test_acquisition.py).
+#: uav_sead is deliberately absent: it is acquired through the Hugging Face
+#: backend (registry `source.provider`), and the Zenodo endpoint previously
+#: listed here was wrong and never resolvable.
 ENDPOINTS = {
-    "uav_sead": ["TO_CONFIRM:https://zenodo.org/"],
     "alfa": ["TO_CONFIRM:https://theairlab.org/alfa-dataset"],
     "insane": ["TO_CONFIRM:https://sst.aau.at/cns/"],
     "blackbird": ["TO_CONFIRM:https://github.com/mit-aera/Blackbird-Dataset"],
@@ -172,6 +179,249 @@ def safe_extract(archive_path, dest):
 
 
 # --- modes --------------------------------------------------------------------
+
+def hf_preflight(reg, dataset_id, root, ack_licenses, token=None):
+    """Hub-API preflight: resolve the commit, inventory files, size the pull.
+
+    Issues read-only Hub API calls. Writes nothing, downloads no payload.
+    """
+    entry = get_dataset(reg, dataset_id)
+    src = source_block(entry)
+    lic = licensing(entry)
+    patterns = src.get("allow_patterns") or hub.ALLOW_PATTERNS
+    root_exists = os.path.isdir(root.path)
+    free = root.free_bytes()
+
+    p = {
+        "dataset_id": dataset_id,
+        "provider": "Hugging Face",
+        "repo_id": src.get("repo_id"),
+        "repo_type": src.get("repo_type", "dataset"),
+        "doi": doi(entry),
+        "title": entry.get("title", "UNKNOWN"),
+        "official_source": entry.get("official_source", "UNKNOWN"),
+        "license": lic["license"],
+        "commercial_use": lic["commercial_use"],
+        "redistribution": lic["redistribution"],
+        "citation_required": lic["citation_required"],
+        "attribution_requirement": lic.get("attribution_requirement"),
+        "prohibited_claims": entry.get("prohibited_claims", []),
+        "license_acknowledgment_required": acknowledgement_required(entry),
+        "license_acknowledged": dataset_id in ack_licenses,
+        "revision_policy": src.get("revision_policy", "pin_resolved_commit"),
+        "included_patterns": list(patterns),
+        "data_root": root.path,
+        "data_root_source": root.source,
+        "data_root_is_repo_local": root.is_repo_local,
+        "free_bytes": free,
+        "free_gib": round(free / (1 << 30), 2),
+        "report_destination": root.report(STATUS_REPORT_NAME),
+    }
+
+    blockers = []
+    if root.is_repo_local:
+        blockers.append("data root is inside the Git repository — pass "
+                        "--data-root or set CSIA_DATA_ROOT")
+    if not root_exists:
+        blockers.append(f"data root does not exist: {root.path}")
+    if p["license_acknowledgment_required"] and not p["license_acknowledged"]:
+        blockers.append(
+            f"restricted licence requires --acknowledge-license {dataset_id}")
+    if not p["repo_id"]:
+        blockers.append("registry source block declares no repo_id")
+
+    try:
+        inv = hub.repo_inventory(p["repo_id"], p["repo_type"],
+                                 revision=src.get("revision", "main"),
+                                 token=token, patterns=patterns)
+    except hub.HubError as exc:
+        p.update(hub_error=str(exc), resolved_commit_sha=None, file_count=None,
+                 expected_bytes=None, download_authorized=False,
+                 blockers=blockers + [f"Hub API unreachable: {exc}"],
+                 cache_destination=None, raw_destination_plan=None,
+                 authentication_required=None, excluded_paths=[])
+        return p
+
+    need, need_why = hub.required_free_bytes(inv)
+    cache_dest = os.path.join(root.cache, dataset_id,
+                              inv["resolved_commit_sha"])
+    p.update(
+        resolved_commit_sha=inv["resolved_commit_sha"],
+        requested_revision=inv["requested_revision"],
+        file_count=inv["file_count"],
+        expected_bytes=inv["total_bytes"],
+        expected_gib=round(inv["total_bytes"] / (1 << 30), 2),
+        expected_size_exact=inv["size_known"],
+        sizes_unknown_for=inv["sizes_unknown_for"],
+        required_free_bytes=need,
+        required_free_gib=round(need / (1 << 30), 2),
+        required_free_rationale=need_why,
+        hub_license=inv["hub_license"],
+        authentication_required=hub.authentication_required(inv),
+        excluded_paths=inv["excluded_paths"][:50],
+        excluded_count=inv["excluded_count"],
+        cache_destination=cache_dest,
+        raw_destination_plan=os.path.join(
+            root.raw, dataset_id, "<aggregate_manifest_sha256>"),
+        manifest_destination=os.path.join(root.manifests, dataset_id),
+    )
+    if not inv["size_known"]:
+        p["size_warning"] = (
+            f"Hub did not report an exact total ({inv['sizes_unknown_for']} "
+            f"file(s) without size); a conservative margin is enforced")
+    if p["authentication_required"]:
+        blockers.append("repository is private or gated — supply a Hub token "
+                        "via HF_TOKEN / --hf-token")
+    if inv["file_count"] == 0:
+        blockers.append("no files matched the allow patterns")
+    if root_exists and free < need:
+        blockers.append(
+            f"insufficient free space: need {need / (1 << 30):.1f} GiB "
+            f"({need_why}), have {free / (1 << 30):.1f} GiB")
+    if p["license"] and p["hub_license"] and \
+            str(p["license"]).lower().replace("_", "-") != \
+            str(p["hub_license"]).lower().replace("_", "-"):
+        p["license_mismatch"] = (f"registry says {p['license']}, Hub card "
+                                 f"says {p['hub_license']}")
+    p["download_authorized"] = not blockers
+    p["blockers"] = blockers
+    return p
+
+
+def print_hf_preflight(p):
+    def yes(b):
+        return "YES" if b else "NO" if b is not None else "UNKNOWN"
+    print(f"=== preflight: {p['dataset_id']} ===")
+    print(f"  provider               {p['provider']}")
+    print(f"  repo id                {p['repo_id']}  ({p['repo_type']})")
+    print(f"  resolved commit        {p.get('resolved_commit_sha')}")
+    print(f"  revision policy        {p['revision_policy']}")
+    print(f"  license                {p['license']}   "
+          f"(Hub card: {p.get('hub_license')})")
+    print(f"  DOI                    {p['doi']}")
+    print(f"  attribution            {p.get('attribution_requirement')}")
+    fc = p.get("file_count")
+    print(f"  file count             {fc if fc is not None else 'UNKNOWN'}")
+    eb = p.get("expected_bytes")
+    size = f"{eb}  ({p.get('expected_gib')} GiB)" if eb else "UNKNOWN"
+    exact = "" if p.get("expected_size_exact", True) else "  [NOT EXACT]"
+    print(f"  expected byte count    {size}{exact}")
+    if p.get("size_warning"):
+        print(f"    ! {p['size_warning']}")
+    print(f"  required free space    {p.get('required_free_gib')} GiB "
+          f"({p.get('required_free_rationale')})")
+    print(f"  available SSD space    {p['free_gib']} GiB "
+          f"({p['free_bytes']} bytes)")
+    print(f"  authentication req'd   {yes(p.get('authentication_required'))}")
+    print(f"  included paths         {p['included_patterns']}")
+    print(f"  excluded paths         {p.get('excluded_count', 0)} file(s) "
+          f"outside scope: {p.get('excluded_paths') or '[]'}")
+    print(f"  cache destination      {p.get('cache_destination')}")
+    print(f"  raw destination plan   {p.get('raw_destination_plan')}")
+    print(f"  manifest destination   {p.get('manifest_destination')}")
+    print(f"  report destination     {p['report_destination']}")
+    print(f"  data root              {p['data_root']}  "
+          f"[{p['data_root_source']}]")
+    print(f"  DOWNLOAD AUTHORIZED    {yes(p['download_authorized'])}")
+    if p.get("license_mismatch"):
+        print(f"    ! license mismatch: {p['license_mismatch']}")
+    for b in p.get("blockers", []):
+        print(f"    blocker: {b}")
+    for c in p.get("prohibited_claims", []):
+        print(f"    prohibited claim: {c}")
+
+
+def hf_acquire(reg, dataset_id, root, ack_licenses, dry_run=False,
+               token=None):
+    """Pinned snapshot -> verify -> hash -> immutable content-addressed raw."""
+    entry = get_dataset(reg, dataset_id)
+    src = source_block(entry)
+    patterns = src.get("allow_patterns") or hub.ALLOW_PATTERNS
+    rec = {"dataset": dataset_id, "provider": "huggingface",
+           "repo_id": src.get("repo_id"), "doi": doi(entry),
+           "license": declared_license(entry), "attempts": [], "files": []}
+
+    if acknowledgement_required(entry) and dataset_id not in ack_licenses:
+        rec["status"] = "LICENSE_ACK_REQUIRED"
+        return rec
+
+    try:
+        inv = hub.repo_inventory(src["repo_id"], src.get("repo_type",
+                                                         "dataset"),
+                                 revision=src.get("revision", "main"),
+                                 token=token, patterns=patterns)
+    except hub.HubError as exc:
+        rec.update(status="HUB_API_FAILED", error=str(exc))
+        rec["attempts"].append({"ts_utc": _now(), "status": "HUB_API_FAILED",
+                                "error": str(exc)})
+        return rec
+
+    sha = inv["resolved_commit_sha"]
+    staging = os.path.join(root.cache, dataset_id, sha)
+    rec.update(resolved_commit_sha=sha,
+               requested_revision=inv["requested_revision"],
+               expected_file_count=inv["file_count"],
+               expected_bytes=inv["total_bytes"],
+               allow_patterns=list(patterns), staging=staging)
+
+    if dry_run:
+        rec["status"] = "DRY_RUN"
+        rec["would_write_raw_to"] = os.path.join(
+            root.raw, dataset_id, "<aggregate_manifest_sha256>")
+        rec["note"] = ("dry run: commit resolved and inventory read, but no "
+                       "file was downloaded and no payload written")
+        return rec
+
+    need, why = hub.required_free_bytes(inv)
+    if root.free_bytes() < need:
+        rec.update(status="INSUFFICIENT_SPACE",
+                   error=f"need {need} bytes ({why}), have "
+                         f"{root.free_bytes()}")
+        return rec
+
+    t0 = _now()
+    try:
+        hub.download_snapshot(src["repo_id"], src.get("repo_type", "dataset"),
+                              sha, staging, patterns=patterns, token=token)
+    except hub.HubError as exc:
+        rec.update(status="DOWNLOAD_FAILED", error=str(exc))
+        rec["attempts"].append({"ts_utc": t0, "status": "DOWNLOAD_FAILED",
+                                "error": str(exc),
+                                "next_action": "rerun the same command; the "
+                                "resolved commit is pinned and completed "
+                                "files are reused"})
+        return rec
+
+    # Completeness is verified against the PINNED inventory, never inferred
+    # from the client cache. No snapshot is promoted until this passes.
+    check = hub.verify_against_inventory(staging, inv)
+    rec["verification"] = check
+    if not check["complete"]:
+        rec.update(status="INCOMPLETE",
+                   error=f"{len(check['missing'])} missing, "
+                         f"{len(check['size_mismatch'])} size mismatch, "
+                         f"{len(check['incomplete_markers'])} partial",
+                   next_action="rerun to resume; raw snapshot NOT created")
+        return rec
+
+    manifest = build_manifest(staging)
+    digest = aggregate_hash(manifest)
+    placed = materialize(staging, assert_outside_repo(root.raw), dataset_id,
+                         manifest, digest)
+    prov = provenance_record(dataset_id, inv, manifest, digest,
+                             placed["path"], t0, declared_license(entry),
+                             doi(entry))
+    prov_path = write_provenance(root.manifests, dataset_id, prov)
+
+    rec.update(status="COMPLETE", aggregate_sha256=digest,
+               raw_path=placed["path"], ingest_status=placed["status"],
+               file_count=len(manifest),
+               total_bytes=sum(e["size"] for e in manifest),
+               provenance_manifest=prov_path, acquired_utc=t0)
+    rec["files"] = manifest[:20]
+    rec["files_truncated"] = max(0, len(manifest) - 20)
+    return rec
+
 
 def preflight(reg, dataset_id, root, ack_licenses):
     """Everything a human needs to authorize a download. No network, no write."""
@@ -363,7 +613,75 @@ def build_parser():
                     metavar="ID", help="acknowledge a restricted licence")
     ap.add_argument("--json", action="store_true",
                     help="emit machine-readable output on stdout")
+    ap.add_argument("--hf-token", default=None, metavar="TOKEN",
+                    help="Hugging Face token (else $HF_TOKEN)")
+    ap.add_argument("--verify-mapping", action="store_true",
+                    help="analyze mapping.json in the acquired raw snapshot")
+    ap.add_argument("--snapshot", default=None, metavar="SHA",
+                    help="aggregate manifest hash to verify "
+                         "(default: the only one present)")
     return ap
+
+
+def run_verify_mapping(names, root, args) -> int:
+    """Analyze mapping.json inside an acquired immutable snapshot."""
+    from csia.data.mapping import analyze_mapping
+    rc = 0
+    results = {}
+    for dataset_id in names:
+        base = root.raw_dir(dataset_id)
+        if not os.path.isdir(base):
+            print(f"error: no acquired snapshot for {dataset_id} at {base}",
+                  file=sys.stderr)
+            rc = 2
+            continue
+        snaps = sorted(d for d in os.listdir(base) if len(d) == 64)
+        if args.snapshot:
+            snaps = [s for s in snaps if s == args.snapshot]
+        if not snaps:
+            print(f"error: no snapshot found under {base}", file=sys.stderr)
+            rc = 2
+            continue
+        if len(snaps) > 1:
+            print(f"error: {len(snaps)} snapshots under {base}; pass "
+                  f"--snapshot <aggregate_sha256>", file=sys.stderr)
+            rc = 2
+            continue
+        snap = os.path.join(base, snaps[0])
+        mapping = os.path.join(snap, "mapping.json")
+        if not os.path.isfile(mapping):
+            print(f"error: {mapping} not present in the snapshot",
+                  file=sys.stderr)
+            rc = 2
+            continue
+        res = analyze_mapping(mapping, os.path.join(snap, "ulg_files"))
+        res["snapshot"] = snap
+        results[dataset_id] = res
+        out = root.report(f"mapping_analysis_{dataset_id}.json")
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        with open(out, "w") as fh:
+            json.dump(res, fh, indent=1, sort_keys=True)
+        if not args.json:
+            print(f"=== mapping analysis: {dataset_id} ===")
+            for k in ("detected_structure", "structure_confidently_parsed",
+                      "total_mapped_entries", "annotated_entries",
+                      "normal_flights", "anomaly_category_count",
+                      "duplicate_mapping_count", "ulg_files_on_disk",
+                      "missing_referenced_count",
+                      "present_but_unreferenced_count", "unmapped_raw_files",
+                      "expected_annotated", "annotated_count_matches_claim",
+                      "expected_raw", "raw_count_matches_claim"):
+                print(f"  {k:34s} {res.get(k)}")
+            print(f"  anomaly_categories                 "
+                  f"{res.get('anomaly_categories')}")
+            if res.get("claim_discrepancy"):
+                print(f"  ! {res['claim_discrepancy']}")
+            print(f"  -> {out}")
+        if not res.get("annotated_count_matches_claim"):
+            rc = rc or 1
+    if args.json:
+        print(json.dumps(results, indent=1, sort_keys=True))
+    return rc
 
 
 def main(argv=None) -> int:
@@ -378,14 +696,27 @@ def main(argv=None) -> int:
     root = resolve_data_root(args.data_root)
     ack = set(args.acknowledge_license)
 
+    token = args.hf_token or os.environ.get("HF_TOKEN") or None
+
+    # --- verify-mapping: post-acquisition analysis of an acquired snapshot ---
+    if args.verify_mapping:
+        return run_verify_mapping(names, root, args)
+
     # --- preflight: read-only; writes nothing, anywhere ----------------------
     if args.preflight:
-        reports = [preflight(reg, n, root, ack) for n in names]
+        reports = []
+        for n in names:
+            entry = get_dataset(reg, n)
+            reports.append(
+                hf_preflight(reg, n, root, ack, token=token)
+                if provider(entry) == "huggingface"
+                else preflight(reg, n, root, ack))
         if args.json:
             print(json.dumps(reports, indent=1, sort_keys=True))
         else:
             for p in reports:
-                print_preflight(p)
+                (print_hf_preflight if p.get("provider") == "Hugging Face"
+                 else print_preflight)(p)
         return 0 if all(p["download_authorized"] for p in reports) else 1
 
     mode = ("status-only" if args.status_only
@@ -416,9 +747,14 @@ def main(argv=None) -> int:
         "datasets": {},
     }
     for n in names:
-        out["datasets"][n] = (
-            status_of(reg, n, root) if mode == "status-only"
-            else acquire(reg, n, root, ack, dry_run=args.dry_run))
+        if mode == "status-only":
+            out["datasets"][n] = status_of(reg, n, root)
+        elif provider(get_dataset(reg, n)) == "huggingface":
+            out["datasets"][n] = hf_acquire(reg, n, root, ack,
+                                            dry_run=args.dry_run, token=token)
+        else:
+            out["datasets"][n] = acquire(reg, n, root, ack,
+                                         dry_run=args.dry_run)
 
     # Runtime reports live under the data root, never in the repository. The
     # committed datasets/reports/acquisition_status_v1.json stays a static

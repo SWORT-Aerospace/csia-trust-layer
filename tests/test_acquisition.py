@@ -66,8 +66,11 @@ def test_registry_declares_exactly_seven_datasets():
 def test_uav_sead_is_recognized():
     reg = load_registry(REGISTRY)
     entry = get_dataset(reg, "uav_sead")
-    assert entry["title"].startswith("UAV-SEAD")
+    assert "UAV" in entry["title"]
     assert select_datasets(reg, ["uav_sead"]) == ["uav_sead"]
+    # acquisition specifics live in tests/test_hf_acquisition.py
+    from csia.data.registry import provider
+    assert provider(entry) == "huggingface"
 
 
 def test_unknown_dataset_is_rejected_and_lists_valid_ids():
@@ -153,7 +156,7 @@ def test_repo_local_data_root_is_refused_for_acquisition():
 
 
 def test_acquire_run_refuses_a_repository_data_root(tmp_path):
-    r = run_tool("--dataset", "uav_sead", "--data-root",
+    r = run_tool("--dataset", "alfa", "--data-root",
                  os.path.join(REPO_ROOT, "datasets"))
     assert r.returncode == 2, r.stdout
     assert "inside the Git repository" in r.stderr
@@ -202,11 +205,11 @@ def test_status_only_works_with_the_repository_fallback_root():
 def test_dry_run_downloads_nothing_and_writes_no_payload(tmp_path):
     root = tmp_path / "lake"
     root.mkdir()
-    r = run_tool("--dataset", "uav_sead", "--dry-run", "--data-root",
+    r = run_tool("--dataset", "alfa", "--dry-run", "--data-root",
                  str(root))
     assert r.returncode == 0, r.stderr
     report = json.load(open(root / "reports" / "acquisition_status_v1.json"))
-    entry = report["datasets"]["uav_sead"]
+    entry = report["datasets"]["alfa"]
     assert entry["status"] == "DRY_RUN"
     assert entry["attempts"] == [] and entry["files"] == []
     assert report["mode"] == "dry-run"
@@ -228,14 +231,14 @@ REQUIRED_PREFLIGHT_FIELDS = [
 def test_preflight_reports_every_required_field(tmp_path):
     root = tmp_path / "lake"
     root.mkdir()
-    r = run_tool("--dataset", "uav_sead", "--preflight", "--json",
+    r = run_tool("--dataset", "alfa", "--preflight", "--json",
                  "--data-root", str(root))
     p = json.loads(r.stdout)[0]
     for field in REQUIRED_PREFLIGHT_FIELDS:
         assert field in p, field
-    assert p["dataset_id"] == "uav_sead"
-    assert p["title"].startswith("UAV-SEAD")
-    assert p["raw_destination"] == str(root / "raw" / "uav_sead")
+    assert p["dataset_id"] == "alfa"
+    assert p["title"].startswith("ALFA")
+    assert p["raw_destination"] == str(root / "raw" / "alfa")
     assert p["report_destination"] == str(
         root / "reports" / "acquisition_status_v1.json")
     assert p["free_bytes"] > 0
@@ -247,7 +250,7 @@ def test_preflight_reports_every_required_field(tmp_path):
 def test_preflight_human_output_names_the_required_fields(tmp_path):
     root = tmp_path / "lake"
     root.mkdir()
-    r = run_tool("--dataset", "uav_sead", "--preflight", "--data-root",
+    r = run_tool("--dataset", "alfa", "--preflight", "--data-root",
                  str(root))
     for label in ("data root", "free disk space", "license",
                   "commercial use", "raw destination", "manifest destination",
@@ -260,7 +263,7 @@ def test_preflight_human_output_names_the_required_fields(tmp_path):
 def test_preflight_writes_nothing_at_all(tmp_path):
     root = tmp_path / "lake"
     root.mkdir()
-    run_tool("--dataset", "uav_sead", "--preflight", "--data-root", str(root))
+    run_tool("--dataset", "alfa", "--preflight", "--data-root", str(root))
     assert list(root.iterdir()) == [], "preflight created files"
 
 
@@ -424,12 +427,24 @@ def test_extraction_into_the_repository_is_refused(tmp_path):
 
 # --- endpoint table must not drift from the registry --------------------------
 
-def test_every_endpoint_key_is_a_registered_dataset():
+def test_every_dataset_has_exactly_one_acquisition_backend():
+    """No registry id may be unreachable, and none may be claimed twice: a
+    dataset is served either by a provider backend or by a URL endpoint."""
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
     from acquire_public_datasets import ENDPOINTS
-    known = set(dataset_ids(load_registry(REGISTRY)))
+    from csia.data.registry import provider
+
+    reg = load_registry(REGISTRY)
+    known = set(dataset_ids(reg))
     assert set(ENDPOINTS) <= known, set(ENDPOINTS) - known
-    assert known <= set(ENDPOINTS), known - set(ENDPOINTS)
+    for name in known:
+        prov = provider(get_dataset(reg, name))
+        has_endpoint = name in ENDPOINTS
+        if prov == "url":
+            assert has_endpoint, f"{name} has no acquisition backend"
+        else:
+            assert not has_endpoint, \
+                f"{name} is served by {prov} but still has a URL endpoint"
 
 
 def test_committed_report_fixture_still_matches_the_registry():

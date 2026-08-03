@@ -90,6 +90,7 @@ def licensing(entry: dict) -> dict:
         "commercial_use": lic.get("commercial_use", "UNKNOWN"),
         "redistribution": lic.get("redistribution", "UNKNOWN"),
         "citation_required": lic.get("citation_required"),
+        "attribution_requirement": lic.get("attribution_requirement"),
     }
 
 
@@ -111,6 +112,24 @@ def expected_size_bytes(entry: dict) -> int | None:
     if isinstance(gb, (int, float)) and gb > 0:
         return int(gb * (1 << 30))
     return None
+
+
+def source_block(entry: dict) -> dict:
+    src = entry.get("source")
+    return src if isinstance(src, dict) else {}
+
+
+def provider(entry: dict) -> str:
+    """Acquisition backend for this dataset. 'url' is the legacy default."""
+    return str(source_block(entry).get("provider") or "url").lower()
+
+
+def doi(entry: dict):
+    return source_block(entry).get("doi")
+
+
+def declared_license(entry: dict):
+    return licensing(entry).get("license")
 
 
 def expected_inventory(entry: dict) -> list:
