@@ -1,0 +1,276 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://swort.local/csia/unified_flight_schema_v1.json",
+ "title": "CSIA unified flight sample schema v1",
+ "description": "One normalized sample row. Missing measurements are null with missingness=true \u2014 NEVER zero. Identity and labels are never inferred; unknown stays UNKNOWN.",
+ "type": "object",
+ "required": [
+  "dataset_id",
+  "aircraft_id",
+  "flight_id",
+  "topic",
+  "sensor_instance",
+  "timestamp_raw",
+  "timestamp_normalized",
+  "field",
+  "value",
+  "validity",
+  "missingness"
+ ],
+ "properties": {
+  "dataset_id": {
+   "type": "string"
+  },
+  "aircraft_id": {
+   "type": "string"
+  },
+  "flight_id": {
+   "type": "string"
+  },
+  "campaign_id": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "vehicle_uuid": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "autopilot": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "firmware": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "airframe": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "component_id": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "sensor_instance": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "device_id": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "timestamp_raw": {
+   "type": "number"
+  },
+  "source_time_domain": {
+   "enum": [
+    "boot_us",
+    "utc_us",
+    "gps_us",
+    "dataset_native",
+    "UNKNOWN"
+   ]
+  },
+  "timestamp_normalized": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "sync_method": {
+   "enum": [
+    "ULOG_MONOTONIC",
+    "GPS_PPS",
+    "OFFSET_FIT",
+    "NONE",
+    "UNKNOWN"
+   ]
+  },
+  "sync_uncertainty_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "interpolation_status": {
+   "enum": [
+    "RAW",
+    "INTERPOLATED",
+    "HELD",
+    "UNKNOWN"
+   ]
+  },
+  "sample_age_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "update_period_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "timing_validity": {
+   "enum": [
+    "VALID",
+    "SUSPECT",
+    "INVALID",
+    "UNKNOWN"
+   ]
+  },
+  "topic": {
+   "type": "string"
+  },
+  "field": {
+   "type": "string"
+  },
+  "value": {
+   "type": [
+    "number",
+    "boolean",
+    "null"
+   ]
+  },
+  "source_unit": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "normalized_unit": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "validity": {
+   "type": "boolean"
+  },
+  "missingness": {
+   "type": "boolean"
+  },
+  "saturation": {
+   "type": [
+    "boolean",
+    "null"
+   ]
+  },
+  "clipping": {
+   "type": [
+    "boolean",
+    "null"
+   ]
+  },
+  "quality": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "source_provenance": {
+   "type": "object"
+  },
+  "label": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "properties": {
+    "state": {
+     "enum": [
+      "NOMINAL",
+      "ANOMALY",
+      "FAULT",
+      "UNKNOWN"
+     ]
+    },
+    "start": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "end": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "precision": {
+     "enum": [
+      "ONSET_ACCURATE",
+      "REGION",
+      "FLIGHT_LEVEL",
+      "NONE"
+     ]
+    },
+    "root_cause": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "affected_sources": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "confidence": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "annotation_source": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   }
+  },
+  "evidence_eligibility": {
+   "type": "object",
+   "properties": {
+    "detection": {
+     "type": "boolean"
+    },
+    "false_alert": {
+     "type": "boolean"
+    },
+    "latency": {
+     "type": "boolean"
+    },
+    "source_isolation": {
+     "type": "boolean"
+    },
+    "root_cause_isolation": {
+     "type": "boolean"
+    },
+    "estimator_evaluation": {
+     "type": "boolean"
+    },
+    "external_replication": {
+     "type": "boolean"
+    }
+   }
+  }
+ }
+}

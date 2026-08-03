@@ -162,14 +162,27 @@ def main() -> int:
                                 "ONLY; final numbers from evaluation seeds"},
            "cells": {}}
 
+    def wilson(k, n, z=1.96):
+        ph = k / n
+        d = 1 + z * z / n
+        c = (ph + z * z / (2 * n)) / d
+        h = z * math.sqrt(ph * (1 - ph) / n + z * z / (4 * n * n)) / d
+        return (round(max(0.0, c - h), 4), round(min(1.0, c + h), 4))
+
     def cell(name, fn, seed, n):
         rng = np.random.default_rng(seed)
         rate = fn(rng, n)
+        k = int(round(rate * n))
         se = math.sqrt(max(rate * (1 - rate), 1e-9) / n)
+        lo, hi = wilson(k, n)
         out["cells"][name] = {
-            "crossing_rate": round(float(rate), 4), "n_paths": n,
-            "se": round(se, 4), "bound": ALPHA,
-            "violates": bool(rate > ALPHA + 3 * se)}
+            "crossing_count": k, "n_paths": n,
+            "crossing_rate": round(float(rate), 4),
+            "ci95_wilson": [lo, hi], "mc_se": round(se, 4),
+            "seed_family": seed, "bound": ALPHA,
+            # a cell violates only when its LOWER confidence limit clears the
+            # bound — point estimates are not presented as exact
+            "violates": bool(lo > ALPHA)}
         print(f"  {name:44s} {rate:7.4f}  "
               f"{'VIOLATES' if out['cells'][name]['violates'] else 'ok':8s}")
 

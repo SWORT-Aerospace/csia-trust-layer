@@ -1,0 +1,99 @@
+# CSIA Trust Contract v0.1 — reference instance.
+# Component: the SOW001 simulation GPS (the only component whose behaviour is
+# fully known to us). Real-vendor contracts are collected via the stakeholder
+# program; this instance exists to validate the schema and conformance suite.
+contract_version: "0.1"
+identity:
+  component_type: sensor
+  manufacturer: "SWORT (simulation model)"
+  model: "sim-gps-v1"
+  hardware_revision: null
+  firmware: "csia-sim-1.0"
+  device_id: "sim:gps:0"
+  configuration_hash: "5eed5eed5eed5eed"
+  software_provenance: "csia/sensors/gps.py @ repo commit"
+functions:
+  - name: position
+    output: "WGS84-equivalent local position"
+    units: "m"
+    uncertainty: {semantics: 1_sigma, value: 1.2}
+    update_rate_hz: 10.0
+    min_update_rate_hz: 4.0
+    max_latency_s: 0.25
+    time_source: fc_clock
+    validity_flags: [fix_valid]
+    quality_indicators: [eph, satellites_used]
+    missing_data_semantics: flagged_invalid
+    consumers: [estimator, csia_trust_layer]
+  - name: velocity_doppler
+    output: "3-axis Doppler velocity"
+    units: "m/s"
+    uncertainty: {semantics: 1_sigma, value: 0.15}
+    update_rate_hz: 10.0
+    min_update_rate_hz: 4.0
+    max_latency_s: 0.25
+    time_source: fc_clock
+    validity_flags: [fix_valid, vz_valid]
+    quality_indicators: [satellites_used]
+    missing_data_semantics: flagged_invalid
+    consumers: [estimator, csia_trust_layer]
+  - name: timing
+    output: "time reference"
+    units: "s"
+    uncertainty: {semantics: UNKNOWN, value: "not characterized"}
+    update_rate_hz: 1.0
+    min_update_rate_hz: 1.0
+    max_latency_s: 1.0
+    time_source: gps
+    missing_data_semantics: omitted
+    consumers: []
+dependencies:
+  power_rails: [SENSOR_5V_RAIL]      # declared; NOT observable in sim (3E audit)
+  timing_source: gps
+  communication_bus: uart0
+  antenna: gps_patch_1
+  environmental: [sky_view]
+  estimator: []
+  shared_software: []
+  common_mounting: mast_1
+validity_domain:
+  flight_phases: [hover, cruise, descent]
+  dynamics: "up to 2 g horizontal"
+  temperature_c: [-10, 55]
+  vibration: "below prop-wash resonance"
+  speed_mps: [0, 60]
+  acceleration_mps2: [0, 20]
+  operating_modes: [3d_fix]
+degradation_modes:
+  - name: multipath_urban
+    affected_functions: [position]
+    observable_signatures: [eph_rise, position_velocity_inconsistency]
+    unobservable_signatures: [slow_coherent_drift_below_noise]
+    permitted_degraded_uses: [velocity_doppler, timing]
+    prohibited_uses: [position_hold_navigation]
+    recovery_requirements: "eph below 2.0 for 5 s"
+  - name: low_satellite_count
+    affected_functions: [position, velocity_doppler]
+    observable_signatures: [satellites_used_drop, eph_rise]
+    permitted_degraded_uses: [timing]
+    prohibited_uses: [waypoint_navigation, rtl]
+fault_modes:
+  - failure_class: spoofing
+    expected_observability: PARTIALLY_OBSERVABLE
+    expected_downstream_effects: [position_walks_off, doppler_stays_clean]
+    structural_alternatives: [unexpected_maneuver]
+    disambiguating_evidence: [imu_coherence, phys_gps_internal_consistency]
+  - failure_class: dropout
+    expected_observability: OBSERVABLE
+    expected_downstream_effects: [no_fix]
+    structural_alternatives: []
+    disambiguating_evidence: [fix_valid_flag]
+restart_semantics:
+  detectable: true
+  signal: "fix_valid falls, satellites re-acquire"
+  state_after_restart: cold
+authorization:
+  monitor_only: true
+  advisory: true
+  shadow_action: true
+  active_action_prohibited: true
