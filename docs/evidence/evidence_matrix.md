@@ -28,7 +28,7 @@ evidence, weaker wording is recommended.
 | C8 | "est. 7–15 µs on the STM32H743 … ≈0.04% FC CPU at 25 Hz" | Extrapolation from desktop, no target run | none | — | Low | **Concept Only** — see W3 |
 | C9 | Causal by construction (bit-identical with/without future data) | Truncation regression atol 1e-10 | `test_comparator.py::test_causality_no_lookahead` | comparator | High | **Validated** |
 | C10 | Online layer == batch pipeline (<0.01 divergence) | Regression test | `test_runtime.py::test_online_matches_batch` | online | High | **Validated** |
-| C11 | Real-flight: 26 PX4 logs, 0.66 h, **2 candidate false alarms → 3.0 alert episodes/hr (95% CI 0.4–10.9)**, 24/26 alarm-free | analyze-logs campaign report, recounted under `csia/metrics` | `data/real_logs_report.json` | metrics, ulog_source, cli | Medium | **Supported, restated** — supersedes "3 → 4.5/hr", which counted a failsafe *recovery* edge as an alarm (audit F-01, 1.50× over-count). Train/test contamination (C2) still applies; interval is wide at 2 events. See W4 |
+| C11 | Real-flight replay: 26 PX4 logs, **UNANNOTATED**, **0.518 MONITORED h** (raw 0.663 h), 2 alert episodes → **3.86/hr (95% CI 0.47–13.94)**, no episode in 24/26 logs. **Verified-healthy exposure 0.000 h; held-out 0.000 h** | analyze-logs campaign report, recounted under `csia/metrics` | `data/real_logs_report.json` | metrics, ulog_source, cli | Medium | **Supported, restated** — supersedes "3 → 4.5/hr", which counted a failsafe *recovery* edge as an alarm (audit F-01, 1.50× over-count). Train/test contamination (C2) still applies; interval is wide at 2 events. See W4 |
 | C12 | ArduPilot SITL: full mission, 6 sensors, min trust 0.78, zero false alarms, landed | SITL run (pre-hardening) | `tools/sitl_validate.py` | plugins | Medium | **Partially Supported** — predates v0.8.0 armed/vz/reboot changes; **must be re-run**. See W5 |
 | C13 | SITL fault injection: GPS glitch + fix-kill detected live from raw stream | SITL --inject run (pre-hardening) | `tools/sitl_validate.py` | plugins | Medium | **Partially Supported** — same re-run caveat |
 | C14 | Raw-GPS monitoring catches a 55 m glitch invisible in fused output | SITL injection observation | `tools/sitl_validate.py` | plugins | Medium | **Supported** (SITL, single scenario) |
@@ -55,15 +55,25 @@ evidence, weaker wording is recommended.
   consistent, and drop the precise "0.04%" until measured).
 - **W4 — "4.5/flight-hour."** **RESOLVED 2026-08-03.** The figure was not
   merely under-hedged, it was miscounted: it included a failsafe *recovery*
-  edge (audit F-01). Restated as *"2 candidate false alarms → 3.0 alert
-  episodes/hr on 0.66 h (Poisson 95% CI 0.4–10.9/hr); untuned upper bound on
-  a train/test-contaminated set — held-out campaign per
-  docs/VALIDATION_PROTOCOL.md pending."* The definition now lives in
-  `docs/validation/METRIC_DEFINITIONS.md` and is shared by `analyze-logs`,
-  `bench` and `mc`. README table updated to match.
+  edge (audit F-01). **Restated again 2026-08-03 (slice 3A)** after two
+  further defects: the denominator used raw log duration including the
+  `arm_time` window in which no alert can fire (21.8% of the corpus), and the
+  data was described as healthy when no log carries any annotation. Final
+  form: *"No CSIA alert episode occurred in 24 of 26 unannotated public PX4
+  logs. 2 alert episodes across 0.518 MONITORED flight-hours → 3.86/hr
+  (Poisson 95% CI 0.47–13.94). Verified-healthy exposure: 0.000 h. Held-out
+  exposure: 0.000 h."* Definitions in `docs/validation/METRIC_DEFINITIONS.md`;
+  exposure accounting in `csia/metrics/exposure.py`; provenance in
+  `docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md`.
 - **W5 — SITL rows.** Mark in the README table as *"measured pre-v0.8.0;
   re-run required"* until `tools/sitl_validate.py` is re-executed on current
   code. (README "Path to flight" already flags this; the table should too.)
+- **W7 — "healthy flight hours" (any document).** **PROHIBITED WORDING.** No
+  CSIA corpus log is annotated, so no hour is verified healthy. Required form:
+  *"No CSIA alert episode occurred during X hours of unannotated real-flight-log
+  replay."* Never: *"CSIA demonstrated zero false alerts during X healthy
+  flight-hours."* Enforced by `tests/test_datasets.py::
+  TestCommittedCorpus::test_no_log_is_classified_verified_healthy`.
 - **W6 — Seeker "100% detection."** Already labeled synthetic — keep the
   "SYNTHETIC / not seeker hardware" qualifier adjacent to *every* instance,
   including any slide or one-pager, not just the table caption.

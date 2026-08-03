@@ -5,6 +5,38 @@ this project versions the **software and its evidence**, not just code.
 Validated scientific results (trust model, diagnosis, campaigns) are
 preserved across releases — campaign artifacts regenerate byte-identical.
 
+## [Unreleased] — 2026-08 — Evidence foundation (slice 3A)
+
+### Added
+- `csia/datasets/` — log manifests, SHA-256 integrity, stable ids, dataset
+  aggregate hash, exact + conservative near-duplicate detection, partition
+  policy with automated leakage checks.
+- `csia/experiments/manifest.py` — canonical provenance (commit, dirty tree,
+  dataset hash, config hashes, seed, compiler, evidence environment).
+- `csia/metrics/exposure.py` — exposure accounting by health class, partition,
+  autopilot, firmware, airframe and sensor config; exact Poisson intervals;
+  zero-event bounds; exposure planner.
+- Versioned schemas `datasets/schemas/*.json`; CI gates on schema validity,
+  split leakage and stale committed artifacts.
+- `docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md`,
+  `docs/validation/DATASET_SPLIT_POLICY.md`,
+  `docs/validation/DATASET_DEDUPLICATION_REPORT.md`,
+  `docs/validation/EXPOSURE_PRECISION_PLAN.md`.
+
+### Corrected (claims, not behavior)
+- **"Healthy flight hours" withdrawn.** No corpus log carries any annotation.
+  Verified-healthy exposure is **0.000 h**; all 26 logs are UNANNOTATED.
+  Absence of a CSIA alert is the hypothesis under test, not evidence for it.
+- **Rate denominator corrected.** 21.8% of recorded duration lies inside
+  `arm_time`, where no alert can be raised. Rate restated from 3.02/h on
+  0.663 raw hours to **3.86/h on 0.518 MONITORED hours (95% CI 0.47–13.94)**.
+- **Held-out exposure recorded as 0.000 h** — all 26 logs shaped `field_mode`
+  and the offline failsafe posture, so none is eligible for blind evaluation.
+
+### Unchanged
+- No trust-algorithm, threshold, failsafe or recommendation change.
+  `campaigns/bench.json` regenerates bit-identical.
+
 ## [Unreleased] — 2026-07 — Dashboard: tactical console + high-speed envelope
 
 ### Added (dashboard / demo only — no algorithm, engine, or sensor change)

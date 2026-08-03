@@ -13,13 +13,20 @@ SWORT LLC · SAM-registered · operating avionics business with revenue.
    (docs/validation/METRIC_DEFINITIONS.md §3). Slow single-IMU bias drift
    crosses the analysis threshold at 13.0 s but raises **no operator alert** —
    redundancy holds `max(imu0,imu1)` above the attitude threshold.
-2. **Real-data validation** (26 public PX4 quadrotor flights, 0.66 flight
-   hours, `csia analyze-logs`): **2 candidate false alarms → 3.0 alert
-   episodes/flight-hour (95% CI 0.4–10.9)** in offline-validation posture;
-   24/26 flights alarm-free. (Supersedes "3 → 4.5/hr", which counted a
-   failsafe recovery edge as an alarm; see docs/validation/METRIC_DEFINITIONS.md.) Public logs carry
-   only 5 of 8 monitored channels at usable rates — the SOW001 vehicle
-   provides all 8 by design.
+2. **Real-data replay** (26 public PX4 logs, **unannotated**,
+   `csia analyze-logs`): **no CSIA alert episode occurred in 24 of 26 logs**;
+   2 alert episodes across **0.518 monitored flight-hours** → **3.86
+   episodes/flight-hour (95% CI 0.47–13.94)**. Three cautions must travel with
+   this number: (a) exposure is monitored time, not raw log duration, which
+   overstates it by 21.8%; (b) **zero hours are verified healthy** — the logs
+   are unannotated, and absence of an alert is the hypothesis under test, not
+   evidence for it; (c) **zero hours are held out** — all 26 shaped `field_mode`
+   and the offline posture. The interval spans ~30x. This is a preliminary
+   characterisation, **not a reliability claim**. Public logs carry only 2–5 of
+   8 monitored channels; the SOW001 vehicle provides all 8 by design.
+   See docs/validation/EXPOSURE_PRECISION_PLAN.md for the exposure required to
+   support a commercial claim (~30 h held-out, zero-event, to bound < 0.1/h).
+
 3. **SITL-validated live path** (`tools/sitl_validate.py`): full autonomous
    ArduCopter mission with the runtime consuming live MAVLink; 6 sensors
    monitored, min trust 0.78, zero false alarms, PASS.

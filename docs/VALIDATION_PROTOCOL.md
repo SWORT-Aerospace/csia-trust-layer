@@ -40,9 +40,8 @@ WHICH logs touch WHICH decisions.
 
 ## Sample-size floor
 
-At the current claimed order (~3.0 alert episodes/hr on 0.66 h, Poisson 95%
-CI 0.4–10.9/hr — well over an order of magnitude wide), the number is not yet
-evidence. (Restated 2026-08-03: the previous "~4.5/hr" counted a failsafe
+At the current claimed order (~3.86 alert episodes/hr on 0.518 MONITORED h, Poisson 95%
+CI 0.47–13.94/hr — a ~30-fold span), the number is not yet evidence. (Restated 2026-08-03: the previous "~4.5/hr" counted a failsafe
 recovery edge as an alarm — audit F-01. The sample-size argument below is
 unaffected and, at 2 events rather than 3, is if anything stronger.) 10 flight hours bounds a zero-alarm result below 0.37/hr (95%)
 and a 5-alarm result to [1.6, 11.7]/hr → the target of ≥ 10 h is the

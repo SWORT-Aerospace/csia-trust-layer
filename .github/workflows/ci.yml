@@ -15,4 +15,22 @@ jobs:
         run: bash csia/native/build.sh --check
       - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run
       - run: python -m pytest -q
+      # Dataset/provenance gates. The MANIFEST is content-addressed and must
+      # regenerate byte-identically; the exposure REPORT embeds a timestamped
+      # experiment manifest by design, so it is validated against its schema
+      # rather than diffed. Leakage/contamination are asserted in the suite.
+      - name: dataset manifest determinism + schema gate
+        run: |
+          python tools/build_dataset_manifest.py
+          git diff --exit-code datasets/manifests datasets/reports/deduplication_report.json \
+            || (echo "::error::committed dataset manifest is stale — re-run tools/build_dataset_manifest.py" && exit 1)
+          python - <<'PYEOF'
+          import json, jsonschema
+          for doc, sch in (("datasets/manifests/px4_public_v1.json",
+                            "datasets/schemas/dataset_manifest_v1.schema.json"),
+                           ("datasets/reports/exposure_v2.json",
+                            "datasets/schemas/result_v1.schema.json")):
+              jsonschema.validate(json.load(open(doc)), json.load(open(sch)))
+              print("schema OK:", doc)
+          PYEOF
       - run: csia report

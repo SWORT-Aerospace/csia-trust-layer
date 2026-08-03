@@ -37,7 +37,7 @@ record yet. Deployable, not yet fielded.
 
 ### Validation maturity — MODERATE-HIGH (≈ 6.5/10)
 Evidence: single-frozen-config Monte Carlo (150 runs) with Wilson/Poisson
-CIs; 26 real PX4 logs (0.66 h); live SITL incl. fault injection; scenario
+CIs; 26 real PX4 logs (0.518 monitored h, unannotated, none held out); live SITL incl. fault injection; scenario
 harness with attribution/isolation/recovery assertions. Gaps: (a) **slow
 IMU-bias detection fails** (TPR 0.00) — a measured hole; (b) real-log
 false-alarm rate is train/test contaminated with a wide CI; (c) SITL
