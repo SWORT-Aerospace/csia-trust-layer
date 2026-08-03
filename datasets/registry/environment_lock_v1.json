@@ -1,5 +1,7 @@
 {
  "ci_enforcement": "this file DOCUMENTS the local research environment; the authoritative dependency declaration is pyproject.toml, whose dev/data/logs/mavlink extras CI installs and smoke-imports (.github/workflows/ci.yml) — a documentation lockfile is not an environment lock unless CI installs from it",
+ "data_extra": "duckdb, polars, pyarrow, PyYAML (pyproject [project.optional-dependencies].data)",
+ "data_root_note": "acquired dataset payload is NEVER stored in this repository; resolution order is --data-root, then CSIA_DATA_ROOT, then a gitignored repo-local fallback used only by tests and fixtures (csia/data/paths.py)",
  "core_mode_note": "the embedded/runtime path (csia/runtime, csia/native) imports NONE of these; enforced by test",
  "install_source": "pypi.org via direct (proxy noProxy list)",
  "lockfile": "datasets/registry/requirements-data.lock",

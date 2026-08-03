@@ -3,8 +3,14 @@
 from .adapters import (ADAPTERS, UNIFIED_SCHEMA_VERSION, CsvAdapter,
                        DatasetAdapter, FlightRecord, PX4UlogAdapter,
                        VisualInertialAdapter)
+from .paths import (ENV_VAR, REPO_FALLBACK, REPO_ROOT, DataRoot, DataRootError,
+                    check_free_space, check_writable,
+                    require_external_data_root, resolve_data_root)
 from .px4_topics import (PX4_ASSURANCE_TOPICS, TOPIC_INDEX, TopicAvailability,
                          survey_ulog)
+from .registry import (RegistryError, UnknownDatasetError,
+                       acknowledgement_required, dataset_ids, get_dataset,
+                       load_registry, select_datasets)
 from .store import (CROSS_DATASET_PARTITIONS, NormalizedStore, RawStore,
                     assign_partition, check_group_leakage, duckdb_summary,
                     flight_quality, sha256_file)
@@ -17,4 +23,9 @@ __all__ = [
     "RawStore", "NormalizedStore", "flight_quality", "duckdb_summary",
     "assign_partition", "check_group_leakage", "CROSS_DATASET_PARTITIONS",
     "sha256_file", "write_fixture",
+    "DataRoot", "DataRootError", "resolve_data_root",
+    "require_external_data_root", "check_writable", "check_free_space",
+    "ENV_VAR", "REPO_ROOT", "REPO_FALLBACK",
+    "load_registry", "dataset_ids", "get_dataset", "select_datasets",
+    "acknowledgement_required", "RegistryError", "UnknownDatasetError",
 ]

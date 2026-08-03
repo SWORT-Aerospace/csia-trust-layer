@@ -78,9 +78,29 @@ def _imported_third_party_modules() -> set:
                     elif isinstance(node, ast.ImportFrom):
                         if node.level == 0 and node.module:
                             found.add(node.module.split(".")[0])
-    local = {"csia", "tests", "tools", "__future__"}
     return {m for m in found
-            if m not in local and m not in sys.stdlib_module_names}
+            if m not in _local_module_names()
+            and m not in sys.stdlib_module_names}
+
+
+def _local_module_names() -> set:
+    """Names importable from this repository rather than from PyPI.
+
+    Derived from the tree, not hardcoded: tools/ modules import each other
+    after a sys.path insert, and a fixed allowlist would flag each new one
+    as an undeclared dependency.
+    """
+    local = {"__future__"}
+    for d in SCANNED_DIRS:
+        local.add(d)
+        base = os.path.join(ROOT, d)
+        for name in os.listdir(base):
+            path = os.path.join(base, name)
+            if name.endswith(".py"):
+                local.add(name[:-3])
+            elif os.path.isdir(path) and name != "__pycache__":
+                local.add(name)
+    return local
 
 
 def test_no_source_file_is_excluded_from_the_repository():
