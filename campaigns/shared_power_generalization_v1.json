@@ -1,0 +1,2552 @@
+{
+ "blind_rule": "BLIND_SYNTHETIC results must not be inspected until the implementation and thresholds are frozen; every access is logged in datasets/reports/blind_evaluation_access.json",
+ "campaign_aggregate_hash": "10f4fe6b7245a657321c4021e9802fe407f8c421159a62716d34a4278f1ce922",
+ "campaign_id": "shared_power_generalization_v1",
+ "campaign_schema_version": "1.0.0",
+ "campaign_seed": "csia-3c-2026-08-03",
+ "counts": {
+  "ADVERSARIAL": {
+   "NEGATIVE_HEALTHY": 1,
+   "NEGATIVE_INDEPENDENT": 2,
+   "POSITIVE_SHARED_POWER": 6
+  },
+  "BLIND_SYNTHETIC": {
+   "NEGATIVE_HEALTHY": 1,
+   "NEGATIVE_INDEPENDENT": 2,
+   "NEGATIVE_SINGLE_SOURCE": 2,
+   "POSITIVE_SHARED_POWER": 26
+  },
+  "DEVELOPMENT": {
+   "NEGATIVE_HEALTHY": 1,
+   "NEGATIVE_INDEPENDENT": 3,
+   "NEGATIVE_SINGLE_SOURCE": 3,
+   "POSITIVE_SHARED_POWER": 39
+  },
+  "VALIDATION": {
+   "NEGATIVE_INDEPENDENT": 1,
+   "NEGATIVE_SINGLE_SOURCE": 1,
+   "POSITIVE_SHARED_POWER": 22
+  }
+ },
+ "experiment_manifest": {
+  "command": "tools/generate_shared_power_campaign.py",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "csia_config_hash": "25c2a143b244f1c2",
+  "dataset_aggregate_hash": "10f4fe6b7245a657321c4021e9802fe407f8c421159a62716d34a4278f1ce922",
+  "dataset_id": "shared_power_generalization_v1",
+  "dataset_partition": null,
+  "dependency_lock_sha256": "b81a0101de46835a",
+  "evidence_environment": "SIMULATION",
+  "exclusions": [],
+  "experiment_id": "shared_power_campaign_generation-20260803T045250Z",
+  "experiment_type": "shared_power_campaign_generation",
+  "failsafe_config_hash": "2d636a3f7e9c2438",
+  "failures": [],
+  "git_commit": "86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84",
+  "git_dirty": true,
+  "git_remote": "http://local_proxy@127.0.0.1:41729/git/SWORT-Aerospace/csia-trust-layer",
+  "input_logs": [],
+  "manifest_schema_version": "1.0.0",
+  "metric_definitions_version": "1.1.0",
+  "native_flags": "-std=c11 -Wall -Wextra -Wpedantic -Werror -O2",
+  "os_platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+  "output_paths": [
+   "campaigns/shared_power_generalization_v1.json"
+  ],
+  "processor_arch": "x86_64",
+  "python_version": "3.11.15",
+  "random_seed": null,
+  "result_schema_version": "1.0.0",
+  "runtime_duration_s": null,
+  "threshold_config_hash": "2d636a3f7e9c2438",
+  "timestamp_utc": "2026-08-03T04:52:50Z",
+  "trust_graph_config_hash": "534f4a31eed1a792",
+  "warnings": []
+ },
+ "generated_by": "tools/generate_shared_power_campaign.py",
+ "partition_policy": {
+  "adversarial": "assigned by construction, never by hash",
+  "method": "sha256(campaign_seed:scenario_id) -> uniform share",
+  "rule": "partition is derived from metadata ONLY, never from observed CSIA performance",
+  "shares": {
+   "BLIND_SYNTHETIC": 0.3,
+   "DEVELOPMENT": 0.45,
+   "VALIDATION": 0.25
+  }
+ },
+ "scenarios": [
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "06267ae9b50fdd1ccdc6578dd549b2659997fb4721dd65f600cadbd20a9a7ccb"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "7c7e70b0bf3fa269934cc2b18a25a0c3775f070228b2c180b16c3126c4f1fa21"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "7dc78a00ed4f3ae2b0cd02ef9253d2897a44c4d68ad93c8502475b5ab5fcbf37"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "c4b3d76d3886f786400cdb4f6113e2a9b92234080b18dd83993cbf27fd2ce68c"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "a15209e6a6ee19ffa032815d27662046d28be094b0134d48072f530409878d1b"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "62ef8e7f1f22971a82a91016a55ee4870398784759fa2b1d86210bc9e81b6e0a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "c712bcb27250a7cb3d6432aa0a5bc5753b4621f39d755e532812060dcc177f22"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "0d9b053cd0f5315aae3ef75392eda8c02d71c3dfb5dd7e271f413b4c1a603233"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "9cfd8132c294612a9ae1224c656d7626933e26d319fb6b4e5679a7b994cab071"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "f0f307d19d4b5d4e879f38558738d73a51d1a31f31c5f6ec2d6ea2d9204c3b8a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "dc48222c8cde19ceed7636b8938c108942f41abc650f7ad22de7a6416c2858e8"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "8c4148848f8c86c852b943ed86cc401507d02251ce298b1884b004aa2cdd6822"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "359ce33df560f7dae1f6d574277e11540a9cd1fcefadf421fe761184c2c55242"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.6,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "ed8866ce44d96c544ec48871d03c7ee5d4981bb31db107d885230cb6ad570726"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "4532617bf9b30fbc77d3f3a646b076171e657f600b3fcb901282511de10bfd83"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "542219b75e16110270dd2f6176c9354abc049f3b227ed7fd3b952efe579dd6e8"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "32daea681f07a2946c3ba975d190e6e4c237ede1d0ba1ce7279975cfa2d95af9"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "59625d9f4be3eb654f3f98b460b7a3ca3adb4a545977c6f4e082df4a9f578a6b"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "58c544b7b66bb2add3a934ee110182630dd01b7081410af40b0e6b581c44cccb"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "576e53946e744f5d5ed5b25bf12788387912b8ee640d1eaed28e712079866960"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "95a9bb9d05223daf1c8d69ce50391e968e6516465417dec08e305f3df4560fd0"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "c8ffa31abe93ea898ddb65a0869bcd1b109e0ed679a4fcf8f102024000e5c44c"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "e784b057d88ac9a7e012dd33c1df5b8b16ecdae710d8b4747700dc240b018a2d"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "c5e41ee7833163f1faa358f153c7cb7d8ef03917a180fad5e230a02a07d55c7b"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "aa7b639d2d69b71fb246e06445c38b020990e9d5dde6ceb1d8ec1094a2366606"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "c0c1c04b324b21e5171a5d8513933e40436ab73e7555a2b051a26b25d65e6d53"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "42765cfa898954dc7317d247eb8c811a80175912d685d4d4c28b2a55bc05b53d"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "fb4c54265bbfa155cb5bad532e8cb777cbe26befc14e028c126933ad9a433289"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "0223968a33ef02b29d6bd998c0e911341a77fda416631e33354765fa55373039"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "6cc68a5087b60bd183d3c5cbf27e49867629bb197442bbffac8a83de04ef70ad"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "02ec19780c8e71f21605835cbe85fc6f9e2c464dc99ce85db270d97a89d15b81"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "cc26d2335830eb262bc597b501ab553481967c763978ae89e10bfa91cd9596dc"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "50d6c160aefe28f96b9d485f66e5793a7fa39a07b2a64c5d3f4b85838286f18a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "31c0f6544ea5a8cbeefd12ced46b68767a71e61fe69a9df72a089c19c9a20e4e"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.2,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "1569243b3839cf061a390e48ee73f89ad881399d529fea5d5f4c8e1607efc4c2"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "3290635aed38f304827b1a06abce16547af1115680507b35b06e51bdf8b93ad3"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "7d70db5e3331f141cad5d73719aa99749831e8af31c4ca621eeb3c2871619444"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "2438774f8a619de4d06722a6d199f48ff23ddf64bae99a7c105ae03509c46d7d"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "31aa05a2153fadd99325b3a0ab80712721300294131ba25c3ef01713905a252e"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "7c5b4b4579b9ee3eaba02c47fcfb70947ee5d68993b732ad55c90332e8b92214"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "419dd2684fbecc4a1c8f5ad733a936a5b9b9daeeeb759548b80ef075de21494e"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.5,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "f0eed36e1d4921a83ba2233ec762e881c7ea83ecd6f1a1ec2f2892baeaf2f444"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "0be9b70873efb73c4d7afe8e1a89b0c3b246ce95a970bb354941815ddc2e6e76"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "5b20a7b0fb306403593ebb6fd8a3b4e9a7baa66a27f48fdd68adf954e5af2392"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "e234693442a65d20eeb8d43aded3a4226f56ddac11edef6bc1b91a38590a5a05"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "894cb241d3f45bc05f9602ab5551c6e95ce27e6f7caa992cf0a4d3ae963b832d"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "ab37d71573a4e230fdad723838accbd401df69fc063510b3d23d1a98ccf20ac4"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "48b822ef6388f6d5062158034c54aa88e15ae9bc47d31d7d70dd232550fd9bee"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "378d59fbf01a27cb63ec2afd869884f58fa0db90fca93c249cf0e34c3b94d46a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "290a15e4e54dcc65b24c6031058b520838a83468a7f1d96bfeead619d4289135"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "b20b5d14e355e1dd655022100b451382d3074af2fde29ac92b9d07ba7a575905"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "c2ad848ee3da4c16d28a72872d0480c2b34f6ab6ae13178716286300fc4e3eaf"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "a45e45404f35a59961efdb09f893169da09469fc8649df0e0335177776f07d3f"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "77d5fa181bd34d10e362b01496c4c02228140881e69740710db484337e6f9d6c"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "504df64da4ede3eac8fd857497320ce10bcdd17ed84a14d0ec492a87c68a668f"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.1,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "8eb536a2d73e134b6b24686d6f49673d56f40437e5826453ab3c8605ac4be3c5"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=100.0",
+   "scenario_sha256": "c4e12c28f9ebd5c4adb0f4e4d022eb13c4352356bd382e45920959cc02322155"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 180.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=180.0",
+   "scenario_sha256": "4bbeb946b1fd7eccf734f8fd809023826b564c3ffdbc188238f3e7f2426d2bb3"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 260.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=260.0",
+   "scenario_sha256": "aac1eaa3114d4c5cc4d2c5253221236589775e2a8688ca0dc624ab86db603f29"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 350.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=350.0",
+   "scenario_sha256": "6f185a03b1f753d3ce2523fa139d056666a7f6bae1bce59e960205a20b1d4d5a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 450.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=450.0",
+   "scenario_sha256": "7012f598b2ce792a410496ec2d63261a931fba152e927663279eecac4f5a01b6"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 560.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=560.0",
+   "scenario_sha256": "b43091367835152c0601b5e9b8c56cf9a9db8740c8dac68926785fed81cb4e5d"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=650.0",
+   "scenario_sha256": "07892c1d92633652a599ee505add769e9fe601a0b9a872a091c8c324eb8a2a43"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 18.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.1,dur=8.0,onset=18.0,rpm_loss=300.0",
+   "scenario_sha256": "611b85a2a762e228bc0a853db8a461cde2950865c6c856418b709a93a0e96c45"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.4,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 18.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=18.0,rpm_loss=300.0",
+   "scenario_sha256": "1ea0f693552d43c82fd2aa1601963e01be533dcee8f4432d3d6dbd67ac28ccca"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 1.2,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 18.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=18.0,rpm_loss=300.0",
+   "scenario_sha256": "d9798608e37040ccba6b350282c9970b3254018a37521e01fe2655acdb496cde"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 2.5,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 18.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=18.0,rpm_loss=300.0",
+   "scenario_sha256": "60d6d497c28fb52bf2aaece2a5ebc1f908d59380c512ae175a0565cc236236ba"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 24.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.1,dur=8.0,onset=24.0,rpm_loss=300.0",
+   "scenario_sha256": "6b57991553523ce71d5fce82547d26bf3d45a5b619f701008928234894727746"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.4,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 24.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=24.0,rpm_loss=300.0",
+   "scenario_sha256": "4b6d0bf9f8e8bbcb9db4d5e2b005f5cd3c29dc78dd925b52b8c9e47deb323abd"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 1.2,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 24.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=24.0,rpm_loss=300.0",
+   "scenario_sha256": "86b976ca9f7814b284d288d13b70123ef9217c0c028e98894e5d32bf4b29a14f"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 2.5,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 24.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=24.0,rpm_loss=300.0",
+   "scenario_sha256": "def15a880f8f6f1a324854047826a30292a8da1bf38167d992deb0e704bf513e"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 30.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.1,dur=8.0,onset=30.0,rpm_loss=300.0",
+   "scenario_sha256": "879bd30f8f97f28b8ff9c902038d0912f3c37d0944124288bef9a5f523844378"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.4,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 30.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=30.0,rpm_loss=300.0",
+   "scenario_sha256": "3e7a6b764e5774efc41b7ed6bfd9ebc456d93c0b3c7e8c2107fec9315c576f09"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 1.2,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 30.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=30.0,rpm_loss=300.0",
+   "scenario_sha256": "250c53417d5f043c23a77008c6990c34b1ad3142936bce1d4c8e9d132b2b57f9"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 2.5,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 30.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=30.0,rpm_loss=300.0",
+   "scenario_sha256": "f5373ac5c0726772e5794b9018c590e66f36e25fd9cfd09b2b48658d858c2f31"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 36.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.1,dur=8.0,onset=36.0,rpm_loss=300.0",
+   "scenario_sha256": "9ea30905683a2e9db27f298ae57ef5edd34b3392fe9159f1fe2c13cc26da688a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.4,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 36.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=36.0,rpm_loss=300.0",
+   "scenario_sha256": "d4dbc14d38e8b7d670c737b86d5610c6a0886409bd3d64b0c1fd8ca9c2c9dc71"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 1.2,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 36.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=36.0,rpm_loss=300.0",
+   "scenario_sha256": "4150aebdd329527e5ba935661c2852a77920abc936da7d5f1ac8451b418f1f82"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 2.5,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 36.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=36.0,rpm_loss=300.0",
+   "scenario_sha256": "470450f67ebeabdb473c860923da010276b4fa6f7e38a721b23384349c182a81"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 42.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.1,dur=8.0,onset=42.0,rpm_loss=300.0",
+   "scenario_sha256": "247e8a5893a23c7698b3d2af69eb25aa01b9ade04ccf77b80dd875e43accad42"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.4,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 42.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=42.0,rpm_loss=300.0",
+   "scenario_sha256": "3b5169f90de48288dbab3eb543d6391245cbb0c2f277556edca1f7fae4fe92d6"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 1.2,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 42.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=42.0,rpm_loss=300.0",
+   "scenario_sha256": "38ab80f36435739dc01d1ee6e774221e8475a5dd218566c0d5d19a5ad3918ffa"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 2.5,
+    "depth_v": 1.1,
+    "dur": 8.0,
+    "onset": 42.0,
+    "rpm_loss": 300.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=42.0,rpm_loss=300.0",
+   "scenario_sha256": "f99d9309564ee2b1ddfbff2657b683b8e9a431236304a5baf02caefa1042ac4c"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.3,
+    "dur": 3.0,
+    "onset": 28.0,
+    "rpm_loss": 280.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.3,dur=3.0,onset=28.0,rpm_loss=280.0",
+   "scenario_sha256": "57f130b6b719a01294b886f923c3f8aab04d2bafc78de0545eadea38b6ad2133"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.3,
+    "dur": 5.0,
+    "onset": 28.0,
+    "rpm_loss": 280.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.3,dur=5.0,onset=28.0,rpm_loss=280.0",
+   "scenario_sha256": "ad7398a04db48301d77a389747e9d7b5d2caf4e0061b77ff2a13f06bbc31548a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.3,
+    "dur": 9.0,
+    "onset": 28.0,
+    "rpm_loss": 280.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.3,dur=9.0,onset=28.0,rpm_loss=280.0",
+   "scenario_sha256": "8938fc178b9070389a4c97b977bc6566b2a0f17f2d777ad6b96bf598c0294a2a"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.3,
+    "dur": 14.0,
+    "onset": 28.0,
+    "rpm_loss": 280.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.3,dur=14.0,onset=28.0,rpm_loss=280.0",
+   "scenario_sha256": "3372aed7591e08dd9c6de076c0ba7e3d9bba1d64c424e3f967ffa6889ddcce14"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 7.0,
+    "onset": 31.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=7.0,onset=31.0,rpm_loss=100.0",
+   "scenario_sha256": "c20119ab50eed4ada5755a4e70f6ec789aa72b48dfbe23c2c3a3ff867dce4614"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 7.0,
+    "onset": 31.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=7.0,onset=31.0,rpm_loss=650.0",
+   "scenario_sha256": "421fcaa155c42b4b012f4aa2850ab0454567a5e5f934814dfdea23d82dc7c531"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.4,
+    "dur": 7.0,
+    "onset": 31.0,
+    "rpm_loss": 650.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=7.0,onset=31.0,rpm_loss=650.0",
+   "scenario_sha256": "4984c4c55942f7d55bb42488194e8ce91e26665d1a861150e8bd84764a11c03f"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.4,
+    "dur": 7.0,
+    "onset": 31.0,
+    "rpm_loss": 100.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=7.0,onset=31.0,rpm_loss=100.0",
+   "scenario_sha256": "8002ffda3377cce48cc55ac5635ee57bbbba95a8f3031fe7abb735df12c445bf"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 4.0,
+    "depth_v": 1.2,
+    "dur": 10.0,
+    "onset": 30.0,
+    "rpm_loss": 200.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=4.0,depth_v=1.2,dur=10.0,onset=30.0,rpm_loss=200.0",
+   "scenario_sha256": "92159efb1633e1ad2d7cf08387455a0a86c7460f74b5d1042581e226f06b0a6a"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "battery",
+    "motor_esc"
+   ],
+   "expected_shared_resource": "MAIN_POWER_PACK",
+   "family": "POSITIVE_SHARED_POWER",
+   "params": {
+    "_truth": [
+     "battery",
+     "motor_esc"
+    ],
+    "delay": 6.0,
+    "depth_v": 1.2,
+    "dur": 10.0,
+    "onset": 30.0,
+    "rpm_loss": 200.0
+   },
+   "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=6.0,depth_v=1.2,dur=10.0,onset=30.0,rpm_loss=200.0",
+   "scenario_sha256": "b5de911cd6ec7a4204d129d96a662092b19fdbb2f5c316cdda45b7586efce122"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "battery"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "battery"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.8,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 0.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['battery'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=0.0",
+   "scenario_sha256": "719a2eecc0762785bc18870e1c66ebdfe20e8384f89910206ab18655f7edffe2"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "battery"
+    ],
+    "delay": 0.0,
+    "depth_v": 1.4,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 0.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['battery'],delay=0.0,depth_v=1.4,dur=6.0,onset=30.0,rpm_loss=0.0",
+   "scenario_sha256": "0368425d09391a61f66778233d85dd52607320e163e31587fd0a930d2eab4250"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "battery"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "battery"
+    ],
+    "delay": 0.0,
+    "depth_v": 2.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 0.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['battery'],delay=0.0,depth_v=2.0,dur=6.0,onset=30.0,rpm_loss=0.0",
+   "scenario_sha256": "2bffc381045dce0b875a3b87a43213327ebe72859594a05fe972ae5bcbc4d4f9"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "motor_esc"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 200.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['motor_esc'],delay=0.0,depth_v=0.0,dur=6.0,onset=30.0,rpm_loss=200.0",
+   "scenario_sha256": "26767466434b56553dec8e61ea216ce42500e44350eac816e20e7d7e63a0c777"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "motor_esc"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 400.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['motor_esc'],delay=0.0,depth_v=0.0,dur=6.0,onset=30.0,rpm_loss=400.0",
+   "scenario_sha256": "576b9c5b2c970806ebfa6dcf128b29e0fd0b183df5576212fd78eea5c01df6dd"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "motor_esc"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_SINGLE_SOURCE",
+   "params": {
+    "_truth": [
+     "motor_esc"
+    ],
+    "delay": 0.0,
+    "depth_v": 0.0,
+    "dur": 6.0,
+    "onset": 30.0,
+    "rpm_loss": 600.0
+   },
+   "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['motor_esc'],delay=0.0,depth_v=0.0,dur=6.0,onset=30.0,rpm_loss=600.0",
+   "scenario_sha256": "9b870c1f2339ad38a4ff9ba863c93e4d6d1ed3731efccdaaf8cb05afe0786db0"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "VALIDATION",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 25.0,
+    "imu1_onset": 27.0,
+    "r0": 0.18,
+    "r1": -0.15
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=25.0,imu1_onset=27.0,r0=0.18,r1=-0.15",
+   "scenario_sha256": "74525b9e2890f6b0aac80d7c105d0f7dba173a73ad7bee57d887ee11f31a95fb"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 25.0,
+    "imu1_onset": 25.2,
+    "r0": 0.18,
+    "r1": -0.15
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=25.0,imu1_onset=25.2,r0=0.18,r1=-0.15",
+   "scenario_sha256": "1dde16694eb8586fdc9a7ccea029efef342b8081ffbb0ae005400ff08e2b26c4"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 25.0,
+    "imu1_onset": 33.0,
+    "r0": 0.18,
+    "r1": -0.15
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=25.0,imu1_onset=33.0,r0=0.18,r1=-0.15",
+   "scenario_sha256": "1e3e6f83f12240a9dd8114c58e78d04814f970b234be7f5c53afb141cac5e667"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 20.0,
+    "imu1_onset": 21.0,
+    "r0": 0.18,
+    "r1": -0.15
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=20.0,imu1_onset=21.0,r0=0.18,r1=-0.15",
+   "scenario_sha256": "cd303bafd095d0eb9ff216511a0a08b675c3149a16b62d411da14111223777a9"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 26.0,
+    "imu1_onset": 26.1,
+    "r0": 0.16,
+    "r1": -0.16
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=26.0,imu1_onset=26.1,r0=0.16,r1=-0.16",
+   "scenario_sha256": "7ff85e95181ed7886ceda700325c24a0b519b71eb9663c72b99f24969e96dd36"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [
+    "imu0",
+    "imu1"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "imu0",
+     "imu1"
+    ],
+    "imu0_onset": 26.0,
+    "imu1_onset": 26.1,
+    "r0": 0.22,
+    "r1": -0.1
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=26.0,imu1_onset=26.1,r0=0.22,r1=-0.1",
+   "scenario_sha256": "7b1b6f769f73008c714e80b4dfaf5e26c61dfbec0c9d207f68d79a743115e165"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [
+    "mag"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "mag"
+    ],
+    "mag_emi": true
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['mag'],mag_emi=True",
+   "scenario_sha256": "1eccfbf6f406684cd82b2c4557ab2105b5b9794629df8d6542132b1472d00069"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [
+    "gps"
+   ],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_INDEPENDENT",
+   "params": {
+    "_truth": [
+     "gps"
+    ],
+    "gps_spoof": true
+   },
+   "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['gps'],gps_spoof=True",
+   "scenario_sha256": "a83dba3b5b905cc69f171d5f61c774ddaa826c818defbfdf61345943c7813c09"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "BLIND_SYNTHETIC",
+   "expected_affected_sources": [],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_HEALTHY",
+   "params": {
+    "_truth": [],
+    "clean": true
+   },
+   "scenario_id": "NEGATIVE_HEALTHY|_truth=[],clean=True",
+   "scenario_sha256": "7850af2533a91f81ed4b5e94a47c73f5e449e4c4b6c13f694ad1b8684d8b0597"
+  },
+  {
+   "adversarial": false,
+   "dataset_partition": "DEVELOPMENT",
+   "expected_affected_sources": [],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_HEALTHY",
+   "params": {
+    "_truth": [],
+    "clean": true,
+    "profile": "fast_cruise"
+   },
+   "scenario_id": "NEGATIVE_HEALTHY|_truth=[],clean=True,profile=fast_cruise",
+   "scenario_sha256": "6cf8b72803da6c90d357ece7687595c920ea5b1e136e624bf55101237a4703e3"
+  },
+  {
+   "adversarial": true,
+   "dataset_partition": "ADVERSARIAL",
+   "expected_affected_sources": [],
+   "expected_shared_resource": null,
+   "family": "NEGATIVE_HEALTHY",
+   "params": {
+    "_truth": [],
+    "clean": true,
+    "note": "startup+yaw transient window"
+   },
+   "scenario_id": "NEGATIVE_HEALTHY|_truth=[],clean=True,note=startup+yaw transient window",
+   "scenario_sha256": "7706aa904590acc41c2dcd329f1c7582b55b4435c73dc77bb74c242a28ecd88a"
+  }
+ ],
+ "total": 110
+}
