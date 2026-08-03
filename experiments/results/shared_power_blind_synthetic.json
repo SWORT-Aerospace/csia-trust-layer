@@ -1,0 +1,603 @@
+{
+ "evidence_environment": "SIMULATION",
+ "experiment_manifest": {
+  "command": "tools/run_shared_power_campaign.py BLIND_SYNTHETIC --reason Single pre-registered blind evaluation of the ratio-invariant causal shared-cause model. Implementation and thresholds frozen at this commit; no tuning will follow.",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "csia_config_hash": "25c2a143b244f1c2",
+  "dataset_aggregate_hash": "10f4fe6b7245a657321c4021e9802fe407f8c421159a62716d34a4278f1ce922",
+  "dataset_id": "shared_power_generalization_v1",
+  "dataset_partition": "BLIND_SYNTHETIC",
+  "dependency_lock_sha256": "b81a0101de46835a",
+  "evidence_environment": "SIMULATION",
+  "exclusions": [],
+  "experiment_id": "shared_power_blind_synthetic-20260803T045851Z",
+  "experiment_type": "shared_power_blind_synthetic",
+  "failsafe_config_hash": "2d636a3f7e9c2438",
+  "failures": [],
+  "git_commit": "f82c2b8da466cd0f517130aeb1fd20fbc6921b5f",
+  "git_dirty": true,
+  "git_remote": "http://local_proxy@127.0.0.1:41729/git/SWORT-Aerospace/csia-trust-layer",
+  "input_logs": [],
+  "manifest_schema_version": "1.0.0",
+  "metric_definitions_version": "1.1.0",
+  "native_flags": "-std=c11 -Wall -Wextra -Wpedantic -Werror -O2",
+  "os_platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+  "output_paths": [],
+  "processor_arch": "x86_64",
+  "python_version": "3.11.15",
+  "random_seed": null,
+  "result_schema_version": "1.0.0",
+  "runtime_duration_s": null,
+  "threshold_config_hash": "2d636a3f7e9c2438",
+  "timestamp_utc": "2026-08-03T04:58:51Z",
+  "trust_graph_config_hash": "534f4a31eed1a792",
+  "warnings": []
+ },
+ "payload": {
+  "aggregate": {
+   "clean_flight_common_cause_activations": 0,
+   "correct_common_cause": 23,
+   "correct_common_cause_rate": 0.8846,
+   "correct_independent_discrimination": 2,
+   "dwell_completion_rate": 0.9231,
+   "incorrect_common_cause_on_negatives": 0,
+   "incorrect_common_cause_rate": 0.0,
+   "independent_discrimination_rate": 1.0,
+   "isolation_counts": {
+    "CORRECT_COMMON_CAUSE": 23,
+    "CORRECT_MULTI_SOURCE": 1,
+    "NONE": 2,
+    "UNKNOWN_DETECTED": 5
+   },
+   "latency_p50": 1.08,
+   "latency_p95": 3.52,
+   "mean_tick_cost_us": 204.4,
+   "n": 31,
+   "n_negative": 5,
+   "n_positive": 26
+  },
+  "authorization": "SHADOW_ONLY",
+  "partition": "BLIND_SYNTHETIC",
+  "scenarios": [
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.2,
+    "margin": 0.5345,
+    "peak_independent": 0.3155,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=350.0",
+    "shared_claimed": true,
+    "tick_cost_us": 202.9,
+    "ticks_above_activation": 122,
+    "ticks_above_support": 136
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.2,
+    "margin": 0.5167,
+    "peak_independent": 0.3333,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.4,dur=6.0,onset=30.0,rpm_loss=650.0",
+    "shared_claimed": true,
+    "tick_cost_us": 204.0,
+    "ticks_above_activation": 122,
+    "ticks_above_support": 143
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.16,
+    "margin": 0.5952,
+    "peak_independent": 0.2548,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=260.0",
+    "shared_claimed": true,
+    "tick_cost_us": 207.9,
+    "ticks_above_activation": 131,
+    "ticks_above_support": 142
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.16,
+    "margin": 0.5345,
+    "peak_independent": 0.3155,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=350.0",
+    "shared_claimed": true,
+    "tick_cost_us": 191.3,
+    "ticks_above_activation": 130,
+    "ticks_above_support": 145
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.16,
+    "margin": 0.5167,
+    "peak_independent": 0.3333,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=0.6,dur=6.0,onset=30.0,rpm_loss=650.0",
+    "shared_claimed": true,
+    "tick_cost_us": 206.6,
+    "ticks_above_activation": 130,
+    "ticks_above_support": 152
+   },
+   {
+    "affected": [],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 6.56,
+    "margin": 0.0,
+    "peak_independent": 0.0,
+    "peak_shared": 0.0,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=100.0",
+    "shared_claimed": false,
+    "tick_cost_us": 201.1,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.9065,
+    "peak_independent": 0.0933,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=180.0",
+    "shared_claimed": true,
+    "tick_cost_us": 213.2,
+    "ticks_above_activation": 151,
+    "ticks_above_support": 151
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.8214,
+    "peak_independent": 0.1785,
+    "peak_shared": 0.9999,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=260.0",
+    "shared_claimed": true,
+    "tick_cost_us": 202.6,
+    "ticks_above_activation": 156,
+    "ticks_above_support": 156
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.7843,
+    "peak_independent": 0.2155,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=350.0",
+    "shared_claimed": true,
+    "tick_cost_us": 199.8,
+    "ticks_above_activation": 159,
+    "ticks_above_support": 159
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.7203,
+    "peak_independent": 0.2795,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=450.0",
+    "shared_claimed": true,
+    "tick_cost_us": 206.0,
+    "ticks_above_activation": 162,
+    "ticks_above_support": 162
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.6717,
+    "peak_independent": 0.3281,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.0,dur=6.0,onset=30.0,rpm_loss=650.0",
+    "shared_claimed": true,
+    "tick_cost_us": 186.9,
+    "ticks_above_activation": 166,
+    "ticks_above_support": 166
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.7845,
+    "peak_independent": 0.2153,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.2,dur=6.0,onset=30.0,rpm_loss=350.0",
+    "shared_claimed": true,
+    "tick_cost_us": 203.8,
+    "ticks_above_activation": 159,
+    "ticks_above_support": 159
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.6717,
+    "peak_independent": 0.3281,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.5,dur=6.0,onset=30.0,rpm_loss=650.0",
+    "shared_claimed": true,
+    "tick_cost_us": 205.3,
+    "ticks_above_activation": 166,
+    "ticks_above_support": 166
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.9063,
+    "peak_independent": 0.0936,
+    "peak_shared": 0.9999,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=260.0",
+    "shared_claimed": true,
+    "tick_cost_us": 193.2,
+    "ticks_above_activation": 156,
+    "ticks_above_support": 156
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.7203,
+    "peak_independent": 0.2795,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.8,dur=6.0,onset=30.0,rpm_loss=450.0",
+    "shared_claimed": true,
+    "tick_cost_us": 194.2,
+    "ticks_above_activation": 162,
+    "ticks_above_support": 162
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.9502,
+    "peak_independent": 0.0496,
+    "peak_shared": 0.9998,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=180.0",
+    "shared_claimed": true,
+    "tick_cost_us": 194.4,
+    "ticks_above_activation": 151,
+    "ticks_above_support": 151
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.9063,
+    "peak_independent": 0.0936,
+    "peak_shared": 0.9999,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.1,dur=6.0,onset=30.0,rpm_loss=260.0",
+    "shared_claimed": true,
+    "tick_cost_us": 212.0,
+    "ticks_above_activation": 156,
+    "ticks_above_support": 156
+   },
+   {
+    "affected": [],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 2.96,
+    "margin": 0.0,
+    "peak_independent": 0.0,
+    "peak_shared": 0.0,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=100.0",
+    "shared_claimed": false,
+    "tick_cost_us": 197.8,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.9063,
+    "peak_independent": 0.0936,
+    "peak_shared": 0.9999,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=260.0",
+    "shared_claimed": true,
+    "tick_cost_us": 196.7,
+    "ticks_above_activation": 156,
+    "ticks_above_support": 156
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.6829,
+    "peak_independent": 0.317,
+    "peak_shared": 0.9999,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=2.4,dur=6.0,onset=30.0,rpm_loss=560.0",
+    "shared_claimed": true,
+    "tick_cost_us": 201.8,
+    "ticks_above_activation": 165,
+    "ticks_above_support": 165
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 2.2,
+    "margin": 0.6882,
+    "peak_independent": 0.2882,
+    "peak_shared": 0.9764,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=1.2,depth_v=1.1,dur=8.0,onset=18.0,rpm_loss=300.0",
+    "shared_claimed": true,
+    "tick_cost_us": 209.8,
+    "ticks_above_activation": 142,
+    "ticks_above_support": 200
+   },
+   {
+    "affected": [],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 2.08,
+    "margin": 0.7003,
+    "peak_independent": 0.2994,
+    "peak_shared": 0.9997,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=24.0,rpm_loss=300.0",
+    "shared_claimed": false,
+    "tick_cost_us": 188.4,
+    "ticks_above_activation": 135,
+    "ticks_above_support": 203
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 3.52,
+    "margin": 0.5649,
+    "peak_independent": 0.2851,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=30.0,rpm_loss=300.0",
+    "shared_claimed": true,
+    "tick_cost_us": 201.0,
+    "ticks_above_activation": 200,
+    "ticks_above_support": 201
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.4,
+    "margin": 0.718,
+    "peak_independent": 0.2784,
+    "peak_shared": 0.9964,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.4,depth_v=1.1,dur=8.0,onset=36.0,rpm_loss=300.0",
+    "shared_claimed": true,
+    "tick_cost_us": 203.0,
+    "ticks_above_activation": 159,
+    "ticks_above_support": 200
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 3.52,
+    "margin": 0.711,
+    "peak_independent": 0.2825,
+    "peak_shared": 0.9935,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=2.5,depth_v=1.1,dur=8.0,onset=42.0,rpm_loss=300.0",
+    "shared_claimed": true,
+    "tick_cost_us": 199.7,
+    "ticks_above_activation": 196,
+    "ticks_above_support": 197
+   },
+   {
+    "affected": [
+     "battery",
+     "motor_esc"
+    ],
+    "family": "POSITIVE_SHARED_POWER",
+    "isolation": "CORRECT_COMMON_CAUSE",
+    "latency_s": 1.08,
+    "margin": 0.739,
+    "peak_independent": 0.111,
+    "peak_shared": 0.85,
+    "root": "H_SHARED_POWER_DEGRADATION",
+    "scenario_id": "POSITIVE_SHARED_POWER|_truth=['battery', 'motor_esc'],delay=0.0,depth_v=1.3,dur=5.0,onset=28.0,rpm_loss=280.0",
+    "shared_claimed": true,
+    "tick_cost_us": 206.1,
+    "ticks_above_activation": 133,
+    "ticks_above_support": 133
+   },
+   {
+    "affected": [],
+    "family": "NEGATIVE_SINGLE_SOURCE",
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 4.32,
+    "margin": 0.0,
+    "peak_independent": 0.0,
+    "peak_shared": 0.0,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['battery'],delay=0.0,depth_v=0.8,dur=6.0,onset=30.0,rpm_loss=0.0",
+    "shared_claimed": false,
+    "tick_cost_us": 212.5,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [],
+    "family": "NEGATIVE_SINGLE_SOURCE",
+    "isolation": "NONE",
+    "latency_s": null,
+    "margin": -0.3333,
+    "peak_independent": 0.3333,
+    "peak_shared": 0.0,
+    "root": null,
+    "scenario_id": "NEGATIVE_SINGLE_SOURCE|_truth=['motor_esc'],delay=0.0,depth_v=0.0,dur=6.0,onset=30.0,rpm_loss=600.0",
+    "shared_claimed": false,
+    "tick_cost_us": 267.7,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [
+     "imu0",
+     "imu1"
+    ],
+    "family": "NEGATIVE_INDEPENDENT",
+    "isolation": "CORRECT_MULTI_SOURCE",
+    "latency_s": 5.76,
+    "margin": -0.775,
+    "peak_independent": 0.775,
+    "peak_shared": 0.0,
+    "root": "H_MULTI_INDEPENDENT_IMU",
+    "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['imu0', 'imu1'],imu0_onset=20.0,imu1_onset=21.0,r0=0.18,r1=-0.15",
+    "shared_claimed": false,
+    "tick_cost_us": 213.9,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [],
+    "family": "NEGATIVE_INDEPENDENT",
+    "isolation": "UNKNOWN_DETECTED",
+    "latency_s": 25.92,
+    "margin": 0.0,
+    "peak_independent": 0.0,
+    "peak_shared": 0.0,
+    "root": "H_UNKNOWN_CROSS_SENSOR_INCONSISTENCY",
+    "scenario_id": "NEGATIVE_INDEPENDENT|_truth=['gps'],gps_spoof=True",
+    "shared_claimed": false,
+    "tick_cost_us": 206.9,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   },
+   {
+    "affected": [],
+    "family": "NEGATIVE_HEALTHY",
+    "isolation": "NONE",
+    "latency_s": null,
+    "margin": 0.0,
+    "peak_independent": 0.0,
+    "peak_shared": 0.0,
+    "root": null,
+    "scenario_id": "NEGATIVE_HEALTHY|_truth=[],clean=True",
+    "shared_claimed": false,
+    "tick_cost_us": 204.7,
+    "ticks_above_activation": 0,
+    "ticks_above_support": 0
+   }
+  ]
+ },
+ "result_schema_version": "1.0.0",
+ "result_type": "SCENARIO"
+}
