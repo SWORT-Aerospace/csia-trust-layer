@@ -25,6 +25,8 @@ of new hypotheses.
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 
+from .causal import CausalSharedCauseModel
+
 HYPOTHESIS_SCHEMA_VERSION = "1.0.0"
 
 #: Bounds for eventual C implementation. Exceeding them is a configuration
@@ -266,7 +268,11 @@ class HypothesisEngine:
                  enable_temporal_evidence: bool = True,
                  enable_topology_evidence: bool = True,
                  arm_time_s: float = DEFAULT_ARM_TIME_S,
-                 dwell_ticks: int = DWELL_TICKS):
+                 dwell_ticks: int = DWELL_TICKS,
+                 enable_causal_model: bool = True,
+                 enable_normalization: bool = True,
+                 enable_contradiction: bool = True,
+                 enable_independent_alternative: bool = True):
         self.registry = tuple(registry)
         self.context = context
         self.enable_shared_cause = enable_shared_cause
@@ -277,6 +283,16 @@ class HypothesisEngine:
         self._onset: dict = {}          # feature -> first tick seen degraded
         self._held: dict = {}           # hypothesis_id -> consecutive ticks
         self._seq = 0
+        # Slice 3C: ratio-invariant shared-cause reasoning replaces the flat
+        # mean over a mixed-source feature list.
+        self.enable_causal_model = enable_causal_model
+        self.causal = CausalSharedCauseModel(
+            enable_normalization=enable_normalization,
+            enable_topology=enable_topology_evidence,
+            enable_temporal=enable_temporal_evidence,
+            enable_contradiction=enable_contradiction,
+            enable_independent_alternative=enable_independent_alternative)
+        self._last_assessment = None
 
     # -- evidence ---------------------------------------------------------
 
@@ -364,8 +380,15 @@ class HypothesisEngine:
         if is_shared:
             if not self.enable_shared_cause:
                 return 0.0, 0.0, ("SHARED_CAUSE_HYPOTHESIS_DISABLED",)
-            # A shared cause REQUIRES co-onset; independent faults must not
-            # be promoted to common cause just because they overlap.
+            if self.enable_causal_model and h.shared_resource:
+                # Ratio-invariant path (slice 3C): per-source severity first,
+                # then geometric mean over coupled members, topology support
+                # and contradiction, monotonic temporal coherence.
+                a = self.causal.assess(t, features, h.shared_resource)
+                self._last_assessment = a
+                iso = a.support * (1.0 - 0.5 * a.topology_contradiction)
+                return (min(1.0, a.support), min(1.0, iso),
+                        tuple(a.reason_codes))
             support *= (0.30 + 0.70 * temporal)
             reasons.append("SHARED_RESOURCE_TOPOLOGY_MATCHED"
                            if self.enable_topology_evidence
