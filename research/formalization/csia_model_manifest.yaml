@@ -1,0 +1,101 @@
+# CSIA implemented-system manifest — WP1
+# Every entry carries its source. Recovered, not designed.
+manifest_version: "1.0.0"
+commit: bc3ed977e14d6eb6c5dc3a8b771b2349337de91a
+package_version: "0.8.0"          # pyproject.toml:7
+model_class: switched_discrete_time_system   # x_{k+1}=F_sigma(x_k,u_k,theta)
+
+graph:
+  source: csia/trust_graph/graph.py
+  nodes: 8                         # :20-29
+  edges: 11                        # :33-56
+  directed: false                  # :60 nx.Graph
+  changes_after_init: false
+  node_names: [imu0, imu1, baro, mag, gps, motor_esc, battery, vibration]
+  shared_relation_note: >
+    velocity_gps_doppler names TWO edges (imu0-gps, imu1-gps); the runtime
+    re-splits it into velocity_gps_doppler_0/_1 (online.py:206-208), yielding
+    11 edge keys. There is no 12-edge topology anywhere in the repository.
+  per_profile_topology_differs: false   # all profiles use the same NODES/EDGES
+
+trust_recursion:
+  source: csia/trust_engine/engine.py
+  prior: {alpha0: 8.0, beta0: 2.0, T0: 0.8}       # :61-62, :98
+  kernel: "c(lam) = exp(-0.5*max(0, lam-1))"      # :78
+  neighbour_weight: "w_ij = gate_ij * T_j(k-1)"   # :113
+  fusion: "E = sum(w*c)/sum(w) over AVAILABLE subscores; 0.5 if none"  # :140
+  weights: {w_nbr: 0.35, w_phys: 0.30, w_temp: 0.20, w_stat: 0.15}     # :55-58
+  rho: {min: 0.95, max: 0.998, law: "rho = rho_max-(rho_max-rho_min)*d"}  # :59-60,:144
+  disagreement: "d = max(scores)-min(scores); 0 if fewer than 2 available"  # :143
+  update: "alpha<-rho*alpha+E ; beta<-rho*beta+(1-E)  iff avail and fresh"  # :146-148
+  synchronous: true                                  # :153-154
+  clipping: none
+  concentration_cap: implicit_only    # alpha+beta <= 1/(1-rho_max) = 500
+  guards: {neighbour_den: 1.0e-6, phys_gate: 1.0e-6}
+  informal_rule_w_i_from_ij:
+    status: absent
+    detail: >
+      w = (1-tau_i)/((1-tau_i)+(1-tau_j)) does not exist in any form. The
+      implemented weight depends on the NEIGHBOUR's trust only, with no
+      dependence on the receiving node's own trust and no responsibility
+      allocation between edge endpoints.
+  parameters_lambda_gplus_gminus_cmax:
+    status: absent
+
+diagnosis:
+  source: csia/diagnosis/bayes.py
+  hypotheses: 8                     # :44-56
+  prior: {nominal: 0.86, each_fault: 0.02}          # :40, :90-92
+  likelihood: "L(c|LOW)=log(1-c+eps) ; L(c|HIGH)=log(c+eps)"   # :101-102
+  eps: 0.02                                          # :37
+  gate_handling: skipped_entirely_if_gate_le_1e-9    # :99-100
+  smoothing_alpha: 0.06                              # :38
+  evidence_mult: 1.5                                 # :39
+  normalization: softmax                             # :110-113
+  conditional_independence: total
+  persistent_state: _smoothed                        # :94
+  simultaneous_faults: unrepresented
+  calibrated: false
+
+failsafe:
+  source: csia/runtime/failsafe.py
+  levels: [NORMAL, CAUTION, CRITICAL, EMERGENCY]     # :36-40
+  thresholds: {nav_caution: 0.75, heading_caution: 0.60, struct_critical: 0.60,
+               power_critical: 0.70, att_caution: 0.82, att_emergency: 0.70,
+               imu_isolation_gap: 0.12}              # :58-65
+  timing: {dwell_up: 1.0, dwell_down: 5.0, arm_time: 10.0}   # :66-68
+  descent_rate_mps: 1.5                              # :71
+  deterministic: true
+  formal_guarantee: none
+  att_default_when_no_fresh_imu: 1.0                 # :106 fail-OPEN corner
+  disarm_guard: "armed is False -> reset_timers(); return []"   # :191-197
+  advisory_by_default: true
+
+execution:
+  model: async_arrival_resampled_to_fixed_tick_with_held_samples  # online.py:281-283
+  tick_hz_by_profile: {sow001_quad: 25.0, sow001_quad_strict: 25.0,
+                       interceptor_seeker: 100.0}    # profiles.py
+  stale_timeout_s: {imu0: 0.05, imu1: 0.05, baro: 0.1, mag: 0.1,
+                    gps: 0.5, motor_esc: 0.1, battery: 0.5, vibration: 0.5}  # online.py:47-50
+
+python_native_equivalence:
+  class: kernel_level_numerical_equivalence_test_corpus_scoped
+  tolerance: 1.0e-12
+  tick_comparisons: 1103
+  covers: [trust, evidence, diagnosis_posterior]
+  excludes: [alpha, beta, rho, subscores, comparator, failsafe, scheduler]
+  skips_silently_if_unbuilt: true      # tests/test_native.py:11-12
+
+open_findings:
+  - id: F-N1
+    text: parity tests skip silently when the native core is not built
+  - id: F-Q1
+    text: no linter, formatter, or static analysis exists in the project
+  - id: F-E1
+    text: engine.py:104 comment says "12 edges"; the graph has 11
+  - id: F-P1
+    text: README 140 us/tick contradicts campaigns/perf_baseline.json 304.82 us
+  - id: F-D1
+    text: imu0/imu1 bias hypotheses collide when motor edges are gated (disarmed)
+  - id: F-D2
+    text: gps_fault collides with nominal and unexpected_maneuver when GPS fix invalid
