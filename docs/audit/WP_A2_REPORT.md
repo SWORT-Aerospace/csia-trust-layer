@@ -142,11 +142,24 @@ severity is small and is reported as small.
 
 ### Finding 4 — Structural diagnostic coverage on the real corpus (new)
 
-The largest finding in WP-A2, and the first measurement of this phenomenon on
-the actual corpus. Because `bayes.py:99-100` **skips** a feature whose gate is
-closed rather than down-weighting it, two hypotheses whose LOW signatures
-coincide over the surviving features receive identical likelihood on every
-remaining feature and stay pinned at their prior ratio forever.
+The largest finding in WP-A2, and the first measurement of κ on a real corpus.
+Because `bayes.py:99-100` **skips** a feature whose gate is closed rather than
+down-weighting it, two hypotheses whose LOW signatures coincide over the
+surviving features receive identical likelihood on every remaining feature and
+stay pinned at their prior ratio forever.
+
+> **What this is and is not.** The mechanism measured here is **channel
+> unavailability** — channels absent from the logs entirely, a property of the
+> corpus. It is **not** gate-conditioning, in which a gate closes as a
+> function of the fault being diagnosed. Both coarsen the partition; only the
+> second is endogenous, and **gate-induced coarsening remains unmeasured**.
+> κ is agnostic to *why* a channel is inactive, so it covers this case
+> cleanly; results that turn on the *cause* of closure do not. Any downstream
+> write-up must use the channel-absence framing, not the endogeneity framing.
+>
+> **The number is a lower bound.** κ was computed from channel inventory
+> alone. In flight, validity gates close on top of absent channels, so actual
+> in-flight coarsening is at least this severe and probably worse.
 
 Restricting each hypothesis's signature to the features the channels support,
 over the configurations the 26 logs actually carry:

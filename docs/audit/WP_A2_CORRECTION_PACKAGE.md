@@ -200,13 +200,22 @@ Organised by the submission's section structure. Replace in place.
 > occurred in 24 of the 26.** Two alert episodes across **0.5183 monitored
 > flight-hours** give **3.86 episodes per hour, Poisson 95% CI [0.47, 13.94]**
 > (n = 26 flights). Exposure is *monitored* time; raw log duration is 0.663 h,
-> of which 21.8% lies inside the arm window where no alert can be raised.
-> Channel availability ranged from 2 to 5 of 8 trust-graph channels, **mean
-> 3.88** (12 flights at 5, 5 at 4, 3 at 3, 6 at 2). **Verified-healthy
+> of which 21.8% lies inside the arm window where no alert can be raised —
+> and that aggregate understates the per-flight effect, because **the median
+> flight loses 40.0% of its duration to the arm window and the worst loses
+> 63.5%**. Channel availability ranged from 2 to 5 of 8 trust-graph channels,
+> **mean 3.88** (12 flights at 5, 5 at 4, 3 at 3, 6 at 2). **Verified-healthy
 > exposure: 0.000 h** — these logs carry no annotation, and CSIA's silence is
 > not evidence of health. **Held-out exposure: 0.000 h** — all 26 shaped the
-> field-mode tolerances. The confidence interval spans a factor of 30; this is
-> a sanity result on real data, not a validated false-alarm rate.
+> field-mode tolerances. Further, at these channel counts the diagnosis layer
+> could not have *named* most faults had they occurred: in all 26 logs at
+> least one fault hypothesis is structurally indistinguishable from healthy
+> flight, and in the six 2-channel logs all eight hypotheses collapse into a
+> single class (see §D4, finding 6). Alarm-free silence on this corpus is
+> therefore doubly weak evidence — the logs are unannotated, *and* the
+> attribution layer was structurally incapable of separating most causes. The
+> confidence interval spans a factor of 30; this is a sanity result on real
+> data, not a validated false-alarm rate.
 
 ### Case study
 
@@ -284,8 +293,11 @@ supply the basis or mark it as an internal estimate.
 2. **The fault harness is not independent evidence of detection capability.**
    It is scripted synthetic injection whose assertions are regression bounds
    set below previously measured values from the same seeds. WP-A2 E4
-   quantified the slack: **detection could take roughly twice as long in every
-   scenario and still pass.**
+   quantified the slack: every scenario carries **+2.40 s to +3.00 s of
+   latency headroom on detections that take 1.5–2.6 s**, so detection could
+   roughly double in latency and every test would still pass. The suite
+   demonstrates **non-regression within a wide band**, not detection
+   capability. Min-trust bounds are tighter (+0.084 to +0.284).
 3. **Embedded timing is a host benchmark.** No STM32H743 build exists, no
    target measurement exists, and the C core does not execute in production.
 4. **The alert rate is an interval, not a number.** [0.47, 13.94] per
@@ -301,8 +313,21 @@ supply the basis or mark it as an internal estimate.
    This is the finding a reviewer is most likely to press on, and it is new.
    Because an absent feature is *skipped* rather than down-weighted, two
    hypotheses whose signatures coincide over the surviving features are pinned
-   at their prior ratio permanently. Computing this over the channel
-   configurations the 26 logs actually carry:
+   at their prior ratio permanently.
+
+   **Mechanism, stated precisely.** What is measured here is coarsening caused
+   by **channels being absent from the logs entirely** — a property of the
+   corpus. It is *not* a measurement of gate-conditioning, in which a gate
+   closes as a function of the fault being diagnosed. Both mechanisms coarsen
+   the partition; only the second is endogenous, and the second is
+   **unmeasured**. The index below is agnostic to *why* a channel is inactive,
+   which is exactly why it applies here.
+
+   **This is a lower bound.** It was computed from the channel inventory
+   alone. In flight, validity gates close *on top of* absent channels, so
+   actual in-flight coarsening is at least this severe and probably worse.
+
+   Computing this over the channel configurations the 26 logs actually carry:
 
    | Channels | Logs | Observable classes (of 8) | κ | Faults absorbed into `nominal` |
    |---|---|---|---|---|
