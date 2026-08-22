@@ -1,0 +1,259 @@
+{
+ "baseline_note": "computed against the POST-PROMOTION signature matrix, i.e. with attitude_gravity_mag already in imu0_bias_drift (WP-C3 promotion)",
+ "closes_coverage": {
+  "derived": 29,
+  "fraction_derived": 0.9062,
+  "total": 32,
+  "unknown": 3,
+  "unknown_cells": [
+   "gps_fault/speed_gate",
+   "power_fault/speed_gate",
+   "unexpected_maneuver/speed_gate"
+  ]
+ },
+ "closes_rationale": {
+  "* / armed_gate": "FALSE for every hypothesis. armed_gate reads vehicle arming state and elapsed time (online.py:491-496); no monitored sensor channel feeds it. Closure is exogenous.",
+  "* / gps_warmup": "FALSE for every hypothesis. Pure elapsed time (ticks > 3.0, comparator.py:199).",
+  "gps_fault / gvalid": "TRUE. gvalid is fix validity (comparator.py:115; fix_type >= 3 at ulog_source.py:178). Denial, jamming and many spoofing modes drop or invalidate the fix. The fault silences the gate that carries its own evidence.",
+  "gps_fault / speed_gate": "UNKNOWN. speed_gate is computed from GPS-derived horizontal velocity (comparator.py:112-113), so a GPS fault perturbs its input \u2014 but whether it drives the gate CLOSED depends on the spoof's velocity profile, which the fault model does not fix. A spoof holding plausible velocity leaves it open; one collapsing reported velocity closes it. Not derivable from source.",
+  "power_fault / speed_gate": "UNKNOWN. A severe power fault degrades flight and could reduce ground speed below the 2 m/s threshold, but nothing in source links battery trust to commanded velocity. Physical plausibility, not source.",
+  "unexpected_maneuver / speed_gate": "UNKNOWN. A manoeuvre is defined by unusual kinematics; whether it crosses below the speed threshold is scenario-dependent."
+ },
+ "closes_table": {
+  "gps_fault": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": true,
+   "speed_gate": "UNKNOWN"
+  },
+  "imu0_bias_drift": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": false
+  },
+  "imu1_bias_drift": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": false
+  },
+  "mag_interference": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": false
+  },
+  "nominal": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": false
+  },
+  "power_fault": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": "UNKNOWN"
+  },
+  "unexpected_maneuver": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": "UNKNOWN"
+  },
+  "vibration_anomaly": {
+   "armed_gate": false,
+   "gps_warmup": false,
+   "gvalid": false,
+   "speed_gate": false
+  }
+ },
+ "definition": "S_eff[f,h] = S[f,h] AND NOT (exists g in gate(f): closes(h,g))",
+ "purpose": "effective signature matrix: a feature is evidence for h only if h perturbs it AND does not silence it",
+ "results": {
+  "unknown_as_closed": {
+   "S_eff": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "attitude_gravity_mag",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   },
+   "gap": 0.142857,
+   "kappa_S": 0.0,
+   "kappa_S_eff": 0.142857,
+   "n_classes_S": 8,
+   "n_classes_S_eff": 7,
+   "pairs_merged_only_in_S_eff": [
+    "gps_fault+nominal"
+   ],
+   "soi": {
+    "gps_fault": {
+     "n_features": 1,
+     "silenced": [
+      "phys_gps"
+     ],
+     "soi": 1.0
+    },
+    "imu0_bias_drift": {
+     "n_features": 3,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "imu1_bias_drift": {
+     "n_features": 2,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "mag_interference": {
+     "n_features": 4,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "nominal": {
+     "n_features": 0,
+     "note": "empty LOW set; SOI undefined",
+     "silenced": [],
+     "soi": null
+    },
+    "power_fault": {
+     "n_features": 5,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "unexpected_maneuver": {
+     "n_features": 1,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "vibration_anomaly": {
+     "n_features": 3,
+     "silenced": [],
+     "soi": 0.0
+    }
+   },
+   "theorem_holds": true,
+   "theorem_violations": []
+  },
+  "unknown_as_open": {
+   "S_eff": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "attitude_gravity_mag",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   },
+   "gap": 0.142857,
+   "kappa_S": 0.0,
+   "kappa_S_eff": 0.142857,
+   "n_classes_S": 8,
+   "n_classes_S_eff": 7,
+   "pairs_merged_only_in_S_eff": [
+    "gps_fault+nominal"
+   ],
+   "soi": {
+    "gps_fault": {
+     "n_features": 1,
+     "silenced": [
+      "phys_gps"
+     ],
+     "soi": 1.0
+    },
+    "imu0_bias_drift": {
+     "n_features": 3,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "imu1_bias_drift": {
+     "n_features": 2,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "mag_interference": {
+     "n_features": 4,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "nominal": {
+     "n_features": 0,
+     "note": "empty LOW set; SOI undefined",
+     "silenced": [],
+     "soi": null
+    },
+    "power_fault": {
+     "n_features": 5,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "unexpected_maneuver": {
+     "n_features": 1,
+     "silenced": [],
+     "soi": 0.0
+    },
+    "vibration_anomaly": {
+     "n_features": 3,
+     "silenced": [],
+     "soi": 0.0
+    }
+   },
+   "theorem_holds": true,
+   "theorem_violations": []
+  }
+ },
+ "theorem": "Pi(S_eff) is coarser than or equal to Pi(S), always (S_eff <= S entrywise)"
+}
