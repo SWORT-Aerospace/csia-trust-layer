@@ -1,0 +1,142 @@
+{
+ "caveat": "assertion bounds were set below values measured from these same seeds (test_fault_scenarios.py:22-27), so passing indicates no regression, not detection capability",
+ "method": "run each scenario unchanged; compare the measured value against the bound the test asserts",
+ "purpose": "how much detection degradation passes the scripted fault harness silently",
+ "scenarios": {
+  "gps_spoof": {
+   "cause": "gps_fault",
+   "detect_latency_s": {
+    "asserted_within": 5.0,
+    "headroom": 2.84,
+    "measured": 2.16,
+    "reading": "detection may slow this much before the test fails"
+   },
+   "exonerated_floor": {
+    "asserted_at_least": 0.85,
+    "headroom": 0.0722,
+    "measured_min": 0.9222
+   },
+   "min_trust": {
+    "asserted_below": 0.72,
+    "headroom": 0.129459,
+    "measured": 0.5905,
+    "reading": "min trust may rise this far before the test fails"
+   },
+   "peak_posterior": {
+    "asserted_at_least": 0.75,
+    "headroom": 0.1434,
+    "measured": 0.8934,
+    "reading": "confidence may fall this far before the test fails"
+   },
+   "target": "gps"
+  },
+  "imu0_bias_drift": {
+   "cause": "imu0_bias_drift",
+   "detect_latency_s": {
+    "asserted_within": 16.0,
+    "headroom": 3.0,
+    "measured": 13.0,
+    "reading": "detection may slow this much before the test fails"
+   },
+   "exonerated_floor": {
+    "asserted_at_least": 0.8,
+    "headroom": 0.1168,
+    "measured_min": 0.9168
+   },
+   "min_trust": {
+    "asserted_below": 0.85,
+    "headroom": 0.084303,
+    "measured": 0.7657,
+    "reading": "min trust may rise this far before the test fails"
+   },
+   "peak_posterior": {
+    "asserted_at_least": 0.85,
+    "headroom": 0.1361,
+    "measured": 0.9861,
+    "reading": "confidence may fall this far before the test fails"
+   },
+   "target": "imu0"
+  },
+  "mag_emi": {
+   "cause": "mag_interference",
+   "detect_latency_s": {
+    "asserted_within": 4.0,
+    "headroom": 2.52,
+    "measured": 1.48,
+    "reading": "detection may slow this much before the test fails"
+   },
+   "exonerated_floor": {
+    "asserted_at_least": 0.8,
+    "headroom": 0.1014,
+    "measured_min": 0.9014
+   },
+   "min_trust": {
+    "asserted_below": 0.5,
+    "headroom": 0.223643,
+    "measured": 0.2764,
+    "reading": "min trust may rise this far before the test fails"
+   },
+   "peak_posterior": {
+    "asserted_at_least": 0.9,
+    "headroom": 0.1,
+    "measured": 1.0,
+    "reading": "confidence may fall this far before the test fails"
+   },
+   "target": "mag"
+  },
+  "power_sag": {
+   "cause": "power_fault",
+   "detect_latency_s": {
+    "asserted_within": 4.0,
+    "headroom": 2.4,
+    "measured": 1.6,
+    "reading": "detection may slow this much before the test fails"
+   },
+   "exonerated_floor": {
+    "asserted_at_least": 0.75,
+    "headroom": 0.1668,
+    "measured_min": 0.9168
+   },
+   "min_trust": {
+    "asserted_below": 0.6,
+    "headroom": 0.200884,
+    "measured": 0.3991,
+    "reading": "min trust may rise this far before the test fails"
+   },
+   "peak_posterior": {
+    "asserted_at_least": 0.9,
+    "headroom": 0.0986,
+    "measured": 0.9986,
+    "reading": "confidence may fall this far before the test fails"
+   },
+   "target": "battery"
+  },
+  "vibration_anomaly": {
+   "cause": "vibration_anomaly",
+   "detect_latency_s": {
+    "asserted_within": 5.0,
+    "headroom": 2.44,
+    "measured": 2.56,
+    "reading": "detection may slow this much before the test fails"
+   },
+   "exonerated_floor": {
+    "asserted_at_least": 0.75,
+    "headroom": 0.1668,
+    "measured_min": 0.9168
+   },
+   "min_trust": {
+    "asserted_below": 0.45,
+    "headroom": 0.284163,
+    "measured": 0.1658,
+    "reading": "min trust may rise this far before the test fails"
+   },
+   "peak_posterior": {
+    "asserted_at_least": 0.9,
+    "headroom": 0.1,
+    "measured": 1.0,
+    "reading": "confidence may fall this far before the test fails"
+   },
+   "target": "vibration"
+  }
+ }
+}
