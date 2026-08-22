@@ -1,0 +1,1188 @@
+{
+ "aggregate_birnbaum_importance": {
+  "armed_gate": 0.033854,
+  "channel:baro": 0.0,
+  "channel:battery": 0.087963,
+  "channel:gps": 0.163484,
+  "channel:imu0": 0.175058,
+  "channel:imu1": 0.116609,
+  "channel:mag": 0.202836,
+  "channel:motor_esc": 0.121817,
+  "channel:vibration": 0.163194,
+  "gps_warmup": 0.032697,
+  "gvalid": 0.032697,
+  "speed_gate": 0.0
+ },
+ "all_pairs_monotone": true,
+ "birnbaum_ranking": [
+  "channel:mag",
+  "channel:imu0",
+  "channel:gps",
+  "channel:vibration",
+  "channel:motor_esc",
+  "channel:imu1",
+  "channel:battery",
+  "armed_gate",
+  "gps_warmup",
+  "gvalid",
+  "speed_gate",
+  "channel:baro"
+ ],
+ "components": [
+  "armed_gate",
+  "gps_warmup",
+  "gvalid",
+  "speed_gate",
+  "channel:baro",
+  "channel:battery",
+  "channel:gps",
+  "channel:imu0",
+  "channel:imu1",
+  "channel:mag",
+  "channel:motor_esc",
+  "channel:vibration"
+ ],
+ "convention": "component = 1 means FAILED (gate closed / channel absent); phi = 1 means the pair is indistinguishable",
+ "gvalid": {
+  "aggregate_birnbaum": 0.032697,
+  "of_total_components": 12,
+  "order_one_cut_set_for": [
+   "gps_fault+nominal"
+  ],
+  "rank_among_components": 10
+ },
+ "n_components": 12,
+ "n_states": 4096,
+ "order_one_cut_sets_by_pair": {
+  "gps_fault+nominal": [
+   "channel:gps",
+   "gps_warmup",
+   "gvalid"
+  ],
+  "gps_fault+unexpected_maneuver": [
+   "channel:gps"
+  ],
+  "imu0_bias_drift+nominal": [
+   "channel:imu0"
+  ],
+  "imu1_bias_drift+nominal": [
+   "channel:imu1"
+  ],
+  "mag_interference+nominal": [
+   "channel:mag"
+  ],
+  "nominal+vibration_anomaly": [
+   "channel:vibration"
+  ]
+ },
+ "per_critical_pair": [
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.054688,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.148438,
+    "channel:imu0": 0.710938,
+    "channel:imu1": 0.164062,
+    "channel:mag": 0.164062,
+    "channel:motor_esc": 0.054688,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.148438,
+    "gvalid": 0.148438,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 3,
+    "4": 6
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "channel:imu0",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu0",
+     "gvalid"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "gps_warmup"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "gvalid"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc",
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2128,
+   "n_minimal_cut_sets": 9,
+   "order_one_cut_sets": [],
+   "pair": "gps_fault+imu0_bias_drift"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.109375,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.171875,
+    "channel:imu0": 0.328125,
+    "channel:imu1": 0.546875,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.109375,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.171875,
+    "gvalid": 0.171875,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 3,
+    "3": 6
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:imu1"
+    ],
+    [
+     "channel:imu1",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu1",
+     "gvalid"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:imu0",
+     "gps_warmup"
+    ],
+    [
+     "armed_gate",
+     "channel:imu0",
+     "gvalid"
+    ],
+    [
+     "channel:gps",
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc",
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2464,
+   "n_minimal_cut_sets": 9,
+   "order_one_cut_sets": [],
+   "pair": "gps_fault+imu1_bias_drift"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.125,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.875,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.125,
+    "gvalid": 0.125,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 3
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:mag"
+    ],
+    [
+     "channel:mag",
+     "gps_warmup"
+    ],
+    [
+     "channel:mag",
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1792,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "gps_fault+mag_interference"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.25,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.25,
+    "gvalid": 0.25,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 3
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps"
+    ],
+    [
+     "gps_warmup"
+    ],
+    [
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 3584,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [
+    "channel:gps",
+    "gps_warmup",
+    "gvalid"
+   ],
+   "pair": "gps_fault+nominal"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.4375,
+    "channel:gps": 0.0625,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.4375,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0625,
+    "gvalid": 0.0625,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 3
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:gps",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:battery",
+     "channel:motor_esc",
+     "gps_warmup"
+    ],
+    [
+     "channel:battery",
+     "channel:motor_esc",
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 896,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "gps_fault+power_fault"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 1.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2048,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [
+    "channel:gps"
+   ],
+   "pair": "gps_fault+unexpected_maneuver"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.125,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.875,
+    "gps_warmup": 0.125,
+    "gvalid": 0.125,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 3
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:vibration"
+    ],
+    [
+     "channel:vibration",
+     "gps_warmup"
+    ],
+    [
+     "channel:vibration",
+     "gvalid"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1792,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "gps_fault+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.25,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.5,
+    "channel:imu1": 0.125,
+    "channel:mag": 0.375,
+    "channel:motor_esc": 0.25,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 5
+   },
+   "minimal_cut_sets": [
+    [
+     "armed_gate",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:mag"
+    ],
+    [
+     "channel:imu0",
+     "channel:imu1"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2560,
+   "n_minimal_cut_sets": 5,
+   "order_one_cut_sets": [],
+   "pair": "imu0_bias_drift+imu1_bias_drift"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0625,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.3125,
+    "channel:imu1": 0.1875,
+    "channel:mag": 0.6875,
+    "channel:motor_esc": 0.0625,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu0",
+     "channel:mag"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1408,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu0_bias_drift+mag_interference"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0625,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.8125,
+    "channel:imu1": 0.1875,
+    "channel:mag": 0.1875,
+    "channel:motor_esc": 0.0625,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 1,
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2432,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [
+    "channel:imu0"
+   ],
+   "pair": "imu0_bias_drift+nominal"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.3125,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.1875,
+    "channel:imu1": 0.0625,
+    "channel:mag": 0.0625,
+    "channel:motor_esc": 0.3125,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 1,
+    "4": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:battery",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 640,
+   "n_minimal_cut_sets": 2,
+   "order_one_cut_sets": [],
+   "pair": "imu0_bias_drift+power_fault"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.03125,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.59375,
+    "channel:imu0": 0.40625,
+    "channel:imu1": 0.09375,
+    "channel:mag": 0.09375,
+    "channel:motor_esc": 0.03125,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "4": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1216,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu0_bias_drift+unexpected_maneuver"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.03125,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.40625,
+    "channel:imu1": 0.09375,
+    "channel:mag": 0.09375,
+    "channel:motor_esc": 0.03125,
+    "channel:vibration": 0.59375,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "4": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu0",
+     "channel:vibration"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "channel:vibration"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc",
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1216,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu0_bias_drift+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0625,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.1875,
+    "channel:imu1": 0.3125,
+    "channel:mag": 0.6875,
+    "channel:motor_esc": 0.0625,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "armed_gate",
+     "channel:imu0",
+     "channel:mag"
+    ],
+    [
+     "channel:imu0",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1408,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu1_bias_drift+mag_interference"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.125,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.375,
+    "channel:imu1": 0.625,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.125,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 1,
+    "2": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu1"
+    ],
+    [
+     "armed_gate",
+     "channel:imu0"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2816,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [
+    "channel:imu1"
+   ],
+   "pair": "imu1_bias_drift+nominal"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.375,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.125,
+    "channel:imu1": 0.125,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.375,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:battery",
+     "channel:imu1",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 768,
+   "n_minimal_cut_sets": 2,
+   "order_one_cut_sets": [],
+   "pair": "imu1_bias_drift+power_fault"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0625,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.6875,
+    "channel:imu0": 0.1875,
+    "channel:imu1": 0.3125,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0625,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:imu1"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "channel:gps",
+     "channel:imu0",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1408,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu1_bias_drift+unexpected_maneuver"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0625,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.1875,
+    "channel:imu1": 0.3125,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0625,
+    "channel:vibration": 0.6875,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1,
+    "3": 2
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:imu1",
+     "channel:vibration"
+    ],
+    [
+     "armed_gate",
+     "channel:imu0",
+     "channel:vibration"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc",
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1408,
+   "n_minimal_cut_sets": 3,
+   "order_one_cut_sets": [],
+   "pair": "imu1_bias_drift+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 1.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:mag"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2048,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [
+    "channel:mag"
+   ],
+   "pair": "mag_interference+nominal"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.25,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.25,
+    "channel:motor_esc": 0.25,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 512,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "mag_interference+power_fault"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.5,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.5,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:mag"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1024,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "mag_interference+unexpected_maneuver"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.5,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.5,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:mag",
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1024,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "mag_interference+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.5,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.5,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1024,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "nominal+power_fault"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 1.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "1": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 2048,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [
+    "channel:vibration"
+   ],
+   "pair": "nominal+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.25,
+    "channel:gps": 0.25,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.25,
+    "channel:vibration": 0.0,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:gps",
+     "channel:motor_esc"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 512,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "power_fault+unexpected_maneuver"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.25,
+    "channel:gps": 0.0,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.25,
+    "channel:vibration": 0.25,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "3": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:battery",
+     "channel:motor_esc",
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 512,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "power_fault+vibration_anomaly"
+  },
+  {
+   "birnbaum_importance": {
+    "armed_gate": 0.0,
+    "channel:baro": 0.0,
+    "channel:battery": 0.0,
+    "channel:gps": 0.5,
+    "channel:imu0": 0.0,
+    "channel:imu1": 0.0,
+    "channel:mag": 0.0,
+    "channel:motor_esc": 0.0,
+    "channel:vibration": 0.5,
+    "gps_warmup": 0.0,
+    "gvalid": 0.0,
+    "speed_gate": 0.0
+   },
+   "cut_set_size_distribution": {
+    "2": 1
+   },
+   "minimal_cut_sets": [
+    [
+     "channel:gps",
+     "channel:vibration"
+    ]
+   ],
+   "monotone": true,
+   "monotonicity_violations": [],
+   "n_failing_configurations": 1024,
+   "n_minimal_cut_sets": 1,
+   "order_one_cut_sets": [],
+   "pair": "unexpected_maneuver+vibration_anomaly"
+  }
+ ],
+ "probability_bridge": {
+  "STATUS": "NOT COMPUTABLE. No per-gate closure probability and no per-channel unavailability probability exists anywhere in this repository. No emission table, no reliability block, no measured rates.",
+  "conditional_form": "the operationally meaningful quantity is P(phi_ab = 1 | h_a true), because gate closure probabilities are hypothesis-dependent: q_gvalid differs under GNSS degradation and under nominal flight",
+  "equivalently": "for a coherent system, P(phi=1) = 1 - prod over minimal PATH sets of (1 - prod of component availabilities); the cut-set form above is used here because the cut sets are enumerated",
+  "expression": "P(phi_ab = 1) = sum over states s of [ prod_{c in s} q_c * prod_{c not in s} (1 - q_c) * phi_ab(s) ]",
+  "externally_supplied_figure": "The ~45:1 ratio quoted by the user (P(Z=0|GNSS_DEG) ~ 0.90 vs P(Z=0|nominal) ~ 0.02) is EXTERNAL to this codebase and is not used in any computation here.",
+  "q_c_required": [
+   "q_armed_gate",
+   "q_gps_warmup",
+   "q_gvalid",
+   "q_speed_gate",
+   "q_channel:baro",
+   "q_channel:battery",
+   "q_channel:gps",
+   "q_channel:imu0",
+   "q_channel:imu1",
+   "q_channel:mag",
+   "q_channel:motor_esc",
+   "q_channel:vibration"
+  ],
+  "single_measurement_that_unlocks_it": "q_gvalid conditioned on hypothesis \u2014 i.e. P(gvalid closed | gps_fault) versus P(gvalid closed | nominal), measured from per-tick gate traces on real flight logs. This is the same measurement WP-E2 needs, and it converts every structural result in WP-C1 through WP-C3 into a risk statement."
+ },
+ "purpose": "diagnostic failure as a coherent-system structure function: cut sets, Birnbaum importance, symbolic risk"
+}
