@@ -271,7 +271,15 @@ Three things surprised me:
   GPS problem.
 - **The promotion made `mag` the most diagnostically important component in
   the aircraft.** We fixed the IMU collision by routing IMU discrimination
-  through the magnetometer. Favourable trade, real coupling, now on record.
+  through the magnetometer.
+
+  > **SUPERSEDED by WP-C4 §2.5.** This section originally called that a
+  > "trade" and a "real coupling". The cut-set test says otherwise: the
+  > promotion created **no new order-one cut set** at `channel:mag`, and the
+  > set of components appearing in any order-one cut set *shrank* from 9 to 7
+  > (`armed_gate` and `channel:motor_esc` dropped out). Birnbaum importance
+  > rose for `mag` without creating a new single point of diagnostic failure.
+  > The trade framing was too pessimistic; it was a strict improvement.
 
 ---
 
