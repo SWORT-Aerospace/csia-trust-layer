@@ -56,7 +56,7 @@ UAS traffic management safety cases.
 
 | Artifact | Where |
 |---|---|
-| Runtime + failsafe + plugins, 39 tests, CI | this repo, `csia/`, `.github/workflows/ci.yml` |
+| Runtime + failsafe + plugins, CI-gated test suite | this repo, `csia/`, `.github/workflows/ci.yml` |
 | Real-data validation report | `data/real_logs_report.json`, `csia analyze-logs` |
 | SITL validation harness | `tools/sitl_validate.py` (PASS) |
 | Live demo | `csia service` → dashboard LIVE tab |

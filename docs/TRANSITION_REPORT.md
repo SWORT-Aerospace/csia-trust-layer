@@ -64,7 +64,7 @@ commit, and remain listed so the audit trail is complete.)
 # PHASE 10 — Final Engineering Report
 
 ## Current strengths
-1. **Genuinely well-engineered software.** 62-test CI suite of *behavioral
+1. **Genuinely well-engineered software.** A CI suite of *behavioral
    contracts* (causality, online/batch equivalence, C parity, determinism,
    crash containment). This is top-decile for a company this size.
 2. **Scientific integrity as a habit.** Adversarial self-review scored 38/100;

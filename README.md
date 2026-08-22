@@ -34,14 +34,14 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (77 tests)
+.venv/bin/python -m pytest    # full test suite
 ```
 
 ## Validation status (v0.8.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (77 tests, CI) | spoof: 2.2 s to trust<0.85 / **4.4 s to operator alert** @ 89%; IMU isolation 99%/0%; mag/power/vib 100%. Both latencies reported — they are not the same quantity ([§3](docs/validation/METRIC_DEFINITIONS.md)) |
+| **Simulated fault harness** — 5 scripted fault scenarios (`tests/scenarios/`), CI-gated. Synthetic injection, not real faults; assertion bounds are regression contracts set below previously measured performance, so passing indicates no regression, **not** independent detection evidence | spoof: 2.2 s to trust<0.85 / **4.4 s to operator alert** @ 89%; IMU isolation 99%/0%; mag/power/vib 100%. Both latencies reported — they are not the same quantity ([§3](docs/validation/METRIC_DEFINITIONS.md)) |
 | **Campaign reproducibility** — `csia bench`, `csia mc` (150 runs), seeker Monte Carlo regenerated after the 2026-07 live-path hardening | **bit-identical** to the committed `campaigns/*.json` and `deliverables/montecarlo_results.*` — the hardening changed no validated behavior |
 | **Soak** — looped runtime through the reset path (`tools/soak.py`) | 185 passes / 3.1 h flight-equivalent: 277,500 ticks, 0 errors, +0.0 MB RSS, latency ratio 1.01x |
 | **Real flight data** — 26 public PX4 logs, **UNANNOTATED** (`csia analyze-logs`) | **No CSIA alert episode occurred in 24 of 26 logs.** 2 alert episodes across **0.518 monitored flight-hours** → **3.86 episodes/h, 95% CI 0.47–13.94**. Exposure is *monitored* time (post-`arm_time`); raw log duration (0.663 h) overstates it by 21.8%, because no alert can be raised inside the arm window. **Verified-healthy exposure: 0.000 h** — these logs carry no annotation, and CSIA's silence is not evidence of health. **Held-out exposure: 0.000 h** — all 26 shaped `field_mode` and the offline posture. ~30-fold uncertainty; not a reliability claim. See [dataset provenance audit](docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md) and [exposure plan](docs/validation/EXPOSURE_PRECISION_PLAN.md) |

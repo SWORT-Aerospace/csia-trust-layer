@@ -20,7 +20,7 @@ with first-pass synthetic evidence — do not conflate them.
 ## Maturity by axis (UAV core)
 
 ### Software maturity — HIGH (≈ 8/10 as software engineering)
-Evidence: 62-test CI-gated suite; online/batch equivalence pinned;
+Evidence: CI-gated test suite; online/batch equivalence pinned;
 causality regression; C-vs-Python parity at 1e-12; determinism with
 byte-identical campaign regeneration; crash containment, self-health,
 bounds safety; requirements + traceability + evidence matrices; perf-

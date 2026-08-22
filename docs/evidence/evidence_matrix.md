@@ -36,7 +36,7 @@ evidence, weaker wording is recommended.
 | C16 | Determinism / bit-for-bit reproducible results | Determinism tests; campaigns regenerate byte-identical | `test_sensors.py`, `campaigns/*.json` | sensors, validation | High | **Validated** |
 | C17 | Armed-state gating from real vehicle state | Unit tests both directions + MAVLink map | `test_runtime.py`, `test_mavlink_map.py` | online/failsafe/plugins | Medium-High | **Supported** — live armed/disarm on hardware not yet observed |
 | C18 | Interceptor seeker: 100% detection, 0.44 s / 0.24 s latency, 100% attribution | 50-run/scenario seeker MC | `deliverables/montecarlo_results.json` | seeker/ | Medium | **Supported (SYNTHETIC)** — clearly labeled synthetic; not seeker hardware. See W6 |
-| C19 | 77-test suite, CI-gated (adds metrics/latency + native guard coverage) | pytest suite green; CI builds native core | `.github/workflows/ci.yml` | tests/ | High | **Validated** |
+| C19 | CI-gated test suite (adds metrics/latency + native guard coverage) | pytest suite green; CI builds native core | `.github/workflows/ci.yml` | tests/ | High | **Validated, count removed** — this row previously read "77-test suite" against a `c13889f` baseline where the suite collected 62. The count is no longer stated in prose; `tests/test_doc_counts.py` now enforces that. Historical counts are recorded in `docs/audit/CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md` §1.3 |
 | C20 | Advisory by default; commands nothing unless opted in | LoggingActuator default; MavlinkActuator gated | (code) | `service.py` | High | **Validated** |
 
 ## Recommended wording changes (claim stronger than evidence)
