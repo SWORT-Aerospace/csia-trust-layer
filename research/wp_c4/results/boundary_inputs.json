@@ -1,0 +1,93 @@
+{
+ "cases": {
+  "all_channels_stale_long_horizon": {
+   "detail": "freshness blocks the BELIEF UPDATE, so trust must hold",
+   "result": "OK",
+   "trust": 0.8
+  },
+  "channel_appears_mid_flight": {
+   "result": "OK",
+   "trust": 0.8182149362477231
+  },
+  "channel_vanishes_and_returns": {
+   "result": "OK",
+   "trust": 0.9952562449605312
+  },
+  "diagnosis_all_gates_closed": {
+   "detail": "every feature gated off: must fall back to the prior",
+   "result": "OK",
+   "top": [
+    "nominal",
+    0.86
+   ]
+  },
+  "diagnosis_consistency_out_of_range": {
+   "detail": "consistency is documented as being in (0,1]",
+   "posterior_sum": NaN,
+   "result": "SILENT_BAD"
+  },
+  "diagnosis_empty_features": {
+   "detail": "no features at all: posterior must be the prior",
+   "posterior_sum": 1.0,
+   "result": "OK",
+   "top": [
+    "nominal",
+    0.86
+   ]
+  },
+  "diagnosis_nan_consistency": {
+   "any_nan": true,
+   "posterior_sum": NaN,
+   "result": "SILENT_BAD"
+  },
+  "gate_above_one": {
+   "detail": "gate is documented as being in [0,1]",
+   "result": "OK",
+   "trust": 0.8182149362477231
+  },
+  "gate_negative": {
+   "result": "OK",
+   "trust": 0.8
+  },
+  "inf_in_edge_lambda": {
+   "result": "OK",
+   "trust": 0.7271402550091074
+  },
+  "nan_in_edge_lambda": {
+   "detail": "clamped/absorbed",
+   "result": "OK",
+   "trust": 0.8182149362477231
+  },
+  "negative_lambda": {
+   "detail": "lambda is a squared normalised residual; negative is physically impossible input",
+   "result": "OK",
+   "trust": 0.8182149362477231
+  },
+  "no_evidence_at_all": {
+   "detail": "regression-tested path (engine.py no-evidence branch)",
+   "result": "OK",
+   "trust": 0.8
+  },
+  "rapid_gate_toggle_every_period_1_to_100": {
+   "detail": "posterior must stay a normalised distribution at every toggle period",
+   "first_bad_period": null,
+   "result": "OK"
+  },
+  "saturated_pseudocounts_long_horizon": {
+   "alpha_plus_beta_cap": 499.99999999999955,
+   "detail": "50k ticks of perfect consistency; concentration is implicitly capped at 1/(1-rho_max)",
+   "result": "OK",
+   "trust": 1.0
+  }
+ },
+ "classification": {
+  "CRASH": "raises",
+  "OK": "handled correctly",
+  "SILENT_BAD": "no exception but wrong output"
+ },
+ "purpose": "degenerate and boundary inputs against the unmodified kernels; findings recorded, nothing fixed",
+ "summary": {
+  "OK": 13,
+  "SILENT_BAD": 2
+ }
+}

@@ -1,0 +1,370 @@
+{
+ "channel_mag_order_one_pairs_post": [
+  "mag_interference+nominal"
+ ],
+ "channel_mag_order_one_pairs_pre": [
+  "mag_interference+nominal"
+ ],
+ "components_appearing_in_any_order_one_post": [
+  "channel:gps",
+  "channel:imu0",
+  "channel:imu1",
+  "channel:mag",
+  "channel:vibration",
+  "gps_warmup",
+  "gvalid"
+ ],
+ "components_appearing_in_any_order_one_pre": [
+  "armed_gate",
+  "channel:gps",
+  "channel:imu0",
+  "channel:imu1",
+  "channel:mag",
+  "channel:motor_esc",
+  "channel:vibration",
+  "gps_warmup",
+  "gvalid"
+ ],
+ "n_pairs_with_order_one_cut_post": 6,
+ "n_pairs_with_order_one_cut_pre": 7,
+ "new_mag_order_one_pairs": [],
+ "order_one_cut_sets_post": {
+  "gps_fault+nominal": [
+   "channel:gps",
+   "gps_warmup",
+   "gvalid"
+  ],
+  "gps_fault+unexpected_maneuver": [
+   "channel:gps"
+  ],
+  "imu0_bias_drift+nominal": [
+   "channel:imu0"
+  ],
+  "imu1_bias_drift+nominal": [
+   "channel:imu1"
+  ],
+  "mag_interference+nominal": [
+   "channel:mag"
+  ],
+  "nominal+vibration_anomaly": [
+   "channel:vibration"
+  ]
+ },
+ "order_one_cut_sets_pre": {
+  "gps_fault+nominal": [
+   "channel:gps",
+   "gps_warmup",
+   "gvalid"
+  ],
+  "gps_fault+unexpected_maneuver": [
+   "channel:gps"
+  ],
+  "imu0_bias_drift+imu1_bias_drift": [
+   "armed_gate",
+   "channel:motor_esc"
+  ],
+  "imu0_bias_drift+nominal": [
+   "channel:imu0"
+  ],
+  "imu1_bias_drift+nominal": [
+   "channel:imu1"
+  ],
+  "mag_interference+nominal": [
+   "channel:mag"
+  ],
+  "nominal+vibration_anomaly": [
+   "channel:vibration"
+  ]
+ },
+ "pairs_whose_cut_sets_changed": [
+  {
+   "cut_sets_post": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "channel:imu0",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu0",
+     "gvalid"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "gps_warmup"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "gvalid"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc",
+     "gps_warmup"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "channel:imu0",
+     "gps_warmup"
+    ],
+    [
+     "channel:imu0",
+     "gvalid"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "gps_warmup"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "gvalid"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:imu1",
+     "channel:motor_esc",
+     "gps_warmup"
+    ]
+   ],
+   "min_cut_size_post": 2,
+   "min_cut_size_pre": 2,
+   "order_one_post": [],
+   "order_one_pre": [],
+   "pair": "gps_fault+imu0_bias_drift"
+  },
+  {
+   "cut_sets_post": [
+    [
+     "armed_gate",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:mag"
+    ],
+    [
+     "channel:imu0",
+     "channel:imu1"
+    ],
+    [
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "armed_gate"
+    ],
+    [
+     "channel:motor_esc"
+    ],
+    [
+     "channel:imu0",
+     "channel:imu1"
+    ]
+   ],
+   "min_cut_size_post": 2,
+   "min_cut_size_pre": 1,
+   "order_one_post": [],
+   "order_one_pre": [
+    "armed_gate",
+    "channel:motor_esc"
+   ],
+   "pair": "imu0_bias_drift+imu1_bias_drift"
+  },
+  {
+   "cut_sets_post": [
+    [
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1"
+    ],
+    [
+     "channel:imu1",
+     "channel:motor_esc"
+    ]
+   ],
+   "min_cut_size_post": 1,
+   "min_cut_size_pre": 1,
+   "order_one_post": [
+    "channel:imu0"
+   ],
+   "order_one_pre": [
+    "channel:imu0"
+   ],
+   "pair": "imu0_bias_drift+nominal"
+  },
+  {
+   "cut_sets_post": [
+    [
+     "channel:battery",
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:battery",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "channel:battery",
+     "channel:imu0",
+     "channel:motor_esc"
+    ],
+    [
+     "channel:battery",
+     "channel:imu1",
+     "channel:motor_esc"
+    ]
+   ],
+   "min_cut_size_post": 3,
+   "min_cut_size_pre": 3,
+   "order_one_post": [],
+   "order_one_pre": [],
+   "pair": "imu0_bias_drift+power_fault"
+  },
+  {
+   "cut_sets_post": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "channel:gps",
+     "channel:imu0"
+    ],
+    [
+     "armed_gate",
+     "channel:gps",
+     "channel:imu1"
+    ],
+    [
+     "channel:gps",
+     "channel:imu1",
+     "channel:motor_esc"
+    ]
+   ],
+   "min_cut_size_post": 2,
+   "min_cut_size_pre": 2,
+   "order_one_post": [],
+   "order_one_pre": [],
+   "pair": "imu0_bias_drift+unexpected_maneuver"
+  },
+  {
+   "cut_sets_post": [
+    [
+     "channel:imu0",
+     "channel:vibration"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:mag",
+     "channel:vibration"
+    ],
+    [
+     "channel:imu1",
+     "channel:mag",
+     "channel:motor_esc",
+     "channel:vibration"
+    ]
+   ],
+   "cut_sets_pre": [
+    [
+     "channel:imu0",
+     "channel:vibration"
+    ],
+    [
+     "armed_gate",
+     "channel:imu1",
+     "channel:vibration"
+    ],
+    [
+     "channel:imu1",
+     "channel:motor_esc",
+     "channel:vibration"
+    ]
+   ],
+   "min_cut_size_post": 2,
+   "min_cut_size_pre": 2,
+   "order_one_post": [],
+   "order_one_pre": [],
+   "pair": "imu0_bias_drift+vibration_anomaly"
+  }
+ ],
+ "purpose": "did promoting the IMU repair create a new order-one cut set at channel:mag?",
+ "question_answered": "NO"
+}
