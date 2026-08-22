@@ -4,8 +4,10 @@ Each case is fed to the unmodified `TrustCore` and `DiagnosisCore` and
 classified:
 
   OK              handled correctly and defensibly
+  REJECTED        raises a ValueError naming the offending input: the correct
+                  response to out-of-domain data
   SILENT_BAD      no exception, but the output is wrong or meaningless
-  CRASH           raises
+  CRASH           raises something other than a deliberate input rejection
 
 Findings are RECORDED, not fixed.
 
@@ -43,6 +45,9 @@ def step(core, lam=0.0, gate=1.0, fresh=True, phys=True):
 def classify(fn):
     try:
         val = fn()
+    except ValueError as exc:                      # noqa: BLE001
+        # A deliberate input rejection is the desired outcome, not a crash.
+        return {"result": "REJECTED", "detail": f"ValueError: {exc}"}
     except Exception as exc:                       # noqa: BLE001
         return {"result": "CRASH", "detail": f"{type(exc).__name__}: {exc}"}
     return val
@@ -234,8 +239,14 @@ def main() -> int:
         "purpose": "degenerate and boundary inputs against the unmodified "
                    "kernels; findings recorded, nothing fixed",
         "classification": {"OK": "handled correctly",
+                           "REJECTED": "raises ValueError naming the input",
                            "SILENT_BAD": "no exception but wrong output",
-                           "CRASH": "raises"},
+                           "CRASH": "raises something else"},
+        "guard_note": "The two DiagnosisCore cases were SILENT_BAD when this "
+                      "probe was first run (WP-C4). WP-C5 added bounds "
+                      "rejection at bayes.py, so they now read REJECTED. The "
+                      "guard was verified to leave every scenario output and "
+                      "campaigns/bench.json bit-identical.",
         "summary": counts,
         "cases": out,
     }

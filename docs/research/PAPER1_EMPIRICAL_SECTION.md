@@ -132,20 +132,20 @@ same (empty) response and therefore need never be distinguished. Define
 
 | Metric | Gate closure (endogenous) | Channel absence (exogenous) |
 |---|---|---|
-| κ_max | 0.286 | 1.000 |
-| CWE | 0.074 | 1.000 |
-| **IRE** | **0.074** | **0.000** |
+| κ_max | **0.143** | 1.000 |
+| CWE | **0.037** | 1.000 |
+| **IRE** | **0.037** | **0.000** |
 
 **CWE does not invert the κ ordering; it widens it.** Weighting by commanded
 response makes exogenous unavailability look *worse*, not better: channel
-absence exposes every decision-relevant pair, gate closure exposes two of 27.
+absence exposes every decision-relevant pair, gate closure exposes one of 27.
 
-**The ordering that inverts is remediability.** Twenty-five of the 27
+**The ordering that inverts is remediability.** Twenty-six of the 27
 decision-relevant exposures vanish the moment the aircraft carries all eight
 channels — they are properties of *this corpus*, not of the architecture. The
-two that survive full instrumentation are **both gate-caused**, and one of
-them is `gps_fault` ≡ `nominal`: the fault hypothesis whose sole discriminating
-feature is suppressed by the very gate that a GPS fault triggers. That is
+**one** that survives full instrumentation is gate-caused: `gps_fault` ≡
+`nominal`, the fault hypothesis whose sole discriminating feature is suppressed
+by the very gate that a GPS fault triggers. That is
 nominal absorption produced by an endogenous gate, on the most safety-relevant
 pair in the system, and it is the one exposure for which no repair exists
 inside the current feature set.
@@ -155,8 +155,16 @@ not through κ magnitude**. A reader given only κ would conclude the theorised
 mechanism is a minor contributor. A reader given only IRE would miss that the
 corpus destroys the partition wholesale. Neither reading alone is correct.
 
+> **Version note.** These gate figures are POST-promotion (commit `081cca3`,
+> which added `attitude_gravity_mag` to `imu0_bias_drift`, repairing the
+> `imu0`/`imu1` collision). Pre-promotion they were κ_max 0.286, CWE 0.074 and
+> IRE 0.074, with two surviving pairs rather than one. The argument is
+> unchanged in either version: the gate ceiling sits far below the corpus's
+> 1.000, and every irreducible exposure is gate-caused. See
+> `docs/audit/VERSION_BOUNDARY.md`.
+
 We emphasise what this does and does not license. Gate-induced coarsening
-remains **unmeasured**: 0.286 and 0.074 are structural ceilings computed from
+remains **unmeasured**: 0.143 and 0.037 are structural ceilings computed from
 the signature matrix and gate map, not realised frequencies. In particular the
 frequency of `gvalid` closure in flight is unknown, and a certificate says
 what can happen, never how often.

@@ -104,6 +104,17 @@ class DiagnosisCore:
         for fname, (c, gate) in features.items():
             if gate <= 1e-9:
                 continue
+            # Bounds rejection, matching TrustCore. Without it a NaN or an
+            # out-of-domain consistency makes np.log return NaN, which
+            # propagates through the softmax and yields a posterior that is
+            # not a distribution -- silently, with only a RuntimeWarning.
+            # consistency() maps lambda into (0, 1], so no production
+            # upstream can trip this; a corrupted or hand-built feature dict
+            # can. Raising is the only outcome that cannot be mistaken for a
+            # diagnosis.
+            if not (0.0 <= float(c) <= 1.0):
+                raise ValueError(
+                    f"consistency for {fname!r} must lie in [0, 1], got {c!r}")
             lo = float(np.log(1.0 - c + EPS))
             hi = float(np.log(c + EPS))
             for ci, low in enumerate(self._low):

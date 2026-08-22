@@ -22,9 +22,8 @@
    ]
   },
   "diagnosis_consistency_out_of_range": {
-   "detail": "consistency is documented as being in (0,1]",
-   "posterior_sum": NaN,
-   "result": "SILENT_BAD"
+   "detail": "ValueError: consistency for 'phys_gps' must lie in [0, 1], got 5.0",
+   "result": "REJECTED"
   },
   "diagnosis_empty_features": {
    "detail": "no features at all: posterior must be the prior",
@@ -36,9 +35,8 @@
    ]
   },
   "diagnosis_nan_consistency": {
-   "any_nan": true,
-   "posterior_sum": NaN,
-   "result": "SILENT_BAD"
+   "detail": "ValueError: consistency for 'phys_gps' must lie in [0, 1], got nan",
+   "result": "REJECTED"
   },
   "gate_above_one": {
    "detail": "gate is documented as being in [0,1]",
@@ -81,13 +79,15 @@
   }
  },
  "classification": {
-  "CRASH": "raises",
+  "CRASH": "raises something else",
   "OK": "handled correctly",
+  "REJECTED": "raises ValueError naming the input",
   "SILENT_BAD": "no exception but wrong output"
  },
+ "guard_note": "The two DiagnosisCore cases were SILENT_BAD when this probe was first run (WP-C4). WP-C5 added bounds rejection at bayes.py, so they now read REJECTED. The guard was verified to leave every scenario output and campaigns/bench.json bit-identical.",
  "purpose": "degenerate and boundary inputs against the unmodified kernels; findings recorded, nothing fixed",
  "summary": {
   "OK": 13,
-  "SILENT_BAD": 2
+  "REJECTED": 2
  }
 }
