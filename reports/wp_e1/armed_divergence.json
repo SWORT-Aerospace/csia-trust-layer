@@ -1,0 +1,112 @@
+{
+ "arming_time_sensitivity": [
+  {
+   "affects_monitored_exposure": false,
+   "assumed_arming_time_s": 0.0,
+   "corpus_seconds_in_window": 156.0,
+   "disagreement_window_s": [
+    0.0,
+    6.0
+   ],
+   "fraction_of_raw_exposure": 0.0654,
+   "fraction_of_window_already_excluded": 1.0,
+   "seconds_also_inside_arm_time_exclusion": 156.0
+  },
+  {
+   "affects_monitored_exposure": false,
+   "assumed_arming_time_s": 2.0,
+   "corpus_seconds_in_window": 104.0,
+   "disagreement_window_s": [
+    2.0,
+    6.0
+   ],
+   "fraction_of_raw_exposure": 0.0436,
+   "fraction_of_window_already_excluded": 1.0,
+   "seconds_also_inside_arm_time_exclusion": 104.0
+  },
+  {
+   "affects_monitored_exposure": false,
+   "assumed_arming_time_s": 5.0,
+   "corpus_seconds_in_window": 0.0,
+   "disagreement_window_s": [
+    0.0,
+    0.0
+   ],
+   "fraction_of_raw_exposure": 0.0,
+   "fraction_of_window_already_excluded": null,
+   "seconds_also_inside_arm_time_exclusion": 0.0
+  },
+  {
+   "affects_monitored_exposure": false,
+   "assumed_arming_time_s": 10.0,
+   "corpus_seconds_in_window": 156.0,
+   "disagreement_window_s": [
+    5.0,
+    11.0
+   ],
+   "fraction_of_raw_exposure": 0.0654,
+   "fraction_of_window_already_excluded": 1.0,
+   "seconds_also_inside_arm_time_exclusion": 156.0
+  },
+  {
+   "affects_monitored_exposure": true,
+   "assumed_arming_time_s": 20.0,
+   "corpus_seconds_in_window": 416.0,
+   "disagreement_window_s": [
+    5.0,
+    21.0
+   ],
+   "fraction_of_raw_exposure": 0.1744,
+   "fraction_of_window_already_excluded": 0.9375,
+   "seconds_also_inside_arm_time_exclusion": 390.0
+  },
+  {
+   "affects_monitored_exposure": true,
+   "assumed_arming_time_s": 30.0,
+   "corpus_seconds_in_window": 676.0,
+   "disagreement_window_s": [
+    5.0,
+    31.0
+   ],
+   "fraction_of_raw_exposure": 0.2833,
+   "fraction_of_window_already_excluded": 0.5769,
+   "seconds_also_inside_arm_time_exclusion": 390.0
+  },
+  {
+   "affects_monitored_exposure": true,
+   "assumed_arming_time_s": 60.0,
+   "corpus_seconds_in_window": 1151.2,
+   "disagreement_window_s": [
+    5.0,
+    61.0
+   ],
+   "fraction_of_raw_exposure": 0.4825,
+   "fraction_of_window_already_excluded": 0.3388,
+   "seconds_also_inside_arm_time_exclusion": 390.0
+  }
+ ],
+ "assumption_free_bound": {
+  "corpus_seconds_in_window": 156.0,
+  "fraction_of_monitored_exposure": 0.0,
+  "fraction_of_raw_exposure": 0.0654,
+  "proxy_unsaturated_window_s": 6.0,
+  "reasoning": "The proxy is unsaturated only over [0, 6.0) s of each flight. That window lies entirely inside the 20 s arm-time exclusion already applied to the exposure denominator, so NONE of it is monitored time."
+ },
+ "batch_path": "comparator.py:137 \u2014 no armed flag exists; assumes arming at t = 5.0 s unconditionally",
+ "corpus": {
+  "arm_time_exclusion_s": 20.0,
+  "monitored_exposure_s": 1865.9,
+  "n_logs": 26,
+  "raw_exposure_s": 2385.9
+ },
+ "corpus_metadata_gap": {
+  "arming_timestamps_recorded": false,
+  "note": "data/real_logs_report.json carries only log id, duration, channel list, min trust, transitions, bad samples and excluded channels. It records no timestamps, no arming events and no topic inventory, so the ACTUAL per-log arming time is UNKNOWN and the exact divergence cannot be computed from committed artifacts. The bound below holds regardless.",
+  "vehicle_status_topic_presence_recorded": false
+ },
+ "purpose": "quantify the armed_gate batch-proxy vs runtime-flag divergence over the real-log corpus",
+ "reference_semantics": "runtime flag (online.py:491-496)",
+ "runtime_fallback": "when the armed flag is None the runtime uses the identical proxy, so the paths agree exactly whenever vehicle_status is absent from the log",
+ "status": "WP1 DISCREPANCY \u2014 recorded, not repaired",
+ "verdict": "The divergence cannot affect any published real-log figure. Under every assumed arming time up to the arm window itself, the entire disagreement region lies inside the 20 s exclusion already removed from the exposure denominator. It affects 0.0% of monitored exposure. For a vehicle arming LATER than the arm window the divergence would reach monitored time, and the runtime (correctly) withholds motor-edge evidence the batch path would credit \u2014 but no corpus log records its arming time, so whether that occurred is UNKNOWN."
+}
