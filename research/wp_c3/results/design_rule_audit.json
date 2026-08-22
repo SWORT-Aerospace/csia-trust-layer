@@ -1,0 +1,41 @@
+{
+ "at_risk_unknown": [],
+ "baseline": "post-promotion signature matrix (attitude_gravity_mag already in imu0_bias_drift)",
+ "fatal_violations": [
+  {
+   "closed_by_this_hypothesis": [
+    "gvalid"
+   ],
+   "feature": "phys_gps",
+   "gated_by": [
+    "gvalid",
+    "gps_warmup"
+   ],
+   "hypothesis": "gps_fault",
+   "is_sole_feature": true,
+   "unknown_for_this_hypothesis": []
+  }
+ ],
+ "n_at_risk_unknown": 0,
+ "n_clean": 18,
+ "n_signature_entries": 19,
+ "n_violations": 1,
+ "provenance": "generalised from the WP-C2 Part 3 control: the same GPS relation repairs gps_fault+nominal when ungated and repairs nothing when gated by gvalid",
+ "rule": "a feature intended to discriminate hypothesis h must not be gated by any gate that h closes",
+ "severity_note": "A violation is fatal to the hypothesis exactly when the violating feature is its SOLE feature: the hypothesis then has an empty effective signature and is absorbed into nominal. A violation on one of several features merely weakens the hypothesis.",
+ "violations": [
+  {
+   "closed_by_this_hypothesis": [
+    "gvalid"
+   ],
+   "feature": "phys_gps",
+   "gated_by": [
+    "gvalid",
+    "gps_warmup"
+   ],
+   "hypothesis": "gps_fault",
+   "is_sole_feature": true,
+   "unknown_for_this_hypothesis": []
+  }
+ ]
+}
