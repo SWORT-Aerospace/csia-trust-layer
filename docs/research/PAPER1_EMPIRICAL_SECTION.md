@@ -109,21 +109,59 @@ observable feature set is therefore a subset of the one assumed here, the
 partition is at least as coarse, and **actual in-flight κ is at least these
 values and plausibly higher.**
 
-A structural bound on the gate contribution can be computed separately. Over
-all sixteen configurations of the four gates that actuate on a signature-
-referenced feature, with all channels present, κ is at most **0.286**: gate
-closure alone can destroy at most two of the eight distinctions, because five
-hypotheses rest on features no gate controls. The corpus property measured
-above therefore dominates the theorised mechanism's structural ceiling by a
-wide margin — 1.000 against 0.286.
+### N.6 Two metrics, and why they disagree
 
-We emphasise what this comparison does and does not license. It shows that in
-this system, under this corpus, exogenous unavailability is the larger source
-of coarsening. It does **not** measure gate-induced coarsening, whose
-structural ceiling is not its realised value, and it does not bear on the
-statistical questions the exogeneity condition addresses.
+κ counts how many distinctions are lost. It does not weight them by whether
+losing them changes what the system should *do*. Reporting only κ makes
+exogenous unavailability look like the dominant problem. Reporting only
+severity-weighted measures would understate how much of the diagnostic
+partition the corpus destroys. Both are needed, and their disagreement is
+itself the finding.
 
-### N.6 Scope: attribution, not detection
+Let `D_critical` be the hypothesis pairs requiring different commanded
+responses — derived from the failsafe automaton's action table including
+action parameters. For this system 27 of 28 pairs are decision-relevant; the
+single exception is `nominal` versus `unexpected_maneuver`, which command the
+same (empty) response and therefore need never be distinguished. Define
+
+- **CWE(M)** — the fraction of `D_critical` merged under some configuration
+  reachable by mechanism M alone;
+- **IRE** — the fraction of `D_critical` merged under some configuration
+  reachable when **all** channels are present, i.e. exposures that no amount
+  of instrumentation removes.
+
+| Metric | Gate closure (endogenous) | Channel absence (exogenous) |
+|---|---|---|
+| κ_max | 0.286 | 1.000 |
+| CWE | 0.074 | 1.000 |
+| **IRE** | **0.074** | **0.000** |
+
+**CWE does not invert the κ ordering; it widens it.** Weighting by commanded
+response makes exogenous unavailability look *worse*, not better: channel
+absence exposes every decision-relevant pair, gate closure exposes two of 27.
+
+**The ordering that inverts is remediability.** Twenty-five of the 27
+decision-relevant exposures vanish the moment the aircraft carries all eight
+channels — they are properties of *this corpus*, not of the architecture. The
+two that survive full instrumentation are **both gate-caused**, and one of
+them is `gps_fault` ≡ `nominal`: the fault hypothesis whose sole discriminating
+feature is suppressed by the very gate that a GPS fault triggers. That is
+nominal absorption produced by an endogenous gate, on the most safety-relevant
+pair in the system, and it is the one exposure for which no repair exists
+inside the current feature set.
+
+The endogeneity results are therefore load-bearing **through irreducibility,
+not through κ magnitude**. A reader given only κ would conclude the theorised
+mechanism is a minor contributor. A reader given only IRE would miss that the
+corpus destroys the partition wholesale. Neither reading alone is correct.
+
+We emphasise what this does and does not license. Gate-induced coarsening
+remains **unmeasured**: 0.286 and 0.074 are structural ceilings computed from
+the signature matrix and gate map, not realised frequencies. In particular the
+frequency of `gvalid` closure in flight is unknown, and a certificate says
+what can happen, never how often.
+
+### N.7 Scope: attribution, not detection
 
 The coarsening reported here constrains **attribution**. The trust recursion
 and the failsafe policy consume trust coefficients and data freshness, not the
@@ -138,11 +176,13 @@ attribution layer could not have named most faults had they occurred. Absence
 of an alert in a κ = 1.000 configuration is close to uninformative about the
 system's diagnostic capability.
 
-### N.7 Limitations
+### N.8 Limitations
 
-1. **One mechanism only.** Gate-induced coarsening is unmeasured. Establishing
-   it requires per-tick gate traces, which the committed corpus artifacts do
-   not contain.
+1. **One mechanism measured, one bounded.** Gate-induced coarsening is
+   unmeasured; §N.6 reports only its structural ceiling. Establishing the
+   realised value requires per-tick gate traces, which the committed corpus
+   artifacts do not contain. The single most important missing number is the
+   in-flight frequency of `gvalid` closure.
 2. **Structural, not statistical.** Hypotheses in one observable class may
    still separate if their conditional distributions differ in magnitude or
    variance. κ bounds structural indistinguishability only.
@@ -160,7 +200,7 @@ system's diagnostic capability.
 7. **Nominal reproducibility.** The logs are identified by UUID with no
    content hashes recorded, so re-acquisition cannot be proven byte-identical.
 
-### N.8 Reproduction
+### N.9 Reproduction
 
 The computation depends only on the committed channel inventory and signature
 matrix; no flight data is required to re-derive it.
@@ -179,3 +219,10 @@ to the cause, with the endogenous mechanism explicitly unmeasured and its
 structural ceiling reported for contrast — is both defensible and, in our
 view, the stronger claim: it is the first measurement of κ on a real corpus,
 and it happens to show the corpus property dominating the theorised one.
+
+A second temptation, added after the severity analysis: do **not** drop κ in
+favour of the criticality-weighted numbers. CWE does not rescue the endogenous
+mechanism — it makes exogenous absence look worse still. What carries the
+endogeneity argument is irreducibility (IRE), and it carries it on two pairs
+out of 27, one of which now has a repair. State all three metrics. A referee
+who sees only the one that flatters the theory will find the other two.
