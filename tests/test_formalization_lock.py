@@ -286,22 +286,51 @@ def test_gated_feature_contributes_nothing_to_diagnosis():
 # Preserved as findings, NOT repaired. See
 # research/formalization/diagnostic_signature_matrix.md.
 
-def test_COUNTEREXAMPLE_imu_hypotheses_collide_when_motor_edges_gated():
-    """F-D1. Disarmed/pre-arm gates the motor edges off (online.py:491-496).
-    imu0_bias_drift and imu1_bias_drift then share the LOW set {redundant_imu}
-    and become observationally identical: equal priors, so the posterior splits
-    and no evidence can separate them."""
+def test_REPAIRED_F_D1_imu_hypotheses_separate_when_motor_edges_gated():
+    """F-D1, **repaired in WP-C3**. Was a documented counterexample.
+
+    Disarmed/pre-arm gates the motor edges off (online.py:491-496). Until
+    2026-08-22 that left imu0_bias_drift and imu1_bias_drift sharing the LOW
+    set {redundant_imu}: equal priors, posterior split evenly, no evidence
+    able to separate them.
+
+    `attitude_gravity_mag` was added to imu0_bias_drift's signature. It
+    compares mag heading against imu0-integrated yaw, so an imu0 bias corrupts
+    it and an imu1 bias does not, and it is UNGATED — which is the property
+    that matters, since the motor edges are exactly what disarm removes.
+
+    This test now pins the repair: the signatures must stay distinct with the
+    motor edges off, and the posterior must favour the correct unit.
+    """
     off = {"accel_motor_current", "accel_esc_rpm", "phys_motor_esc"}
     a = set(CAUSES["imu0_bias_drift"]) - off
     b = set(CAUSES["imu1_bias_drift"]) - off
-    assert a == b == {"redundant_imu"}
+    assert a != b, "F-D1 has regressed: the IMU hypotheses collide again"
+    assert a == {"redundant_imu", "attitude_gravity_mag"}
+    assert b == {"redundant_imu"}
+    assert "attitude_gravity_mag" not in CAUSES["imu1_bias_drift"], (
+        "the repair must remain asymmetric; adding it to both units would "
+        "restore the collision")
 
+    # imu0 faulted: both its features anomalous, motor edges gated off.
     d = DiagnosisCore()
     for _ in range(200):
         post = d.step({"redundant_imu": (0.01, 1.0),
+                       "attitude_gravity_mag": (0.01, 1.0),
                        "accel_motor_current": (0.01, 0.0),
                        "accel_esc_rpm": (0.99, 0.0)})
-    assert post["imu0_bias_drift"] == pytest.approx(post["imu1_bias_drift"])
+    assert post["imu0_bias_drift"] > post["imu1_bias_drift"], (
+        "with attitude_gravity_mag anomalous the faulted unit must be imu0")
+
+    # imu1 faulted: the shared edge is anomalous, the imu0-specific one is not.
+    d = DiagnosisCore()
+    for _ in range(200):
+        post = d.step({"redundant_imu": (0.01, 1.0),
+                       "attitude_gravity_mag": (0.99, 1.0),
+                       "accel_motor_current": (0.99, 0.0),
+                       "accel_esc_rpm": (0.99, 0.0)})
+    assert post["imu1_bias_drift"] > post["imu0_bias_drift"], (
+        "with attitude_gravity_mag healthy the faulted unit must be imu1")
 
 
 def test_COUNTEREXAMPLE_gps_fault_unnameable_when_fix_invalid():

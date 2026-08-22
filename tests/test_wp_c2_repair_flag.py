@@ -1,9 +1,10 @@
-"""The WP-C2 IMU repair is an experiment. Assert it is OFF by default.
+"""The IMU repair, measured in WP-C2 and PROMOTED TO DEFAULT in WP-C3.
 
-The repair adds `attitude_gravity_mag` to `imu0_bias_drift`'s LOW signature,
-which separates the IMU pair under every configuration at full instrumentation
-(WP-C2 Part 2). It is authorized as a research experiment, not as a production
-default, so these tests pin the production path shut.
+`attitude_gravity_mag` is now in `imu0_bias_drift`'s production LOW signature
+(`csia/diagnosis/bayes.py`). These tests pinned the flag OFF while it was an
+experiment; they now pin the promotion, so a silent revert fails the build.
+The flag itself is retained as a no-op so the WP-C2 before/after experiment
+stays re-runnable.
 
 The research module lives under `research/`, which is NOT an installed package
 — CI runs `pip install -e .`, which ships `csia` only. Importing it at module
@@ -32,12 +33,19 @@ def _experiment():
 
 # --- production-path guards: these must hold on any runner -----------------
 
-def test_production_signature_does_not_carry_the_repair():
-    """The committed cause table must be untouched by this work package."""
+def test_production_signature_now_carries_the_repair():
+    """PROMOTED 2026-08-22. The repair was measured behind a flag in WP-C2 and
+    promoted to default in WP-C3 on the user's authorization.
+
+    This assertion is inverted from its original form, which pinned the flag
+    OFF. It now pins the promotion, so a silent revert fails the build.
+    """
     causes = CausalDiagnosis().causes
-    assert REPAIR_FEATURE not in causes[REPAIR_TARGET], (
-        f"{REPAIR_FEATURE} has leaked into the production {REPAIR_TARGET} "
-        f"signature; the WP-C2 repair was authorized behind a flag only")
+    assert REPAIR_FEATURE in causes[REPAIR_TARGET], (
+        f"{REPAIR_FEATURE} is missing from the production {REPAIR_TARGET} "
+        f"signature; the WP-C3 promotion has been reverted")
+    assert REPAIR_FEATURE not in causes["imu1_bias_drift"], (
+        "the repair must remain asymmetric between the two IMUs")
 
 
 def test_nominal_signature_is_empty():
@@ -81,6 +89,19 @@ def test_default_diagnosis_is_unmodified(monkeypatch):
     assert exp.make_diagnosis(repair=False).causes == CausalDiagnosis().causes
 
 
+def test_flag_is_now_a_no_op_after_promotion():
+    """Post-promotion the flag adds nothing: the feature is already in the
+    production table, so repaired == default. Kept so the WP-C2 experiment
+    remains re-runnable and its before/after record stays reproducible."""
+    exp = _experiment()
+    base = CausalDiagnosis().causes
+    repaired = exp.repaired_causes(base)
+    # Compare as sets: repaired_causes sorts only the entry it touches, so
+    # list order differs for the others without any content change.
+    assert {h: set(v) for h, v in repaired.items()} \
+        == {h: set(v) for h, v in base.items()}
+
+
 def test_repair_changes_exactly_one_signature():
     """A repair that touches more than its target is not the repair we
     measured."""
@@ -89,10 +110,9 @@ def test_repair_changes_exactly_one_signature():
     repaired = exp.repaired_causes(base)
     assert set(repaired) == set(base), "hypothesis set must not change"
     differing = [h for h in base if sorted(repaired[h]) != sorted(base[h])]
-    assert differing == [REPAIR_TARGET], (
-        f"expected only {REPAIR_TARGET} to change, got {differing}")
-    assert (set(repaired[REPAIR_TARGET]) - set(base[REPAIR_TARGET])
-            == {REPAIR_FEATURE})
+    assert differing == [], (
+        f"post-promotion the repair is a no-op; unexpected changes: "
+        f"{differing}")
 
 
 def test_repair_never_touches_nominal():
@@ -102,8 +122,9 @@ def test_repair_never_touches_nominal():
 
 def test_pipeline_gets_the_production_table_when_flag_absent(monkeypatch):
     """End-to-end guard: with the flag unset, the object handed to the
-    pipeline is the production one."""
+    pipeline is the production one — which now carries the repair."""
     exp = _experiment()
     monkeypatch.delenv(FLAG, raising=False)
     diag = exp.make_diagnosis(repair=exp.repair_enabled())
-    assert REPAIR_FEATURE not in diag.causes[REPAIR_TARGET]
+    assert diag.causes == CausalDiagnosis().causes
+    assert REPAIR_FEATURE in diag.causes[REPAIR_TARGET]

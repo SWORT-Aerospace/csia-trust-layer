@@ -1,20 +1,21 @@
-artifact_version: 1.0.0
+artifact_version: 1.1.0
 source_of_truth: csia/diagnosis/bayes.py CAUSES (lines 44-56)
 likelihood: L(c|LOW)=log(1-c+EPS), L(c|HIGH)=log(c+EPS), EPS=0.02
 accumulation: EW alpha=0.06 (~15 ticks), tempered x1.5, softmax over log-prior
 prior:
   nominal: 0.86
   each_fault: 0.02
-note: 'A gated feature (gate<=1e-9) is SKIPPED entirely (bayes.py:99-100): it is neither evidence for
-  nor against any hypothesis. Two hypotheses whose LOW sets coincide after gating therefore receive identical
-  log-likelihood on EVERY remaining feature, so their posterior ratio stays pinned at the prior ratio
-  forever. That is indistinguishability, not merely weak evidence.'
+note: 'A gated feature (gate<=1e-9) is SKIPPED entirely (bayes.py:99-100): it is neither evidence
+  for nor against any hypothesis. Two hypotheses whose LOW sets coincide after gating therefore
+  receive identical log-likelihood on EVERY remaining feature, so their posterior ratio stays
+  pinned at the prior ratio forever. That is indistinguishability, not merely weak evidence.'
 hypotheses:
   nominal: []
   gps_fault:
   - phys_gps
   imu0_bias_drift:
   - accel_motor_current
+  - attitude_gravity_mag
   - redundant_imu
   imu1_bias_drift:
   - accel_esc_rpm
@@ -46,6 +47,7 @@ modes:
       - phys_gps
       imu0_bias_drift:
       - accel_motor_current
+      - attitude_gravity_mag
       - redundant_imu
       imu1_bias_drift:
       - accel_esc_rpm
@@ -67,67 +69,7 @@ modes:
       - vibration_prop_freq
       unexpected_maneuver:
       - temp_gps
-    collisions:
-    - pair:
-      - nominal
-      - gps_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_gps
-    - pair:
-      - nominal
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_motor_current
-      - redundant_imu
-    - pair:
-      - nominal
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - redundant_imu
-    - pair:
-      - nominal
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - heading_course
-      - phys_mag
-      - temp_mag
-    - pair:
-      - nominal
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - accel_motor_current
-      - phys_battery
-      - phys_motor_esc
-      - temp_battery
-    - pair:
-      - nominal
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - nominal
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - temp_gps
+    collisions: []
     collision_count: 0
   disarmed_or_prearm:
     gate_source: csia/runtime/online.py:491-496 armed_gate=0.0 when self._armed is False
@@ -140,6 +82,7 @@ modes:
       gps_fault:
       - phys_gps
       imu0_bias_drift:
+      - attitude_gravity_mag
       - redundant_imu
       imu1_bias_drift:
       - redundant_imu
@@ -157,71 +100,8 @@ modes:
       - vibration_prop_freq
       unexpected_maneuver:
       - temp_gps
-    collisions:
-    - pair:
-      - nominal
-      - gps_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_gps
-    - pair:
-      - nominal
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - nominal
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - nominal
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - heading_course
-      - phys_mag
-      - temp_mag
-    - pair:
-      - nominal
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_battery
-      - temp_battery
-    - pair:
-      - nominal
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - nominal
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - temp_gps
-    - pair:
-      - imu0_bias_drift
-      - imu1_bias_drift
-      classification: indistinguishable_under_current_observables
-      residual_low_a:
-      - redundant_imu
-      residual_low_b:
-      - redundant_imu
-    collision_count: 1
+    collisions: []
+    collision_count: 0
   gps_fix_invalid:
     gate_source: csia/prediction/comparator.py:198-199 P['gps'] gate=gvalid*(ticks>3); :144,:155,:168
       gvalid on baro/doppler/heading
@@ -229,13 +109,13 @@ modes:
     - altitude_baro
     - heading_course
     - phys_gps
-    - temp_gps
     - velocity_gps_doppler
     observable_low_signatures:
       nominal: []
       gps_fault: []
       imu0_bias_drift:
       - accel_motor_current
+      - attitude_gravity_mag
       - redundant_imu
       imu1_bias_drift:
       - accel_esc_rpm
@@ -254,162 +134,11 @@ modes:
       - phys_vibration
       - temp_vibration
       - vibration_prop_freq
-      unexpected_maneuver: []
+      unexpected_maneuver:
+      - temp_gps
     collisions:
-    - pair:
-      - nominal
-      - gps_fault
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - nominal
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_motor_current
-      - redundant_imu
-    - pair:
-      - nominal
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - redundant_imu
-    - pair:
-      - nominal
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-    - pair:
-      - nominal
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - accel_motor_current
-      - phys_battery
-      - phys_motor_esc
-      - temp_battery
-    - pair:
-      - nominal
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - nominal
-      - unexpected_maneuver
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - gps_fault
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_motor_current
-      - redundant_imu
-    - pair:
-      - gps_fault
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - redundant_imu
-    - pair:
-      - gps_fault
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-    - pair:
-      - gps_fault
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - accel_motor_current
-      - phys_battery
-      - phys_motor_esc
-      - temp_battery
-    - pair:
-      - gps_fault
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - gps_fault
-      - unexpected_maneuver
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - imu0_bias_drift
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - accel_motor_current
-      - redundant_imu
-      residual_low_b: []
-    - pair:
-      - imu1_bias_drift
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - accel_esc_rpm
-      - redundant_imu
-      residual_low_b: []
-    - pair:
-      - mag_interference
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-      residual_low_b: []
-    - pair:
-      - power_fault
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - accel_esc_rpm
-      - accel_motor_current
-      - phys_battery
-      - phys_motor_esc
-      - temp_battery
-      residual_low_b: []
-    - pair:
-      - vibration_anomaly
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-      residual_low_b: []
-    collision_count: 3
+    - gps_fault == nominal
+    collision_count: 1
   low_speed_hover:
     gate_source: csia/prediction/comparator.py:33-34,112,168 GATE_SPEED_LO=2.0 GATE_SPEED_HI=3.0
     features_removed:
@@ -420,6 +149,7 @@ modes:
       - phys_gps
       imu0_bias_drift:
       - accel_motor_current
+      - attitude_gravity_mag
       - redundant_imu
       imu1_bias_drift:
       - accel_esc_rpm
@@ -440,66 +170,7 @@ modes:
       - vibration_prop_freq
       unexpected_maneuver:
       - temp_gps
-    collisions:
-    - pair:
-      - nominal
-      - gps_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_gps
-    - pair:
-      - nominal
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_motor_current
-      - redundant_imu
-    - pair:
-      - nominal
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - redundant_imu
-    - pair:
-      - nominal
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-    - pair:
-      - nominal
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - accel_esc_rpm
-      - accel_motor_current
-      - phys_battery
-      - phys_motor_esc
-      - temp_battery
-    - pair:
-      - nominal
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - nominal
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - temp_gps
+    collisions: []
     collision_count: 0
   gps_invalid_and_disarmed:
     gate_source: conjunction of the two gates above
@@ -510,12 +181,12 @@ modes:
     - heading_course
     - phys_gps
     - phys_motor_esc
-    - temp_gps
     - velocity_gps_doppler
     observable_low_signatures:
       nominal: []
       gps_fault: []
       imu0_bias_drift:
+      - attitude_gravity_mag
       - redundant_imu
       imu1_bias_drift:
       - redundant_imu
@@ -530,152 +201,19 @@ modes:
       - phys_vibration
       - temp_vibration
       - vibration_prop_freq
-      unexpected_maneuver: []
+      unexpected_maneuver:
+      - temp_gps
     collisions:
-    - pair:
-      - nominal
-      - gps_fault
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - nominal
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - nominal
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - nominal
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-    - pair:
-      - nominal
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_battery
-      - temp_battery
-    - pair:
-      - nominal
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - nominal
-      - unexpected_maneuver
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - gps_fault
-      - imu0_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - gps_fault
-      - imu1_bias_drift
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - gps_fault
-      - mag_interference
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-    - pair:
-      - gps_fault
-      - power_fault
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_battery
-      - temp_battery
-    - pair:
-      - gps_fault
-      - vibration_anomaly
-      classification: nested_signature
-      residual_low_a: []
-      residual_low_b:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-    - pair:
-      - gps_fault
-      - unexpected_maneuver
-      classification: indistinguishable_under_current_observables
-      residual_low_a: []
-      residual_low_b: []
-    - pair:
-      - imu0_bias_drift
-      - imu1_bias_drift
-      classification: indistinguishable_under_current_observables
-      residual_low_a:
-      - redundant_imu
-      residual_low_b:
-      - redundant_imu
-    - pair:
-      - imu0_bias_drift
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - redundant_imu
-      residual_low_b: []
-    - pair:
-      - imu1_bias_drift
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - redundant_imu
-      residual_low_b: []
-    - pair:
-      - mag_interference
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - attitude_gravity_mag
-      - phys_mag
-      - temp_mag
-      residual_low_b: []
-    - pair:
-      - power_fault
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - phys_battery
-      - temp_battery
-      residual_low_b: []
-    - pair:
-      - vibration_anomaly
-      - unexpected_maneuver
-      classification: nested_signature
-      residual_low_a:
-      - phys_vibration
-      - temp_vibration
-      - vibration_prop_freq
-      residual_low_b: []
-    collision_count: 4
+    - gps_fault == nominal
+    collision_count: 1
+changelog:
+- '1.1.0 (2026-08-22, WP-C3): attitude_gravity_mag added to imu0_bias_drift''s LOW set in
+  csia/diagnosis/bayes.py. Repairs the F-D1 collision (imu0_bias_drift == imu1_bias_drift
+  when the motor edges gate off). Derived mode blocks below regenerated from the new CAUSES.'
+- "1.1.0 (2026-08-22, WP-C3): corrected features_removed for ['gps_fix_invalid', 'gps_invalid_and_disarmed']\
+  \ \u2014 temp_gps was listed as gating off with the GPS fix, but bayes.py:135-136 gates\
+  \ every temp_* feature with np.ones unconditionally, so no gate can close it. The v1.0.0\
+  \ record therefore reported a three-way collision (gps_fault == nominal == unexpected_maneuver)\
+  \ where source gives a two-way one. Found by WP-E1's independent recomputation and corrected\
+  \ here."
+- '1.0.0: initial WP1 recovery of the implemented system.'

@@ -44,7 +44,13 @@ PRIOR_NOMINAL = 0.86       # remaining mass split across fault hypotheses
 CAUSES = {
     "nominal": [],
     "gps_fault": ["phys_gps"],
-    "imu0_bias_drift": ["redundant_imu", "accel_motor_current"],
+    # attitude_gravity_mag breaks the imu0/imu1 tie. It compares mag heading
+    # against imu0-integrated yaw, so an imu0 bias corrupts it and an imu1
+    # bias does not. It is ungated, so unlike the motor edges it survives
+    # disarm/pre-arm, which is where the two hypotheses used to collapse to a
+    # shared {redundant_imu} signature (WP1 F-D1, repaired in WP-C3).
+    "imu0_bias_drift": ["redundant_imu", "accel_motor_current",
+                        "attitude_gravity_mag"],
     "imu1_bias_drift": ["redundant_imu", "accel_esc_rpm"],
     "mag_interference": ["attitude_gravity_mag", "heading_course",
                          "phys_mag", "temp_mag"],
