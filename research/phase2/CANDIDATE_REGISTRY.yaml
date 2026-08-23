@@ -29,7 +29,7 @@ evaluation_contract:
         Pre-existing requirement, not a number chosen after seeing candidate
         results. Fixed for the duration of Phase II.
       # ---- MEASURED ON THE MODERN RIG, 2026-08-23 ----
-      status_on_modern_target: VIOLATED_BY_THE_FROZEN_BASELINE
+      status_on_modern_target_unmodified: VIOLATED_BY_THE_FROZEN_BASELINE
       observed_on_modern: 1 transition on each of 4 nominal flights
       driver: >-
         The power_thrust edge (online.py:546), a pack-versus-ESC current
@@ -38,8 +38,44 @@ evaluation_contract:
       budget_is_NOT_moved: >-
         The budget stays at 0. Section 6 fixes it and a baseline failing it is
         a finding about the baseline and about R10's verification evidence,
-        not a reason to relax the constraint.
-      blocks: [B2, B3, B4]
+        not a reason to relax the constraint. Rule 7.
+
+      # ---- P0.5 RESOLUTION ----
+      p05_classification: SIMULATOR_ARTIFACT
+      p05_finding: >-
+        ESC_TELEMETRY_1_TO_4 carries no information on this build. `current`
+        is a hard-coded 0.8 A liveness stub (AP_ESC_Telem_SITL.cpp:72) and
+        `rpm` is identically 0 (SIM_Frame.cpp:901 with SIM_VIB_MOT_MAX
+        defaulting to 0.0). See INFORMATION_CONTRACT_POWER_THRUST.md and
+        claim C11.
+      p05_finding_preserved: >-
+        The R10 breach on the UNMODIFIED modern rig stands as a committed
+        finding. It is not withdrawn.
+
+      scoring_rig_configuration:
+        name: legacy_information_architecture
+        what: ESC_TELEMETRY_1_TO_4 suppressed at ingestion, research-only
+        why: >-
+          restores exactly the information architecture of ArduCopter 3.3, on
+          which the motor_esc node was unavailable. This removes a channel
+          proven at source and by intervention to carry no information. It is
+          a RIG CONTROL, not a CSIA change and not a threshold move.
+        declared_before_any_candidate_is_run: true
+        evidence: research/phase2/results/r10_attribution.json
+        measured_R10_in_this_configuration:
+          arm_A_unmodified_transitions: 1
+          arm_B_esc_suppressed_transitions: 0
+          arm_C_battery_suppressed_transitions: 0
+          trust_battery_trough_arm_B: 0.997
+          B1_satisfies_R10_in_this_configuration: true
+        does_not_license: >-
+          suppressing the channel in production. On real hardware ESC
+          telemetry may carry genuine current and power_thrust has never been
+          tested against data that could falsify it (claim C14).
+
+      blocks: []
+      previously_blocked: [B2, B3, B4]
+      unblocked_by: P0.5
 
     latency_budget_per_tick:
       budget: 2.0
@@ -223,16 +259,20 @@ candidates:
 # ---------------------------------------------------------------------------
 invention_gate:
   status: CLOSED
-  opens_when: >-
-    B0-B4 are measured AND a meaningful residual gap remains inside the hard
-    constraints.
-  additionally_blocked_by: E3
+  conditions:
+    1_modern_measurement_contract_valid: MET      # P0.5
+    2_R10_semantics_resolved: MET                 # claim C16
+    3_B0_to_B4_fairly_evaluated: NOT_MET
+    4_safety_relevant_residual_gap_remains: UNKNOWN_UNTIL_3
+    5_gap_not_closable_by_simple_established_method: UNKNOWN_UNTIL_3
+  binding_condition: 3
   why: >-
-    B2/B3/B4 are scored against a contract whose binding constraint is R10,
-    and the frozen baseline B1 does not satisfy R10 on the modern target.
-    Scoring candidates against a budget the baseline itself breaks would not
-    mean anything. E1 producing a favourable F3 verdict does not open the
-    gate; it only makes the target worth measuring against.
+    B2, B3 and B4 have not been measured. Conditions 4 and 5 are not
+    answerable until they are. E1 producing a favourable F3 verdict does not
+    open the gate; it only makes the target worth measuring against.
+  when_it_opens: >-
+    the exact unresolved capability must be written down at that point, and
+    not before.
   required_fields_for_any_new_candidate:
     - candidate_id
     - technical_uncertainty_addressed
@@ -299,18 +339,50 @@ experiments:
       profile. Rule 3 applies. NO wider grid is launched to explore this
       without a distinct preregistered hypothesis.
 
-  - id: E2
-    name: Modern-stack replication
+  - id: E0
+    name: Modern-stack replication feasibility
     status: COMPLETE
     target: ArduCopter 4.8.0-dev SITL, built from source at this session
     see: research/phase2/results/modern_replication.json
+    id_note: >-
+      recorded as "E2" in commits up to bb1c280. Renamed to E0 because the
+      Phase-II brief assigns E2 to the confirmatory replication below. The
+      artifact and its contents are unchanged.
 
   - id: E3
     name: R10 breach on the modern rig — power_thrust current balance
-    status: OPEN
-    blocks: [B2, B3, B4]
+    status: COMPLETE
     question: >-
       Is the pack-versus-ESC current mismatch a simulator artifact or a real
       condition the power_thrust edge mismodels? R10 cannot be used to score
       candidates until this is answered.
-    see: [research/phase2/results/r10_modern.json, research/phase2/claims.yaml]
+    verdict: SIMULATOR_ARTIFACT
+    result:
+      esc_current_raw_distinct_values_cA: [80]
+      samples: 3659
+      pack_current_range_A: 41.25
+      arithmetic_closure: stub accounts for the residual to within 0.01 A
+      intervention: >-
+        suppressing ESC_TELEMETRY_1_TO_4 at ingestion returns R10 transitions
+        to 0 and trust_battery to 0.997
+    see:
+      - research/phase2/INFORMATION_CONTRACT_POWER_THRUST.md
+      - research/phase2/results/power_thrust_contract.json
+      - research/phase2/results/r10_attribution.json
+    residual_open_question: C14, whether real ESC telemetry satisfies the
+      conservation model
+
+  - id: E2
+    name: Confirmatory replication of the three modern joint-miss cells
+    status: PREREGISTERED_FROZEN_NOT_EXECUTED
+    see: research/phase2/E2_PREREGISTRATION.md
+    design: 3 slews x 2 glitch axes x 3 repeats, plus 6 nominal arms
+    replication_criteria_fixed_before_execution:
+      REPLICATED: k >= 7 of 9 X-axis cells JOINT_MISS
+      PARTIALLY_REPLICATED: 3 <= k <= 6
+      NOT_REPLICATED: k <= 2, F3 downgraded to
+        SINGLE_OBSERVATION_NOT_REPRODUCED
+    does_not_block: P0.5 or the established-method challenge
+    note: >-
+      E1's grid is NOT enlarged. E2 is a separate campaign and its four-way
+      decomposition is reported separately, never pooled with E1's.

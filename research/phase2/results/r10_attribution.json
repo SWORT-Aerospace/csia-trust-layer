@@ -1,0 +1,142 @@
+{
+ "R10_budget_unchanged": 0,
+ "arms": [
+  {
+   "R10_satisfied": false,
+   "armed_ticks_with_fresh_sensor": {
+    "baro": 2778,
+    "battery": 2778,
+    "gps": 2778,
+    "imu0": 2778,
+    "imu1": 2778,
+    "mag": 2778,
+    "motor_esc": 2598,
+    "vibration": 2778
+   },
+   "failsafe_transitions_out_of_normal": 1,
+   "flight_time_s": 150.04,
+   "label": "A_baseline",
+   "suppressed_messages": [],
+   "transitions": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.53; diagnosis nominal p=0.98)"
+     ],
+     "t": 44.32
+    },
+    {
+     "level": "NORMAL",
+     "reasons": [
+      "all monitored conditions recovered"
+     ],
+     "t": 54.6
+    }
+   ],
+   "troughs": {
+    "edge_accel_esc_rpm": 1.0,
+    "edge_accel_motor_current": 1.0,
+    "edge_power_thrust": 0.0,
+    "edge_vibration_prop_freq": 4e-06,
+    "gate_accel_esc_rpm": 0.0,
+    "gate_accel_motor_current": 0.0,
+    "gate_power_thrust": 0.0,
+    "gate_vibration_prop_freq": 0.0,
+    "trust_baro": 0.99784,
+    "trust_battery": 0.462666,
+    "trust_gps": 0.97056,
+    "trust_imu0": 0.915564,
+    "trust_imu1": 0.915688,
+    "trust_mag": 0.601704,
+    "trust_motor_esc": 0.945143,
+    "trust_vibration": 0.779912
+   }
+  },
+  {
+   "R10_satisfied": true,
+   "armed_ticks_with_fresh_sensor": {
+    "baro": 2736,
+    "battery": 2736,
+    "gps": 2736,
+    "imu0": 2736,
+    "imu1": 2736,
+    "mag": 2736,
+    "motor_esc": 0,
+    "vibration": 2736
+   },
+   "failsafe_transitions_out_of_normal": 0,
+   "flight_time_s": 150.03,
+   "label": "B_esc_suppressed",
+   "suppressed_messages": [
+    "ESC_TELEMETRY_1_TO_4"
+   ],
+   "transitions": [],
+   "troughs": {
+    "edge_accel_esc_rpm": 1.0,
+    "edge_accel_motor_current": 1.0,
+    "edge_power_thrust": 0.0,
+    "edge_vibration_prop_freq": 0.022613,
+    "gate_accel_esc_rpm": 0.0,
+    "gate_accel_motor_current": 0.0,
+    "gate_power_thrust": 0.0,
+    "gate_vibration_prop_freq": 0.0,
+    "trust_baro": 0.998079,
+    "trust_battery": 0.996976,
+    "trust_gps": 0.964304,
+    "trust_imu0": 0.916368,
+    "trust_imu1": 0.915938,
+    "trust_mag": 0.610076,
+    "trust_motor_esc": 0.8,
+    "trust_vibration": 0.829969
+   }
+  },
+  {
+   "R10_satisfied": true,
+   "armed_ticks_with_fresh_sensor": {
+    "baro": 2735,
+    "battery": 0,
+    "gps": 2735,
+    "imu0": 2735,
+    "imu1": 2735,
+    "mag": 2735,
+    "motor_esc": 2735,
+    "vibration": 2735
+   },
+   "failsafe_transitions_out_of_normal": 0,
+   "flight_time_s": 150.02,
+   "label": "C_battery_suppressed",
+   "suppressed_messages": [
+    "BATTERY_STATUS"
+   ],
+   "transitions": [],
+   "troughs": {
+    "edge_accel_esc_rpm": 1.0,
+    "edge_accel_motor_current": 1.0,
+    "edge_power_thrust": 1.0,
+    "edge_vibration_prop_freq": 5e-06,
+    "gate_accel_esc_rpm": 0.038352,
+    "gate_accel_motor_current": 0.038352,
+    "gate_power_thrust": 0.0,
+    "gate_vibration_prop_freq": 1.0,
+    "trust_baro": 0.997298,
+    "trust_battery": 0.8,
+    "trust_gps": 0.961414,
+    "trust_imu0": 0.913029,
+    "trust_imu1": 0.912565,
+    "trust_mag": 0.603957,
+    "trust_motor_esc": 0.973624,
+    "trust_vibration": 0.804749
+   }
+  }
+ ],
+ "intervention": "drop one MAVLink message at ingestion; change nothing else. No production file is modified and no threshold is moved.",
+ "question": "is the modern R10 breach fully attributable to the ESC telemetry stub?",
+ "result": {
+  "baseline_transitions": 1,
+  "battery_suppressed_transitions": 0,
+  "esc_suppressed_transitions": 0,
+  "interpretation": "arm B restores the LEGACY information architecture: the motor_esc node returns to unavailable, which is what it was on ArduCopter 3.3. If R10 holds in B and fails in A, the breach is caused by the arrival of a channel that carries no information, not by any change in CSIA or in the vehicle.",
+  "suppressing_the_stub_restores_R10": true
+ },
+ "what_this_does_not_license": "It does not license suppressing the channel in production. On real hardware ESC telemetry may carry genuine current, and the power_thrust relation has never been tested against data that could falsify it. Suppression here is an EXPERIMENTAL CONTROL used to configure a scientifically scoreable rig, and it is recorded as such."
+}

@@ -1,0 +1,418 @@
+{
+ "answer": {
+  "actual_information_added_by_battery": "REAL. SITL models pack voltage sag and current from the frame's own motor model.",
+  "actual_information_added_by_motor_esc": "ZERO. Both of its MAVLink fields are constants on this build: current is a hard-coded 0.8 A liveness stub, rpm is identically 0.",
+  "measured_statement": "Two nodes moved from unavailable to available. One of them carries no information. Five relations that had never evaluated on any stack began evaluating, none of them with validation evidence, and one of them (power_thrust) now breaches R10 on every flight.",
+  "nodes_newly_available": [
+   "battery",
+   "motor_esc"
+  ],
+  "of_those_with_no_validation_evidence": 7,
+  "relations_newly_active_on_modern": 7
+ },
+ "counts": {
+  "ACTIVE_BOTH": 11,
+  "MODERN_ONLY": 7
+ },
+ "legacy_column_limitation": "The ArduCopter 3.3 binary is not obtainable in this container (dronekit/assets is outside this session's repository allowlist and add_repo refuses cross-owner adds), so the legacy column could not be re-measured. Every row carries its evidence provenance.",
+ "legacy_corroboration": {
+  "claim": "the battery and motor_esc nodes did not participate in any Phase-I escalation",
+  "gps_alarms": 37,
+  "magnetometer_alarms": 0,
+  "method": "scan every 'alarms' list in research/wp_c*/results/*.json",
+  "modern_comparison": "a power-integrity alarm occurs in 100% of modern flights (12 of 12 across E1, r10_modern and p05), at t ~ 44-47 s",
+  "power_integrity_alarms": 0,
+  "run_records_scanned": 101,
+  "strength": "this shows the path did not FIRE on 3.3. It does not by itself prove the message was absent rather than present and consistent. Combined with the stub finding below it is sufficient for the architecture claim but is reported as INFERRED, not MEASURED.",
+  "structural_vibration_alarms": 0
+ },
+ "question": "Did additional telemetry increase the information available to CSIA while simultaneously activating diagnostic relationships whose validity domain had never been established?",
+ "relations": [
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY",
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu0": "available",
+    "imu1": "available"
+   },
+   "modern_nodes_available": {
+    "imu0": "available",
+    "imu1": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "imu0",
+    "imu1"
+   ],
+   "relation": "redundant_imu"
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "imu0 accel, ESC_TELEMETRY_1_TO_4.current",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY",
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu0": "available",
+    "motor_esc": "unavailable"
+   },
+   "model": "PROPORTIONALITY via an airframe thrust model (HOVER_THRUST_PER_MOTOR, HOVER_CURRENT_PER_MOTOR, MASS)",
+   "modern_input_quality": "same 0.8 A constant",
+   "modern_nodes_available": {
+    "imu0": "available",
+    "motor_esc": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "imu0",
+    "motor_esc"
+   ],
+   "relation": "accel_motor_current",
+   "validation_evidence": "NONE on either stack. Additionally carries CSIA's 2.0 kg reference-airframe constants, which do not describe the SITL quad."
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "imu1 accel, ESC_TELEMETRY_1_TO_4.rpm",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu1": "available",
+    "motor_esc": "unavailable"
+   },
+   "model": "PROPORTIONALITY: vertical accel tracks total prop speed squared",
+   "modern_input_quality": "rpm is identically 0. SITL computes motor rpm as motors[i].get_command() * SIM_VIB_MOT_MAX * 60 (SIM_Frame.cpp:901) and SIM_VIB_MOT_MAX defaults to 0.0 (SITL.cpp:512). It is a VIBRATION-model quantity, not a motor-speed model.",
+   "modern_nodes_available": {
+    "imu1": "available",
+    "motor_esc": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "imu1",
+    "motor_esc"
+   ],
+   "relation": "accel_esc_rpm",
+   "validation_evidence": "NONE on either stack."
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "INFERRED_LEGACY",
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "baro": "available",
+    "gps": "available"
+   },
+   "modern_nodes_available": {
+    "baro": "available",
+    "gps": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "baro",
+    "gps"
+   ],
+   "relation": "altitude_baro"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "gps": "available",
+    "imu0": "available"
+   },
+   "modern_nodes_available": {
+    "gps": "available",
+    "imu0": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "gps",
+    "imu0"
+   ],
+   "relation": "velocity_gps_doppler"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu0": "available",
+    "mag": "available"
+   },
+   "modern_nodes_available": {
+    "imu0": "available",
+    "mag": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "imu0",
+    "mag"
+   ],
+   "relation": "attitude_gravity_mag"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "gps": "available",
+    "mag": "available"
+   },
+   "modern_nodes_available": {
+    "gps": "available",
+    "mag": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "gps",
+    "mag"
+   ],
+   "relation": "heading_course"
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "BATTERY_STATUS.current_battery, ESC_TELEMETRY_1_TO_4.current[0..3]",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "battery": "unavailable",
+    "motor_esc": "unavailable"
+   },
+   "model": "CONSERVATION: batt_i == sum(esc_i) + AVIONICS_CURRENT",
+   "modern_input_quality": "ESC current is a HARD-CODED 0.8 A constant (AP_ESC_Telem_SITL.cpp:72, comment: 'some fake values so that is_telemetry_active() returns true')",
+   "modern_nodes_available": {
+    "battery": "available",
+    "motor_esc": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "battery",
+    "motor_esc"
+   ],
+   "relation": "power_thrust",
+   "validation_evidence": "NONE. Unreachable on 3.3 (both channels absent); tautologically satisfied on the bench because csia/sensors/truth.py:140 defines batt_i as the motor-current sum; fed a stub on 4.8."
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "VIBRATION rms, ESC_TELEMETRY_1_TO_4.rpm",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "motor_esc": "unavailable",
+    "vibration": "available"
+   },
+   "model": "PROPORTIONALITY: dominant vibration line tracks rpm/60",
+   "modern_input_quality": "rpm identically 0, so the predicted rms collapses to the 0.08 floor term and the relation degenerates to a constant test",
+   "modern_nodes_available": {
+    "motor_esc": "available",
+    "vibration": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "motor_esc",
+    "vibration"
+   ],
+   "relation": "vibration_prop_freq",
+   "validation_evidence": "NONE on 4.8. On 3.3 the motor_esc node was unavailable, so online.py:617-618 gated P['vibration'] by fresh['motor_esc'] and the vibration physics term was gated off too."
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "SCALED_PRESSURE.temperature (battery-baro annotation edge)",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY",
+    "INFERRED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "baro": "available",
+    "battery": "unavailable"
+   },
+   "model": "shared thermal environment",
+   "modern_input_quality": "requires battery fresh; the edge is gated by fresh['battery'] * fresh['baro']",
+   "modern_nodes_available": {
+    "baro": "available",
+    "battery": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "baro",
+    "battery"
+   ],
+   "relation": "temp_bias_drift",
+   "validation_evidence": "NONE on 3.3: battery absent gated this edge off entirely despite baro being present."
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu0": "available"
+   },
+   "modern_nodes_available": {
+    "imu0": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "imu0"
+   ],
+   "relation": "phys_imu0"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "imu1": "available"
+   },
+   "modern_nodes_available": {
+    "imu1": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "imu1"
+   ],
+   "relation": "phys_imu1"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "INFERRED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "baro": "available"
+   },
+   "modern_nodes_available": {
+    "baro": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "baro"
+   ],
+   "relation": "phys_baro"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "mag": "available"
+   },
+   "modern_nodes_available": {
+    "mag": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "mag"
+   ],
+   "relation": "phys_mag"
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "MEASURED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "gps": "available"
+   },
+   "modern_nodes_available": {
+    "gps": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "gps"
+   ],
+   "relation": "phys_gps"
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "ESC_TELEMETRY_1_TO_4.current, .rpm",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "motor_esc": "unavailable"
+   },
+   "model": "PROPORTIONALITY: per-motor current follows (rpm/HOVER_RPM)^3",
+   "modern_input_quality": "both inputs are stubs: |0.8 - 0| = 0.8 A against a 0.2 A scale, a fixed 4-sigma residual with no dependence on the vehicle",
+   "modern_nodes_available": {
+    "motor_esc": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "motor_esc"
+   ],
+   "relation": "phys_motor_esc",
+   "validation_evidence": "NONE on either stack."
+  },
+  {
+   "classification": "MODERN_ONLY",
+   "has_validation_evidence": false,
+   "inputs": "BATTERY_STATUS voltages, current_battery",
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "battery": "unavailable"
+   },
+   "model": "OHMIC: batt_v == ocv - batt_i * PACK_R_INTERNAL, with ocv an EW(0.01) estimate",
+   "modern_input_quality": "genuine. SITL models pack sag with its own resistance (SIM_Battery.cpp:179-181)",
+   "modern_nodes_available": {
+    "battery": "available"
+   },
+   "newly_active_on_modern": true,
+   "nodes": [
+    "battery"
+   ],
+   "relation": "phys_battery",
+   "validation_evidence": "NONE on 3.3 (channel absent). On 4.8 it is exercised for the first time and sits just inside tolerance: plant R regresses to 0.0100 ohm against a compiled-in 0.0120, a 0.058 V residual against a 0.06 V scale."
+  },
+  {
+   "classification": "ACTIVE_BOTH",
+   "has_validation_evidence": null,
+   "legacy_evidence_provenance": [
+    "ASSERTED_LEGACY"
+   ],
+   "legacy_nodes_available": {
+    "vibration": "available"
+   },
+   "modern_nodes_available": {
+    "vibration": "available"
+   },
+   "newly_active_on_modern": false,
+   "nodes": [
+    "vibration"
+   ],
+   "relation": "phys_vibration"
+  }
+ ]
+}

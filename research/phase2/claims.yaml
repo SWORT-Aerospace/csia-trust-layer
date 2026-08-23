@@ -125,6 +125,11 @@ claims:
       The frozen baseline CSIA v1 violates R10 on ArduCopter 4.8. Every clean
       nominal flight produces one failsafe transition out of NORMAL, against a
       budget of zero.
+    p05_resolution: >-
+      CAUSE ESTABLISHED, see C11. The finding is PRESERVED, not withdrawn: on
+      the unmodified modern rig the frozen baseline does breach R10. What
+      changed is that the cause is now known to be a simulator stub rather
+      than a property of CSIA or of the vehicle.
     quantities:
       nominal_flights: 4
       transitions_observed: 4
@@ -193,14 +198,185 @@ claims:
       category replicates is exactly what a coverage table hides.
 
   - id: C8
-    status: OPEN
+    status: RESOLVED
     question: >-
       Is the ESC-versus-pack current mismatch a simulator artifact or a
       real-hardware condition?
+    answer: >-
+      SIMULATOR ARTIFACT, established at source and by intervention. See C11.
+      The real-hardware half of the question remains open as C14.
+    resolved_by: research/phase2/INFORMATION_CONTRACT_POWER_THRUST.md
+
+  - id: C11
+    status: MEASURED
+    statement: >-
+      The modern R10 breach is caused by ESC_TELEMETRY_1_TO_4 carrying no
+      information on ArduCopter 4.8 SITL. Its `current` field is a hard-coded
+      0.8 A liveness stub and its `rpm` field is identically zero.
+    p05_classification: SIMULATOR_ARTIFACT
+    source_evidence:
+      - "libraries/AP_ESC_Telem/AP_ESC_Telem_SITL.cpp:72  .current = 0.8f,
+         under the comment 'some fake values so that is_telemetry_active()
+         returns true'"
+      - "libraries/SITL/SIM_Frame.cpp:901  rpm[i] = motors[i].get_command() *
+         AP::sitl()->vibe_motor * 60.0f"
+      - "libraries/SITL/SITL.cpp:512  SIM_VIB_MOT_MAX defaults to 0.0"
+      - "libraries/SITL/SIM_Multicopter.cpp:102  battery_current =
+         frame->get_current_amp(), which SIM_Frame.cpp:942 computes as the sum
+         of per-motor currents. The BATTERY side is genuinely modelled."
+    runtime_evidence:
+      raw_esc_current_cA_distinct_values: [80]
+      samples: 3659
+      pack_current_range_A: 41.25
+      pack_current_distinct_values: 375
+      null_control: >-
+        the intended control (rpm, same message) FAILED, being constant too.
+        It was replaced with BATTERY_STATUS.current_battery on the same ticks,
+        which is live. The failed control is retained in the artifact.
+      arithmetic_closure: >-
+        pack_mean - stub - avionics = 16.82 A against an observed residual of
+        16.83 A. Nothing is left over for a second cause.
+    intervention_evidence:
+      artifact: research/phase2/results/r10_attribution.json
+      arm_A_baseline_transitions: 1
+      arm_B_esc_suppressed_transitions: 0
+      arm_C_battery_suppressed_transitions: 0
+      discriminator: >-
+        both B and C silence the alarm because power_thrust needs both
+        endpoints fresh. trust_battery discriminates: 0.997 in B (channel live
+        and healthy once the stub is gone) versus the untouched 0.800 prior in
+        C. The battery telemetry is good; the ESC telemetry is the fault.
+    ruled_out_with_evidence:
+      UNIT_OR_SCALE_INVALID: >-
+        AP_ESC_Telem.cpp:451 encodes A x 100; plugins.py:207 decodes / 100.
+        common.xml:6431 specifies cA; plugins.py:194 decodes / 100. Correct.
+      AGGREGATION_SEMANTICS_INVALID: >-
+        per-ESC summed against a pack aggregate is the correct pairing, and is
+        the same aggregation SIM_Frame.cpp:942 performs.
+      INTERFACE_MAPPING_INVALID: >-
+        message and field selection are right. Two real mapping defects exist
+        (C12, C13) but neither is active on this build.
+      RELATION_MODEL_INVALID: >-
+        the conservation model is what SITL itself uses on the battery side.
+        The AVIONICS_CURRENT term is a real model gap (C13) but is 1.2 sigma
+        against a 50 sigma residual.
+      REAL_INCONSISTENCY: >-
+        the simulated vehicle's power balance is internally consistent; only
+        its published telemetry is not.
+      MULTIPLE_CAUSES: >-
+        not claimed. The stub accounts for the residual to within 0.01 A.
+
+  - id: C12
+    status: MEASURED
+    statement: >-
+      csia/runtime/plugins.py:194 collapses the BATTERY_STATUS.current_battery
+      MAVLink sentinel -1 ("autopilot does not measure the current") to 0.0 A,
+      indistinguishable from a genuine zero.
+    evidence: >-
+      deterministic offline probe, sentinel_probe in
+      research/phase2/results/power_thrust_contract.json, ingested_value_A 0.0
+    active_on_this_build: false
+    why_not: BATT_MONITOR = 4, so current is genuinely measured
+    consequence: >-
+      an autopilot that does not measure pack current would be read by
+      power_thrust as a pack drawing nothing while the ESCs draw current, i.e.
+      a guaranteed 100 percent conservation violation. Latent, not active.
+    also: >-
+      ESC_TELEMETRY_1_TO_4 defines no invalid sentinel at all;
+      AP_ESC_Telem.cpp zero-initialises the struct, so an absent ESC is
+      indistinguishable from one drawing 0 A.
+    no_production_change_proposed: true
+
+  - id: C13
+    status: MEASURED
+    statement: >-
+      AVIONICS_CURRENT (0.6 A, csia/sensors/truth.py:25) has no counterpart in
+      the SITL plant, whose battery_current is purely the motor-current sum.
+      Even a perfect ESC channel would leave a permanent 1.2 sigma offset.
+    magnitude_relative_to_observed: 1.2 sigma against 50 sigma
+    consequence: >-
+      power_thrust could never be exactly satisfied on this plant. Too small
+      to explain the alarm; recorded so it is not rediscovered later.
+
+  - id: C14
+    status: OPEN
+    question: >-
+      Does real ESC telemetry satisfy the conservation model
+      sum(esc_i) == batt_i - avionics?
     note: >-
-      Real ESC telemetry current is frequently a coarse per-ESC estimate that
-      does not sum to measured pack current. Nothing measured here settles it.
-    blocks_interpretation_of: C4
+      Protocol-dependent. Some ESC telemetry reports phase current rather than
+      DC input current, in which case the sum does not equal pack current at
+      all. Also open: whether 0.5 A is a defensible scale for a cross-source
+      current balance at ~29 A hover, a 1.7 percent tolerance across
+      independent shunts.
+    not_startable_here: requires hardware
+    blocks: production validity of power_thrust
+
+  - id: C15
+    status: MEASURED
+    statement: >-
+      Seven CSIA relations became active on ArduCopter 4.8 that had never
+      evaluated on any stack, and none of the seven has validation evidence.
+      Five of the seven depend on motor_esc, whose telemetry is a stub in both
+      fields.
+    counts:
+      ACTIVE_BOTH: 11
+      MODERN_ONLY: 7
+      LEGACY_ONLY: 0
+      newly_active_without_validation_evidence: 7
+      newly_active_fed_real_data: 2      # phys_battery, temp_bias_drift
+    artifact: research/phase2/results/information_architecture_diff.json
+    answers_the_brief_question: >-
+      Yes for the activation, partly no for the information. The modern stack
+      added a channel that is present, fresh, well-formed, correctly scaled
+      and empty. CSIA has no gate distinguishing "present" from
+      "informative", so four relations began scoring a constant as evidence
+      and one escalated to a LAND_NOW recommendation on every flight.
+    legacy_column_provenance: >-
+      the 3.3 binary could not be re-measured here (dronekit/assets is outside
+      this session's repository allowlist; add_repo refuses cross-owner adds).
+      Corroborated by 101 committed Phase-I run records containing zero
+      power-integrity, structural and magnetometer alarms against 12 of 12
+      modern flights. Reported as INFERRED, not MEASURED.
+
+  - id: C16
+    status: MEASURED
+    statement: >-
+      R10 constrains CSIA's own FailsafePolicy transitions, and the modern
+      baseline genuinely violates it. No conflation of an internal diagnostic
+      state with a failsafe transition occurred.
+    requirement_text: >-
+      docs/REQUIREMENTS.md R10 — "Clean nominal flight shall produce zero
+      failsafe transitions"
+    verification_test: >-
+      tests/test_runtime.py:73 test_failsafe_clean_no_false_alarms asserts
+      `not s.transitions` on csia.runtime.failsafe.FailsafePolicy — the same
+      object measured in E1, r10_modern and r10_attribution.
+    ladder:
+      internal_trust_or_residual_degradation: >-
+        trust_battery 0.463, edge consistency 3.06e-03. NOT what R10
+        constrains.
+      diagnostic_alert: >-
+        NONE RAISED. The naive-Bayes posterior reports nominal p=0.98
+        throughout.
+      csia_final_verdict: >-
+        FailsafeLevel NORMAL -> CRITICAL. THIS is what R10 constrains, and it
+        is what was violated.
+      bounded_response_recommendation: >-
+        Action REDUCE_POWER and Action LAND_NOW (failsafe.py:157-159),
+        advisory by default per the module docstring.
+      autopilot_failsafe_transition: >-
+        none observed, BUT the harness sets FS_THR_ENABLE=0, FS_GCS_ENABLE=0,
+        BATT_FS_LOW_ACT=0 and BATT_FS_CRT_ACT=0 (modern_rig.connect) to stop
+        the autopilot RTL-ing mid-experiment. This level is therefore
+        SUPPRESSED BY THE HARNESS and no claim is made about it.
+    internal_inconsistency_recorded: >-
+      CSIA recommends LAND_NOW while its own diagnosis reports the vehicle
+      nominal at p=0.98. The failsafe reads trust; the diagnosis reads the
+      signature matrix and finds no matching cause. They disagree and nothing
+      in the layer notices.
+    requirement_not_relaxed: >-
+      the budget stays at 0. Rule 7.
 
   - id: C9
     status: OPEN
@@ -222,8 +398,16 @@ claims:
 
 invention_gate:
   status: CLOSED
-  was_gated_on: B0-B4 measured with a residual gap remaining
-  now_additionally_gated_on: C4 resolved
+  conditions:
+    1_modern_measurement_contract_valid: MET
+    2_R10_semantics_resolved: MET
+    3_B0_to_B4_fairly_evaluated: NOT_MET      # B2, B3, B4 not yet run
+    4_safety_relevant_residual_gap_remains: UNKNOWN_UNTIL_3
+    5_gap_not_closable_by_a_simple_established_method: UNKNOWN_UNTIL_3
   reason: >-
-    B2/B3/B4 are scored against a contract whose binding constraint is R10,
-    and B1 does not satisfy R10 on this build.
+    Conditions 1 and 2 were met by P0.5. Condition 3 is the binding one: B2,
+    B3 and B4 have not been measured. Conditions 4 and 5 are not answerable
+    until they are. E1 producing a favourable F3 verdict does not open the
+    gate.
+  exact_unresolved_capability_if_it_opens: >-
+    to be written down only when condition 5 is evaluated, and not before.
