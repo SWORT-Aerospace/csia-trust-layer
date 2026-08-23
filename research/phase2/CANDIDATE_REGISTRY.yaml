@@ -28,6 +28,18 @@ evaluation_contract:
       note: >-
         Pre-existing requirement, not a number chosen after seeing candidate
         results. Fixed for the duration of Phase II.
+      # ---- MEASURED ON THE MODERN RIG, 2026-08-23 ----
+      status_on_modern_target: VIOLATED_BY_THE_FROZEN_BASELINE
+      observed_on_modern: 1 transition on each of 4 nominal flights
+      driver: >-
+        The power_thrust edge (online.py:546), a pack-versus-ESC current
+        balance at 0.5 A scale. Pack 29.33 A, ESCs 3.20 A combined, residual
+        50 sigma. See research/phase2/results/r10_modern.json and claim C4.
+      budget_is_NOT_moved: >-
+        The budget stays at 0. Section 6 fixes it and a baseline failing it is
+        a finding about the baseline and about R10's verification evidence,
+        not a reason to relax the constraint.
+      blocks: [B2, B3, B4]
 
     latency_budget_per_tick:
       budget: 2.0
@@ -214,6 +226,13 @@ invention_gate:
   opens_when: >-
     B0-B4 are measured AND a meaningful residual gap remains inside the hard
     constraints.
+  additionally_blocked_by: E3
+  why: >-
+    B2/B3/B4 are scored against a contract whose binding constraint is R10,
+    and the frozen baseline B1 does not satisfy R10 on the modern target.
+    Scoring candidates against a budget the baseline itself breaks would not
+    mean anything. E1 producing a favourable F3 verdict does not open the
+    gate; it only makes the target worth measuring against.
   required_fields_for_any_new_candidate:
     - candidate_id
     - technical_uncertainty_addressed
@@ -234,7 +253,8 @@ invention_gate:
 experiments:
   - id: E1
     name: Slow-slew extension — does a real joint blind region exist?
-    status: PLANNED
+    status: COMPLETE
+    target: ArduCopter V4.8.0-dev SITL, built from source in this session
     rationale: >-
       The tested grid's slowest ramp is 20 s and the blind wedge widened
       monotonically with slew. At significant magnitudes the joint blind region
@@ -245,9 +265,52 @@ experiments:
     decides:
       estimator_still_detects_all: "F3 refuted at significant magnitude; verdict D for F3"
       estimator_fails_on_slow: "F3 confirmed and bounded; Phase II has a target"
+    result:
+      verdict: SURVIVES_BOUNDED
+      valid_trials: 8
+      of: 8
+      joint_miss_cells: [a55.7_s60, a55.7_s120, a55.7_s240]
+      R_incremental_csia_only: 0.0
+      R_autopilot_dependence: 0.5
+      R_joint_miss: 0.375
+      excess_airframe_excursion_on_joint_miss_m: [48.8, 48.5, 48.0]
+      see: [research/phase2/E1_FINDINGS.md, research/phase2/results/e1_modern.json]
+    runs:
+      - run: 1
+        status: WITHDRAWN
+        verdict_reported: REFUTED_AS_TESTED_SAFETY_RELEVANT_PHENOMENON
+        artifact: research/phase2/results/e1_modern_run1_defective_instrument.json
+        withdrawn_because: >-
+          The displacement instrument measured the injected offset and the
+          airframe's own motion added together, and read 38.89 m on a
+          zero-injection nominal arm. It invalidated exactly the three cells
+          that decide the question; their injections were correct to within
+          2.2%. Grid, tolerances and decision rule unchanged; only the
+          estimator was corrected, and all eight cells were re-flown.
+        see: research/phase2/V6_INSTRUMENT_DEFECT.md
+      - run: 2
+        status: AUTHORITATIVE
+        artifact: research/phase2/results/e1_modern.json
+        instrument_control: >-
+          PASS. The corrected instrument reads 0.81-0.91 m on the four
+          zero-injection arms; run 1's read 38.8-39.6 m.
+    bound: >-
+      Three cells, one amplitude, one flight each, one autopilot, one flight
+      profile. Rule 3 applies. NO wider grid is launched to explore this
+      without a distinct preregistered hypothesis.
 
   - id: E2
     name: Modern-stack replication
-    status: IN_PROGRESS
+    status: COMPLETE
     target: ArduCopter 4.8.0-dev SITL, built from source at this session
     see: research/phase2/results/modern_replication.json
+
+  - id: E3
+    name: R10 breach on the modern rig — power_thrust current balance
+    status: OPEN
+    blocks: [B2, B3, B4]
+    question: >-
+      Is the pack-versus-ESC current mismatch a simulator artifact or a real
+      condition the power_thrust edge mismodels? R10 cannot be used to score
+      candidates until this is answered.
+    see: [research/phase2/results/r10_modern.json, research/phase2/claims.yaml]

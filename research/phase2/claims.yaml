@@ -1,0 +1,229 @@
+%YAML 1.2
+---
+# Machine-readable claim objects for Phase II.
+#
+# Every claim carries the artifact it is computed from, the build it is bound
+# to, and what would refute it. Claims that were withdrawn or corrected stay in
+# this file: rule 8, negative results remain committed, and rule 7, no claim is
+# resurrected by renaming it.
+#
+# Permitted status values:
+#   MEASURED    computed from a committed artifact on a stated target
+#   BOUNDED     measured, with the bound stated in `bound`
+#   OPEN        posed, not answered
+#   WITHDRAWN   was asserted, is now refuted; kept as history
+#   PROVISIONAL a candidate mechanism, not yet evaluated
+# Forbidden anywhere in this file: NOVEL, BREAKTHROUGH, PROVED.
+
+schema: csia.phase2.claims/1
+baseline_commit: 848f556
+
+targets:
+  legacy:
+    firmware: ArduCopter 3.3
+    provenance: dronekit-assets prebuilt, 2015-10-22
+    scope: every Phase-I result
+  modern:
+    firmware: ArduCopter V4.8.0-dev
+    git_head: 01a504b
+    provenance: built from source in this session
+    scope: every Phase-II E1 result
+
+claims:
+
+  - id: C1
+    status: BOUNDED
+    statement: >-
+      A joint miss exists. Three validated GNSS position faults above the
+      project's own 48 m significance threshold are escalated by neither the
+      autopilot estimator nor CSIA.
+    cells: [a55.7_s60, a55.7_s120, a55.7_s240]
+    quantities:
+      injected_sensor_offset_m: [56.4, 56.5, 56.5]
+      ekf_pos_horiz_variance_post: [0.525, 0.262, 0.139]
+      ekf_threshold: 0.8
+      csia_escalates_for_gps: [false, false, false]
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    bound: >-
+      Three cells at one amplitude, one flight each, one autopilot, one flight
+      profile, one simulator. Rule 3: these are not independent replicates.
+      This licenses "a joint miss exists in the tested grid", NOT "a blind
+      region has been characterised".
+    refuted_by: >-
+      Any of the three cells escalating on a re-fly, or the injection failing
+      the validity contract under a further-corrected instrument.
+    supersedes: C1_WITHDRAWN
+
+  - id: C1_WITHDRAWN
+    status: WITHDRAWN
+    statement: >-
+      F3 is refuted at operationally significant magnitude: every validated
+      significant cell is caught by at least one monitor.
+    target: modern
+    artifact: research/phase2/results/e1_modern_run1_defective_instrument.json
+    withdrawn_because: >-
+      The displacement instrument measured the injected offset and the
+      airframe's own motion added together, and read 38.89 m on a
+      zero-injection nominal arm. It invalidated the three cells that decide
+      the question. Their injections were in fact correct to within 2.2%.
+    withdrawal_record: research/phase2/V6_INSTRUMENT_DEFECT.md
+    kept_because: rule 8, negative and withdrawn results remain committed
+
+  - id: C2
+    status: MEASURED
+    statement: >-
+      CSIA contributes no incremental escalation coverage on this fault class.
+      In eight validated significant cells there is no cell that CSIA escalates
+      for GPS and the autopilot estimator misses.
+    quantities:
+      N_total: 8
+      N_both: 1
+      N_autopilot_only: 4
+      N_csia_only: 0
+      N_joint_miss: 3
+      R_incremental_csia_only: 0.0
+      R_autopilot_dependence: 0.5
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    relation_to_phase1: >-
+      Restates F2, measured independently on a different autopilot. Phase I
+      reported 6 of 9 significant cells detected by the estimator and not
+      escalated by CSIA.
+    refuted_by: any validated significant cell in CSIA_ONLY
+
+  - id: C3
+    status: MEASURED
+    statement: >-
+      Detection and airframe consequence are inversely ordered at 55.7 m. The
+      one cell the estimator detects produces no excursion beyond the nominal
+      control; the three it does not detect displace the airframe 48.0-48.8 m
+      past that control.
+    quantities:
+      nominal_control_excursion_m: [39.2, 39.1, 39.5, 39.6]
+      excess_excursion_m: {a55.7_s20: -0.2, a55.7_s60: 48.8,
+                           a55.7_s120: 48.5, a55.7_s240: 48.0}
+    mechanism: >-
+      A slow ramp presents as a small constant velocity bias. The velocity
+      controller cancels the bias it believes in, so the airframe flies the
+      other way. A fast ramp is rejected by the innovation test and is not
+      flown.
+    counterexample_within_the_claim: >-
+      a556.6_s240 is detected (EKF variance 5.296) and still produces the
+      largest excess excursion in the grid, 68.8 m. Detection does not imply
+      prevention. The claim is about ordering at 55.7 m, not a general law.
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    bound: >-
+      The control is a matched-window nominal arm, not the same flight
+      counterfactually un-injected. The four nominal arms agree to within
+      0.5 m.
+
+  - id: C4
+    status: MEASURED
+    statement: >-
+      The frozen baseline CSIA v1 violates R10 on ArduCopter 4.8. Every clean
+      nominal flight produces one failsafe transition out of NORMAL, against a
+      budget of zero.
+    quantities:
+      nominal_flights: 4
+      transitions_observed: 4
+      budget: 0
+      onset_s: [46.8, 46.7, 46.7, 46.0]
+    driver: >-
+      The power_thrust edge (online.py:546), a current balance between pack
+      and ESC telemetry at a scale of 0.5 A. Pack reports 29.33 A, the four
+      ESCs report 3.20 A combined; residual 25.15 A = 50 sigma. Edge
+      consistency 3.5e-07, battery neighbour evidence 0.171, against the
+      failsafe's power_critical = 0.70.
+    not_driven_by: >-
+      The phys_battery voltage residual. components['battery']['phys'] reads
+      1.000 for the entire flight; field-mode normalisation maps anything
+      below 1.0 to consistency exactly 1.0.
+    target: modern
+    artifact: research/phase2/results/r10_modern.json
+    blocks: [B2, B3, B4]
+    consequence: >-
+      Candidate scoring cannot proceed against a hard constraint the frozen
+      baseline itself fails.
+
+  - id: C5
+    status: MEASURED
+    statement: >-
+      R10's verification evidence does not cover an independent plant. The
+      channels feeding the power_thrust edge are absent on ArduCopter 3.3, and
+      on the bench both sides of the balance are generated from one equation
+      in csia/sensors/truth.py:140, so the edge is satisfied by construction.
+    target: [legacy, bench]
+    artifacts:
+      - research/phase2/results/r10_modern.json
+      - research/phase2/results/modern_replication.json
+    consequence: >-
+      A zero-false-alert requirement verified only against the monitor's own
+      plant model is a weaker guarantee than it reads as.
+
+  - id: C6
+    status: MEASURED
+    statement: >-
+      The pack internal resistance compiled into CSIA (0.0120 ohm) differs
+      from this plant's (0.0100 ohm regressed). At 29.3 A hover current that
+      is a 0.058 V residual against a 0.06 V scale.
+    target: modern
+    artifact: research/phase2/results/r10_modern.json
+    why_not_an_alarm: >-
+      Field-mode normalisation keeps it off the trust recursion. It is a
+      latent near-miss, not an active fault, and it is recorded because it
+      was the wrong answer to C4 and would otherwise look like a fit.
+
+  - id: C7
+    status: OPEN
+    question: >-
+      Why does CSIA's GPS physics residual saturate on ArduCopter 3.3 and not
+      on 4.8, at the same injected amplitude (55.7 m) and slew (20 s), in a
+      cell whose top-line coverage otherwise replicates?
+    candidates:
+      - the field-mode adaptive normaliser measures against a different
+        running level when two further nodes are live
+      - the flight profiles differ (Phase-I cruise, modern square pattern)
+    artifacts:
+      - research/wp_c8/results/response_surface.json
+      - research/phase2/results/e1_modern.json
+    matters_because: >-
+      A component-level replication failure inside a cell whose coverage
+      category replicates is exactly what a coverage table hides.
+
+  - id: C8
+    status: OPEN
+    question: >-
+      Is the ESC-versus-pack current mismatch a simulator artifact or a
+      real-hardware condition?
+    note: >-
+      Real ESC telemetry current is frequently a coarse per-ESC estimate that
+      does not sum to measured pack current. Nothing measured here settles it.
+    blocks_interpretation_of: C4
+
+  - id: C9
+    status: OPEN
+    question: >-
+      Would the Phase-I displacement figures survive re-measurement against
+      ArduCopter 3.3's SIMSTATE truth?
+    current_evidence: >-
+      Phase-I reported displacements track the requested amplitudes closely
+      and the run-1 contamination only bites at slews of 60 s and above, which
+      Phase I never ran. That is evidence of absence of a problem, not a check.
+    blocks: nothing
+
+  - id: C10
+    status: OPEN
+    question: >-
+      Does any of this hold on a second independent autopilot stack?
+    note: PX4 not attempted; needs a Gazebo or jMAVSim backend, neither
+      installed.
+
+invention_gate:
+  status: CLOSED
+  was_gated_on: B0-B4 measured with a residual gap remaining
+  now_additionally_gated_on: C4 resolved
+  reason: >-
+    B2/B3/B4 are scored against a contract whose binding constraint is R10,
+    and B1 does not satisfy R10 on this build.
