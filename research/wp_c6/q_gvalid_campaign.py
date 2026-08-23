@@ -442,8 +442,13 @@ GUIDED = 4
 TAKEOFF_ALT_M = 20.0
 
 
-def _pilot(m, state, mavutil):
+def _pilot(m, state, mavutil, hold_position=False):
     """Wait for a 3D fix, enter GUIDED, arm, take off, fly a square.
+
+    `hold_position` commands zero ground velocity instead of the square. WP-C7
+    uses it to isolate the wind response: a multirotor holding position must
+    tilt into the wind, and the square pattern's own manoeuvring tilt swamps
+    that signal.
 
     Sequenced on the autopilot's own reported state rather than on elapsed
     time: ArduCopter refuses GUIDED without a 3D fix, and arming before the
@@ -503,8 +508,11 @@ def _pilot(m, state, mavutil):
         elif not armed and due(2.0):
             state["phase"] = "arm"
     elif phase == "fly" and due(0.2):
-        leg = int((t - state.get("fly_t0", t)) / 8) % 4
-        vn, ve = [(4, 0), (0, 4), (-4, 0), (0, -4)][leg]
+        if hold_position:
+            vn, ve = 0, 0
+        else:
+            leg = int((t - state.get("fly_t0", t)) / 8) % 4
+            vn, ve = [(4, 0), (0, 4), (-4, 0), (0, -4)][leg]
         m.mav.set_position_target_local_ned_send(
             0, m.target_system, m.target_component,
             mavutil.mavlink.MAV_FRAME_LOCAL_NED,
