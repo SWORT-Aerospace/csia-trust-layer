@@ -115,9 +115,49 @@ fault-state-dependent case that ours is an instance of,
 signatures is established
 \cite{krysander2024multimode,krysander2008sensorplacement}, and the
 reliability-side machinery we apply is likewise established
-\cite{hurdle2007faulttree,reeves2019sensorselection}. Our contribution is a
-measurement on a real system, an engineering rule derived from it, and a
-repair whose cost we report.
+\cite{hurdle2007faulttree,reeves2019sensorselection}.
+
+\paragraph{Contribution.} We studied which GNSS fault classes a deployed
+cross-sensor diagnostic layer detects, which it escalates, and how long it
+reports health without applicable evidence, using controlled injection against
+a real autopilot; we report the fault classes where it and the vehicle's own
+estimator are both blind, a closed-form account of why detection does not
+imply escalation, and the fault-injection harness we used.
+
+\paragraph{Fault taxonomy.} Every result below is reported against these four
+classes, distinguished by what each does to \emph{applicability}: whether the
+test for \code{gps\_fault} can be evaluated at all.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{0.19\textwidth}p{0.26\textwidth}p{0.13\textwidth}p{0.30\textwidth}}
+\toprule
+Class & Mechanism & Applicability & Consequence \\
+\midrule
+fix-loss denial & receiver reports no 3D fix &
+$A_h \to 0$ & evidence destroyed; self-occlusion \\
+receiver link loss & serial corruption, fix lost &
+$A_h \to 0$ & as above, by a different route \\
+retained-fix step & position jumps, fix valid &
+$A_h = 1$ & evidence intact; detected, not escalated \\
+retained-fix ramp & position drifts, fix valid &
+$A_h = 1$ & evidence intact; escalated only if slow and large enough \\
+\bottomrule
+\end{tabular}
+\caption{Fault taxonomy. The applicability column is what separates
+self-occlusion from every other failure in this paper.}
+\label{tab:taxonomy}
+\end{table}
+
+\paragraph{Harness.} The injector and its all-layer recorder are the reusable
+part of this work and are prepared for release alongside the paper. They drive
+a real autopilot in software-in-the-loop, inject a parameterised GNSS fault,
+and record the receiver output, the estimator's innovation test ratios, every
+diagnostic residual before smoothing, the trust recursion before and after
+update, the gate state and the final verdict, all on one timebase. Ground
+truth is the injection schedule, which is what makes the false-healthy
+quantities of Section~\ref{sec:falsehealthy} measurable at all.
 
 %======================================================================
 \section{Related work: what we instantiate}
@@ -796,10 +836,136 @@ argument, and it is the opposite of the EKF's own behaviour: the 20 and 60\,s
 ramps are absorbed completely, with EKF variance staying near baseline. Each
 monitor is blind to what the other sees.
 
-\paragraph{What this changes.} Escalation here is duration-limited, not
-magnitude-limited, and that is a property of the trust recursion's time
-constant rather than of the evidence available to it. It is a separate defect
-from self-occlusion and has a separate fix, which we do not attempt here.
+\subsection{Why, in closed form}
+\label{sec:algebra}
+
+The trust coefficient is a Beta belief with adaptive forgetting
+(\code{engine.py}). Two facts fix the behaviour.
+
+First, the belief mass $S_k = \alpha_k + \beta_k$ obeys
+$S_{k+1} = \rho S_k + 1$ regardless of the evidence, so it converges to
+$1/(1-\rho)$. Calm flight has zero spread between evidence components and runs
+at $\rho_{\max} = 0.998$, so the belief settles carrying
+$S_0 = 1/(1-\rho_{\max}) = 500$ units of accumulated agreement.
+
+Second, when a fault destroys one evidence component the spread jumps to 1 and
+$\rho$ drops to its floor $\rho_{\min} = 0.95$, whose sustainable mass is only
+$M = 20$. Holding evidence at a constant $e_f$ for $N$ ticks then gives, with
+$x = \rho^N$,
+
+\begin{equation}
+T_N = \frac{x S_0 T_0 + (1-x) M e_f}{x S_0 + (1-x) M}
+\label{eq:trustlag}
+\end{equation}
+
+a mass-weighted average of the old trust and the new evidence. Two corollaries
+follow, and both are measured above.
+
+\paragraph{The evidence floor.} At the GPS node the fusion weights are
+$w_{nbr}, w_{phys}, w_{temp}, w_{stat} = 0.35, 0.30, 0.20, 0.15$. A fault that
+destroys only the physics residual leaves
+$e_f = 0.35 + 0.20 + 0.15 = 0.70$, against a threshold of 0.75. Trust cannot
+fall below 0.70 however large the error. Measured minimum fused evidence in the
+saturated cells of the sweep: \textbf{0.7000}.
+
+\paragraph{The ticks required.} Setting $T_N = T^*$ in \eqref{eq:trustlag},
+
+\begin{equation}
+N^* = \frac{\ln \left( \frac{M(T^* - e_f)}{S_0(T_0 - T^*) + M(T^* - e_f)}
+\right)}{\ln \rho} \approx 93 \text{ ticks} = 3.7\,\text{s}
+\label{eq:nstar}
+\end{equation}
+
+Note which term dominates: $S_0(T_0 - T^*) = 125$ against
+$M(T^* - e_f) = 1.0$. \textbf{The delay is set by how much agreement the calm
+period banked, not by how bad the fault is.} Halving the concentration cap
+nearly halves the delay; doubling the threshold margin barely moves it.
+
+Escalation additionally requires the failsafe's $1\,\text{s}$ dwell, so the
+boundary is $N^* + 25 \approx 118$ ticks at the floor. Against the 21 cells of
+the sweep this classifies \textbf{19 correctly}. Both misses lie near the line,
+at $+0.7$ and $-12.3$ ticks, and the model assumes a constant $e_f$ where the
+measured floor ranges 0.678 to 0.700.
+
+Equation~\eqref{eq:trustlag} was checked against the shipping recursion driven
+with a synthetic evidence sequence: maximum absolute error \textbf{0.00} over
+200 ticks, and the predicted crossing at 93.3 ticks against an observed
+crossing at tick 94.
+
+\paragraph{And why magnitude cannot substitute for duration.} The step detector
+holds a peak decaying at $0.85$ per tick, so the residual stays saturated for
+$N_{floor} \propto \ln(\text{amplitude})$ ticks. A thousandfold larger error
+buys at most 42 extra ticks, every one of them on a residual already pinned at
+zero and therefore contributing no further evidence. \textbf{A saturating
+detector with a fixed decay cannot escalate on magnitude alone.}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/wp_c8_escalation_boundary.png}
+\caption{Left: escalation against time at the floor, with the predicted
+boundary. Right: how each axis buys time.}
+\end{figure}
+
+%======================================================================
+\section{Two detectors, and what neither sees}
+\label{sec:coverage}
+
+The vehicle carries two independent monitors of GNSS integrity: its own
+estimator, which gates measurements on innovation test ratios, and the
+diagnostic layer, which compares raw receiver output against inertial and
+barometric predictions. They read different signals, so their blind spots need
+not coincide. We swept amplitude against slew rate, 21 cells, recording for
+each whether the estimator flags, whether the layer's residual saturates, and
+whether the layer escalates.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Coverage & By detection & By escalation \\
+\midrule
+both            & 12 / 21 & 3 / 21 \\
+estimator only  & 0 / 21  & 9 / 21 \\
+layer only      & 1 / 21  & 0 / 21 \\
+\textbf{neither} & \textbf{8 / 21 (38\%)} & \textbf{9 / 21 (43\%)} \\
+\bottomrule
+\end{tabular}
+\caption{Two-detector coverage over the amplitude-slew grid.}
+\label{tab:coverage}
+\end{table}
+
+\textbf{The uncovered region is not empty and it is not a corner.} It is a
+wedge that widens as the error slows: an instantaneous step is caught above
+$2\,$m, a 4\,s ramp is missed up to $5.6\,$m, and a 20\,s ramp is missed up to
+$22.3\,$m. The estimator misses slow errors because they are absorbed into its
+state with small innovations; the layer misses them because its step detector
+never saturates. Both blind spots move the same way, so they overlap instead of
+covering each other.
+
+Judged by escalation rather than detection the picture is worse: the layer
+escalates in 3 of 21 cells and the uncovered fraction rises to 43\%. A
+detection nobody acts on is not coverage.
+
+\textbf{We state the limits of this plainly.} A 2\,m error is inside normal
+GNSS noise and not detecting it is correct behaviour, not a blind spot. The
+result is the \emph{shape} of the boundary rather than any single cell: the
+uncovered amplitude grows with slew time, and nothing in the grid closes it.
+The largest uncovered error we measured is 22.3\,m over 20\,s, which is a
+regime a gradual position walk-off would occupy. We measured one autopilot
+build and one diagnostic layer, and we make no claim about detectors in
+general.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/wp_c8_coverage_map.png}
+\caption{Two-detector coverage by detection and by escalation.}
+\end{figure}
+
+\paragraph{Flight phase.} Injecting the same 556.6\,m 4\,s ramp during climb,
+cruise and descent gives minimum trust 0.697, 0.735 and 0.744; only the climb
+case escalated. The dependence is real but small, and it is smaller than the
+slew dependence.
 
 \begin{figure}[h]
 \centering
@@ -815,12 +981,8 @@ is what bounds the excursion.}
 
 The quantity that matters operationally is not whether a gate closes but how
 long the system asserts health while holding nothing it is entitled to assert
-it from. Write
-
-\[
-T_{FH} \;=\; \text{time}\{\, \text{health} = \texttt{HEALTHY} \;\wedge\;
-\text{applicable evidence} = \emptyset \,\}.
-\]
+it from, and for how much of that time it is actually wrong. Those are two
+different questions and Section~\ref{sec:fourq} separates them into four.
 
 \subsection{The four states, and what this system emits instead}
 
@@ -861,39 +1023,91 @@ denial exists at the receiver and is well studied; this system routes its
 diagnosis through position-domain relations that the fault switches off, and
 then has no way to say so.
 
+\subsection{Four quantities, because one was not enough}
+\label{sec:fourq}
+
+A single exposure number conflated two different things. Time spent healthy
+with no applicable evidence is an \emph{unsupported} verdict; without ground
+truth it may still be correct by accident, and calling it false overclaims.
+Controlled injection supplies the ground truth an operational log cannot, so
+the quantity splits. Let $A_h = 1$ mean the test for $h$ is applicable at this
+tick and $F_h = 1$ mean the injection schedule says $h$ is truly present:
+
+\begin{align*}
+T_{NA}   &= \text{time}\{ A_h = 0 \} & &\text{inapplicable}\\
+T_{UH}   &= \text{time}\{ A_h = 0 \wedge \text{healthy} \} &
+  &\text{unsupported healthy}\\
+T_{FH}   &= \text{time}\{ F_h = 1 \wedge \text{healthy} \} &
+  &\text{false healthy}\\
+T_{SOFH} &= \text{time}\{ F_h = 1 \wedge A_h = 0 \wedge \text{healthy} \} &
+  &\text{self-occluded false healthy}
+\end{align*}
+
+Only $T_{SOFH}$ is this paper's original subject. Verdicts are reported in the
+ISO/IEC 9646-1 conformance vocabulary, PASS, FAIL, INCONCLUSIVE and
+INAPPLICABLE, presented as HEALTHY, FAULT, UNKNOWN and NOT\_APPLICABLE. That
+unusable data must not be presented as normal data is established at field
+level: ARINC 429 carries a Sign/Status Matrix distinguishing Failure Warning
+and No Computed Data from Normal Operation, and OPC UA carries a StatusCode
+whose Bad severity means the value must not be used. We are aware of no
+standard term for the exposure quantity itself and do not coin one.
+
 \subsection{Measured exposure}
 
-Four arms plus a recovery arm, three flights each, 25\,s conditioning window.
-Both policies are scored from the same tick stream, so the comparison is
-paired.
+Four arms plus a recovery arm, three flights each, 25\,s conditioning window,
+attribution channel unless stated. All policies are scored from the same tick
+stream, so the comparisons are paired.
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lcrrrrrr}
 \toprule
-Arm & $T_{FH}$ attribution & $T_{FH}$ status & $T_{FH}$ abstaining &
-Silenced ticks & Onset (s) \\
+Arm & $F_h$ & $T_{NA}$ & $T_{UH}$ & $T_{FH}$ & $T_{SOFH}$ &
+$T_{FH}$ status & $T_{FH}$ abstain \\
 \midrule
-\code{nominal}    & 0.00  & 0.00 & 0.00 & 0 / 624   & --- \\
-\code{denial}     & \textbf{23.97} & 1.04 & \textbf{0.00} & 614 / 624 &
-1.48 $\to$ 0.44 \\
-\code{glitch}     & 0.00  & 0.00 & 0.00 & 0 / 624   & 1.52 \\
-\code{link loss}  & \textbf{24.48} & 1.04 & \textbf{0.00} & 612 / 624 &
-1.56 $\to$ 0.52 \\
-\code{denial, recovered} & 14.68 & 1.04 & 0.00 & 382 / 624 & 1.48 $\to$ 0.44 \\
+\code{nominal}   & no  & 0.00  & 0.00  & 0.00  & 0.00  & 0.00 & 0.00 \\
+\code{glitch}    & yes & \textbf{0.00}  & \textbf{0.00}  &
+\textbf{24.64} & \textbf{0.00}  & 24.64 & \textbf{24.64} \\
+\code{link loss} & yes & 24.48 & 24.48 & 24.96 & \textbf{24.48} & 1.52 & 0.48 \\
+\code{denial}    & yes & 24.56 & 23.97 & 24.37 & \textbf{23.97} & 1.44 & 0.40 \\
+\code{denial, recovered} & yes & 15.20 & 14.61 & 14.37 & 13.97 & 1.44 & 0.40 \\
 \bottomrule
 \end{tabular}
-\caption{False-healthy exposure by channel. Onset is deployed then abstaining.}
-\label{tab:tfh}
+\caption{Seconds in a 25\,s window. The \code{glitch} row is the point of the
+decomposition.}
+\label{tab:fourq}
 \end{table}
 
-\textbf{Two numbers, not one, and reporting only either would mislead.} The
-attribution channel spends 23.97 of 25\,s asserting \code{nominal} while its
-evidence is silenced, which is 96\% of the window and is the failure this paper
-is about. The reported status spends 1.04\,s, because the freshness disjunct
-drives the failsafe out of NORMAL 1.48\,s after onset without consulting the
-diagnosis at all. The escalation path holds. The naming path does not.
+\paragraph{The \code{glitch} row is why one number was not enough.} It has the
+\emph{largest} false-healthy exposure of any arm, 24.64 of 25\,s, and
+$T_{SOFH} = 0$ exactly. $A_h = 1$ for every tick: the fix is retained,
+\code{gvalid} stays open, \code{phys\_gps} keeps contributing. The hypothesis
+is applicable throughout, so no part of that exposure can be self-occlusion.
+Its cause is detector sensitivity and the escalation interface, which
+Section~\ref{sec:glitch} characterises separately. Pooling it with the denial
+arm under one heading would have attributed the programme's largest exposure
+to the wrong mechanism.
+
+\paragraph{Two channels, because reporting either alone would mislead.} On the
+attribution channel the denial arm spends 23.97 of 25\,s asserting
+\code{nominal} with no applicable evidence. On the reported status it spends
+1.44\,s, because the freshness disjunct drives the failsafe out of NORMAL
+without consulting the diagnosis. The escalation path holds. The naming path
+does not.
+
+\paragraph{A permanent limit on operational data.} $F_h$ does not exist in
+unannotated telemetry. $T_{NA}$ and $T_{UH}$ are estimable from the 26-log
+corpus; $T_{FH}$ and $T_{SOFH}$ never will be. That is a property of the data,
+not of the method, and it is why controlled injection is not optional here.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/wp_c8_four_quantities.png}
+\caption{Left: the four quantities by arm on the attribution channel. Right:
+$T_{FH}$ by channel, showing that the abstaining policy removes the denial and
+link-loss exposure and does nothing at all for the glitch.}
+\end{figure}
 
 \subsection{The abstaining baseline}
 
@@ -902,23 +1116,27 @@ counterfactual policy that emits \code{NOT\_APPLICABLE} when a hypothesis's
 entire support is silenced. Scored on the same flights:
 
 \begin{itemize}
-\item $T_{FH}$ falls to \textbf{0.00\,s in every arm}. By construction, since
-the policy cannot report health while abstaining, but the construction is the
-point: the state exists to be reported.
+\item \textbf{It removes the self-occlusion exposure completely.}
+$T_{SOFH}$ falls to 0.00\,s in every arm, and $T_{FH}$ falls from 24.37 to
+0.40\,s under denial and from 24.96 to 0.48\,s under link loss.
+\item \textbf{It does nothing for the glitch.} $T_{FH}$ stays at 24.64\,s,
+unchanged to two decimals. There is nothing to abstain about when $A_h = 1$
+throughout. \emph{The two defects need two different fixes, and this is the
+measurement that shows it.}
 \item Onset of a non-healthy status moves from 1.48\,s to \textbf{0.44\,s}
-under denial and 1.56\,s to 0.52\,s under link loss, a gain of about 1\,s. The
-abstention is available as soon as the gate closes, without waiting for the
-freshness watchdog.
-\item \textbf{Nuisance cost is zero.} In the two arms with no fix loss,
-\code{nominal} and \code{glitch}, the abstaining policy never fires: zero
-silenced ticks, zero abstentions, identical behaviour to the deployed system.
+under denial and 1.56\,s to 0.52\,s under link loss. The abstention is
+available as soon as the gate closes, without waiting for the freshness
+watchdog.
+\item \textbf{Nuisance cost is zero.} In \code{nominal} the policy never
+fires: zero silenced ticks, zero abstentions, behaviour identical to the
+deployed system.
 \item \textbf{Recovery costs nothing.} After denial ends while airborne, both
-policies return to health after 5.71\,s, which is the failsafe's own
-de-escalation dwell.
+policies return to health after 5.71\,s, the failsafe's own de-escalation
+dwell.
 \end{itemize}
 
-The comparison is therefore one-sided on this evidence: an earlier and honest
-status, no false alerts, and no recovery penalty. We report it as a measured
+On this evidence the abstaining state is one-sided for the faults it addresses,
+and irrelevant to the faults it does not. We report it as a measured
 counterfactual and not as a recommendation to ship, because three flights per
 arm against one simulator is not the basis for a production change.
 
@@ -1133,6 +1351,21 @@ cost is a property of those flights, and a policy that abstains whenever any
 hypothesis's support is silenced will abstain more often on a platform with
 more gates. Nothing in production was changed.
 
+\paragraph{Two of the four exposure quantities are unavailable from
+operational data.} $T_{FH}$ and $T_{SOFH}$ both condition on $F_h$, the
+ground-truth presence of the fault, which does not exist in unannotated
+telemetry. Only $T_{NA}$ and $T_{UH}$ can be estimated from a flight corpus,
+and the 26-log corpus used elsewhere in this project carries no health labels.
+Any deployment wishing to track false-healthy exposure must either annotate its
+corpus or run controlled injection; there is no way to recover $F_h$ after the
+fact.
+
+\paragraph{The escalation defect is characterised and not fixed.} Section
+\ref{sec:algebra} derives it, predicts the boundary and tests the prediction.
+No change was made to the trust recursion, the detector decay or the failsafe
+dwell. A correction belongs in a separate authorised change with
+before-and-after evidence.
+
 %======================================================================
 \section{Claim table}
 \label{sec:claims}
@@ -1178,10 +1411,23 @@ shows the satellite count contributes nothing; the closure came from byte loss
 and the arm is relabelled \\
 The gate closes at some satellite count & REFUTED. It does not close at any
 count down to zero, in this generator \\
-$T_{FH}$ on the attribution channel is 23.97 of 25\,s under denial &
+$T_{SOFH}$ is 23.97 of 25\,s under denial on the attribution channel &
 EMPIRICAL RESULT, 3 flights per arm \\
-$T_{FH}$ on the reported status is 1.04\,s & EMPIRICAL RESULT. The freshness
+$T_{SOFH}$ is 0.00\,s for the retained-fix glitch, whose $T_{FH}$ is the
+largest of any arm at 24.64\,s & EMPIRICAL RESULT. $A_h = 1$ throughout, so its
+exposure cannot be self-occlusion \\
+A single exposure quantity suffices & REFUTED by our own measurement. It
+attributed the largest exposure to the wrong mechanism \\
+$T_{FH}$ on the reported status is 1.44\,s & EMPIRICAL RESULT. The freshness
 disjunct bounds exposure; the naming failure is not bounded by it \\
+Equation (\ref{eq:trustlag}) predicts the shipping recursion & VERIFIED FACT,
+maximum absolute error 0.00 over 200 ticks; predicted crossing 93.3, observed 94 \\
+The escalation boundary $N^*+25$ classifies the sweep & EMPIRICAL RESULT, 19 of
+21 cells, both misses within 13 ticks of the line \\
+Neither detector covers slow moderate errors & EMPIRICAL RESULT, 8 of 21 cells
+by detection and 9 of 21 by escalation \\
+An abstaining state fixes the glitch exposure & REFUTED. $T_{FH}$ unchanged at
+24.64\,s; the two defects need two fixes \\
 An abstaining policy costs nuisance alerts & REFUTED on this evidence. Zero
 abstentions in both arms without fix loss, and no recovery penalty \\
 No step magnitude of GNSS position error alarms & EMPIRICAL RESULT, tested to
@@ -1219,12 +1465,44 @@ fault sat in a telemetry field the receiver reported correctly and the
 ingestion path does not read. What we measure is evidence routing and the
 absence of a vocabulary for ``I cannot assess this''.
 
-The engineering output is small and checkable: one ungated relation suffices,
-enforced as a rule in the test suite, and an abstaining state whose cost we
-measured at zero nuisance alerts and one second of earlier warning. We claim no
-mathematics. The frameworks were already there; what was missing was somebody
-running the measurements on a real system and reporting what came back,
-including the parts that took claims away.
+We claim no mathematics. The frameworks were already there; what was missing
+was somebody running the measurements on a real system and reporting what came
+back, including the parts that took claims away.
+
+What we would tell someone building a gated diagnostic layer, all of it
+measured rather than argued:
+
+\begin{enumerate}
+\item \textbf{A hypothesis whose evidence sits entirely behind one gate needs
+one relation that gate does not control.} Not more evidence: one ungated
+relation. Absorption into the healthy class runs at 1.000 with every feature
+behind the gate and 0.000 with exactly one outside, at every signature density
+we tested. The check is a linear-time subset test over the signature matrix and
+the gate map, and it belongs in the build.
+\item \textbf{A saturating detector with a fixed decay cannot escalate on
+magnitude.} Once the residual pins at zero, a larger fault buys only
+logarithmic extra time on an already-saturated signal. If escalation integrates
+evidence, the escalation condition is a duration, and it should be stated and
+tested as one.
+\item \textbf{Size the escalation delay from the concentration cap, not from
+the threshold margin.} In this system the delay is dominated by the belief mass
+banked during calm flight, 500 units against an evidence margin worth 1. A
+forgetting factor chosen for smoothness silently sets the worst-case time to
+alarm.
+\item \textbf{A monitor reading raw measurements and an estimator reading
+fused output have complementary blind spots, and complementary is not the same
+as covering.} Verify them jointly on the same fault grid. Ours are both blind
+to slow, moderate errors, and the uncovered region widens as the fault slows.
+\item \textbf{Give the system a way to say it cannot assess something.} Absence
+of applicable evidence surfaced as health here because there was no other state
+to surface it as. Adding one removed the entire self-occlusion exposure at zero
+nuisance cost, and did nothing for the fault where evidence was present and
+ignored. Two defects, two fixes.
+\item \textbf{Separate detection from escalation, and unsupported verdicts from
+false ones, before reporting either.} Pooling them attributed our largest
+measured exposure to the wrong mechanism, and we only caught it by measuring
+applicability separately from ground truth.
+\end{enumerate}
 
 \bibliographystyle{plain}
 \bibliography{refs}

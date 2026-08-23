@@ -67,6 +67,16 @@ def main() -> int:
     print(f"  ----  uncited bib entries          "
           f"{sorted(keys - cites) or 'none'}")
 
+    # Cross-references cannot be checked by compiling here, so check them by
+    # hand: every \ref and \eqref must have a matching \label.
+    labels = set(re.findall(r"\\label\{([^}]*)\}", src))
+    refs = set(re.findall(r"\\(?:eq)?ref\{([^}]*)\}", src))
+    check("every ref resolves to a label", not (refs - labels),
+          f"{len(refs)} refs, dangling={sorted(refs - labels) or 'none'}")
+    dupes = [x for x in set(labels)
+             if len(re.findall(r"\\label\{" + re.escape(x) + r"\}", src)) > 1]
+    check("no duplicate labels", not dupes, f"dupes={dupes or 'none'}")
+
     figs = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]*)\}", src)
     missing = [f for f in figs
                if not os.path.exists(os.path.join(HERE, f))]
