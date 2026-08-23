@@ -1,0 +1,19 @@
+{
+ "availability": {
+  "corpus_report_present": true,
+  "log_glob": "data/real_logs/*.ulg",
+  "n_ulg_files_present": 0,
+  "pyulog_installed": false
+ },
+ "exactly_what_is_needed": [
+  "1. A network-permitted host, then: python tools/fetch_real_logs.py --no-run",
+  "2. pip install -e '.[logs]' for pyulog (installed here: False)",
+  "3. Re-run this script; it needs no other change, because fix_type is already plumbed at ulog_source.py:178 and gvalid is a function of fix_type alone."
+ ],
+ "explicitly_not_done": "No simulator run was substituted. The brief forbids simulating and labelling it real, and an unconditional rate from synthetic denial would measure the fault model, not flight.",
+ "measured": null,
+ "status": "NO_REAL_TELEMETRY_REACHABLE",
+ "what_it_would_NOT_yield": "q_gvalid | h. The conditioning variable does not exist in an unannotated corpus. See research/wp_c5/Q_GVALID_MEASUREMENT_SPEC.md section 2.",
+ "what_it_would_yield": "Per-flight gvalid occupancy against applicable (post-arm) time, closure-run count and longest-run length, and the across-flight distribution. Unconditional only.",
+ "why": "data/real_logs/ contains no .ulg files. The corpus is identified by UUID in data/real_logs_report.json but the files themselves were never committed (gitignored), and review.px4.io is refused by this environment's egress policy."
+}
