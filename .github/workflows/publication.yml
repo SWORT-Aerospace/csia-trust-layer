@@ -1,0 +1,71 @@
+name: publication
+on: [push, pull_request]
+
+# The publication lane is separate from `ci` on purpose. `ci` gates the
+# software; this gates the two manuscripts. A red bibliography guard means a
+# paper is not submittable, which is a different fact from a broken build, and
+# conflating them would let one hide the other.
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    name: publication guards
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # phase_guard.py diffs Phase-I artifacts against the frozen baseline
+          # commit, so the full history has to be present.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml
+      # Every guard runs and reports before the job fails, so one red guard
+      # does not mask the state of the others.
+      - name: artifact maps
+        if: always()
+        run: python tools/publication/artifact_map_check.py
+      - name: figure bundles match figures/
+        if: always()
+        run: python tools/publication/sync_paper_figures.py --check
+      - name: Phase-I papers must not cite Phase-II results
+        if: always()
+        run: python tools/publication/phase_guard.py
+      - name: manuscript hard style rules
+        if: always()
+        run: python papers/csia_systems/check.py
+      - name: secrets scan
+        if: always()
+        run: python tools/publication/secrets_scan.py
+      # KNOWN RED. refs.bib carries 37 unresolved provenance markers and no
+      # entry is marked verified. This is a real submission blocker recorded
+      # in RESEARCH_STATE.md open items and in the artifact map as OI-1.
+      # It is NOT to be cleared by deleting markers or inventing citations.
+      - name: bibliography guard
+        if: always()
+        run: python tools/publication/bib_guard.py
+
+  papers:
+    runs-on: ubuntu-latest
+    name: LaTeX builds
+    steps:
+      - uses: actions/checkout@v4
+      # Pinned to the distribution's TeX Live package set, which is what
+      # `make tex-deps` installs locally, so a clean checkout builds the same
+      # way in both places.
+      - name: TeX Live
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended \
+            texlive-latex-extra texlive-fonts-recommended poppler-utils
+      - name: build CSIA Systems Paper I
+        run: make paper-systems
+      - name: build the gate-conditioning paper (scaffold)
+        run: make paper-math
+      # Generated PDFs are never committed; they are build outputs, retained
+      # here only so a reviewer can read what the branch actually produces.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: papers
+          path: build/papers/*/main.pdf
+          if-no-files-found: error

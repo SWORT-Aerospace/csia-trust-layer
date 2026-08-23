@@ -27,3 +27,28 @@ research/phase2/results/_wd_*/
 # P1 per-tick residual streams: regenerable by re-running p1_fault_suite.py,
 # several MB each, and not the scientific record (the analyses are).
 research/phase2/results/p1_streams_*.json
+
+# --- LaTeX auxiliaries and paper build outputs -----------------------------
+# `make paper-*` writes to build/papers/, already covered by /build/ above.
+# These catch a stray in-tree pdflatex run inside a paper directory. Generated
+# PDFs are never committed: a committed PDF drifts from its source silently.
+papers/**/*.aux
+papers/**/*.bbl
+papers/**/*.blg
+papers/**/*.fdb_latexmk
+papers/**/*.fls
+papers/**/*.lof
+papers/**/*.log
+papers/**/*.lot
+papers/**/*.out
+papers/**/*.synctex.gz
+papers/**/*.toc
+papers/**/main.pdf
+
+# --- editor and OS junk ----------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/

@@ -1,0 +1,128 @@
+% ---------------------------------------------------------------------------
+% BUILD SCAFFOLD -- THIS IS NOT THE MANUSCRIPT.
+%
+% The gate-conditioning paper is being written elsewhere. This file exists so
+% that `make paper-math` has something to compile from a clean checkout, so
+% that the bibliography guard and the artifact-map check have a target, and so
+% that the claim inventory the paper must respect is visible as a compiled
+% artifact rather than only as markdown.
+%
+% When the manuscript arrives it replaces the body below. The preamble, the
+% bibliography style and the artifact map are the parts intended to survive.
+%
+% Do NOT cite this document. Do NOT treat the table below as a result: it is a
+% transcription of docs/math/PROOF_STATUS.md, which is the authoritative
+% register.
+% ---------------------------------------------------------------------------
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage[margin=1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\title{Gate Conditioning and Anytime-Valid Evidence in a Cross-Sensor\\
+Diagnostic Layer\\[6pt]
+\large BUILD SCAFFOLD, NOT THE MANUSCRIPT}
+
+\author{SWORT Aerospace}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This file is a build scaffold. It is committed so the publication toolchain
+has a compilable target for the mathematical paper before the manuscript
+itself lands, and so that the claim register the manuscript must respect is
+carried in the build rather than only in prose. It contains no results and
+must not be cited. The authoritative sources are listed in
+\code{papers/gate\_conditioning/GATE\_PAPER\_ARTIFACT\_MAP.yaml}.
+\end{abstract}
+
+\section{Scope of the mathematical paper}
+
+The paper concerns \emph{gate conditioning}: the statistical consequences of a
+validity gate whose closure depends on the vehicle state, potentially
+including the state produced by the fault under diagnosis. The distinction the
+paper turns on is between \emph{endogenous} coarsening, where a gate closes as
+a function of that state, and \emph{exogenous} coarsening, where a channel is
+absent from the record for reasons unrelated to the fault. The coarsening
+index $\kappa$ is agnostic to which mechanism applies; results that turn on
+the cause of unavailability apply only to the first.
+
+Source material, all committed:
+\begin{itemize}
+\item \code{docs/math/CSIA\_EVIDENCE\_FORMAL\_SPEC.md}, the formal setting.
+\item \code{docs/math/ANYTIME\_VALID\_EVIDENCE.md}, the e-value framing.
+\item \code{docs/math/T1\_BLOCKWISE\_EPROCESS.md}, the blockwise construction.
+\item \code{docs/math/T2\_MISSION\_ERROR\_CONTROL.md}, mission-level control.
+\item \code{docs/math/PROOF\_STATUS.md}, the authoritative claim register.
+\item \code{docs/research/PAPER1\_EMPIRICAL\_SECTION.md}, the empirical
+      section drafted for \emph{this} paper. The filename says
+      \code{PAPER1} and refers to the mathematical paper, not to CSIA Systems
+      Paper~I. The collision is recorded in \code{RESEARCH\_STATE.md}.
+\end{itemize}
+
+\section{Claim register, transcribed}
+
+Transcribed from \code{docs/math/PROOF\_STATUS.md}. That file governs; if this
+table and it disagree, this table is stale.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{0.56\textwidth}ll}
+\toprule
+Claim & Status & Evidence \\
+\midrule
+Calibrator $\kappa p^{\kappa-1}$ is an e-value for super-uniform $p$
+  & PROVED & T-1 Lemma 1 \\
+Predictable convex combination across dependent residuals
+  & PROVED & T-1 Lemma 2 \\
+Product across dependent residuals
+  & REFUTED & measured mean 2.87 \\
+Naive per-tick temporal product under CSIA smoothing
+  & REFUTED & measured 0.442 vs 0.05 \\
+T-1 blockwise product given block conditional super-uniformity
+  & PROVED given A3 & T-1 \S5 \\
+A3 itself at $L=50$ for $\rho \le 0.94$
+  & EMPIRICAL ONLY & 0.0248 / 0.0498 \\
+LR e-process under correct conditional null
+  & PROVED & measured 0.0088 \\
+LR e-process under misspecified null
+  & REFUTED & measured 0.4467 \\
+Context-ignorant calibration under regime switching
+  & REFUTED & measured 0.7850 \\
+Restart validity without first-observation conditioning
+  & REFUTED & measured 0.196 \\
+T-2 mission-level error control
+  & OPEN & e-BH pre-registered \\
+T-3 non-double-counting formalization
+  & OPEN & Lemma 2 is the base \\
+T-4 identifiability-constrained isolation
+  & OPEN & v1 \code{classify\_isolation} \\
+T-5 bounded shadow arbitration
+  & OPEN & --- \\
+\bottomrule
+\end{tabular}
+\caption{Claim register for the mathematical paper. Six entries are REFUTED
+and are retained: they are counterexamples that shaped the construction, and
+one of them was found by the verification suite against the project's own
+proposal.}
+\end{table}
+
+\section{What this scaffold deliberately does not contain}
+
+No theorem statements, no proofs, no numerical examples, and no empirical
+results. Those belong to the manuscript. Committing a placeholder that looked
+like a paper would be worse than committing one that plainly is not.
+
+\end{document}
