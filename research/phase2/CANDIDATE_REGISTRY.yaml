@@ -127,17 +127,35 @@ evaluation_contract:
     - implementation_complexity_loc
 
   partitions:
-    development:
-      description: parameter and structure search happens ONLY here
-      flight_specs: [0, 1, 2]
-      slews_s: [0, 4, 20]
-    protected:
-      description: >-
-        Touched once, after parameters are frozen. Repeated optimisation
-        against this partition is forbidden (section 9).
-      flight_specs: [3, 4, 5]
-      slews_s: [0, 4, 20, 60, 120]
-      status: UNTOUCHED
+    # AUDITED 2026-08-23, see research/phase2/PARTITION_AUDIT.md.
+    # The declaration below was written for the ArduCopter 3.3 rig and its
+    # `status: UNTOUCHED` was FALSE by the time P1 began.
+    as_declared_phase1:
+      development:
+        flight_specs: [0, 1, 2]
+        slews_s: [0, 4, 20]
+      protected:
+        flight_specs: [3, 4, 5]
+        slews_s: [0, 4, 20, 60, 120]
+        status_as_declared: UNTOUCHED
+        status_as_measured: CONTAMINATED_ON_THE_SLEW_AXIS
+        contamination: >-
+          slews 60 s and 120 s are declared protected-only and were flown and
+          inspected in E1 run 1, E1 run 2 and the V6 diagnosis. Slew 240 s was
+          flown and appears in neither declared list.
+    as_used_by_P1:
+      # Declared in PARTITION_AUDIT.md BEFORE any candidate was tuned.
+      development:
+        flight_specs: [0]
+        rule: all B2/B3/B4 parameter search here and nowhere else
+      validation:
+        flight_specs: [3, 4]
+        rule: >-
+          never flown on the modern target before P1. Touched with parameters
+          already frozen; no parameter changed between the two touches. Two
+          were spent because a third instrument defect required a re-fly.
+      reserved_untouched:
+        flight_specs: [1, 2, 5]
 
   search_objective:
     # Declared before any protected-partition run.
@@ -192,12 +210,21 @@ candidates:
   - candidate_id: B2
     class: established
     name: Direct saturated-residual counter
-    status: NOT_YET_RUN
+    status: MEASURED
+    result:
+      selected_k: 5
+      searched_on: development flight spec 0 only
+      R10: {spec0: 0, spec3: 0, spec4: 0}
+      ledger_B: {spec0: "1/4/0/2", spec3: "1/4/0/2", spec4: "1/4/0/2"}
+      incremental_csia_coverage: 0
+      cpu_us_per_tick: 0.18
+      taxonomy: "A - duplicates autopilot coverage, and covers LESS than B1"
+      verdict: does not solve
     mechanism: >-
       Alarm when the GPS physics residual stays below the saturation floor for
       k consecutive ticks, bypassing the trust recursion.
     parameters: [k]
-    search_partition: development
+    search_partition: development (flight spec 0)
     required_inputs: []
     additional_sensor_inputs: 0
     expected_advantage: >-
@@ -210,7 +237,15 @@ candidates:
   - candidate_id: B3
     class: established
     name: Concentration-cap correction
-    status: NOT_YET_RUN
+    status: MEASURED_AND_REFUTED
+    result:
+      R10_by_rho_max: {0.99: 2, 0.98: 4, 0.96: 4}
+      budget: 0
+      wrong_isolation: 6 at every setting, against 3 for B1
+      taxonomy: "D unacceptable false alerts, and E attribution damage"
+      verdict: >-
+        REFUTED. Fails the R10 hard constraint at every setting tried and
+        simultaneously degrades attribution. The budget was not relaxed.
     mechanism: >-
       Cap accumulated Beta mass at S_max < 1/(1-rho_max) = 500, which the
       Phase-I algebra identifies as the dominant term in the escalation delay.
@@ -228,8 +263,30 @@ candidates:
 
   - candidate_id: B4
     class: established
-    name: CUSUM on the GPS-vs-inertial innovation sequence
-    status: NOT_YET_RUN
+    name: CUSUM on the per-node residual sequence
+    status: MEASURED_AND_SELECTED
+    result:
+      drift_k: 0.5
+      drift_set_by: design (Page 1954)
+      decision_h: 500
+      decision_h_rule: >-
+        smallest value from a fixed grid for which the clean nominal arm
+        produces zero alarms; reads the clean arm only, never a fault outcome
+      R10: {spec0: 0, spec3: 0, spec4: 0}
+      ledger_B: {spec0: "2/3/2/0", spec3: "1/4/2/0", spec4: "1/4/2/0"}
+      incremental_csia_coverage: 2 at every flight spec
+      joint_miss: 0 at every flight spec
+      wrong_isolation: 0
+      cpu_us_per_tick: 0.62
+      additional_sensor_inputs: 0
+      taxonomy: "B genuine incremental coverage, and C converts JOINT_MISS"
+      blind_on: >-
+        both IMU families; the layer publishes no per-IMU physics residual.
+        B1 and B4 are COMPLEMENTARY, not ordered.
+      committed_negative_result: >-
+        the textbook h = 5.0 gives 4 clean-flight alarms and fails R10
+      verdict: >-
+        SOLVES the fault-suite coverage problem inside every hard constraint
     mechanism: >-
       Two-sided cumulative sum change detector with drift parameter set from
       the clean-flight residual distribution and decision interval set by
