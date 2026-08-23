@@ -1,0 +1,122 @@
+{
+ "ardupilot": {
+  "build": "./waf configure --board sitl && ./waf copter",
+  "build_host": "gcc, 4 cores, built in ~5 min",
+  "built_binary": "/home/user/ardupilot/ardupilot/build/sitl/bin/arducopter",
+  "checkout": "/home/user/ardupilot/ardupilot",
+  "firmware_string": "ArduCopter V4.8.0-dev",
+  "git_head": "01a504b",
+  "source": "https://github.com/ArduPilot/ardupilot"
+ },
+ "baseline_for_comparison": {
+  "binary_date": "2015-10-22",
+  "firmware": "ArduCopter 3.3",
+  "provenance": "dronekit-assets prebuilt tarball"
+ },
+ "external_claim_status": "Phase-I numbers remain bounded to ArduCopter 3.3 until the campaign is re-run here. Building the target does not replicate the result.",
+ "how_the_phase1_blocker_was_wrong": "Phase I recorded github.com as returning 403 and concluded the network blocked it. The 403 body is in fact this session's repository allowlist message, and it names the remedy. Anonymous git reads of PUBLIC repositories are served directly by the session git proxy. The blocker was a misread, not a network policy.",
+ "material_differences_from_baseline": [
+  {
+   "baseline_3_3": "absent",
+   "consequence": "the `battery` node becomes live, so phys_battery and power_thrust contribute evidence that was structurally missing in every Phase-I measurement",
+   "item": "BATTERY_STATUS",
+   "modern_4_8": "present"
+  },
+  {
+   "baseline_3_3": "absent",
+   "consequence": "the `motor_esc` node becomes live, enabling accel_motor_current, accel_esc_rpm and phys_motor_esc",
+   "item": "ESC_TELEMETRY_1_TO_4",
+   "modern_4_8": "present"
+  },
+  {
+   "baseline_3_3": 3,
+   "consequence": "modern SITL reports RTK-fixed. gvalid is fix_type >= 3, so the gate predicate is unchanged, but the receiver model is not the same one",
+   "item": "GPS fix_type",
+   "modern_4_8": 6
+  },
+  {
+   "baseline_3_3": [
+    "SIM_GPS_BYTELOSS",
+    "SIM_GPS_DISABLE",
+    "SIM_GPS_GLITCH_X",
+    "SIM_GPS_NUMSATS"
+   ],
+   "consequence": "THE PHASE-I CAMPAIGN SCRIPTS CANNOT DRIVE A MODERN BUILD UNCHANGED. Injection is a no-op under the old names, which would silently produce a clean-flight result labelled as a fault arm.",
+   "item": "SIM GPS parameter names",
+   "modern_4_8": [
+    "SIM_GPS1_BYTELOSS",
+    "SIM_GPS1_ENABLE",
+    "SIM_GPS1_GLTCH_X",
+    "SIM_GPS1_NUMSATS"
+   ]
+  }
+ ],
+ "new_param_names_present": [
+  "SIM_GPS1_ENABLE",
+  "SIM_GPS1_GLTCH_X",
+  "SIM_GPS1_NUMSATS"
+ ],
+ "old_param_names_present": [],
+ "probe": {
+  "connected": true,
+  "ekf_pos_horiz_variance": 0.00513,
+  "gps": {
+   "fix_type": 6,
+   "satellites_visible": 10,
+   "time_usec": 121563000
+  },
+  "injection_parameters_present": {
+   "FS_EKF_THRESH": 0.8,
+   "SIM_GPS1_BYTELOS": 0.0,
+   "SIM_GPS1_ENABLE": 1.0,
+   "SIM_GPS1_GLTCH_X": 0.0,
+   "SIM_GPS1_NUMSATS": 10.0,
+   "SIM_WIND_DIR": 180.0,
+   "SIM_WIND_SPD": 0.0,
+   "STAT_RUNTIME": 123.0
+  },
+  "messages_seen": {
+   "ATTITUDE": 1192,
+   "BATTERY_STATUS": 1192,
+   "EKF_STATUS_REPORT": 1182,
+   "ESC_TELEMETRY_1_TO_4": 1157,
+   "GLOBAL_POSITION_INT": 1192,
+   "GPS_RAW_INT": 1192,
+   "HEARTBEAT": 122,
+   "RAW_IMU": 1192,
+   "SCALED_IMU": 0,
+   "SCALED_IMU2": 1192,
+   "SCALED_PRESSURE": 1192,
+   "SIMSTATE": 1192,
+   "VIBRATION": 1192
+  },
+  "schema_messages_absent": [
+   "SCALED_IMU"
+  ],
+  "schema_messages_present": [
+   "GPS_RAW_INT",
+   "SCALED_IMU2",
+   "RAW_IMU",
+   "SCALED_PRESSURE",
+   "VIBRATION",
+   "GLOBAL_POSITION_INT",
+   "EKF_STATUS_REPORT",
+   "SIMSTATE",
+   "ATTITUDE",
+   "BATTERY_STATUS",
+   "ESC_TELEMETRY_1_TO_4",
+   "HEARTBEAT"
+  ]
+ },
+ "px4": {
+  "expected_route": "same anonymous git read of https://github.com/PX4/PX4-Autopilot",
+  "known_extra_cost": "PX4 SITL needs a Gazebo or jMAVSim backend; jmavsim needs a JDK, gazebo needs a large dependency set. Neither is installed.",
+  "status": "NOT_YET_ATTEMPTED"
+ },
+ "schema_carried": {
+  "all_required_messages_present": true,
+  "note": "SCALED_IMU is absent on BOTH builds; ArduPilot publishes the primary IMU as RAW_IMU in the same units. The Phase-I research shim that relabels it is still required and still correct."
+ },
+ "status": "MODERN_TARGET_AVAILABLE",
+ "why_this_matters_for_evidence_configuration": "This is not merely a newer build. Two of the eight graph nodes that were dead throughout Phase I are live here. The evidence asymptote e_f, which the Phase-I algebra derives from which components are AVAILABLE, is therefore expected to differ. Phase-I escalation numbers should NOT be assumed to carry over, in either direction."
+}

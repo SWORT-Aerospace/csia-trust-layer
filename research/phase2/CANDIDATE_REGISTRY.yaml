@@ -1,0 +1,253 @@
+%YAML 1.2
+---
+# Phase-II candidate registry and evaluation contract.
+#
+# Section 6 of the brief: the metrics and thresholds below are fixed BEFORE any
+# candidate is measured. The false-alert budget is not moved after seeing
+# results. Every candidate ever evaluated stays in this file, including the
+# ones that fail — section 14 forbids hiding negative results.
+
+schema: csia.phase2.candidate_registry/1
+baseline_commit: 848f556
+baseline_manifest: research/phase2/BASELINE_MANIFEST.json
+
+# ---------------------------------------------------------------------------
+# FIXED EVALUATION CONTRACT — declared before measurement
+# ---------------------------------------------------------------------------
+evaluation_contract:
+
+  hard_constraints:
+    # Violating any of these fails the candidate outright, whatever it gains.
+    false_alerts_clean_nominal:
+      budget: 0
+      units: failsafe transitions
+      derived_from: docs/REQUIREMENTS.md R10
+      requirement_text: >-
+        Clean nominal flight shall produce zero failsafe transitions.
+      verified_by: [test_failsafe_clean_no_false_alarms, campaigns/bench.json]
+      note: >-
+        Pre-existing requirement, not a number chosen after seeing candidate
+        results. Fixed for the duration of Phase II.
+
+    latency_budget_per_tick:
+      budget: 2.0
+      units: ms
+      derived_from: docs/REQUIREMENTS.md R13
+      requirement_text: >-
+        Trust-core latency shall be <2 ms/tick (Python reference).
+      measured_baseline_us: 85.5
+      note: >-
+        Baseline measured by `csia report`. A candidate has ~23x headroom;
+        this constraint exists to catch a candidate that spends it all.
+
+    determinism:
+      required: true
+      derived_from: docs/REQUIREMENTS.md R3
+      note: identical inputs must produce identical outputs.
+
+    causality:
+      required: true
+      derived_from: docs/REQUIREMENTS.md R2
+      note: strictly causal, no future samples.
+
+  primary_objective:
+    # NOT "higher detection". A candidate improves the problem only if it
+    # reduces safety-relevant joint misses inside the hard constraints.
+    metric: significant_cells_not_escalated
+    definition: >-
+      Count of tested conditions with total induced position error >= 48 m
+      (the project's own gps_spoof reference displacement) that the candidate
+      fails to escalate.
+    baseline_b1_value: 6
+    of_total: 9
+    direction: minimise
+
+  reported_metrics:
+    - joint_blind_region_cells          # neither monitor detects
+    - joint_blind_region_significant    # ... restricted to >= 48 m
+    - miss_rate_on_fault_grid
+    - false_alerts_on_nominal           # hard constraint above
+    - detection_delay_s
+    - escalation_delay_s
+    - wrong_isolation                   # top cause != injected cause
+    - abstention_rate                   # where the candidate supports it
+    - cpu_cost_us_per_tick
+    - memory_cost_bytes
+    - additional_sensor_inputs          # count; 0 preferred
+    - additional_dependencies
+    - additional_gates
+    - implementation_complexity_loc
+
+  partitions:
+    development:
+      description: parameter and structure search happens ONLY here
+      flight_specs: [0, 1, 2]
+      slews_s: [0, 4, 20]
+    protected:
+      description: >-
+        Touched once, after parameters are frozen. Repeated optimisation
+        against this partition is forbidden (section 9).
+      flight_specs: [3, 4, 5]
+      slews_s: [0, 4, 20, 60, 120]
+      status: UNTOUCHED
+
+  search_objective:
+    # Declared before any protected-partition run.
+    form: constrained
+    minimise: significant_cells_not_escalated
+    subject_to:
+      - false_alerts_clean_nominal == 0
+      - cpu_us_per_tick <= 2000
+      - determinism == true
+    note: >-
+      A weighted scalar J(phi) is deliberately NOT used as the primary form.
+      Weights would let a candidate buy misses with false alerts, and R10 is a
+      requirement rather than a term to be traded.
+
+# ---------------------------------------------------------------------------
+# CANDIDATES
+# ---------------------------------------------------------------------------
+candidates:
+
+  - candidate_id: B0
+    class: established
+    name: Native autopilot behaviour
+    status: MEASURED
+    mechanism: >-
+      No CSIA in the escalation path. The autopilot estimator's own innovation
+      test ratio against its own FS_EKF_THRESH default.
+    required_inputs: []
+    additional_sensor_inputs: 0
+    result:
+      significant_cells_detected: 9
+      of_total: 9
+      source: research/wp_c8/results/response_surface.json
+    note: >-
+      Not a strawman. The estimator detected every operationally significant
+      cell in the tested grid. If this covers what the others cover, verdict A.
+
+  - candidate_id: B1
+    class: frozen_baseline
+    name: CSIA v1
+    status: MEASURED
+    mechanism: gated naive-Bayes diagnosis + Beta trust recursion + failsafe dwell
+    required_inputs: []
+    additional_sensor_inputs: 0
+    result:
+      significant_cells_not_escalated: 6
+      of_total: 9
+      grid_cells_escalated: 3
+      of_grid: 21
+      escalation_boundary_ticks: 118.31
+      source: research/wp_c8/results/response_surface.json
+
+  - candidate_id: B2
+    class: established
+    name: Direct saturated-residual counter
+    status: NOT_YET_RUN
+    mechanism: >-
+      Alarm when the GPS physics residual stays below the saturation floor for
+      k consecutive ticks, bypassing the trust recursion.
+    parameters: [k]
+    search_partition: development
+    required_inputs: []
+    additional_sensor_inputs: 0
+    expected_advantage: >-
+      Recovers the detection the residual already performs but the accumulator
+      discards.
+    expected_failure_mode: >-
+      Clean-flight residual excursions breach the R10 zero budget. B2 is the
+      experiment that prices the smoothing.
+
+  - candidate_id: B3
+    class: established
+    name: Concentration-cap correction
+    status: NOT_YET_RUN
+    mechanism: >-
+      Cap accumulated Beta mass at S_max < 1/(1-rho_max) = 500, which the
+      Phase-I algebra identifies as the dominant term in the escalation delay.
+    parameters: [S_max]
+    search_partition: development
+    required_inputs: []
+    additional_sensor_inputs: 0
+    scope: >-
+      Addresses escalation only. Deliberately does NOT address F1 applicability
+      loss; conflating them was a Phase-I error.
+    expected_failure_mode: >-
+      Shorter memory raises clean-flight sensitivity; R10 is the binding
+      constraint.
+    note: if this closes the gap inside budget, verdict B and no invention.
+
+  - candidate_id: B4
+    class: established
+    name: CUSUM on the GPS-vs-inertial innovation sequence
+    status: NOT_YET_RUN
+    mechanism: >-
+      Two-sided cumulative sum change detector with drift parameter set from
+      the clean-flight residual distribution and decision interval set by
+      design.
+    parameters: [drift_k, decision_h]
+    search_partition: development
+    required_inputs: []
+    additional_sensor_inputs: 0
+    literature:
+      - "Page, E.S. (1954), Continuous inspection schemes, Biometrika 41(1)."
+      - "Gustafsson, F., Adaptive Filtering and Change Detection — standard
+         treatment of CUSUM in model-based FDI."
+      - "docs/REQUIREMENTS.md R16 — the repository already names
+         'dual-timescale CUSUM' as the tracked remedy for its known blind spot
+         (issue #1). This applies the project's own identified method to a
+         second phenomenon."
+    why_appropriate: >-
+      The measured phenomenon is a small persistent shift in a residual
+      sequence of unknown onset, which is the problem CUSUM is the standard
+      sequential test for. It is duration-aware by construction, which is the
+      property B1 lacks.
+    note: if this closes the gap inside budget, verdict A and the invention is
+      abandoned.
+
+# ---------------------------------------------------------------------------
+# INVENTION GATE — no entries permitted until the challenge above reports
+# ---------------------------------------------------------------------------
+invention_gate:
+  status: CLOSED
+  opens_when: >-
+    B0-B4 are measured AND a meaningful residual gap remains inside the hard
+    constraints.
+  required_fields_for_any_new_candidate:
+    - candidate_id
+    - technical_uncertainty_addressed
+    - mechanism
+    - why_existing_baselines_are_insufficient
+    - required_inputs
+    - new_assumptions
+    - expected_advantage
+    - expected_failure_mode
+    - simplest_counterexample
+    - kill_criterion
+  permitted_initial_status: [PROVISIONAL]
+  forbidden_status_words: [NOVEL, BREAKTHROUGH, PROVED]
+
+# ---------------------------------------------------------------------------
+# OPEN EXPERIMENTS
+# ---------------------------------------------------------------------------
+experiments:
+  - id: E1
+    name: Slow-slew extension — does a real joint blind region exist?
+    status: PLANNED
+    rationale: >-
+      The tested grid's slowest ramp is 20 s and the blind wedge widened
+      monotonically with slew. At significant magnitudes the joint blind region
+      is currently empty, so F3 may be a curiosity. This decides it.
+    grid:
+      amplitudes_m: [55.7, 556.6]
+      slews_s: [20, 60, 120, 240]
+    decides:
+      estimator_still_detects_all: "F3 refuted at significant magnitude; verdict D for F3"
+      estimator_fails_on_slow: "F3 confirmed and bounded; Phase II has a target"
+
+  - id: E2
+    name: Modern-stack replication
+    status: IN_PROGRESS
+    target: ArduCopter 4.8.0-dev SITL, built from source at this session
+    see: research/phase2/results/modern_replication.json
