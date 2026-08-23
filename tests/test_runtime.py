@@ -150,6 +150,191 @@ def test_stale_sensor_watchdog(truth):
     assert "invalid" in " ".join(caution.reasons)
 
 
+def _ground_stream(duration=30.0, hz=25.0, armed=None, climb=0.0,
+                   vz_mode="true"):
+    """Synthetic on-ground / steady-climb sample stream at uniform rate.
+    armed: None = never report vehicle status; True/False = report it.
+    vz_mode: 'true' = GPS reports real vz; 'fabricated' = vz forced to 0 but
+    still claimed valid (the old GPS_RAW_INT behavior); 'flagged' = vz 0
+    with vz_valid=False (the fixed GPS_RAW_INT mapping)."""
+    G = 9.80665
+    for i in range(int(duration * hz)):
+        t = i / hz
+        alt = climb * t
+        vz = climb if vz_mode == "true" else 0.0
+        gps_ch = {"pos": np.array([0.0, 0.0, alt]),
+                  "vel": np.array([0.0, 0.0, vz]), "valid": True}
+        if vz_mode == "flagged":
+            gps_ch["vz_valid"] = False
+        yield "imu0", t, {"accel": np.array([0.0, 0.0, G]),
+                          "gyro": np.zeros(3), "valid": True}
+        yield "imu1", t, {"accel": np.array([0.0, 0.0, G]),
+                          "gyro": np.zeros(3), "valid": True}
+        yield "baro", t, {"altitude": alt, "temp_c": 25.0, "valid": True}
+        yield "mag", t, {"field_ut": np.array([22.0, 0.0, -42.0]),
+                         "valid": True}
+        yield "gps", t, gps_ch
+        yield "motor_esc", t, {"rpm": np.zeros(4), "current": np.zeros(4),
+                               "valid": True}
+        yield "battery", t, {"voltage": 16.8, "current": 0.6, "valid": True}
+        yield "vibration", t, {"rms": 0.08, "valid": True}
+        if armed is not None:
+            yield "vehicle_status", t, {"armed": armed}
+
+
+def _run_stream(layer, stream):
+    states = []
+    for sensor, t, ch in stream:
+        states.extend(layer.ingest(sensor, t, ch))
+    return states
+
+
+def test_disarmed_vehicle_gates_motor_edges_and_failsafe():
+    """Real armed state: a vehicle idling DISARMED on the ground (rotors
+    stopped, accel reading gravity) must not false-alarm its motor edges,
+    and the failsafe must stay silent — for as long as it sits there."""
+    layer = OnlineTrustLayer()
+    states = _run_stream(layer, _ground_stream(duration=30.0, armed=False))
+    late = [s for s in states if s.t > 10.0]
+    assert late
+    for s in late:
+        assert s.armed is False
+        assert s.edges["accel_motor_current"][1] == 0.0
+        assert s.edges["accel_esc_rpm"][1] == 0.0
+    worst = min(s.trust[n] for s in late
+                for n in ("imu0", "imu1", "motor_esc"))
+    assert worst > 0.7, f"disarmed ground idle degraded trust to {worst:.2f}"
+    policy = FailsafePolicy()
+    for s in states:
+        assert policy.update(s) == [], "failsafe acted on a disarmed vehicle"
+    assert policy.level == FailsafeLevel.NORMAL
+
+
+def test_time_proxy_fallback_poisons_motor_edges_disarmed_ground():
+    """Documents WHY real armed state matters: with no vehicle_status (the
+    simulator time-proxy fallback), a disarmed ground idle drives the motor
+    edges fully inconsistent once the t>5s proxy opens (gravity vs zero
+    thrust), eroding imu1/motor_esc trust toward the strict profile's
+    caution threshold. Graph fusion cushions the collapse — but the
+    evidence is corrupted, which is exactly what armed gating prevents.
+    (Measured: worst ~0.84 vs ~0.99 armed-aware.)"""
+    layer = OnlineTrustLayer()
+    states = _run_stream(layer, _ground_stream(duration=30.0, armed=None))
+    late = [s for s in states if s.t > 15.0]
+    last = late[-1]
+    for key in ("accel_motor_current", "accel_esc_rpm"):
+        c, gate = last.edges[key]
+        assert gate == 1.0, "proxy should have gated the motor edges in"
+        assert c < 0.05, "motor edges should read fully inconsistent"
+    worst = min(s.trust[n] for s in late for n in ("imu1", "motor_esc"))
+    assert worst < 0.87, "time-proxy no longer erodes trust; update docs"
+
+
+def test_gps_vz_invalid_does_not_false_alarm_on_climb():
+    """GPS vertical velocity: GPS_RAW_INT carries no vertical rate. A
+    fabricated vz=0 during a steady 2 m/s climb reads as a spoof-like
+    vertical residual in phys_gps (the old behavior); with vz_valid=False
+    the layer judges horizontal only and GPS trust must hold."""
+    def gps_min(vz_mode):
+        layer = OnlineTrustLayer()
+        states = _run_stream(layer, _ground_stream(
+            duration=30.0, armed=False, climb=2.0, vz_mode=vz_mode))
+        return min(s.trust["gps"] for s in states if s.t > 10.0)
+
+    assert gps_min("true") > 0.85       # control: real vz is consistent
+    assert gps_min("flagged") > 0.85    # the fix: no fabricated z-residual
+    assert gps_min("fabricated") < 0.8  # the bug this guards against
+
+
+def test_runtime_resets_on_source_time_jump(truth):
+    """FC reboot / looped replay: source time going backwards must reset
+    the layer (filters, calibration, tick counter) and keep running — not
+    integrate a negative dt or die."""
+    class RebootingSource(SimulatedFlightSource):
+        def samples(self):
+            for s, t, ch in super().samples():
+                if t <= 20.0:
+                    yield s, t, ch
+            for s, t, ch in super().samples():
+                if t <= 10.0:
+                    yield s, t, ch
+
+    rt = TrustLayerRuntime(RebootingSource("clean", truth=truth))
+    s = rt.run()
+    assert s.errors == 0
+    assert 700 <= s.ticks <= 800, \
+        f"expected ~750 ticks across the reboot, got {s.ticks}"
+
+
+def test_bad_samples_counted_and_health_logged(truth, tmp_path):
+    """Monitor self-health: malformed (NaN) telemetry is rejected before
+    the filters, counted, surfaced in RunSummary, and written into every
+    JSONL state line — the monitor reports on itself."""
+    import json
+
+    class CorruptBaro(SimulatedFlightSource):
+        def samples(self):
+            for s, t, ch in super().samples():
+                if s == "baro" and 30.0 < t < 30.5:
+                    ch = dict(ch, altitude=float("nan"))
+                yield s, t, ch
+
+    log_path = tmp_path / "run.jsonl"
+    rt = TrustLayerRuntime(CorruptBaro("clean", truth=truth),
+                           log_path=str(log_path))
+    s = rt.run()
+    assert s.bad_samples > 0, "NaN samples were not rejected/counted"
+    assert s.errors == 0
+    last = json.loads(log_path.read_text().strip().splitlines()[-1])
+    assert last["health"]["bad_samples"] == s.bad_samples
+    assert last["health"]["contained_errors"] == 0
+
+
+def test_field_mode_withdrawn_plus_stale_holds_trust(truth):
+    """Regression: in field mode, a chronically-noisy channel has its
+    temporal evidence withdrawn (adapt_level > 25); if that sensor then
+    goes stale, every edge and physics gate zeroes out and the node has NO
+    evidence source left. This used to crash the whole runtime with
+    ZeroDivisionError — it must instead hold trust and keep monitoring."""
+    src = SimulatedFlightSource("clean", truth=truth)
+    layer = OnlineTrustLayer(field_mode=True)
+    last_t = 0.0
+    states = []
+    for sensor, t, ch in src.samples():
+        if sensor == "gps" and t > 5.0:
+            continue                          # gps goes silent -> stale
+        layer.slots["gps"].adapt_level = 30.0  # chronic-noise withdrawal
+        states.extend(layer.ingest(sensor, t, ch))
+        last_t = t
+        if t > 12.0:
+            break
+    states.extend(layer.flush(last_t))
+    after = [s for s in states if s.t > 6.0]
+    assert after, "runtime died after gps lost all evidence sources"
+    assert not any(s.fresh["gps"] for s in after)
+    t_ref = after[0].trust["gps"]
+    assert all(abs(s.trust["gps"] - t_ref) < 1e-9 for s in after), \
+        "trust must hold, not drift, with no evidence"
+
+
+def test_runtime_contains_layer_errors(truth):
+    """The monitor dying is itself a failure mode: an exception inside the
+    trust math must be contained, counted, and surfaced — not kill the
+    integrity monitor mid-flight."""
+    class BombLayer(OnlineTrustLayer):
+        def ingest(self, sensor, t, channels):
+            if 20.0 < t < 21.0:
+                raise RuntimeError("injected trust-math fault")
+            return super().ingest(sensor, t, channels)
+
+    runtime = TrustLayerRuntime(SimulatedFlightSource("clean", truth=truth),
+                                layer=BombLayer())
+    s = runtime.run()
+    assert s.errors > 0, "injected faults were not counted"
+    assert s.ticks > 1200, "runtime stopped monitoring after the fault window"
+    assert s.final_level == "NORMAL"
+
+
 def test_profiles_registry_and_validation(truth):
     from csia.profiles import PROFILES, get_profile
     import pytest as _pytest

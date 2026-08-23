@@ -45,7 +45,15 @@ SCENARIOS = {
               {"axis": 2, "rate": 0.18, "channel": "accel"}),
         Fault("bias_drift", "imu1", 27.0, 28.0,
               {"axis": 2, "rate": -0.15, "channel": "accel"})]),
+    "high_speed_dash": ("High-speed forward dash — ~55 m/s cruise (kinematic "
+                        "high-speed ENVELOPE; aerodynamic drag NOT modeled, "
+                        "sensor tolerances quad-tuned)", []),
 }
+
+# Scenarios that fly a non-default truth profile. Everything else shares the
+# baseline hover/circle flight so cross-scenario comparison stays
+# apples-to-apples (and the existing test corpus is untouched).
+SCENARIO_PROFILE = {"high_speed_dash": "fast_cruise"}
 
 
 def make_sensors() -> dict:
@@ -86,9 +94,14 @@ def run_pipeline(truth=None, faults=(), duration: float = DURATION,
 
 
 def run_scenario(name: str, truth=None):
-    """Run a named scenario from the catalog. Returns (title, faults, td, hist, diag)."""
+    """Run a named scenario from the catalog. Returns (title, faults, td, hist, diag).
+
+    If ``truth`` is not supplied, the scenario's own flight profile is used
+    (default ``hover_circle``; see SCENARIO_PROFILE)."""
     if name not in SCENARIOS:
         raise KeyError(f"unknown scenario {name!r}; available: {list(SCENARIOS)}")
     title, faults = SCENARIOS[name]
+    if truth is None:
+        truth = generate_flight(profile=SCENARIO_PROFILE.get(name, "hover_circle"))
     td, hist, diag = run_pipeline(truth=truth, faults=faults)
     return title, faults, td, hist, diag

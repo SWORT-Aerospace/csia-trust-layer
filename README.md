@@ -8,11 +8,18 @@ Trust Graph** whose edges encode physical relationships between sensors, and
 whose anomaly output is a **probability distribution over causes**. never a
 binary fault flag.
 
-> **Status: research prototype / desktop simulation — NOT flight software.**
-> This code validates the trust-scoring concept and supports investor and
-> technical demos. A flight-certified implementation would require a separate
-> DO-178C/DO-254 qualification effort on embedded hardware. No certification
-> claims are made or implied anywhere in this repository.
+> **Status: deployable companion-computer ADVISORY software — validated in
+> simulation, on real flight logs, and against a live SITL autopilot; not
+> yet flown in the loop, and NOT certified flight-critical software.**
+> The runtime path is engineered for real deployment: armed-state gating,
+> MAVLink stream reconnection, FC-reboot recovery, per-sample crash
+> containment, monitor self-health reporting, soak-tested state stability,
+> and a systemd deployment package (`deploy/`). Every failsafe output is
+> advisory by default; nothing commands the vehicle unless explicitly and
+> separately enabled. See **Path to flight** below for the exact gates
+> between this repository and the airframe. Certified flight-critical use
+> (DO-178C/DO-254 on qualified hardware) is a separate program this
+> repository does not claim.
 
 ## Quick start
 
@@ -27,18 +34,20 @@ python3.13 -m venv .venv
 .venv/bin/csia run --profile sow001_quad_strict --scenario power_sag  # profile posture
 .venv/bin/csia serve          # dashboard on replays only
 .venv/bin/csia report         # detection/diagnosis summary for all scenarios
-.venv/bin/python -m pytest    # full test suite (39 tests, ~4 s)
+.venv/bin/python -m pytest    # full test suite
 ```
 
-## Validation status (v0.7.0)
+## Validation status (v0.8.0)
 
 | Evidence | Result |
 |---|---|
-| Simulated fault harness (39 tests, CI) | spoof 2.2 s @ 89%; IMU isolation 99%/0%; mag/power/vib 100% |
-| **Real flight data** — 26 public PX4 quadrotor flights, 0.66 h (`csia analyze-logs "data/real_logs/*.ulg"`) | **3 candidate false alarms → 4.5/flight-hour**; 24/26 flights alarm-free (offline posture; logs carry 5/8 channels) |
+| **Simulated fault harness** — 5 scripted fault scenarios (`tests/scenarios/`), CI-gated. Synthetic injection, not real faults; assertion bounds are regression contracts set below previously measured performance, so passing indicates no regression, **not** independent detection evidence | spoof: 2.2 s to trust<0.85 / **4.4 s to operator alert** @ 89%; IMU isolation 99%/0%; mag/power/vib 100%. Both latencies reported — they are not the same quantity ([§3](docs/validation/METRIC_DEFINITIONS.md)) |
+| **Campaign reproducibility** — `csia bench`, `csia mc` (150 runs), seeker Monte Carlo regenerated after the 2026-07 live-path hardening | **bit-identical** to the committed `campaigns/*.json` and `deliverables/montecarlo_results.*` — the hardening changed no validated behavior |
+| **Soak** — looped runtime through the reset path (`tools/soak.py`) | 185 passes / 3.1 h flight-equivalent: 277,500 ticks, 0 errors, +0.0 MB RSS, latency ratio 1.01x |
+| **Real flight data** — 26 public PX4 logs, **UNANNOTATED** (`csia analyze-logs`) | **No CSIA alert episode occurred in 24 of 26 logs.** 2 alert episodes across **0.518 monitored flight-hours** → **3.86 episodes/h, 95% CI 0.47–13.94**. Exposure is *monitored* time (post-`arm_time`); raw log duration (0.663 h) overstates it by 21.8%, because no alert can be raised inside the arm window. **Verified-healthy exposure: 0.000 h** — these logs carry no annotation, and CSIA's silence is not evidence of health. **Held-out exposure: 0.000 h** — all 26 shaped `field_mode` and the offline posture. ~30-fold uncertainty; not a reliability claim. See [dataset provenance audit](docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md) and [exposure plan](docs/validation/EXPOSURE_PRECISION_PLAN.md) |
 | **ArduPilot SITL** — full autonomous mission, live MAVLink (`tools/sitl_validate.py`) | **PASS**: 6 sensors monitored, min trust 0.78, zero false alarms, landed |
 | **SITL fault injection** — GPS glitch + fix-kill injected into the REAL autopilot mid-flight (`--inject gps_glitch`) | **PASS**: both faults detected live from the RAW receiver stream (GPS trust 0.99 → 0.70, nav CAUTION raised) |
-| **Native core** (`csia/native/csia_core.c`, C, zero-alloc, pinned to Python at 1e-12) | trust kernel **247 ns** + diagnosis **427 ns** per tick on desktop → est. 7–15 µs on the STM32H743 itself ≈ 0.04% FC CPU at 25 Hz |
+| **Native core** (`csia/native/csia_core.c`, C, zero-alloc, parity-pinned to Python at 1e-12 on the **production 8-node/11-edge graph**) | **Host benchmark:** trust kernel 247 ns + diagnosis 427 ns per tick on desktop. The 7–15 µs STM32H743 figure and 0.04% CPU are **estimates, not target measurements**. The C core is **not on any production execution path** — the Python runtime is what executes. See [NATIVE_RUNTIME_STATUS](docs/embedded/NATIVE_RUNTIME_STATUS.md) |
 
 Plug YOUR data in:
 ```sh
@@ -53,6 +62,10 @@ anti-alias downsampling, mag-aided yaw, self-calibrated field magnitude,
 minimum-rate channel screening, and monitored-sensor-aware failsafe rules —
 all of it forced into existence by real logs, all of it tested.
 
+Held-out validation protocol (C2): [docs/VALIDATION_PROTOCOL.md](docs/VALIDATION_PROTOCOL.md); `tools/fetch_real_logs.py` re-downloads the 26-log campaign by UUID and re-runs it in one command.
+
+**Transition engineering package** (for an Army xTech / SBIR reviewer):
+[requirements](docs/requirements/requirements.md) · [traceability matrix](docs/traceability/traceability_matrix.md) · [evidence matrix](docs/evidence/evidence_matrix.md) · [TRL assessment](docs/TRL_ASSESSMENT.md) · [transition report + audit](docs/TRANSITION_REPORT.md) · [validation hardware BOM](docs/HARDWARE_BOM.md). Embedded readiness: [hardware validation plan](docs/hardware_validation.md), [embedded checklist](docs/embedded_checklist.md), report templates. Perf regression: `tools/perf_regression.py` vs `campaigns/perf_baseline.json`. Changelog: [CHANGELOG.md](CHANGELOG.md).
 Commercial/SBIR readiness: [docs/COMMERCIALIZATION.md](docs/COMMERCIALIZATION.md).
 Engineering review (adversarial, scored): [docs/ARCHITECTURE_REVIEW.md](docs/ARCHITECTURE_REVIEW.md). Org-level 10-year blueprint: [docs/ORG_BLUEPRINT.md](docs/ORG_BLUEPRINT.md).
 
@@ -106,10 +119,14 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
   `MavlinkActuator` (opt-in `enable_commands=True`, maps
   CONTROLLED_DESCENT/LAND_NOW → autopilot LAND, etc.; SITL-validate first).
   Runtime cost: ~140 µs/tick in reference Python (0.35% of the 40 ms tick
-  budget at 25 Hz — detection latency is set by evidence statistics, not
-  code speed). The **native C core** (`csia/native/`, same algorithm,
-  test-pinned to 1e-12) runs the trust+diagnosis math in **674 ns/tick**,
-  sized for the STM32H743 flight controller itself, not just the Pi.
+  budget at 25 Hz — alert latency is set by evidence statistics and the
+  dwell/threshold policy, not by code speed). The **native C core**
+  (`csia/native/`, same algorithm, parity-pinned to 1e-12 on the production
+  8-node/11-edge graph) runs the trust+diagnosis math in **674 ns/tick on a
+  desktop host**. It is sized for the STM32H743 but is **not currently on any
+  production execution path and has never been measured on target** — the
+  Python runtime is what executes. See
+  [NATIVE_RUNTIME_STATUS](docs/embedded/NATIVE_RUNTIME_STATUS.md).
 - **Raw-sensor monitoring**: the GPS node consumes GPS_RAW_INT, not the
   EKF's fused output — the autopilot's estimator innovation-gates faults
   out of its own output stream, hiding exactly what an integrity monitor
@@ -120,6 +137,31 @@ SourcePlugin ──samples──▶ OnlineTrustLayer ──TrustState/tick──
 - **Silence watchdog**: a sensor that stops producing samples is declared
   not-fresh within ~5 sample periods and handled by the failsafe — stale
   values are never silently held (tested).
+- **Armed-state gating**: the motor edges and the failsafe key on the
+  vehicle's ACTUAL armed flag (MAVLink HEARTBEAT / ULog `vehicle_status`)
+  when the source provides it — a vehicle idling disarmed on the ground
+  cannot poison its motor edges with gravity-vs-zero-thrust evidence, and
+  the failsafe never acts on a disarmed vehicle. The t>5 s proxy remains
+  only as the simulator bench fallback (both behaviors tested).
+- **No fabricated measurements**: `GPS_RAW_INT` carries no vertical
+  velocity, so the mapping marks `vz_valid=False` and every GPS check
+  judges horizontal components only (df adjusted) — a steady climb no
+  longer reads as a spoof-like vertical residual (tested).
+- **Reboot/time-jump hardened**: an FC reboot re-anchors the MAVLink epoch
+  monotonically instead of dropping all post-reboot data; any source time
+  discontinuity resets the trust layer and failsafe dwell timers instead
+  of integrating a negative dt (tested; `tools/soak.py` loops hours of
+  flight time through the reset path and watches RSS/latency).
+- **Stream resilience**: `MavlinkSource` reconnects with capped backoff on
+  timeout or connection error, preserving the time epoch and GPS origin
+  across the gap — an in-flight monitor never gives up on its stream; the
+  stale watchdog + failsafe report the outage while it retries.
+- **Self-health**: every JSONL state line carries the monitor's own health
+  (contained errors, rejected malformed samples), and `RunSummary` reports
+  the same — "who watches the watchman" is answered in the log (tested).
+- **Deployment package**: `sudo deploy/install.sh` installs the hardened
+  systemd unit (`deploy/csia.service` — advisory only, `Restart=always`,
+  no privileges, logs to `/var/log/csia/`) on the companion computer.
 - **`csia service`**: runtime + dashboard in one process; the dashboard's
   LIVE tab renders the runtime's trust/diagnosis feed at 1 Hz refresh while
   replay tabs remain available for analysis.
@@ -160,19 +202,67 @@ GPS checks gate on fix validity; motor edges gate on armed state.
 - **No magic numbers in the loop.** Engine tunables live in `EngineConfig`;
   comparator σ's are documented noise budgets per check.
 - **Measured, honestly labeled latency.** ~85 µs/tick trust core (mean, 8
-  nodes / 12 edges, desktop Python). This is **not** embedded timing.
+  nodes / 11 edges, desktop Python). This is **not** embedded timing, and the
+  measured window currently includes replay marshalling as well as the trust
+  core itself (audit F-08).
 
 ## Scenario results (fixed seeds, `csia report`)
 
-| scenario | target | min trust | detection | peak diagnosis |
-|---|---|---|---|---|
-| clean | — | 0.92 (no false alarm) | — | 98% nominal |
-| gps_spoof | gps | 0.59 | 2.2 s | 89% gps_fault |
-| gps_dropout | gps | 0.89 (trust holds) | n/a | 98% nominal (absence of data ≠ fault) |
-| imu0_bias_drift | imu0 | 0.77 (imu1 stays 0.86) | 13.0 s (slow ramp) | 99% imu0_bias_drift, 0% imu1 |
-| mag_emi | mag | 0.28 | 1.5 s | 100% mag_interference |
-| power_sag | battery | 0.40 | 1.6 s | 100% power_fault |
-| vibration_anomaly | vibration | 0.17 | 2.6 s | 100% vibration_anomaly |
+Two latencies are reported because they differ by 2-2.7x and must not be
+conflated ([METRIC_DEFINITIONS](docs/validation/METRIC_DEFINITIONS.md) §3,
+[latency path audit](docs/audit/CSIA_LATENCY_PATH_AUDIT.md)):
+
+- **to trust<0.85** — *analysis only.* Detector-internal; the analysis
+  threshold triggers nothing. Retained for historical continuity.
+- **to alert** — *operator-facing.* Onset to the first failsafe alert episode,
+  which additionally requires the per-class production threshold, `dwell_up`
+  and `arm_time`. This is the number comparable to a PX4/ArduPilot health flag.
+
+| scenario | target | min trust | to trust<0.85 (analysis) | **to alert (operator)** | peak diagnosis |
+|---|---|---|---|---|---|
+| clean | — | 0.92 (no false alarm) | — | — | 98% nominal |
+| gps_spoof | gps | 0.59 | 2.2 s | **4.4 s** (CAUTION) | 89% gps_fault |
+| gps_dropout | gps | 0.89 (trust holds) | n/a | n/a | 98% nominal (absence of data ≠ fault) |
+| imu0_bias_drift | imu0 | 0.77 (imu1 stays 0.86) | 13.0 s (slow ramp) | **never alerts** † | 99% imu0_bias_drift, 0% imu1 |
+| mag_emi | mag | 0.28 | 1.5 s | **3.9 s** (CAUTION) | 100% mag_interference |
+| power_sag | battery | 0.40 | 1.4 s | **3.4 s** (CRITICAL) | 100% power_fault |
+| vibration_anomaly | vibration | 0.17 | 2.2 s | **5.8 s** (CRITICAL) | 100% vibration_anomaly |
+| dual_imu_failure | imu0/imu1 | 0.44 | 6.4 s | (see scenario) | 99% imu0_bias_drift, 1% imu1 (failsafe → stabilize + descent) |
+| high_speed_dash‡ | — | 0.89 (no false alarm) | — | — | 100% nominal |
+
+† **`imu0_bias_drift` raises no operator alert at any time.** `imu0` degrades,
+but the attitude condition reads `max(imu0, imu1)` and `imu1` stays healthy at
+≈0.86, above `att_caution` 0.82 — redundancy working as designed. The 13.0 s
+figure is a trust crossing with no operator-visible consequence; diagnosis
+still isolates `imu0` correctly (at 15.1 s). It is **not** a detection event
+and was previously published as if it were.
+
+‡ `high_speed_dash` flies a **different truth profile** (`fast_cruise`,
+peak ground speed **52.0 m/s**) instead of the shared hover/circle baseline.
+Its purpose is to exercise the velocity readout and the speed-gated
+Mag-Heading↔GPS-Course edge at an elevated envelope; the trust layer flies it
+**clean** (min trust 0.89, failsafe NORMAL throughout). **Caveat:** the flight
+is *kinematic only* — aerodynamic drag is not modeled and sensor tolerances
+remain quad-tuned, so this is a regime-envelope demo, not a validated
+high-speed flight-dynamics model. Because `csia report` deliberately runs
+every scenario against the shared baseline truth for apples-to-apples
+comparison, the 0.89 figure above comes from the scenario's own profile (as
+rendered in the dashboard replay), not from the `csia report` shared-truth
+row.
+
+### Dashboard (tactical cross-sensor console)
+
+The web dashboard renders the live trust graph, per-sensor trust
+coefficients, Bayesian fault attribution, the regime gate, ground velocity,
+and the autonomous-remediation response loop. A fully self-contained,
+zero-dependency build embedding all nine scenario replays is committed at
+[`dashboard_standalone.html`](dashboard_standalone.html) — open it directly in
+any browser, no server required (rebuild with
+`python tools/build_standalone_dashboard.py`).
+
+| GPS spoof (fault detected) | High-speed dash (52 m/s, clean) |
+|---|---|
+| ![GPS spoof scenario](deliverables/dashboard_gps_spoof.png) | ![High-speed dash scenario](deliverables/dashboard_high_speed_dash.png) |
 
 ## Hardware context & integration path
 
@@ -185,6 +275,36 @@ telemetry (`HIGHRES_IMU`, `ESC_STATUS`, `GPS_RAW_INT`, `BATTERY_STATUS`, …),
 publishing per-sensor trust and diagnosis for the ground station and, later,
 for fusion-weight adaptation. The causality guarantee above is what makes
 that port mechanical rather than a rewrite.
+
+## Path to flight
+
+The runtime runs on the vehicle today — in an ADVISORY role on the
+companion computer. The gates between this repository and the airframe, in
+order; each is a measurement campaign, not a rewrite:
+
+1. **Re-run SITL on current code** (`tools/sitl_validate.py`, then
+   `--inject gps_glitch`). The SITL rows in the table above were measured
+   before the 2026-07 armed-state/vz/reboot hardening and must be
+   refreshed before any new claim.
+2. **Commissioning calibration on the actual airframe** — the mandatory
+   sigma-calibration procedure in docs/HARDWARE.md
+   (`OnlineTrustLayer(auto_baseline_s=...)`).
+3. **Overnight soak on the Pi 5 itself**:
+   `python tools/soak.py --minutes 480`. Desktop reference: 3.1 h
+   flight-equivalent, zero errors, zero growth.
+4. **Advisory-only supervised flights**: `deploy/install.sh`, service
+   consumes live MAVLink, logs `state.jsonl`, commands nothing. Compare
+   post-flight logs against expectations before trusting a single number.
+5. **Held-out real-log campaign** (docs/VALIDATION_PROTOCOL.md) for a
+   false-alarm rate an evaluator can't dismiss.
+6. Only after all of the above: consider `MavlinkActuator` with
+   `enable_commands=True` — SITL-validated first, range-safety rules
+   apply, and it remains uncertified.
+
+Certified flight-critical operation (DO-178C/DO-254, qualified toolchain,
+target-hardware verification) is a separate, funded program — see
+docs/COMMERCIALIZATION.md. This repository provides the algorithm,
+evidence, and deployment path; it does not provide certification.
 
 ## Known limitations (read before demoing)
 

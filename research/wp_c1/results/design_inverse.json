@@ -1,0 +1,235 @@
+{
+ "baseline_full_channels": {
+  "critical_exposed": [
+   "gps_fault+nominal",
+   "imu0_bias_drift+imu1_bias_drift"
+  ],
+  "n_guaranteed": 26
+ },
+ "cheapest_repairs": [
+  {
+   "channel_addition_helps": false,
+   "complete_repairs": [],
+   "exposed_by": "gate closure at full channel availability",
+   "n_complete_repairs": 0,
+   "n_partial_or_harmful": 5,
+   "pair": "gps_fault+nominal",
+   "partial_or_harmful": [
+    {
+     "channels_required": [
+      "baro",
+      "gps"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "altitude_baro",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid"
+     ],
+     "into_hypothesis": "gps_fault",
+     "new_hardware": false
+    },
+    {
+     "channels_required": [
+      "gps",
+      "mag"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "heading_course",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid",
+      "speed_gate"
+     ],
+     "into_hypothesis": "gps_fault",
+     "new_hardware": false
+    },
+    {
+     "channels_required": [
+      "gps"
+     ],
+     "creates_new_critical_exposure": [
+      "gps_fault+unexpected_maneuver"
+     ],
+     "feature": "temp_gps",
+     "fixes_pair_in_all_configurations": true,
+     "gated_by": [],
+     "into_hypothesis": "gps_fault",
+     "new_hardware": false
+    },
+    {
+     "channels_required": [
+      "gps",
+      "imu0"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "velocity_gps_doppler_0",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid"
+     ],
+     "into_hypothesis": "gps_fault",
+     "new_hardware": false
+    },
+    {
+     "channels_required": [
+      "gps",
+      "imu1"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "velocity_gps_doppler_1",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid"
+     ],
+     "into_hypothesis": "gps_fault",
+     "new_hardware": false
+    }
+   ],
+   "reading": "No existing feature repairs this pair under every configuration without collateral damage; the fix requires a NEW physics relation whose gate is independent of the one that breaks the pair."
+  },
+  {
+   "channel_addition_helps": false,
+   "complete_repairs": [
+    {
+     "channels_required": [
+      "imu0",
+      "mag"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "attitude_gravity_mag",
+     "fixes_pair_in_all_configurations": true,
+     "gated_by": [],
+     "into_hypothesis": "imu0_bias_drift",
+     "new_hardware": false
+    }
+   ],
+   "exposed_by": "gate closure at full channel availability",
+   "n_complete_repairs": 1,
+   "n_partial_or_harmful": 2,
+   "pair": "imu0_bias_drift+imu1_bias_drift",
+   "partial_or_harmful": [
+    {
+     "channels_required": [
+      "gps",
+      "imu0"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "velocity_gps_doppler_0",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid"
+     ],
+     "into_hypothesis": "imu0_bias_drift",
+     "new_hardware": false
+    },
+    {
+     "channels_required": [
+      "gps",
+      "imu1"
+     ],
+     "creates_new_critical_exposure": [],
+     "feature": "velocity_gps_doppler_1",
+     "fixes_pair_in_all_configurations": false,
+     "gated_by": [
+      "gvalid"
+     ],
+     "into_hypothesis": "imu1_bias_drift",
+     "new_hardware": false
+    }
+   ],
+   "reading": "Repairable by re-wiring the signature matrix alone, no new hardware."
+  }
+ ],
+ "marginal_channel_value": {
+  "baro": {
+   "critical_pairs_lost_if_removed": [],
+   "n_critical_lost": 0,
+   "sole_protector": []
+  },
+  "battery": {
+   "critical_pairs_lost_if_removed": [],
+   "n_critical_lost": 0,
+   "sole_protector": []
+  },
+  "gps": {
+   "critical_pairs_lost_if_removed": [
+    "gps_fault+unexpected_maneuver"
+   ],
+   "n_critical_lost": 1,
+   "sole_protector": [
+    "gps_fault+unexpected_maneuver"
+   ]
+  },
+  "imu0": {
+   "critical_pairs_lost_if_removed": [
+    "gps_fault+imu0_bias_drift",
+    "gps_fault+imu1_bias_drift",
+    "imu0_bias_drift+nominal",
+    "imu1_bias_drift+nominal"
+   ],
+   "n_critical_lost": 4,
+   "sole_protector": [
+    "gps_fault+imu0_bias_drift",
+    "gps_fault+imu1_bias_drift",
+    "imu0_bias_drift+nominal",
+    "imu1_bias_drift+nominal"
+   ]
+  },
+  "imu1": {
+   "critical_pairs_lost_if_removed": [
+    "gps_fault+imu0_bias_drift",
+    "gps_fault+imu1_bias_drift",
+    "imu0_bias_drift+nominal",
+    "imu1_bias_drift+nominal"
+   ],
+   "n_critical_lost": 4,
+   "sole_protector": [
+    "gps_fault+imu0_bias_drift",
+    "gps_fault+imu1_bias_drift",
+    "imu0_bias_drift+nominal",
+    "imu1_bias_drift+nominal"
+   ]
+  },
+  "mag": {
+   "critical_pairs_lost_if_removed": [
+    "gps_fault+mag_interference",
+    "mag_interference+nominal"
+   ],
+   "n_critical_lost": 2,
+   "sole_protector": [
+    "gps_fault+mag_interference",
+    "mag_interference+nominal"
+   ]
+  },
+  "motor_esc": {
+   "critical_pairs_lost_if_removed": [],
+   "n_critical_lost": 0,
+   "sole_protector": []
+  },
+  "vibration": {
+   "critical_pairs_lost_if_removed": [
+    "gps_fault+vibration_anomaly",
+    "nominal+vibration_anomaly"
+   ],
+   "n_critical_lost": 2,
+   "sole_protector": [
+    "gps_fault+vibration_anomaly",
+    "nominal+vibration_anomaly"
+   ]
+  }
+ },
+ "minimal_sufficient_channel_sets": [],
+ "minimal_sufficient_exists": false,
+ "n_critical_pairs": 27,
+ "not_novel": "see research/wp_c1/NOVELTY_ATTACK.md \u2014 this is Krysander & Frisk sensor placement applied to CSIA",
+ "purpose": "design inverse: minimal sufficient channel sets, marginal channel value, cheapest repair",
+ "single_points_of_assurance_failure": [
+  "gps",
+  "imu0",
+  "imu1",
+  "mag",
+  "vibration"
+ ],
+ "why_none": "No channel set is sufficient. The two exposed critical pairs are exposed by GATE closure at full channel availability, and no amount of instrumentation closes a gate-induced collision. The design inverse over channels is therefore vacuous for this architecture, and the actionable lever is the signature matrix, not the sensor suite."
+}

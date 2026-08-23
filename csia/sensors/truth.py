@@ -57,30 +57,58 @@ def _smoothstep(x: np.ndarray) -> np.ndarray:
 
 
 def generate_flight(duration: float = 60.0, dt: float = 0.01,
-                    seed: int | None = 42) -> FlightTruth:
-    """Scripted flight: ground 0-5 s, climb 5-15 s to 30 m, one 40 m-radius
-    circle 15-45 s, hover 45-50 s, descend 50-58 s, settle."""
+                    seed: int | None = 42,
+                    profile: str = "hover_circle") -> FlightTruth:
+    """Scripted flight truth. Profiles:
+
+    ``hover_circle`` (default): ground 0-5 s, climb 5-15 s to 30 m, one
+    40 m-radius circle 15-45 s, hover 45-50 s, descend 50-58 s, settle. Peak
+    ground speed ~15 m/s (a 2 kg quad). This path is fixed and every existing
+    scenario/test depends on it byte-for-byte.
+
+    ``fast_cruise``: a high-speed forward dash — accelerate to ~55 m/s, cruise,
+    decelerate — exercising the velocity readout and regime gate at a
+    high-speed ENVELOPE. IMPORTANT: aerodynamic drag is NOT modeled (thrust
+    follows kinematic acceleration only), so this is a kinematic regime demo,
+    not a validated high-speed flight-dynamics model. Sensor tolerances remain
+    quad-tuned; the dashboard labels this scenario accordingly.
+    """
     rng = np.random.default_rng(seed)
     t = np.arange(0.0, duration, dt)
 
-    # --- position -----------------------------------------------------------
-    alt = 30.0 * _smoothstep((t - 5.0) / 10.0) - 28.0 * _smoothstep((t - 50.0) / 8.0)
-    radius = 40.0
-    theta = 2.0 * np.pi * _smoothstep((t - 15.0) / 30.0)  # one full circle
-    x = radius * np.sin(theta)
-    y = radius * (1.0 - np.cos(theta))
+    # --- position + heading (per flight profile) ----------------------------
+    if profile == "hover_circle":
+        alt = 30.0 * _smoothstep((t - 5.0) / 10.0) - 28.0 * _smoothstep((t - 50.0) / 8.0)
+        radius = 40.0
+        theta = 2.0 * np.pi * _smoothstep((t - 15.0) / 30.0)  # one full circle
+        x = radius * np.sin(theta)
+        y = radius * (1.0 - np.cos(theta))
+        # Yaw follows the path tangent (theta) while translating, PLUS a 90-deg
+        # yaw-in-place sweep during the hover segment (45-49.5 s). A quadrotor's
+        # heading is NOT slaved to its velocity vector — this deliberate
+        # divergence exists so the Mag-Heading<->GPS-Course edge is a real check
+        # that must be speed-gated, not a tautology of the truth model.
+        yaw = theta + 0.5 * np.pi * _smoothstep((t - 45.0) / 4.5)
+    elif profile == "fast_cruise":
+        # Phases are deliberately gentle so the (quad-tuned) trust layer flies
+        # this envelope CLEAN: climb rate stays under the baro gate (~8 m/s)
+        # and acceleration stays mild enough for the battery OCV tracker.
+        v_cruise = 52.0   # m/s cruise speed
+        speed = v_cruise * (_smoothstep((t - 8.0) / 20.0)
+                            - _smoothstep((t - 46.0) / 12.0))
+        x = np.cumsum(speed) * dt                       # integrate speed -> x
+        y = 5.0 * np.sin(2.0 * np.pi * (t - 14.0) / 52.0) \
+            * _smoothstep((t - 14.0) / 10.0)            # very gentle weave
+        alt = 42.0 * _smoothstep((t - 5.0) / 15.0) - 38.0 * _smoothstep((t - 52.0) / 8.0)
+        yaw = np.arctan2(np.gradient(y, dt), np.maximum(speed, 1.0))
+    else:
+        raise ValueError(f"unknown flight profile {profile!r}")
     pos = np.column_stack([x, y, alt])
 
     vel = np.gradient(pos, dt, axis=0)
     acc = np.gradient(vel, dt, axis=0)
 
     # --- attitude -----------------------------------------------------------
-    # Yaw follows the path tangent (theta) while translating, PLUS a 90-deg
-    # yaw-in-place sweep during the hover segment (45-49.5 s). A quadrotor's
-    # heading is NOT slaved to its velocity vector — this deliberate
-    # divergence exists so the Mag-Heading<->GPS-Course edge is a real check
-    # that must be speed-gated, not a tautology of the truth model.
-    yaw = theta + 0.5 * np.pi * _smoothstep((t - 45.0) / 4.5)
     # Small-angle quasi-static tilt: horizontal accel is produced by tilting
     # the thrust vector. Body-forward/lateral accel from world accel via yaw.
     a_fwd = acc[:, 0] * np.cos(yaw) + acc[:, 1] * np.sin(yaw)

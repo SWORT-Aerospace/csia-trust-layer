@@ -1,0 +1,271 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://swort.local/csia/dataset_manifest_v1.schema.json",
+ "title": "CSIA dataset manifest v1",
+ "type": "object",
+ "required": [
+  "manifest_schema_version",
+  "dataset_id",
+  "dataset_aggregate_hash",
+  "log_count",
+  "logs"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "manifest_schema_version": {
+   "type": "string"
+  },
+  "dataset_id": {
+   "type": "string"
+  },
+  "dataset_aggregate_hash": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "log_count": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "notes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "logs": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/log"
+   }
+  }
+ },
+ "$defs": {
+  "log": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "log_id",
+    "dataset_id",
+    "source_type",
+    "health_classification",
+    "annotation_status",
+    "dataset_partition",
+    "flight_duration_s"
+   ],
+   "properties": {
+    "log_id": {
+     "type": "string",
+     "minLength": 1
+    },
+    "dataset_id": {
+     "type": "string"
+    },
+    "content_sha256": {
+     "oneOf": [
+      {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "byte_size": {
+     "oneOf": [
+      {
+       "type": "integer",
+       "minimum": 0
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "source_type": {
+     "enum": [
+      "REAL_FLIGHT",
+      "SITL",
+      "HIL",
+      "SIMULATION",
+      "UNKNOWN"
+     ]
+    },
+    "source_reference": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "retrieved_at": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "autopilot": {
+     "type": "string"
+    },
+    "firmware_version": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "airframe_type": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "vehicle_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "campaign_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "mission_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "flight_duration_s": {
+     "type": "number",
+     "minimum": 0
+    },
+    "monitored_duration_s": {
+     "type": "number",
+     "minimum": 0
+    },
+    "sensor_inventory": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "available_channels": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "missing_channels": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "annotation_status": {
+     "enum": [
+      "ANNOTATED",
+      "PARTIALLY_ANNOTATED",
+      "UNANNOTATED"
+     ]
+    },
+    "health_classification": {
+     "enum": [
+      "VERIFIED_HEALTHY",
+      "VERIFIED_FAULTED",
+      "KNOWN_ANOMALY",
+      "UNANNOTATED",
+      "UNKNOWN",
+      "UNUSABLE"
+     ]
+    },
+    "known_faults": {
+     "type": "array"
+    },
+    "known_anomalies": {
+     "type": "array"
+    },
+    "confidentiality": {
+     "enum": [
+      "PUBLIC",
+      "CLIENT_CONFIDENTIAL",
+      "INTERNAL",
+      "UNKNOWN"
+     ]
+    },
+    "redistribution_permission": {
+     "enum": [
+      "PERMITTED",
+      "PROHIBITED",
+      "UNKNOWN"
+     ]
+    },
+    "license": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "dataset_partition": {
+     "enum": [
+      "DEVELOPMENT",
+      "THRESHOLD_TUNING",
+      "REGRESSION",
+      "HELD_OUT_EVALUATION",
+      "BLIND_EXTERNAL",
+      "UNASSIGNED"
+     ]
+    },
+    "split_group_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "used_for_threshold_tuning": {
+     "type": "boolean"
+    },
+    "used_for_architecture_design": {
+     "type": "boolean"
+    },
+    "eligible_for_blind_evaluation": {
+     "type": "boolean"
+    },
+    "file_present": {
+     "type": "boolean"
+    },
+    "parse_status": {
+     "type": "string"
+    },
+    "exclusion_reason": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "duplicate_of": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "suspected_near_duplicate_of": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "alert_episodes": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "notes": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

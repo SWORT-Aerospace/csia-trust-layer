@@ -1,0 +1,53 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://swort.local/csia/result_v1.schema.json",
+ "title": "CSIA result envelope v1",
+ "description": "Every committed result artifact must validate against this and reference a valid experiment manifest.",
+ "type": "object",
+ "required": [
+  "result_schema_version",
+  "result_type",
+  "evidence_environment",
+  "experiment_manifest",
+  "payload"
+ ],
+ "properties": {
+  "result_schema_version": {
+   "type": "string"
+  },
+  "result_type": {
+   "enum": [
+    "REAL_LOG_CORPUS",
+    "ALERT_EPISODES",
+    "LATENCY",
+    "ISOLATION",
+    "SCENARIO",
+    "MONTE_CARLO",
+    "NATIVE_BENCHMARK",
+    "BASELINE_COMPARISON",
+    "DEDUPLICATION",
+    "EXPOSURE"
+   ]
+  },
+  "evidence_environment": {
+   "enum": [
+    "SIMULATION",
+    "SITL",
+    "HIL",
+    "REAL_LOG_REPLAY",
+    "LIVE_SHADOW_FLIGHT",
+    "LIVE_ACTIVE_FLIGHT"
+   ]
+  },
+  "experiment_manifest": {
+   "type": [
+    "object",
+    "string"
+   ],
+   "description": "inline manifest, or a path to one"
+  },
+  "payload": {
+   "type": "object"
+  }
+ }
+}

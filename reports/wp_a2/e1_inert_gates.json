@@ -1,0 +1,281 @@
+{
+ "constant_gate_edges": [
+  "redundant_imu",
+  "attitude_gravity_mag",
+  "power_thrust",
+  "vibration_prop_freq",
+  "temp_bias_drift"
+ ],
+ "detect_trust_threshold": 0.85,
+ "method": "post-hoc ablation of TickData.edges; engine, diagnosis, graph, thresholds and seeds unchanged",
+ "purpose": "measure the operational contribution of the five constant-gate edges",
+ "scenarios": {
+  "gps_spoof": {
+   "all_five_removed": {
+    "detect_latency_s": 2.16,
+    "mean_trust_all_nodes": 0.9787696643583383,
+    "min_trust_faulted": 0.5905411530831427,
+    "peak_posterior_correct_cause": 0.8934348378484248
+   },
+   "baseline": {
+    "detect_latency_s": 2.16,
+    "mean_trust_all_nodes": 0.9742955376744968,
+    "min_trust_faulted": 0.5905411530787573,
+    "peak_posterior_correct_cause": 0.8934469765597562
+   },
+   "delta": {
+    "d_latency_s": 0.0,
+    "d_min_trust": 0.0,
+    "d_peak_posterior": -1.2e-05
+   },
+   "expected_cause": "gps_fault",
+   "faulted_node": "gps",
+   "onset_s": 20.0,
+   "per_edge_removed": {
+    "attitude_gravity_mag": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.0,
+     "d_peak_posterior": -0.0
+    },
+    "power_thrust": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.0,
+     "d_peak_posterior": 0.0
+    },
+    "redundant_imu": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.0,
+     "d_peak_posterior": -1.2e-05
+    },
+    "temp_bias_drift": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "vibration_prop_freq": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.0
+    }
+   }
+  },
+  "imu0_bias_drift": {
+   "all_five_removed": {
+    "detect_latency_s": 19.92,
+    "mean_trust_all_nodes": 0.9881987829442023,
+    "min_trust_faulted": 0.8352611455499319,
+    "peak_posterior_correct_cause": 0.16605450402684604
+   },
+   "baseline": {
+    "detect_latency_s": 13.0,
+    "mean_trust_all_nodes": 0.9753041344264978,
+    "min_trust_faulted": 0.7656967595206293,
+    "peak_posterior_correct_cause": 0.9860874200079927
+   },
+   "delta": {
+    "d_latency_s": 6.92,
+    "d_min_trust": 0.069564,
+    "d_peak_posterior": -0.820033
+   },
+   "expected_cause": "imu0_bias_drift",
+   "faulted_node": "imu0",
+   "onset_s": 20.0,
+   "per_edge_removed": {
+    "attitude_gravity_mag": {
+     "d_latency_s": -0.4,
+     "d_min_trust": -0.074034,
+     "d_peak_posterior": -0.0
+    },
+    "power_thrust": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.000667,
+     "d_peak_posterior": 0.0
+    },
+    "redundant_imu": {
+     "d_latency_s": null,
+     "d_min_trust": 0.095407,
+     "d_peak_posterior": -0.820033
+    },
+    "temp_bias_drift": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "vibration_prop_freq": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.000692,
+     "d_peak_posterior": -0.0
+    }
+   }
+  },
+  "mag_emi": {
+   "all_five_removed": {
+    "detect_latency_s": 1.8000000000000007,
+    "mean_trust_all_nodes": 0.9772007574535837,
+    "min_trust_faulted": 0.26033053398451833,
+    "peak_posterior_correct_cause": 0.9999410705765824
+   },
+   "baseline": {
+    "detect_latency_s": 1.4800000000000004,
+    "mean_trust_all_nodes": 0.972008800183208,
+    "min_trust_faulted": 0.27635745975777704,
+    "peak_posterior_correct_cause": 0.9999997330328405
+   },
+   "delta": {
+    "d_latency_s": 0.32,
+    "d_min_trust": -0.016027,
+    "d_peak_posterior": -5.9e-05
+   },
+   "expected_cause": "mag_interference",
+   "faulted_node": "mag",
+   "onset_s": 25.0,
+   "per_edge_removed": {
+    "attitude_gravity_mag": {
+     "d_latency_s": 0.32,
+     "d_min_trust": -0.016027,
+     "d_peak_posterior": -5.9e-05
+    },
+    "power_thrust": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "redundant_imu": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.000635,
+     "d_peak_posterior": -0.0
+    },
+    "temp_bias_drift": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "vibration_prop_freq": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.0,
+     "d_peak_posterior": -0.0
+    }
+   }
+  },
+  "power_sag": {
+   "all_five_removed": {
+    "detect_latency_s": 2.0799999999999983,
+    "mean_trust_all_nodes": 0.946219756713657,
+    "min_trust_faulted": 0.22019161856130204,
+    "peak_posterior_correct_cause": 0.9976871453262636
+   },
+   "baseline": {
+    "detect_latency_s": 1.6000000000000014,
+    "mean_trust_all_nodes": 0.9524648652620985,
+    "min_trust_faulted": 0.3991156710245665,
+    "peak_posterior_correct_cause": 0.9986036107298388
+   },
+   "delta": {
+    "d_latency_s": 0.48,
+    "d_min_trust": -0.178924,
+    "d_peak_posterior": -0.000916
+   },
+   "expected_cause": "power_fault",
+   "faulted_node": "battery",
+   "onset_s": 30.0,
+   "per_edge_removed": {
+    "attitude_gravity_mag": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.0
+    },
+    "power_thrust": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 1e-06,
+     "d_peak_posterior": 0.0
+    },
+    "redundant_imu": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.000916
+    },
+    "temp_bias_drift": {
+     "d_latency_s": 0.0,
+     "d_min_trust": -0.0,
+     "d_peak_posterior": 0.0
+    },
+    "vibration_prop_freq": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.0
+    }
+   }
+  },
+  "vibration_anomaly": {
+   "all_five_removed": {
+    "detect_latency_s": 2.5600000000000023,
+    "mean_trust_all_nodes": 0.9664840944335361,
+    "min_trust_faulted": 0.25188626999438346,
+    "peak_posterior_correct_cause": 0.9984622189339651
+   },
+   "baseline": {
+    "detect_latency_s": 2.5600000000000023,
+    "mean_trust_all_nodes": 0.9566756726145571,
+    "min_trust_faulted": 0.16583664519121466,
+    "peak_posterior_correct_cause": 0.9999930174273147
+   },
+   "delta": {
+    "d_latency_s": 0.0,
+    "d_min_trust": 0.08605,
+    "d_peak_posterior": -0.001531
+   },
+   "expected_cause": "vibration_anomaly",
+   "faulted_node": "vibration",
+   "onset_s": 28.0,
+   "per_edge_removed": {
+    "attitude_gravity_mag": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.0
+    },
+    "power_thrust": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "redundant_imu": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": -0.0
+    },
+    "temp_bias_drift": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.0,
+     "d_peak_posterior": 0.0
+    },
+    "vibration_prop_freq": {
+     "d_latency_s": 0.0,
+     "d_min_trust": 0.08605,
+     "d_peak_posterior": -0.001531
+    }
+   }
+  }
+ },
+ "temp_bias_drift_constant": {
+  "edge": "temp_bias_drift",
+  "gate": "0.2 * ones (constant)",
+  "nodes": {
+   "baro": {
+    "mean_trust_with_edge": 0.997235,
+    "mean_trust_without_edge": 0.997053,
+    "steady_state_offset": -0.000183
+   },
+   "battery": {
+    "mean_trust_with_edge": 0.996991,
+    "mean_trust_without_edge": 0.996931,
+    "steady_state_offset": -6e-05
+   }
+  },
+  "scenario": "clean",
+  "touches": [
+   "baro",
+   "battery"
+  ],
+  "window": "t > 20 s (settled)"
+ }
+}

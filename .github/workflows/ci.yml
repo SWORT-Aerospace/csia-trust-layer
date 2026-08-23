@@ -1,12 +1,78 @@
 name: ci
 on: [push, pull_request]
 jobs:
+  # Python matrix. The Mac operator host runs 3.13, so 3.13 is a first-class
+  # gate, not an afterthought: install, dependency smoke, the full suite
+  # (including the mocked Hugging Face acquisition tests) and the packaged
+  # wheel all run on both interpreters.
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    name: test (py${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install -e ".[dev]" pyulog pymavlink
+        with: { python-version: "${{ matrix.python-version }}" }
+      # Every third-party package the suite imports must come from a declared
+      # extra (tests/test_ci_env.py enforces the same invariant from inside
+      # the suite, so a new undeclared import fails even locally).
+      - run: pip install -e ".[dev,data,logs,mavlink]"
+      - name: dependency smoke — fail at install time, not mid-collection
+        run: python -c "import duckdb, huggingface_hub, jsonschema, polars, pyarrow, pymavlink, pyulog, yaml"
+      - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run
+      # The acquisition suite runs entirely against a mocked Hub: CI never
+      # downloads the real dataset.
       - run: python -m pytest -q
+      # Dataset/provenance gates. The MANIFEST is content-addressed and must
+      # regenerate byte-identically; the exposure REPORT embeds a timestamped
+      # experiment manifest by design, so it is validated against its schema
+      # rather than diffed. Leakage/contamination are asserted in the suite.
+      - name: dataset manifest determinism + schema gate
+        run: |
+          python tools/build_dataset_manifest.py
+          git diff --exit-code datasets/manifests datasets/reports/deduplication_report.json \
+            || (echo "::error::committed dataset manifest is stale — re-run tools/build_dataset_manifest.py" && exit 1)
+          python - <<'PYEOF'
+          import json, jsonschema
+          for doc, sch in (("datasets/manifests/px4_public_v1.json",
+                            "datasets/schemas/dataset_manifest_v1.schema.json"),
+                           ("datasets/reports/exposure_v2.json",
+                            "datasets/schemas/result_v1.schema.json")):
+              jsonschema.validate(json.load(open(doc)), json.load(open(sch)))
+              print("schema OK:", doc)
+          PYEOF
+      # The package must work INSTALLED, not just from a checkout: build a
+      # wheel, install it into a scratch venv, and validate a contract from
+      # a foreign cwd — this is where missing package data fails.
+      - name: packaged wheel — schema accessible after install
+        run: |
+          python -m build --wheel
+          python -m venv /tmp/wheel-venv
+          /tmp/wheel-venv/bin/pip install --quiet "$(ls dist/*.whl)[dev]"
+          cd /tmp && /tmp/wheel-venv/bin/python - <<'PYEOF'
+          from csia.contracts import validate_contract
+          from csia.contracts.validate import load_schema
+          assert load_schema()["title"] == "CSIA Trust Contract v0.1"
+          verdict = validate_contract({})["verdict"]
+          assert verdict == "CSIA_CONTRACT_INVALID", verdict
+          print("wheel OK: packaged schema found; empty contract ->", verdict)
+          PYEOF
       - run: csia report
+      # Frozen CSIA v1: bench.json must regenerate bit-identically.
+      - name: frozen v1 benchmark reproducibility
+        run: |
+          git diff --exit-code campaigns/bench.json \
+            || (echo "::error::frozen CSIA v1 benchmark changed" && exit 1)
+
+  # The C core is the deployment-path implementation, so an out-of-bounds
+  # access is a flight hazard. The sanitizer harness is interpreter-agnostic,
+  # so it runs once rather than being duplicated across the matrix.
+  native:
+    runs-on: ubuntu-latest
+    name: native core — strict warnings + sanitizers
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash csia/native/build.sh --check

@@ -1,0 +1,35 @@
+# CSIA Trust Layer — companion-computer advisory service (SOW001 Pi 5).
+# Installed by deploy/install.sh; documented in docs/HARDWARE.md.
+#
+# ADVISORY ONLY by default: the service logs trust state and failsafe
+# recommendations; it commands nothing. Wiring MavlinkActuator with
+# enable_commands=True is a deliberate, SITL-validated-first decision that
+# does not belong in a unit file.
+
+[Unit]
+Description=CSIA Trust Layer (advisory sensor-integrity monitor)
+Documentation=https://github.com/SWORT-Aerospace/csia-trust-layer
+After=network-online.target mavlink-router.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=csia
+Group=csia
+ExecStart=/opt/csia/.venv/bin/csia run --source mavlink \
+    --conn udp:127.0.0.1:14551 --profile sow001_quad \
+    --log /var/log/csia/state.jsonl
+# the monitor contains its own errors; if the PROCESS dies anyway, come
+# back fast and keep coming back — an in-flight monitor never gives up
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=0
+LogsDirectory=csia
+# hygiene: the monitor needs no privileges beyond its venv and log dir
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

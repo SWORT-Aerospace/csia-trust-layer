@@ -1,0 +1,480 @@
+{
+ "corpus_logs": 26,
+ "cwe_curve_by_min_channels": [
+  {
+   "channel_absence_alone": 1.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 1.0,
+   "min_channels": 1
+  },
+  {
+   "channel_absence_alone": 1.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 1.0,
+   "min_channels": 2
+  },
+  {
+   "channel_absence_alone": 1.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 1.0,
+   "min_channels": 3
+  },
+  {
+   "channel_absence_alone": 1.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 1.0,
+   "min_channels": 4
+  },
+  {
+   "channel_absence_alone": 1.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 1.0,
+   "min_channels": 5
+  },
+  {
+   "channel_absence_alone": 0.7778,
+   "gate_closure_alone": 0.0741,
+   "joint": 0.8148,
+   "min_channels": 6
+  },
+  {
+   "channel_absence_alone": 0.2593,
+   "gate_closure_alone": 0.0741,
+   "joint": 0.4074,
+   "min_channels": 7
+  },
+  {
+   "channel_absence_alone": 0.0,
+   "gate_closure_alone": 0.0741,
+   "joint": 0.0741,
+   "min_channels": 8
+  }
+ ],
+ "emission_table_note": "The endogeneity ratio quoted for gvalid (P(Z=0|GNSS_DEG) ~ 0.90 vs P(Z=0|nominal) ~ 0.02, ~45:1) is NOT verifiable from this repository. No emission table, closure-probability model or equivalent exists anywhere in source. It is taken on the author's word and must be labelled as external to the codebase wherever it is used.",
+ "irreducible_critical_exposure": {
+  "all_irreducible_are_gate_caused": true,
+  "definition": "critical pairs that merge under some configuration reachable at FULL instrumentation, i.e. that cannot be fixed by adding sensors",
+  "ire": 0.0741,
+  "n_irreducible": 2,
+  "n_reducible_by_instrumentation": 25,
+  "pairs": [
+   "gps_fault+nominal",
+   "imu0_bias_drift+imu1_bias_drift"
+  ],
+  "reading": "CWE does not invert the kappa ordering \u2014 it widens it in the same direction. The ordering that DOES invert is remediability: 25 of 27 critical exposures vanish the moment the aircraft carries all 8 channels; the 2 that survive are both gate-caused, and one of those has no repair inside the current feature set."
+ },
+ "n_critical_pairs": 27,
+ "n_response_equivalent_pairs": 1,
+ "necessity_per_exposed_critical_pair": [
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+imu0_bias_drift",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+imu1_bias_drift",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+mag_interference",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "either mechanism suffices",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": true,
+   "pair": "gps_fault+nominal",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": true
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+power_fault",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+unexpected_maneuver",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "gps_fault+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "either mechanism suffices",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": true,
+   "pair": "imu0_bias_drift+imu1_bias_drift",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": true
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu0_bias_drift+mag_interference",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu0_bias_drift+nominal",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu0_bias_drift+power_fault",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu0_bias_drift+unexpected_maneuver",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu0_bias_drift+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu1_bias_drift+mag_interference",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu1_bias_drift+nominal",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu1_bias_drift+power_fault",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu1_bias_drift+unexpected_maneuver",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "imu1_bias_drift+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "mag_interference+nominal",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "mag_interference+power_fault",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "mag_interference+unexpected_maneuver",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "mag_interference+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "nominal+power_fault",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "nominal+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "power_fault+unexpected_maneuver",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "power_fault+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  },
+  {
+   "mechanism": "channel absence only",
+   "merges_under_channel_absence_alone": true,
+   "merges_under_gate_closure_alone": false,
+   "pair": "unexpected_maneuver+vibration_anomaly",
+   "requires_both_jointly": false,
+   "survives_full_instrumentation": false
+  }
+ ],
+ "pairs_requiring_both_mechanisms": [],
+ "per_admissibility_assumption": {
+  "any_channel_subset": {
+   "channel_absence_alone": {
+    "critical_pairs": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+nominal",
+     "gps_fault+power_fault",
+     "gps_fault+unexpected_maneuver",
+     "gps_fault+vibration_anomaly",
+     "imu0_bias_drift+imu1_bias_drift",
+     "imu0_bias_drift+mag_interference",
+     "imu0_bias_drift+nominal",
+     "imu0_bias_drift+power_fault",
+     "imu0_bias_drift+unexpected_maneuver",
+     "imu0_bias_drift+vibration_anomaly",
+     "imu1_bias_drift+mag_interference",
+     "imu1_bias_drift+nominal",
+     "imu1_bias_drift+power_fault",
+     "imu1_bias_drift+unexpected_maneuver",
+     "imu1_bias_drift+vibration_anomaly",
+     "mag_interference+nominal",
+     "mag_interference+power_fault",
+     "mag_interference+unexpected_maneuver",
+     "mag_interference+vibration_anomaly",
+     "nominal+power_fault",
+     "nominal+vibration_anomaly",
+     "power_fault+unexpected_maneuver",
+     "power_fault+vibration_anomaly",
+     "unexpected_maneuver+vibration_anomaly"
+    ],
+    "cwe": 1.0,
+    "n_configurations": 256,
+    "n_critical_exposed": 27
+   },
+   "description": "every subset of channels, including the empty one \u2014 degenerate, retained to show why an admissibility assumption is mandatory",
+   "gate_closure_alone": {
+    "critical_pairs": [
+     "gps_fault+nominal",
+     "imu0_bias_drift+imu1_bias_drift"
+    ],
+    "cwe": 0.0741,
+    "n_configurations": 16,
+    "n_critical_exposed": 2
+   },
+   "joint": {
+    "critical_pairs": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+nominal",
+     "gps_fault+power_fault",
+     "gps_fault+unexpected_maneuver",
+     "gps_fault+vibration_anomaly",
+     "imu0_bias_drift+imu1_bias_drift",
+     "imu0_bias_drift+mag_interference",
+     "imu0_bias_drift+nominal",
+     "imu0_bias_drift+power_fault",
+     "imu0_bias_drift+unexpected_maneuver",
+     "imu0_bias_drift+vibration_anomaly",
+     "imu1_bias_drift+mag_interference",
+     "imu1_bias_drift+nominal",
+     "imu1_bias_drift+power_fault",
+     "imu1_bias_drift+unexpected_maneuver",
+     "imu1_bias_drift+vibration_anomaly",
+     "mag_interference+nominal",
+     "mag_interference+power_fault",
+     "mag_interference+unexpected_maneuver",
+     "mag_interference+vibration_anomaly",
+     "nominal+power_fault",
+     "nominal+vibration_anomaly",
+     "power_fault+unexpected_maneuver",
+     "power_fault+vibration_anomaly",
+     "unexpected_maneuver+vibration_anomaly"
+    ],
+    "cwe": 1.0,
+    "n_configurations": 1232,
+    "n_critical_exposed": 27
+   },
+   "n_channel_sets": 256
+  },
+  "corpus_observed": {
+   "channel_absence_alone": {
+    "critical_pairs": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+nominal",
+     "gps_fault+power_fault",
+     "gps_fault+unexpected_maneuver",
+     "gps_fault+vibration_anomaly",
+     "imu0_bias_drift+imu1_bias_drift",
+     "imu0_bias_drift+mag_interference",
+     "imu0_bias_drift+nominal",
+     "imu0_bias_drift+power_fault",
+     "imu0_bias_drift+unexpected_maneuver",
+     "imu0_bias_drift+vibration_anomaly",
+     "imu1_bias_drift+mag_interference",
+     "imu1_bias_drift+nominal",
+     "imu1_bias_drift+power_fault",
+     "imu1_bias_drift+unexpected_maneuver",
+     "imu1_bias_drift+vibration_anomaly",
+     "mag_interference+nominal",
+     "mag_interference+power_fault",
+     "mag_interference+unexpected_maneuver",
+     "mag_interference+vibration_anomaly",
+     "nominal+power_fault",
+     "nominal+vibration_anomaly",
+     "power_fault+unexpected_maneuver",
+     "power_fault+vibration_anomaly",
+     "unexpected_maneuver+vibration_anomaly"
+    ],
+    "cwe": 1.0,
+    "n_configurations": 6,
+    "n_critical_exposed": 27
+   },
+   "description": "the 6 channel configurations the 26 public PX4 logs actually carry (2-5 of 8) \u2014 other people's aircraft, not ours",
+   "gate_closure_alone": {
+    "critical_pairs": [
+     "gps_fault+nominal",
+     "imu0_bias_drift+imu1_bias_drift"
+    ],
+    "cwe": 0.0741,
+    "n_configurations": 16,
+    "n_critical_exposed": 2
+   },
+   "joint": {
+    "critical_pairs": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+nominal",
+     "gps_fault+power_fault",
+     "gps_fault+unexpected_maneuver",
+     "gps_fault+vibration_anomaly",
+     "imu0_bias_drift+imu1_bias_drift",
+     "imu0_bias_drift+mag_interference",
+     "imu0_bias_drift+nominal",
+     "imu0_bias_drift+power_fault",
+     "imu0_bias_drift+unexpected_maneuver",
+     "imu0_bias_drift+vibration_anomaly",
+     "imu1_bias_drift+mag_interference",
+     "imu1_bias_drift+nominal",
+     "imu1_bias_drift+power_fault",
+     "imu1_bias_drift+unexpected_maneuver",
+     "imu1_bias_drift+vibration_anomaly",
+     "mag_interference+nominal",
+     "mag_interference+power_fault",
+     "mag_interference+unexpected_maneuver",
+     "mag_interference+vibration_anomaly",
+     "nominal+power_fault",
+     "nominal+vibration_anomaly",
+     "power_fault+unexpected_maneuver",
+     "power_fault+vibration_anomaly",
+     "unexpected_maneuver+vibration_anomaly"
+    ],
+    "cwe": 1.0,
+    "n_configurations": 19,
+    "n_critical_exposed": 27
+   },
+   "n_channel_sets": 6
+  },
+  "full_instrumentation": {
+   "channel_absence_alone": {
+    "critical_pairs": [],
+    "cwe": 0.0,
+    "n_configurations": 1,
+    "n_critical_exposed": 0
+   },
+   "description": "the aircraft carries all 8 channels \u2014 the design intent for a production SOW001 quad",
+   "gate_closure_alone": {
+    "critical_pairs": [
+     "gps_fault+nominal",
+     "imu0_bias_drift+imu1_bias_drift"
+    ],
+    "cwe": 0.0741,
+    "n_configurations": 16,
+    "n_critical_exposed": 2
+   },
+   "joint": {
+    "critical_pairs": [
+     "gps_fault+nominal",
+     "imu0_bias_drift+imu1_bias_drift"
+    ],
+    "cwe": 0.0741,
+    "n_configurations": 16,
+    "n_critical_exposed": 2
+   },
+   "n_channel_sets": 1
+  }
+ },
+ "purpose": "criticality-weighted exposure per mechanism; kappa counts distinctions, CWE weights them by whether losing them changes the commanded response"
+}

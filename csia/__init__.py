@@ -10,4 +10,4 @@ separate DO-178C/DO-254 qualification effort on embedded hardware; no
 certification claims are made or implied anywhere in this package.
 """
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"

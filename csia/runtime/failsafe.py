@@ -89,6 +89,7 @@ class FailsafePolicy:
         self._issued: set[str] = set()            # conditions already acted on
         self._below_since: float | None = None    # de-escalation hysteresis
         self._selected_imu: str | None = None
+        self._ever_fresh: set[str] = set()        # sensors seen delivering data
 
     # --- condition evaluation ---------------------------------------------------
 
@@ -134,7 +135,12 @@ class FailsafePolicy:
                 [Action("SELECT_IMU", "switch attitude/velocity source to the "
                         "trusted unit", {"use": best_imu})])
 
-        gps_was_monitored = fresh.get("gps") or T["gps"] != 0.8
+        # "was monitored" = the sensor delivered data at some point this
+        # run (tracked in update()); a sensor absent from the whole flight
+        # must not raise loss-of-data alarms. (Previously inferred from
+        # trust != the Beta-prior mean 0.8 — a silent coupling that broke
+        # if EngineConfig's prior changed.)
+        gps_was_monitored = "gps" in self._ever_fresh
         if (T["gps"] < cfg.nav_caution and fresh.get("gps")) or \
                 (not fresh.get("gps", True) and gps_was_monitored):
             why = "GPS data invalid" if not fresh.get("gps", True) \
@@ -177,6 +183,18 @@ class FailsafePolicy:
         dwelled, de-escalation requires dwell_down of the target holding."""
         cfg = self.cfg
         t = state.t
+        # track data delivery even pre-arm, so a sensor that dies during
+        # ground checks still counts as "was monitored" once armed
+        for n, ok in state.fresh.items():
+            if ok:
+                self._ever_fresh.add(n)
+        if getattr(state, "armed", None) is False:
+            # vehicle known-DISARMED (real state from the source, not a time
+            # proxy): failsafe actions are meaningless on the ground — hold,
+            # and drop dwell bookkeeping so a pre-disarm onset can't
+            # instantly escalate at the next arming.
+            self.reset_timers()
+            return []
         if t < cfg.arm_time:   # not armed: calibration + prior convergence
             return []
         conds = self._conditions(state)
@@ -221,6 +239,15 @@ class FailsafePolicy:
             if a.name == "SELECT_IMU":
                 self._selected_imu = a.params["use"]
         return issued
+
+    def reset_timers(self):
+        """Drop dwell/hysteresis bookkeeping (level and the transition audit
+        trail persist). Called on disarm and on source time discontinuities
+        (FC reboot, looped replay) where stale onset times would otherwise
+        allow instant escalation."""
+        self._cond_since.clear()
+        self._issued.clear()
+        self._below_since = None
 
     def _transition(self, t, level, reasons, actions):
         prev = self.level

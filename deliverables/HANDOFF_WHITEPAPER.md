@@ -289,8 +289,8 @@ Verbatim from SUMMARY.md (not softened):
 
 ```sh
 pip install -e ".[dev,logs]"                 # from repo root, py3.11+
-python -m pytest                             # full suite (48; 2 native tests
-                                             # skip unless csia/native built)
+python -m pytest                             # full suite — native parity
+                                             # tests skip unless csia/native built
 python tools/interceptor_montecarlo.py       # -> montecarlo_results.{md,json}
 python tools/interceptor_plots.py            # -> the 3 PNG plots
 python -m pytest tests/scenarios/test_seeker_scenarios.py   # seeker scenarios

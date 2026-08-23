@@ -118,6 +118,7 @@ class TrustState:
     components: dict       # sensor -> {nbr, phys, temp, stat} (None if absent)
     posterior: dict        # cause -> probability
     fresh: dict            # sensor -> bool (valid AND recent data at this tick)
+    armed: bool | None = None   # vehicle armed flag (None: source never said)
     edges: dict = field(default_factory=dict)  # edge key -> (consistency, gate)
     latency_us: float = 0.0
 
@@ -154,6 +155,11 @@ class OnlineTrustLayer:
                  stale_timeout_s: dict | None = None,
                  mag_yaw_gain: float = 0.0,
                  field_mode: bool = False):
+        # captured before profile mutates locals, so reset() can rebuild the
+        # layer identically after a source time discontinuity (FC reboot)
+        self._init_args = (tick_hz, config, t_calibrate, profile, mag_ref_ut,
+                           auto_baseline_s, stale_timeout_s, mag_yaw_gain,
+                           field_mode)
         # field_mode: the real-world tolerance package, ON for live vehicles
         # and log replay, OFF (default) for the simulator (where sigmas are
         # exact and bit-equivalence with the batch path is tested):
@@ -242,6 +248,24 @@ class OnlineTrustLayer:
             self._mag_yaw_gain = max(self._mag_yaw_gain, 0.005)
         self._adapt = {}             # check key -> slow-level _EW
         self._acc_s = {n: _EW(0.06) for n in ("imu0", "imu1")}  # ~0.7 s
+        # Vehicle armed state (from HEARTBEAT / vehicle_status). None means
+        # the source never reported it -> fall back to the simulator's
+        # scripted t>5s arming proxy. False gates the motor edges OFF (idle
+        # rotors explain no lift; on the ground these checks would read
+        # gravity as a thrust mismatch) and holds the failsafe.
+        self._armed: bool | None = None
+        self._armed_since: float | None = None
+
+    def reset(self):
+        """Full state reset after a source time discontinuity (FC reboot,
+        looped replay): filters, biases, calibration, and the tick counter
+        all restart from zero. Trust re-converges from the prior."""
+        OnlineTrustLayer.__init__(self, *self._init_args)
+
+    @property
+    def bad_samples(self) -> int:
+        """Malformed (non-finite) samples rejected before the filters."""
+        return self._bad_samples
 
     # --- ingest ---------------------------------------------------------------
 
@@ -249,6 +273,19 @@ class OnlineTrustLayer:
         """Apply one sample; returns TrustStates for any ticks that fired.
         Ticks fire strictly before the first sample with a later timestamp,
         matching the batch sample-and-hold alignment exactly."""
+        if sensor == "vehicle_status":
+            # vehicle state channel (armed flag) — not a trust node; gates
+            # the motor edges and the failsafe. Ticks fire first, exactly as
+            # for a sensor sample, so tick timing is source-order invariant.
+            states = []
+            while self.next_tick < t - 1e-12:
+                states.append(self._tick(self.next_tick))
+                self.next_tick += self.dt_tick
+            armed = bool(channels.get("armed", False))
+            if armed and self._armed is not True:
+                self._armed_since = t
+            self._armed = armed
+            return states
         if sensor not in self.slots:
             raise ValueError(f"unknown sensor {sensor!r}")
         for key, val in channels.items():
@@ -320,6 +357,7 @@ class OnlineTrustLayer:
         elif sensor == "gps":
             pos = np.asarray(ch["pos"], dtype=float)
             vel = np.asarray(ch["vel"], dtype=float)
+            vz_ok = bool(ch.get("vz_valid", True))
             if self._gps_prev is not None:
                 pt, ppos, pvel = self._gps_prev
                 dt = max(t - pt, 1e-6)
@@ -327,11 +365,14 @@ class OnlineTrustLayer:
                 self._gps_fd_dvel = (vel - pvel) / dt
                 # step detector: position must not jump beyond what the
                 # reported velocity can explain (spoof/glitch step signature)
-                self._gps_step_peak = max(
-                    self._gps_step_peak,
-                    float(np.linalg.norm(self._gps_fd_vel - vel)))
+                dstep = self._gps_fd_vel - vel
+                if not vz_ok:   # no real vz reported: judge horizontal only
+                    dstep = np.array([dstep[0], dstep[1], 0.0])
+                self._gps_step_peak = max(self._gps_step_peak,
+                                          float(np.linalg.norm(dstep)))
             self._gps_prev = (t, pos, vel)
             slot.latest["pos"], slot.latest["vel"] = pos, vel
+            slot.latest["vz_ok"] = vz_ok
         elif sensor == "mag":
             field_ut = np.asarray(ch["field_ut"], dtype=float)
             slot.latest["field_ut"] = field_ut
@@ -443,7 +484,17 @@ class OnlineTrustLayer:
         course = float(np.arctan2(vel[1], vel[0]))
         speed_gate = float(np.clip(
             (vh - GATE_SPEED_LO) / (GATE_SPEED_HI - GATE_SPEED_LO), 0.0, 1.0))
-        armed_gate = float(np.clip((tau - 5.0) / 1.0, 0.0, 1.0))
+        # Motor edges gate on ARMED state: real vehicle state when the
+        # source provides it (HEARTBEAT / vehicle_status), the simulator's
+        # scripted t>5s arming as the bench fallback. 1 s ramp after arming
+        # (spin-up transient), hard zero when known-disarmed.
+        if self._armed is None:
+            armed_gate = float(np.clip((tau - 5.0) / 1.0, 0.0, 1.0))
+        elif self._armed:
+            armed_gate = float(np.clip(tau - (self._armed_since or 0.0),
+                                       0.0, 1.0))
+        else:
+            armed_gate = 0.0
 
         E = {}
         if self._field:
@@ -466,14 +517,23 @@ class OnlineTrustLayer:
         E["altitude_baro"] = self._lam_upd(
             "altitude_baro", alt - pos[2], 2.2), gvalid
 
+        # A dialect with no real vertical velocity (GPS_RAW_INT carries none;
+        # the source marks vz_valid=False) must never have a z-residual
+        # fabricated from the zero placeholder: compare horizontal only
+        # (df drops 3 -> 2). Previously a steady climb read as a spoof-like
+        # vertical error in the flagship phys_gps check.
+        vz_ok = bool(L("gps", "vz_ok", True))
         dvel_s = self._dvel_s.update(self._gps_fd_dvel)
         for n, acc, att, key in (("imu0", acc0, att0, "velocity_gps_doppler_0"),
                                  ("imu1", acc1, att1, "velocity_gps_doppler_1")):
             f_w = _body_to_world_1(acc, att)
             f_w = f_w - np.array([0.0, 0.0, G])
             fw_s = self._fw_s[n].update(f_w)
+            d = fw_s - dvel_s
+            if not vz_ok:
+                d = np.array([d[0], d[1], 0.0])
             E[key] = self._lam_upd(
-                key, np.linalg.norm(fw_s - dvel_s), 1.6, df=3), gvalid
+                key, np.linalg.norm(d), 1.6, df=3 if vz_ok else 2), gvalid
 
         E["attitude_gravity_mag"] = self._lam_upd(
             "attitude_gravity_mag",
@@ -499,9 +559,12 @@ class OnlineTrustLayer:
             "temp_bias_drift", dtemp, 0.5), 0.2
 
         P = {}
-        r_gps = self._rgps_s.update(self._gps_fd_vel - vel)
+        r_raw = self._gps_fd_vel - vel
+        if not vz_ok:
+            r_raw = np.array([r_raw[0], r_raw[1], 0.0])
+        r_gps = self._rgps_s.update(r_raw)
         lam_gps = self._lam_upd("phys_gps", np.linalg.norm(r_gps),
-                                0.45, df=3)
+                                0.45, df=3 if vz_ok else 2)
         # absolute step check, NOT adaptively normalized: no vehicle
         # teleports — sigma 20 m/s of unexplained instantaneous motion
         lam_step = (self._gps_step_peak / 20.0) ** 2
@@ -578,6 +641,7 @@ class OnlineTrustLayer:
                                                    "stat")} for n in SENSORS},
             posterior=posterior,
             fresh=fresh,
+            armed=self._armed,
             latency_us=(time.perf_counter() - t0) * 1e6)
 
 

@@ -5,13 +5,28 @@ SWORT LLC · SAM-registered · operating avionics business with revenue.
 ## The pitch in three measured numbers
 
 1. **Detection** (deterministic sim harness, 39 automated tests): GPS spoof
-   detected in 2.2 s at 89% attributed confidence; IMU drift isolated to the
-   correct unit at 99%/0%; mag/power/vibration faults at 100%, 1.5–2.6 s.
-2. **Real-data validation** (26 public PX4 quadrotor flights, 0.66 flight
-   hours, `csia analyze-logs`): **3 candidate false alarms → 4.5/flight-hour**
-   in offline-validation posture; 24/26 flights alarm-free. Public logs carry
-   only 5 of 8 monitored channels at usable rates — the SOW001 vehicle
-   provides all 8 by design.
+   detected at 89% attributed confidence in 2.2 s to the internal analysis
+   threshold (trust<0.85) and **4.4 s to the operator-facing alert**; IMU drift
+   isolated to the correct unit at 99%/0%; mag/power/vibration faults at 100%,
+   1.4–2.2 s to analysis threshold and **3.4–5.8 s to alert**. The two are
+   different quantities and differ by 2–2.7x
+   (docs/validation/METRIC_DEFINITIONS.md §3). Slow single-IMU bias drift
+   crosses the analysis threshold at 13.0 s but raises **no operator alert** —
+   redundancy holds `max(imu0,imu1)` above the attitude threshold.
+2. **Real-data replay** (26 public PX4 logs, **unannotated**,
+   `csia analyze-logs`): **no CSIA alert episode occurred in 24 of 26 logs**;
+   2 alert episodes across **0.518 monitored flight-hours** → **3.86
+   episodes/flight-hour (95% CI 0.47–13.94)**. Three cautions must travel with
+   this number: (a) exposure is monitored time, not raw log duration, which
+   overstates it by 21.8%; (b) **zero hours are verified healthy** — the logs
+   are unannotated, and absence of an alert is the hypothesis under test, not
+   evidence for it; (c) **zero hours are held out** — all 26 shaped `field_mode`
+   and the offline posture. The interval spans ~30x. This is a preliminary
+   characterisation, **not a reliability claim**. Public logs carry only 2–5 of
+   8 monitored channels; the SOW001 vehicle provides all 8 by design.
+   See docs/validation/EXPOSURE_PRECISION_PLAN.md for the exposure required to
+   support a commercial claim (~30 h held-out, zero-event, to bound < 0.1/h).
+
 3. **SITL-validated live path** (`tools/sitl_validate.py`): full autonomous
    ArduCopter mission with the runtime consuming live MAVLink; 6 sensors
    monitored, min trust 0.78, zero false alarms, PASS.
@@ -41,7 +56,7 @@ UAS traffic management safety cases.
 
 | Artifact | Where |
 |---|---|
-| Runtime + failsafe + plugins, 39 tests, CI | this repo, `csia/`, `.github/workflows/ci.yml` |
+| Runtime + failsafe + plugins, CI-gated test suite | this repo, `csia/`, `.github/workflows/ci.yml` |
 | Real-data validation report | `data/real_logs_report.json`, `csia analyze-logs` |
 | SITL validation harness | `tools/sitl_validate.py` (PASS) |
 | Live demo | `csia service` → dashboard LIVE tab |

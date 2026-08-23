@@ -18,15 +18,21 @@ import numpy as np
 
 def _build(args) -> int:
     from .dashboard import export_replay
-    from .scenarios import SCENARIOS, run_scenario
+    from .scenarios import SCENARIO_PROFILE, SCENARIOS, run_scenario
     from .sensors import generate_flight
     from .trust_graph import build_trust_graph
 
     replay_dir = os.path.join(args.data_dir, "replay")
     os.makedirs(replay_dir, exist_ok=True)
-    truth = generate_flight()
+    base = generate_flight()                      # shared baseline flight
+    profile_truth = {}                            # cache non-default profiles
     graph = build_trust_graph()
     for name in SCENARIOS:
+        prof = SCENARIO_PROFILE.get(name)
+        if prof:
+            truth = profile_truth.setdefault(prof, generate_flight(profile=prof))
+        else:
+            truth = base
         title, faults, td, hist, diag = run_scenario(name, truth=truth)
         export_replay(name, title, td, hist, diag, graph, faults, replay_dir)
         print(f"built {name}")
@@ -49,8 +55,12 @@ def _report(args) -> int:
     from .sensors import generate_flight
 
     truth = generate_flight()
+    # NOTE: the latency column is TIME-TO-TRUST-THRESHOLD(0.85) — an internal
+    # analysis measure, not the operator-facing alert latency (which also needs
+    # the per-class production threshold, dwell_up and arm_time). They differ by
+    # 2-2.7x. See docs/validation/METRIC_DEFINITIONS.md section 3.
     print(f"{'scenario':20s} {'target':10s} {'min trust':>9s} "
-          f"{'detect [s]':>10s} {'peak diagnosis':40s} {'lat us':>7s}")
+          f"{'t<0.85 [s]':>10s} {'peak diagnosis':40s} {'lat us':>7s}")
     for name in SCENARIOS:
         title, faults, td, hist, diag = run_scenario(name, truth=truth)
         target = faults[0].target if faults else "-"
@@ -70,6 +80,8 @@ def _report(args) -> int:
         print(f"{name:20s} {target:10s} {tmin:9.2f} {detect:>10s} "
               f"{diag.callout(kk, 2):40s} "
               f"{float(hist.latency_us[10:].mean()):7.1f}")
+    print("\n(t<0.85 is the internal ANALYSIS threshold, NOT operator-alert "
+          "latency — see docs/validation/METRIC_DEFINITIONS.md section 3)")
     return 0
 
 
@@ -97,6 +109,9 @@ def _run(args) -> int:
 
     print(f"\n=== run complete: {summary.ticks} ticks, "
           f"trust-core+failsafe mean {summary.mean_latency_us:.0f} us/tick ===")
+    if summary.errors:
+        print(f"WARNING: {summary.errors} trust-layer errors were contained "
+              "during this run — inspect the log")
     print(f"final failsafe level: {summary.final_level}")
     for tr in summary.transitions:
         print(f"  t={tr.t:5.1f}s  {tr.previous.name} -> {tr.level.name}: "
@@ -119,6 +134,7 @@ def _analyze_logs(args) -> int:
     import glob
     import json as _json
 
+    from .metrics import alert_episodes, alert_summary
     from .runtime import FailsafePolicy, OnlineTrustLayer, TrustLayerRuntime
     from .runtime.failsafe import FailsafeConfig
     from .runtime.ulog_source import UlogSource
@@ -132,8 +148,9 @@ def _analyze_logs(args) -> int:
     results = []
     total_hours = 0.0
     total_transitions = 0
+    all_episodes = 0
     print(f"{'log':38s} {'dur':>6s} {'sensors':>7s} {'minT':>5s} "
-          f"{'alarms':>6s}  worst sensor / notes")
+          f"{'alerts':>6s}  worst sensor / notes")
     for path in files:
         try:
             src = UlogSource(path)
@@ -162,8 +179,13 @@ def _analyze_logs(args) -> int:
             continue
         hours = src.duration / 3600.0
         total_hours += hours
-        n_alarm = len(summary.transitions)
-        total_transitions += n_alarm
+        # An operator alert is an ALERT EPISODE, not a state-machine edge:
+        # a CAUTION->NORMAL recovery is not an alarm. Counting raw transitions
+        # over-counted this corpus by 1.50x (audit F-01); see csia/metrics.
+        episodes = alert_episodes(summary.transitions)
+        n_alarm = len(episodes)
+        all_episodes += n_alarm
+        total_transitions += len(summary.transitions)   # legacy, for compare
         present = ",".join(n[:3] for n in src.sensors_present)
         worst = min(summary.min_trust.items(), key=lambda kv: kv[1])             if summary.min_trust else ("-", 1.0)
         results.append({
@@ -173,28 +195,48 @@ def _analyze_logs(args) -> int:
             "transitions": [{"t": tr.t, "level": tr.level.name,
                              "reasons": tr.reasons}
                             for tr in summary.transitions],
-            "bad_samples": layer._bad_samples,
+            "bad_samples": layer.bad_samples,
             "excluded_channels": getattr(src, "excluded", {}),
+            "alerts": alert_summary(summary.transitions, max(hours, 1e-9)),
         })
         print(f"{os.path.basename(path)[:38]:38s} {src.duration:5.0f}s "
               f"{len(src.sensors_present):7d} {worst[1]:5.2f} "
               f"{n_alarm:6d}  {worst[0]}"
-              + (f" | {layer._bad_samples} bad samples rejected"
-                 if layer._bad_samples else ""))
+              + (f" | {layer.bad_samples} bad samples rejected"
+                 if layer.bad_samples else ""))
 
+    corpus = None
     if total_hours > 0:
-        rate = total_transitions / total_hours
+        from .metrics import poisson_ci
+        rate = all_episodes / total_hours
+        lo, hi = poisson_ci(all_episodes, total_hours)
+        corpus = {"flights": len(results),
+                  "hours": round(total_hours, 3),
+                  "alert_episodes": all_episodes,
+                  "episodes_per_hour": round(rate, 3),
+                  "episodes_per_hour_ci95": [round(lo, 3), round(hi, 3)],
+                  "transitions_legacy": total_transitions}
         print(f"\n=== REAL-DATA VALIDATION: {len(results)} flights, "
               f"{total_hours:.2f} flight hours ===")
-        print(f"failsafe activations: {total_transitions}  ->  "
-              f"{rate:.2f} activations per flight hour")
-        print("(on presumed-healthy public logs every activation is a "
-              "candidate false alarm — inspect reasons in the JSON report)")
+        print(f"alert episodes: {all_episodes}  ->  "
+              f"{rate:.2f} per flight hour  "
+              f"(95% CI {lo:.2f}-{hi:.2f})")
+        print(f"  (raw state-machine transitions: {total_transitions} — "
+              "includes recoveries; NOT operator alerts)")
+        print("(on presumed-healthy public logs every episode is a candidate "
+              "false alarm — inspect reasons in the JSON report)")
+        if all_episodes < 5:
+            print("  NOTE: interval is wide at this event count — the point "
+                  "estimate should not be quoted without its CI.")
     if args.out:
         with open(args.out, "w") as fh:
             _json.dump({"flights": results,
                         "total_hours": round(total_hours, 3),
-                        "total_transitions": total_transitions}, fh, indent=1)
+                        "total_transitions": total_transitions,
+                        "corpus_alerts": corpus,
+                        "metric_definitions": "docs/validation/"
+                                              "METRIC_DEFINITIONS.md"},
+                       fh, indent=1)
         print(f"report -> {args.out}")
     return 0
 
@@ -211,6 +253,18 @@ def _service(args) -> int:
     run_service(scenario=args.scenario, port=args.port,
                 replay_dir=replay_dir, speed=args.speed,
                 profile=get_profile(args.profile))
+    return 0
+
+
+def _bench(args) -> int:
+    from .validation import bench
+    bench(args.out)
+    return 0
+
+
+def _mc(args) -> int:
+    from .validation import monte_carlo
+    monte_carlo(args.runs, True, args.seed, args.out)
     return 0
 
 
@@ -264,15 +318,12 @@ def main(argv=None) -> int:
     bp = sub.add_parser("bench", help="C1 truth table: detection under "
                         "sim vs field configurations")
     bp.add_argument("--out", default="campaigns/bench.json")
-    bp.set_defaults(fn=lambda a: __import__("csia.validation",
-        fromlist=["bench"]).bench(a.out) and 0 or 0)
+    bp.set_defaults(fn=_bench)
     mp = sub.add_parser("mc", help="Monte Carlo detection/false-alarm campaign")
     mp.add_argument("--runs", type=int, default=150)
     mp.add_argument("--seed", type=int, default=0)
     mp.add_argument("--out", default="campaigns/monte_carlo.json")
-    mp.set_defaults(fn=lambda a: __import__("csia.validation",
-        fromlist=["monte_carlo"]).monte_carlo(a.runs, True, a.seed, a.out)
-        and 0 or 0)
+    mp.set_defaults(fn=_mc)
     sub.add_parser("info", help="package info").set_defaults(fn=_info)
     args = ap.parse_args(argv)
     logging.basicConfig(

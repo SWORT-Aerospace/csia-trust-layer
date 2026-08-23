@@ -1,0 +1,108 @@
+{
+ "actionable_trust_threshold": 0.85,
+ "arms": {
+  "A_spoof_only": "fix stays VALID \u2014 control, evidence survives",
+  "B_denial_only": "fix INVALID \u2014 the self-occlusion case",
+  "C_spoof_then_denial": "spoof for 5 s, then denial"
+ },
+ "failsafe": "shipping FailsafePolicy, driven as dashboard/export.py drives it",
+ "onset_s": 20.0,
+ "purpose": "convert SOI(gps_fault)=1.0 from a matrix property into an observed behaviour of the deployed pipeline",
+ "results": {
+  "A_spoof_only": {
+   "failsafe_actions": [
+    {
+     "action": "SWITCH_NAV_INERTIAL",
+     "params": {},
+     "t": 24.36
+    },
+    {
+     "action": "INHIBIT_GPS_MODES",
+     "params": {},
+     "t": 24.36
+    },
+    {
+     "action": "RESUME_NORMAL",
+     "params": {},
+     "t": 53.12
+    }
+   ],
+   "gps_trust_min_after_onset": 0.5905,
+   "gvalid_frac_closed_after_onset": 0.0,
+   "gvalid_min_after_onset": 1.0,
+   "max_failsafe_level": 1,
+   "n_failsafe_actions": 3,
+   "n_ticks_after_onset": 1000,
+   "seconds_confident_wrong_nominal_above_actionable_trust": 12.68,
+   "seconds_nominal_on_top_while_faulted": 13.4,
+   "time_to_first_gps_fault_lead_s": 1.44,
+   "top_cause_occupancy_after_onset": {
+    "gps_fault": 0.665,
+    "nominal": 0.335
+   }
+  },
+  "B_denial_only": {
+   "failsafe_actions": [
+    {
+     "action": "SWITCH_NAV_INERTIAL",
+     "params": {},
+     "t": 21.0
+    },
+    {
+     "action": "INHIBIT_GPS_MODES",
+     "params": {},
+     "t": 21.0
+    },
+    {
+     "action": "RESUME_NORMAL",
+     "params": {},
+     "t": 50.0
+    }
+   ],
+   "gps_trust_min_after_onset": 0.9767,
+   "gvalid_frac_closed_after_onset": 0.625,
+   "gvalid_min_after_onset": 0.0,
+   "max_failsafe_level": 1,
+   "n_failsafe_actions": 3,
+   "n_ticks_after_onset": 1000,
+   "seconds_confident_wrong_nominal_above_actionable_trust": 40.0,
+   "seconds_nominal_on_top_while_faulted": 40.0,
+   "time_to_first_gps_fault_lead_s": null,
+   "top_cause_occupancy_after_onset": {
+    "nominal": 1.0
+   }
+  },
+  "C_spoof_then_denial": {
+   "failsafe_actions": [
+    {
+     "action": "SWITCH_NAV_INERTIAL",
+     "params": {},
+     "t": 24.36
+    },
+    {
+     "action": "INHIBIT_GPS_MODES",
+     "params": {},
+     "t": 24.36
+    },
+    {
+     "action": "RESUME_NORMAL",
+     "params": {},
+     "t": 53.12
+    }
+   ],
+   "gps_trust_min_after_onset": 0.7003,
+   "gvalid_frac_closed_after_onset": 0.5,
+   "gvalid_min_after_onset": 0.0,
+   "max_failsafe_level": 1,
+   "n_failsafe_actions": 3,
+   "n_ticks_after_onset": 1000,
+   "seconds_confident_wrong_nominal_above_actionable_trust": 12.68,
+   "seconds_nominal_on_top_while_faulted": 33.76,
+   "time_to_first_gps_fault_lead_s": 1.44,
+   "top_cause_occupancy_after_onset": {
+    "gps_fault": 0.156,
+    "nominal": 0.844
+   }
+  }
+ }
+}

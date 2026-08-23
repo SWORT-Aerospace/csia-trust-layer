@@ -1,0 +1,663 @@
+{
+ "characterisation_only": true,
+ "constants_from_source": {
+  "nav_caution": 0.75,
+  "rho_max": 0.998,
+  "rho_min": 0.95,
+  "step_decay_per_tick": 0.85,
+  "step_sigma_m_s": 20.0,
+  "tick_hz": 25.0,
+  "w_nbr": 0.35,
+  "w_phys": 0.3,
+  "w_stat": 0.15,
+  "w_temp": 0.2
+ },
+ "equation_1": "T_N = (x S_0 T_0 + (1-x) M e_f) / (x S_0 + (1-x) M), x = rho^N, M = 1/(1-rho)",
+ "equation_2": "N* = ln(M(T*-e_f) / (S_0(T_0-T*) + M(T*-e_f))) / ln(rho)",
+ "equation_3": "N_floor(peak) = ln(peak / (20*sqrt(1 - 2 ln f))) / ln(1/0.85)",
+ "evidence_asymptote_e_f": 0.7,
+ "lemma_mass_invariance": "S_{k+1} = rho*S_k + 1 regardless of evidence, fixed point 1/(1-rho). The Beta denominator is constant once settled.",
+ "magnitude_buys_only_logarithmic_time": {
+  "extra_ticks_per_1000x_amplitude": 42.5,
+  "statement": "N_floor grows as ln(amplitude), and every tick of it is spent on a residual already saturated at zero, so it adds no further evidence. A detector that saturates while its decay runs cannot escalate on magnitude alone."
+ },
+ "magnitude_sweep_prediction_vs_wp_c7_measurement": [
+  {
+   "floor_tick_error": -26.0,
+   "implied_peak_m_s": 28.0,
+   "measured_floor_ticks": 26,
+   "measured_min_trust": 0.9237,
+   "position_error_m": 5.6,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 0.0,
+   "predicted_min_trust": 0.9998,
+   "trust_error": 0.0761
+  },
+  {
+   "floor_tick_error": -26.7,
+   "implied_peak_m_s": 111.5,
+   "measured_floor_ticks": 32,
+   "measured_min_trust": 0.9089,
+   "position_error_m": 22.3,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 5.3,
+   "predicted_min_trust": 0.9959,
+   "trust_error": 0.087
+  },
+  {
+   "floor_tick_error": -22.1,
+   "implied_peak_m_s": 278.5,
+   "measured_floor_ticks": 33,
+   "measured_min_trust": 0.9063,
+   "position_error_m": 55.7,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 10.9,
+   "predicted_min_trust": 0.9906,
+   "trust_error": 0.0843
+  },
+  {
+   "floor_tick_error": -13.6,
+   "implied_peak_m_s": 1113.0,
+   "measured_floor_ticks": 33,
+   "measured_min_trust": 0.9061,
+   "position_error_m": 222.6,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 19.4,
+   "predicted_min_trust": 0.9797,
+   "trust_error": 0.0736
+  },
+  {
+   "floor_tick_error": -3.7,
+   "implied_peak_m_s": 5566.0,
+   "measured_floor_ticks": 33,
+   "measured_min_trust": 0.9061,
+   "position_error_m": 1113.2,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 29.3,
+   "predicted_min_trust": 0.9613,
+   "trust_error": 0.0552
+  },
+  {
+   "floor_tick_error": -0.8,
+   "implied_peak_m_s": 27830.0,
+   "measured_floor_ticks": 40,
+   "measured_min_trust": 0.8881,
+   "position_error_m": 5566.0,
+   "predicted_escalates": false,
+   "predicted_floor_ticks": 39.2,
+   "predicted_min_trust": 0.9356,
+   "trust_error": 0.0475
+  }
+ ],
+ "no_fix_implemented": true,
+ "prediction_for_part_3_2": {
+  "claim": "a SUSTAINED fault holding the physics residual at the floor escalates after N* ticks at ANY magnitude above saturation, and never before",
+  "how_it_is_tested": "ramps refresh the step peak every GPS sample, so the floor persists for the whole ramp instead of decaying. Sweeping ramp duration across N*/25 Hz should show a sharp boundary.",
+  "independent_of_magnitude": true,
+  "minimum_escalating_duration_s": 3.732
+ },
+ "retro_validation_against_wp_c7": {
+  "boundary_N_star_ticks": 93.31,
+  "n_misclassified": 0,
+  "runs": [
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 26,
+    "predicted_escalates": false,
+    "run": "step 5.6 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 32,
+    "predicted_escalates": false,
+    "run": "step 22.3 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 33,
+    "predicted_escalates": false,
+    "run": "step 55.7 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 33,
+    "predicted_escalates": false,
+    "run": "step 222.6 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 33,
+    "predicted_escalates": false,
+    "run": "step 1113.2 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": false,
+    "measured_floor_ticks": 40,
+    "predicted_escalates": false,
+    "run": "step 5566.0 m"
+   },
+   {
+    "correct": true,
+    "measured_escalated": true,
+    "measured_floor_ticks": 104,
+    "predicted_escalates": true,
+    "run": "ramp 5 s"
+   },
+   {
+    "correct": true,
+    "measured_escalated": true,
+    "measured_floor_ticks": 168,
+    "predicted_escalates": true,
+    "run": "ramp 20 s"
+   },
+   {
+    "correct": true,
+    "measured_escalated": true,
+    "measured_floor_ticks": 139,
+    "predicted_escalates": true,
+    "run": "ramp 60 s"
+   }
+  ],
+  "separates_every_wp_c7_run": true,
+  "why_this_is_strong": "the nine runs were flown before the derivation existed and the boundary has no free parameters: N* comes from the fusion weights, the forgetting bounds and the threshold, all read from source. Steps range 26 to 40 floor ticks and none escalated; ramps range 104 to 168 and all did; N* = 93 lies in the gap."
+ },
+ "rho_under_full_disagreement": 0.95,
+ "seconds_required": 3.732,
+ "ticks_required_N_star": 93.31,
+ "verification_against_shipping_trustcore": {
+  "closed_form_matches_shipping_code": true,
+  "concentration_cap_1_over_1_minus_rho_max": 500.0,
+  "evidence_observed": 0.7,
+  "evidence_predicted": 0.7,
+  "fault_phase_mass_M": 20.0,
+  "first_tick_at_or_below_threshold": 94,
+  "max_abs_error_vs_equation_1": 0.0,
+  "note_on_crossing": "scanned over every tick, not over the sampled trace below. An earlier version scanned the sample and reported 100 because 94 was not in it.",
+  "rho_observed": 0.95,
+  "settled_mass_S0": 475.6775,
+  "settled_trust_T0": 0.999791,
+  "trace": [
+   {
+    "actual": 0.999129,
+    "evidence": 0.7,
+    "k": 1,
+    "predicted": 0.999129,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.998436,
+    "evidence": 0.7,
+    "k": 2,
+    "predicted": 0.998436,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.997709,
+    "evidence": 0.7,
+    "k": 3,
+    "predicted": 0.997709,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.996948,
+    "evidence": 0.7,
+    "k": 4,
+    "predicted": 0.996948,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.996151,
+    "evidence": 0.7,
+    "k": 5,
+    "predicted": 0.996151,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.995317,
+    "evidence": 0.7,
+    "k": 6,
+    "predicted": 0.995317,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.994443,
+    "evidence": 0.7,
+    "k": 7,
+    "predicted": 0.994443,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.99353,
+    "evidence": 0.7,
+    "k": 8,
+    "predicted": 0.99353,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.992574,
+    "evidence": 0.7,
+    "k": 9,
+    "predicted": 0.992574,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.991575,
+    "evidence": 0.7,
+    "k": 10,
+    "predicted": 0.991575,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.990531,
+    "evidence": 0.7,
+    "k": 11,
+    "predicted": 0.990531,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.98944,
+    "evidence": 0.7,
+    "k": 12,
+    "predicted": 0.98944,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.9883,
+    "evidence": 0.7,
+    "k": 13,
+    "predicted": 0.9883,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.98711,
+    "evidence": 0.7,
+    "k": 14,
+    "predicted": 0.98711,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.985867,
+    "evidence": 0.7,
+    "k": 15,
+    "predicted": 0.985867,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.984571,
+    "evidence": 0.7,
+    "k": 16,
+    "predicted": 0.984571,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.983219,
+    "evidence": 0.7,
+    "k": 17,
+    "predicted": 0.983219,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.98181,
+    "evidence": 0.7,
+    "k": 18,
+    "predicted": 0.98181,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.980342,
+    "evidence": 0.7,
+    "k": 19,
+    "predicted": 0.980342,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.978813,
+    "evidence": 0.7,
+    "k": 20,
+    "predicted": 0.978813,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.977222,
+    "evidence": 0.7,
+    "k": 21,
+    "predicted": 0.977222,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.975566,
+    "evidence": 0.7,
+    "k": 22,
+    "predicted": 0.975566,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.973844,
+    "evidence": 0.7,
+    "k": 23,
+    "predicted": 0.973844,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.972055,
+    "evidence": 0.7,
+    "k": 24,
+    "predicted": 0.972055,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.970197,
+    "evidence": 0.7,
+    "k": 25,
+    "predicted": 0.970197,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.968268,
+    "evidence": 0.7,
+    "k": 26,
+    "predicted": 0.968268,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.966267,
+    "evidence": 0.7,
+    "k": 27,
+    "predicted": 0.966267,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.964193,
+    "evidence": 0.7,
+    "k": 28,
+    "predicted": 0.964193,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.962044,
+    "evidence": 0.7,
+    "k": 29,
+    "predicted": 0.962044,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.95982,
+    "evidence": 0.7,
+    "k": 30,
+    "predicted": 0.95982,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.957519,
+    "evidence": 0.7,
+    "k": 31,
+    "predicted": 0.957519,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.95514,
+    "evidence": 0.7,
+    "k": 32,
+    "predicted": 0.95514,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.952684,
+    "evidence": 0.7,
+    "k": 33,
+    "predicted": 0.952684,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.950148,
+    "evidence": 0.7,
+    "k": 34,
+    "predicted": 0.950148,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.947534,
+    "evidence": 0.7,
+    "k": 35,
+    "predicted": 0.947534,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.94484,
+    "evidence": 0.7,
+    "k": 36,
+    "predicted": 0.94484,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.942067,
+    "evidence": 0.7,
+    "k": 37,
+    "predicted": 0.942067,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.939216,
+    "evidence": 0.7,
+    "k": 38,
+    "predicted": 0.939216,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.936286,
+    "evidence": 0.7,
+    "k": 39,
+    "predicted": 0.936286,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.933278,
+    "evidence": 0.7,
+    "k": 40,
+    "predicted": 0.933278,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.930194,
+    "evidence": 0.7,
+    "k": 41,
+    "predicted": 0.930194,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.927034,
+    "evidence": 0.7,
+    "k": 42,
+    "predicted": 0.927034,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.9238,
+    "evidence": 0.7,
+    "k": 43,
+    "predicted": 0.9238,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.920494,
+    "evidence": 0.7,
+    "k": 44,
+    "predicted": 0.920494,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.917118,
+    "evidence": 0.7,
+    "k": 45,
+    "predicted": 0.917118,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.913674,
+    "evidence": 0.7,
+    "k": 46,
+    "predicted": 0.913674,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.910166,
+    "evidence": 0.7,
+    "k": 47,
+    "predicted": 0.910166,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.906594,
+    "evidence": 0.7,
+    "k": 48,
+    "predicted": 0.906594,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.902964,
+    "evidence": 0.7,
+    "k": 49,
+    "predicted": 0.902964,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.899278,
+    "evidence": 0.7,
+    "k": 50,
+    "predicted": 0.899278,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.89554,
+    "evidence": 0.7,
+    "k": 51,
+    "predicted": 0.89554,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.891753,
+    "evidence": 0.7,
+    "k": 52,
+    "predicted": 0.891753,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.887923,
+    "evidence": 0.7,
+    "k": 53,
+    "predicted": 0.887923,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.884053,
+    "evidence": 0.7,
+    "k": 54,
+    "predicted": 0.884053,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.880148,
+    "evidence": 0.7,
+    "k": 55,
+    "predicted": 0.880148,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.876212,
+    "evidence": 0.7,
+    "k": 56,
+    "predicted": 0.876212,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.872251,
+    "evidence": 0.7,
+    "k": 57,
+    "predicted": 0.872251,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.868269,
+    "evidence": 0.7,
+    "k": 58,
+    "predicted": 0.868269,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.864272,
+    "evidence": 0.7,
+    "k": 59,
+    "predicted": 0.864272,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.860265,
+    "evidence": 0.7,
+    "k": 60,
+    "predicted": 0.860265,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.785562,
+    "evidence": 0.7,
+    "k": 80,
+    "predicted": 0.785562,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.737197,
+    "evidence": 0.7,
+    "k": 100,
+    "predicted": 0.737197,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.714435,
+    "evidence": 0.7,
+    "k": 120,
+    "predicted": 0.714435,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.705333,
+    "evidence": 0.7,
+    "k": 140,
+    "predicted": 0.705333,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.701933,
+    "evidence": 0.7,
+    "k": 160,
+    "predicted": 0.701933,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.700696,
+    "evidence": 0.7,
+    "k": 180,
+    "predicted": 0.700696,
+    "rho": 0.95
+   },
+   {
+    "actual": 0.70025,
+    "evidence": 0.7,
+    "k": 200,
+    "predicted": 0.70025,
+    "rho": 0.95
+   }
+  ]
+ },
+ "what_dominates_N_star": {
+  "margin_term_M_times_Tstar_minus_ef": 1.0,
+  "mass_term_S0_times_T0_minus_Tstar": 118.82,
+  "statement": "the accumulated mass term is two orders of magnitude larger than the evidence-margin term, so the escalation delay is set by how much agreement the calm period banked, not by how bad the fault is. Halving the concentration cap nearly halves the delay; doubling the threshold margin barely moves it."
+ },
+ "why_e_f_is_0_70": "a fault that destroys only the physics residual removes weight w_phys = 0.30 of a unit weight sum, so evidence cannot fall below 0.70 however bad the residual is. The nav_caution threshold is 0.75, leaving a margin of 0.05."
+}

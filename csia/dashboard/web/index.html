@@ -4,51 +4,199 @@
 <meta charset="utf-8">
 <title>CSIA Trust Layer — live dashboard</title>
 <style>
+  /* CSIA — Tactical C2 / HUD console. Near-monochrome by intent: white/grey
+     hairline chrome on pure black; interactive state reads through BRIGHTNESS,
+     not a brand hue. Saturated color is reserved STRICTLY for trust status
+     (green/amber/red) so color always means state, never decoration. */
   :root {
-    --bg: #0d1117; --panel: #161b22; --edge: #30363d; --text: #e6edf3;
-    --dim: #8b949e; --accent: #58a6ff; --warn: #f0883e;
+    /* Pure neutral black — NO blue cast. Greys are true greys (R=G=B). */
+    --bg: #000000; --ink: #000000;
+    --line: rgba(255,255,255,0.11);    /* hairline chrome (neutral white) */
+    --line-hi: rgba(255,255,255,0.44);  /* corner brackets / active edges */
+    --text: #ECECEE; --hot: #FFFFFF;    /* bright = active/emphasis */
+    --dim: #8C8C90; --faint: #4A4A4E;
+    --good: #46D08A; --warn: #FFB020; --crit: #FF4D4D;
+    --scan: #46D08A;                    /* futuristic accent = status green */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 13px/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
-  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px;
-           border-bottom: 1px solid var(--edge); flex-wrap: wrap; }
-  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
-  header h1 span { color: var(--dim); font-weight: 400; }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tabs button { background: var(--panel); color: var(--text);
-                 border: 1px solid var(--edge); border-radius: 6px;
-                 padding: 5px 10px; cursor: pointer; font-size: 12px; }
-  .tabs button.active { border-color: var(--accent); color: var(--accent); }
-  .controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  .controls button { background: var(--panel); color: var(--text);
-                     border: 1px solid var(--edge); border-radius: 6px;
-                     padding: 5px 12px; cursor: pointer; }
-  #time { font-variant-numeric: tabular-nums; color: var(--accent); min-width: 66px; }
-  #scrub { width: 220px; }
-  .banner { background: #3d1d00; color: var(--warn); text-align: center;
-            padding: 4px 8px; font-size: 11.5px; letter-spacing: .04em; }
-  main { display: grid; grid-template-columns: minmax(380px, 44%) 1fr;
-         gap: 10px; padding: 10px 16px; }
-  .panel { background: var(--panel); border: 1px solid var(--edge);
-           border-radius: 8px; padding: 8px 10px; }
-  .panel h2 { font-size: 11.5px; margin: 0 0 6px; color: var(--dim);
-              text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-  canvas { width: 100%; display: block; }
-  #callout { font-size: 14px; padding: 8px 2px 2px; min-height: 24px; }
-  #callout b { color: var(--warn); }
-  .col { display: flex; flex-direction: column; gap: 10px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px;
-            color: var(--dim); padding-top: 4px; }
-  .legend i { display: inline-block; width: 10px; height: 10px;
-              border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-  footer { color: var(--dim); font-size: 11px; padding: 4px 16px 14px; }
+  body { margin: 0; color: var(--text);
+         font: 12px/1.5 var(--mono); letter-spacing: .01em;
+         -webkit-font-smoothing: antialiased; background-color: #000;
+         background:
+           linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px) 0 0 / 100% 34px,
+           linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px) 0 0 / 34px 100%,
+           radial-gradient(1200px 620px at 50% -16%, #0E0E10 0%, #000000 72%); }
+
+  /* classification / caution strip — text kept verbatim for honesty */
+  .banner { display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #0A0704; color: var(--warn);
+            border-bottom: 1px solid rgba(255,176,32,0.28);
+            padding: 4px 8px; font: 700 10px/1 var(--mono);
+            letter-spacing: .26em; text-transform: uppercase; }
+  .banner::before, .banner::after { content: "// CAUTION //"; color: rgba(255,176,32,0.55);
+            letter-spacing: .18em; }
+
+  /* command strip */
+  header { display: flex; align-items: center; gap: 12px 18px; padding: 10px 16px;
+           background: linear-gradient(#070B11, var(--bg));
+           border-bottom: 1px solid var(--line-hi); flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .mark { width: 15px; height: 15px; flex: none; position: relative;
+                 border: 1px solid var(--hot); }
+  .brand .mark::before { content: ""; position: absolute; inset: 3px;
+                 background: var(--good); box-shadow: 0 0 8px var(--good); }
+  header h1 { font: 700 13px/1 var(--mono); margin: 0; letter-spacing: .1em;
+              text-transform: uppercase; color: var(--hot); }
+  header h1 span { color: var(--dim); font-weight: 400; letter-spacing: .06em; }
+
+  .tabs { display: flex; gap: 0; flex-wrap: wrap;
+          border: 1px solid var(--line); }
+  .tabs button { background: transparent; color: var(--dim);
+                 border: 0; border-right: 1px solid var(--line);
+                 padding: 6px 11px; cursor: pointer; text-transform: uppercase;
+                 font: 500 10.5px/1 var(--mono); letter-spacing: .1em;
+                 transition: background .12s, color .12s; }
+  .tabs button:last-child { border-right: 0; }
+  .tabs button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .tabs button.active { color: var(--ink); background: var(--hot); font-weight: 700; }
+
+  .controls { display: flex; align-items: center; gap: 7px; margin-left: auto;
+              border: 1px solid var(--line); padding: 4px 7px; }
+  .controls button, .controls select {
+      background: #0A0F16; color: var(--text); border: 1px solid var(--line);
+      padding: 5px 10px; cursor: pointer; text-transform: uppercase;
+      font: 600 11px var(--mono); letter-spacing: .08em; }
+  .controls button:hover, .controls select:hover { border-color: var(--line-hi);
+      color: var(--hot); }
+  #time { color: var(--hot); font-weight: 700; min-width: 66px; text-align: right;
+          font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+  #scrub { width: 190px; accent-color: var(--hot); }
+
+  /* annunciator — live posture from the worst Trust Coefficient at the cursor */
+  .annun { display: flex; align-items: center; gap: 8px; padding-left: 2px; }
+  .annun .lab { font: 700 9px/1 var(--mono); letter-spacing: .22em;
+                color: var(--faint); text-transform: uppercase; }
+  #annun { font: 700 11px/1 var(--mono); letter-spacing: .18em; padding: 5px 11px;
+           text-transform: uppercase; border: 1px solid; position: relative; }
+  #annun::before { content: "●"; margin-right: 7px; font-size: 8px; vertical-align: 1px; }
+  #annun[data-level="NOMINAL"]  { color: var(--good); border-color: rgba(70,208,138,0.5);
+      background: rgba(70,208,138,0.07); }
+  #annun[data-level="CAUTION"]  { color: var(--warn); border-color: rgba(255,176,32,0.6);
+      background: rgba(255,176,32,0.09); }
+  #annun[data-level="CRITICAL"] { color: var(--crit); border-color: var(--crit);
+      background: rgba(255,77,77,0.12); animation: blink 1s steps(2,end) infinite; }
+  @keyframes blink { 50% { opacity: .4; } }
+  #annunVal { font: 700 12px var(--mono); font-variant-numeric: tabular-nums;
+              color: var(--text); letter-spacing: .04em; }
+
+  /* minmax(0, …) + min-width:0 below stop a canvas's (Retina-doubled)
+     intrinsic width from inflating its grid/flex track — the "screen keeps
+     getting larger, graphs mis-scaled" bug on devicePixelRatio>1 displays. */
+  main { display: grid; grid-template-columns: minmax(380px, 43%) minmax(0, 1fr);
+         gap: 14px; padding: 14px 16px 6px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .col:first-child { align-self: start; }
+
+  /* HUD panel: hairline frame + four amber-white corner brackets */
+  .panel { position: relative; padding: 12px 14px 13px; min-width: 0;
+           border: 1px solid var(--line); background: rgba(255,255,255,0.008);
+           --al: 13px;
+           background-image:
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi)),
+             linear-gradient(var(--line-hi),var(--line-hi)), linear-gradient(var(--line-hi),var(--line-hi));
+           background-repeat: no-repeat;
+           background-size: var(--al) 1px, 1px var(--al), var(--al) 1px, 1px var(--al),
+                            var(--al) 1px, 1px var(--al), var(--al) 1px, 1px var(--al);
+           background-position: left top, left top, right top, right top,
+                                left bottom, left bottom, right bottom, right bottom; }
+  .panel h2 { display: flex; align-items: center; gap: 8px;
+              font: 700 10px/1.3 var(--mono); margin: 0 0 10px; color: var(--text);
+              text-transform: uppercase; letter-spacing: .14em; }
+  .panel h2::before { content: "▚"; color: var(--dim); font-size: 10px; flex: none; }
+  .panel h2 .code { margin-left: auto; color: var(--faint); font-weight: 500;
+                    letter-spacing: .1em; }
+  /* max-width:100% is a hard cap so a canvas can never exceed its container,
+     regardless of its (device-pixel) backing-store width attribute. */
+  canvas { width: 100%; max-width: 100%; display: block; }
+
+  #callout { font: 12px/1.6 var(--mono); padding: 11px 2px 2px; min-height: 24px;
+             color: var(--dim); font-variant-numeric: tabular-nums;
+             text-transform: uppercase; letter-spacing: .04em; }
+  #callout b { color: var(--hot); font-weight: 700; letter-spacing: .1em; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 5px 7px; padding-top: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px;
+                 font: 500 10px var(--mono); color: var(--dim); text-transform: uppercase;
+                 letter-spacing: .06em; border: 1px solid var(--line); padding: 2px 7px 2px 6px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; flex: none; }
+
+  /* --- Autonomous Remediation panel: the failsafe RESPONSE loop --------- */
+  /* the level badge in the panel header reuses the annunciator color scale */
+  #remedLevel[data-level="NORMAL"]   { color: var(--good); }
+  #remedLevel[data-level="CAUTION"]  { color: var(--warn); }
+  #remedLevel[data-level="CRITICAL"] { color: var(--crit); }
+  #remedLevel[data-level="EMERGENCY"]{ color: var(--crit); animation: blink 1s steps(2,end) infinite; }
+  /* SCAN -> ANALYZE -> FIX -> STABILIZE recovery loop */
+  .remed-loop { display: flex; align-items: center; gap: 4px; margin: 2px 0 9px; }
+  .phase { flex: 1; display: flex; align-items: center; justify-content: center;
+           gap: 6px; padding: 6px 4px; border: 1px solid var(--line);
+           font: 600 9.5px var(--mono); letter-spacing: .1em; color: var(--faint);
+           text-transform: uppercase; transition: color .15s, border-color .15s,
+           background .15s; }
+  .phase .ph-dot { width: 6px; height: 6px; flex: none; border-radius: 50%;
+                   background: var(--faint); transition: background .15s, box-shadow .15s; }
+  .phase.active { color: var(--text); border-color: var(--line-hi);
+                  background: rgba(255,255,255,0.04); }
+  .phase.active .ph-dot { background: var(--accent, var(--good));
+                          box-shadow: 0 0 7px var(--accent, var(--good)); }
+  .phase-arrow { flex: none; color: var(--faint); font-size: 11px; }
+  .remed-posture { font: 500 10.5px var(--mono); letter-spacing: .04em;
+                   color: var(--dim); text-transform: uppercase; padding: 0 1px 8px;
+                   border-bottom: 1px solid var(--line); }
+  .remed-log { display: flex; flex-direction: column; gap: 0; margin-top: 8px;
+               height: 118px; overflow-y: auto; }  /* fixed -> stable panel height */
+  .remed-log:empty::before { content: "no remediation actions at this time";
+               color: var(--faint); font: 500 10px var(--mono);
+               text-transform: uppercase; letter-spacing: .06em; }
+  .log-row { display: grid; grid-template-columns: 52px auto; gap: 2px 10px;
+             padding: 5px 2px 5px 9px; border-left: 2px solid var(--faint);
+             align-items: baseline; }
+  .log-row + .log-row { border-top: 1px solid var(--line); }
+  .log-row.lvl-1 { border-left-color: var(--warn); }
+  .log-row.lvl-2 { border-left-color: var(--crit); }
+  .log-row.lvl-3 { border-left-color: var(--crit); }
+  .log-row.lvl-0 { border-left-color: var(--good); }
+  .log-t { font: 700 10.5px var(--mono); color: var(--hot);
+           font-variant-numeric: tabular-nums; }
+  .log-act { font: 700 10.5px var(--mono); letter-spacing: .06em;
+             text-transform: uppercase; color: var(--text); }
+  .log-why { grid-column: 2; font: 400 9.5px var(--mono); color: var(--dim);
+             letter-spacing: .02em; }
+
+  footer { color: var(--faint); font: 10px/1.7 var(--mono); padding: 10px 16px 16px;
+           max-width: 120ch; text-transform: uppercase; letter-spacing: .05em; }
+
+  :focus-visible { outline: 1px solid var(--hot); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
-<div class="banner">SIMULATION / RESEARCH PROTOTYPE — SYNTHETIC DATA — NOT FLIGHT SOFTWARE</div>
+<div class="banner">Simulation / Research Prototype — Synthetic Data — Not Flight Software</div>
 <header>
-  <h1>CSIA Trust Layer <span>· SWORT LLC · Dynamic Trust Graph replay</span></h1>
+  <div class="brand">
+    <i class="mark"></i>
+    <h1>CSIA<span>&nbsp;// CROSS-SENSOR INTEGRITY · SWORT</span></h1>
+  </div>
+  <div class="annun">
+    <span class="lab">SYS</span>
+    <span id="annun" data-level="NOMINAL">NOMINAL</span>
+    <span class="lab">MIN&nbsp;T</span>
+    <span id="annunVal">1.00</span>
+  </div>
   <div class="tabs" id="tabs"></div>
   <div class="controls">
     <button id="play">▶ Play</button>
@@ -60,30 +208,52 @@
 <main>
   <div class="col">
     <div class="panel">
-      <h2>Dynamic Trust Graph — node fill = Trust Coefficient, edge = gated consistency</h2>
+      <h2>Node Integrity Matrix — Dynamic Trust Graph<span class="code">08 NODES · 11 EDGES</span></h2>
       <canvas id="graph" height="430"></canvas>
       <div id="callout">loading…</div>
     </div>
     <div class="panel">
-      <h2>Causal diagnosis — P(cause | consistency signature)</h2>
+      <h2>Fault Attribution — Bayes Posterior<span class="code">08 HYPOTH</span></h2>
       <canvas id="diag" height="170"></canvas>
       <div class="legend" id="diagLegend"></div>
+    </div>
+    <div class="panel" id="remedPanel">
+      <h2>Autonomous Remediation — Failsafe Response<span class="code" id="remedLevel" data-level="NORMAL">NORMAL</span></h2>
+      <div class="remed-loop" id="remedLoop">
+        <div class="phase" data-phase="scan"><span class="ph-dot"></span>Scan</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="analyze"><span class="ph-dot"></span>Analyze</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="fix"><span class="ph-dot"></span>Fix</div>
+        <div class="phase-arrow">→</div>
+        <div class="phase" data-phase="stabilize"><span class="ph-dot"></span>Stabilize</div>
+      </div>
+      <div class="remed-posture" id="remedPosture">monitoring 8 nodes · all nominal</div>
+      <div class="remed-log" id="remedLog"></div>
     </div>
   </div>
   <div class="col">
     <div class="panel">
-      <h2>Trust Coefficients (click a chart to scrub, click a node to inspect)</h2>
-      <canvas id="trust" height="240"></canvas>
+      <h2>Trust Coefficients — Per Sensor<span class="code">SCRUB / SELECT</span></h2>
+      <canvas id="trust" height="350"></canvas>
       <div class="legend" id="trustLegend"></div>
     </div>
     <div class="panel">
-      <h2 id="compTitle">Evidence sub-scores</h2>
-      <canvas id="comp" height="170"></canvas>
+      <h2 id="compTitle">Evidence Decomposition</h2>
+      <canvas id="comp" height="239"></canvas>
       <div class="legend" id="compLegend"></div>
     </div>
     <div class="panel">
-      <h2>heading_course speed gate (COG constrains heading only in translation)</h2>
-      <canvas id="gate" height="110"></canvas>
+      <h2>Regime Gate — Heading × Course<span class="code">SPEED-GATED</span></h2>
+      <canvas id="gate" height="128"></canvas>
+    </div>
+    <div class="panel" id="velocityPanel" style="padding: 11px 14px; min-height: 66px; display: flex; flex-direction: column; justify-content: center;">
+      <h2 style="margin-bottom: 6px;">Ground Velocity<span class="code">REAL-TIME</span></h2>
+      <div id="velocityReadout" style="display: flex; align-items: baseline; gap: 8px;">
+        <span id="velocityValue" style="font: 700 32px var(--mono); letter-spacing: .04em; color: var(--hot); font-variant-numeric: tabular-nums;">0.0</span>
+        <span style="font: 500 12px var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .08em;">m/s</span>
+      </div>
+      <div id="velocityGate" style="font: 500 10px var(--mono); color: var(--faint); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em;">gate: off</div>
     </div>
   </div>
 </main>
@@ -102,11 +272,30 @@ window.addEventListener("error", ev => {
 // every canvas every frame — on a 120 Hz display "1x" ran ~5x too fast and
 // stuttered: the "play is bugged" bug.)
 const $ = id => document.getElementById(id);
-const SENSOR_COLORS = ["#58a6ff","#f78166","#56d364","#d2a8ff","#e3b341",
-                       "#ff7b72","#79c0ff","#f0883e"];
-const CAUSE_COLORS  = ["#3fb950","#ff7b72","#58a6ff","#79c0ff","#d2a8ff",
-                       "#e3b341","#f0883e","#8b949e"];
-const COMP_COLORS = { nbr:"#58a6ff", phys:"#ff7b72", temp:"#56d364", stat:"#e3b341" };
+// tactical series palette — legible tracks on pure black; cohesive, not
+// rainbow. Trust STATUS (nodes/annunciator) uses the green/amber/red scale;
+// these hues only identify which trace is which.
+const SENSOR_COLORS = ["#E4EAF0","#FF5C5C","#46D08A","#B98CE0","#FFB020",
+                       "#E07AA8","#5BC7DE","#F0913C"];
+const CAUSE_COLORS  = ["#46D08A","#FF5C5C","#E4EAF0","#5BC7DE","#B98CE0",
+                       "#FFB020","#F0913C","#6B7480"];
+const COMP_COLORS = { nbr:"#9DB4C6", phys:"#FF5C5C", temp:"#46D08A", stat:"#FFB020" };
+// Autonomous remediation: failsafe level -> loop phase + operator posture.
+// The failsafe RESPONSE (from the shipping FailsafePolicy) is what the
+// vehicle DOES about each fault — the recovery half of the loop.
+const FS_LEVELS  = ["NORMAL", "CAUTION", "CRITICAL", "EMERGENCY"];
+const FS_ACCENT  = ["#46D08A", "#FFB020", "#FF4D4D", "#FF4D4D"];
+const FS_PHASES  = { 0: ["scan"], 1: ["analyze", "fix"],
+                     2: ["analyze", "fix", "stabilize"], 3: ["stabilize"] };
+const FS_POSTURE = {
+  0: "monitoring 8 nodes · all nominal",
+  1: "degraded capability isolated · reconfiguring around it",
+  2: "critical fault · ending flight on our terms",
+  3: "attitude reference lost · autonomous controlled descent" };
+const INK = "#04060A", GRIDLINE = "rgba(226,232,240,0.08)",
+      AXIS = "#6B7480", CURSOR = "rgba(255,255,255,0.92)",
+      TICK = "rgba(226,232,240,0.4)",
+      MONO = "ui-monospace, Menlo, Consolas, monospace";
 
 let scenarios = [], data = null;
 let k = 0, kf = 0.0, playing = false, lastTs = null;
@@ -115,7 +304,7 @@ let liveMode = false, liveTimer = null;
 
 function trustColor(v) { // red -> yellow -> green
   v = Math.max(0, Math.min(1, v));
-  const stops = [[0,[214,57,57]], [0.5,[227,179,65]], [1,[63,185,80]]];
+  const stops = [[0,[255,77,77]], [0.5,[255,176,32]], [1,[70,208,138]]];
   let lo = stops[0], hi = stops[stops.length-1];
   for (let i = 0; i + 1 < stops.length; i++)
     if (v >= stops[i][0] && v <= stops[i+1][0]) { lo = stops[i]; hi = stops[i+1]; }
@@ -130,6 +319,11 @@ class TimeChart {
     this.opts = opts;
     this.pad = { l: 30, r: 6, t: 6, b: 16 };
     this.series = [];
+    // Logical (CSS-px) height captured ONCE from the initial HTML attribute.
+    // render() overwrites cv.height with device pixels (h*dpr); on a Retina
+    // display re-reading getAttribute('height') would feed that doubled value
+    // back in and grow the canvas every frame ("screen keeps getting larger").
+    this.baseH = parseInt(this.cv.getAttribute("height")) || 200;
     this.cv.addEventListener("pointerdown", ev => {
       if (!data) return;
       this.cv.setPointerCapture(ev.pointerId);
@@ -147,10 +341,18 @@ class TimeChart {
     return this.pad.l
       + (data.t[i] / data.t[data.t.length - 1]) * (this.w - this.pad.l - this.pad.r);
   }
+  xf(kf) {  // fractional-index x: the playhead glides BETWEEN samples so the
+    const n = data.t.length;             // cursor moves smoothly every frame,
+    const i = Math.max(0, Math.min(n - 1, Math.floor(kf)));  // not in 25 Hz
+    const j = Math.min(n - 1, i + 1);    // tick-sized jumps
+    const t = data.t[i] + (data.t[j] - data.t[i]) * (kf - i);
+    return this.pad.l
+      + (t / data.t[n - 1]) * (this.w - this.pad.l - this.pad.r);
+  }
   render() {  // heavy path: offscreen layer with axes + bands + all series
     const dpr = window.devicePixelRatio || 1;
     this.w = this.cv.clientWidth;
-    this.h = parseInt(this.cv.getAttribute("height"));
+    this.h = this.baseH;   // logical height (NOT the device-px attribute we set)
     if (this.w < 20 || !data) {
       // panel not laid out yet (hidden pane / mid-reflow / zero width):
       // rendering now would create a 0x0 layer and drawImage would THROW,
@@ -169,20 +371,33 @@ class TimeChart {
     const tEnd = data.t[data.t.length - 1];
     const ymin = this.opts.ymin ?? 0, ymax = this.opts.ymax ?? 1;
     const y = v => pad.t + (1 - (v - ymin) / (ymax - ymin)) * (h - pad.t - pad.b);
-    g.fillStyle = "rgba(248,81,73,0.10)";
+    // fault window: red wash with bright vertical rails (HUD threat band)
     for (const f of data.faults) {
       const x0 = pad.l + (f.start / tEnd) * (w - pad.l - pad.r);
       const x1 = pad.l + ((f.start + f.duration) / tEnd) * (w - pad.l - pad.r);
+      g.fillStyle = "rgba(255,77,77,0.08)";
       g.fillRect(x0, pad.t, x1 - x0, h - pad.t - pad.b);
+      g.fillStyle = "rgba(255,77,77,0.45)";
+      g.fillRect(x0, pad.t, 1, h - pad.t - pad.b);
+      g.fillRect(x1 - 1, pad.t, 1, h - pad.t - pad.b);
     }
-    g.strokeStyle = "#30363d"; g.fillStyle = "#8b949e"; g.font = "10px sans-serif";
+    // grid lines + horizontal-axis value ticks
+    g.fillStyle = AXIS; g.font = "9px " + MONO;
+    const xR = w - pad.r, yB = h - pad.b;
     for (const gv of this.opts.grid ?? [0, 0.5, 1]) {
-      g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(w - pad.r, y(gv)); g.stroke();
-      g.fillText(gv.toFixed(1), 4, y(gv) + 3);
+      g.strokeStyle = GRIDLINE; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(pad.l, y(gv)); g.lineTo(xR, y(gv)); g.stroke();
+      g.strokeStyle = TICK;   // brighter axis tick stub
+      g.beginPath(); g.moveTo(pad.l - 3, y(gv)); g.lineTo(pad.l, y(gv)); g.stroke();
+      g.fillText(gv.toFixed(1), 3, y(gv) + 3);
     }
-    for (let s = 0; s <= tEnd; s += 10) {
+    // time ruler: major tick + label every 10 s, minor tick every 5 s
+    g.strokeStyle = TICK; g.lineWidth = 1;
+    for (let s = 0; s <= tEnd; s += 5) {
       const xx = pad.l + (s / tEnd) * (w - pad.l - pad.r);
-      g.fillText(s + "s", xx - 6, h - 4);
+      const major = s % 10 === 0;
+      g.beginPath(); g.moveTo(xx, yB); g.lineTo(xx, yB + (major ? 4 : 2)); g.stroke();
+      if (major) g.fillText(s.toString().padStart(2, "0"), xx - 6, h - 2);
     }
     if (this.opts.stacked) {
       let base = new Float64Array(data.t.length);
@@ -214,12 +429,17 @@ class TimeChart {
     g.clearRect(0, 0, this.cv.width, this.cv.height);
     g.drawImage(this.layer, 0, 0);
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    g.strokeStyle = "#e6edf3"; g.lineWidth = 1;
+    const cx = this.xf(kf);   // fractional cursor -> smooth glide during play
+    g.strokeStyle = CURSOR; g.lineWidth = 1;
     g.beginPath();
-    g.moveTo(this.x(k), this.pad.t);
-    g.lineTo(this.x(k), this.h - this.pad.b);
+    g.moveTo(cx, this.pad.t);
+    g.lineTo(cx, this.h - this.pad.b);
     g.stroke();
   }
+}
+
+function drawCursors() {  // per-FRAME light path: glide the playhead only
+  for (const c of Object.values(charts)) c.draw();
 }
 
 const charts = {
@@ -230,11 +450,15 @@ const charts = {
 };
 
 const NODE_R = 26;
-let nodePix = {}, graphGeom = null;
+let nodePix = {}, nodePrev = {}, graphGeom = null, hoveredEdge = null;
+// Logical (CSS-px) height captured ONCE — same Retina self-doubling guard as
+// TimeChart.baseH: cv.height is later set to h*dpr, so re-reading the attribute
+// would compound every render on devicePixelRatio>1 displays.
+const GRAPH_BASE_H = parseInt($("graph").getAttribute("height")) || 430;
 function sizeGraph() {
   const cv = $("graph");
   const dpr = window.devicePixelRatio || 1;
-  const w = cv.clientWidth, h = parseInt(cv.getAttribute("height"));
+  const w = cv.clientWidth, h = GRAPH_BASE_H;
   if (w < 20) { graphGeom = null; return; }
   cv.width = w * dpr; cv.height = h * dpr; cv.style.height = h + "px";
   graphGeom = { w, h, dpr };
@@ -243,6 +467,7 @@ function sizeGraph() {
   const ys = Object.values(data.layout).map(p => p[1]);
   const [x0, x1] = [Math.min(...xs), Math.max(...xs)];
   const [y0, y1] = [Math.min(...ys), Math.max(...ys)];
+  nodePrev = nodePix; // save previous for smooth transitions
   nodePix = {};
   for (const [n, p] of Object.entries(data.layout))
     nodePix[n] = [pad + (p[0] - x0) / (x1 - x0) * (w - 2 * pad),
@@ -254,27 +479,57 @@ function drawGraph() {
   const g = cv.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
+  // edges: render with glow on hovered edges
   for (const e of data.edges) {
     const [ax, ay] = nodePix[e.a], [bx, by] = nodePix[e.b];
-    g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by);
-    if (e.gate[k] < 0.05) {
-      g.strokeStyle = "rgba(139,148,158,0.3)"; g.lineWidth = 1; g.setLineDash([4, 5]);
-    } else {
-      g.strokeStyle = trustColor(e.c[k]); g.lineWidth = 1 + 3.4 * e.gate[k]; g.setLineDash([]);
+    const isHovered = hoveredEdge === `${e.a}-${e.b}` || hoveredEdge === `${e.b}-${e.a}`;
+    const inactive = e.gate[k] < 0.05;
+    const col = inactive ? "rgba(120,140,170,0.22)" : trustColor(e.c[k]);
+    const wid = 1 + (inactive ? 0 : 3.4 * e.gate[k]);
+    // glow pass (on hover only, semi-transparent large stroke)
+    if (isHovered) {
+      g.strokeStyle = col.replace("rgb", "rgba").replace(")", ", 0.35)");
+      g.lineWidth = wid + 6; g.lineCap = "round"; g.lineJoin = "round";
+      g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by); g.stroke();
     }
-    g.stroke(); g.setLineDash([]);
+    // main edge stroke
+    g.strokeStyle = col; g.lineWidth = wid; g.lineCap = "round"; g.lineJoin = "round";
+    if (inactive) g.setLineDash([3, 5]);
+    g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by); g.stroke();
+    g.setLineDash([]);
   }
+  // nodes with smooth transitions + enhanced highlight
   for (const n of data.sensors) {
-    const [xx, yy] = nodePix[n], tr = data.trust[n][k];
+    const curr = nodePix[n];
+    const prev = nodePrev[n] || curr;
+    const [xx, yy] = curr;
+    const tr = data.trust[n][k], col = trustColor(tr);
+    const sel = n === selected;
+    // selected node: multi-ring reticle with glow
+    if (sel) {
+      g.shadowColor = "#FFFFFF"; g.shadowBlur = 8; g.shadowOffsetX = 0; g.shadowOffsetY = 0;
+      g.beginPath(); g.arc(xx, yy, NODE_R + 5, 0, 7);
+      g.strokeStyle = "#FFFFFF"; g.lineWidth = 2; g.stroke();
+      g.shadowColor = "transparent";
+      g.setLineDash([2, 3]);
+      g.beginPath(); g.arc(xx, yy, NODE_R + 11, 0, 7);
+      g.strokeStyle = "rgba(255,255,255,0.35)"; g.lineWidth = 1; g.stroke();
+      g.setLineDash([]);
+    }
+    // main node: trust-colored fill + subtle inner rim
     g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);
-    g.fillStyle = trustColor(tr); g.fill();
-    g.lineWidth = n === selected ? 3 : 1.2;
-    g.strokeStyle = n === selected ? "#e6edf3" : "#0d1117"; g.stroke();
-    g.fillStyle = "#0d1117"; g.font = "bold 10px sans-serif"; g.textAlign = "center";
+    g.fillStyle = col; g.fill();
+    g.lineWidth = 2.5; g.strokeStyle = INK; g.stroke();
+    g.beginPath(); g.arc(xx, yy, NODE_R, 0, 7);
+    g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,0.2)"; g.stroke();
+    // text: sensor ID + trust coefficient
+    g.fillStyle = INK; g.textAlign = "center";
+    g.font = "600 9.5px " + MONO;
     g.fillText(n, xx, yy - 2);
+    g.font = "700 11px " + MONO;
     g.fillText(tr.toFixed(2), xx, yy + 11);
   }
-  g.textAlign = "left";
+  g.textAlign = "left"; g.shadowColor = "transparent";
 }
 $("graph").addEventListener("click", ev => {
   if (!data) return;
@@ -283,10 +538,32 @@ $("graph").addEventListener("click", ev => {
       selected = n;
       charts.comp.setSeries(compSeries());
       $("compTitle").textContent =
-        `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+        `Evidence Decomposition — ${selected.toUpperCase()} · NBR / PHYS / TEMP / STAT`;
       drawDynamic();
       return;
     }
+});
+$("graph").addEventListener("mousemove", ev => {
+  if (!data) { hoveredEdge = null; return; }
+  let prev = hoveredEdge;
+  hoveredEdge = null;
+  // check if pointer is near any edge
+  for (const e of data.edges) {
+    const [ax, ay] = nodePix[e.a], [bx, by] = nodePix[e.b];
+    const px = ev.offsetX, py = ev.offsetY;
+    const dx = bx - ax, dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+    const cx = ax + t * dx, cy = ay + t * dy;
+    const dist = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+    if (dist < 8) {
+      hoveredEdge = `${e.a}-${e.b}`;
+      break;
+    }
+  }
+  if (hoveredEdge !== prev && graphGeom) drawGraph();
+});
+$("graph").addEventListener("mouseleave", () => {
+  if (hoveredEdge !== null && graphGeom) { hoveredEdge = null; drawGraph(); }
 });
 
 function compSeries() {
@@ -297,6 +574,33 @@ function compSeries() {
 function legend(el, items) {
   el.innerHTML = items.map(([label, color]) =>
     `<span><i style="background:${color}"></i>${label}</span>`).join("");
+}
+
+function renderRemediation(k) {  // the failsafe RESPONSE at the cursor
+  const fs = data.failsafe;
+  const panel = $("remedPanel");
+  if (!fs) { panel.style.display = "none"; return; }  // pre-failsafe replay JSON
+  panel.style.display = "";
+  const lvl = fs.level[k] || 0;
+  const badge = $("remedLevel");
+  badge.textContent = FS_LEVELS[lvl]; badge.dataset.level = FS_LEVELS[lvl];
+  const active = FS_PHASES[lvl], accent = FS_ACCENT[lvl];
+  for (const ph of $("remedLoop").querySelectorAll(".phase")) {
+    ph.classList.toggle("active", active.includes(ph.dataset.phase));
+    ph.style.setProperty("--accent", accent);
+  }
+  $("remedPosture").textContent = FS_POSTURE[lvl];
+  // action log: every remediation action issued up to the cursor, newest first
+  const rows = [];
+  for (const e of fs.events) {
+    if (e.k > k) break;
+    for (const a of e.actions)
+      rows.push(`<div class="log-row lvl-${e.level}">`
+        + `<span class="log-t">t=${e.t.toFixed(1)}</span>`
+        + `<span class="log-act">${a.name}</span>`
+        + `<span class="log-why">${a.reason}</span></div>`);
+  }
+  $("remedLog").innerHTML = rows.reverse().join("");
 }
 
 function drawDynamic() {  // everything that changes with the cursor
@@ -311,6 +615,21 @@ function drawDynamic() {  // everything that changes with the cursor
     .map(([c, p]) => `${(100 * p).toFixed(0)}% ${c}`).join(" · ");
   $("callout").innerHTML = `<b>diagnosis:</b> ${post}` +
     ` &nbsp;·&nbsp; ${selected} trust ${data.trust[selected][k].toFixed(3)}`;
+  // velocity readout (vh = horizontal ground speed, hypot(vx, vy))
+  const vel = (data.aux.vh ? data.aux.vh[k] : 0) || 0;
+  $("velocityValue").textContent = Math.abs(vel).toFixed(1);
+  const gateActive = data.aux.speed_gate[k] > 0.5;
+  $("velocityGate").textContent = "gate: " + (gateActive ? "ACTIVE" : "off");
+  $("velocityGate").style.color = gateActive ? "var(--good)" : "var(--faint)";
+  renderRemediation(k);
+  // annunciator: worst sensor trust at this instant -> operator posture.
+  // A summary readout of true state (min over the 8 Trust Coefficients),
+  // not the full per-class failsafe machine — labeled MIN T accordingly.
+  let mn = 1.0;
+  for (const n of data.sensors) mn = Math.min(mn, data.trust[n][k]);
+  const lvl = mn < 0.60 ? "CRITICAL" : mn < 0.75 ? "CAUTION" : "NOMINAL";
+  const a = $("annun"); a.textContent = lvl; a.dataset.level = lvl;
+  $("annunVal").textContent = mn.toFixed(2);
 }
 
 function setCursor(newK) {
@@ -339,7 +658,11 @@ function advance(now) {  // wall-clock playback: rate-correct on any display
   kf += dt * parseFloat($("speed").value) / dtData;
   if (kf >= data.t.length) kf = 0;  // loop the replay
   const nk = Math.floor(kf);
+  // Heavy data update (graph, readouts, remediation) only when the 25 Hz tick
+  // actually changes; glide the playhead EVERY frame so motion is smooth
+  // independent of the data rate.
   if (nk !== k) { k = nk; drawDynamic(); }
+  else drawCursors();
 }
 
 let lastRaf = 0;
@@ -373,7 +696,7 @@ async function load(name) {
   legend($("diagLegend"), data.diagnosis.causes.map((c, i) => [c, CAUSE_COLORS[i]]));
   legend($("compLegend"), Object.entries(COMP_COLORS).map(([n, c]) => [`C_${n}`, c]));
   $("compTitle").textContent =
-    `Evidence sub-scores — ${selected} (nbr / phys / temp / stat)`;
+    `Evidence Decomposition — ${selected.toUpperCase()} · NBR / PHYS / TEMP / STAT`;
   $("foot").textContent = `${data.title} — trust-core latency mean ` +
     `${data.latency_us.mean} µs / p95 ${data.latency_us.p95} µs per tick ` +
     `(desktop Python; not embedded timing). Reference HW context: STM32H743 FC, ` +

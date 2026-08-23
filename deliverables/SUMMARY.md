@@ -114,7 +114,7 @@ unmodified-core check, detection-floor bracket).
 python -m pytest tests/scenarios/test_seeker_scenarios.py   # scenario tests
 python tools/interceptor_montecarlo.py     # -> montecarlo_results.{md,json}
 python tools/interceptor_plots.py          # -> the 3 PNG plots
-python -m pytest                           # full suite, 48 tests
+python -m pytest                           # full suite
 ```
 
 All runs are deterministic (fixed per-scenario seed bases: ir_decoy 1000+i,

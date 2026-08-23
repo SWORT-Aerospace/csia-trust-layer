@@ -1,0 +1,259 @@
+{
+ "certificate_diff": {
+  "diff_by_min_channels": {
+   "0": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "1": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "2": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "3": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "4": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "5": {
+    "critical_exposed_after": 27,
+    "critical_exposed_before": 27,
+    "exposed_after": 28,
+    "exposed_before": 28,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "6": {
+    "critical_exposed_after": 22,
+    "critical_exposed_before": 22,
+    "exposed_after": 23,
+    "exposed_before": 23,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "7": {
+    "critical_exposed_after": 11,
+    "critical_exposed_before": 11,
+    "exposed_after": 12,
+    "exposed_before": 12,
+    "fixed": [],
+    "newly_broken": []
+   },
+   "8": {
+    "critical_exposed_after": 1,
+    "critical_exposed_before": 2,
+    "exposed_after": 1,
+    "exposed_before": 2,
+    "fixed": [
+     "imu0_bias_drift+imu1_bias_drift"
+    ],
+    "newly_broken": []
+   }
+  },
+  "guaranteed_after": 0,
+  "guaranteed_before": 0,
+  "kappa_max_by_min_channels_after": {
+   "0": 1.0,
+   "1": 1.0,
+   "2": 1.0,
+   "3": 0.857143,
+   "4": 0.857143,
+   "5": 0.714286,
+   "6": 0.571429,
+   "7": 0.428571,
+   "8": 0.142857
+  },
+  "kappa_max_by_min_channels_before": {
+   "0": 1.0,
+   "1": 1.0,
+   "2": 1.0,
+   "3": 0.857143,
+   "4": 0.857143,
+   "5": 0.714286,
+   "6": 0.571429,
+   "7": 0.428571,
+   "8": 0.285714
+  },
+  "n_exposed_pairs_after": 28,
+  "n_exposed_pairs_before": 28,
+  "n_reachable_configurations": 1232,
+  "no_new_collisions": true,
+  "pairs_fixed": [],
+  "pairs_newly_broken": [],
+  "whole_lattice_diff_is_degenerate": "the union over ALL configurations includes the zero-channel case, where every pair merges; use diff_by_min_channels"
+ },
+ "criticality_effect": {
+  "cwe_gate_after": 0.037,
+  "cwe_gate_before": 0.0741,
+  "ire_after": 0.037,
+  "ire_before": 0.0741,
+  "irreducible_pairs_after": [
+   "gps_fault+nominal"
+  ],
+  "irreducible_pairs_before": [
+   "gps_fault+nominal",
+   "imu0_bias_drift+imu1_bias_drift"
+  ]
+ },
+ "default": "OFF \u2014 production behaviour unchanged; asserted by tests/test_wp_c2_repair_flag.py",
+ "flag": "CSIA_WP_C2_IMU_REPAIR",
+ "purpose": "execute the free repair behind a research flag and measure it, including the FULL certificate diff",
+ "repair": {
+  "channels_spanned": [
+   "imu0",
+   "mag"
+  ],
+  "feature": "attitude_gravity_mag",
+  "gated_by": [],
+  "into_hypothesis": "imu0_bias_drift",
+  "new_hardware": false,
+  "physical_justification": "attitude_gravity_mag compares mag heading against imu0-integrated yaw. An imu0 bias corrupts that comparison; an imu1 bias does not. The asymmetry is what breaks the tie."
+ },
+ "scenario_deltas": {
+  "gps_spoof": {
+   "d_detect_latency_s": 0.0,
+   "d_min_trust": 0.0,
+   "d_peak_posterior": 0.0,
+   "top_cause_changed": false,
+   "top_cause_still_correct": true
+  },
+  "imu0_bias_drift": {
+   "d_detect_latency_s": 0.0,
+   "d_min_trust": 0.0,
+   "d_peak_posterior": -0.0658,
+   "top_cause_changed": false,
+   "top_cause_still_correct": true
+  },
+  "mag_emi": {
+   "d_detect_latency_s": 0.0,
+   "d_min_trust": 0.0,
+   "d_peak_posterior": 0.0,
+   "top_cause_changed": false,
+   "top_cause_still_correct": true
+  },
+  "power_sag": {
+   "d_detect_latency_s": 0.0,
+   "d_min_trust": 0.0,
+   "d_peak_posterior": 0.0,
+   "top_cause_changed": false,
+   "top_cause_still_correct": true
+  },
+  "vibration_anomaly": {
+   "d_detect_latency_s": 0.0,
+   "d_min_trust": 0.0,
+   "d_peak_posterior": 0.0,
+   "top_cause_changed": false,
+   "top_cause_still_correct": true
+  }
+ },
+ "scenarios_after": {
+  "_clean_false_positives": {
+   "n_settled_ticks": 999,
+   "n_ticks_non_nominal": 0,
+   "non_nominal_leading_causes_after_20s": []
+  },
+  "gps_spoof": {
+   "detect_latency_s": 2.16,
+   "min_trust": 0.5905,
+   "peak_posterior_correct_cause": 0.8934,
+   "top_cause_at_peak": "gps_fault",
+   "top_cause_correct": true
+  },
+  "imu0_bias_drift": {
+   "detect_latency_s": 13.0,
+   "min_trust": 0.7657,
+   "peak_posterior_correct_cause": 0.9203,
+   "top_cause_at_peak": "imu0_bias_drift",
+   "top_cause_correct": true
+  },
+  "mag_emi": {
+   "detect_latency_s": 1.48,
+   "min_trust": 0.2764,
+   "peak_posterior_correct_cause": 1.0,
+   "top_cause_at_peak": "mag_interference",
+   "top_cause_correct": true
+  },
+  "power_sag": {
+   "detect_latency_s": 1.6,
+   "min_trust": 0.3991,
+   "peak_posterior_correct_cause": 0.9986,
+   "top_cause_at_peak": "power_fault",
+   "top_cause_correct": true
+  },
+  "vibration_anomaly": {
+   "detect_latency_s": 2.56,
+   "min_trust": 0.1658,
+   "peak_posterior_correct_cause": 1.0,
+   "top_cause_at_peak": "vibration_anomaly",
+   "top_cause_correct": true
+  }
+ },
+ "scenarios_before": {
+  "_clean_false_positives": {
+   "n_settled_ticks": 999,
+   "n_ticks_non_nominal": 0,
+   "non_nominal_leading_causes_after_20s": []
+  },
+  "gps_spoof": {
+   "detect_latency_s": 2.16,
+   "min_trust": 0.5905,
+   "peak_posterior_correct_cause": 0.8934,
+   "top_cause_at_peak": "gps_fault",
+   "top_cause_correct": true
+  },
+  "imu0_bias_drift": {
+   "detect_latency_s": 13.0,
+   "min_trust": 0.7657,
+   "peak_posterior_correct_cause": 0.9861,
+   "top_cause_at_peak": "imu0_bias_drift",
+   "top_cause_correct": true
+  },
+  "mag_emi": {
+   "detect_latency_s": 1.48,
+   "min_trust": 0.2764,
+   "peak_posterior_correct_cause": 1.0,
+   "top_cause_at_peak": "mag_interference",
+   "top_cause_correct": true
+  },
+  "power_sag": {
+   "detect_latency_s": 1.6,
+   "min_trust": 0.3991,
+   "peak_posterior_correct_cause": 0.9986,
+   "top_cause_at_peak": "power_fault",
+   "top_cause_correct": true
+  },
+  "vibration_anomaly": {
+   "detect_latency_s": 2.56,
+   "min_trust": 0.1658,
+   "peak_posterior_correct_cause": 1.0,
+   "top_cause_at_peak": "vibration_anomaly",
+   "top_cause_correct": true
+  }
+ }
+}

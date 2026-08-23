@@ -24,8 +24,8 @@ if available:
     _d = ctypes.POINTER(ctypes.c_double)
     _i = ctypes.POINTER(ctypes.c_int)
     _u = ctypes.POINTER(ctypes.c_ubyte)
-    _lib.csia_trust_step.restype = None
-    _lib.csia_diag_step.restype = None
+    _lib.csia_trust_step.restype = ctypes.c_int
+    _lib.csia_diag_step.restype = ctypes.c_int
 
 
 def _dp(a):
@@ -64,7 +64,7 @@ class NativeTrustState:
 
     def step(self):
         c = self.cfg
-        _lib.csia_trust_step(
+        rc = _lib.csia_trust_step(
             self.n, self.m, _ip(self.ea), _ip(self.eb),
             _dp(self.elam), _dp(self.egate),
             _dp(self.plam), _dp(self.pgate), _up(self.phas),
@@ -75,6 +75,9 @@ class NativeTrustState:
             ctypes.c_double(c.rho_max), ctypes.c_double(c.rho_min),
             _dp(self.alpha), _dp(self.beta), _dp(self.trust),
             _dp(self.out_trust), _dp(self.out_ev), _dp(self.out_comps))
+        if rc != 0:
+            raise ValueError(
+                f"csia_trust_step: n={self.n} exceeds CSIA_MAX_NODES (64)")
 
 
 class NativeDiagState:
@@ -90,10 +93,13 @@ class NativeDiagState:
         self.out = np.zeros(nc)
 
     def step(self):
-        _lib.csia_diag_step(
+        rc = _lib.csia_diag_step(
             self.nf, self.nc, _dp(self.c), _dp(self.gate), _up(self.low),
             _dp(self.log_prior), ctypes.c_double(self.alpha),
             ctypes.c_double(self.mult), ctypes.c_double(self.eps),
             _dp(self.smoothed), ctypes.byref(self.initialized),
             _dp(self.out))
+        if rc != 0:
+            raise ValueError(
+                f"csia_diag_step: nc={self.nc} exceeds CSIA_MAX_CAUSES (32)")
         return self.out

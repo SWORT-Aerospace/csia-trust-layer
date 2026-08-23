@@ -1,0 +1,2037 @@
+{
+ "arms": {
+  "degraded": "partial constellation loss plus receiver link corruption. Degradation rather than denial.",
+  "denial": "outright GNSS denial. The paper's arm-B condition. NOTE: this switches the fix flag off directly, so a high closure rate here is close to tautological. It is included to confirm the mechanism end to end on a real autopilot, not as evidence about how often real faults close the gate.",
+  "glitch": "a position glitch of roughly 55 m with the fix RETAINED. This is the fault class the spec's section 7 says SITL denial cannot represent, and it is the arm that actually tests whether a GNSS fault closes the gate.",
+  "nominal": "healthy flight. This arm is the denominator of R and is the informative half of the campaign."
+ },
+ "cell_counts": {
+  "degraded": {
+   "closed_ticks": 3672,
+   "flights_attempted": 6,
+   "flights_excluded_for_coverage": 0,
+   "flights_usable": 6,
+   "flights_with_at_least_one_closure": 6,
+   "monitored_ticks": 3744,
+   "per_flight_p": [
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769
+   ],
+   "whole_window_secondary": {
+    "closed_ticks": 5742,
+    "monitored_ticks": 11814,
+    "per_flight_p": [
+     0.486034,
+     0.486034,
+     0.486034,
+     0.486034,
+     0.486034,
+     0.486034
+    ]
+   }
+  },
+  "denial": {
+   "closed_ticks": 3684,
+   "flights_attempted": 6,
+   "flights_excluded_for_coverage": 0,
+   "flights_usable": 6,
+   "flights_with_at_least_one_closure": 6,
+   "monitored_ticks": 3744,
+   "per_flight_p": [
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974
+   ],
+   "whole_window_secondary": {
+    "closed_ticks": 5804,
+    "monitored_ticks": 11864,
+    "per_flight_p": [
+     0.487049,
+     0.49348,
+     0.487049,
+     0.487049,
+     0.49348,
+     0.487049
+    ]
+   }
+  },
+  "glitch": {
+   "closed_ticks": 0,
+   "flights_attempted": 6,
+   "flights_excluded_for_coverage": 0,
+   "flights_usable": 6,
+   "flights_with_at_least_one_closure": 0,
+   "monitored_ticks": 3744,
+   "per_flight_p": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "whole_window_secondary": {
+    "closed_ticks": 0,
+    "monitored_ticks": 15000,
+    "per_flight_p": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "nominal": {
+   "closed_ticks": 0,
+   "flights_attempted": 6,
+   "flights_excluded_for_coverage": 0,
+   "flights_usable": 6,
+   "flights_with_at_least_one_closure": 0,
+   "monitored_ticks": 3744,
+   "per_flight_p": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "whole_window_secondary": {
+    "closed_ticks": 0,
+    "monitored_ticks": 15000,
+    "per_flight_p": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ },
+ "ekf_failsafe_left_at_default": false,
+ "flights_excluded": [],
+ "generator": "ArduCopter SITL (dronekit-assets copter 3.3) driven over MAVLink; ingestion through the production csia.runtime.plugins.map_mavlink adapter and the production OnlineTrustLayer",
+ "inference_permitted": true,
+ "per_flight": [
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "47.397742,8.545594,488,0",
+   "injection_effect": {
+    "max_position_step_m_post": 1.08,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24609,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9515,
+    "imu0": 0.8379,
+    "imu1": 0.8378,
+    "mag": 0.6415,
+    "vibration": 0.7565
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 0,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    0.0,
+    180.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-35.363261,149.165230,584,0",
+   "injection_effect": {
+    "max_position_step_m_post": 1.09,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24609,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9537,
+    "imu0": 0.835,
+    "imu1": 0.8396,
+    "mag": 0.6432,
+    "vibration": 0.7633
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 1,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "imu1_bias_drift",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    4.0,
+    45.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "37.413360,-121.996500,10,90",
+   "injection_effect": {
+    "max_position_step_m_post": 1.1,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24609,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8343,
+    "imu1": 0.8341,
+    "mag": 0.8284,
+    "vibration": 0.7578
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 2,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    8.0,
+    270.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "55.953251,-3.188267,47,180",
+   "injection_effect": {
+    "max_position_step_m_post": 1.08,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8375,
+    "imu1": 0.8374,
+    "mag": 0.7957,
+    "vibration": 0.7562
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 3,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    2.0,
+    90.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-22.906847,-43.172896,15,270",
+   "injection_effect": {
+    "max_position_step_m_post": 1.08,
+    "max_position_step_m_pre": 1.09,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8403,
+    "imu1": 0.8402,
+    "mag": 0.8298,
+    "vibration": 0.7632
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 4,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    6.0,
+    315.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "nominal",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "64.128288,-21.827774,61,45",
+   "injection_effect": {
+    "max_position_step_m_post": 1.07,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9837,
+    "imu0": 0.8388,
+    "imu1": 0.8387,
+    "mag": 0.7441,
+    "vibration": 0.7625
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 5,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    10.0,
+    135.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 959,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "47.397742,8.545594,488,0",
+   "injection_effect": {
+    "max_position_step_m_post": 0.92,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.8,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9513,
+    "imu0": 0.838,
+    "imu1": 0.8379,
+    "mag": 0.6402,
+    "vibration": 0.7567
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.487049,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 0,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    0.0,
+    180.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.57)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 984,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-35.363261,149.165230,584,0",
+   "injection_effect": {
+    "max_position_step_m_post": 0.97,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9537,
+    "imu0": 0.8351,
+    "imu1": 0.8396,
+    "mag": 0.6432,
+    "vibration": 0.7634
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1994,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.49348,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 1,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    4.0,
+    45.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 959,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "37.413360,-121.996500,10,90",
+   "injection_effect": {
+    "max_position_step_m_post": 0.93,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8343,
+    "imu1": 0.8341,
+    "mag": 0.8284,
+    "vibration": 0.7578
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.487049,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 2,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    8.0,
+    270.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 959,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "55.953251,-3.188267,47,180",
+   "injection_effect": {
+    "max_position_step_m_post": 0.92,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8375,
+    "imu1": 0.8374,
+    "mag": 0.7901,
+    "vibration": 0.7561
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.487049,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 3,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    2.0,
+    90.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.57)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 984,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-22.906847,-43.172896,15,270",
+   "injection_effect": {
+    "max_position_step_m_post": 0.95,
+    "max_position_step_m_pre": 1.09,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8404,
+    "imu1": 0.8402,
+    "mag": 0.8298,
+    "vibration": 0.7631
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1994,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.49348,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 4,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    6.0,
+    315.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "arm": "denial",
+   "closed_ticks": 959,
+   "closed_ticks_after_injection": 614,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "64.128288,-21.827774,61,45",
+   "injection_effect": {
+    "max_position_step_m_post": 0.97,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 3.05,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24085,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9837,
+    "imu0": 0.8386,
+    "imu1": 0.8385,
+    "mag": 0.7436,
+    "vibration": 0.7625
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.487049,
+   "p_closed_after_injection": 0.983974,
+   "reached_injection": true,
+   "spec_id": 5,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    10.0,
+    135.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "47.397742,8.545594,488,0",
+   "injection_effect": {
+    "max_position_step_m_post": 67.99,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9062,
+    "imu0": 0.838,
+    "imu1": 0.8379,
+    "mag": 0.6402,
+    "vibration": 0.7566
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 0,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    0.0,
+    180.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-35.363261,149.165230,584,0",
+   "injection_effect": {
+    "max_position_step_m_post": 72.61,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9062,
+    "imu0": 0.835,
+    "imu1": 0.8396,
+    "mag": 0.6432,
+    "vibration": 0.7633
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 1,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    4.0,
+    45.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "37.413360,-121.996500,10,90",
+   "injection_effect": {
+    "max_position_step_m_post": 71.88,
+    "max_position_step_m_pre": 1.09,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24609,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9342,
+    "imu0": 0.8343,
+    "imu1": 0.8341,
+    "mag": 0.8284,
+    "vibration": 0.7579
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 2,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    8.0,
+    270.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "55.953251,-3.188267,47,180",
+   "injection_effect": {
+    "max_position_step_m_post": 64.6,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9338,
+    "imu0": 0.8375,
+    "imu1": 0.8374,
+    "mag": 0.7956,
+    "vibration": 0.7561
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 3,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    2.0,
+    90.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-22.906847,-43.172896,15,270",
+   "injection_effect": {
+    "max_position_step_m_post": 76.4,
+    "max_position_step_m_pre": 1.09,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9328,
+    "imu0": 0.8403,
+    "imu1": 0.8402,
+    "mag": 0.8298,
+    "vibration": 0.7632
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 4,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    6.0,
+    315.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "arm": "glitch",
+   "closed_ticks": 0,
+   "closed_ticks_after_injection": 0,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "64.128288,-21.827774,61,45",
+   "injection_effect": {
+    "max_position_step_m_post": 61.62,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 10.0,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 24610,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9062,
+    "imu0": 0.8386,
+    "imu1": 0.8385,
+    "mag": 0.7436,
+    "vibration": 0.7625
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.0,
+   "p_closed_after_injection": 0.0,
+   "reached_injection": true,
+   "spec_id": 5,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.9997
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ],
+    [
+     "gps_fault",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    10.0,
+    135.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "47.397742,8.545594,488,0",
+   "injection_effect": {
+    "max_position_step_m_post": 0.93,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.8,
+   "messages": 23844,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9511,
+    "imu0": 0.8379,
+    "imu1": 0.8377,
+    "mag": 0.6391,
+    "vibration": 0.7565
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 0,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    0.0,
+    180.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-35.363261,149.165230,584,0",
+   "injection_effect": {
+    "max_position_step_m_post": 0.97,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 23844,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9537,
+    "imu0": 0.8351,
+    "imu1": 0.8396,
+    "mag": 0.6431,
+    "vibration": 0.7633
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 1,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    4.0,
+    45.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "37.413360,-121.996500,10,90",
+   "injection_effect": {
+    "max_position_step_m_post": 0.94,
+    "max_position_step_m_pre": 1.07,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.8,
+   "messages": 23843,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8368,
+    "imu1": 0.8367,
+    "mag": 0.8289,
+    "vibration": 0.7636
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 2,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    8.0,
+    270.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "55.953251,-3.188267,47,180",
+   "injection_effect": {
+    "max_position_step_m_post": 0.92,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.7,
+   "messages": 23844,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8375,
+    "imu1": 0.8373,
+    "mag": 0.7954,
+    "vibration": 0.7562
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 3,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    2.0,
+    90.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "-22.906847,-43.172896,15,270",
+   "injection_effect": {
+    "max_position_step_m_post": 0.95,
+    "max_position_step_m_pre": 1.09,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 23843,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9967,
+    "imu0": 0.8403,
+    "imu1": 0.8402,
+    "mag": 0.8298,
+    "vibration": 0.7631
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 4,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    6.0,
+    315.0
+   ],
+   "window_coverage": 0.9984
+  },
+  {
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "arm": "degraded",
+   "closed_ticks": 957,
+   "closed_ticks_after_injection": 612,
+   "final_layer_time_s": 120.0,
+   "final_phase": "fly",
+   "fs_ekf_thresh_readback": 10.0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    3
+   ],
+   "home": "64.128288,-21.827774,61,45",
+   "injection_effect": {
+    "max_position_step_m_post": 0.95,
+    "max_position_step_m_pre": 1.08,
+    "mean_satellites_post": 0.17,
+    "mean_satellites_pre": 9.93
+   },
+   "max_relative_alt_m": 17.9,
+   "messages": 23844,
+   "min_trust_monitored": {
+    "baro": 0.9966,
+    "gps": 0.9837,
+    "imu0": 0.8386,
+    "imu1": 0.8385,
+    "mag": 0.7434,
+    "vibration": 0.7625
+   },
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "monitored_ticks_after_injection": 624,
+   "p_closed": 0.486034,
+   "p_closed_after_injection": 0.980769,
+   "reached_injection": true,
+   "spec_id": 5,
+   "top_causes_20s_after_injection": [
+    [
+     "nominal",
+     0.977
+    ],
+    [
+     "gps_fault",
+     0.0227
+    ],
+    [
+     "unexpected_maneuver",
+     0.0001
+    ]
+   ],
+   "total_ticks": 3001,
+   "wind": [
+    10.0,
+    135.0
+   ],
+   "window_coverage": 0.9984
+  }
+ ],
+ "preregistration": {
+  "AMENDMENT": "Amended once, after a one-flight-per-arm pipeline smoke test and BEFORE the campaign was run. Two changes, both recorded here rather than silently applied. (1) The per-flight statistic was originally the whole monitored window; that window contains 40 s of pre-injection nominal flight in every arm, so it estimated a mixture rather than q_gvalid|h. The conditioning window above replaces it and the original is retained as the secondary. (2) The smoke test showed ArduPilot's own EKF failsafe switching to LAND 8.8 s after denial, which eventually disarms the vehicle and truncates the observation window in the fault arms only. Raising FS_EKF_THRESH did not stop it (the readback is recorded per flight), so rather than fight the autopilot the conditioning window is sized to fit inside the armed segment the failsafe leaves, and the mode changes are recorded as an observable in their own right. What the smoke test showed of the outcome: denial closed the gate, glitch did not.",
+  "arm_statistic": "mean over flights (flight is the independence unit, NOT the tick: closure is autocorrelated within a flight)",
+  "arm_time_s": 20.0,
+  "bootstrap_resamples": 10000,
+  "bootstrap_seed": 20260823,
+  "conditioning_window": "[injection_time_s, injection_time_s + 25 s]. The hypothesis label is the injection state, so the window over which q_gvalid|h is estimated must be the window in which h holds. In the nominal arm the same instant passes with no parameter applied, so the window is [60 s, 85 s] in every arm and the design is matched. 25 s is chosen because ArduPilot's own EKF failsafe switches to LAND under GNSS loss and the vehicle eventually disarms; the window is sized to sit inside the armed segment that leaves, in every arm.",
+  "conditioning_window_s": 25.0,
+  "flight_end_s": 120.0,
+  "gvalid_closed_at_tick": "TrustState.edges['altitude_baro'][1] == 0.0 (online.py:517-518 gates that edge on gvalid alone, so it is a direct readout of the gate)",
+  "injection_time_s": 60.0,
+  "interval_method": "BCa over flights for each arm; PAIRED percentile for the ratio (the arms share flight specs, so the resample is over spec index)",
+  "min_flights_for_inference": 5,
+  "min_window_coverage": 0.95,
+  "monitored_tick": "armed is True AND layer time >= arm_time_s",
+  "n_flights_per_arm": 6,
+  "per_flight_statistic": "closed monitored ticks in the conditioning window / monitored ticks in the conditioning window",
+  "secondary_statistic": "the same ratio over the whole monitored window, which dilutes the fault arms with their own pre-injection nominal segment and is reported only for completeness",
+  "tick_hz": 25.0
+ },
+ "q_gvalid_by_arm": {
+  "degraded": {
+   "ci95": {
+    "hi": 0.980769,
+    "lo": 0.980769,
+    "method": "percentile (BCa degenerate: bootstrap distribution is a point mass relative to theta)"
+   },
+   "concentrated_in_two_or_fewer_flights": false,
+   "per_flight": [
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769,
+    0.980769
+   ],
+   "q_gvalid": 0.980769
+  },
+  "denial": {
+   "ci95": {
+    "hi": 0.983974,
+    "lo": 0.983974,
+    "method": "percentile (BCa degenerate: bootstrap distribution is a point mass relative to theta)"
+   },
+   "concentrated_in_two_or_fewer_flights": false,
+   "per_flight": [
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974,
+    0.983974
+   ],
+   "q_gvalid": 0.983974
+  },
+  "glitch": {
+   "ci95": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "method": "percentile (BCa degenerate: bootstrap distribution is a point mass relative to theta)"
+   },
+   "concentrated_in_two_or_fewer_flights": false,
+   "per_flight": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "q_gvalid": 0.0
+  },
+  "nominal": {
+   "ci95": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "method": "percentile (BCa degenerate: bootstrap distribution is a point mass relative to theta)"
+   },
+   "concentrated_in_two_or_fewer_flights": false,
+   "per_flight": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "q_gvalid": 0.0
+  }
+ },
+ "ratios_against_nominal": {
+  "degraded": {
+   "ci95": {
+    "hi": null,
+    "lo": null,
+    "note": "every resample had a zero denominator"
+   },
+   "one_sided": "R = infinity as a point estimate; the finite content is q_gvalid|degraded = 0.980769 against q_gvalid|nominal = 0.000000",
+   "point": null,
+   "stopping_rule": "spec section 4: zero closures in the nominal arm. The ratio is unbounded above. Reported as a one-sided statement only."
+  },
+  "denial": {
+   "ci95": {
+    "hi": null,
+    "lo": null,
+    "note": "every resample had a zero denominator"
+   },
+   "one_sided": "R = infinity as a point estimate; the finite content is q_gvalid|denial = 0.983974 against q_gvalid|nominal = 0.000000",
+   "point": null,
+   "stopping_rule": "spec section 4: zero closures in the nominal arm. The ratio is unbounded above. Reported as a one-sided statement only."
+  },
+  "glitch": {
+   "ci95": {
+    "hi": null,
+    "lo": null,
+    "note": "every resample had a zero denominator"
+   },
+   "one_sided": "R = infinity as a point estimate; the finite content is q_gvalid|glitch = 0.000000 against q_gvalid|nominal = 0.000000",
+   "point": null,
+   "stopping_rule": "spec section 4: zero closures in the nominal arm. The ratio is unbounded above. Reported as a one-sided statement only.",
+   "zero_in_fault_arm": "spec section 5: the gate did not close under this fault. For this fault class the design-time and effective partitions coincide operationally."
+  }
+ },
+ "speedup": 20,
+ "status": "MEASURED",
+ "stopping_rule_gate_per_arm": {
+  "degraded": true,
+  "denial": true,
+  "glitch": true,
+  "nominal": true
+ },
+ "this_is_a_simulator": "Every figure is q_gvalid under ArduPilot's SIM GPS fault models. It is not a measurement of real GNSS environments and must not be reported as one. Section 7 of the measurement spec stands.",
+ "wall_seconds": 300.2
+}

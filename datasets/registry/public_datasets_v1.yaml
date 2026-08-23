@@ -1,0 +1,170 @@
+# CSIA public dataset registry v1.
+# EVERY spec field below is PUBLISHED_SPECIFICATION (from the datasets'
+# public descriptions) unless locally_verified says otherwise. Nothing here
+# is local inventory until acquisition succeeds and hashes are recorded.
+registry_version: "1.0.0"
+datasets:
+  uav_sead:
+    # Corrected 2026-08-03: the earlier Zenodo endpoint was wrong and was
+    # never resolvable. The dataset is published on the Hugging Face Hub.
+    title: "UAV Flight Anomaly Dataset (PX4 ULog) — CSIA id retained as uav_sead"
+    official_source: "https://huggingface.co/datasets/aykutkabaoglu/uav-flight-anomaly-dataset"
+    source:
+      provider: huggingface
+      repo_type: dataset
+      repo_id: aykutkabaoglu/uav-flight-anomaly-dataset
+      doi: "10.57967/hf/7772"
+      revision_policy: pin_resolved_commit
+      paths: ["ulg_files/", "mapping.json", "README.md", ".gitattributes"]
+      allow_patterns: ["ulg_files/**", "mapping.json", "README.md",
+                       ".gitattributes"]
+    published_specification:
+      autopilot: PX4
+      log_format: "ULog (.ulg)"
+      annotated_flight_count: 1396
+      raw_flight_count: 3196
+      annotated_duration: "52:20:05"
+      annotated_duration_h: 52.335
+      px4_topics_populated: 81
+      px4_topics_superset: 84
+      archive_files: ["ulg_files/ (directory)", "mapping.json", "README.md"]
+      size_note: "total download size is NOT published; resolved from the Hub
+        API at preflight, which is why no approx_size_gb is asserted here"
+      label_structure: "per-flight annotation via mapping.json — structure
+        NOT assumed; parsed and verified after acquisition
+        (csia/data/mapping.py)"
+      label_precision: "UNVERIFIED until mapping.json is read; whether labels
+        are onset-accurate or region-level is a post-acquisition finding"
+    licensing: {license: "CC-BY-4.0", commercial_use: PERMITTED_WITH_ATTRIBUTION,
+                redistribution: PERMITTED_WITH_ATTRIBUTION,
+                citation_required: true,
+                attribution_requirement: "CC-BY-4.0 attribution is mandatory:
+                  credit the dataset authors and cite DOI 10.57967/hf/7772 in
+                  any artifact derived from this data"}
+    intended_csia_use: "primary real-PX4 anomaly benchmark; event-level
+      detection; false-alert characterization"
+    prohibited_claims: ["latency precision beyond what mapping.json's label
+        granularity supports — granularity is UNVERIFIED until parsed",
+      "any count claim (1396 annotated / 3196 raw) before the acquired
+        snapshot reproduces it"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "proxy CONNECT 403 to huggingface.co (2026-08-03); the Hub API
+        is unreachable from the CSIA build environment",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset uav_sead
+         --data-root /Volumes/CSIA_DATA/CSIA_DATA_LAKE"}
+    locally_verified: {present: false, files: [], hashes: []}
+  alfa:
+    title: "ALFA: AIR Lab Fault Detection Dataset (fixed-wing, CMU)"
+    official_source: "https://theairlab.org/alfa-dataset (+ Kaggle mirror)"
+    published_specification:
+      autopilot: "Pixhawk/PX4 fixed-wing"
+      approx_size_gb: 2
+      aircraft_count: 1
+      flight_count: 47
+      approx_duration_h: "~1.1 processed sequences"
+      sensors: [imu, gps, mag, baro, airspeed, control surfaces]
+      label_structure: "EXACT fault onset + fault type (engine, aileron,
+        rudder, elevator)"
+      label_precision: "ONSET-ACCURATE"
+    licensing: {license: "CC BY 4.0 (to confirm)", commercial_use: UNKNOWN,
+                redistribution: UNKNOWN, citation_required: true}
+    intended_csia_use: "fixed-wing transfer; exact-onset latency claims;
+      actuator faults from cross-sensor consequences"
+    prohibited_claims: ["multirotor generalization from this dataset alone"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "dataset hosts unreachable via proxy (2026-08-03)",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset alfa"}
+    locally_verified: {present: false, files: [], hashes: []}
+  insane:
+    title: "INSANE: multi-IMU / dual-RTK aerial navigation dataset"
+    official_source: "https://sst.aau.at/cns/navigation-datasets (Univ. Klagenfurt)"
+    published_specification:
+      autopilot: "custom + PX4 components"
+      approx_size_gb: 40
+      sensors: [3x imu, dual-RTK GNSS, mag, baro, cameras, high-rate vibration]
+      label_structure: "ground truth trajectory; modality transitions"
+      label_precision: "trajectory ground truth; no fault labels"
+    licensing: {license: "RESEARCH-ONLY restrictions reported — MUST be
+        verified and enforced before any commercial artifact touches it",
+      commercial_use: RESTRICTED, redistribution: RESTRICTED,
+      citation_required: true}
+    intended_csia_use: "multi-IMU consistency; estimator research;
+      sensor-degradation transitions. RESEARCH TRACK ONLY."
+    prohibited_claims: ["any commercial benchmark result until license
+        review completes"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "host unreachable via proxy (2026-08-03)",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset insane"}
+    locally_verified: {present: false, files: [], hashes: []}
+  blackbird:
+    title: "MIT Blackbird: aggressive quadrotor flight, motion capture"
+    official_source: "https://github.com/mit-aera/Blackbird-Dataset"
+    published_specification:
+      flight_count: "~168 sequences"
+      sensors: [imu, motors/rpm, cameras, mocap ground truth]
+      label_structure: "nominal aggressive flight; no fault labels"
+      label_precision: "n/a (nominal corpus)"
+    licensing: {license: "MIT-style (confirm)", commercial_use: LIKELY_OK,
+                redistribution: UNKNOWN, citation_required: true}
+    intended_csia_use: "high-dynamic FALSE-POSITIVE testing; motor/IMU
+      consistency under aggression"
+    prohibited_claims: ["fault-detection performance (no faults present)"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "github release assets: proxy 400/403 (2026-08-03)",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset blackbird"}
+    locally_verified: {present: false, files: [], hashes: []}
+  euroc_mav:
+    title: "EuRoC MAV visual-inertial dataset"
+    official_source: "ETH Zurich ASL projects page"
+    published_specification:
+      sensors: [stereo cameras, imu, leica/vicon ground truth]
+      label_structure: "trajectory ground truth"
+    licensing: {license: "CC BY-SA (confirm)", commercial_use: SHARE_ALIKE,
+                redistribution: SHARE_ALIKE, citation_required: true}
+    intended_csia_use: "visual-inertial estimator divergence, timing skew,
+      dropout studies (modality extension; not PX4-shaped)"
+    prohibited_claims: ["autopilot-stack conclusions"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "host unreachable via proxy (2026-08-03)",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset euroc_mav"}
+    locally_verified: {present: false, files: [], hashes: []}
+  tum_vi:
+    title: "TUM VI visual-inertial benchmark"
+    official_source: "https://vision.in.tum.de/data/datasets/visual-inertial-dataset"
+    published_specification:
+      sensors: [stereo cameras, calibrated imu, mocap (partial)]
+    licensing: {license: "CC BY 4.0 (confirm)", commercial_use: UNKNOWN,
+                redistribution: UNKNOWN, citation_required: true}
+    intended_csia_use: "calibration faults, estimator divergence (modality
+      extension)"
+    prohibited_claims: ["autopilot-stack conclusions"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "host unreachable via proxy (2026-08-03)",
+      unrestricted_host_command:
+        "python tools/acquire_public_datasets.py --dataset tum_vi"}
+    locally_verified: {present: false, files: [], hashes: []}
+  px4_flightreview_v1:
+    title: "Existing 26-log public PX4 Flight Review corpus (CSIA v1 dev set)"
+    official_source: "https://review.px4.io/download_log?log=<uuid>"
+    published_specification:
+      autopilot: PX4
+      flight_count: 26
+      approx_duration_h: 0.663
+      label_structure: "NONE (unannotated)"
+      label_precision: "none"
+    licensing: {license: UNKNOWN, commercial_use: UNKNOWN,
+                redistribution: UNKNOWN, citation_required: false}
+    intended_csia_use: "v1 development corpus ONLY — 100% contaminated
+      (shaped field_mode); never held out"
+    prohibited_claims: ["held-out evaluation", "healthy-flight claims"]
+    acquisition: {status: BLOCKED_NETWORK_POLICY,
+      error: "proxy CONNECT 403 to review.px4.io (recorded slice 3A)",
+      unrestricted_host_command: "python tools/fetch_real_logs.py --no-run"}
+    locally_verified: {present: false, files: [],
+      note: "committed campaign REPORT exists (data/real_logs_report.json);
+        raw .ulg files were never locally present"}

@@ -1,0 +1,401 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://swort.local/csia/trust_contract_v0.1.json",
+ "title": "CSIA Trust Contract v0.1",
+ "type": "object",
+ "required": [
+  "contract_version",
+  "identity",
+  "functions",
+  "dependencies",
+  "validity_domain",
+  "degradation_modes",
+  "fault_modes",
+  "authorization"
+ ],
+ "properties": {
+  "contract_version": {
+   "const": "0.1"
+  },
+  "identity": {
+   "type": "object",
+   "required": [
+    "component_type",
+    "manufacturer",
+    "model",
+    "firmware",
+    "device_id",
+    "configuration_hash"
+   ],
+   "properties": {
+    "component_type": {
+     "enum": [
+      "sensor",
+      "estimator",
+      "autonomy_module",
+      "power_resource",
+      "timing_resource",
+      "comms_resource",
+      "flight_control_function"
+     ]
+    },
+    "manufacturer": {
+     "type": "string"
+    },
+    "model": {
+     "type": "string"
+    },
+    "hardware_revision": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "firmware": {
+     "type": "string"
+    },
+    "device_id": {
+     "type": "string"
+    },
+    "configuration_hash": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{8,64}$"
+    },
+    "software_provenance": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   }
+  },
+  "functions": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "output",
+     "units",
+     "uncertainty",
+     "update_rate_hz",
+     "min_update_rate_hz",
+     "max_latency_s",
+     "time_source"
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "output": {
+      "type": "string"
+     },
+     "units": {
+      "type": "string"
+     },
+     "uncertainty": {
+      "type": "object",
+      "required": [
+       "semantics",
+       "value"
+      ],
+      "properties": {
+       "semantics": {
+        "enum": [
+         "1_sigma",
+         "95_percent",
+         "bound",
+         "UNKNOWN"
+        ]
+       },
+       "value": {
+        "type": [
+         "number",
+         "string"
+        ]
+       }
+      }
+     },
+     "update_rate_hz": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "min_update_rate_hz": {
+      "type": "number",
+      "minimum": 0
+     },
+     "max_latency_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "time_source": {
+      "enum": [
+       "component_clock",
+       "fc_clock",
+       "gps",
+       "ptp",
+       "UNKNOWN"
+      ]
+     },
+     "validity_flags": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "quality_indicators": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "missing_data_semantics": {
+      "enum": [
+       "flagged_invalid",
+       "last_value_held",
+       "omitted",
+       "UNKNOWN"
+      ]
+     },
+     "consumers": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "dependencies": {
+   "type": "object",
+   "properties": {
+    "power_rails": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "timing_source": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "communication_bus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "antenna": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "environmental": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "estimator": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "shared_software": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "common_mounting": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   }
+  },
+  "validity_domain": {
+   "type": "object",
+   "properties": {
+    "flight_phases": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "dynamics": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "temperature_c": {
+     "type": "array"
+    },
+    "vibration": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "speed_mps": {
+     "type": "array"
+    },
+    "acceleration_mps2": {
+     "type": "array"
+    },
+    "operating_modes": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "degradation_modes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "affected_functions",
+     "observable_signatures",
+     "permitted_degraded_uses",
+     "prohibited_uses"
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "affected_functions": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "observable_signatures": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "unobservable_signatures": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "permitted_degraded_uses": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "prohibited_uses": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "recovery_requirements": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    }
+   }
+  },
+  "fault_modes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "failure_class",
+     "expected_observability"
+    ],
+    "properties": {
+     "failure_class": {
+      "type": "string"
+     },
+     "expected_observability": {
+      "enum": [
+       "OBSERVABLE",
+       "PARTIALLY_OBSERVABLE",
+       "UNOBSERVABLE",
+       "UNKNOWN"
+      ]
+     },
+     "expected_downstream_effects": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "structural_alternatives": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "disambiguating_evidence": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "restart_semantics": {
+   "type": "object",
+   "properties": {
+    "detectable": {
+     "type": "boolean"
+    },
+    "signal": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "state_after_restart": {
+     "enum": [
+      "cold",
+      "warm",
+      "UNKNOWN"
+     ]
+    }
+   }
+  },
+  "authorization": {
+   "type": "object",
+   "required": [
+    "monitor_only",
+    "advisory",
+    "shadow_action",
+    "active_action_prohibited"
+   ],
+   "properties": {
+    "monitor_only": {
+     "type": "boolean"
+    },
+    "advisory": {
+     "type": "boolean"
+    },
+    "shadow_action": {
+     "type": "boolean"
+    },
+    "active_action_prohibited": {
+     "const": true
+    }
+   }
+  }
+ }
+}

@@ -214,6 +214,16 @@ class UlogSource(SourcePlugin):
                     ev.append((float(t_s[i]), "motor_esc", {
                         "rpm": rpm, "current": cur, "valid": True}))
 
+        # --- armed state: gates motor edges + failsafe on real vehicle state --
+        vs = self._topic("vehicle_status")
+        if vs is not None and "arming_state" in vs.data:
+            d = vs.data
+            t_s = rel(ts(d))
+            armed = np.asarray(d["arming_state"]) == 2  # ARMING_STATE_ARMED
+            for i in range(len(t_s)):
+                ev.append((float(t_s[i]), "vehicle_status",
+                           {"armed": bool(armed[i])}))
+
         ev = [e for e in ev if e[0] >= 0.0]
         # Minimum-rate screen: an IMU logged at 2 Hz is aliased vibration
         # snapshots, not a monitorable inertial stream (live rate is 100+ Hz;
@@ -243,7 +253,8 @@ class UlogSource(SourcePlugin):
 
     @property
     def sensors_present(self):
-        return sorted({name for _, name, _ in self._events})
+        return sorted({name for _, name, _ in self._events}
+                      - {"vehicle_status"})
 
     def stale_timeouts(self, factor: float = 5.0) -> dict:
         """Watchdog timeouts derived from the log's own topic rates —

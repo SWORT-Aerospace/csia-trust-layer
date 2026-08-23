@@ -1,0 +1,1022 @@
+{
+ "actuating_gates": [
+  "armed_gate",
+  "gvalid",
+  "speed_gate",
+  "gps_warmup"
+ ],
+ "armed_gate_semantics": "RUNTIME FLAG (online.py:491-496)",
+ "armed_semantics_detail": {
+  "batch": "comparator.py:137 -> clip((ticks - 5.0) / 1.0, 0, 1), unconditionally; the batch path has no armed flag at all",
+  "runtime_armed": "armed flag is True -> clip(tau - armed_since, 0, 1)",
+  "runtime_disarmed": "armed flag is False -> hard 0.0",
+  "runtime_unknown": "armed flag is None -> clip((tau - 5.0) / 1.0, 0, 1) \u2014 identical to the batch proxy",
+  "source_of_truth": "csia/runtime/ulog_source.py:217-225 emits vehicle_status arming_state == 2 (ARMING_STATE_ARMED) when the topic is present in the log"
+ },
+ "configurations": [
+  {
+   "features_lost": [],
+   "gates_closed": [],
+   "kappa": 0.0,
+   "merged_classes": {},
+   "n_observable_classes": 8,
+   "nominal_absorbs": [],
+   "restricted_signatures": {
+    "gps_fault": [
+     "phys_gps"
+    ],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current"
+   ],
+   "gates_closed": [
+    "armed_gate"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [],
+   "restricted_signatures": {
+    "gps_fault": [
+     "phys_gps"
+    ],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "phys_gps"
+   ],
+   "gates_closed": [
+    "gps_warmup"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "gvalid"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "heading_course"
+   ],
+   "gates_closed": [
+    "speed_gate"
+   ],
+   "kappa": 0.0,
+   "merged_classes": {},
+   "n_observable_classes": 8,
+   "nominal_absorbs": [],
+   "restricted_signatures": {
+    "gps_fault": [
+     "phys_gps"
+    ],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "phys_gps"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "heading_course",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gvalid"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "heading_course"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "speed_gate"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [],
+   "restricted_signatures": {
+    "gps_fault": [
+     "phys_gps"
+    ],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "gps_warmup",
+    "gvalid"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "heading_course",
+    "phys_gps"
+   ],
+   "gates_closed": [
+    "gps_warmup",
+    "speed_gate"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "gvalid"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "heading_course",
+    "phys_gps"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "speed_gate"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "gps_warmup",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa": 0.1429,
+   "merged_classes": {
+    "gps_fault, nominal": []
+   },
+   "n_observable_classes": 7,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "accel_motor_current",
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "accel_esc_rpm",
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "accel_esc_rpm",
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  },
+  {
+   "features_lost": [
+    "accel_esc_rpm",
+    "accel_motor_current",
+    "altitude_baro",
+    "heading_course",
+    "phys_gps",
+    "velocity_gps_doppler_0",
+    "velocity_gps_doppler_1"
+   ],
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa": 0.2857,
+   "merged_classes": {
+    "gps_fault, nominal": [],
+    "imu0_bias_drift, imu1_bias_drift": [
+     "redundant_imu"
+    ]
+   },
+   "n_observable_classes": 6,
+   "nominal_absorbs": [
+    "gps_fault"
+   ],
+   "restricted_signatures": {
+    "gps_fault": [],
+    "imu0_bias_drift": [
+     "redundant_imu"
+    ],
+    "imu1_bias_drift": [
+     "redundant_imu"
+    ],
+    "mag_interference": [
+     "attitude_gravity_mag",
+     "phys_mag",
+     "temp_mag"
+    ],
+    "nominal": [],
+    "power_fault": [
+     "phys_battery",
+     "phys_motor_esc",
+     "temp_battery"
+    ],
+    "unexpected_maneuver": [
+     "temp_gps"
+    ],
+    "vibration_anomaly": [
+     "phys_vibration",
+     "temp_vibration",
+     "vibration_prop_freq"
+    ]
+   }
+  }
+ ],
+ "disjointness": {
+  "composition": "multiplicative (product of gates), so EITHER gate alone drives the feature to zero",
+  "gates_share_features": true,
+  "pure_interaction_found": false,
+  "shared": {
+   "heading_course": [
+    "gvalid",
+    "speed_gate"
+   ],
+   "phys_gps": [
+    "gvalid",
+    "gps_warmup"
+   ]
+  },
+  "superadditive_configurations": [],
+  "verdict": "SHARED BUT SUB-ADDITIVE. Sharing is real \u2014 two features each depend on two gates \u2014 but because the composition is a product, closure is an OR: each gate alone is sufficient. No gate set produces a merge that no proper subset produces, so there is NO pure interaction in this gate map. Level-1 marginals still cannot be summed, but the reason is over-counting, not hidden interaction."
+ },
+ "gate_severity_ranking": [
+  {
+   "gate": "armed_gate",
+   "kappa": 0.1429,
+   "merged": [
+    "imu0_bias_drift, imu1_bias_drift"
+   ],
+   "nominal_absorbs": []
+  },
+  {
+   "gate": "gvalid",
+   "kappa": 0.1429,
+   "merged": [
+    "gps_fault, nominal"
+   ],
+   "nominal_absorbs": [
+    "gps_fault"
+   ]
+  },
+  {
+   "gate": "gps_warmup",
+   "kappa": 0.1429,
+   "merged": [
+    "gps_fault, nominal"
+   ],
+   "nominal_absorbs": [
+    "gps_fault"
+   ]
+  },
+  {
+   "gate": "speed_gate",
+   "kappa": 0.0,
+   "merged": [],
+   "nominal_absorbs": []
+  }
+ ],
+ "inputs": {
+  "flight_data_used": "none",
+  "gate_map": "research/wp_e1/gate_map.py (source-verified)",
+  "signature_matrix": "research/formalization/diagnostic_signature_matrix.yaml"
+ },
+ "interactions": [
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gvalid"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.1429,
+   "kappa_sum_of_marginals": 0.1429,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.1429,
+   "kappa_sum_of_marginals": 0.1429,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "gps_warmup",
+    "gvalid"
+   ],
+   "kappa_joint": 0.1429,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "gps_warmup",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.1429,
+   "kappa_sum_of_marginals": 0.1429,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "gvalid"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.4287,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "gps_warmup",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.1429,
+   "kappa_sum_of_marginals": 0.2858,
+   "novel_merges": [],
+   "pure_interaction": false
+  },
+  {
+   "gates_closed": [
+    "armed_gate",
+    "gps_warmup",
+    "gvalid",
+    "speed_gate"
+   ],
+   "kappa_joint": 0.2857,
+   "kappa_sum_of_marginals": 0.4287,
+   "novel_merges": [],
+   "pure_interaction": false
+  }
+ ],
+ "kappa_definition": "(H - P) / (H - 1)",
+ "method": "restrict each hypothesis LOW signature to the features surviving a gate configuration; hypotheses sharing a restricted signature are indistinguishable (bayes.py:99-100 SKIPS a gated feature)",
+ "n_hypotheses": 8,
+ "non_actuating_gates": {
+  "quasi_static": "modulates an attitude estimate, not a feature",
+  "temp_bias_scale": "constant 0.2 * ones; controls temp_bias_drift, which is in no hypothesis LOW set"
+ },
+ "purpose": "deterministic structural consequence of gate closure on diagnostic identifiability"
+}

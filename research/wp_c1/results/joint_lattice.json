@@ -1,0 +1,155 @@
+{
+ "channels": [
+  "baro",
+  "battery",
+  "gps",
+  "imu0",
+  "imu1",
+  "mag",
+  "motor_esc",
+  "vibration"
+ ],
+ "corpus": {
+  "argmax_channels": [
+   "baro",
+   "imu0"
+  ],
+  "argmax_gates": [],
+  "distinct_channel_configurations": 6,
+  "kappa_max": 1.0,
+  "n_logs": 26,
+  "reachable_configurations": 19
+ },
+ "gates": [
+  "armed_gate",
+  "gps_warmup",
+  "gvalid",
+  "speed_gate"
+ ],
+ "kappa_max_by_min_channels": {
+  "0": {
+   "argmax_channels": [],
+   "argmax_gates": [],
+   "kappa_max": 1.0,
+   "n_configurations": 1232
+  },
+  "1": {
+   "argmax_channels": [
+    "baro"
+   ],
+   "argmax_gates": [],
+   "kappa_max": 1.0,
+   "n_configurations": 1231
+  },
+  "2": {
+   "argmax_channels": [
+    "baro",
+    "imu0"
+   ],
+   "argmax_gates": [],
+   "kappa_max": 1.0,
+   "n_configurations": 1220
+  },
+  "3": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "imu0"
+   ],
+   "argmax_gates": [],
+   "kappa_max": 0.857143,
+   "n_configurations": 1165
+  },
+  "4": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "imu0",
+    "motor_esc"
+   ],
+   "argmax_gates": [
+    "armed_gate"
+   ],
+   "kappa_max": 0.857143,
+   "n_configurations": 1005
+  },
+  "5": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "gps",
+    "imu0",
+    "motor_esc"
+   ],
+   "argmax_gates": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa_max": 0.714286,
+   "n_configurations": 710
+  },
+  "6": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "gps",
+    "imu0",
+    "imu1",
+    "motor_esc"
+   ],
+   "argmax_gates": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa_max": 0.571429,
+   "n_configurations": 363
+  },
+  "7": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "gps",
+    "imu0",
+    "imu1",
+    "mag",
+    "motor_esc"
+   ],
+   "argmax_gates": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa_max": 0.428571,
+   "n_configurations": 114
+  },
+  "8": {
+   "argmax_channels": [
+    "baro",
+    "battery",
+    "gps",
+    "imu0",
+    "imu1",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "argmax_gates": [
+    "armed_gate",
+    "gps_warmup"
+   ],
+   "kappa_max": 0.285714,
+   "n_configurations": 16
+  }
+ },
+ "kappa_max_unrestricted": {
+  "channels": [],
+  "gates_closed": [],
+  "kappa": 1.0,
+  "note": "the empty channel set trivially collapses everything; an admissibility assumption is required for a non-degenerate certificate"
+ },
+ "naive_product_size": 4096,
+ "not_novel": "see research/wp_c1/NOVELTY_ATTACK.md \u2014 worst-case diagnosability under sensor loss and isolability across modes are established results; this applies them",
+ "purpose": "joint gate x channel availability lattice for CSIA",
+ "reachability_rule": "a gate whose every feature has an absent channel is vacuous; (G u {g}, X) collapses to (G, X)",
+ "reachable_size": 1232,
+ "reduction_factor": 3.325
+}

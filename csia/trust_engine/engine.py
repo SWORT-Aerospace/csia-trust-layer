@@ -132,13 +132,18 @@ class TrustCore:
                      (cfg.w_temp, c_temp), (cfg.w_stat, c_stat)]
             avail = [(w, c) for w, c in parts if c is not None]
             wsum = sum(w for w, _ in avail)
-            evidence = sum(w * c for w, c in avail) / wsum
+            # A node can lose every evidence source at once (all edges gated
+            # out or endpoints stale, physics gated, temporal evidence
+            # withdrawn). Absence of evidence is absence: hold the Beta
+            # belief and report a neutral 0.5 placeholder — never divide by
+            # zero, never fabricate consistency. Mirrors csia_core.c.
+            evidence = sum(w * c for w, c in avail) / wsum if avail else 0.5
 
             scores = [c for _, c in avail]
             d = max(scores) - min(scores) if len(scores) > 1 else 0.0
             rho = cfg.rho_max - (cfg.rho_max - cfg.rho_min) * d
 
-            if fresh.get(n, True):
+            if avail and fresh.get(n, True):
                 self.alpha[n] = rho * self.alpha[n] + evidence
                 self.beta[n] = rho * self.beta[n] + (1.0 - evidence)
             new_trust[n] = self.alpha[n] / (self.alpha[n] + self.beta[n])

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "csia-trust-layer"
-version = "0.7.0"
+version = "0.8.0"
 description = "SWORT LLC Cross-Sensor Intelligence Architecture (CSIA) Trust Layer — research prototype / desktop simulation. NOT flight software."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,9 +17,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "jsonschema>=4", "build>=1"]
 mavlink = ["pymavlink>=2.4"]
 logs = ["pyulog>=1.0"]
+# Research data lake only — the embedded runtime path (csia/runtime,
+# csia/native) must never import these; enforced by test.
+data = ["duckdb>=1.0", "huggingface_hub>=0.34", "polars>=1.0", "pyarrow>=25",
+        "PyYAML>=6"]
 
 [project.scripts]
 csia = "csia.cli:main"
@@ -29,7 +33,11 @@ include = ["csia*"]
 
 [tool.setuptools.package-data]
 "csia.dashboard" = ["web/*"]
+"csia.contracts" = ["*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "slow: end-to-end runs through the full detector (seconds, not ms)",
+]

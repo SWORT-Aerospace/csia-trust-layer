@@ -1,0 +1,433 @@
+{
+ "evidence_environment": "SIMULATION",
+ "experiment_manifest": {
+  "command": "tools/simulate_anytime_validity.py",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "csia_config_hash": "25c2a143b244f1c2",
+  "dataset_aggregate_hash": null,
+  "dataset_id": null,
+  "dataset_partition": null,
+  "dependency_lock_sha256": "b81a0101de46835a",
+  "evidence_environment": "SIMULATION",
+  "exclusions": [],
+  "experiment_id": "anytime_validity_t1-20260803T064835Z",
+  "experiment_type": "anytime_validity_t1",
+  "failsafe_config_hash": "2d636a3f7e9c2438",
+  "failures": [],
+  "git_commit": "d527b75475d8039d58646aa8d6c985ba3f9c52f3",
+  "git_dirty": true,
+  "git_remote": "http://local_proxy@127.0.0.1:41729/git/SWORT-Aerospace/csia-trust-layer",
+  "input_logs": [],
+  "manifest_schema_version": "1.0.0",
+  "metric_definitions_version": "1.1.0",
+  "native_flags": "-std=c11 -Wall -Wextra -Wpedantic -Werror -O2",
+  "os_platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+  "output_paths": [
+   "experiments/results/anytime_validity_v1.json"
+  ],
+  "processor_arch": "x86_64",
+  "python_version": "3.11.15",
+  "random_seed": null,
+  "result_schema_version": "1.0.0",
+  "runtime_duration_s": null,
+  "threshold_config_hash": "2d636a3f7e9c2438",
+  "timestamp_utc": "2026-08-03T06:48:35Z",
+  "trust_graph_config_hash": "534f4a31eed1a792",
+  "warnings": []
+ },
+ "payload": {
+  "T": 3000,
+  "alpha": 0.05,
+  "cells": {
+   "eval/blockwise_L50/ar1_0.5": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0204,
+     0.03
+    ],
+    "crossing_count": 99,
+    "crossing_rate": 0.0248,
+    "mc_se": 0.0025,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/blockwise_L50/ar1_0.94": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0434,
+     0.0569
+    ],
+    "crossing_count": 199,
+    "crossing_rate": 0.0498,
+    "mc_se": 0.0034,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/blockwise_L50/ar1_0.99": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.1957,
+     0.2209
+    ],
+    "crossing_count": 832,
+    "crossing_rate": 0.208,
+    "mc_se": 0.0064,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": true
+   },
+   "eval/blockwise_L50/regime_IGNORED_context": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.772,
+     0.7975
+    ],
+    "crossing_count": 3140,
+    "crossing_rate": 0.785,
+    "mc_se": 0.0065,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": true
+   },
+   "eval/blockwise_L50/regime_oracle_context": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0413,
+     0.0545
+    ],
+    "crossing_count": 190,
+    "crossing_rate": 0.0475,
+    "mc_se": 0.0034,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/lr_MISSPECIFIED_iid_assumed/ar1_0.94": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.4314,
+     0.4622
+    ],
+    "crossing_count": 1787,
+    "crossing_rate": 0.4467,
+    "mc_se": 0.0079,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": true
+   },
+   "eval/lr_correct_null/ar1_0.94": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0063,
+     0.0121
+    ],
+    "crossing_count": 35,
+    "crossing_rate": 0.0088,
+    "mc_se": 0.0015,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/naive/ar1_0.94_KNOWN_INVALID": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.4267,
+     0.4574
+    ],
+    "crossing_count": 1768,
+    "crossing_rate": 0.442,
+    "mc_se": 0.0079,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": true
+   },
+   "eval/naive/calibration_reuse": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.008,
+     0.0144
+    ],
+    "crossing_count": 43,
+    "crossing_rate": 0.0107,
+    "mc_se": 0.0016,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/naive/iid": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0204,
+     0.03
+    ],
+    "crossing_count": 99,
+    "crossing_rate": 0.0248,
+    "mc_se": 0.0025,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "eval/naive/t3_iid": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0213,
+     0.0311
+    ],
+    "crossing_count": 103,
+    "crossing_rate": 0.0257,
+    "mc_se": 0.0025,
+    "n_paths": 4000,
+    "seed_family": 1000,
+    "violates": false
+   },
+   "select/ar1_0.5/L1": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.1369,
+     0.1684
+    ],
+    "crossing_count": 304,
+    "crossing_rate": 0.152,
+    "mc_se": 0.008,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.5/L100": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0208,
+     0.0351
+    ],
+    "crossing_count": 54,
+    "crossing_rate": 0.027,
+    "mc_se": 0.0036,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.5/L25": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0256,
+     0.0412
+    ],
+    "crossing_count": 65,
+    "crossing_rate": 0.0325,
+    "mc_se": 0.004,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.5/L5": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0436,
+     0.0632
+    ],
+    "crossing_count": 105,
+    "crossing_rate": 0.0525,
+    "mc_se": 0.005,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.5/L50": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.019,
+     0.0328
+    ],
+    "crossing_count": 50,
+    "crossing_rate": 0.025,
+    "mc_se": 0.0035,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.94/L1": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.4378,
+     0.4814
+    ],
+    "crossing_count": 919,
+    "crossing_rate": 0.4595,
+    "mc_se": 0.0111,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.94/L100": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0287,
+     0.0451
+    ],
+    "crossing_count": 72,
+    "crossing_rate": 0.036,
+    "mc_se": 0.0042,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.94/L25": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0942,
+     0.1213
+    ],
+    "crossing_count": 214,
+    "crossing_rate": 0.107,
+    "mc_se": 0.0069,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.94/L5": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.2749,
+     0.3149
+    ],
+    "crossing_count": 589,
+    "crossing_rate": 0.2945,
+    "mc_se": 0.0102,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.94/L50": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0472,
+     0.0675
+    ],
+    "crossing_count": 113,
+    "crossing_rate": 0.0565,
+    "mc_se": 0.0052,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.99/L1": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.5166,
+     0.5603
+    ],
+    "crossing_count": 1077,
+    "crossing_rate": 0.5385,
+    "mc_se": 0.0111,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.99/L100": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0999,
+     0.1276
+    ],
+    "crossing_count": 226,
+    "crossing_rate": 0.113,
+    "mc_se": 0.0071,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.99/L200": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0449,
+     0.0648
+    ],
+    "crossing_count": 108,
+    "crossing_rate": 0.054,
+    "mc_se": 0.0051,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.99/L25": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.2813,
+     0.3215
+    ],
+    "crossing_count": 602,
+    "crossing_rate": 0.301,
+    "mc_se": 0.0103,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.99/L400": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.0097,
+     0.0202
+    ],
+    "crossing_count": 28,
+    "crossing_rate": 0.014,
+    "mc_se": 0.0026,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": false
+   },
+   "select/ar1_0.99/L5": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.4343,
+     0.4779
+    ],
+    "crossing_count": 912,
+    "crossing_rate": 0.456,
+    "mc_se": 0.0111,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   },
+   "select/ar1_0.99/L50": {
+    "bound": 0.05,
+    "ci95_wilson": [
+     0.2005,
+     0.2366
+    ],
+    "crossing_count": 436,
+    "crossing_rate": 0.218,
+    "mc_se": 0.0092,
+    "n_paths": 2000,
+    "seed_family": 0,
+    "violates": true
+   }
+  },
+  "kappa": 0.5,
+  "power": {
+   "blockwise_L50/ar1_0.94/shift0.5": {
+    "detection_rate": 0.689,
+    "median_latency_ticks": 1050
+   },
+   "blockwise_L50/ar1_0.94/shift1.0": {
+    "detection_rate": 1.0,
+    "median_latency_ticks": 400
+   }
+  },
+  "protocol": {
+   "evaluation_seed_base": 1000,
+   "rule": "block length selected on selection seeds ONLY; final numbers from evaluation seeds",
+   "selection_seed_base": 0
+  },
+  "runtime_s": 21.0,
+  "selected_block_len": 50,
+  "threshold": 20.0,
+  "validity_domain": {
+   "boundary_counterexample": "rho = 0.99 violates at L <= 100 (0.113 at L=100) and is restored at L = 200 (0.054) and L = 400 (0.014): L must scale with the mixing time",
+   "declared": "AR(1)-like dependence with rho <= 0.94 (approx. 15-tick decorrelation, CSIA's smoothed regime)"
+  }
+ },
+ "result_schema_version": "1.0.0",
+ "result_type": "MONTE_CARLO"
+}

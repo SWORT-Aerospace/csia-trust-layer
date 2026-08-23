@@ -2,8 +2,21 @@
 __pycache__/
 *.egg-info/
 *.pyc
-data/
-!data/real_logs_report.json
 .pytest_cache/
+
+# Build outputs (python -m build)
+/dist/
+/build/
+
+# Scratch corpora at the repository ROOT only. This rule MUST stay anchored:
+# an unanchored "data/" also matched csia/data/, which silently excluded the
+# entire data-lake package from the repository (see tests/test_ci_env.py).
+/data/
+!/data/real_logs_report.json
+
+# Repository-local data-root fallback (tests and fixtures only; real
+# acquisition is refused here — see csia/data/paths.py).
+/.csia-data/
+
 csia/native/*.dylib
 csia/native/*.so

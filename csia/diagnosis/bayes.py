@@ -44,7 +44,13 @@ PRIOR_NOMINAL = 0.86       # remaining mass split across fault hypotheses
 CAUSES = {
     "nominal": [],
     "gps_fault": ["phys_gps"],
-    "imu0_bias_drift": ["redundant_imu", "accel_motor_current"],
+    # attitude_gravity_mag breaks the imu0/imu1 tie. It compares mag heading
+    # against imu0-integrated yaw, so an imu0 bias corrupts it and an imu1
+    # bias does not. It is ungated, so unlike the motor edges it survives
+    # disarm/pre-arm, which is where the two hypotheses used to collapse to a
+    # shared {redundant_imu} signature (WP1 F-D1, repaired in WP-C3).
+    "imu0_bias_drift": ["redundant_imu", "accel_motor_current",
+                        "attitude_gravity_mag"],
     "imu1_bias_drift": ["redundant_imu", "accel_esc_rpm"],
     "mag_interference": ["attitude_gravity_mag", "heading_course",
                          "phys_mag", "temp_mag"],
@@ -98,6 +104,17 @@ class DiagnosisCore:
         for fname, (c, gate) in features.items():
             if gate <= 1e-9:
                 continue
+            # Bounds rejection, matching TrustCore. Without it a NaN or an
+            # out-of-domain consistency makes np.log return NaN, which
+            # propagates through the softmax and yields a posterior that is
+            # not a distribution -- silently, with only a RuntimeWarning.
+            # consistency() maps lambda into (0, 1], so no production
+            # upstream can trip this; a corrupted or hand-built feature dict
+            # can. Raising is the only outcome that cannot be mistaken for a
+            # diagnosis.
+            if not (0.0 <= float(c) <= 1.0):
+                raise ValueError(
+                    f"consistency for {fname!r} must lie in [0, 1], got {c!r}")
             lo = float(np.log(1.0 - c + EPS))
             hi = float(np.log(c + EPS))
             for ci, low in enumerate(self._low):
