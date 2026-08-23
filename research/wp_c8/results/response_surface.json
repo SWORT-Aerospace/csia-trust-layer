@@ -1,0 +1,2334 @@
+{
+ "coverage_map_by_detection": {
+  "both": 12,
+  "layer_only": 1,
+  "neither": 8
+ },
+ "coverage_map_by_escalation": {
+  "both": 3,
+  "ekf_only": 9,
+  "neither": 9
+ },
+ "criteria": {
+  "ekf_detects": "EKF_STATUS_REPORT pos_horiz_variance > 0.8 (ArduPilot's own FS_EKF_THRESH default; these variances are normalised innovation test ratios)",
+  "layer_detects": "gps physics component < 0.1",
+  "layer_escalates": "failsafe leaves NORMAL"
+ },
+ "detection_is_not_escalation": "every cell reports ekf_detects, layer_detects and layer_escalates separately. Collapsing them into one detection rate would erase this programme's central finding, which is that the diagnostic residual saturates at every magnitude while trust never crosses threshold.",
+ "duration_experiment": {
+  "DEGENERATE": true,
+  "n_misclassified": 0,
+  "rows": [
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 1.0,
+    "measured_escalates": false,
+    "min_trust": 0.846272,
+    "phys_floor_ticks": 49,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 2.0,
+    "measured_escalates": false,
+    "min_trust": 0.817448,
+    "phys_floor_ticks": 58,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 3.0,
+    "measured_escalates": false,
+    "min_trust": 0.84743,
+    "phys_floor_ticks": 58,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 4.0,
+    "measured_escalates": false,
+    "min_trust": 0.857316,
+    "phys_floor_ticks": 58,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 6.0,
+    "measured_escalates": false,
+    "min_trust": 0.882738,
+    "phys_floor_ticks": 58,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 55.7,
+    "correct": true,
+    "hold_s": 10.0,
+    "measured_escalates": false,
+    "min_trust": 0.907007,
+    "phys_floor_ticks": 58,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 1.0,
+    "measured_escalates": false,
+    "min_trust": 0.796024,
+    "phys_floor_ticks": 65,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 2.0,
+    "measured_escalates": false,
+    "min_trust": 0.759465,
+    "phys_floor_ticks": 80,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 3.0,
+    "measured_escalates": false,
+    "min_trust": 0.778178,
+    "phys_floor_ticks": 80,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 4.0,
+    "measured_escalates": false,
+    "min_trust": 0.801047,
+    "phys_floor_ticks": 80,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 6.0,
+    "measured_escalates": false,
+    "min_trust": 0.827333,
+    "phys_floor_ticks": 80,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   },
+   {
+    "amplitude_m": 5566.0,
+    "correct": true,
+    "hold_s": 10.0,
+    "measured_escalates": false,
+    "min_trust": 0.862922,
+    "phys_floor_ticks": 80,
+    "predicted_escalates": false,
+    "time_to_escalate_s": null
+   }
+  ],
+  "why_degenerate": "releasing the offset stops refreshing the step peak, so held glitches capped at 80 floor ticks and never reached the boundary. Every cell was predicted negative and observed negative, which confirms the prediction only on one side. The positive side is exercised by the amplitude-slew grid, where sustained ramps reach 106 to 423 floor ticks."
+ },
+ "escalation_boundary": {
+  "boundary_ticks": 118.31,
+  "failsafe_dwell_ticks": 25,
+  "grid_classification": [
+   {
+    "cell": "a0.5_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.941768,
+    "min_trust": 0.98333,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a0.5_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.940834,
+    "min_trust": 0.983142,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a0.5_s20",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.942234,
+    "min_trust": 0.983423,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a2_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.721621,
+    "min_trust": 0.967997,
+    "phys_floor_ticks": 5,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -113.3
+   },
+   {
+    "cell": "a2_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.93539,
+    "min_trust": 0.982588,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a2_s20",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.9416,
+    "min_trust": 0.983196,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a5.6_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.924077,
+    "phys_floor_ticks": 26,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -92.3
+   },
+   {
+    "cell": "a5.6_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.761802,
+    "min_trust": 0.924441,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a5.6_s20",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.94148,
+    "min_trust": 0.983324,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a22.3_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.908962,
+    "phys_floor_ticks": 32,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -86.3
+   },
+   {
+    "cell": "a22.3_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.739289,
+    "phys_floor_ticks": 88,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -30.3
+   },
+   {
+    "cell": "a22.3_s20",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.735614,
+    "min_trust": 0.90285,
+    "phys_floor_ticks": 0,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -118.3
+   },
+   {
+    "cell": "a55.7_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.906459,
+    "phys_floor_ticks": 33,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -85.3
+   },
+   {
+    "cell": "a55.7_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.736023,
+    "phys_floor_ticks": 91,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -27.3
+   },
+   {
+    "cell": "a55.7_s20",
+    "correct": false,
+    "measured_escalates": false,
+    "min_evidence": 0.687411,
+    "min_trust": 0.729517,
+    "phys_floor_ticks": 119,
+    "predicted_escalates": true,
+    "ticks_from_boundary": 0.7
+   },
+   {
+    "cell": "a556.6_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.906096,
+    "phys_floor_ticks": 33,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -85.3
+   },
+   {
+    "cell": "a556.6_s4",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.735263,
+    "phys_floor_ticks": 91,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -27.3
+   },
+   {
+    "cell": "a556.6_s20",
+    "correct": true,
+    "measured_escalates": true,
+    "min_evidence": 0.679873,
+    "min_trust": 0.714769,
+    "phys_floor_ticks": 242,
+    "predicted_escalates": true,
+    "ticks_from_boundary": 123.7
+   },
+   {
+    "cell": "a5566_s0",
+    "correct": true,
+    "measured_escalates": false,
+    "min_evidence": 0.7,
+    "min_trust": 0.88809,
+    "phys_floor_ticks": 40,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -78.3
+   },
+   {
+    "cell": "a5566_s4",
+    "correct": false,
+    "measured_escalates": true,
+    "min_evidence": 0.698318,
+    "min_trust": 0.716273,
+    "phys_floor_ticks": 106,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -12.3
+   },
+   {
+    "cell": "a5566_s20",
+    "correct": true,
+    "measured_escalates": true,
+    "min_evidence": 0.678527,
+    "min_trust": 0.707354,
+    "phys_floor_ticks": 423,
+    "predicted_escalates": true,
+    "ticks_from_boundary": 304.7
+   }
+  ],
+  "grid_correct_of_total": "19/21",
+  "grid_misclassified": 2,
+  "honest_limits": "the model assumes a constant evidence floor and a constant forgetting factor. Observed evidence floors range 0.678 to 0.700, so cells within a few ticks of the boundary can fall either side. Both misclassifications, if any, sit inside that margin.",
+  "misclassified_cells": [
+   {
+    "cell": "a55.7_s20",
+    "correct": false,
+    "measured_escalates": false,
+    "min_evidence": 0.687411,
+    "min_trust": 0.729517,
+    "phys_floor_ticks": 119,
+    "predicted_escalates": true,
+    "ticks_from_boundary": 0.7
+   },
+   {
+    "cell": "a5566_s4",
+    "correct": false,
+    "measured_escalates": true,
+    "min_evidence": 0.698318,
+    "min_trust": 0.716273,
+    "phys_floor_ticks": 106,
+    "predicted_escalates": false,
+    "ticks_from_boundary": -12.3
+   }
+  ],
+  "predicted_N_star_ticks": 93.31,
+  "why_dwell_is_added": "N* is when trust first crosses the threshold. The failsafe additionally requires the condition to persist for dwell_up = 1 s, so escalation needs N* + 25 ticks at the floor, not N*."
+ },
+ "evidence_floor_confirmation": {
+  "cells_whose_min_evidence_equals_0_700": 8,
+  "observed_range": [
+   0.6785,
+   0.9422
+  ],
+  "of_cells": 21,
+  "predicted_e_f": 0.7,
+  "statement": "the algebra predicts that destroying only the physics residual floors fused evidence at w_nbr+w_temp+w_stat = 0.70. Cells whose residual saturates land on 0.7000 to four decimals. Cells slightly below it are ones where the neighbour term also degraded, which lowers e_f further and is consistent with the same equation."
+ },
+ "neither_region_by_detection": {
+  "amplitudes_m": [
+   0.5,
+   2.0,
+   5.6,
+   22.3
+  ],
+  "cells": [
+   {
+    "amplitude_m": 0.5,
+    "ekf_var": 0.10802,
+    "min_phys": 1.0,
+    "min_trust": 0.98333,
+    "raw_error_m": 2.42,
+    "slew_s": 0
+   },
+   {
+    "amplitude_m": 0.5,
+    "ekf_var": 0.06361,
+    "min_phys": 1.0,
+    "min_trust": 0.983142,
+    "raw_error_m": 2.42,
+    "slew_s": 4
+   },
+   {
+    "amplitude_m": 0.5,
+    "ekf_var": 0.02985,
+    "min_phys": 1.0,
+    "min_trust": 0.983423,
+    "raw_error_m": 2.42,
+    "slew_s": 20
+   },
+   {
+    "amplitude_m": 2.0,
+    "ekf_var": 0.1948,
+    "min_phys": 1.0,
+    "min_trust": 0.982588,
+    "raw_error_m": 3.91,
+    "slew_s": 4
+   },
+   {
+    "amplitude_m": 2.0,
+    "ekf_var": 0.05634,
+    "min_phys": 1.0,
+    "min_trust": 0.983196,
+    "raw_error_m": 3.91,
+    "slew_s": 20
+   },
+   {
+    "amplitude_m": 5.6,
+    "ekf_var": 0.51458,
+    "min_phys": 0.206008,
+    "min_trust": 0.924441,
+    "raw_error_m": 7.5,
+    "slew_s": 4
+   },
+   {
+    "amplitude_m": 5.6,
+    "ekf_var": 0.11903,
+    "min_phys": 1.0,
+    "min_trust": 0.983324,
+    "raw_error_m": 7.5,
+    "slew_s": 20
+   },
+   {
+    "amplitude_m": 22.3,
+    "ekf_var": 0.41075,
+    "min_phys": 0.302639,
+    "min_trust": 0.90285,
+    "raw_error_m": 24.16,
+    "slew_s": 20
+   }
+  ],
+  "fraction": 0.381,
+  "n_cells": 8,
+  "of_total": 21,
+  "slews_s": [
+   0,
+   4,
+   20
+  ]
+ },
+ "neither_region_by_escalation": {
+  "fraction": 0.4286,
+  "n_cells": 9,
+  "note": "cells where the EKF does not flag AND the diagnostic layer does not escalate. This is the operationally relevant blind region, since a detection nobody acts on is not coverage.",
+  "of_total": 21
+ },
+ "per_run": {
+  "duration": [
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14889,
+     "mean_pos_horiz_variance_before": 0.00579,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 1.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.56,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 55.01
+    },
+    "label": "hold1_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.894528,
+     "min_phys_component": 0.0,
+     "min_trust": 0.846272,
+     "phys_floor_ticks": 49,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14671,
+     "mean_pos_horiz_variance_before": 0.00592,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 2.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.57,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 55.01
+    },
+    "label": "hold2_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.894741,
+     "min_phys_component": 0.0,
+     "min_trust": 0.817448,
+     "phys_floor_ticks": 58,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14674,
+     "mean_pos_horiz_variance_before": 0.00592,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 3.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.57,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 55.04
+    },
+    "label": "hold3_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.89423,
+     "min_phys_component": 0.0,
+     "min_trust": 0.84743,
+     "phys_floor_ticks": 58,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14691,
+     "mean_pos_horiz_variance_before": 0.00583,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 4.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.58,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 55.33
+    },
+    "label": "hold4_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.683081,
+     "min_nbr_component": 0.893677,
+     "min_phys_component": 0.0,
+     "min_trust": 0.857316,
+     "phys_floor_ticks": 58,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14816,
+     "mean_pos_horiz_variance_before": 0.00566,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 6.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.65,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 56.16
+    },
+    "label": "hold6_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.893434,
+     "min_phys_component": 0.0,
+     "min_trust": 0.882738,
+     "phys_floor_ticks": 58,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14836,
+     "mean_pos_horiz_variance_before": 0.00592,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      815,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.602
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 10.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 56.03,
+     "max_gps_sample_step_m": 56.56,
+     "max_raw_position_error_m": 56.18
+    },
+    "label": "hold10_a55.7",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.918893,
+     "min_phys_component": 0.0,
+     "min_trust": 0.907007,
+     "phys_floor_ticks": 58,
+     "time_to_detect_s": 0.64,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2119,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18652,
+     "mean_pos_horiz_variance_before": 0.00582,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 1.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.57,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5565.31
+    },
+    "label": "hold1_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.891693,
+     "min_phys_component": 0.0,
+     "min_trust": 0.796024,
+     "phys_floor_ticks": 65,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18726,
+     "mean_pos_horiz_variance_before": 0.00596,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 2.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.57,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5565.32
+    },
+    "label": "hold2_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.894396,
+     "min_phys_component": 0.0,
+     "min_trust": 0.759465,
+     "phys_floor_ticks": 80,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18726,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 3.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.57,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5565.34
+    },
+    "label": "hold3_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.678357,
+     "min_nbr_component": 0.894591,
+     "min_phys_component": 0.0,
+     "min_trust": 0.778178,
+     "phys_floor_ticks": 80,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18665,
+     "mean_pos_horiz_variance_before": 0.00603,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 4.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.59,
+     "max_gps_sample_step_m": 5566.9,
+     "max_raw_position_error_m": 5565.87
+    },
+    "label": "hold4_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.678411,
+     "min_nbr_component": 0.895087,
+     "min_phys_component": 0.0,
+     "min_trust": 0.801047,
+     "phys_floor_ticks": 80,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18726,
+     "mean_pos_horiz_variance_before": 0.00594,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 6.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.68,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5566.43
+    },
+    "label": "hold6_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.894683,
+     "min_phys_component": 0.0,
+     "min_trust": 0.827333,
+     "phys_floor_ticks": 80,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18726,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      815,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": 10.0,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 5566.38,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5566.46
+    },
+    "label": "hold10_a5566",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.973176,
+     "min_phys_component": 0.0,
+     "min_trust": 0.862922,
+     "phys_floor_ticks": 80,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2094,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   }
+  ],
+  "grid": [
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 0.5,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.10802,
+     "mean_pos_horiz_variance_before": 0.00595,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.99,
+     "max_gps_sample_step_m": 1.37,
+     "max_raw_position_error_m": 2.42
+    },
+    "label": "a0.5_s0",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.941768,
+     "min_nbr_component": 0.895907,
+     "min_phys_component": 1.0,
+     "min_trust": 0.98333,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 0.5,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.06361,
+     "mean_pos_horiz_variance_before": 0.00593,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.99,
+     "max_gps_sample_step_m": 1.08,
+     "max_raw_position_error_m": 2.42
+    },
+    "label": "a0.5_s4",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.940834,
+     "min_nbr_component": 0.895037,
+     "min_phys_component": 1.0,
+     "min_trust": 0.983142,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 0.125,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 0.5,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.02985,
+     "mean_pos_horiz_variance_before": 0.00593,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 0.98,
+     "max_gps_sample_step_m": 1.08,
+     "max_raw_position_error_m": 2.42
+    },
+    "label": "a0.5_s20",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.942234,
+     "min_nbr_component": 0.895504,
+     "min_phys_component": 1.0,
+     "min_trust": 0.983423,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 0.025,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 2.0,
+    "coverage": "layer_only",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.40808,
+     "mean_pos_horiz_variance_before": 0.00588,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 2.49,
+     "max_gps_sample_step_m": 2.87,
+     "max_raw_position_error_m": 3.92
+    },
+    "label": "a2_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.721621,
+     "min_nbr_component": 0.894034,
+     "min_phys_component": 0.072069,
+     "min_trust": 0.967997,
+     "phys_floor_ticks": 5,
+     "time_to_detect_s": 0.68,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 2.0,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.1948,
+     "mean_pos_horiz_variance_before": 0.00573,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 2.5,
+     "max_gps_sample_step_m": 1.39,
+     "max_raw_position_error_m": 3.91
+    },
+    "label": "a2_s4",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.93539,
+     "min_nbr_component": 0.893652,
+     "min_phys_component": 1.0,
+     "min_trust": 0.982588,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 0.5,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 2.0,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.05634,
+     "mean_pos_horiz_variance_before": 0.00593,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 2.44,
+     "max_gps_sample_step_m": 1.09,
+     "max_raw_position_error_m": 3.91
+    },
+    "label": "a2_s20",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.9416,
+     "min_nbr_component": 0.895253,
+     "min_phys_component": 1.0,
+     "min_trust": 0.983196,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 0.1,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5.6,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1.15857,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.602
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 6.82,
+     "max_gps_sample_step_m": 6.47,
+     "max_raw_position_error_m": 7.5
+    },
+    "label": "a5.6_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.901527,
+     "min_phys_component": 0.0,
+     "min_trust": 0.924077,
+     "phys_floor_ticks": 26,
+     "time_to_detect_s": 0.72,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5.6,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.51458,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 6.84,
+     "max_gps_sample_step_m": 2.27,
+     "max_raw_position_error_m": 7.5
+    },
+    "label": "a5.6_s4",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.761802,
+     "min_nbr_component": 0.899084,
+     "min_phys_component": 0.206008,
+     "min_trust": 0.924441,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 1.4,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5.6,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.11903,
+     "mean_pos_horiz_variance_before": 0.00597,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 5.98,
+     "max_gps_sample_step_m": 1.16,
+     "max_raw_position_error_m": 7.5
+    },
+    "label": "a5.6_s20",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.94148,
+     "min_nbr_component": 0.896212,
+     "min_phys_component": 1.0,
+     "min_trust": 0.983324,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 0.27999999999999997,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 22.3,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 4.50957,
+     "mean_pos_horiz_variance_before": 0.00596,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 24.05,
+     "max_gps_sample_step_m": 23.18,
+     "max_raw_position_error_m": 25.03
+    },
+    "label": "a22.3_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.895589,
+     "min_phys_component": 0.0,
+     "min_trust": 0.908962,
+     "phys_floor_ticks": 32,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 22.3,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 4.50778,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 24.03,
+     "max_gps_sample_step_m": 6.45,
+     "max_raw_position_error_m": 25.03
+    },
+    "label": "a22.3_s4",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.895414,
+     "min_phys_component": 0.0,
+     "min_trust": 0.739289,
+     "phys_floor_ticks": 88,
+     "time_to_detect_s": 0.52,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 5.575,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 22.3,
+    "coverage": "neither",
+    "coverage_by_escalation": "neither",
+    "ekf": {
+     "detects": false,
+     "max_pos_horiz_variance_after": 0.41075,
+     "mean_pos_horiz_variance_before": 0.00581,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": null
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 22.97,
+     "max_gps_sample_step_m": 2.0,
+     "max_raw_position_error_m": 24.16
+    },
+    "label": "a22.3_s20",
+    "layer": {
+     "alarms": [],
+     "detects": false,
+     "escalates": false,
+     "min_evidence": 0.735614,
+     "min_nbr_component": 0.898164,
+     "min_phys_component": 0.302639,
+     "min_trust": 0.90285,
+     "phys_floor_ticks": 0,
+     "time_to_detect_s": null,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 1.115,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 11.14694,
+     "mean_pos_horiz_variance_before": 0.00597,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 56.85,
+     "max_gps_sample_step_m": 56.57,
+     "max_raw_position_error_m": 57.95
+    },
+    "label": "a55.7_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.905912,
+     "min_phys_component": 0.0,
+     "min_trust": 0.906459,
+     "phys_floor_ticks": 33,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 7.52427,
+     "mean_pos_horiz_variance_before": 0.00583,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 56.86,
+     "max_gps_sample_step_m": 14.81,
+     "max_raw_position_error_m": 57.97
+    },
+    "label": "a55.7_s4",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.904641,
+     "min_phys_component": 0.0,
+     "min_trust": 0.736023,
+     "phys_floor_ticks": 91,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 13.925,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 55.7,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1.0442,
+     "mean_pos_horiz_variance_before": 0.00597,
+     "status_flags_seen": [
+      0,
+      165,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 1.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 57.17,
+     "max_gps_sample_step_m": 3.66,
+     "max_raw_position_error_m": 57.9
+    },
+    "label": "a55.7_s20",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.687411,
+     "min_nbr_component": 0.910295,
+     "min_phys_component": 0.000678,
+     "min_trust": 0.729517,
+     "phys_floor_ticks": 119,
+     "time_to_detect_s": 0.6,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 2.785,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 111.32368,
+     "mean_pos_horiz_variance_before": 0.0059,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 557.76,
+     "max_gps_sample_step_m": 557.47,
+     "max_raw_position_error_m": 558.85
+    },
+    "label": "a556.6_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.905862,
+     "min_phys_component": 0.0,
+     "min_trust": 0.906096,
+     "phys_floor_ticks": 33,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 74.93237,
+     "mean_pos_horiz_variance_before": 0.00588,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 557.76,
+     "max_gps_sample_step_m": 140.02,
+     "max_raw_position_error_m": 558.85
+    },
+    "label": "a556.6_s4",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.905831,
+     "min_phys_component": 0.0,
+     "min_trust": 0.735263,
+     "phys_floor_ticks": 91,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 139.15,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "both",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 15.47848,
+     "mean_pos_horiz_variance_before": 0.00593,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      815,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 556.6,
+     "max_gps_sample_step_m": 28.74,
+     "max_raw_position_error_m": 556.6
+    },
+    "label": "a556.6_s20",
+    "layer": {
+     "alarms": [
+      {
+       "level": "CAUTION",
+       "reasons": [
+        "GPS trust 0.72 (diagnosis gps_fault p=0.74)"
+       ],
+       "t": 64.8
+      }
+     ],
+     "detects": true,
+     "escalates": true,
+     "min_evidence": 0.679873,
+     "min_nbr_component": 0.973139,
+     "min_phys_component": 0.0,
+     "min_trust": 0.714769,
+     "phys_floor_ticks": 242,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": 4.8
+    },
+    "monitored_ticks": 2094,
+    "phase": "cruise",
+    "slew_rate_m_s": 27.830000000000002,
+    "slew_s": 20
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 1113.18726,
+     "mean_pos_horiz_variance_before": 0.00594,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 5567.1,
+     "max_gps_sample_step_m": 5566.88,
+     "max_raw_position_error_m": 5568.25
+    },
+    "label": "a5566_s0",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.906288,
+     "min_phys_component": 0.0,
+     "min_trust": 0.88809,
+     "phys_floor_ticks": 40,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": Infinity,
+    "slew_s": 0
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "both",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 749.09198,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 5567.1,
+     "max_gps_sample_step_m": 1392.38,
+     "max_raw_position_error_m": 5568.25
+    },
+    "label": "a5566_s4",
+    "layer": {
+     "alarms": [
+      {
+       "level": "CAUTION",
+       "reasons": [
+        "GPS trust 0.72 (diagnosis gps_fault p=0.85)"
+       ],
+       "t": 64.68
+      }
+     ],
+     "detects": true,
+     "escalates": true,
+     "min_evidence": 0.698318,
+     "min_nbr_component": 0.906143,
+     "min_phys_component": 0.0,
+     "min_trust": 0.716273,
+     "phys_floor_ticks": 106,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": 4.68
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 1391.5,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 5566.0,
+    "coverage": "both",
+    "coverage_by_escalation": "both",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 154.77536,
+     "mean_pos_horiz_variance_before": 0.00591,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      815,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 5566.01,
+     "max_gps_sample_step_m": 279.17,
+     "max_raw_position_error_m": 5566.02
+    },
+    "label": "a5566_s20",
+    "layer": {
+     "alarms": [
+      {
+       "level": "CAUTION",
+       "reasons": [
+        "GPS trust 0.71 (diagnosis gps_fault p=0.84)"
+       ],
+       "t": 65.04
+      }
+     ],
+     "detects": true,
+     "escalates": true,
+     "min_evidence": 0.678527,
+     "min_nbr_component": 1.0,
+     "min_phys_component": 0.0,
+     "min_trust": 0.707354,
+     "phys_floor_ticks": 423,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": 5.04
+    },
+    "monitored_ticks": 2094,
+    "phase": "cruise",
+    "slew_rate_m_s": 278.3,
+    "slew_s": 20
+   }
+  ],
+  "phase": [
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "both",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 75.01759,
+     "mean_pos_horiz_variance_before": 0.00269,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 32.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 557.95,
+     "max_gps_sample_step_m": 139.27,
+     "max_raw_position_error_m": 558.83
+    },
+    "label": "phase_climb",
+    "layer": {
+     "alarms": [
+      {
+       "level": "CAUTION",
+       "reasons": [
+        "GPS trust 0.71 (diagnosis nominal p=0.55)"
+       ],
+       "t": 36.48
+      }
+     ],
+     "detects": true,
+     "escalates": true,
+     "min_evidence": 0.617137,
+     "min_nbr_component": 0.822824,
+     "min_phys_component": 0.0,
+     "min_trust": 0.696942,
+     "phys_floor_ticks": 91,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": 4.48
+    },
+    "monitored_ticks": 2500,
+    "phase": "climb",
+    "slew_rate_m_s": 139.15,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 74.9251,
+     "mean_pos_horiz_variance_before": 0.00569,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 60.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 557.74,
+     "max_gps_sample_step_m": 140.01,
+     "max_raw_position_error_m": 558.84
+    },
+    "label": "phase_cruise",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.90309,
+     "min_phys_component": 0.0,
+     "min_trust": 0.735241,
+     "phys_floor_ticks": 91,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "cruise",
+    "slew_rate_m_s": 139.15,
+    "slew_s": 4
+   },
+   {
+    "airborne_at_s": 22.6,
+    "amplitude_m": 556.6,
+    "coverage": "both",
+    "coverage_by_escalation": "ekf_only",
+    "ekf": {
+     "detects": true,
+     "max_pos_horiz_variance_after": 74.91049,
+     "mean_pos_horiz_variance_before": 0.00761,
+     "status_flags_seen": [
+      0,
+      165,
+      807,
+      831,
+      933
+     ],
+     "threshold": 0.8,
+     "time_to_detect_s": 0.402
+    },
+    "gate_closed_ticks": 0,
+    "gps_fix_types_seen": [
+     0,
+     1,
+     3
+    ],
+    "hold_s": null,
+    "inject_at_s": 100.0,
+    "injection_effect": {
+     "max_fused_position_error_m": 558.3,
+     "max_gps_sample_step_m": 139.13,
+     "max_raw_position_error_m": 558.48
+    },
+    "label": "phase_descent",
+    "layer": {
+     "alarms": [],
+     "detects": true,
+     "escalates": false,
+     "min_evidence": 0.7,
+     "min_nbr_component": 0.943698,
+     "min_phys_component": 0.0,
+     "min_trust": 0.744014,
+     "phys_floor_ticks": 91,
+     "time_to_detect_s": 0.44,
+     "time_to_escalate_s": null
+    },
+    "monitored_ticks": 2500,
+    "phase": "descent",
+    "slew_rate_m_s": 139.15,
+    "slew_s": 4
+   }
+  ]
+ },
+ "phase_dependence": [
+  {
+   "ekf_detects": true,
+   "inject_at_s": 32.0,
+   "layer_detects": true,
+   "layer_escalates": true,
+   "min_trust": 0.696942,
+   "phase": "climb"
+  },
+  {
+   "ekf_detects": true,
+   "inject_at_s": 60.0,
+   "layer_detects": true,
+   "layer_escalates": false,
+   "min_trust": 0.735241,
+   "phase": "cruise"
+  },
+  {
+   "ekf_detects": true,
+   "inject_at_s": 100.0,
+   "layer_detects": true,
+   "layer_escalates": false,
+   "min_trust": 0.744014,
+   "phase": "descent"
+  }
+ ],
+ "question": "is there a fault region NEITHER the estimator nor the diagnostic layer covers, and how large is it"
+}
