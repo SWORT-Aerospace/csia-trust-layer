@@ -1,0 +1,900 @@
+{
+ "abstaining_policy_is_research_code_only": true,
+ "definition": "T_FH = time{ health = HEALTHY AND applicable evidence = empty }, over the conditioning window [60.0, 85.0] s",
+ "four_state_mapping_from_source": {
+  "FAULT": "failsafe above NORMAL, or top cause not `nominal`. Emitted.",
+  "HEALTHY": "failsafe NORMAL and top cause `nominal`. Emitted.",
+  "NOT_APPLICABLE": "hypothesis support entirely silenced (bayes.py `if gate <= 1e-9: continue`). NOT emitted; surfaces as `nominal` at high posterior, because the prior decides once the likelihoods tie.",
+  "UNKNOWN": "no evidence available, Beta belief held (engine.py:140,146). NOT emitted; surfaces as HEALTHY, because a held belief and a confirmed one are the same number at the output."
+ },
+ "nuisance_cost_in_quiet_arms": {
+  "glitch": 0.0,
+  "nominal": 0.0
+ },
+ "nuisance_note": "T_FH under abstention in arms with no fix loss. Anything above zero here would be the abstaining policy firing when it should not.",
+ "per_arm": {
+  "degraded": {
+   "T_FH_abstaining_fraction": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction": 0.9808,
+   "T_FH_attribution_only_s": 24.48,
+   "T_FH_deployed_fraction": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "alarms_from_freshness_disjunct": 1.0,
+   "flights": 3,
+   "gate_transitions_in_window": 1.0,
+   "onset_to_status_change_abstaining_s": 0.52,
+   "onset_to_status_change_deployed_s": 1.56,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 612.0
+  },
+  "denial": {
+   "T_FH_abstaining_fraction": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction": 0.9604,
+   "T_FH_attribution_only_s": 23.9733,
+   "T_FH_deployed_fraction": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "alarms_from_freshness_disjunct": 1.0,
+   "flights": 3,
+   "gate_transitions_in_window": 1.0,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 614.0
+  },
+  "denial_recovered": {
+   "T_FH_abstaining_fraction": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction": 0.5881,
+   "T_FH_attribution_only_s": 14.68,
+   "T_FH_deployed_fraction": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "alarms_from_freshness_disjunct": 1.0,
+   "flights": 3,
+   "gate_transitions_in_window": 2.0,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_delay_abstaining_s": 5.7067,
+   "recovery_delay_deployed_s": 5.7067,
+   "silenced_ticks_in_window": 381.6667
+  },
+  "glitch": {
+   "T_FH_abstaining_fraction": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "alarms_from_freshness_disjunct": 0.0,
+   "flights": 3,
+   "gate_transitions_in_window": 0.0,
+   "onset_to_status_change_abstaining_s": 1.52,
+   "onset_to_status_change_deployed_s": 1.52,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0.0
+  },
+  "nominal": {
+   "T_FH_abstaining_fraction": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "alarms_from_freshness_disjunct": 0.0,
+   "flights": 3,
+   "gate_transitions_in_window": 0.0,
+   "onset_to_status_change_abstaining_s": null,
+   "onset_to_status_change_deployed_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0.0
+  }
+ },
+ "per_flight": [
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "nominal",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": null,
+   "onset_to_status_change_deployed_s": null,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 0,
+   "status_histogram_abstaining": {
+    "HEALTHY": 624
+   },
+   "status_histogram_deployed": {
+    "HEALTHY": 624
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "nominal",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": null,
+   "onset_to_status_change_deployed_s": null,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 1,
+   "status_histogram_abstaining": {
+    "HEALTHY": 624
+   },
+   "status_histogram_deployed": {
+    "HEALTHY": 624
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "nominal",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": null,
+   "onset_to_status_change_deployed_s": null,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 2,
+   "status_histogram_abstaining": {
+    "HEALTHY": 624
+   },
+   "status_histogram_deployed": {
+    "HEALTHY": 624
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9599,
+   "T_FH_attribution_only_s": 23.96,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial",
+   "gate_transition_times": [
+    60.44
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 614,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 614,
+   "spec_id": 0,
+   "status_histogram_abstaining": {
+    "FAULT": 588,
+    "HEALTHY": 10,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 588,
+    "HEALTHY": 36
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9583,
+   "T_FH_attribution_only_s": 23.92,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.57)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial",
+   "gate_transition_times": [
+    60.44
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1994,
+   "not_fresh_ticks_in_window": 614,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 614,
+   "spec_id": 1,
+   "status_histogram_abstaining": {
+    "FAULT": 588,
+    "HEALTHY": 10,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 588,
+    "HEALTHY": 36
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9631,
+   "T_FH_attribution_only_s": 24.04,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial",
+   "gate_transition_times": [
+    60.44
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 614,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 614,
+   "spec_id": 2,
+   "status_histogram_abstaining": {
+    "FAULT": 588,
+    "HEALTHY": 10,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 588,
+    "HEALTHY": 36
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "glitch",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": 1.52,
+   "onset_to_status_change_deployed_s": 1.52,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 0,
+   "status_histogram_abstaining": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "status_histogram_deployed": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.8,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "glitch",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": 1.52,
+   "onset_to_status_change_deployed_s": 1.52,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 1,
+   "status_histogram_abstaining": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "status_histogram_deployed": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.0,
+   "T_FH_attribution_only_s": 0.0,
+   "T_FH_deployed_fraction_of_window": 0.0,
+   "T_FH_deployed_s": 0.0,
+   "airborne_at_s": 22.6,
+   "alarms": [],
+   "alarms_from_freshness_disjunct": 0,
+   "arm": "glitch",
+   "gate_transition_times": [],
+   "gate_transitions_in_window": 0,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2500,
+   "not_fresh_ticks_in_window": 0,
+   "onset_to_first_silenced_s": null,
+   "onset_to_status_change_abstaining_s": 1.52,
+   "onset_to_status_change_deployed_s": 1.52,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 0,
+   "spec_id": 2,
+   "status_histogram_abstaining": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "status_histogram_deployed": {
+    "FAULT": 8,
+    "HEALTHY": 616
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9808,
+   "T_FH_attribution_only_s": 24.48,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "degraded",
+   "gate_transition_times": [
+    60.52
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 612,
+   "onset_to_first_silenced_s": 0.52,
+   "onset_to_status_change_abstaining_s": 0.52,
+   "onset_to_status_change_deployed_s": 1.56,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 612,
+   "spec_id": 0,
+   "status_histogram_abstaining": {
+    "FAULT": 586,
+    "HEALTHY": 12,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 586,
+    "HEALTHY": 38
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9808,
+   "T_FH_attribution_only_s": 24.48,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "degraded",
+   "gate_transition_times": [
+    60.52
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 612,
+   "onset_to_first_silenced_s": 0.52,
+   "onset_to_status_change_abstaining_s": 0.52,
+   "onset_to_status_change_deployed_s": 1.56,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 612,
+   "spec_id": 1,
+   "status_histogram_abstaining": {
+    "FAULT": 586,
+    "HEALTHY": 12,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 586,
+    "HEALTHY": 38
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.9808,
+   "T_FH_attribution_only_s": 24.48,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.99)"
+     ],
+     "t": 61.56
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "degraded",
+   "gate_transition_times": [
+    60.52
+   ],
+   "gate_transitions_in_window": 1,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 612,
+   "onset_to_first_silenced_s": 0.52,
+   "onset_to_status_change_abstaining_s": 0.52,
+   "onset_to_status_change_deployed_s": 1.56,
+   "recovery_at_s": null,
+   "recovery_delay_abstaining_s": null,
+   "recovery_delay_deployed_s": null,
+   "silenced_ticks_in_window": 612,
+   "spec_id": 2,
+   "status_histogram_abstaining": {
+    "FAULT": 586,
+    "HEALTHY": 12,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 586,
+    "HEALTHY": 38
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.5929,
+   "T_FH_attribution_only_s": 14.8,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial_recovered",
+   "gate_transition_times": [
+    60.44,
+    75.84
+   ],
+   "gate_transitions_in_window": 2,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 385,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": 75.0,
+   "recovery_delay_abstaining_s": 5.84,
+   "recovery_delay_deployed_s": 5.84,
+   "silenced_ticks_in_window": 385,
+   "spec_id": 0,
+   "status_histogram_abstaining": {
+    "FAULT": 484,
+    "HEALTHY": 114,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 484,
+    "HEALTHY": 140
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.5833,
+   "T_FH_attribution_only_s": 14.56,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.8,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.57)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial_recovered",
+   "gate_transition_times": [
+    60.44,
+    75.64
+   ],
+   "gate_transitions_in_window": 2,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1994,
+   "not_fresh_ticks_in_window": 380,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": 75.0,
+   "recovery_delay_abstaining_s": 5.64,
+   "recovery_delay_deployed_s": 5.64,
+   "silenced_ticks_in_window": 380,
+   "spec_id": 1,
+   "status_histogram_abstaining": {
+    "FAULT": 479,
+    "HEALTHY": 119,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 479,
+    "HEALTHY": 145
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  },
+  {
+   "T_FH_abstaining_fraction_of_window": 0.0,
+   "T_FH_abstaining_s": 0.0,
+   "T_FH_attribution_fraction_of_window": 0.5881,
+   "T_FH_attribution_only_s": 14.68,
+   "T_FH_deployed_fraction_of_window": 0.0417,
+   "T_FH_deployed_s": 1.04,
+   "airborne_at_s": 22.6,
+   "alarms": [
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS data invalid (diagnosis nominal p=0.58)"
+     ],
+     "t": 61.48
+    }
+   ],
+   "alarms_from_freshness_disjunct": 1,
+   "arm": "denial_recovered",
+   "gate_transition_times": [
+    60.44,
+    75.64
+   ],
+   "gate_transitions_in_window": 2,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     5.0,
+     "GUIDED"
+    ],
+    [
+     68.8,
+     "LAND"
+    ]
+   ],
+   "monitored_ticks": 1969,
+   "not_fresh_ticks_in_window": 380,
+   "onset_to_first_silenced_s": 0.44,
+   "onset_to_status_change_abstaining_s": 0.44,
+   "onset_to_status_change_deployed_s": 1.48,
+   "recovery_at_s": 75.0,
+   "recovery_delay_abstaining_s": 5.64,
+   "recovery_delay_deployed_s": 5.64,
+   "silenced_ticks_in_window": 380,
+   "spec_id": 2,
+   "status_histogram_abstaining": {
+    "FAULT": 479,
+    "HEALTHY": 119,
+    "NOT_APPLICABLE": 26
+   },
+   "status_histogram_deployed": {
+    "FAULT": 479,
+    "HEALTHY": 145
+   },
+   "window_seconds": 24.96,
+   "window_ticks": 624
+  }
+ ],
+ "policies_agree_fraction": {
+  "degraded": 0.0,
+  "denial": 0.0,
+  "denial_recovered": 0.0,
+  "glitch": 1.0,
+  "nominal": 1.0
+ },
+ "the_gap": "The system has no way to say `I cannot assess this`. Both states that mean that are emitted as health. That is the finding, and it is a semantics gap rather than an observability limit.",
+ "two_numbers_not_one": "T_FH_deployed folds in the failsafe level, which the freshness disjunct drives out of NORMAL about 1.5 s after onset without the diagnosis contributing anything. T_FH_attribution_only excludes the failsafe and measures the channel this paper's claim is about: naming the cause. Reporting only the first would understate the attribution failure by more than an order of magnitude; reporting only the second would overstate the vehicle's exposure, because the escalation path does hold."
+}
