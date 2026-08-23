@@ -1,0 +1,176 @@
+{
+ "containment_complete_over_ingested_field_set": false,
+ "escape_route": "Every GPS-spanning relation buildable from the CURRENTLY INGESTED fields depends on position, velocity or altitude, all of which are meaningless without a fix and are therefore gvalid-gated by construction. The fields that could support a relation surviving fix loss (satellites_used, noise_per_ms, jamming_indicator, hdop/vdop) are NOT ingested. That is why the containment is complete over this field set and why plumbing those fields is the escape.",
+ "gps_fields_NOT_ingested": {
+  "eph / epv": "reported position accuracy estimates",
+  "hdop": "horizontal dilution of precision",
+  "jamming_indicator": "receiver jamming flag where reported",
+  "noise_per_ms": "receiver noise floor, carrier-to-noise proxy",
+  "s_variance_m_s": "reported speed accuracy",
+  "satellites_used": "satellite count; survives fix loss",
+  "vdop": "vertical dilution of precision"
+ },
+ "gps_spanning_relations": {
+  "relations": {
+   "altitude_baro": [
+    "baro",
+    "gps"
+   ],
+   "heading_course": [
+    "gps",
+    "mag"
+   ],
+   "phys_gps": [
+    "gps"
+   ],
+   "temp_gps": [
+    "gps"
+   ],
+   "velocity_gps_doppler_0": [
+    "gps",
+    "imu0"
+   ],
+   "velocity_gps_doppler_1": [
+    "gps",
+    "imu1"
+   ]
+  },
+  "total": 6
+ },
+ "gvalid_controlled_features": [
+  "altitude_baro",
+  "heading_course",
+  "phys_gps",
+  "velocity_gps_doppler_0",
+  "velocity_gps_doppler_1"
+ ],
+ "informativeness_of_the_one_escape": {
+  "feature": "temp_gps",
+  "informative_about_the_fault": false,
+  "traces": {
+   "clean": {
+    "channel_fresh_fraction": 1.0,
+    "max": 1.0,
+    "mean": 0.9155,
+    "min": 0.640319
+   },
+   "denial": {
+    "channel_fresh_fraction": 0.001597,
+    "max": 1.0,
+    "mean": 0.9155,
+    "min": 0.640319
+   }
+  },
+  "value_identical_clean_vs_denial": true,
+  "why": "The temporal predictor is computed from the channel history and does not consult channel validity, so a dropout that sets valid=False leaves the underlying series and therefore the Holt residual unchanged. The feature is ungated but carries no information about denial."
+ },
+ "ingested_field_set": {
+  "baro": {
+   "fields": [
+    "baro_alt_meter"
+   ],
+   "source": "ulog_source.py:137-145 vehicle_air_data"
+  },
+  "battery": {
+   "fields": [
+    "voltage_v",
+    "current_a"
+   ],
+   "source": "ulog_source.py:192-199 battery_status"
+  },
+  "gps": {
+   "fields": [
+    "latitude_deg",
+    "longitude_deg",
+    "altitude_msl_m",
+    "fix_type",
+    "vel_n_m_s",
+    "vel_e_m_s",
+    "vel_d_m_s"
+   ],
+   "source": "ulog_source.py:166-187 vehicle_gps_position"
+  },
+  "imu0": {
+   "fields": [
+    "accelerometer_m_s2[0..2]",
+    "gyro_rad[0..2]"
+   ],
+   "source": "ulog_source.py:73-83 sensor_combined"
+  },
+  "imu1": {
+   "fields": [
+    "delta_velocity[0..2]",
+    "delta_angle[0..2]",
+    "delta_velocity_dt",
+    "delta_angle_dt"
+   ],
+   "source": "ulog_source.py:107-117 vehicle_imu(1)"
+  },
+  "mag": {
+   "fields": [
+    "magnetometer_ga[0..2]"
+   ],
+   "source": "ulog_source.py:149-161 vehicle_magnetometer"
+  },
+  "motor_esc": {
+   "fields": [
+    "esc rpm",
+    "esc current"
+   ],
+   "source": "ulog_source.py:203-217 esc_status"
+  },
+  "vibration": {
+   "fields": [],
+   "source": "not ingested from ULog"
+  }
+ },
+ "inside_C_gps_fault": [
+  "altitude_baro",
+  "heading_course",
+  "phys_gps",
+  "velocity_gps_doppler_0",
+  "velocity_gps_doppler_1"
+ ],
+ "n_inside": 5,
+ "n_outside": 1,
+ "nodes_with_ingested_fields": [
+  "baro",
+  "battery",
+  "gps",
+  "imu0",
+  "imu1",
+  "mag",
+  "motor_esc"
+ ],
+ "outside_C_gps_fault": [
+  "temp_gps"
+ ],
+ "possible_gps_partner_pairs": [
+  [
+   "gps",
+   "baro"
+  ],
+  [
+   "gps",
+   "battery"
+  ],
+  [
+   "gps",
+   "imu0"
+  ],
+  [
+   "gps",
+   "imu1"
+  ],
+  [
+   "gps",
+   "mag"
+  ],
+  [
+   "gps",
+   "motor_esc"
+  ]
+ ],
+ "purpose": "bound the admissible evidence universe for gps_fault over the FINITE, ENUMERABLE set of telemetry fields the ingestion path currently reads",
+ "why_this_is_not_the_universal_claim": "U_h subset C_h over ALL physically admissible relations is not established and is not claimed. This enumerates U_h restricted to the currently ingested field set, which is closed and mechanical."
+}

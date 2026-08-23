@@ -1,0 +1,398 @@
+{
+ "C_h_features": [
+  "altitude_baro",
+  "heading_course",
+  "phys_gps",
+  "velocity_gps_doppler_0",
+  "velocity_gps_doppler_1"
+ ],
+ "coarsening_counterexample": {
+  "does_this_affect_the_real_system": "No. In the deployed signature matrix only gps_fault silences anything, and its column is unique, so no shared column can be broken. WP-C3's computational verification on the real matrix stands. What fails is the GENERAL justification, not the instance.",
+  "example": {
+   "S": {
+    "h1_nominal": [],
+    "h2_star": [
+     "heading_course",
+     "phys_mag",
+     "velocity_gps_doppler_1"
+    ],
+    "h3": [
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc"
+    ],
+    "h4": [
+     "phys_gps",
+     "temp_mag",
+     "velocity_gps_doppler_0"
+    ],
+    "h5": [
+     "altitude_baro",
+     "attitude_gravity_mag",
+     "vibration_prop_freq"
+    ],
+    "h6": [
+     "attitude_gravity_mag",
+     "phys_baro",
+     "temp_gps"
+    ],
+    "h7": [
+     "heading_course",
+     "phys_mag",
+     "velocity_gps_doppler_1"
+    ],
+    "h8": [
+     "phys_gps",
+     "power_thrust",
+     "temp_mag"
+    ]
+   },
+   "S_eff": {
+    "h1_nominal": [],
+    "h2_star": [
+     "phys_mag"
+    ],
+    "h3": [
+     "accel_motor_current",
+     "phys_battery",
+     "phys_motor_esc"
+    ],
+    "h4": [
+     "phys_gps",
+     "temp_mag",
+     "velocity_gps_doppler_0"
+    ],
+    "h5": [
+     "altitude_baro",
+     "attitude_gravity_mag",
+     "vibration_prop_freq"
+    ],
+    "h6": [
+     "attitude_gravity_mag",
+     "phys_baro",
+     "temp_gps"
+    ],
+    "h7": [
+     "heading_course",
+     "phys_mag",
+     "velocity_gps_doppler_1"
+    ],
+    "h8": [
+     "phys_gps",
+     "power_thrust",
+     "temp_mag"
+    ]
+   },
+   "density": 3,
+   "gap": -0.142857,
+   "n_outside": 1
+  },
+  "finding": "Pi(S_eff) is NOT always coarser than Pi(S). The entrywise domination argument fails for column-dependent deletion: two hypotheses sharing a column in S separate in S_eff when only one of them silences. Equal columns are preserved only under UNIFORM row deletion, which is not what per-hypothesis silencing does.",
+  "fraction": 0.002415,
+  "n_negative_gap": 483,
+  "trials": 200000
+ },
+ "grid": [
+  {
+   "density": 1,
+   "frac_gap_positive": 0.73,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.104286,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 1,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.0
+  },
+  {
+   "density": 2,
+   "frac_gap_positive": 0.9675,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.138214,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 2,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.005357,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.5
+  },
+  {
+   "density": 2,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 2,
+   "rho_fraction_inside_C": 0.0
+  },
+  {
+   "density": 3,
+   "frac_gap_positive": 0.9975,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.1425,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 3,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.001429,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.6667
+  },
+  {
+   "density": 3,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.000357,
+   "n_features_outside_C": 2,
+   "rho_fraction_inside_C": 0.3333
+  },
+  {
+   "density": 3,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 3,
+   "rho_fraction_inside_C": 0.0
+  },
+  {
+   "density": 4,
+   "frac_gap_positive": 1.0,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.142857,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 4,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.000357,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.75
+  },
+  {
+   "density": 4,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.000357,
+   "n_features_outside_C": 2,
+   "rho_fraction_inside_C": 0.5
+  },
+  {
+   "density": 4,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 3,
+   "rho_fraction_inside_C": 0.25
+  },
+  {
+   "density": 4,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 4,
+   "rho_fraction_inside_C": 0.0
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 1.0,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.142857,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.8333
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 2,
+   "rho_fraction_inside_C": 0.6667
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 3,
+   "rho_fraction_inside_C": 0.5
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 4,
+   "rho_fraction_inside_C": 0.3333
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 5,
+   "rho_fraction_inside_C": 0.1667
+  },
+  {
+   "density": 6,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 6,
+   "rho_fraction_inside_C": 0.0
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 1.0,
+   "frac_star_absorbed_into_nominal": 1.0,
+   "mean_gap": 0.142857,
+   "n_features_outside_C": 0,
+   "rho_fraction_inside_C": 1.0
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 1,
+   "rho_fraction_inside_C": 0.875
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 2,
+   "rho_fraction_inside_C": 0.75
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 3,
+   "rho_fraction_inside_C": 0.625
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 4,
+   "rho_fraction_inside_C": 0.5
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": -0.000357,
+   "n_features_outside_C": 5,
+   "rho_fraction_inside_C": 0.375
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 6,
+   "rho_fraction_inside_C": 0.25
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 7,
+   "rho_fraction_inside_C": 0.125
+  },
+  {
+   "density": 8,
+   "frac_gap_positive": 0.0,
+   "frac_star_absorbed_into_nominal": 0.0,
+   "mean_gap": 0.0,
+   "n_features_outside_C": 8,
+   "rho_fraction_inside_C": 0.0
+  }
+ ],
+ "is_knife_edge_at_rho_1": true,
+ "n_draws_per_cell": 400,
+ "outside_features": [
+  "accel_esc_rpm",
+  "accel_motor_current",
+  "attitude_gravity_mag",
+  "phys_baro",
+  "phys_battery",
+  "phys_mag",
+  "phys_motor_esc",
+  "phys_vibration",
+  "power_thrust",
+  "redundant_imu",
+  "temp_battery",
+  "temp_bias_drift",
+  "temp_gps",
+  "temp_mag",
+  "temp_vibration",
+  "vibration_prop_freq"
+ ],
+ "purpose": "sweep the interior between full and zero containment",
+ "seed": 20260823,
+ "threshold_test": [
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 1,
+   "drop": 1.0
+  },
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 2,
+   "drop": 1.0
+  },
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 3,
+   "drop": 1.0
+  },
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 4,
+   "drop": 1.0
+  },
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 6,
+   "drop": 1.0
+  },
+  {
+   "absorbed_at_rho_1": 1.0,
+   "absorbed_with_one_feature_outside": 0.0,
+   "density": 8,
+   "drop": 1.0
+  }
+ ],
+ "verdict": "THRESHOLD, not graceful. A single feature outside C_h removes absorption entirely at every density tested. Effective undetectability requires FULL containment of the present support; partial containment does not partially degrade it. The useful engineering statement is therefore 'one ungated relation suffices', which is a stronger and more actionable claim than anything about containment in general."
+}

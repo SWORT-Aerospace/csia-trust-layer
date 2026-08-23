@@ -1,0 +1,117 @@
+{
+ "candidates": [
+  {
+   "candidate": "gps_cn0_stats",
+   "channels": [
+    "gps"
+   ],
+   "critical_exposed_k7_after": 7,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 0,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [],
+   "kappa_max_k8_after": 0.0,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": true,
+   "telemetry": "needs plumbing: noise_per_ms"
+  },
+  {
+   "candidate": "gps_sat_geometry",
+   "channels": [
+    "gps"
+   ],
+   "critical_exposed_k7_after": 7,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 0,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [],
+   "kappa_max_k8_after": 0.0,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": true,
+   "telemetry": "needs plumbing: satellites_used, hdop"
+  },
+  {
+   "candidate": "gps_jamming_flag",
+   "channels": [
+    "gps"
+   ],
+   "critical_exposed_k7_after": 7,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 0,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [],
+   "kappa_max_k8_after": 0.0,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": true,
+   "telemetry": "needs plumbing: jamming_indicator"
+  },
+  {
+   "candidate": "gps_accuracy_report",
+   "channels": [
+    "gps"
+   ],
+   "critical_exposed_k7_after": 7,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 0,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [],
+   "kappa_max_k8_after": 0.0,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": true,
+   "telemetry": "needs plumbing: eph, epv, s_variance_m_s"
+  },
+  {
+   "candidate": "phys_gps_inertial",
+   "channels": [
+    "gps",
+    "imu0"
+   ],
+   "critical_exposed_k7_after": 9,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 0,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [],
+   "kappa_max_k8_after": 0.0,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": true,
+   "telemetry": "no new fields: position derivative vs inertial"
+  },
+  {
+   "candidate": "CONTROL_gated_cn0",
+   "channels": [
+    "gps"
+   ],
+   "critical_exposed_k7_after": 11,
+   "critical_exposed_k7_before": 11,
+   "critical_exposed_k8_after": 1,
+   "critical_exposed_k8_before": 1,
+   "gated_by": [
+    "gvalid"
+   ],
+   "kappa_max_k8_after": 0.142857,
+   "kappa_max_k8_before": 0.142857,
+   "new_collisions_anywhere": [],
+   "repairs_target_at_k8": false,
+   "telemetry": "control: same relation, gated by gvalid"
+  }
+ ],
+ "candidates_that_repair_cleanly": [
+  "gps_cn0_stats",
+  "gps_sat_geometry",
+  "gps_jamming_flag",
+  "gps_accuracy_report",
+  "phys_gps_inertial"
+ ],
+ "implements_nothing": true,
+ "minimum_addition_size": 1,
+ "n_reachable_configurations": 1232,
+ "purpose": "smallest addition to E_gps_fault that leaves effective undetectability, quantified over the full lattice",
+ "recommendation_basis": "repairs the target at full instrumentation, creates no new collision anywhere in the lattice, and leaves the fewest critical pairs exposed at k=7 (one channel already lost)",
+ "recommended": "gps_cn0_stats",
+ "why_size_one": "The partial-containment sweep shows a knife edge: a single feature outside C_h removes absorption entirely at every density. So the minimum repair is one relation, and the question is only which."
+}
