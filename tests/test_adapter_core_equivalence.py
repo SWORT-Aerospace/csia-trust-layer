@@ -245,3 +245,85 @@ def test_adapter_reports_no_unmapped_message_it_should_have_handled():
     _new, ad = _adapter_channels()
     unmapped = ad.unmapped_types()
     assert unmapped == {}, f"adapter ignored messages it maps: {unmapped}"
+
+
+# --------------------------------------------------------------------------
+# Sequence equivalence.
+#
+# Everything above compares ONE conversion. That is not enough, and this
+# section exists because the single-shot tests passed while the adapter was
+# re-feeding the frozen core nine sensors every tick regardless of whether
+# any new data had arrived.
+#
+# The v1 path hands the core one sample per MEASUREMENT
+# (csia/runtime/service.py:120 iterates the source stream). An adapter that
+# hands it one sample per TICK per sensor is not equivalent, even though every
+# individual value is identical -- it changes how many times a filter is
+# updated, and therefore the effective time constants of a FROZEN core.
+
+def _stream_at_rates(seconds=1.0, imu_hz=25, gps_hz=5):
+    """Interleaved messages at DIFFERENT rates, which is the whole point."""
+    msgs = []
+    for i in range(int(seconds * imu_hz)):
+        t = i / imu_hz
+        msgs.append((t, Msg("SCALED_IMU", time_boot_ms=int(t * 1000),
+                            xacc=100 + i, yacc=-200, zacc=-1000,
+                            xgyro=10, ygyro=-5, zgyro=2,
+                            xmag=400, ymag=-100, zmag=300)))
+    for i in range(int(seconds * gps_hz)):
+        t = i / gps_hz
+        msgs.append((t, Msg("GPS_RAW_INT", time_usec=int(t * 1e6), fix_type=3,
+                            lat=473_000_000 + i * 100, lon=85_000_000,
+                            alt=500_000, vel=100, cog=9000)))
+    return sorted(msgs, key=lambda p: p[0])
+
+
+def test_core_receives_one_sample_per_measurement_not_per_tick():
+    """A slow sensor must not be re-fed at the tick rate.
+
+    GPS arrives at 5 Hz while the layer ticks at 25 Hz. The core must see the
+    GPS sample 5 times, not 25 -- otherwise one fix is presented to the Holt
+    filters as five agreeing measurements.
+    """
+    ad = get_adapter("ardupilot")
+    clock = {"t": 0.0}
+    ad._clock = lambda: clock["t"]
+
+    handed = {}
+    stream = _stream_at_rates()
+    tick_dt = 1.0 / 25.0
+    next_tick, idx = 0.0, 0
+    while next_tick <= 1.0:
+        while idx < len(stream) and stream[idx][0] <= next_tick:
+            clock["t"] = stream[idx][0]
+            ad.ingest(stream[idx][1])
+            idx += 1
+        clock["t"] = next_tick
+        for sensor, _t, _ch in ad.to_core_samples(ad.sample(t_mono=next_tick)):
+            handed[sensor] = handed.get(sensor, 0) + 1
+        next_tick += tick_dt
+
+    assert handed.get("imu0", 0) >= 20, handed
+    # The assertion that was missing: 5 Hz data handed over ~5 times, not 25.
+    assert handed.get("gps", 0) <= 8, (
+        f"GPS was handed to the core {handed.get('gps')} times for 5 "
+        f"measurements -- the adapter is re-feeding stale samples")
+
+
+def test_an_unchanged_sensor_is_not_handed_over_twice():
+    """The minimal case, stated directly."""
+    ad = get_adapter("ardupilot")
+    ad.ingest(Msg("SCALED_IMU", time_boot_ms=1000, xacc=137, yacc=-241,
+                  zacc=-993, xgyro=53, ygyro=-27, zgyro=11,
+                  xmag=421, ymag=-133, zmag=377))
+    first = {s for s, _t, _c in ad.to_core_samples(ad.sample(t_mono=1.0))}
+    assert "imu0" in first
+    # Nothing new arrived. The core must not be told again.
+    second = {s for s, _t, _c in ad.to_core_samples(ad.sample(t_mono=1.04))}
+    assert "imu0" not in second, "stale sensor re-fed to the frozen core"
+
+    ad.ingest(Msg("SCALED_IMU", time_boot_ms=1040, xacc=140, yacc=-240,
+                  zacc=-990, xgyro=50, ygyro=-25, zgyro=10,
+                  xmag=420, ymag=-130, zmag=375))
+    third = {s for s, _t, _c in ad.to_core_samples(ad.sample(t_mono=1.08))}
+    assert "imu0" in third, "a genuinely new sample was withheld"

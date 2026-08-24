@@ -78,6 +78,9 @@ class PlatformAdapter:
         self._clock = clock
         # channel -> (raw_value, t_mono_received, t_source, frame, unit)
         self._latest: dict = {}
+        # Per-sensor receive stamps at the last core hand-off, so a
+        # sensor is not re-fed while it has nothing new to say.
+        self._emitted: dict = {}
         self._t_source_last: Optional[float] = None
         self._flight_mode: Optional[str] = None
         self.counters = {"messages": 0, "mapped": 0, "unmapped": 0,
@@ -181,6 +184,27 @@ class PlatformAdapter:
         A sensor is emitted only when ALL of its required channels are usable.
         Partial sensors are withheld: half a GPS fix is not a degraded fix, it
         is a fabricated one.
+
+        **And only when it has NEW data.** The reference runtime
+        (`csia/runtime/service.py:120`) iterates the source stream and feeds
+        each sample as it arrives, so the core sees one sample per actual
+        measurement. This adapter holds the latest value per channel, so
+        without a freshness gate it re-fed all nine sensors 25 times a second
+        regardless of whether anything had changed.
+
+        That was wrong twice over:
+
+        * **Cost.** Phase timing on live telemetry put 1542.7 us of a 1753 us
+          tick inside the frozen core -- 88% -- against 297-356 us/tick on the
+          replay path. Most of that was filter and residual work recomputed on
+          values the vehicle had not re-sent.
+        * **Semantics.** Feeding one GPS fix into a Holt filter 25 times makes
+          the filter behave as though 25 measurements agreed. It silently
+          changes the effective time constants of a FROZEN core.
+
+        The near-miss worth recording: this looked exactly like "the v1 core is
+        5x slower than its documented figure". It is not. It is v1.1 handing
+        the core work it never asked for.
         """
         out = []
         for sensor, mapping in self.CORE_MAP.items():
@@ -198,6 +222,14 @@ class PlatformAdapter:
                 chans[core_key] = cv.value
             if not complete or not chans:
                 continue
+            # Freshness gate: has anything in this sensor actually arrived
+            # since we last handed it over?
+            stamps = tuple(self._latest[ch][1]
+                           for ch in mapping.values()
+                           if ch in self._latest)
+            if stamps and self._emitted.get(sensor) == stamps:
+                continue
+            self._emitted[sensor] = stamps
             if sensor == "gps":
                 # GPS_RAW_INT carries no vertical rate; the core already
                 # knows to judge horizontal only when told.
