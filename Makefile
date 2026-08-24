@@ -26,7 +26,11 @@ help:
 	@echo "  make phase-guard     Phase-I papers must not cite Phase-II results"
 	@echo "  make manuscript-rules  csia_systems hard style rules"
 	@echo "  make secrets-scan    credential and local-path scan"
+	@echo "  make release-check   verify built archives against the allowlist"
 	@echo "  make check           every guard above"
+	@echo "Release:"
+	@echo "  make evidence-export rebuild the 16-file Paper I evidence export"
+	@echo "  make public-release  pack + sanitize the public archives"
 	@echo "Science:"
 	@echo "  make test            full pytest suite (includes doc-count guard)"
 	@echo "  make figures         regenerate all figures from committed results"
@@ -87,18 +91,39 @@ manuscript-rules:
 secrets-scan:
 	$(PY) tools/publication/secrets_scan.py
 
+# Verifies the committed archives without rebuilding them: every allowlisted
+# path still exists and is tracked, and the archive on disk is still clean.
+.PHONY: release-check
+release-check:
+	$(PY) tools/publication/build_public_release.py --check
+
 # `check` deliberately runs every guard and reports all of them before
 # failing, so one red guard does not hide the state of the others.
 .PHONY: check
 check:
 	@rc=0; \
-	for t in artifact-map figure-sync phase-guard manuscript-rules secrets-scan bib-guard; do \
+	for t in artifact-map figure-sync phase-guard manuscript-rules secrets-scan release-check bib-guard; do \
 	  echo ""; echo "############ $$t"; \
 	  $(MAKE) --no-print-directory $$t || rc=1; \
 	done; \
 	echo ""; \
 	if [ $$rc -ne 0 ]; then echo "PUBLICATION CHECK: FAIL"; else echo "PUBLICATION CHECK: PASS"; fi; \
 	exit $$rc
+
+# ---------------------------------------------------------------------------
+# Release packaging (decisions H-1 .. H-5)
+#
+# `public-release` is the ONLY way an archive is produced. It packs exactly the
+# paths in publication/system_paper_i/PUBLIC_RELEASE_MANIFEST.yaml, then
+# unpacks what it built and scans it. A failed scan deletes the archive.
+# ---------------------------------------------------------------------------
+.PHONY: evidence-export
+evidence-export:
+	PYTHONPATH=. $(PY) publication/system_paper_i/build_evidence_export.py
+
+.PHONY: public-release
+public-release: evidence-export
+	$(PY) tools/publication/build_public_release.py
 
 # ---------------------------------------------------------------------------
 # Science

@@ -11,7 +11,10 @@ equation or a commit.
 
 Run:  PYTHONPATH=. python publication/system_paper_i/build_evidence_export.py
 Out:  publication/system_paper_i/evidence_export/*
-      publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz
+
+This writes the directory only. The archive is built separately, from the
+allowlist in PUBLIC_RELEASE_MANIFEST.yaml, by
+tools/publication/build_public_release.py (decision H-3).
 """
 
 import hashlib
@@ -20,7 +23,6 @@ import os
 import re
 import subprocess
 import sys
-import tarfile
 from datetime import datetime, timezone
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -1994,13 +1996,14 @@ def main() -> int:
           f"{os.path.relpath(OUT, ROOT)}")
     print(f"=== {UNREC} markers: {unrec}")
 
-    tar = os.path.join(os.path.dirname(OUT), "PAPER1_EVIDENCE_EXPORT.tar.gz")
-    with tarfile.open(tar, "w:gz") as tf:
-        for p in sorted(written):
-            tf.add(p, arcname=os.path.join("evidence_export",
-                                           os.path.basename(p)))
-    print(f"=== archive: {os.path.relpath(tar, ROOT)} "
-          f"({os.path.getsize(tar):,} B)")
+    # Archives are NOT built here. Under decision H-3 every file that enters a
+    # public archive must come from the allowlist in
+    # publication/system_paper_i/PUBLIC_RELEASE_MANIFEST.yaml, so packaging
+    # lives in tools/publication/build_public_release.py and nowhere else. A
+    # generator that also tarred its own output would be a second, unscreened
+    # way into the release.
+    print("\n=== package with: python tools/publication/"
+          "build_public_release.py")
     return 1 if problems else 0
 
 

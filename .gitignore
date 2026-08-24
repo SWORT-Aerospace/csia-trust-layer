@@ -53,6 +53,11 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Evidence-export tarball is a build product of build_evidence_export.py.
-# The evidence_export/ directory itself IS committed: it is the deliverable.
+# Public archives are build products of tools/publication/build_public_release.py,
+# packed from the allowlist in PUBLIC_RELEASE_MANIFEST.yaml. The SOURCES are
+# committed — evidence_export/ is the deliverable, and every other member is a
+# tracked artifact — so the archives are reproducible byte-for-byte and a
+# committed copy could only drift from its own inputs. Rebuild with
+# `make public-release`; the manifest and the build log carry the SHA-256.
 publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz
+publication/system_paper_i/PAPER1_SANITIZED_PACKAGE.tar.gz

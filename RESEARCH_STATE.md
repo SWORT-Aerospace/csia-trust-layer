@@ -190,12 +190,46 @@ make paper-math      # -> build/papers/gate_conditioning/main.pdf (scaffold)
 make check           # every publication guard
 make test            # full pytest suite
 make figures         # regenerate figures from committed results, then sync
+make public-release  # rebuild + sanitize the two public archives
 ```
 
 Reproducing Systems Paper I means checking out the frozen baseline `848f556`,
 not `HEAD`. `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` gives, for every
 figure, table and headline scalar, the committed result, the generating
 script, the JSON pointer where applicable, and the regeneration command.
+
+### 6.1 Release packaging is an allowlist
+
+Nothing leaves this repository by being copied. `make public-release` packs
+exactly the paths named in
+`publication/system_paper_i/PUBLIC_RELEASE_MANIFEST.yaml`, then unpacks what
+it built and scans it for an operator username, a home path, a credential, a
+strategy document, interceptor tooling, `.git`, or a Phase-II identifier
+outside the files whose stated job is to say what is excluded. A failed scan
+deletes the archive.
+
+Two archives are produced, both reproducible byte-for-byte:
+
+| archive | for | contents |
+|---|---|---|
+| `publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz` | a writing agent with **zero** repository access | the 16-file evidence export |
+| `publication/system_paper_i/PAPER1_SANITIZED_PACKAGE.tar.gz` | scientific review | the evidence export plus 30 result JSON, 19 figures, 7 figure generators, manifests, schemas, the environment lock and `LICENSE` |
+
+Neither contains the CSIA core, the fault-injection harness, any Phase-II
+material, or any strategy, customer or defence-domain file. The decisions
+behind that — H-1 through H-5 — are recorded in `HARNESS_RELEASE_AUDIT.md`,
+and the screening is `docs/compliance/EXPORT_CONTROL_REVIEW.md`. The
+reproducibility limit this creates is stated inside the package itself, in
+`publication/system_paper_i/SANITIZED_PACKAGE_README.md`: every number is
+traceable to a committed artifact and a hash, and none is independently
+re-executable from the released package.
+
+```
+HARNESS PUBLIC RELEASE:  NOT_AUTHORIZED
+PUBLICATION PACKAGING:   PREPARED_FOR_REVIEW
+EXPORT CLASSIFICATION:   ECCN_PENDING
+MANUSCRIPT SUBMISSION:   BLOCKED (bibliography)
+```
 
 ---
 
@@ -206,9 +240,17 @@ script, the JSON pointer where applicable, and the regeneration command.
 | 37 unresolved citation markers in `papers/csia_systems/refs.bib` (12 VERIFY, 20 FROM-BRIEF-UNVERIFIED, 5 RECONSTRUCTED); no entry marked verified | human | **Systems Paper I submission.** `make bib-guard` fails until resolved |
 | the gate-conditioning manuscript itself | manuscript agent | **the math paper.** `papers/gate_conditioning/main.tex` is a scaffold |
 | 46 prose numeric literals in `main.tex` not individually mapped | manuscript author | review, not a blocker; listed by `make artifact-map` |
-| `/Users/ZINTRAX-5/...` appears in `docs/runbooks/UAV_SEAD_MAC_ACQUISITION.md` and is asserted by `tests/test_mac_pipeline.py` | human | publication hygiene; deliberate, so not silently changed |
+| EAR/ITAR classification for the sanitized results and the manuscripts (`ECCN_PENDING`) | counsel | any actual public release; see `docs/compliance/EXPORT_CONTROL_REVIEW.md` |
+| SEAD runbook and interceptor tooling held at `COUNSEL_REQUIRED` | counsel | nothing in the papers; they are excluded from every package |
 | run B2/B4 on the E1 slow-slew cells | Phase II | completeness of §5, not the papers |
 | E2 confirmatory replication, preregistered and frozen | Phase II | F3's bound |
+
+**Closed since the last revision.** The operator username that appeared in
+`docs/runbooks/UAV_SEAD_MAC_ACQUISITION.md`, and was asserted by
+`tests/test_mac_pipeline.py`, is gone: decision **H-2** directed fixing the
+source rather than redacting output, so the runbook now uses `$HOME`-relative
+paths and the test asserts that `/Users/` is **absent**. The name appears in no
+tracked file.
 
 ---
 

@@ -55,13 +55,13 @@ REVIEW_ALLOW = {
     # Documents whose PURPOSE is to report the finding. The string is the
     # subject of the sentence, not a leak. Allowlisting the reporter rather
     # than the source would be wrong, so the source rows stay flagged.
-    ("mac_home_path", "HARNESS_RELEASE_AUDIT.md"):
-        "the audit reports this path as a review item H-2; quoting it is the "
-        "point of the document",
+    #
+    # The two `mac_home_path` entries that used to sit here are gone: decision
+    # H-2 fixed the source instead of allowlisting the reporter, so no tracked
+    # file contains an absolute macOS home path any more and there is nothing
+    # left to allow.
     ("linux_home_path", "HARNESS_RELEASE_AUDIT.md"):
-        "same: the audit quotes the container-local paths it reviewed",
-    ("mac_home_path", "RESEARCH_STATE.md"):
-        "listed as an open item; quoting it is the point",
+        "the audit quotes the container-local paths it reviewed",
     ("linux_home_path", "tools/publication/secrets_scan.py"):
         "this scanner's own allowlist keys contain the paths it allowlists",
     ("linux_home_path", "artifacts/ci/75881b9_failed_run.log"):
