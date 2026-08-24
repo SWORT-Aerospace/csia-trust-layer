@@ -1,8 +1,10 @@
 # Harness release audit
 
 **Subject:** the GNSS fault-injection and observation harness described in
-`research/wp_c8/HARNESS_RELEASE.md`, plus the Phase-II modern rig under
-`research/phase2/`.
+`research/wp_c8/HARNESS_RELEASE.md`, plus the Phase-II modern rig. (The
+Phase-II rig lives under `research/phase2/` on the Phase-II branch and is not
+present on the publication baseline; the decisions below cover it regardless,
+so that a later merge inherits them rather than re-opening them.)
 
 **Scope of this document:** it records what the repository's own evidence
 shows, and what the owner decided on the questions the evidence could not
@@ -217,7 +219,7 @@ and a submission, and neither is engineering work:
 | H-4 | No defence-specific material authorized. Classify without guessing. | `docs/compliance/EXPORT_CONTROL_REVIEW.md` |
 | H-5 | Full harness release = NO; expose the measurement contract only. | evidence export + `SANITIZED_PACKAGE_README.md` boundary statement |
 | H-6 | 37 references remain a submission blocker. | `bib_guard.py` stays red by design |
-| H-7 | Strict phase separation preferred. | see `RESEARCH_STATE.md` for the branch outcome |
+| H-7 | Strict phase separation preferred. | `b60cb67` was found to be **mixed** — its `RESEARCH_STATE.md` and `CLAIMS_INDEX.md` carry Phase-II scientific results — so it was **not** cherry-picked. The publication-safe subset was split into a clean commit and a minimal PR against `main`; the Phase-II science stays on its own branch |
 
 ## Still open, with owners
 
