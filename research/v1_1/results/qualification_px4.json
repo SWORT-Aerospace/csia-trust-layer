@@ -2,28 +2,31 @@
  "PROBE_VALID": false,
  "admissible_stubs": [],
  "counters": {
-  "mapped": 6689,
-  "messages": 18895,
-  "rejected_sentinel": 391,
+  "mapped": 6577,
+  "messages": 17046,
+  "rejected_sentinel": 384,
   "time_reanchors": 0,
-  "unmapped": 15341
+  "unmapped": 13552
  },
  "disagreements": [],
- "messages": 18895,
+ "messages": 17046,
  "observed_stubs": [],
  "platform": "px4",
  "positive_control": {
-  "alt_samples": 5780,
+  "alt_samples": 1138,
   "arm_ack": 0,
   "armed": true,
-  "climbed_m": 0.05,
+  "climbed_m": 0.01,
   "fix_type": 3,
   "gates": "CONSTANCY claims only; PRESENCE claims are motion-independent and are always issued",
   "phase": "climb",
   "rule": "RULE A -- an informativeness probe needs a positive control; motion is it",
   "satisfied": false,
   "takeoff_ack": 0,
-  "takeoff_alt_param": 25.0
+  "takeoff_alt_param": 25.0,
+  "warnings": [
+   "no STATUSTEXT received: the diagnostic channel is dead, so its silence carries no information"
+  ]
  },
  "presence_findings": {
   "never_arrived": [
@@ -48,12 +51,12 @@
    "channel": "baro.altitude",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.531064, sd 0.0907153, n=18890",
+   "detail": "range 0.560894, sd 0.0881126, n=17024",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18890,
-   "spread": 0.5310641332033015
+   "samples": 17024,
+   "spread": 0.5608940239902154
   },
   {
    "admissible": false,
@@ -61,11 +64,11 @@
    "channel": "baro.temp_c",
    "criterion": "VARIATION",
    "declared": "VALIDATED_SEMANTICS",
-   "detail": "constant at 11.82 over 18890 samples",
+   "detail": "constant at 11.82 over 17024 samples",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
-   "samples": 18890,
+   "samples": 17024,
    "spread": 0.0
   },
   {
@@ -87,11 +90,11 @@
    "channel": "battery.voltage",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "constant at 15.3 over 18881 samples",
+   "detail": "constant at 15.3 over 17014 samples",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
-   "samples": 18881,
+   "samples": 17014,
    "spread": 0.0
   },
   {
@@ -126,11 +129,11 @@
    "channel": "estimator.flight_mode",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 548, decoded over 18845 samples (criterion DECODE, not variation)",
+   "detail": "latched value 1, decoded over 16941 samples (criterion DECODE, not variation)",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18845,
+   "samples": 16941,
    "spread": null
   },
   {
@@ -139,12 +142,12 @@
    "channel": "estimator.variances",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.113475, sd 0.0212527, n=18813",
+   "detail": "range 0.111898, sd 0.0196638, n=17011",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18813,
-   "spread": 0.11347456742078066
+   "samples": 17011,
+   "spread": 0.11189805483445525
   },
   {
    "admissible": true,
@@ -152,12 +155,12 @@
    "channel": "gnss.position",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.320065, sd 0.0521204, n=18836",
+   "detail": "range 0.318067, sd 0.0547952, n=17025",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18836,
-   "spread": 0.3200652243061654
+   "samples": 17025,
+   "spread": 0.3180671422354815
   },
   {
    "admissible": true,
@@ -165,12 +168,12 @@
    "channel": "gnss.velocity",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.197756, sd 0.0322543, n=18836",
+   "detail": "range 0.178281, sd 0.0292925, n=17025",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18836,
-   "spread": 0.1977559866515623
+   "samples": 17025,
+   "spread": 0.17828074175077363
   },
   {
    "admissible": false,
@@ -191,12 +194,12 @@
    "channel": "imu0.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.874534, sd 0.123383, n=18887",
+   "detail": "range 0.908243, sd 0.124584, n=17040",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18887,
-   "spread": 0.8745341897010803
+   "samples": 17040,
+   "spread": 0.9082432836294174
   },
   {
    "admissible": true,
@@ -204,12 +207,12 @@
    "channel": "imu0.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0904034, sd 0.0125623, n=18887",
+   "detail": "range 0.0938965, sd 0.0122376, n=17040",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18887,
-   "spread": 0.09040343202650547
+   "samples": 17040,
+   "spread": 0.09389648586511612
   },
   {
    "admissible": true,
@@ -243,12 +246,12 @@
    "channel": "mag.field_ut",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 15.3479, sd 2.35552, n=18887",
+   "detail": "range 13.3079, sd 2.26492, n=17040",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18887,
-   "spread": 15.347888739779592
+   "samples": 17040,
+   "spread": 13.307884894311428
   },
   {
    "admissible": true,
@@ -256,11 +259,11 @@
    "channel": "vehicle_status.armed",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 1, decoded over 18845 samples (criterion DECODE, not variation)",
+   "detail": "latched value 1, decoded over 16941 samples (criterion DECODE, not variation)",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18845,
+   "samples": 16941,
    "spread": null
   },
   {
@@ -269,43 +272,43 @@
    "channel": "vibration.rms",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0120502, sd 0.00224037, n=18877",
+   "detail": "range 0.0150575, sd 0.00237376, n=17012",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 18877,
-   "spread": 0.012050239633841206
+   "samples": 17012,
+   "spread": 0.015057484901066766
   }
  ],
  "seconds": 40.0,
  "unmapped_types": {
   "ALTITUDE": 39,
-  "ATTITUDE": 1953,
-  "ATTITUDE_QUATERNION": 1952,
-  "ATTITUDE_TARGET": 1952,
-  "DISTANCE_SENSOR": 20,
+  "ATTITUDE": 1919,
+  "ATTITUDE_QUATERNION": 1919,
+  "ATTITUDE_TARGET": 1920,
+  "DISTANCE_SENSOR": 19,
   "EXTENDED_SYS_STATE": 39,
-  "GLOBAL_POSITION_INT": 1952,
-  "HOME_POSITION": 20,
-  "LOCAL_POSITION_NED": 1952,
+  "GLOBAL_POSITION_INT": 384,
+  "HOME_POSITION": 19,
+  "LOCAL_POSITION_NED": 1919,
   "MISSION_CURRENT": 38,
   "OPEN_DRONE_ID_LOCATION": 39,
   "OPEN_DRONE_ID_SYSTEM": 39,
   "PING": 4,
   "POSITION_TARGET_GLOBAL_INT": 39,
-  "POSITION_TARGET_LOCAL_NED": 1952,
-  "SCALED_IMU": 976,
-  "SERVO_OUTPUT_RAW": 1952,
+  "POSITION_TARGET_LOCAL_NED": 1919,
+  "SCALED_IMU": 960,
+  "SERVO_OUTPUT_RAW": 1919,
   "SYS_STATUS": 39,
   "UNKNOWN_290": 39,
   "UNKNOWN_291": 39,
   "UNKNOWN_380": 19,
   "UNKNOWN_411": 13,
-  "UNKNOWN_436": 20,
+  "UNKNOWN_436": 19,
   "UNKNOWN_441": 39,
-  "UNKNOWN_514": 20,
+  "UNKNOWN_514": 19,
   "UNKNOWN_8": 39,
-  "VFR_HUD": 156
+  "VFR_HUD": 153
  },
  "verdict": "PARTIAL: no motion, so constancy is not assessed; PRESENCE findings stand and a channel the contract admits as evidence never arrived"
 }

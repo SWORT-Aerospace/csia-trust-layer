@@ -88,10 +88,19 @@ def launch_px4(workdir, speedup=1):
     # real dynamics, so the motion positive control can actually fire.
     env["PX4_SYS_AUTOSTART"] = "10040"      # sihsim_quadx
     env["PX4_SIM_MODEL"] = "sihsim_quadx"
+    # CAPTURE THE CONSOLE. It was going to DEVNULL.
+    #
+    # PX4 prints boot progress, preflight failures, mode rejections and
+    # takeoff decisions to stdout. Three rounds of hypotheses about a failing
+    # climb were spent while that output was being discarded, and a fourth was
+    # spent on STATUSTEXT -- which turned out to be dead -- when the console
+    # says the same things and needs no MAVLink stream at all.
+    console = os.path.join(workdir, "px4_console.log")
+    fh = open(console, "wb")
     proc = subprocess.Popen(
         [binary, "-d", "-s", os.path.join(etc, "init.d-posix", "rcS"), etc],
-        cwd=workdir, env=env,
-        stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        cwd=workdir, env=env, stdout=fh, stderr=subprocess.STDOUT)
+    proc.console_path = console
     return proc, "udp:127.0.0.1:14550"
 
 
