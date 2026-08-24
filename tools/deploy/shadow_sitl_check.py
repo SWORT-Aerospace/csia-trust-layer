@@ -187,6 +187,8 @@ def main() -> int:
             "adapter_counters": runner.adapter.counters,
             "unmapped_types": runner.adapter.unmapped_types(),
             "latency": summarise(lat),
+            "phases": {k: summarise(list(v))
+                       for k, v in runner.phase_us.items()},
             "command_authority": runner.authority_evidence,
             "log_dir": os.path.relpath(logdir, ROOT),
         })
@@ -228,6 +230,11 @@ def main() -> int:
             print(f"=== tick latency through the FULL v1.1 stack")
             print(f"    median {L['median_us']:.1f} us | p95 {L['p95_us']:.1f} "
                   f"| p99 {L['p99_us']:.1f} | max {L['max_us']:.1f} us")
+            ph = result["phases"]
+            print(f"    phases (median us): "
+                  + "  ".join(f"{k}={ph[k]['median_us']:.1f}"
+                              for k in ("sample", "convert", "core")
+                              if ph.get(k)))
             print(f"    R13 budget {R13_BUDGET_US:.0f} us -> "
                   f"{L['over_budget']} tick(s) over budget, "
                   f"worst-case headroom {L['worst_headroom_x']}x")

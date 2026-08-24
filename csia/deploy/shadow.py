@@ -106,6 +106,10 @@ class ShadowRunner:
         # `max_latency_us` is kept separately and covers the whole flight, so
         # nothing is lost when the ring wraps.
         self.tick_latencies = deque(maxlen=100_000)
+        # Where the tick time goes, split three ways. Same bound and
+        # the same reason as tick_latencies.
+        self.phase_us = {k: deque(maxlen=100_000)
+                         for k in ("sample", "convert", "core")}
         self._running = False
         self._last_msg_mono = None
 
@@ -200,19 +204,31 @@ class ShadowRunner:
 
     # ------------------------------------------------------------------
     def _tick(self, t_rel: float, clock):
+        # Phase timing, because "the tick is slow" is not an actionable fact.
+        # A companion-profile run cut the message count 36% and moved the
+        # median by 2%, which ruled out message volume; the next guess would
+        # have been wrong too without splitting the tick up.
         t_wall0 = time.perf_counter()
         sample = self.adapter.sample(t_mono=t_rel)
+        t_sample = time.perf_counter()
+
+        core_samples = self.adapter.to_core_samples(sample)
+        t_convert = time.perf_counter()
 
         # Feed the FROZEN core. Only admissible channels are in the sample,
         # so a stub cannot become evidence -- and no v1 code changed to make
         # that true.
         state = None
-        for sensor, t, chans in self.adapter.to_core_samples(sample):
+        for sensor, t, chans in core_samples:
             states = self.layer.ingest(sensor, t, chans)
             if states:
                 state = states[-1]
 
-        latency_us = (time.perf_counter() - t_wall0) * 1e6
+        t_core = time.perf_counter()
+        latency_us = (t_core - t_wall0) * 1e6
+        self.phase_us["sample"].append((t_sample - t_wall0) * 1e6)
+        self.phase_us["convert"].append((t_convert - t_sample) * 1e6)
+        self.phase_us["core"].append((t_core - t_convert) * 1e6)
         self.stats["ticks"] += 1
         self.stats["max_latency_us"] = max(self.stats["max_latency_us"],
                                            latency_us)
