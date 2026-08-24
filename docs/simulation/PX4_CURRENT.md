@@ -42,50 +42,86 @@ real dynamics behind it.
 
 ---
 
-## 2. Qualification status: **INVALID_PROBE**
+## 2. Qualification status: **PARTIAL**
 
-**No PX4 channel verdict is issued.**
+**Presence findings stand. No constancy verdict is issued.**
 
 ```
-positive control:  armed=True   climbed=0.4 m   (threshold: >= 1.0 m)
-verdict:           INVALID_PROBE
+positive control:  armed=True   climbed=0.43 m   (threshold: >= 1.0 m)
+verdict:           PARTIAL
+                   no motion, so constancy is not assessed;
+                   PRESENCE findings stand, and a channel the contract
+                   admits as evidence never arrived
 ```
+
+**This was `INVALID_PROBE` until the probe was corrected.** The old gate
+voided the entire run when the airframe did not climb, which threw away
+findings that do not depend on motion at all: a run that collected 18,900
+samples and established that `imu1.*`, `esc.*` and `battery.current` never
+arrive on SIH reported none of it.
+
+Two kinds of claim, two different validity conditions:
+
+| claim | example | motion needed? |
+|---|---|---|
+| **PRESENCE** | "this channel never arrived" | **no** — an unpublished message is unpublished whether or not the vehicle flew |
+| **CONSTANCY** | "this channel is a stub" | **yes** — on a static airframe "constant" describes the trial, not the channel |
+
+Presence findings are now always issued; constancy findings stay gated. Under
+RULE A an informativeness measurement without motion is still not a
+measurement, so **no constancy claim below may be quoted as a PX4 result.**
 
 The vehicle **arms** — that took `COM_ARM_WO_GPS`, the EKF arming thresholds,
 the supply/USB circuit breakers, `AUTO.TAKEOFF` entry and force-arm
-(`param2=21196`) — but `MAV_CMD_NAV_TAKEOFF` does not produce a climb: 0.4 m,
+(`param2=21196`) — but `MAV_CMD_NAV_TAKEOFF` does not produce a climb: 0.43 m,
 below the 1.0 m the probe requires.
 
-Under RULE A an informativeness measurement without motion is not a weak
-measurement, it is not a measurement. The tool therefore reports
-`INVALID_PROBE` and withholds every channel verdict rather than reporting
-constancy as evidence. **PX4 is not qualified, and nothing here may be quoted
-as a PX4 result.**
+**PX4 is not qualified.** Getting SIH to climb is the remaining work; see §3.
 
-This is the contract working, not a tooling failure. It is also the honest
-status: **PX4 is not qualified.**
+### 2.1 PRESENCE findings — valid on this run
 
-### What the live stream did show
+Motion-independent, so these are results rather than observations. Measured
+over ~18,900 samples per channel, PX4-Autopilot @ `547e2ca`, `sihsim_quadx`:
 
-These are observations from a booted SIH vehicle that did not climb, recorded for
-integration purposes and **not** as qualification verdicts:
+| channel | contract declares | observed | admissible? |
+|---|---|---|---|
+| **`battery.current`** | INFORMATIVE | **never arrived** | **yes** |
+| **`imu1.accel`** | INFORMATIVE | **never arrived** | **yes** |
+| **`imu1.gyro`** | INFORMATIVE | **never arrived** | **yes** |
+| `esc.current` | STUB_OR_NONINFORMATIVE | never arrived | no |
+| `esc.rpm` | STUB_OR_NONINFORMATIVE | never arrived | no |
+| `gnss.velocity_z` | UNAVAILABLE | never arrived | no |
 
-| channel | arrived? | observation |
-|---|---|---|
-| imu0.accel | yes | range 0.80 m/s^2, sd 0.121, n=14198 |
-| imu0.gyro | yes | range 0.075 rad/s, sd 0.0122 |
-| mag.field_ut | yes | range 15.7 uT, sd 2.74 |
-| baro.altitude | yes | range 0.58 m, sd 0.089 |
-| gnss.position | yes | range 0.27 m |
-| gnss.velocity | yes | range 0.20 m/s |
-| vibration.rms | yes | range 0.012 m/s^2 |
-| estimator.variances | yes | range 0.152 — `ESTIMATOR_STATUS` ratios |
-| estimator.flight_mode | yes | decoded via main/sub mode |
-| vehicle_status.armed | yes | latched; arms on the current sequence, but the climb does not follow |
-| battery.voltage | yes | constant 16.2 V (unloaded, stationary) |
-| **imu1.accel / imu1.gyro** | **no** | `SCALED_IMU2` is not published |
-| **esc.current / esc.rpm** | **no** | `ESC_STATUS` is not published |
-| **battery.current** | **no** | not populated in SIH |
+The three bold rows are what makes the verdict `PARTIAL` rather than
+`INVALID_PROBE`: the contract admits them as evidence and PX4 SIH does not
+publish them. That is a contract defect on any trial, flying or not.
+
+**The contract has NOT been edited.** The probe's rule is that it produces the
+evidence for changing a row, never the change; `producer_px4` for `imu1.*`
+says `SCALED_IMU2` and for `battery.current` says
+`BATTERY_STATUS.current_battery`, and correcting those is a decision with an
+owner. Recorded here for that decision.
+
+### 2.2 CONSTANCY observations — NOT verdicts
+
+The airframe did not move, so **nothing in this table is a channel verdict**.
+Numbers are from the current run (`research/v1_1/results/qualification_px4.json`);
+channels that never arrived are in 2.1 and are not repeated here.
+
+| channel | observation |
+|---|---|
+| imu0.accel | range 1.52 m/s^2, sd 0.200, n=18917 |
+| imu0.gyro | range 0.100 rad/s, sd 0.0145, n=18917 |
+| mag.field_ut | range 15.6 uT, sd 2.51, n=18907 |
+| baro.altitude | range 0.438 m, sd 0.0847, n=18886 |
+| gnss.position | range 0.234 m, sd 0.0476, n=18887 |
+| gnss.velocity | range 0.195 m/s, sd 0.0329, n=18887 |
+| vibration.rms | range 0.0131 m/s^2, sd 0.00221, n=18916 |
+| estimator.variances | range 0.179, sd 0.0300, n=18868 — `ESTIMATOR_STATUS` ratios |
+| estimator.flight_mode | latched, decoded via main/sub mode, n=18511 |
+| vehicle_status.armed | latched armed=1, n=18511 |
+| baro.temp_c | constant at 11.82 over 18886 samples — already declared non-informative |
+| **battery.voltage** | **constant at 15.3 V over 18920 samples.** The contract marks this channel ADMISSIBLE. This is the W-5 pattern on a second platform and it is **UNCONFIRMED**: constancy on a static airframe describes the trial, not the channel. It becomes a finding only when SIH climbs. |
 
 ### Three findings that matter for CSIA on PX4
 
@@ -111,10 +147,10 @@ integration purposes and **not** as qualification verdicts:
 
 | item | owner | note |
 |---|---|---|
-| **make SIH climb** | engineering | arming is solved; `MAV_CMD_NAV_TAKEOFF` yields 0.4 m. Next: check whether SIH needs `MIS_TAKEOFF_ALT`, an offboard setpoint stream, or a mission item rather than a bare takeoff command |
+| **make SIH climb** | engineering | arming is solved; `MAV_CMD_NAV_TAKEOFF` yields 0.43 m. Next: check whether SIH needs `MIS_TAKEOFF_ALT`, an offboard setpoint stream, or a mission item rather than a bare takeoff command |
 | decide the SIH-vs-Gazebo question | engineering | SIH gives dynamics with no dependencies but publishes fewer messages; Gazebo publishes more but adds a heavy dependency |
 | per-platform contract rows | engineering | the ESC rows are ArduPilot-specific and must not be read as PX4 verdicts |
-| re-run `make sim-px4` to PASS | engineering | until it does, **no PX4 result may be quoted** |
+| re-run `make sim-px4` to PASS | engineering | until it does, no PX4 **constancy** result may be quoted. Presence results (2.1) are already valid. |
 
 ---
 
