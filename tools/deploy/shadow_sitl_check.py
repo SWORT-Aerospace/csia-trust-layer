@@ -230,6 +230,22 @@ def main() -> int:
             print(f"=== tick latency through the FULL v1.1 stack")
             print(f"    median {L['median_us']:.1f} us | p95 {L['p95_us']:.1f} "
                   f"| p99 {L['p99_us']:.1f} | max {L['max_us']:.1f} us")
+            # The tee runs as a THREAD in this interpreter. Under the GIL its
+            # forwarding work is charged to the core's wall clock, and a
+            # controlled test (same log, same core, varying only concurrent
+            # in-process threads) measured 679 / 955 / 1598 us at 0 / 1 / 2
+            # threads. An earlier run of this harness reported 1590 us and it
+            # was recorded as an R13 failure of CSIA. It was not.
+            #
+            # For a clean core figure use
+            # tools/deploy/profile_core_from_log.py, which replays a flight
+            # log with nothing else in the process.
+            result["timing_caveat"] = (
+                "phases include GIL contention from the in-process tee "
+                "thread; NOT a clean core measurement. See W-8 and "
+                "tools/deploy/profile_core_from_log.py")
+            print("    NOTE: phases include in-process tee contention -- "
+                  "not a clean core figure (see W-8)")
             ph = result["phases"]
             print(f"    phases (median us): "
                   + "  ".join(f"{k}={ph[k]['median_us']:.1f}"

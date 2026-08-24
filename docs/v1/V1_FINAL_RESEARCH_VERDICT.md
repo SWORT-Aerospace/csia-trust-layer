@@ -40,7 +40,7 @@ such.
 | trust core, replay build | 69–75 µs/tick |
 | trust core + failsafe, live runtime | 297–356 µs/tick |
 | requirement R13 | ≤ 2 ms/tick |
-| headroom against R13 | **see W-8 — the ~6x previously stated here is wrong** |
+| headroom against R13 | **~2.4x measured on real data — see W-8.** The ~6x once stated here came from a sub-measurement |
 | native C core, host benchmark | 247 ns trust kernel + 427 ns diagnosis |
 | native C core on STM32H743 | **NOT MEASURED.** The 7–15 µs figure in older docs is an estimate. The C core is on no execution path. |
 
@@ -166,55 +166,74 @@ not a detector programme. That is a deliberate decision, recorded here.
 
 ### W-8 The published tick figure is a sub-measurement
 
-**Found after the freeze**, by phase-timing the v1.1 shadow stack on live
-telemetry and then profiling the core directly.
+**Found after the freeze.** Narrower than first recorded here — see the
+correction at the end of this entry, which is part of the finding.
 
 `TrustState.latency_us` — the number `csia run` prints and the source of the
 297–356 µs/tick in section 2 — starts its timer at `online.py:461`, inside
 `_tick()`, and stops at `online.py:645`. **It excludes `ingest()` and
 `_apply()`**: the per-sensor work of accepting a sample, updating the Holt
-filters and computing residuals, without which `_tick()` cannot run at all.
+filters and computing residuals, without which `_tick()` cannot run.
 
-Measured with `cProfile`, 400 ticks at 25 Hz, 8 sensors:
+Confirmed by profile on real logged flight data: `ingest` cumulative 0.882 s
+against `_tick` cumulative 0.655 s — a ratio of **1.35×**.
 
-| | field_mode=False | field_mode=True |
-|---|---|---|
-| total driving cost | 1488 µs/tick | 1683 µs/tick |
-| `ingest` cumulative ÷ `_tick` cumulative | 1.69× | 1.71× |
+**The full drive cost, measured on real data.** 751 logged ticks from a live
+ArduCopter 4.8 shadow run, replayed into a fresh core, timed with
+`perf_counter` and no profiler
+(`tools/deploy/profile_core_from_log.py`):
 
-So the full cost of *driving* the layer is at least ~1.7× the figure that was
-published, and `field_mode` — the setting a real vehicle requires — adds a
-further ~13%.
+| | median | p95 | hand-offs/tick |
+|---|---|---|---|
+| `field_mode=False` | 576.9 µs | 734.4 | 2.92 |
+| `field_mode=True` (deployment setting) | **632.7 µs** | 776.9 | 2.92 |
 
-End-to-end on live ArduCopter 4.8 telemetry through the v1.1 stack, phase
-split of a 1753 µs median tick:
+So the published figure understates the cost of driving the layer by roughly
+1.8×, and `field_mode` — which a real vehicle requires — adds ~10%.
 
-```
-sample   181.6 µs   adapter: qualify 18 channels
-convert   25.4 µs   adapter: build core tuples
-core    1542.7 µs   the FROZEN v1 layer          <- 88%
-```
+**R13 status on desktop:** ~633 µs core + ~207 µs v1.1 adapter ≈ **840 µs
+against the 2 ms budget, about 2.4× headroom.** Lower than the ~6× the
+benchmark row implied, and not a failure.
 
-**Consequence.** R13 headroom was never ~6×. Against a 2 ms budget the
-measured core cost alone is ~1.5 ms, and the observed end-to-end median is
-1753 µs — 88% of budget, with 191–276 of 751 ticks *over* it. On a
-companion-class ARM, expected several times slower than this desktop, the
-budget is exceeded outright.
+---
 
-**Not fixed, and not a v1.1 defect.** The core is frozen. Three v1.1-side
-hypotheses were tested and refuted by measurement — dispatch overhead (−6%
-median), message volume (−36% messages, +2% median), and re-feeding stale
-samples (0%, though that was a genuine correctness bug and is fixed). The cost
-is real work inside the frozen core.
+#### Correction: the R13 "failure" was a measurement artifact, and it was mine
 
-**What is NOT established:** why the live figure (1543 µs) exceeds what the
-profile predicts from the replay figure (~525 µs). Live telemetry may exercise
-more edges, or more sensors may be active, than the bench scenario. That gap
-is open and needs profiling under live data, not another hypothesis.
+This entry first recorded the core at ~1.5 ms and concluded *"R13 headroom was
+never ~6×… on companion-class ARM the budget is exceeded outright."*
+**That was wrong**, and the way it was wrong is worth more than the number.
 
-**Deployment consequence.** Gate 2 must measure this on target hardware before
-any timing margin is claimed. The figure to measure is the full drive cost,
-not `latency_us`.
+The 1542–1590 µs came from phase timing inside
+`tools/deploy/shadow_sitl_check.py`, where the telemetry tee runs as a
+**thread in the same interpreter**, forwarding 68,000 messages while the core
+is being timed. Python's GIL means that work is charged to the core's wall
+clock.
+
+Controlled, same log, same core, varying only concurrent in-process load:
+
+| concurrent GIL threads | core median |
+|---|---|
+| 0 | 679.5 µs |
+| 1 | 954.6 µs |
+| 2 | **1598.3 µs** |
+
+The live figure was 1590 µs. It reproduces the two-thread case, not a property
+of CSIA.
+
+**What survives:** `latency_us` is a sub-measurement, the drive cost is ~1.8×
+the published number, and headroom is ~2.4× rather than ~6×.
+
+**What does not:** the core is not 1.5 ms, and R13 does not fail on desktop.
+
+**The lesson, recorded because it will recur:** a timing harness that shares
+an interpreter with the traffic generator measures the harness. On a real
+aircraft the tee is a separate process or hardware and does not contend — so
+the deployment configuration was never the one that failed. Any future timing
+claim must state what else was running in the same process.
+
+**Gate 2 must still measure on target hardware.** ~2.4× headroom on a desktop
+is not ~2.4× on companion-class ARM, and the figure to measure is the full
+drive cost, not `latency_us`.
 
 ### W-7 The first heartbeat is discarded on every connection
 
