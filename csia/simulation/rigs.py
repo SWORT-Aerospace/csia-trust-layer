@@ -34,11 +34,32 @@ def launch_ardupilot(workdir, speedup=10):
                          f"./waf configure --board sitl && ./waf copter")
     shutil.rmtree(workdir, ignore_errors=True)
     os.makedirs(workdir)
+    # SERIAL1 gives a SECOND MAVLink link, and it is not a convenience.
+    #
+    # SITL's SERIAL0 (tcp:5760) accepts one client. A shadow monitor sharing
+    # it with the rig cannot work: the rig holds it to arm and to request data
+    # streams, and when it disconnects the monitor's reconnect gets EOF.
+    #
+    # More importantly the two links have different AUTHORITY, and that is the
+    # real deployment shape rather than a test fixture. SERIAL0 is the rig or
+    # the GCS: it commands, and it is what asks the autopilot to stream.
+    # SERIAL1 is CSIA: passive, read-only, and structurally unable to ask for
+    # anything. On a real aircraft this is a GCS/telemetry link plus a
+    # companion port.
     proc = subprocess.Popen(
         [binary, "--model", "quad", "--speedup", str(speedup), "-w",
-         "--home", HOME, "--instance", "0"],
+         "--home", HOME, "--instance", "0",
+         "--serial1", "tcp:5762"],
         cwd=workdir, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     return proc, "tcp:127.0.0.1:5760"
+
+
+# The passive link per platform: where a shadow monitor listens while the rig
+# or a GCS holds the command link. See launch_ardupilot for why two exist.
+PASSIVE_LINKS = {
+    "ardupilot": "tcp:127.0.0.1:5762",
+    "px4": "udp:127.0.0.1:14550",
+}
 
 
 def launch_px4(workdir, speedup=1):

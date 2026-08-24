@@ -42,7 +42,8 @@ sys.path.insert(0, ROOT)
 
 from csia.deploy.guard import CommandAuthorityError          # noqa: E402
 from csia.deploy.shadow import Mode, ShadowConfig, ShadowRunner  # noqa: E402
-from csia.simulation.rigs import LAUNCHERS, connect, fly     # noqa: E402
+from csia.simulation.rigs import (LAUNCHERS, PASSIVE_LINKS, connect,  # noqa: E402
+                                  fly)
 
 R13_BUDGET_US = 2000.0
 
@@ -88,26 +89,58 @@ def main() -> int:
 
     result = {"platform": args.platform, "seconds": args.seconds}
     try:
-        # The rig connection is COMMAND-CAPABLE on purpose: arming the vehicle
-        # is the rig's job, not CSIA's. It is closed before the shadow runner
-        # opens its own, so the two never coexist.
+        # The rig holds the COMMAND link (SERIAL0) for the whole run. It is
+        # what asks the autopilot to stream, because a shadow monitor cannot:
+        # request_data_stream_send is a transmit, and the guard denies it. On
+        # a real aircraft that request comes from the GCS or from the FC's own
+        # SR*_ parameters -- see docs/deployment/AIRCRAFT_INTEGRATION.md.
+        # It is NOT closed early: the streams stop when the requester leaves.
+        rig_conn = connect(conn_str, args.platform)
+
+        # Make SERIAL1 -- the passive link -- actually stream.
+        #
+        # REQUEST_DATA_STREAM is PER-LINK. The rig requesting streams on
+        # SERIAL0 does nothing for SERIAL1, which is why the first run of this
+        # harness saw a flying vehicle and 0 usable channels. Stream rates for
+        # a port are set by its SRn_* parameters, and those are global state
+        # the rig can write from its own link.
+        #
+        # This is not a test trick: it is exactly the installation step
+        # docs/deployment/AIRCRAFT_INTEGRATION.md 2.0 calls the preferred
+        # option -- configure the companion's port on the flight controller,
+        # so CSIA's evidence does not depend on anyone staying connected.
+        if args.platform == "ardupilot":
+            from pymavlink import mavutil as _mav
+            for name, hz in (("SR1_RAW_SENS", 25), ("SR1_EXTRA1", 25),
+                             ("SR1_EXTRA2", 10), ("SR1_EXTRA3", 5),
+                             ("SR1_POSITION", 10), ("SR1_EXT_STAT", 10),
+                             ("SR1_PARAMS", 0), ("SR1_RC_CHAN", 0)):
+                rig_conn.mav.param_set_send(
+                    rig_conn.target_system, rig_conn.target_component,
+                    name.encode(), float(hz),
+                    _mav.mavlink.MAV_PARAM_TYPE_INT32)
+            time.sleep(2.0)
+            print("=== rig set SR1_* stream rates on the passive port "
+                  "(the documented install step)")
+        print("=== rig holds the command link")
         if args.fly:
             print("=== rig: arming and climbing (rig authority, not CSIA)")
-            rig_conn = connect(conn_str, args.platform)
             ev = fly(rig_conn, args.platform)
             print(f"    armed={ev['armed']} climbed={ev['climbed_m']:.2f} m")
             result["rig_flight"] = {"armed": ev["armed"],
                                     "climbed_m": round(ev["climbed_m"], 2)}
-            rig_conn.close()
 
         from pymavlink import mavutil
 
+        passive = PASSIVE_LINKS[args.platform]
+
         def factory():
-            c = mavutil.mavlink_connection(conn_str)
+            # A SEPARATE, passive link. Not the rig's command link.
+            c = mavutil.mavlink_connection(passive)
             c.wait_heartbeat(timeout=60)
             return c
 
-        cfg = ShadowConfig(platform=args.platform, connection=conn_str,
+        cfg = ShadowConfig(platform=args.platform, connection=passive,
                            mode=Mode.SHADOW, tick_hz=25.0, log_dir=logdir,
                            max_runtime_s=args.seconds,
                            autopilot_version=args.platform)

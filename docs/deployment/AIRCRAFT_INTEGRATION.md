@@ -53,6 +53,52 @@ and explicit approval.** Nothing in this repository is a step toward it.
 
 ## 2. Companion computer deployment (mode A, first)
 
+### 2.0 The vehicle must already be streaming. CSIA cannot ask.
+
+**Read this before wiring anything.** It is the first thing that will go wrong
+on a real aircraft, and it produces no error message.
+
+A MAVLink autopilot does not stream telemetry unprompted. Someone has to ask —
+`REQUEST_DATA_STREAM`, `MAV_CMD_SET_MESSAGE_INTERVAL`, or the flight
+controller's own `SR*_` rate parameters.
+
+**CSIA cannot be that someone.** Asking is transmitting, and in SHADOW mode
+the transmit surface is denied by construction. `request_data_stream_send`
+raises `CommandAuthorityError` like any other command. That is correct
+behaviour, not a bug to work around: a monitor that can ask for streams is a
+monitor that can send.
+
+Discovered by running the stack against live SITL rather than a fake:
+
+```
+ticks: 31   messages: 1
+R13: INVALID_MEASUREMENT -- 1 message, 0 usable channels
+```
+
+One heartbeat, then silence. Every channel `NOT_RECEIVED`, no error anywhere,
+a flight log full of well-formed empty ticks.
+
+**What this means for installation.** One of these must be true before a
+shadow flight is worth taking:
+
+| option | how | check |
+|---|---|---|
+| **FC parameters** (preferred) | set `SR2_*` on the companion's serial port: `SR2_RAW_SENS`, `SR2_EXTRA1/2/3`, `SR2_POSITION`, `SR2_EXT_STAT` | persists across reboots; nothing else needed in the air |
+| GCS on another link | the ground station requests streams on its own link | fragile: streams stop when the GCS disconnects |
+| a separate requester process | a small tool with command authority | reintroduces a transmit path on the vehicle — needs its own safety case |
+
+**Use the first.** It is the only one where CSIA's evidence does not depend on
+another party staying connected.
+
+The rates the contract expects per channel are in
+`docs/simulation/CHANNEL_SEMANTICS.yaml` (`producer_ardupilot.rate_hz` /
+`producer_px4.rate_hz`). Below those, channels go `STALE` and the layer
+abstains — correctly, but you will have flown for nothing.
+
+**Verify before flight, not after:** `csia.deploy.cli --self-test` reports the
+per-channel arrival state from the live link. Zero usable channels means the
+vehicle is not configured to stream, not that CSIA is broken.
+
 ### 2.1 Hardware
 
 | item | minimum | notes |

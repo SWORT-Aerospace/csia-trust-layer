@@ -43,6 +43,68 @@ def build_contract(cfg: dict, context: str) -> SemanticContract:
     return contract
 
 
+
+def self_test(runner, seconds: float) -> int:
+    """Pre-flight: does telemetry actually arrive on this link?
+
+    Exists because a shadow monitor CANNOT ask an autopilot to stream --
+    requesting is transmitting, and the guard denies it. If the vehicle's
+    SR*_ parameters are not set for this port, CSIA receives one heartbeat and
+    nothing else, forever, with no error anywhere. That failure is invisible
+    in the air and obvious here.
+
+    Exit 0 only if at least one channel reached the diagnostic core.
+    """
+    import time as _t
+    runner.connect()
+    log.info("self-test: listening %.0f s on %s", seconds,
+             runner.cfg.connection)
+    t0 = _t.monotonic()
+    while _t.monotonic() - t0 < seconds:
+        try:
+            m = runner.conn.recv_match(blocking=True, timeout=1.0)
+        except Exception as exc:                        # pragma: no cover
+            log.warning("receive error: %s", exc)
+            continue
+        if m is not None:
+            runner.adapter.ingest(m)
+
+    sample = runner.adapter.sample(t_mono=_t.monotonic() - t0)
+    usable = sample.usable_channels()
+    blocked = sample.blocked_channels()
+    counters = runner.adapter.counters
+
+    print(f"\n=== self-test over {seconds:.0f} s on {runner.cfg.connection}")
+    print(f"    messages seen:   {counters['messages']}")
+    print(f"    channels mapped: {counters['mapped']}")
+    print(f"    USABLE channels: {len(usable)}")
+    for cv in sorted(usable, key=lambda c: c.channel):
+        print(f"        {cv.channel:26s} age {cv.age_s:.3f}s")
+    absent = [cv for cv in sample.channels()
+              if not cv.usable and cv not in blocked]
+    if absent:
+        print(f"    NOT ARRIVING ({len(absent)}):")
+        for cv in sorted(absent, key=lambda c: c.channel):
+            print(f"        {cv.channel:26s} "
+                  f"{cv.missing.value if cv.missing else '-'}")
+    if blocked:
+        print(f"    blocked by contract ({len(blocked)}): "
+              + ", ".join(sorted(cv.channel for cv in blocked)))
+    unmapped = runner.adapter.unmapped_types()
+    if unmapped:
+        print(f"    unmapped message types: {sorted(unmapped)}")
+
+    if not usable:
+        print("\nSELF-TEST: FAIL -- no channel reached the diagnostic core.")
+        print("  Most likely the vehicle is not streaming on this port. CSIA "
+              "cannot request streams (that would be transmitting).")
+        print("  Set SR*_ parameters for this serial port on the flight "
+              "controller. See docs/deployment/AIRCRAFT_INTEGRATION.md 2.0.")
+        return 1
+    print(f"\nSELF-TEST: PASS -- {len(usable)} channel(s) usable.")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="csia-shadow")
     ap.add_argument("--config", default="configs/vehicle/example_quad.yaml")
@@ -57,6 +119,12 @@ def main(argv=None) -> int:
                                           CONTEXT_HARDWARE],
                     default=CONTEXT_HARDWARE,
                     help="qualification context; HARDWARE on a real vehicle")
+    ap.add_argument("--self-test", action="store_true",
+                    help="connect, listen briefly, report which channels "
+                         "actually arrive, then exit. Run this BEFORE a "
+                         "shadow flight: zero usable channels means the "
+                         "vehicle is not configured to stream.")
+    ap.add_argument("--self-test-seconds", type=float, default=10.0)
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
 
@@ -101,6 +169,9 @@ def main(argv=None) -> int:
     def stop(_sig, _frm):
         log.info("stopping on signal")
         runner.stop()
+
+    if args.self_test:
+        return self_test(runner, args.self_test_seconds)
 
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
