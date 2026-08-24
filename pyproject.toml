@@ -27,6 +27,7 @@ data = ["duckdb>=1.0", "huggingface_hub>=0.34", "polars>=1.0", "pyarrow>=25",
 
 [project.scripts]
 csia = "csia.cli:main"
+csia-shadow = "csia.deploy.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["csia*"]
@@ -40,4 +41,5 @@ testpaths = ["tests"]
 addopts = "-q"
 markers = [
     "slow: end-to-end runs through the full detector (seconds, not ms)",
+    "sitl: needs a live ArduPilot or PX4 SITL binary; excluded from the fast CI lane",
 ]

@@ -1,0 +1,446 @@
+# CSIA channel semantics contract (v1.1, PHASE S2)
+#
+# ONE ROW PER CHANNEL CSIA CONSUMES. A channel that is not in this file is
+# not admissible as diagnostic evidence, on any platform, ever.
+#
+# The rule this file exists to enforce:
+#
+#     A FIELD BEING PRESENT AND FRESH IS NOT EVIDENCE THAT IT MEANS ANYTHING.
+#
+# That is not a general principle we adopted for tidiness. It is the direct
+# consequence of a measured defect: ArduPilot SITL publishes ESC current as a
+# hard-coded 0.8 A specifically so that `is_telemetry_active()` returns true
+# (AP_ESC_Telem_SITL.cpp:72). The field is present, fresh, well-formed, and
+# carries no information. Fed to the `power_thrust` relation it produced a
+# spurious CRITICAL on every clean flight -- Phase-II P0.5, classified
+# SIMULATOR_ARTIFACT. See docs/v1/V1_FINAL_RESEARCH_VERDICT.md W-5.
+#
+# ---------------------------------------------------------------------------
+# simulator_implementation -- what the SIMULATOR actually computes
+# ---------------------------------------------------------------------------
+#   PHYSICAL_MODEL   derived from the simulated vehicle dynamics or sensor model
+#   APPROXIMATION    physically motivated but simplified; usable with care
+#   PLACEHOLDER      a value chosen to satisfy a liveness check, not physics
+#   CONSTANT_STUB    literally constant regardless of vehicle state
+#   UNAVAILABLE      not produced at all
+#
+# ---------------------------------------------------------------------------
+# qualification -- whether CSIA MAY USE IT, and on what basis
+# ---------------------------------------------------------------------------
+#   UNAVAILABLE             not produced; relations depending on it stay dark
+#   AVAILABLE_UNVALIDATED   present, but nobody has checked units/frame/meaning
+#   VALIDATED_SEMANTICS     units, frame, rate and sentinel semantics confirmed
+#                           against source, but informativeness not established
+#   INFORMATIVE             VALIDATED_SEMANTICS *and* demonstrated to vary with
+#                           the physical quantity it claims to represent
+#   STUB_OR_NONINFORMATIVE  present and well-formed but carries no information
+#
+# ---------------------------------------------------------------------------
+# qualification_criterion -- HOW a channel earns INFORMATIVE
+# ---------------------------------------------------------------------------
+#   VARIATION  (default) the channel must be observed to VARY while the
+#              vehicle is in motion. A continuous physical quantity that never
+#              moves is a stub. This is the criterion that catches the ESC
+#              current.
+#   DECODE     the channel is a latched enum or boolean -- a flight mode, an
+#              armed flag. Constancy is its NORMAL state: a vehicle that stays
+#              armed for a whole flight reports the same value 131,000 times
+#              and is not thereby a stub. These are qualified by decoding
+#              correctly against the platform's enum, not by varying.
+#
+# Applying VARIATION to a latched enum is a category error, and the live
+# qualification run made it: it flagged `vehicle_status.armed` as a stub
+# because the aircraft stayed armed for the whole observation window.
+#
+# ADMISSIBILITY: only INFORMATIVE channels may drive a relation.
+# Everything else is delivered to the core as MISSING, with the reason
+# recorded, so the layer abstains instead of concluding from noise.
+#
+# This is enforced in csia/aircraft/qualification.py at the ADAPTER boundary.
+# It is NOT enforced by thresholds inside the diagnostic core, and it does not
+# alter any v1 relation, weight or gate.
+
+contract_version: 1
+applies_to_csia_version: "1.1"
+frozen_core: csia-v1.0-research-final
+
+platforms:
+  ardupilot:
+    verified_against: "ArduCopter V4.8.0-dev @ 01a504b"
+    source_root_env: CSIA_AP_ROOT
+  px4:
+    verified_against: "NOT YET VERIFIED -- see docs/simulation/PX4_CURRENT.md"
+    source_root_env: CSIA_PX4_ROOT
+
+# ===========================================================================
+channels:
+
+# --------------------------------------------------------------------- IMU
+- channel: imu0.accel
+  node: imu0
+  quantity: specific force, body frame
+  unit: m/s^2
+  frame: body z-up (converted from MAVLink FRD)
+  scale: "ArduPilot SCALED_IMU xacc is mG -> *9.80665e-3; PX4 HIGHRES_IMU is SI"
+  producer_ardupilot: {message: "RAW_IMU (or SCALED_IMU)", fields: [xacc, yacc, zacc], rate_hz: 25}
+  producer_px4: {message: HIGHRES_IMU, fields: [xacc, yacc, zacc], rate_hz: 50}
+  producer_note: >-
+    ArduPilot publishes inertial instance 0 as RAW_IMU on the RAW_SENSORS
+    stream; SCALED_IMU carries the same instance but is not always enabled.
+    Measured on 4.8: RAW_IMU arrives, SCALED_IMU does not. Both use
+    accel*1000/GRAVITY_MSS (GCS_Common.cpp send_raw_imu / send_scaled_imu).
+  missing_semantics: "message absent -> MISSING; there is no in-band sentinel"
+  aggregation: instantaneous sample, not averaged
+  physical_interpretation: >-
+    accelerometer output including gravity. The attitude/gravity relations
+    depend on the magnitude being near 9.81 in steady flight.
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Multicopter.cpp integrates the airframe dynamics; accel noise via SIM_ACC*_RND"
+
+- channel: imu0.gyro
+  node: imu0
+  quantity: angular rate, body frame
+  unit: rad/s
+  frame: body z-up (converted from MAVLink FRD)
+  scale: "ArduPilot SCALED_IMU xgyro is mrad/s -> *1e-3; PX4 HIGHRES_IMU is SI"
+  producer_ardupilot: {message: SCALED_IMU, fields: [xgyro, ygyro, zgyro], rate_hz: 25}
+  producer_px4: {message: HIGHRES_IMU, fields: [xgyro, ygyro, zgyro], rate_hz: 50}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: instantaneous sample
+  physical_interpretation: body angular rate about each axis
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Aircraft gyro from rigid-body state; noise via SIM_GYR*_RND"
+
+- channel: imu1.accel
+  node: imu1
+  quantity: specific force, body frame, second unit
+  unit: m/s^2
+  frame: body z-up
+  scale: "SCALED_IMU2 xacc mG -> *9.80665e-3"
+  producer_ardupilot: {message: SCALED_IMU2, fields: [xacc, yacc, zacc], rate_hz: 25}
+  producer_px4: {message: SCALED_IMU2, fields: [xacc, yacc, zacc], rate_hz: 25}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: instantaneous sample
+  physical_interpretation: redundant IMU; the imu0/imu1 cross-check relation needs both
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: >-
+    SITL simulates multiple IMU instances with independent noise draws. NOTE:
+    they share one dynamics source, so a SITL imu0/imu1 disagreement is a
+    noise-model artifact, not an independent-hardware result.
+
+- channel: imu1.gyro
+  node: imu1
+  quantity: angular rate, body frame, second unit
+  unit: rad/s
+  frame: body z-up
+  scale: "SCALED_IMU2 xgyro mrad/s -> *1e-3"
+  producer_ardupilot: {message: SCALED_IMU2, fields: [xgyro, ygyro, zgyro], rate_hz: 25}
+  producer_px4: {message: SCALED_IMU2, fields: [xgyro, ygyro, zgyro], rate_hz: 25}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: instantaneous sample
+  physical_interpretation: redundant gyro
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: same as imu1.accel
+
+# --------------------------------------------------------------- MAGNETOMETER
+- channel: mag.field_ut
+  node: mag
+  quantity: magnetic field vector, body frame
+  unit: microtesla
+  frame: body z-up
+  scale: "ArduPilot SCALED_IMU xmag is mgauss -> *0.1; PX4 HIGHRES_IMU is gauss -> *100"
+  producer_ardupilot: {message: SCALED_IMU, fields: [xmag, ymag, zmag], rate_hz: 25}
+  producer_px4: {message: HIGHRES_IMU, fields: [xmag, ymag, zmag], rate_hz: 50}
+  missing_semantics: "all-zero triple is treated as ABSENT, not as a zero field"
+  aggregation: instantaneous sample
+  physical_interpretation: >-
+    magnetic field used for heading. The heading_course relation compares it
+    against GNSS course-over-ground, which is why a GNSS course fault can be
+    attributed to the magnetometer (W-2).
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Aircraft world-frame field rotated into body; SIM_MAG1_* offsets available"
+
+# ---------------------------------------------------------------------- BARO
+- channel: baro.altitude
+  node: baro
+  quantity: pressure altitude
+  unit: m
+  frame: ISA standard atmosphere, relative to sea-level pressure
+  scale: "SCALED_PRESSURE press_abs hPa -> pressure_to_altitude()"
+  producer_ardupilot: {message: SCALED_PRESSURE, fields: [press_abs], rate_hz: 10}
+  producer_px4: {message: SCALED_PRESSURE, fields: [press_abs], rate_hz: 10}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: instantaneous sample
+  physical_interpretation: barometric altitude, cross-checked against GNSS altitude
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Aircraft barometer model with SIM_BARO_RND noise"
+
+- channel: baro.temp_c
+  node: baro
+  quantity: barometer die temperature
+  unit: degC
+  frame: n/a
+  scale: "SCALED_PRESSURE temperature is centi-degC -> /100"
+  producer_ardupilot: {message: SCALED_PRESSURE, fields: [temperature], rate_hz: 10}
+  producer_px4: {message: SCALED_PRESSURE, fields: [temperature], rate_hz: 10}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: instantaneous sample
+  physical_interpretation: >-
+    feeds the temp_bias_drift relation. Phase-I WP-A2 measured this edge as
+    the ONE genuinely inert relation of eleven -- it does not vary with state
+    in either direction.
+  simulator_implementation: APPROXIMATION
+  qualification: VALIDATED_SEMANTICS
+  csia_may_use: false
+  csia_may_use_reason: >-
+    semantics are confirmed but informativeness is not: SITL temperature does
+    not track any modelled thermal process, and the relation it feeds is
+    measured inert. Admitting it would create the appearance of evidence where
+    there is none. Recorded, not deleted.
+
+# ----------------------------------------------------------------------- GNSS
+- channel: gnss.position
+  node: gps
+  quantity: receiver position, local tangent plane
+  unit: m
+  frame: local NED converted to z-up, origin = first valid fix
+  scale: "GPS_RAW_INT lat/lon are 1e-7 deg; alt is mm"
+  producer_ardupilot: {message: GPS_RAW_INT, fields: [lat, lon, alt, fix_type], rate_hz: 5}
+  producer_px4: {message: GPS_RAW_INT, fields: [lat, lon, alt, fix_type], rate_hz: 5}
+  missing_semantics: >-
+    fix_type < 3 is NOT a zero position. It is MISSING with reason
+    NO_3D_FIX. Treating it as a position at the origin would inject a
+    fictitious kilometre-scale jump.
+  aggregation: instantaneous receiver solution
+  physical_interpretation: >-
+    RAW receiver output, deliberately not the EKF-fused GLOBAL_POSITION_INT.
+    The EKF innovation-gates faults out of its fused output, hiding exactly
+    what an integrity monitor exists to see.
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_GPS.cpp:581 d.latitude += glitch_offsets.x -- injection reaches the receiver"
+
+- channel: gnss.velocity
+  node: gps
+  quantity: receiver ground velocity
+  unit: m/s
+  frame: local NED converted to z-up
+  scale: "GPS_RAW_INT vel is cm/s ground speed; cog is centi-degrees"
+  producer_ardupilot: {message: GPS_RAW_INT, fields: [vel, cog], rate_hz: 5}
+  producer_px4: {message: GPS_RAW_INT, fields: [vel, cog], rate_hz: 5}
+  missing_semantics: "fix_type < 3 -> MISSING"
+  aggregation: instantaneous receiver solution
+  physical_interpretation: >-
+    horizontal velocity reconstructed from ground speed and course. NOTE the
+    vertical component is a structural gap, see gnss.velocity_z.
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: derived from the same simulated receiver state as position
+
+- channel: gnss.velocity_z
+  node: gps
+  quantity: receiver vertical velocity
+  unit: m/s
+  frame: z-up
+  scale: n/a
+  producer_ardupilot: {message: GPS_RAW_INT, fields: [], rate_hz: 5}
+  producer_px4: {message: GPS_RAW_INT, fields: [], rate_hz: 5}
+  missing_semantics: "ALWAYS MISSING from GPS_RAW_INT; carried as vz_valid=false"
+  aggregation: n/a
+  physical_interpretation: >-
+    GPS_RAW_INT carries no vertical rate. v1 sets the component to 0.0 with
+    vz_valid=false so the layer judges horizontal only, rather than reading
+    every climb as a spoof-like z residual.
+  simulator_implementation: UNAVAILABLE
+  qualification: UNAVAILABLE
+  csia_may_use: false
+  csia_may_use_reason: >-
+    the field does not exist in the chosen message. The zero placed in the
+    vector is a padding value and must never be read as a measurement.
+
+# -------------------------------------------------------------------- BATTERY
+- channel: battery.voltage
+  node: battery
+  quantity: pack voltage
+  unit: V
+  frame: n/a
+  scale: "BATTERY_STATUS voltages[] are mV -> /1000, summing valid cells"
+  producer_ardupilot: {message: BATTERY_STATUS, fields: [voltages], rate_hz: 10}
+  producer_px4: {message: BATTERY_STATUS, fields: [voltages], rate_hz: 10}
+  missing_semantics: "cell value 65535 (UINT16_MAX) means 'cell not present' and is excluded from the sum"
+  aggregation: sum over present cells
+  physical_interpretation: pack terminal voltage; sags under load
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Multicopter battery model responds to commanded thrust"
+
+- channel: battery.current
+  node: battery
+  quantity: pack current draw
+  unit: A
+  frame: n/a
+  scale: "BATTERY_STATUS current_battery is cA -> /100"
+  producer_ardupilot: {message: BATTERY_STATUS, fields: [current_battery], rate_hz: 10}
+  producer_px4: {message: BATTERY_STATUS, fields: [current_battery], rate_hz: 10}
+  missing_semantics: "-1 means 'not measured' -> MISSING, not zero current"
+  aggregation: instantaneous
+  physical_interpretation: total pack current
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: "SIM_Multicopter.cpp:102 battery_current = frame->get_current_amp()"
+
+# ------------------------------------------------------------------- ESC ****
+# The reason this file exists. Read W-5 before changing anything here.
+- channel: esc.current
+  node: motor_esc
+  quantity: per-ESC current
+  unit: A
+  frame: n/a
+  scale: "ESC_TELEMETRY_1_TO_4 current is cA -> /100; ESC_STATUS current is A"
+  producer_ardupilot: {message: ESC_TELEMETRY_1_TO_4, fields: [current], rate_hz: 10}
+  producer_px4: {message: ESC_STATUS, fields: [current], rate_hz: 10}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: per-motor vector, length 4
+  physical_interpretation: >-
+    should be the current each ESC draws; the power_thrust relation compares
+    summed ESC current against pack current and commanded thrust.
+  simulator_implementation: CONSTANT_STUB
+  qualification: STUB_OR_NONINFORMATIVE
+  csia_may_use: false
+  csia_may_use_reason: >-
+    AP_ESC_Telem_SITL.cpp:72 sets .current = 0.8f under the comment "some fake
+    values so that is_telemetry_active() returns true". It is constant on
+    every tick of every flight regardless of throttle. Admitting it made
+    power_thrust fire a false CRITICAL on every clean flight (P0.5).
+  regression_test: tests/test_channel_semantics.py::test_esc_sitl_stub_is_not_informative
+  on_real_hardware: >-
+    REAL ESC telemetry IS informative. This qualification is SIMULATOR
+    SPECIFIC. The adapter re-qualifies per platform instance, and a bench with
+    real ESCs must re-run the qualification probe rather than inherit this row.
+
+- channel: esc.rpm
+  node: motor_esc
+  quantity: per-ESC rotational speed
+  unit: rpm
+  frame: n/a
+  scale: direct
+  producer_ardupilot: {message: ESC_TELEMETRY_1_TO_4, fields: [rpm], rate_hz: 10}
+  producer_px4: {message: ESC_STATUS, fields: [rpm], rate_hz: 10}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: per-motor vector, length 4
+  physical_interpretation: motor speed; drives thrust and the vibration relation
+  simulator_implementation: PLACEHOLDER
+  qualification: STUB_OR_NONINFORMATIVE
+  csia_may_use: false
+  csia_may_use_reason: >-
+    SIM_Frame.cpp:901 computes rpm[i] = motors[i].get_command() * vibe_motor *
+    60, and SITL.cpp:512 defaults VIB_MOT_MAX to 0. With the default parameter
+    set the reported rpm is identically zero at every throttle setting. It
+    becomes a PLACEHOLDER (not a physical model) even when VIB_MOT_MAX is
+    nonzero, because it is a vibration-model term, not a motor-speed model.
+  regression_test: tests/test_channel_semantics.py::test_esc_sitl_stub_is_not_informative
+  on_real_hardware: same caveat as esc.current
+
+# ------------------------------------------------------------------ VIBRATION
+- channel: vibration.rms
+  node: vibration
+  quantity: airframe vibration level
+  unit: m/s^2
+  frame: magnitude over three axes / sqrt(3)
+  scale: "VIBRATION vibration_x/y/z are already m/s^2"
+  producer_ardupilot: {message: VIBRATION, fields: [vibration_x, vibration_y, vibration_z], rate_hz: 10}
+  producer_px4: {message: VIBRATION, fields: [vibration_x, vibration_y, vibration_z], rate_hz: 10}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: RMS envelope over the reporting interval, NOT an instantaneous sample
+  physical_interpretation: accelerometer vibration energy used to detect structural faults
+  simulator_implementation: APPROXIMATION
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: >-
+    responds to SIM_VIB_MOT_MAX together with SIM_ACC*_RND. Two earlier probes
+    failed because they set SIM_VIB_MOT_MAX alone; the amplitude comes from
+    accel_noise. A campaign that sets only one of the two produces an
+    INVALID_SCENARIO, not a negative result.
+  caveat: >-
+    on the LEGACY_COMPAT rig the vibration PHYSICS term is gated by
+    fresh["motor_esc"] (online.py:617-618), so suppressing ESC telemetry makes
+    components["vibration"]["phys"] None on every tick. Attribution of a
+    vibration fault is then impossible in principle. Recorded in W-5.
+
+# ------------------------------------------------------------- VEHICLE STATUS
+- channel: vehicle_status.armed
+  node: vehicle_status
+  qualification_criterion: DECODE
+  quantity: armed state
+  unit: boolean
+  frame: n/a
+  scale: "HEARTBEAT base_mode & MAV_MODE_FLAG_SAFETY_ARMED (128)"
+  producer_ardupilot: {message: HEARTBEAT, fields: [base_mode, type], rate_hz: 1}
+  producer_px4: {message: HEARTBEAT, fields: [base_mode, type], rate_hz: 1}
+  missing_semantics: >-
+    HEARTBEAT from MAV_TYPE_GCS (6) is IGNORED. Only the autopilot's own
+    heartbeat counts; a ground station heartbeat would otherwise assert armed
+    state the vehicle never reported.
+  aggregation: latest value, latched
+  physical_interpretation: gates the motor relations and the failsafe on real vehicle state
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: true
+  evidence: SITL arms and disarms exactly as the real vehicle does
+
+# ------------------------------------------------- AUTOPILOT ESTIMATOR (S9)
+# Consumed for LOGGING and comparison only. These never drive a CSIA relation:
+# the whole point of the layer is to be independent of the estimator.
+- channel: estimator.variances
+  node: _autopilot_reference
+  quantity: EKF innovation test ratios
+  unit: dimensionless
+  frame: n/a
+  scale: direct
+  producer_ardupilot: {message: EKF_STATUS_REPORT, fields: [velocity_variance, pos_horiz_variance, pos_vert_variance, compass_variance], rate_hz: 5}
+  producer_px4: {message: ESTIMATOR_STATUS, fields: [vel_ratio, pos_horiz_ratio, pos_vert_ratio, mag_ratio], rate_hz: 5}
+  missing_semantics: "message absent -> MISSING"
+  aggregation: low-pass filtered by the autopilot before publication
+  physical_interpretation: what the AUTOPILOT believes about its own health
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: false
+  csia_may_use_reason: >-
+    deliberately excluded from diagnosis. CSIA must not consume the estimator
+    it is meant to be independent of. Logged for the autopilot-vs-CSIA
+    comparison required by S9, and for nothing else.
+
+- channel: estimator.flight_mode
+  node: _autopilot_reference
+  qualification_criterion: DECODE
+  quantity: active flight mode
+  unit: enum
+  frame: n/a
+  scale: "HEARTBEAT custom_mode, platform-specific enum"
+  producer_ardupilot: {message: HEARTBEAT, fields: [custom_mode], rate_hz: 1}
+  producer_px4: {message: HEARTBEAT, fields: [custom_mode], rate_hz: 1}
+  missing_semantics: "absent -> MISSING"
+  aggregation: latest value, latched
+  physical_interpretation: >-
+    lets a post-flight reader see whether the autopilot changed mode (e.g. an
+    EKF failsafe LAND) independently of anything CSIA said.
+  simulator_implementation: PHYSICAL_MODEL
+  qualification: INFORMATIVE
+  csia_may_use: false
+  csia_may_use_reason: logging and comparison only, same as estimator.variances

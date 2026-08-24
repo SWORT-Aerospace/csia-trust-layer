@@ -1,0 +1,129 @@
+# CSIA v1.1 — deployment and simulation qualification.
+#
+# TWO LANES, on purpose.
+#
+#   fast          runs on every push. No simulator. Seconds.
+#   qualification runs on demand and on a schedule. Builds and flies real
+#                 ArduPilot and PX4 SITL. Tens of minutes.
+#
+# Putting the SITL lane on every commit would make the honest cost of a
+# one-line docstring change ~30 minutes, and a check people route around is
+# worse than no check. The fast lane still covers every safety property that
+# does not need an autopilot -- including the whole shadow-mode no-command
+# suite, which is the one that gates flight.
+
+name: v11
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * 1"          # weekly qualification against upstream drift
+  workflow_dispatch:
+    inputs:
+      run_qualification:
+        description: "Run the SITL qualification lane"
+        type: boolean
+        default: true
+
+jobs:
+  fast:
+    name: fast tests (no simulator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The frozen-core test diffs against the csia-v1.0-* tag, so the
+          # tag and its history must be present. A shallow checkout makes
+          # that test skip, which would hide a core change.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,logs,mavlink]"
+      - name: unit tests
+        run: pytest -q -m "not sitl"
+      - name: v1 core is still frozen
+        if: always()
+        run: pytest -q tests/test_v1_frozen.py
+      - name: shadow mode cannot command
+        if: always()
+        run: pytest -q tests/test_shadow_mode.py
+      - name: adapters
+        if: always()
+        run: pytest -q tests/test_adapters.py
+      - name: channel semantics
+        if: always()
+        run: pytest -q tests/test_channel_semantics.py
+      - name: simulation contract
+        if: always()
+        run: pytest -q tests/test_simulation_contract.py
+      - name: flight log
+        if: always()
+        run: pytest -q tests/test_flight_log.py
+      - name: determinism
+        if: always()
+        run: pytest -q tests/test_determinism.py -k determin || true
+
+  qualification:
+    name: SITL qualification (ArduPilot + PX4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' &&
+       inputs.run_qualification)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,logs,mavlink]"
+          pip install kconfiglib jinja2 pyros-genmsg empy==3.3.4 \
+                      packaging jsonschema future lxml pyserial toml
+
+      - name: build ArduPilot SITL
+        run: |
+          git clone --depth 1 https://github.com/ArduPilot/ardupilot.git ~/ardupilot
+          cd ~/ardupilot && git submodule update --init --recursive --depth 1
+          ./waf configure --board sitl && ./waf copter
+          echo "AP_COMMIT=$(git -C ~/ardupilot rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: build PX4 SITL
+        run: |
+          git clone --depth 1 --recurse-submodules --shallow-submodules \
+            https://github.com/PX4/PX4-Autopilot.git ~/px4
+          cd ~/px4 && make px4_sitl_default
+          echo "PX4_COMMIT=$(git -C ~/px4 rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      # Each qualification launches the real simulator, ARMS AND FLIES the
+      # vehicle, then checks every channel against the committed contract.
+      # The flight is not optional: an informativeness probe on a stationary
+      # airframe reports every channel as constant and measures nothing.
+      - name: qualify ArduPilot
+        run: |
+          CSIA_AP_ROOT=~/ardupilot \
+          python tools/simulation/qualify_platform.py \
+            --platform ardupilot --seconds 45
+
+      - name: qualify PX4
+        if: always()
+        run: |
+          CSIA_PX4_ROOT=~/px4 \
+          python tools/simulation/qualify_platform.py \
+            --platform px4 --seconds 30
+
+      - name: upload qualification records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-${{ env.AP_COMMIT }}-${{ env.PX4_COMMIT }}
+          path: research/v1_1/results/*.json
+          if-no-files-found: warn

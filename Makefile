@@ -35,6 +35,14 @@ help:
 	@echo "Science:"
 	@echo "  make test            full pytest suite (includes doc-count guard)"
 	@echo "  make figures         regenerate all figures from committed results"
+	@echo "v1.1 deployment:"
+	@echo "  make qualification   live channel-semantics check, both platforms"
+	@echo "  make sim-ardupilot   qualify against ArduPilot SITL"
+	@echo "  make sim-px4         qualify against PX4 SITL"
+	@echo "  make campaign        run the scenario suite"
+	@echo "  make shadow-run      run CSIA in SHADOW mode"
+	@echo "  make replay          replay a flight log"
+	@echo "  make test-fast       tests that need no simulator"
 
 # ---------------------------------------------------------------------------
 # LaTeX
@@ -156,3 +164,66 @@ clean:
 	rm -rf $(BUILD)
 	find . -name '__pycache__' -not -path './.venv/*' -not -path './.git/*' -prune -exec rm -rf {} +
 	find . -name '*.pyc' -not -path './.venv/*' -delete
+
+# ---------------------------------------------------------------------------
+# v1.1 simulation qualification and deployment (S1-S10)
+#
+# `qualification` is the gate: it launches the REAL simulator, runs the REAL
+# adapter, and checks every channel's semantics against the committed
+# contract. It arms and flies the vehicle first -- an informativeness probe on
+# a stationary airframe measures nothing.
+# ---------------------------------------------------------------------------
+AP_ROOT  ?= /home/user/ardupilot/ardupilot
+PX4_ROOT ?= /home/user/px4
+
+.PHONY: sim-ardupilot
+sim-ardupilot:
+	CSIA_AP_ROOT=$(AP_ROOT) $(PY) tools/simulation/qualify_platform.py \
+	  --platform ardupilot --seconds 45
+
+.PHONY: sim-px4
+sim-px4:
+	CSIA_PX4_ROOT=$(PX4_ROOT) $(PY) tools/simulation/qualify_platform.py \
+	  --platform px4 --seconds 30
+
+# Both platforms. Reports each; fails if either fails.
+.PHONY: qualification
+qualification:
+	@rc=0; \
+	for p in ardupilot px4; do \
+	  echo ""; echo "############ qualification: $$p"; \
+	  $(MAKE) --no-print-directory sim-$$p || rc=1; \
+	done; \
+	echo ""; \
+	if [ $$rc -ne 0 ]; then echo "QUALIFICATION: FAIL"; else echo "QUALIFICATION: PASS"; fi; \
+	exit $$rc
+
+.PHONY: campaign
+campaign:
+	CSIA_AP_ROOT=$(AP_ROOT) $(PY) tools/simulation/run_campaign.py \
+	  --config configs/simulation/scenarios_ardupilot.yaml \
+	  --profile $(or $(PROFILE),FIELD_DERIVED_NOISE)
+
+# Shadow deployment. CSIA_MODE defaults to SHADOW; there is no mode with
+# command authority, and an unrecognised value is a hard error.
+.PHONY: shadow-run
+shadow-run:
+	CSIA_MODE=$(or $(CSIA_MODE),SHADOW) $(PY) -m csia.deploy.cli \
+	  --config $(or $(VEHICLE),configs/vehicle/example_quad.yaml) \
+	  --log-dir $(or $(LOGDIR),logs/shadow)
+
+.PHONY: replay
+replay:
+	$(PY) tools/simulation/replay_flight_log.py $(LOG)
+
+# Fast lane: everything that does NOT need a simulator. This is what runs on
+# every commit; the SITL-dependent qualification is a separate lane.
+.PHONY: test-fast
+test-fast:
+	$(PY) -m pytest -q -m "not sitl"
+
+.PHONY: test-v11
+test-v11:
+	$(PY) -m pytest -q tests/test_channel_semantics.py tests/test_adapters.py \
+	  tests/test_shadow_mode.py tests/test_simulation_contract.py \
+	  tests/test_flight_log.py tests/test_v1_frozen.py
