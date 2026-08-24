@@ -49,30 +49,47 @@ CONSTANT_EPS = 1e-9
 
 
 def _scalarize(v):
-    """Reduce any channel value to one number for variation testing."""
+    """Reduce any channel value to one finite number for variation testing.
+
+    SINGLE EXIT, deliberately. The first version guarded only the numpy branch
+    and let the dict branch return early, so a NaN inside a dict-valued
+    channel went straight through. PX4's ESTIMATOR_STATUS publishes NaN ratios
+    before the EKF converges (ArduPilot's EKF_STATUS_REPORT does not), which
+    reached `statistics.pstdev` and crashed the whole probe with
+    "'float' object has no attribute 'numerator'" -- Python 3.12's signature
+    for NaN in the Fraction path.
+
+    Guarding one branch fixes one crash; funnelling every branch through one
+    check fixes the class. A NaN is not a sample, and it must never be allowed
+    to decide a channel's verdict either.
+    """
+    out = None
     if v is None:
         return None
-    if isinstance(v, dict):
-        nums = [x for x in v.values() if isinstance(x, (int, float))]
-        return float(sum(nums)) if nums else None
-    if isinstance(v, bool):
-        return float(v)
-    if isinstance(v, (int, float)):
-        return float(v)
-    if isinstance(v, str):
-        return float(abs(hash(v)) % 1000)
-    try:
-        out = float(np.sum(np.asarray(v, dtype=float)))
-    except Exception:
+    elif isinstance(v, dict):
+        nums = [x for x in v.values()
+                if isinstance(x, (int, float)) and not isinstance(x, bool)]
+        out = float(sum(nums)) if nums else None
+    elif isinstance(v, bool):
+        out = float(v)
+    elif isinstance(v, (int, float)):
+        out = float(v)
+    elif isinstance(v, str):
+        out = float(abs(hash(v)) % 1000)
+    else:
+        try:
+            out = float(np.sum(np.asarray(v, dtype=float)))
+        except Exception:
+            out = None
+    if out is None or not math.isfinite(out):
         return None
-    # A NaN or inf is not a sample. Letting one through crashed pstdev and,
-    # worse, would have let a corrupt value decide a channel's verdict.
-    return out if math.isfinite(out) else None
+    return out
 
 
 def observe(platform, duration_s, conn, adapter):
     """Collect per-channel observations from the live stream."""
     obs = {ch: [] for ch in adapter.contract.channels}
+    nonfinite = {}
     t0 = time.time()
     msgs = 0
     while time.time() - t0 < duration_s:
@@ -89,18 +106,38 @@ def observe(platform, duration_s, conn, adapter):
             s = _scalarize(entry[0])
             if s is not None:
                 obs.setdefault(ch, []).append(s)
-    return obs, msgs
+            elif entry[0] is not None:
+                # Present but unusable as a sample: NaN, inf, or a shape the
+                # probe cannot reduce. Counted rather than silently dropped --
+                # a channel that publishes NaN is a finding in itself, and
+                # discarding it quietly is how the PX4 crash stayed invisible
+                # until it took the whole run down.
+                nonfinite[ch] = nonfinite.get(ch, 0) + 1
+    return obs, msgs, nonfinite
 
 
-def analyse(obs, raw_present, contract):
+def analyse(obs, raw_present, contract, nonfinite=None):
+    nonfinite = nonfinite or {}
     rows = []
     for ch, row in sorted(contract.channels.items()):
         vals = obs.get(ch, [])
         n = len(vals)
+        bad = nonfinite.get(ch, 0)
+        # Initialised per channel: the DECODE branch never assigns it, so
+        # without this a latched row reported whatever spread the PREVIOUS
+        # channel happened to leave behind.
+        spread = None
         if n == 0:
-            observed = Quality.UNAVAILABLE
-            spread = None
-            detail = "never arrived"
+            if bad:
+                # It DID arrive. It was unusable. Those are different facts and
+                # collapsing them to "never arrived" would misreport PX4's
+                # pre-convergence estimator as an absent message.
+                observed = Quality.AVAILABLE_UNVALIDATED
+                detail = (f"arrived {bad} times, every sample non-finite "
+                          f"(NaN/inf) -- present but not measurable")
+            else:
+                observed = Quality.UNAVAILABLE
+                detail = "never arrived"
         elif row.criterion == "DECODE":
             # A latched enum or boolean. Constancy is its normal state -- a
             # vehicle that stays armed reports the same value all flight --
@@ -131,6 +168,7 @@ def analyse(obs, raw_present, contract):
             "admissible": row.admissible,
             "criterion": row.criterion,
             "samples": n,
+            "nonfinite_samples": bad,
             "spread": spread,
             "detail": detail,
         })
@@ -165,8 +203,8 @@ def main() -> int:
             print(f"    armed={motion['armed']} "
                   f"climbed={motion['climbed_m']:.1f} m")
         print(f"=== observing {args.seconds:.0f}s")
-        obs, msgs = observe(args.platform, args.seconds, conn, adapter)
-        rows = analyse(obs, {}, adapter.contract)
+        obs, msgs, nonfinite = observe(args.platform, args.seconds, conn, adapter)
+        rows = analyse(obs, {}, adapter.contract, nonfinite)
     finally:
         proc.send_signal(signal.SIGINT)
         try:
