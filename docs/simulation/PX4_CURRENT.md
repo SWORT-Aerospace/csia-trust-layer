@@ -44,18 +44,30 @@ real dynamics behind it.
 
 ## 2. Qualification status: **INVALID_PROBE**
 
-**No PX4 channel verdict is issued.** The probe's positive control — arm and
-climb — did not complete, and under RULE A an informativeness measurement
-without motion is not a weak measurement, it is not a measurement. The tool
-therefore reports `INVALID_PROBE` and withholds every channel verdict rather
-than reporting constancy as evidence.
+**No PX4 channel verdict is issued.**
+
+```
+positive control:  armed=True   climbed=0.4 m   (threshold: >= 1.0 m)
+verdict:           INVALID_PROBE
+```
+
+The vehicle **arms** — that took `COM_ARM_WO_GPS`, the EKF arming thresholds,
+the supply/USB circuit breakers, `AUTO.TAKEOFF` entry and force-arm
+(`param2=21196`) — but `MAV_CMD_NAV_TAKEOFF` does not produce a climb: 0.4 m,
+below the 1.0 m the probe requires.
+
+Under RULE A an informativeness measurement without motion is not a weak
+measurement, it is not a measurement. The tool therefore reports
+`INVALID_PROBE` and withholds every channel verdict rather than reporting
+constancy as evidence. **PX4 is not qualified, and nothing here may be quoted
+as a PX4 result.**
 
 This is the contract working, not a tooling failure. It is also the honest
 status: **PX4 is not qualified.**
 
 ### What the live stream did show
 
-These are observations from a booted, stationary SIH vehicle, recorded for
+These are observations from a booted SIH vehicle that did not climb, recorded for
 integration purposes and **not** as qualification verdicts:
 
 | channel | arrived? | observation |
@@ -69,7 +81,7 @@ integration purposes and **not** as qualification verdicts:
 | vibration.rms | yes | range 0.012 m/s^2 |
 | estimator.variances | yes | range 0.152 — `ESTIMATOR_STATUS` ratios |
 | estimator.flight_mode | yes | decoded via main/sub mode |
-| vehicle_status.armed | yes | latched 0 — never armed, hence INVALID_PROBE |
+| vehicle_status.armed | yes | latched; arms on the current sequence, but the climb does not follow |
 | battery.voltage | yes | constant 16.2 V (unloaded, stationary) |
 | **imu1.accel / imu1.gyro** | **no** | `SCALED_IMU2` is not published |
 | **esc.current / esc.rpm** | **no** | `ESC_STATUS` is not published |
@@ -99,7 +111,7 @@ integration purposes and **not** as qualification verdicts:
 
 | item | owner | note |
 |---|---|---|
-| arm and take off under SIH | engineering | preflight checks and mode entry differ from ArduPilot; force-arm plus AUTO.TAKEOFF is the current attempt |
+| **make SIH climb** | engineering | arming is solved; `MAV_CMD_NAV_TAKEOFF` yields 0.4 m. Next: check whether SIH needs `MIS_TAKEOFF_ALT`, an offboard setpoint stream, or a mission item rather than a bare takeoff command |
 | decide the SIH-vs-Gazebo question | engineering | SIH gives dynamics with no dependencies but publishes fewer messages; Gazebo publishes more but adds a heavy dependency |
 | per-platform contract rows | engineering | the ESC rows are ArduPilot-specific and must not be read as PX4 verdicts |
 | re-run `make sim-px4` to PASS | engineering | until it does, **no PX4 result may be quoted** |

@@ -74,6 +74,16 @@ REVIEW_ALLOW = {
         "CSIA_AP_ROOT default for the Phase-II SITL rig; overridable by env",
     ("linux_home_path", "research/phase2/modern_rig.py"):
         "CSIA_AP_ROOT default for the Phase-II SITL rig; overridable by env",
+    ("linux_home_path", "tools/simulation/qualify_platform.py"):
+        "CSIA_AP_ROOT / CSIA_PX4_ROOT defaults for the v1.1 qualification "
+        "harness; both overridable by env, and neither is a personal path",
+    ("linux_home_path", "Makefile"):
+        "AP_ROOT / PX4_ROOT defaults for the qualification targets; "
+        "overridable on the make command line",
+    ("linux_home_path", "research/v1_1/results/qualification_ardupilot.json"):
+        "container-local simulator path recorded as run provenance",
+    ("linux_home_path", "research/v1_1/results/qualification_px4.json"):
+        "container-local simulator path recorded as run provenance",
     ("linux_home_path", "research/phase2/results/e1_modern.json"):
         "container-local binary path recorded as Phase-II run provenance",
     ("linux_home_path",
