@@ -17,7 +17,7 @@ Two rules the tooling enforces for you, so you cannot get them wrong:
 
 | Thing | Value |
 | --- | --- |
-| Code folder | `/Users/ZINTRAX-5/swort/csia-trust-layer` |
+| Code folder | `$HOME/swort/csia-trust-layer` — `$HOME` is your own home folder, so no username is written down here |
 | External SSD | `/Volumes/CSIA_DATA` |
 | Data root | `/Volumes/CSIA_DATA/CSIA_DATA_LAKE` |
 | Dataset | `aykutkabaoglu/uav-flight-anomaly-dataset` (DOI `10.57967/hf/7772`, CC-BY-4.0) |
@@ -54,16 +54,18 @@ ten seconds, run it again.
 ## 3. Go to the code folder
 
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 pwd
 ```
 
-`pwd` must print exactly `/Users/ZINTRAX-5/swort/csia-trust-layer`.
+`pwd` must print a path ending in `/swort/csia-trust-layer`. If it prints
+anything else, the code folder is somewhere other than `$HOME/swort/` and
+every `cd` block below must be changed to match it.
 
 ## 4. Update the code
 
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 git status --short
 ```
 
@@ -175,7 +177,7 @@ without it the tool refuses and downloads nothing.
 Open a **second** Terminal window (`Command` + `N`), then:
 
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 source .venv/bin/activate
 python tools/run_uav_sead_mac_pipeline.py \
   --stage monitor \
@@ -331,7 +333,7 @@ deliberately never the same run.
 ## 15. Confirm the code folder is still clean
 
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 git status --short
 ```
 
@@ -345,7 +347,7 @@ should ever appear here — they all live on the SSD.
 Once you have done it once, the whole sequence is:
 
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 source .venv/bin/activate
 caffeinate -i python tools/run_uav_sead_mac_pipeline.py \
   --stage all \
@@ -438,7 +440,7 @@ python tools/run_uav_sead_mac_pipeline.py \
 ### Python environment missing
 `source .venv/bin/activate` fails. Rebuild it:
 ```bash
-cd /Users/ZINTRAX-5/swort/csia-trust-layer
+cd "$HOME/swort/csia-trust-layer"
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[data,dev,logs,mavlink]"
@@ -450,7 +452,7 @@ Check with:
 which python
 python --version
 ```
-`which python` must be inside `/Users/ZINTRAX-5/swort/csia-trust-layer/.venv/`.
+`which python` must be inside `$HOME/swort/csia-trust-layer/.venv/`.
 If it is not, or the version is below 3.11, delete and rebuild:
 ```bash
 rm -rf .venv
