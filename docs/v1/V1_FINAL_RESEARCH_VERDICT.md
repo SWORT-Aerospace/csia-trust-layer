@@ -40,7 +40,7 @@ such.
 | trust core, replay build | 69–75 µs/tick |
 | trust core + failsafe, live runtime | 297–356 µs/tick |
 | requirement R13 | ≤ 2 ms/tick |
-| headroom against R13 | **~2.4x measured on real data — see W-8.** The ~6x once stated here came from a sub-measurement |
+| headroom against R13 | **~1.9x measured on the full graph — see W-8.** The ~6x once stated here came from a sub-measurement taken on a graph missing two nodes |
 | native C core, host benchmark | 247 ns trust kernel + 427 ns diagnosis |
 | native C core on STM32H743 | **NOT MEASURED.** The 7–15 µs figure in older docs is an estimate. The C core is on no execution path. |
 
@@ -178,22 +178,29 @@ filters and computing residuals, without which `_tick()` cannot run.
 Confirmed by profile on real logged flight data: `ingest` cumulative 0.882 s
 against `_tick` cumulative 0.655 s — a ratio of **1.35×**.
 
-**The full drive cost, measured on real data.** 751 logged ticks from a live
+**The full drive cost, measured on real data.** Logged ticks from a live
 ArduCopter 4.8 shadow run, replayed into a fresh core, timed with
 `perf_counter` and no profiler
 (`tools/deploy/profile_core_from_log.py`):
 
-| | median | p95 | hand-offs/tick |
+| graph | `field_mode=False` | `field_mode=True` | hand-offs/tick |
 |---|---|---|---|
-| `field_mode=False` | 576.9 µs | 734.4 | 2.92 |
-| `field_mode=True` (deployment setting) | **632.7 µs** | 776.9 | 2.92 |
+| 8 channels (imu0 + mag missing) | 576.9 µs | 632.7 µs | 2.92 |
+| **12 channels (full graph)** | 709.1 µs | **840.0 µs** | 4.28 |
 
-So the published figure understates the cost of driving the layer by roughly
-1.8×, and `field_mode` — which a real vehicle requires — adds ~10%.
+The first row is not a baseline, it is a **defect**: a dispatch regression had
+removed `imu0` and the magnetometer from the graph, so every earlier timing
+figure here was measured on a crippled system. Restoring them costs ~33% more
+core time, which is what two more nodes and their relations should cost.
 
-**R13 status on desktop:** ~633 µs core + ~207 µs v1.1 adapter ≈ **840 µs
-against the 2 ms budget, about 2.4× headroom.** Lower than the ~6× the
-benchmark row implied, and not a failure.
+**Use the 12-channel row.** The published `latency_us` understates the real
+drive cost by roughly **2.4x** (840.0 against 297-356 µs), and `field_mode` —
+which a real vehicle requires — adds ~18%.
+
+**R13 status on desktop:** ~840 µs core + ~216 µs v1.1 adapter ≈ **1056 µs
+against the 2 ms budget, about 1.9x headroom.** Not the ~6x the benchmark row
+implied, and not a failure. The margin is thinner than any figure previously
+recorded in this document.
 
 ---
 
