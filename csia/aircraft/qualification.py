@@ -46,9 +46,10 @@ class ChannelContract:
 
     __slots__ = ("channel", "node", "unit", "quantity", "quality",
                  "may_use", "reason", "simulator_implementation",
-                 "missing_semantics", "aggregation", "criterion", "raw")
+                 "missing_semantics", "aggregation", "criterion", "raw",
+                 "platform", "platform_row", "base_quality", "base_may_use")
 
-    def __init__(self, row: dict):
+    def __init__(self, row: dict, platform: Optional[str] = None):
         self.raw = row
         self.channel = row["channel"]
         self.node = row.get("node", "")
@@ -57,6 +58,13 @@ class ChannelContract:
         self.quality = Quality(row["qualification"])
         self.may_use = bool(row.get("csia_may_use", False))
         self.reason = row.get("csia_may_use_reason", "")
+        self.base_quality = self.quality
+        self.base_may_use = self.may_use
+        self.platform = platform
+        self.platform_row = None
+        pq = (row.get("platform_qualification") or {}).get(platform or "")
+        if pq:
+            self._apply_platform_row(pq)
         self.simulator_implementation = row.get("simulator_implementation", "")
         self.missing_semantics = row.get("missing_semantics", "")
         self.aggregation = row.get("aggregation", "")
@@ -64,6 +72,53 @@ class ChannelContract:
         # CHANNEL_SEMANTICS.yaml: a latched enum is constant by nature and
         # cannot be qualified by variation.
         self.criterion = row.get("qualification_criterion", "VARIATION")
+
+    def _apply_platform_row(self, pq: dict):
+        """Narrow this row for one platform, using measured evidence.
+
+        Qualification is per platform instance -- the file header has said so
+        from the beginning, and the measurements finally forced the mechanism.
+        PX4 SIH publishes one IMU, so `imu1.*` is not "missing", it does not
+        exist there; its `BATTERY_STATUS` carries the documented -1 sentinel,
+        so battery current is not "not received", it is not measured. Grading
+        those the same as a channel that should be present and is not makes
+        every PX4 run FAIL for reasons that are true of the airframe rather
+        than of CSIA.
+
+        NARROWING ONLY, and this is the load-bearing rule. A platform row may
+        remove a channel from evidence; it may never add one. If it could
+        widen, this mechanism would be the easiest possible way to re-admit a
+        stub -- write a platform row and the guard disappears. So the
+        effective admissibility is the AND of base and platform, always, and
+        `test_platform_rows_can_only_narrow` holds it there.
+
+        Evidence is mandatory for the same reason a local override needs a
+        reason: a qualification decision with no measurement behind it is an
+        opinion, and an opinion in a contract is indistinguishable from a
+        measurement once it is committed.
+        """
+        if not pq.get("reason"):
+            raise ValueError(
+                f"{self.channel}: a platform_qualification row without a "
+                f"reason is not permitted")
+        if not pq.get("evidence"):
+            raise ValueError(
+                f"{self.channel}: a platform_qualification row without an "
+                f"evidence path is not permitted; a qualification decision "
+                f"with no measurement behind it is an opinion")
+        q = Quality(pq["qualification"])
+        may = bool(pq.get("csia_may_use", False))
+        if (q.admissible and may) and not (self.base_quality.admissible
+                                           and self.base_may_use):
+            raise ValueError(
+                f"{self.channel}: a platform_qualification row may not make a "
+                f"channel admissible that the base contract blocks "
+                f"(base {self.base_quality.value}/may_use={self.base_may_use},"
+                f" platform {q.value}/may_use={may})")
+        self.quality = q
+        self.may_use = may
+        self.reason = pq["reason"]
+        self.platform_row = dict(pq)
 
     @property
     def admissible(self) -> bool:
@@ -93,17 +148,19 @@ class SemanticContract:
     """The loaded contract, plus per-instance overrides."""
 
     def __init__(self, path: str = CONTRACT_PATH,
-                 context: str = CONTEXT_SIMULATOR):
+                 context: str = CONTEXT_SIMULATOR,
+                 platform: Optional[str] = None):
         with open(path, encoding="utf-8") as fh:
             doc = yaml.safe_load(fh)
         self.path = path
         self.context = context
+        self.platform = platform
         self.version = doc.get("contract_version")
         self.frozen_core = doc.get("frozen_core")
         self.platforms = doc.get("platforms", {})
         self.channels = {}
         for row in doc.get("channels", []):
-            c = ChannelContract(row)
+            c = ChannelContract(row, platform=platform)
             if c.channel in self.channels:
                 raise ValueError(f"duplicate channel row: {c.channel}")
             self.channels[c.channel] = c
@@ -224,11 +281,32 @@ class SemanticContract:
         return "\n".join(lines)
 
 
-_DEFAULT: Optional[SemanticContract] = None
+# platform -> contract. `None` is the unnarrowed base contract.
+_DEFAULT: Optional[dict] = None
 
 
-def default_contract() -> SemanticContract:
+def default_contract(platform: Optional[str] = None) -> SemanticContract:
+    """The committed contract, optionally narrowed for one platform.
+
+    Cached per platform. `default_contract()` with no argument is the
+    unnarrowed contract and stays exactly what it was, so nothing that reads
+    the base rows changes behaviour.
+    """
     global _DEFAULT
     if _DEFAULT is None:
-        _DEFAULT = SemanticContract()
-    return _DEFAULT
+        _DEFAULT = {}
+    if platform not in _DEFAULT:
+        _DEFAULT[platform] = SemanticContract(platform=platform)
+    return _DEFAULT[platform]
+
+
+def platform_rows_in_force(contract: SemanticContract) -> dict:
+    """Every platform narrowing actually applied, with its evidence.
+
+    Reported in the qualification result and printed on every run. A narrowing
+    that nobody can see is a narrowing nobody reviews, and that is how "the
+    platform genuinely does not provide it" turns into "we stopped checking".
+    """
+    return {ch: dict(c.platform_row)
+            for ch, c in contract.channels.items()
+            if c.platform_row is not None}

@@ -48,22 +48,31 @@ to `/dev/null`.
 
 ---
 
-## 2. Qualification status: **FAIL** — and the probe is valid
+## 2. Qualification status: **PASS**, with five declared platform narrowings
 
 ```
-positive control:  armed=True   climbed=2.69 m   (threshold: >= 1.0 m)
+positive control:  armed=True   climbed=1.52 m   (threshold: >= 1.0 m)
 decoder:           csia_px4, 250 message types, vehicle definitions IN USE
                    0 undecodable frames
-verdict:           FAIL -- a channel the contract admits as evidence
-                   never arrived
+heading:           HEADING_REFERENCE_VALID, source MAGNETOMETER,
+                   aligned at 2.152 s; yaw vs SIH ground truth
+                   mean |err| 0.196 deg, max 0.658 deg over 13,725 samples
+platform rows:     5 in force (section 2.5)
+verdict:           PASS
 ```
 
-`MOTION_CONTROL_SATISFIED: true`, `DECODER_COMPLETE: true`, `PROBE_VALID:
-true`. Both validity conditions hold, so **every row below is a result**, not
-an observation: presence claims and constancy claims alike.
+Four validity flags, all true: `MOTION_CONTROL_SATISFIED`,
+`DECODER_COMPLETE`, `HEADING_VERIFIED`, and their conjunction `PROBE_VALID`.
+They are separate because there are four different ways a run can be invalid
+and collapsing them loses which one happened.
 
-The FAIL is a real contract defect and is described in 2.1. It is not a
-simulator failure and not a probe failure.
+**This PASS is reached by narrowing, and the narrowing is on the face of the
+result.** Five contract rows are declared UNAVAILABLE or non-admissible *for
+PX4 specifically*, each carrying the measurement that justifies it. Section
+2.5 lists all five. A reader who disagrees with any of them can see exactly
+what was excluded and on what evidence — which is the whole difference
+between "the platform genuinely does not provide it" and "we stopped
+checking".
 
 ### 2.0 CORRECTION: the previous "no ESC telemetry on PX4" finding was wrong
 
@@ -115,8 +124,11 @@ What the decoder had been hiding, on this platform alone: `ESC_STATUS` (291),
 | **`battery.current`** | INFORMATIVE | **arrived 387× carrying the not-measured sentinel** | **yes** |
 | `gnss.velocity_z` | UNAVAILABLE | never arrived | no |
 
-The three bold rows are the FAIL: the contract admits them as diagnostic
-evidence and PX4 SIH does not deliver them.
+All three were the FAIL until 2026-08-24. They are now **declared platform
+rows** (section 2.5): the contract records, per platform and with the
+measurement attached, that PX4 SIH does not provide them. The channels are
+still absent, still reported, and still excluded from evidence — what changed
+is that PX4 no longer fails qualification for a property of the airframe.
 
 `battery.current` is a **different fact** from the other two and the previous
 report gave both the same words. `BATTERY_STATUS` reaches us at ~9.7 Hz with
@@ -126,31 +138,118 @@ fix is wiring a message or fitting a sensor, so the adapters now count
 sentinel rejections **per channel** (`AircraftAdapter.sentinel_counts()`)
 instead of keeping one global tally that could not say which channel it meant.
 
-**The contract has NOT been edited.** The probe produces the evidence for
-changing a row, never the change; `producer_px4` for `imu1.*` says
-`SCALED_IMU2`, and correcting these rows is a decision with an owner.
+### 2.5 The five platform rows, and the rule that keeps them honest
+
+Qualification is per platform instance — `CHANNEL_SEMANTICS.yaml` has said so
+since it was written, and these measurements forced the mechanism. A row may
+now carry `platform_qualification: {px4: {...}}`, and the adapter for that
+platform is built from the narrowed contract.
+
+| channel | base | PX4 row | why |
+|---|---|---|---|
+| `imu1.accel` | INFORMATIVE | **UNAVAILABLE** | SIH models one IMU; `SCALED_IMU2` is never published |
+| `imu1.gyro` | INFORMATIVE | **UNAVAILABLE** | same |
+| `battery.current` | INFORMATIVE | **UNAVAILABLE** | `BATTERY_STATUS` arrives at ~9.7 Hz with the `-1` not-measured sentinel; no current sensor is modelled |
+| `esc.current` | STUB (ArduPilot fake 0.8 A) | **STUB**, different reason | PX4 publishes 0, not a liveness placeholder. Same verdict, and the base row's `AP_ESC_Telem_SITL.cpp` citation does not apply here |
+| `esc.rpm` | STUB (ArduPilot `VIB_MOT_MAX=0`) | **AVAILABLE_UNVALIDATED** | it varies over 5,447 RPM on PX4 — the base row is wrong here. Still **not admissible**: see below |
+
+**A platform row can only narrow.** The effective admissibility is the AND of
+the base row and the platform row, enforced in `ChannelContract`, and a row
+that tries to make an inadmissible channel admissible raises. Without that
+rule this mechanism would be the easiest imaginable way to re-admit a stub:
+write a platform row and W-5 disappears. Every platform row must also carry a
+`reason`, an `evidence` path that exists, and the `measured` numbers, and
+`tests/test_platform_contract.py` holds all of it.
+
+**`esc.rpm` is the case worth dwelling on.** It moves on PX4 — 5,447 RPM of
+range, sd 1,317, n=17,346 — and it is still refused. INFORMATIVE requires
+`VALIDATED_SEMANTICS` **and** demonstrated variation, and nobody has read the
+PX4 source for this field's units, indexing or scaling. Variation alone is not
+semantics. Admitting it because it moves would be W-5's mistake with the sign
+reversed. The row records what promoting it would take: read
+`src/modules/mavlink/streams/ESC_STATUS.hpp` and the `esc_status` uORB
+definition. A source read, not another flight.
+
+Every narrowing in force is printed on every run and written into
+`platform_contract_rows` in the result file. A narrowing nobody sees is a
+narrowing nobody reviews.
+
+### 2.6 "Preflight Fail: no heading reference" — traced, and it is a transient
+
+PX4 prints this on every boot. Taking it at face value would have been wrong;
+so would ignoring it. If the simulation genuinely had no heading source, every
+magnetometer, GNSS-course, attitude and cross-sensor result on this backend
+would be contaminated and nothing in the report would show it.
+
+`estimatorCheck.cpp:648-670` is the exact source. The condition is:
+
+```cpp
+!context.isArmed()
+&& (hrt_absolute_time() - estimator_status_flags.timestamp < 5_s)
+&& !estimator_status_flags.cs_yaw_align
+&& lpos.xy_global
+```
+
+So the line says one thing: **at that instant the EKF had not declared yaw
+alignment.** It does not say a heading source is missing, broken or disabled.
+Separating "not yet" from "not at all" needs the time series, and PX4 writes
+one. From the run's own ulog:
+
+| question | answer | from |
+|---|---|---|
+| when did yaw align? | **2.152 s**, and it never regressed over the remaining 53.7 s | `estimator_status_flags.cs_yaw_align` |
+| what aligned it? | **the magnetometer** — `cs_mag` and `cs_mag_heading_consistent` turn true at the *same* timestamp | same topic |
+| any other source? | no: `cs_gnss_yaw`, `cs_ev_yaw`, `cs_yaw_manual` never true | same topic |
+| was the mag healthy? | `cs_mag_fault` never, `cs_mag_field_disturbed` never | same topic |
+| was it actually fused? | **99.87 %** of samples fused after alignment, **0.0 %** innovations rejected | `estimator_aid_src_mag` |
+| was the heading *correct*? | **mean \|err\| 0.196°, max 0.658°** over 13,725 samples | `vehicle_attitude` vs `vehicle_attitude_groundtruth` |
+
+The last row is the one that settles it. Alignment is a claim the estimator
+makes about itself; an estimator can be confidently wrong. SIH publishes
+ground-truth attitude, so the estimate can be checked against it, and the
+heading is right to within a degree for the whole flight.
+
+`cs_mag_hdg` → `cs_mag_3d` at 17.0 s, together with `cs_mag_aligned_in_flight`
+at 16.96 s: the normal PX4 progression from heading-only fusion on the ground
+to full 3-axis fusion after in-flight alignment. The airframe setup confirms
+the sensor is enabled by design — `10040_sihsim_quadx` sets
+`SENS_EN_MAGSIM 1`, and boot assigns `CAL_MAG0_ID`/`CAL_MAG1_ID` at priority
+50.
+
+**The observation window is entirely inside the aligned period.** The probe
+arms at ~10 s and observes for 40 s after, so nothing in section 2.2 was
+measured without a heading reference.
+
+This is now an automatic check, not a one-off investigation.
+`csia/simulation/ulog_check.py` runs on every PX4 qualification, records the
+whole trace in `estimator_provenance`, and sets `HEADING_VERIFIED`. If yaw
+alignment never happens or is lost mid-run, `mag.field_ut`, `gnss.velocity`
+and `estimator.variances` are marked `UNVERIFIED_HEADING` — not graded, not
+reported as agreeing — and the verdict becomes `INSTRUMENT_DEAD`. A run that
+could not check reports `UNVERIFIABLE` and says so loudly, because "we could
+not check" and "it was fine" must never read the same.
 
 ### 2.2 CONSTANCY findings — now valid verdicts
 
-The airframe climbed 2.69 m, so these are channel verdicts rather than
+The airframe climbed 1.52 m, so these are channel verdicts rather than
 observations. From `research/v1_1/results/qualification_px4.json`.
 
 | channel | observed | verdict |
 |---|---|---|
-| imu0.accel | range 3.74 m/s², sd 0.348, n=17153 | INFORMATIVE |
-| imu0.gyro | range 1.213 rad/s, sd 0.230, n=17153 | INFORMATIVE |
-| mag.field_ut | range 56.5 µT, sd 10.24, n=17153 | INFORMATIVE |
-| baro.altitude | range 22.0 m, sd 6.54, n=17158 | INFORMATIVE |
-| gnss.position | range 21.7 m, sd 6.53, n=17162 | INFORMATIVE |
-| gnss.velocity | range 0.238 m/s, sd 0.042, n=17162 | INFORMATIVE |
-| vibration.rms | range 0.0113 m/s², sd 0.0022, n=17139 | INFORMATIVE |
-| estimator.variances | range 0.124, sd 0.0188, n=17138 | INFORMATIVE (blocked from use by policy) |
-| estimator.flight_mode | latched, decoded, n=16728 | INFORMATIVE (DECODE criterion) |
-| vehicle_status.armed | latched armed=1, n=16728 | INFORMATIVE (DECODE criterion) |
-| baro.temp_c | range 0.14 °C, sd 0.043, n=17158 | varies, but declared non-informative and not used |
-| **`battery.voltage`** | **range 0.689 V, sd 0.229, n=17144** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
-| **`esc.rpm`** | **range 5540 RPM, sd 1323, n=17167** | **INFORMATIVE — the contract declares it a stub** |
-| `esc.current` | constant at 0 over 17167 samples | STUB_OR_NONINFORMATIVE, as declared |
+| imu0.accel | range 3.95 m/s², sd 0.349, n=17336 | INFORMATIVE |
+| imu0.gyro | range 1.202 rad/s, sd 0.226, n=17336 | INFORMATIVE |
+| mag.field_ut | range 57.9 µT, sd 12.22, n=17325 | INFORMATIVE (heading reference verified — 2.6) |
+| baro.altitude | range 23.1 m, sd 7.13, n=17340 | INFORMATIVE |
+| gnss.position | range 23.0 m, sd 7.11, n=17343 | INFORMATIVE |
+| gnss.velocity | range 0.300 m/s, sd 0.048, n=17343 | INFORMATIVE |
+| vibration.rms | range 0.0130 m/s², sd 0.0023, n=17319 | INFORMATIVE |
+| estimator.variances | range 0.155, sd 0.0286, n=17318 | INFORMATIVE (blocked from use by policy) |
+| estimator.flight_mode | latched, decoded, n=16908 | INFORMATIVE (DECODE criterion) |
+| vehicle_status.armed | latched armed=1, n=16908 | INFORMATIVE (DECODE criterion) |
+| baro.temp_c | range 0.15 °C, sd 0.047, n=17340 | varies, but declared non-informative and not used |
+| **`battery.voltage`** | **range 0.72 V, sd 0.240, n=17326** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
+| **`esc.rpm`** | **range 5447 RPM, sd 1317, n=17346** | **INFORMATIVE — see 2.5; declared AVAILABLE_UNVALIDATED on PX4 and still refused** |
+| `esc.current` | constant at 0 over 17346 samples | STUB_OR_NONINFORMATIVE, as declared |
 
 Two of these change what CSIA can do on PX4.
 
@@ -160,8 +259,8 @@ suspicion rather than a finding, precisely because constancy on a vehicle that
 never moved describes the trial. Under load it varies by 0.689 V. Marking it
 UNCONFIRMED was correct, and recording it as a finding would have been wrong.
 
-**`esc.rpm` is real on PX4 and the contract is wrong about it.** 5,540 RPM of
-range with sd 1,323 over 17,167 samples is a live signal, and the contract row
+**`esc.rpm` is real on PX4 and the base contract is wrong about it.** 5,447
+RPM of range with sd 1,317 over 17,346 samples is a live signal, and the contract row
 — written against ArduPilot SITL, where `SIM_Frame.cpp:901` derives rpm from
 `vibe_motor` with `VIB_MOT_MAX` defaulting to 0 — declares it
 `STUB_OR_NONINFORMATIVE`. On ArduPilot that row is correct and was
@@ -174,7 +273,7 @@ is **per platform instance**, never global.
 | | ArduPilot SITL | PX4 SIH |
 |---|---|---|
 | `esc.current` | constant 3.2 A (placeholder) | constant 0 (stub) |
-| `esc.rpm` | constant 0 | **varies, 5540 RPM range** |
+| `esc.rpm` | constant 0 | **varies, 5447 RPM range** |
 | `battery.current` | varies, 5.4 A range | not measured (sentinel) |
 | `battery.voltage` | varies, 0.053 V range | varies, 0.689 V range |
 

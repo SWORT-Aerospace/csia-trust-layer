@@ -71,7 +71,11 @@ class PlatformAdapter:
     def __init__(self, contract: Optional[SemanticContract] = None,
                  max_age: Optional[dict] = None,
                  clock=time.monotonic):
-        self.contract = contract or default_contract()
+        # Narrowed for THIS platform: qualification is per platform
+        # instance, never global. A base contract here would grade a
+        # channel the airframe does not physically have the same way
+        # as one that should be present and is not.
+        self.contract = contract or default_contract(self.platform)
         self.max_age = dict(MaxAge)
         if max_age:
             self.max_age.update(max_age)

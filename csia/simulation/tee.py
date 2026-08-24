@@ -33,7 +33,9 @@ a transmitter there would break that guarantee, and the guarantee is the point.
 
 from __future__ import annotations
 
+import json
 import logging
+import os
 import socket
 import threading
 import time
@@ -192,3 +194,80 @@ class MavlinkTee:
     def __exit__(self, *exc):
         self.stop()
         return False
+
+
+# ---------------------------------------------------------------------------
+# Standalone entry point: THE TEE MUST NOT SHARE AN INTERPRETER WITH CSIA.
+#
+# This is a measurement-validity fix, not an optimisation.
+#
+# The shadow harness ran the tee as a THREAD in the CSIA process, and Python's
+# GIL made every byte the tee decoded time stolen from the tick being timed.
+# Measured directly, with a synthetic tick and N competing GIL threads:
+#
+#     0 threads   679.5 us       1 thread   954.6 us       2 threads  1598.3 us
+#
+# against a live figure of ~1590 us. The R13 FAIL was, in large part, the
+# instrument. That is the same defect as the decoder reporting itself as the
+# platform, one layer up: the rig's own cost booked against the thing it
+# measures.
+#
+# It is also unfaithful to deployment in the one way that matters. On a real
+# aircraft the telemetry tee is the GCS, a hardware UART split, or a MAVProxy
+# `--out` -- it is NOT inside CSIA's process, and it never competes with CSIA
+# for a lock. Running it out of process makes the rig MORE like the aircraft,
+# not less.
+#
+#     python -m csia.simulation.tee --source tcp:127.0.0.1:5760 \
+#            --out 127.0.0.1:14561 --status /tmp/tee.json
+#
+# The status file exists because the parent still needs its positive control:
+# "did the feed carry real sensor traffic before we started timing?" is not a
+# question a separate process can answer by touching an attribute.
+# ---------------------------------------------------------------------------
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--source", required=True,
+                    help="link to drive, e.g. tcp:127.0.0.1:5760")
+    ap.add_argument("--out", action="append", required=True,
+                    help="host:port to forward to; repeatable")
+    ap.add_argument("--platform", default="ardupilot")
+    ap.add_argument("--profile", choices=sorted(STREAM_PROFILES),
+                    default="full")
+    ap.add_argument("--status", default=None,
+                    help="JSON file to publish forwarding stats into")
+    ap.add_argument("--status-interval", type=float, default=0.5)
+    args = ap.parse_args(argv)
+
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s tee %(message)s")
+    tee = MavlinkTee(args.source, args.out, platform=args.platform,
+                     profile=args.profile)
+    tee.start()
+    try:
+        while True:
+            if args.status:
+                # Written to a temporary name and renamed, so a parent that
+                # reads at the wrong moment gets the previous complete file
+                # rather than half of this one.
+                tmp = args.status + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as fh:
+                    json.dump({"pid": os.getpid(), "t": time.time(),
+                               "forwarded": tee.stats["forwarded"],
+                               "bytes": tee.stats["bytes"],
+                               "errors": tee.stats["errors"],
+                               "by_type": tee.stats["by_type"]}, fh)
+                os.replace(tmp, args.status)
+            time.sleep(args.status_interval)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        tee.stop()
+    return 0
+
+
+if __name__ == "__main__":                              # pragma: no cover
+    raise SystemExit(main())

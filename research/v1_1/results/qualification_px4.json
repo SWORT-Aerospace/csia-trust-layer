@@ -1,14 +1,15 @@
 {
  "DECODER_COMPLETE": true,
+ "HEADING_VERIFIED": true,
  "MOTION_CONTROL_SATISFIED": true,
  "PROBE_VALID": true,
  "admissible_stubs": [],
  "counters": {
-  "mapped": 6703,
-  "messages": 17173,
-  "rejected_sentinel": 387,
+  "mapped": 6774,
+  "messages": 17348,
+  "rejected_sentinel": 391,
   "time_reanchors": 0,
-  "unmapped": 13614
+  "unmapped": 13751
  },
  "decoder": {
   "blind_channels": {},
@@ -22,70 +23,78 @@
   "vehicle_dialect_active": true,
   "xml": "/home/user/px4/src/modules/mavlink/mavlink/message_definitions/v1.0/development.xml"
  },
- "disagreements": [
-  {
-   "admissible": true,
-   "agrees": false,
-   "channel": "battery.current",
-   "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
-   "detail": "producer arrived 387 times carrying the documented not-measured sentinel: the stream is implemented, the measurement is absent",
-   "may_use": true,
-   "nonfinite_samples": 0,
-   "observed": "UNAVAILABLE",
-   "samples": 0,
-   "spread": null
-  },
-  {
-   "admissible": false,
-   "agrees": false,
-   "channel": "esc.rpm",
-   "criterion": "VARIATION",
-   "declared": "STUB_OR_NONINFORMATIVE",
-   "detail": "range 5540, sd 1323.15, n=17167",
-   "may_use": false,
-   "nonfinite_samples": 0,
-   "observed": "INFORMATIVE",
-   "samples": 17167,
-   "spread": 5540.0
-  },
-  {
-   "admissible": true,
-   "agrees": false,
-   "channel": "imu1.accel",
-   "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
-   "detail": "never arrived",
-   "may_use": true,
-   "nonfinite_samples": 0,
-   "observed": "UNAVAILABLE",
-   "samples": 0,
-   "spread": null
-  },
-  {
-   "admissible": true,
-   "agrees": false,
-   "channel": "imu1.gyro",
-   "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
-   "detail": "never arrived",
-   "may_use": true,
-   "nonfinite_samples": 0,
-   "observed": "UNAVAILABLE",
-   "samples": 0,
-   "spread": null
+ "disagreements": [],
+ "estimator_provenance": {
+  "aligned_at_s": 2.152,
+  "final_aligned": true,
+  "fused_pct_after_align": 99.87,
+  "log": "/home/user/csia-trust-layer/build/sitl-px4/log/2026-08-24/14_33_25.ulg",
+  "mag_fault_seen": false,
+  "mag_field_disturbed_seen": false,
+  "notes": [
+   "cs_yaw_align false for the first 2.152 s and true for the remainder of 55.9 s. The boot-time 'Preflight Fail: no heading reference' is that window: estimatorCheck.cpp reports the flag, not the absence of a source."
+  ],
+  "rejected_pct_after_align": 0.0,
+  "source": "MAGNETOMETER",
+  "source_candidates": [
+   "MAGNETOMETER"
+  ],
+  "verdict": "HEADING_REFERENCE_VALID",
+  "yaw_error_vs_truth_deg": {
+   "max_abs": 0.658,
+   "mean_abs": 0.1961,
+   "n": 13725
   }
- ],
- "messages": 17173,
+ },
+ "heading_voided_channels": [],
+ "messages": 17348,
  "observed_stubs": [
   "esc.current"
  ],
  "platform": "px4",
+ "platform_contract_rows": {
+  "battery.current": {
+   "csia_may_use": false,
+   "evidence": "research/v1_1/results/qualification_px4.json",
+   "measured": "387 producer frames in 40 s, every one carrying the -1 sentinel; 0 usable samples. See presence_findings.sentinel_counts.",
+   "qualification": "UNAVAILABLE",
+   "reason": "PX4 SIH publishes BATTERY_STATUS at ~9.7 Hz with current_battery = -1, the documented \"not measured\" sentinel. The stream is implemented and the measurement is absent: there is no simulated current sensor. That is a different fact from an unimplemented message, and the fix would be a sensor rather than wiring."
+  },
+  "esc.current": {
+   "csia_may_use": false,
+   "evidence": "research/v1_1/results/qualification_px4.json",
+   "measured": "constant at 0 over 17,167 samples, airframe flying",
+   "qualification": "STUB_OR_NONINFORMATIVE",
+   "reason": "Same verdict as ArduPilot, DIFFERENT mechanism, and the base row's justification (AP_ESC_Telem_SITL.cpp) does not apply to PX4 at all. PX4 SIH publishes ESC_STATUS with current identically 0 -- not a fake liveness value, simply no current model. Recorded separately so a reader does not carry an ArduPilot source citation onto PX4."
+  },
+  "esc.rpm": {
+   "csia_may_use": false,
+   "evidence": "research/v1_1/results/qualification_px4.json",
+   "measured": "range 5540 rpm, sd 1323.15, n=17167, airframe climbed 2.69 m. Compare ArduPilot the same day: constant at 0 over 116,911 samples.",
+   "qualification": "AVAILABLE_UNVALIDATED",
+   "reason": "THE BASE ROW IS WRONG FOR PX4, and the measurement says so: PX4 SIH publishes ESC_STATUS rpm that varies over a 5,540 RPM range (sd 1,323, n=17,167) while the airframe flies. It is not a stub here. It is still NOT ADMISSIBLE, and deliberately so: INFORMATIVE requires VALIDATED_SEMANTICS *and* demonstrated variation, and nobody has read the PX4 source for this field's units, indexing or scaling. Variation alone is not semantics. Admitting it on the strength of \"it moves\" would be the exact mistake W-5 is about, with the sign reversed. Promoting this row needs a source read, not another flight.",
+   "to_promote": "read PX4 src/modules/mavlink/streams/ESC_STATUS.hpp and the esc_status uORB definition, confirm units and per-motor indexing, then raise to VALIDATED_SEMANTICS and decide csia_may_use separately."
+  },
+  "imu1.accel": {
+   "csia_may_use": false,
+   "evidence": "research/v1_1/results/qualification_px4.json",
+   "measured": "0 samples over 17,173 messages with the airframe flying (climbed 2.69 m), decoder csia_px4 with 0 undecodable frames -- so this is a presence fact about PX4, not a parser limitation.",
+   "qualification": "UNAVAILABLE",
+   "reason": "PX4 SIH models ONE IMU. SCALED_IMU2 is never published, so imu1 does not exist on this backend -- it is not a message we failed to receive. CONSEQUENCE, and it is not a small one: CSIA's imu0/imu1 cross-check relation CANNOT BE EVALUATED on PX4 SIH at all, and a PX4 evaluation that does not say so is omitting one of the two families v1 handles best. This row makes the absence explicit and reviewable rather than letting every run FAIL for a reason that is true of the airframe."
+  },
+  "imu1.gyro": {
+   "csia_may_use": false,
+   "evidence": "research/v1_1/results/qualification_px4.json",
+   "measured": "0 samples over 17,173 messages with the airframe flying",
+   "qualification": "UNAVAILABLE",
+   "reason": "Same as imu1.accel: PX4 SIH models one IMU and never publishes SCALED_IMU2. The imu0/imu1 cross-check relation cannot be evaluated on this backend."
+  }
+ },
  "positive_control": {
-  "alt_samples": 157,
+  "alt_samples": 147,
   "arm_ack": 0,
   "armed": true,
-  "climbed_m": 2.69,
+  "climbed_m": 1.52,
   "event_ids": [
    27825120,
    28241790,
@@ -98,7 +107,7 @@
    21054825
   ],
   "events_frames": 15,
-  "events_seq": 20,
+  "events_seq": 23,
   "fix_type": 3,
   "gates": "CONSTANCY claims only; PRESENCE claims are motion-independent and are always issued",
   "phase": "climb",
@@ -117,13 +126,9 @@
    "imu1.accel",
    "imu1.gyro"
   ],
-  "never_arrived_but_admissible": [
-   "battery.current",
-   "imu1.accel",
-   "imu1.gyro"
-  ],
+  "never_arrived_but_admissible": [],
   "sentinel_counts": {
-   "battery.current": 387
+   "battery.current": 391
   }
  },
  "rows": [
@@ -133,12 +138,12 @@
    "channel": "baro.altitude",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 21.9976, sd 6.54463, n=17158",
+   "detail": "range 23.121, sd 7.13215, n=17340",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17158,
-   "spread": 21.997560618751095
+   "samples": 17340,
+   "spread": 23.120974669704367
   },
   {
    "admissible": false,
@@ -146,21 +151,21 @@
    "channel": "baro.temp_c",
    "criterion": "VARIATION",
    "declared": "VALIDATED_SEMANTICS",
-   "detail": "range 0.14, sd 0.0430601, n=17158",
+   "detail": "range 0.15, sd 0.0469661, n=17340",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17158,
-   "spread": 0.14000000000000057
+   "samples": 17340,
+   "spread": 0.15000000000000036
   },
   {
-   "admissible": true,
-   "agrees": false,
+   "admissible": false,
+   "agrees": true,
    "channel": "battery.current",
    "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
-   "detail": "producer arrived 387 times carrying the documented not-measured sentinel: the stream is implemented, the measurement is absent",
-   "may_use": true,
+   "declared": "UNAVAILABLE",
+   "detail": "producer arrived 391 times carrying the documented not-measured sentinel: the stream is implemented, the measurement is absent",
+   "may_use": false,
    "nonfinite_samples": 0,
    "observed": "UNAVAILABLE",
    "samples": 0,
@@ -172,12 +177,12 @@
    "channel": "battery.voltage",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.689, sd 0.228824, n=17144",
+   "detail": "range 0.72, sd 0.23967, n=17326",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17144,
-   "spread": 0.6890000000000001
+   "samples": 17326,
+   "spread": 0.7199999999999989
   },
   {
    "admissible": false,
@@ -185,25 +190,25 @@
    "channel": "esc.current",
    "criterion": "VARIATION",
    "declared": "STUB_OR_NONINFORMATIVE",
-   "detail": "constant at 0 over 17167 samples",
+   "detail": "constant at 0 over 17346 samples",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
-   "samples": 17167,
+   "samples": 17346,
    "spread": 0.0
   },
   {
    "admissible": false,
-   "agrees": false,
+   "agrees": true,
    "channel": "esc.rpm",
    "criterion": "VARIATION",
-   "declared": "STUB_OR_NONINFORMATIVE",
-   "detail": "range 5540, sd 1323.15, n=17167",
+   "declared": "AVAILABLE_UNVALIDATED",
+   "detail": "range 5447, sd 1317.09, n=17346",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17167,
-   "spread": 5540.0
+   "samples": 17346,
+   "spread": 5447.0
   },
   {
    "admissible": false,
@@ -211,11 +216,11 @@
    "channel": "estimator.flight_mode",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 396, decoded over 16728 samples (criterion DECODE, not variation)",
+   "detail": "latched value 32, decoded over 16908 samples (criterion DECODE, not variation)",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 16728,
+   "samples": 16908,
    "spread": null
   },
   {
@@ -224,12 +229,12 @@
    "channel": "estimator.variances",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.123515, sd 0.0188113, n=17138",
+   "detail": "range 0.155311, sd 0.0286033, n=17318",
    "may_use": false,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17138,
-   "spread": 0.12351511571614537
+   "samples": 17318,
+   "spread": 0.1553106065839529
   },
   {
    "admissible": true,
@@ -237,12 +242,12 @@
    "channel": "gnss.position",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 21.6655, sd 6.53259, n=17162",
+   "detail": "range 23.0491, sd 7.10691, n=17343",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17162,
-   "spread": 21.665483142335585
+   "samples": 17343,
+   "spread": 23.049052530382756
   },
   {
    "admissible": true,
@@ -250,12 +255,12 @@
    "channel": "gnss.velocity",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.238148, sd 0.0422545, n=17162",
+   "detail": "range 0.299693, sd 0.0482053, n=17343",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17162,
-   "spread": 0.23814836333970715
+   "samples": 17343,
+   "spread": 0.29969303186372764
   },
   {
    "admissible": false,
@@ -276,12 +281,12 @@
    "channel": "imu0.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 3.74472, sd 0.34776, n=17153",
+   "detail": "range 3.95063, sd 0.349088, n=17336",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17153,
-   "spread": 3.7447182163596153
+   "samples": 17336,
+   "spread": 3.950632835738361
   },
   {
    "admissible": true,
@@ -289,34 +294,34 @@
    "channel": "imu0.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1.21315, sd 0.230007, n=17153",
+   "detail": "range 1.2024, sd 0.22623, n=17336",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17153,
-   "spread": 1.2131485152058303
+   "samples": 17336,
+   "spread": 1.202402390903444
   },
   {
-   "admissible": true,
-   "agrees": false,
+   "admissible": false,
+   "agrees": true,
    "channel": "imu1.accel",
    "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
+   "declared": "UNAVAILABLE",
    "detail": "never arrived",
-   "may_use": true,
+   "may_use": false,
    "nonfinite_samples": 0,
    "observed": "UNAVAILABLE",
    "samples": 0,
    "spread": null
   },
   {
-   "admissible": true,
-   "agrees": false,
+   "admissible": false,
+   "agrees": true,
    "channel": "imu1.gyro",
    "criterion": "VARIATION",
-   "declared": "INFORMATIVE",
+   "declared": "UNAVAILABLE",
    "detail": "never arrived",
-   "may_use": true,
+   "may_use": false,
    "nonfinite_samples": 0,
    "observed": "UNAVAILABLE",
    "samples": 0,
@@ -328,12 +333,12 @@
    "channel": "mag.field_ut",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 56.5248, sd 10.2354, n=17153",
+   "detail": "range 57.8621, sd 12.2218, n=17325",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17153,
-   "spread": 56.524837017059326
+   "samples": 17325,
+   "spread": 57.86212719976902
   },
   {
    "admissible": true,
@@ -341,11 +346,11 @@
    "channel": "vehicle_status.armed",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 1, decoded over 16728 samples (criterion DECODE, not variation)",
+   "detail": "latched value 1, decoded over 16908 samples (criterion DECODE, not variation)",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 16728,
+   "samples": 16908,
    "spread": null
   },
   {
@@ -354,44 +359,44 @@
    "channel": "vibration.rms",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0113417, sd 0.00218518, n=17139",
+   "detail": "range 0.0129559, sd 0.00231047, n=17319",
    "may_use": true,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 17139,
-   "spread": 0.011341676278814612
+   "samples": 17319,
+   "spread": 0.012955906254369036
   }
  ],
  "rows_unscored": [],
  "seconds": 40.0,
  "undecodable_channels": [],
  "unmapped_types": {
-  "ALTITUDE": 39,
-  "ATTITUDE": 1934,
-  "ATTITUDE_QUATERNION": 1933,
-  "ATTITUDE_TARGET": 1933,
+  "ALTITUDE": 40,
+  "ATTITUDE": 1952,
+  "ATTITUDE_QUATERNION": 1952,
+  "ATTITUDE_TARGET": 1952,
   "CURRENT_EVENT_SEQUENCE": 13,
   "CURRENT_MODE": 20,
   "DISTANCE_SENSOR": 20,
-  "ESC_INFO": 39,
+  "ESC_INFO": 40,
   "ESTIMATOR_SENSOR_FUSION_STATUS": 20,
-  "EXTENDED_SYS_STATE": 39,
-  "GLOBAL_POSITION_INT": 387,
-  "GNSS_INTEGRITY": 39,
+  "EXTENDED_SYS_STATE": 40,
+  "GLOBAL_POSITION_INT": 390,
+  "GNSS_INTEGRITY": 40,
   "HOME_POSITION": 20,
-  "LINK_NODE_STATUS": 39,
-  "LOCAL_POSITION_NED": 1933,
-  "MISSION_CURRENT": 39,
-  "OPEN_DRONE_ID_LOCATION": 39,
-  "OPEN_DRONE_ID_SYSTEM": 39,
+  "LINK_NODE_STATUS": 40,
+  "LOCAL_POSITION_NED": 1952,
+  "MISSION_CURRENT": 40,
+  "OPEN_DRONE_ID_LOCATION": 40,
+  "OPEN_DRONE_ID_SYSTEM": 40,
   "PING": 4,
-  "POSITION_TARGET_GLOBAL_INT": 39,
-  "POSITION_TARGET_LOCAL_NED": 1933,
-  "SCALED_IMU": 967,
-  "SERVO_OUTPUT_RAW": 1933,
-  "SYS_STATUS": 39,
+  "POSITION_TARGET_GLOBAL_INT": 40,
+  "POSITION_TARGET_LOCAL_NED": 1952,
+  "SCALED_IMU": 976,
+  "SERVO_OUTPUT_RAW": 1952,
+  "SYS_STATUS": 40,
   "TIME_ESTIMATE_TO_TARGET": 19,
-  "VFR_HUD": 155
+  "VFR_HUD": 157
  },
- "verdict": "FAIL: a channel the contract admits as evidence never arrived"
+ "verdict": "PASS"
 }

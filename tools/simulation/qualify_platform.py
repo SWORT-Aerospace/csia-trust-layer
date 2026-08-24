@@ -38,12 +38,15 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
 from csia.aircraft.adapters import get_adapter            # noqa: E402
-from csia.aircraft.qualification import default_contract  # noqa: E402
+from csia.aircraft.qualification import (                # noqa: E402
+    default_contract, platform_rows_in_force)
 from csia.aircraft.sample import Quality                  # noqa: E402
 from csia.simulation.dialect import (                     # noqa: E402
     blind_channels, message_names, undecodable_frames)
 from csia.simulation.rigs import (                        # noqa: E402
     LAUNCHERS, ROOTS, connect, dialect_report, fly)
+from csia.simulation.ulog_check import (                  # noqa: E402
+    HEADING_DEPENDENT_CHANNELS, heading_provenance, newest_ulog)
 
 # Not a Quality: it is a statement about the INSTRUMENT, not the channel.
 # A channel whose producer arrived as a frame the decoder could not parse is
@@ -284,12 +287,38 @@ def main() -> int:
         except subprocess.TimeoutExpired:
             proc.kill()
 
+    # AFTER the autopilot has exited, so its own log is flushed and closed.
+    #
+    # PX4 SIH prints "Preflight Fail: no heading reference" on every boot. If
+    # that were a real missing heading source, every magnetometer,
+    # GNSS-course, attitude and cross-sensor row in this report would be
+    # contaminated and nothing here would show it. The autopilot's ulog
+    # settles the question; see csia/simulation/ulog_check.py.
+    provenance = {"verdict": "NOT_APPLICABLE",
+                  "notes": [f"{args.platform} does not write a ulog"]}
+    if args.platform == "px4":
+        provenance = heading_provenance(newest_ulog(workdir))
+    heading_verified = provenance["verdict"] == "HEADING_REFERENCE_VALID"
+    heading_broken = provenance["verdict"] in ("NO_HEADING_REFERENCE",
+                                               "HEADING_REFERENCE_LOST")
+
     print(f"\n=== {msgs} messages, {adapter.counters['mapped']} mapped, "
           f"{adapter.counters['unmapped']} unmapped")
     if unmapped:
         top = sorted(unmapped.items(), key=lambda kv: -kv[1])[:8]
         print("    unmapped types: " +
               ", ".join(f"{k}x{v}" for k, v in top))
+
+    # Every platform narrowing in force, printed on every run. A narrowing
+    # nobody sees is a narrowing nobody reviews, and that is how "the platform
+    # genuinely does not provide it" decays into "we stopped checking".
+    narrowed = platform_rows_in_force(adapter.contract)
+    if narrowed:
+        print(f"=== platform contract rows in force for {args.platform}: "
+              f"{len(narrowed)}")
+        for ch, row in sorted(narrowed.items()):
+            print(f"    {ch:22s} -> {row['qualification']:22s} "
+                  f"may_use={bool(row.get('csia_may_use'))}")
 
     dialect = dialect_report(args.platform)
     print(f"=== decoder: {dialect.name if dialect else 'library default'} "
@@ -305,6 +334,21 @@ def main() -> int:
     for ch, b in sorted(blind.items()):
         print(f"    *** {ch} depends on {b['message']}, which this decoder "
               f"could not read")
+
+    if args.platform == "px4":
+        print(f"=== estimator heading: {provenance['verdict']}"
+              + (f", source {provenance.get('source')}, aligned at "
+                 f"{provenance.get('aligned_at_s')} s"
+                 if provenance.get("aligned_at_s") is not None else ""))
+        gt = provenance.get("yaw_error_vs_truth_deg")
+        if gt:
+            print(f"    yaw vs SIH ground truth: mean |err| "
+                  f"{gt['mean_abs']}deg, max {gt['max_abs']}deg, n={gt['n']}")
+        if not heading_verified:
+            # Loud, because "we could not check" and "it was fine" are the two
+            # things this whole check exists to keep apart.
+            print("    *** HEADING NOT VERIFIED -- "
+                  + "; ".join(provenance.get("notes", [])))
 
     print(f"\n{'channel':26s} {'declared':24s} {'observed':24s} agree")
     disagreements = []
@@ -350,6 +394,25 @@ def main() -> int:
     absent_rows = [r for r in rows if r["observed"] == "UNAVAILABLE"]
     absent_but_expected = [r for r in absent_rows if r["admissible"]]
 
+    # A channel whose MEANING depends on a heading reference cannot be graded
+    # on a run that had none. Same shape as the decoder guard: narrow the
+    # claim to what the evidence supports instead of voiding the whole run.
+    heading_voided = []
+    if heading_broken:
+        for r in rows:
+            if r["channel"] in HEADING_DEPENDENT_CHANNELS:
+                r["observed"] = "UNVERIFIED_HEADING"
+                r["agrees"] = None
+                r["detail"] = (f"the estimator had no valid heading reference "
+                               f"({provenance['verdict']}), so this channel's "
+                               f"values carry no interpretable heading and no "
+                               f"claim is issued")
+                heading_voided.append(r["channel"])
+        disagreements = [r for r in disagreements
+                         if r["channel"] not in heading_voided]
+        absent_rows = [r for r in rows if r["observed"] == "UNAVAILABLE"]
+        absent_but_expected = [r for r in absent_rows if r["admissible"]]
+
     # RULE A applied to the DECODER, and it dominates every other verdict.
     #
     # A blind spot is not a result. If the contract depends on a message this
@@ -357,7 +420,12 @@ def main() -> int:
     # that channel, and a PASS or a FAIL would both be assertions the evidence
     # does not support. INSTRUMENT_DEAD is the existing name for this in
     # csia/simulation/contract.py and it means the same thing here.
-    if blind:
+    if heading_broken:
+        verdict = (f"INSTRUMENT_DEAD: {provenance['verdict']} -- the "
+                   f"estimator had no valid heading reference, so "
+                   f"{len(heading_voided)} heading-dependent channel(s) "
+                   f"carry no interpretable value")
+    elif blind:
         verdict = ("INSTRUMENT_DEAD: the decoder could not read "
                    + ", ".join(sorted({b["message"] for b in blind.values()}))
                    + f", which {len(blind)} contract channel(s) depend on; "
@@ -391,6 +459,10 @@ def main() -> int:
         "messages": msgs,
         "counters": adapter.counters,
         "unmapped_types": unmapped,
+        # The narrowings applied to this run, verbatim from the contract with
+        # their evidence. A PASS reached by narrowing must show what it
+        # narrowed, in the same file as the PASS.
+        "platform_contract_rows": narrowed,
         # What actually did the decoding, and what it could not read. A reader
         # asking "is this row a fact about PX4 or a fact about pymavlink?"
         # must be able to answer it from the result file without rerunning
@@ -438,15 +510,23 @@ def main() -> int:
             # sensor fitted".
             "sentinel_counts": adapter.sentinel_counts(),
         },
-        # THREE flags, because there are three ways a run can be invalid and
-        # collapsing them loses which one happened. PROBE_VALID is the
-        # conjunction and is what a caller should read; the other two say why
-        # it is false. Row-level gating still keys off the motion control
-        # alone -- a blind channel is marked UNDECODABLE in its own row, so
-        # the remaining rows stay readable instead of being voided wholesale.
-        "PROBE_VALID": probe_valid and not blind,
+        # FOUR flags, because there are four ways a run can be invalid and
+        # collapsing them loses which one happened: the airframe did not move,
+        # the decoder could not read a producer, the estimator had no heading
+        # reference, or nothing went wrong. PROBE_VALID is the conjunction and
+        # is what a caller should read; the others say why it is false.
+        # Row-level gating still keys off the motion control alone -- a blind
+        # or heading-voided channel is marked in its own row, so the remaining
+        # rows stay readable instead of being voided wholesale.
+        "PROBE_VALID": probe_valid and not blind and not heading_broken,
         "MOTION_CONTROL_SATISFIED": probe_valid,
         "DECODER_COMPLETE": not blind,
+        # Separate from PROBE_VALID on purpose: "the heading reference was
+        # checked and was good" and "we could not check it" must never read
+        # the same, and only this flag distinguishes them.
+        "HEADING_VERIFIED": heading_verified,
+        "estimator_provenance": provenance,
+        "heading_voided_channels": heading_voided,
         "undecodable_channels": sorted(blind),
         "rows": rows if probe_valid else [],
         "rows_unscored": [] if probe_valid else rows,

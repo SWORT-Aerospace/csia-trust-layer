@@ -139,6 +139,23 @@ channels:
     SITL simulates multiple IMU instances with independent noise draws. NOTE:
     they share one dynamics source, so a SITL imu0/imu1 disagreement is a
     noise-model artifact, not an independent-hardware result.
+  platform_qualification:
+    px4:
+      qualification: UNAVAILABLE
+      csia_may_use: false
+      reason: >-
+        PX4 SIH models ONE IMU. SCALED_IMU2 is never published, so imu1 does
+        not exist on this backend -- it is not a message we failed to receive.
+        CONSEQUENCE, and it is not a small one: CSIA's imu0/imu1 cross-check
+        relation CANNOT BE EVALUATED on PX4 SIH at all, and a PX4 evaluation
+        that does not say so is omitting one of the two families v1 handles
+        best. This row makes the absence explicit and reviewable rather than
+        letting every run FAIL for a reason that is true of the airframe.
+      evidence: research/v1_1/results/qualification_px4.json
+      measured: >-
+        0 samples over 17,173 messages with the airframe flying (climbed
+        2.69 m), decoder csia_px4 with 0 undecodable frames -- so this is a
+        presence fact about PX4, not a parser limitation.
 
 - channel: imu1.gyro
   node: imu1
@@ -155,6 +172,16 @@ channels:
   qualification: INFORMATIVE
   csia_may_use: true
   evidence: same as imu1.accel
+  platform_qualification:
+    px4:
+      qualification: UNAVAILABLE
+      csia_may_use: false
+      reason: >-
+        Same as imu1.accel: PX4 SIH models one IMU and never publishes
+        SCALED_IMU2. The imu0/imu1 cross-check relation cannot be evaluated
+        on this backend.
+      evidence: research/v1_1/results/qualification_px4.json
+      measured: "0 samples over 17,173 messages with the airframe flying"
 
 # --------------------------------------------------------------- MAGNETOMETER
 - channel: mag.field_ut
@@ -311,6 +338,20 @@ channels:
   qualification: INFORMATIVE
   csia_may_use: true
   evidence: "SIM_Multicopter.cpp:102 battery_current = frame->get_current_amp()"
+  platform_qualification:
+    px4:
+      qualification: UNAVAILABLE
+      csia_may_use: false
+      reason: >-
+        PX4 SIH publishes BATTERY_STATUS at ~9.7 Hz with current_battery = -1,
+        the documented "not measured" sentinel. The stream is implemented and
+        the measurement is absent: there is no simulated current sensor. That
+        is a different fact from an unimplemented message, and the fix would
+        be a sensor rather than wiring.
+      evidence: research/v1_1/results/qualification_px4.json
+      measured: >-
+        387 producer frames in 40 s, every one carrying the -1 sentinel;
+        0 usable samples. See presence_findings.sentinel_counts.
 
 # ------------------------------------------------------------------- ESC ****
 # The reason this file exists. Read W-5 before changing anything here.
@@ -340,6 +381,18 @@ channels:
     REAL ESC telemetry IS informative. This qualification is SIMULATOR
     SPECIFIC. The adapter re-qualifies per platform instance, and a bench with
     real ESCs must re-run the qualification probe rather than inherit this row.
+  platform_qualification:
+    px4:
+      qualification: STUB_OR_NONINFORMATIVE
+      csia_may_use: false
+      reason: >-
+        Same verdict as ArduPilot, DIFFERENT mechanism, and the base row's
+        justification (AP_ESC_Telem_SITL.cpp) does not apply to PX4 at all.
+        PX4 SIH publishes ESC_STATUS with current identically 0 -- not a fake
+        liveness value, simply no current model. Recorded separately so a
+        reader does not carry an ArduPilot source citation onto PX4.
+      evidence: research/v1_1/results/qualification_px4.json
+      measured: "constant at 0 over 17,167 samples, airframe flying"
 
 - channel: esc.rpm
   node: motor_esc
@@ -363,6 +416,28 @@ channels:
     nonzero, because it is a vibration-model term, not a motor-speed model.
   regression_test: tests/test_channel_semantics.py::test_esc_sitl_stub_is_not_informative
   on_real_hardware: same caveat as esc.current
+  platform_qualification:
+    px4:
+      qualification: AVAILABLE_UNVALIDATED
+      csia_may_use: false
+      reason: >-
+        THE BASE ROW IS WRONG FOR PX4, and the measurement says so: PX4 SIH
+        publishes ESC_STATUS rpm that varies over a 5,540 RPM range (sd 1,323,
+        n=17,167) while the airframe flies. It is not a stub here. It is still
+        NOT ADMISSIBLE, and deliberately so: INFORMATIVE requires
+        VALIDATED_SEMANTICS *and* demonstrated variation, and nobody has read
+        the PX4 source for this field's units, indexing or scaling. Variation
+        alone is not semantics. Admitting it on the strength of "it moves"
+        would be the exact mistake W-5 is about, with the sign reversed.
+        Promoting this row needs a source read, not another flight.
+      evidence: research/v1_1/results/qualification_px4.json
+      measured: >-
+        range 5540 rpm, sd 1323.15, n=17167, airframe climbed 2.69 m. Compare
+        ArduPilot the same day: constant at 0 over 116,911 samples.
+      to_promote: >-
+        read PX4 src/modules/mavlink/streams/ESC_STATUS.hpp and the
+        esc_status uORB definition, confirm units and per-motor indexing,
+        then raise to VALIDATED_SEMANTICS and decide csia_may_use separately.
 
 # ------------------------------------------------------------------ VIBRATION
 - channel: vibration.rms

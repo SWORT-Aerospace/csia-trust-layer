@@ -45,6 +45,10 @@ sys.path.insert(0, ROOT)
 
 from csia.aircraft.adapters.base import PlatformAdapter    # noqa: E402
 from csia.runtime.online import OnlineTrustLayer           # noqa: E402
+from csia.simulation.host_noise import (                   # noqa: E402
+    measure as measure_host_noise, r13_verdict)
+
+R13_BUDGET_US = 2000.0
 
 # Channels whose value is a vector and must be restored as an ndarray: the
 # core does arithmetic on them, and a list would either crash or silently
@@ -141,21 +145,67 @@ def main() -> int:
     ap.add_argument("log")
     ap.add_argument("--tick-hz", type=float, default=25.0)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--passes", type=int, default=1,
+                    help="repeat each mode N times; the spread across "
+                         "identical passes is itself a measurement of the "
+                         "host, and a single pass hides it")
+    ap.add_argument("--no-control", action="store_true",
+                    help="skip the host-noise null control (then no tail "
+                         "verdict is issued at all)")
     args = ap.parse_args()
 
     result = {"log": os.path.relpath(args.log, ROOT), "modes": {}}
     print(f"=== replaying {os.path.basename(args.log)}")
 
+    worst_over = 0
+    n_ticks = 0
     for fm in (False, True):
-        ticks, per_tick, handoffs, _ = replay(args.log, field_mode=fm,
-                                              tick_hz=args.tick_hz)
-        s = summarise(per_tick)
-        s["handoffs"] = handoffs
-        s["handoffs_per_tick"] = round(handoffs / max(1, len(ticks)), 2)
-        result["modes"][f"field_mode={fm}"] = s
-        print(f"    field_mode={str(fm):5s} median {s['median_us']:8.1f} us  "
-              f"p95 {s['p95_us']:8.1f}  max {s['max_us']:9.1f}  "
-              f"handoffs/tick {s['handoffs_per_tick']}")
+        passes = []
+        for _ in range(max(1, args.passes)):
+            ticks, per_tick, handoffs, _ = replay(args.log, field_mode=fm,
+                                                  tick_hz=args.tick_hz)
+            s = summarise(per_tick)
+            s["handoffs"] = handoffs
+            s["handoffs_per_tick"] = round(handoffs / max(1, len(ticks)), 2)
+            s["over_budget"] = sum(1 for x in per_tick if x > R13_BUDGET_US)
+            passes.append(s)
+            n_ticks = max(n_ticks, len(per_tick))
+            print(f"    field_mode={str(fm):5s} median {s['median_us']:8.1f} us"
+                  f"  p95 {s['p95_us']:8.1f}  max {s['max_us']:9.1f}  "
+                  f"over2ms {s['over_budget']:3d}  "
+                  f"handoffs/tick {s['handoffs_per_tick']}")
+        # The FIRST pass stays under the original key so existing readers of
+        # this file keep working; the spread is recorded alongside it.
+        # dict(), not the object itself: assigning `passes` into passes[0]
+        # makes the structure contain itself and json.dump raises
+        # "Circular reference detected" AFTER the whole replay has run.
+        result["modes"][f"field_mode={fm}"] = dict(passes[0])
+        if len(passes) > 1:
+            result["modes"][f"field_mode={fm}"]["passes"] = passes
+            result["modes"][f"field_mode={fm}"]["median_spread_us"] = round(
+                max(p["median_us"] for p in passes)
+                - min(p["median_us"] for p in passes), 1)
+            result["modes"][f"field_mode={fm}"]["max_spread_us"] = round(
+                max(p["max_us"] for p in passes)
+                - min(p["max_us"] for p in passes), 1)
+        worst_over = max(worst_over,
+                         max(p["over_budget"] for p in passes))
+
+    # The clean-core figure is worth nothing without knowing what the host
+    # does to a CONSTANT workload in the same process. Measured on this
+    # container: a busy loop sized to the core's median went over the 2 ms
+    # budget on up to 10 of 751 iterations, with a 26.7 ms outlier.
+    if not args.no_control:
+        median = result["modes"]["field_mode=True"]["median_us"]
+        noise = measure_host_noise(n_ticks=n_ticks or 751, target_us=median,
+                                   budget_us=R13_BUDGET_US, trials=3)
+        result["host_noise_control"] = noise
+        w = noise["worst_trial"]
+        print(f"\n=== host-noise control (constant work, same process): "
+              f"median {w['median_us']:.0f} us  max {w['max_us']:.0f} us  "
+              f"{w['over_budget']}/{w['n']} over budget")
+        result["R13_replay"] = r13_verdict(worst_over, noise, n_ticks or 751)
+        print(f"=== R13 (deterministic replay): {result['R13_replay']}")
 
     # Attribution pass. Inflated absolute numbers; ratios only.
     _t, _p, _h, pr = replay(args.log, field_mode=True, tick_hz=args.tick_hz,

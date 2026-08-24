@@ -152,12 +152,23 @@ RPM range (sd 1,323, n=17,167) and `esc.current` is constant at 0. ArduPilot
 SITL, re-measured the same day, is the mirror image: current constant at 3.2 A,
 rpm constant at 0. The contract row declares both `STUB_OR_NONINFORMATIVE`,
 which is right for ArduPilot and **wrong for PX4** — the row was written
-against one simulator and the contract has no per-platform qualification
-field. Neither backend supplies a complete set and they fail in opposite
-places, which is more useful than either alone: a relation that survives both
-has not been validated against one simulator's quirks. This does not admit any
-stub anywhere; `esc.current` stays blocked on both. Evidence and the decision
-still owed to a contract owner: `docs/simulation/PX4_CURRENT.md` §2.2-2.3.
+against one simulator. Neither backend supplies a complete set and they fail
+in opposite places, which is more useful than either alone: a relation that
+survives both has not been validated against one simulator's quirks.
+
+**Resolved the same day by a per-platform mechanism, not by editing the base
+row.** `platform_qualification:` narrows a row for one platform, carrying the
+measurement that justifies it. On PX4 `esc.rpm` is now
+`AVAILABLE_UNVALIDATED` and `esc.current` keeps `STUB_OR_NONINFORMATIVE` with
+its own reason, since the ArduPilot source citation does not apply there.
+**Neither becomes admissible**, and `esc.rpm` stays refused deliberately:
+INFORMATIVE needs `VALIDATED_SEMANTICS` *and* variation, and nobody has read
+the PX4 source for that field's units or indexing. Admitting it because it
+moves would be this weakness with the sign reversed. A platform row can only
+narrow — effective admissibility is the AND of base and platform, enforced in
+`ChannelContract` and held by `tests/test_platform_contract.py`, because
+otherwise the mechanism would be the easiest possible way to re-admit a stub.
+Details: `docs/simulation/PX4_CURRENT.md` §2.5.
 
 **How that PX4 measurement was nearly missed.** The first PX4 run reported
 both ESC channels as "never arrived" and it was published. PX4 had been
@@ -266,6 +277,55 @@ claim must state what else was running in the same process.
 **Gate 2 must still measure on target hardware.** ~2.4× headroom on a desktop
 is not ~2.4× on companion-class ARM, and the figure to measure is the full
 drive cost, not `latency_us`.
+
+#### W-8 addendum, 2026-08-24: the tail is not measurable here at all
+
+Two further steps, and the second one closes this entry as far as it can be
+closed on this infrastructure.
+
+**1. The tee now runs in a separate interpreter.** `--tee-mode process` is the
+default; `--tee-mode thread` is retained as the null control. Same rig, same
+flight, back to back:
+
+| | tee as thread | tee as process |
+|---|---|---|
+| tick median | 1253.9 µs | **1125.8 µs** |
+| p99 | 2118.5 µs | **1768.2 µs** |
+| core phase median | 1097.7 µs | **952.2 µs** |
+| over 2 ms | 9 / 751 | **2 / 751** |
+
+Real and in the predicted direction, and it is the faithful arrangement: on a
+real aircraft the tee is the GCS or a UART split, never a thread inside CSIA.
+
+**2. The latency instrument had no null control, and now it does.** A loop
+doing identical arithmetic on every iteration — no CSIA, no I/O — sized to the
+tick's own median and run the same number of times in the same process:
+
+```
+median 508.9 us   p95 706.0   p99  847.1   max  2057.7   over-2ms  1/751
+median 520.6 us   p95 812.5   p99 2067.0   max 26730.8   over-2ms 10/751
+median 492.2 us   p95 890.0   p99  995.9   max  4160.9   over-2ms  1/751
+```
+
+Constant work, a 26.7 ms outlier, up to ten ticks over budget. In a live run
+the same day the control went over **15 / 749** times while CSIA went over
+**9 / 749**: on this host the full v1.1 stack is *quieter than a busy loop*.
+
+**Conclusion, and it is not a pass.** Central tendency is measurable and
+sound — deterministic replay of a real 30 s flight gives a core median of
+430–495 µs with p95 604–848 µs across six passes, against a 2000 µs budget.
+The **deadline property R13 actually asserts is not measurable on shared cloud
+infrastructure**, because the instrument's own noise floor exceeds the budget.
+`csia/simulation/host_noise.py` now runs the control on every timing run and
+the R13 verdict is three-valued: `PASS`, `FAIL`, or `INDETERMINATE` — the last
+only when the control failed too, so it can never rescue a real failure. A
+clean control leaves `FAIL` standing, because a control that passes proves
+nothing: it may simply have run during a quiet stretch.
+
+**What this changes for Gate 2:** nothing about the requirement, everything
+about where it can be discharged. R13 must be measured on the target companion
+computer with a quiet scheduler, and no verdict from this container — pass or
+fail — may be quoted as evidence either way.
 
 ### W-7 The first heartbeat is discarded on every connection
 

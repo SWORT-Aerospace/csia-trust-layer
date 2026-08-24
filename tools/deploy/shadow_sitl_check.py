@@ -34,6 +34,7 @@ import json
 import os
 import signal
 import statistics
+import subprocess
 import sys
 import time
 
@@ -43,6 +44,8 @@ sys.path.insert(0, ROOT)
 from csia.deploy.guard import CommandAuthorityError          # noqa: E402
 from csia.deploy.shadow import Mode, ShadowConfig, ShadowRunner  # noqa: E402
 from csia.simulation.rigs import LAUNCHERS, connect, fly   # noqa: E402
+from csia.simulation.host_noise import (                 # noqa: E402
+    measure as measure_host_noise, r13_verdict)
 from csia.simulation.tee import MavlinkTee               # noqa: E402
 
 R13_BUDGET_US = 2000.0
@@ -51,6 +54,43 @@ R13_BUDGET_US = 2000.0
 TEE_OUT = ("127.0.0.1", 14561)
 # The rig commands here; the tee owns SERIAL0.
 RIG_LINK = "tcp:127.0.0.1:5762"
+
+
+def start_tee_process(source, out_addr, platform, profile, status_path,
+                      timeout=30.0, min_types=5):
+    """Run the tee in its own interpreter and wait for real traffic.
+
+    The positive control is unchanged in substance and is now read from the
+    tee's status file instead of an attribute: "did the feed carry sensor
+    data before we started timing" is the question, and a separate process
+    cannot be interrogated by touching `self.stats`.
+    """
+    if os.path.exists(status_path):
+        os.unlink(status_path)
+    os.makedirs(os.path.dirname(status_path), exist_ok=True)
+    cmd = [sys.executable, "-m", "csia.simulation.tee",
+           "--source", source, "--out", f"{out_addr[0]}:{out_addr[1]}",
+           "--platform", platform, "--profile", profile,
+           "--status", status_path]
+    proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+    deadline = time.time() + timeout
+    seen = 0
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            raise SystemExit(f"tee process exited early (rc {proc.returncode})")
+        try:
+            with open(status_path, encoding="utf-8") as fh:
+                seen = len(json.load(fh).get("by_type", {}))
+        except (OSError, ValueError):
+            seen = 0
+        if seen >= min_types:
+            return proc, seen
+        time.sleep(0.5)
+    proc.kill()
+    raise SystemExit(
+        f"tee process never carried sensor traffic ({seen} message types). "
+        f"Without it this run would measure an idle loop again.")
 
 
 def summarise(latencies):
@@ -87,6 +127,13 @@ def main() -> int:
     ap.add_argument("--stream-profile", choices=("full", "companion"),
                     default="full",
                     help="companion = only the streams CSIA reads")
+    ap.add_argument("--tee-mode", choices=("process", "thread"),
+                    default="process",
+                    help="process (default) runs the tee in its own "
+                         "interpreter so it cannot steal GIL time from the "
+                         "tick being measured; thread is the old in-process "
+                         "arrangement, kept as the null control that shows "
+                         "the difference")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -116,18 +163,44 @@ def main() -> int:
         # The rig commands on SERIAL1 instead. Commands work on any link;
         # only STREAMS are per-link, which is precisely the distinction that
         # took four runs to establish.
-        tee = MavlinkTee(conn_str, [TEE_OUT], platform=args.platform,
-                         profile=args.stream_profile)
-        tee.start()
-        if not tee.wait_for_traffic(min_types=5, timeout=25.0):
-            raise SystemExit(
-                f"tee never carried sensor traffic: "
-                f"{sorted(tee.stats['by_type'])}. Without it this run would "
-                f"measure an idle loop again.")
-        print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
-              f"({len(tee.stats['by_type'])} message types flowing)")
+        #
+        # OUT OF PROCESS BY DEFAULT. The tee used to run as a thread here, and
+        # under the GIL every byte it decoded was time stolen from the tick
+        # this script exists to time. Controlled measurement, synthetic tick
+        # against N competing GIL threads: 679.5 us at 0, 954.6 us at 1,
+        # 1598.3 us at 2 -- against a live figure of ~1590 us. Most of the R13
+        # FAIL was the instrument.
+        #
+        # It is also the faithful arrangement: on a real aircraft the tee is
+        # the GCS or a UART split, never a thread inside CSIA.
+        tee, tee_proc, status_path = None, None, None
+        if args.tee_mode == "process":
+            status_path = os.path.join(workdir, "tee_status.json")
+            tee_proc, types = start_tee_process(
+                conn_str, TEE_OUT, args.platform, args.stream_profile,
+                status_path)
+            print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
+                  f"({types} message types flowing, pid {tee_proc.pid}, "
+                  f"SEPARATE INTERPRETER)")
+        else:
+            tee = MavlinkTee(conn_str, [TEE_OUT], platform=args.platform,
+                             profile=args.stream_profile)
+            tee.start()
+            if not tee.wait_for_traffic(min_types=5, timeout=25.0):
+                raise SystemExit(
+                    f"tee never carried sensor traffic: "
+                    f"{sorted(tee.stats['by_type'])}. Without it this run "
+                    f"would measure an idle loop again.")
+            types = len(tee.stats["by_type"])
+            print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
+                  f"({types} message types flowing, IN-PROCESS THREAD -- "
+                  f"this contends for the GIL with the measured tick)")
         result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}",
-                         "profile": args.stream_profile}
+                         "profile": args.stream_profile,
+                         "mode": args.tee_mode,
+                         "shares_interpreter_with_csia":
+                             args.tee_mode == "thread",
+                         "types_flowing_before_measurement": types}
         rig_conn = connect(RIG_LINK, args.platform)
 
         print("=== rig commands on SERIAL1 (streams are per-link)")
@@ -240,12 +313,27 @@ def main() -> int:
             # For a clean core figure use
             # tools/deploy/profile_core_from_log.py, which replays a flight
             # log with nothing else in the process.
-            result["timing_caveat"] = (
-                "phases include GIL contention from the in-process tee "
-                "thread; NOT a clean core measurement. See W-8 and "
-                "tools/deploy/profile_core_from_log.py")
-            print("    NOTE: phases include in-process tee contention -- "
-                  "not a clean core figure (see W-8)")
+            # The caveat must match the run that produced the numbers. It
+            # was printed unconditionally, so a process-mode run would have
+            # carried a warning about a thread it did not have -- a stale
+            # caveat is as misleading as a missing one.
+            if args.tee_mode == "thread":
+                result["timing_caveat"] = (
+                    "phases include GIL contention from the IN-PROCESS tee "
+                    "thread; NOT a clean core measurement. Re-run with "
+                    "--tee-mode process. See W-8.")
+                print("    NOTE: phases include in-process tee contention -- "
+                      "not a clean core figure (see W-8)")
+            else:
+                result["timing_caveat"] = (
+                    "tee ran in a SEPARATE interpreter, so no GIL contention "
+                    "from it. Remaining contention is the host: this "
+                    "container also runs SITL, and run-to-run spread on the "
+                    "same command exceeds the tee effect. An R13 verdict from "
+                    "shared cloud infrastructure is a statement about the "
+                    "host as much as about CSIA.")
+                print("    NOTE: tee is out-of-process; remaining variance is "
+                      "the host (SITL shares this container)")
             ph = result["phases"]
             print(f"    phases (median us): "
                   + "  ".join(f"{k}={ph[k]['median_us']:.1f}"
@@ -254,8 +342,20 @@ def main() -> int:
             print(f"    R13 budget {R13_BUDGET_US:.0f} us -> "
                   f"{L['over_budget']} tick(s) over budget, "
                   f"worst-case headroom {L['worst_headroom_x']}x")
-            result["R13"] = ("PASS" if L["over_budget"] == 0
-                             else f"FAIL: {L['over_budget']} ticks over budget")
+            # RULE A on the CLOCK. Before attributing an over-budget tick
+            # to CSIA, measure what a constant workload does in the same
+            # process on the same host -- see csia/simulation/host_noise.py
+            # for the numbers that forced this. It cannot turn a real failure
+            # into a pass: INDETERMINATE requires the control to fail too.
+            noise = measure_host_noise(
+                n_ticks=L["n"], target_us=L["median_us"],
+                budget_us=R13_BUDGET_US, trials=3)
+            result["host_noise_control"] = noise
+            w = noise["worst_trial"]
+            print(f"    host-noise control (constant work, same process): "
+                  f"median {w['median_us']:.0f} us, max {w['max_us']:.0f} us, "
+                  f"{w['over_budget']}/{w['n']} over budget")
+            result["R13"] = r13_verdict(L["over_budget"], noise, L["n"])
         if L and not control["satisfied"]:
             print(f"    (idle-loop cost, NOT R13: median "
                   f"{L['median_us']:.1f} us over {L['n']} empty ticks)")
@@ -266,6 +366,19 @@ def main() -> int:
                 tee.stop()
         except Exception:
             pass
+        if tee_proc is not None:
+            tee_proc.send_signal(signal.SIGINT)
+            try:
+                tee_proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                tee_proc.kill()
+            if status_path and os.path.exists(status_path):
+                try:
+                    with open(status_path, encoding="utf-8") as fh:
+                        result.setdefault("tee", {})["final_status"] = \
+                            json.load(fh)
+                except Exception:
+                    pass
         try:
             proc.send_signal(signal.SIGTERM)
             proc.wait(timeout=10)
@@ -278,7 +391,12 @@ def main() -> int:
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(result, fh, indent=1, sort_keys=True, default=str)
     print(f"-> {os.path.relpath(out, ROOT)}")
-    return 0 if str(result.get("R13", "")).startswith("PASS") else 1
+    # INDETERMINATE is not a pass. It exits non-zero, with its own code, so
+    # a CI job cannot read "the host was too noisy to tell" as success.
+    r13 = str(result.get("R13", ""))
+    if r13.startswith("PASS"):
+        return 0
+    return 2 if r13.startswith("INDETERMINATE") else 1
 
 
 if __name__ == "__main__":

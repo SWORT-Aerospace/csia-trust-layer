@@ -1,65 +1,171 @@
 {
+ "R13_replay": "FAIL: 4 ticks over budget",
  "attribution_profiled_ratios_only": [
   {
-   "cumtime_s": "0.655",
-   "tottime_s": "0.150",
+   "cumtime_s": "0.468",
+   "tottime_s": "0.105",
    "where": "/home/user/csia-trust-layer/csia/runtime/online.py:460(_tick)"
   },
   {
-   "cumtime_s": "0.104",
-   "tottime_s": "0.084",
+   "cumtime_s": "0.073",
+   "tottime_s": "0.059",
    "where": "/home/user/csia-trust-layer/csia/runtime/online.py:62(update)"
   },
   {
-   "cumtime_s": "0.116",
-   "tottime_s": "0.076",
+   "cumtime_s": "0.091",
+   "tottime_s": "0.057",
    "where": "/home/user/csia-trust-layer/csia/trust_engine/engine.py:101(step)"
   },
   {
-   "cumtime_s": "0.143",
-   "tottime_s": "0.060",
-   "where": "/home/user/csia-trust-layer/csia/runtime/online.py:426(_lam_upd)"
-  },
-  {
-   "cumtime_s": "0.057",
-   "tottime_s": "0.050",
-   "where": "/home/user/csia-trust-layer/csia/diagnosis/bayes.py:102(step)"
-  },
-  {
-   "cumtime_s": "0.168",
-   "tottime_s": "0.049",
+   "cumtime_s": "0.190",
+   "tottime_s": "0.052",
    "where": "/home/user/csia-trust-layer/csia/runtime/online.py:312(_apply)"
   },
   {
-   "cumtime_s": "0.882",
-   "tottime_s": "0.027",
+   "cumtime_s": "0.099",
+   "tottime_s": "0.042",
+   "where": "/home/user/csia-trust-layer/csia/runtime/online.py:426(_lam_upd)"
+  },
+  {
+   "cumtime_s": "0.042",
+   "tottime_s": "0.037",
+   "where": "/home/user/csia-trust-layer/csia/diagnosis/bayes.py:102(step)"
+  },
+  {
+   "cumtime_s": "0.714",
+   "tottime_s": "0.026",
    "where": "/home/user/csia-trust-layer/csia/runtime/online.py:272(ingest)"
   },
   {
-   "cumtime_s": "0.031",
-   "tottime_s": "0.027",
-   "where": "/home/user/csia-trust-layer/csia/runtime/online.py:648(_body_to_world_1)"
+   "cumtime_s": "0.055",
+   "tottime_s": "0.024",
+   "where": "/home/user/csia-trust-layer/csia/runtime/online.py:98(update)"
   }
  ],
- "log": "logs/shadow-sitl-ardupilot/20260824T114545Z-8fbb7719.part000.jsonl",
+ "host_noise_control": {
+  "iterations_per_tick": 7059,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 494.6,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1771.5,
+    "median_us": 495.0,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 611.2,
+    "p99_us": 864.9
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 946.6,
+    "median_us": 487.5,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 615.3,
+    "p99_us": 847.1
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 1771.5,
+   "median_us": 495.0,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 611.2,
+   "p99_us": 864.9
+  }
+ },
+ "log": "logs/shadow-sitl-ardupilot/20260824T143709Z-713280b4.part000.jsonl",
  "modes": {
   "field_mode=False": {
-   "handoffs": 2196,
-   "handoffs_per_tick": 2.92,
-   "max_us": 1884.8,
-   "mean_us": 589.9,
-   "median_us": 576.9,
+   "handoffs": 3207,
+   "handoffs_per_tick": 4.27,
+   "max_spread_us": 22783.7,
+   "max_us": 24827.4,
+   "mean_us": 533.7,
+   "median_spread_us": 18.7,
+   "median_us": 448.7,
    "n": 751,
-   "p95_us": 734.4
+   "over_budget": 4,
+   "p95_us": 761.2,
+   "passes": [
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 24827.4,
+     "mean_us": 533.7,
+     "median_us": 448.7,
+     "n": 751,
+     "over_budget": 4,
+     "p95_us": 761.2
+    },
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 2043.7,
+     "mean_us": 452.8,
+     "median_us": 430.0,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 603.9
+    },
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 2090.5,
+     "mean_us": 489.9,
+     "median_us": 444.0,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 766.7
+    }
+   ]
   },
   "field_mode=True": {
-   "handoffs": 2196,
-   "handoffs_per_tick": 2.92,
-   "max_us": 1775.5,
-   "mean_us": 647.1,
-   "median_us": 632.7,
+   "handoffs": 3207,
+   "handoffs_per_tick": 4.27,
+   "max_spread_us": 6330.5,
+   "max_us": 8325.7,
+   "mean_us": 549.4,
+   "median_spread_us": 19.8,
+   "median_us": 494.6,
    "n": 751,
-   "p95_us": 776.9
+   "over_budget": 1,
+   "p95_us": 848.1,
+   "passes": [
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 8325.7,
+     "mean_us": 549.4,
+     "median_us": 494.6,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 848.1
+    },
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 3058.8,
+     "mean_us": 504.1,
+     "median_us": 474.8,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 729.1
+    },
+    {
+     "handoffs": 3207,
+     "handoffs_per_tick": 4.27,
+     "max_us": 1995.2,
+     "mean_us": 509.8,
+     "median_us": 484.6,
+     "n": 751,
+     "over_budget": 0,
+     "p95_us": 694.4
+    }
+   ]
   }
  }
 }

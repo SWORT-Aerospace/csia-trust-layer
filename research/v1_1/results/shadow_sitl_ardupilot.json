@@ -1,11 +1,11 @@
 {
- "R13": "FAIL: 264 ticks over budget",
+ "R13": "INDETERMINATE: 9/749 ticks over budget, but a constant-work control on this host went over 15/749 times (max 7600 us). The tail is the host; measure the deadline at Gate 2 on target hardware",
  "adapter_counters": {
-  "mapped": 80462,
-  "messages": 105972,
+  "mapped": 80279,
+  "messages": 105732,
   "rejected_sentinel": 0,
   "time_reanchors": 0,
-  "unmapped": 68001
+  "unmapped": 67847
  },
  "command_authority": {
   "checked": 21,
@@ -37,21 +37,56 @@
   "write_half_closed": true,
   "write_half_state": "CLOSED_ENOTCONN"
  },
- "flight_id": "20260824T113833Z-71e7360b",
+ "flight_id": "20260824T144244Z-d7e58c1a",
+ "host_noise_control": {
+  "iterations_per_tick": 14705,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": false,
+  "target_us": 1125.66,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1950.5,
+    "median_us": 1019.6,
+    "n": 749,
+    "over_budget": 0,
+    "p95_us": 1461.5,
+    "p99_us": 1789.2
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 7599.9,
+    "median_us": 1044.1,
+    "n": 749,
+    "over_budget": 15,
+    "p95_us": 1796.0,
+    "p99_us": 3088.6
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 7599.9,
+   "median_us": 1044.1,
+   "n": 749,
+   "over_budget": 15,
+   "p95_us": 1796.0,
+   "p99_us": 3088.6
+  }
+ },
  "latency": {
   "budget_us": 2000.0,
-  "max_us": 22886.5,
-  "mean_us": 2015.93,
-  "median_us": 1869.88,
-  "min_us": 137.96,
-  "n": 751,
-  "over_budget": 264,
-  "p95_us": 2777.54,
-  "p99_us": 3129.12,
-  "worst_headroom_x": 0.09
+  "max_us": 10674.96,
+  "mean_us": 1204.65,
+  "median_us": 1125.66,
+  "min_us": 124.05,
+  "n": 749,
+  "over_budget": 9,
+  "p95_us": 1573.94,
+  "p99_us": 2157.94,
+  "worst_headroom_x": 0.19
  },
  "latency_positive_control": {
-  "messages_ingested": 105972,
+  "messages_ingested": 105732,
   "rule": "a latency figure from an idle tick measures the loop, not the workload",
   "satisfied": true,
   "usable_channels_at_end": 12
@@ -62,45 +97,130 @@
   "rc_channels_override_send: denied"
  ],
  "log_dir": "logs/shadow-sitl-ardupilot",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 372.44,
+   "mean_us": 40.03,
+   "median_us": 34.6,
+   "min_us": 16.1,
+   "n": 749,
+   "over_budget": 0,
+   "p95_us": 59.83,
+   "p99_us": 96.63,
+   "worst_headroom_x": 5.37
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 10514.6,
+   "mean_us": 1022.04,
+   "median_us": 953.1,
+   "min_us": 0.27,
+   "n": 749,
+   "over_budget": 6,
+   "p95_us": 1344.8,
+   "p99_us": 1963.06,
+   "worst_headroom_x": 0.19
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 821.68,
+   "mean_us": 142.58,
+   "median_us": 128.1,
+   "min_us": 102.81,
+   "n": 749,
+   "over_budget": 0,
+   "p95_us": 202.93,
+   "p99_us": 291.72,
+   "worst_headroom_x": 2.43
+  }
+ },
  "platform": "ardupilot",
  "rig_flight": {
   "armed": true,
-  "climbed_m": 13.27
+  "climbed_m": 13.26
  },
  "seconds": 30.0,
  "stats": {
-  "max_latency_us": 22886.50300010886,
-  "messages": 105972,
+  "max_latency_us": 10674.955000013142,
+  "messages": 105732,
   "reconnects": 0,
   "stale_ticks": 1,
-  "ticks": 751,
+  "ticks": 749,
   "watchdog_trips": 0
  },
  "tee": {
+  "final_status": {
+   "by_type": {
+    "AHRS": 2039,
+    "AHRS2": 10191,
+    "ATTITUDE": 10191,
+    "BAD_DATA": 4,
+    "BATTERY_STATUS": 2039,
+    "EKF_STATUS_REPORT": 2034,
+    "ESC_TELEMETRY_1_TO_4": 10102,
+    "GLOBAL_POSITION_INT": 4077,
+    "GPS_GLOBAL_ORIGIN": 2,
+    "GPS_RAW_INT": 4077,
+    "HEARTBEAT": 412,
+    "HOME_POSITION": 2,
+    "LOCAL_POSITION_NED": 3685,
+    "MEMINFO": 4077,
+    "MISSION_CURRENT": 4077,
+    "NAV_CONTROLLER_OUTPUT": 4077,
+    "PARAM_VALUE": 57,
+    "POWER_STATUS": 4077,
+    "RAW_IMU": 10191,
+    "SCALED_IMU2": 10191,
+    "SCALED_IMU3": 10191,
+    "SCALED_PRESSURE": 10191,
+    "SCALED_PRESSURE2": 10191,
+    "SIMSTATE": 10191,
+    "STATUSTEXT": 21,
+    "SYSTEM_TIME": 2039,
+    "SYS_STATUS": 4077,
+    "TERRAIN_REPORT": 2039,
+    "TERRAIN_REQUEST": 229,
+    "TIMESYNC": 40,
+    "VFR_HUD": 4077,
+    "VIBRATION": 2039,
+    "WIND": 1843
+   },
+   "bytes": 5217995,
+   "errors": 0,
+   "forwarded": 142770,
+   "pid": 23241,
+   "t": 1787582595.798133
+  },
+  "mode": "process",
   "out": "127.0.0.1:14561",
-  "source": "tcp:127.0.0.1:5760"
+  "profile": "full",
+  "shares_interpreter_with_csia": false,
+  "source": "tcp:127.0.0.1:5760",
+  "types_flowing_before_measurement": 25
  },
+ "timing_caveat": "tee ran in a SEPARATE interpreter, so no GIL contention from it. Remaining contention is the host: this container also runs SITL, and run-to-run spread on the same command exceeds the tee effect. An R13 verdict from shared cloud infrastructure is a statement about the host as much as about CSIA.",
  "unmapped_types": {
-  "AHRS": 1507,
-  "AHRS2": 7534,
-  "ATTITUDE": 7534,
-  "GLOBAL_POSITION_INT": 3014,
-  "LOCAL_POSITION_NED": 3013,
-  "MEMINFO": 3014,
-  "MISSION_CURRENT": 3013,
-  "NAV_CONTROLLER_OUTPUT": 3013,
+  "AHRS": 1504,
+  "AHRS2": 7517,
+  "ATTITUDE": 7517,
+  "GLOBAL_POSITION_INT": 3007,
+  "LOCAL_POSITION_NED": 3007,
+  "MEMINFO": 3007,
+  "MISSION_CURRENT": 3007,
+  "NAV_CONTROLLER_OUTPUT": 3007,
   "PARAM_VALUE": 19,
-  "POWER_STATUS": 3014,
-  "SCALED_IMU3": 7534,
-  "SCALED_PRESSURE2": 7534,
-  "SIMSTATE": 7534,
-  "SYSTEM_TIME": 1507,
-  "SYS_STATUS": 3014,
-  "TERRAIN_REPORT": 1507,
-  "TERRAIN_REQUEST": 145,
+  "POWER_STATUS": 3007,
+  "SCALED_IMU3": 7516,
+  "SCALED_PRESSURE2": 7516,
+  "SIMSTATE": 7516,
+  "SYSTEM_TIME": 1504,
+  "SYS_STATUS": 3007,
+  "TERRAIN_REPORT": 1504,
+  "TERRAIN_REQUEST": 144,
   "TIMESYNC": 30,
-  "VFR_HUD": 3014,
-  "WIND": 1507
+  "VFR_HUD": 3007,
+  "WIND": 1504
  },
- "wall_s": 30.03
+ "wall_s": 30.04
 }
