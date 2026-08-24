@@ -288,6 +288,15 @@ def main() -> int:
         "counters": adapter.counters,
         "unmapped_types": unmapped,
         "positive_control": {
+            # Everything the rig recorded, not a hand-picked subset.
+            #
+            # This dict used to name six keys explicitly and silently dropped
+            # the rest, so takeoff_ack, arm_ack and takeoff_alt_param -- added
+            # specifically to diagnose a failing climb -- never reached the
+            # result file. An instrument that collects evidence and then
+            # discards it is the same defect as the verdict gate that voided
+            # presence findings, and this is the third time today.
+            **{k: v for k, v in motion.items() if k != "alt_samples"},
             "armed": motion["armed"],
             "climbed_m": round(motion["climbed_m"], 2),
             "alt_samples": len(motion["alt_samples"]),
