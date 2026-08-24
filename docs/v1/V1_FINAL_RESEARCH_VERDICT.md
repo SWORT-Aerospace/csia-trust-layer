@@ -40,7 +40,7 @@ such.
 | trust core, replay build | 69–75 µs/tick |
 | trust core + failsafe, live runtime | 297–356 µs/tick |
 | requirement R13 | ≤ 2 ms/tick |
-| headroom against R13 | ~6x at the runtime figure |
+| headroom against R13 | **see W-8 — the ~6x previously stated here is wrong** |
 | native C core, host benchmark | 247 ns trust kernel + 427 ns diagnosis |
 | native C core on STM32H743 | **NOT MEASURED.** The 7–15 µs figure in older docs is an estimate. The C core is on no execution path. |
 
@@ -163,6 +163,58 @@ completed B0–B4 branch.
 
 **Deployment consequence.** v1.1 is a qualification and integration programme,
 not a detector programme. That is a deliberate decision, recorded here.
+
+### W-8 The published tick figure is a sub-measurement
+
+**Found after the freeze**, by phase-timing the v1.1 shadow stack on live
+telemetry and then profiling the core directly.
+
+`TrustState.latency_us` — the number `csia run` prints and the source of the
+297–356 µs/tick in section 2 — starts its timer at `online.py:461`, inside
+`_tick()`, and stops at `online.py:645`. **It excludes `ingest()` and
+`_apply()`**: the per-sensor work of accepting a sample, updating the Holt
+filters and computing residuals, without which `_tick()` cannot run at all.
+
+Measured with `cProfile`, 400 ticks at 25 Hz, 8 sensors:
+
+| | field_mode=False | field_mode=True |
+|---|---|---|
+| total driving cost | 1488 µs/tick | 1683 µs/tick |
+| `ingest` cumulative ÷ `_tick` cumulative | 1.69× | 1.71× |
+
+So the full cost of *driving* the layer is at least ~1.7× the figure that was
+published, and `field_mode` — the setting a real vehicle requires — adds a
+further ~13%.
+
+End-to-end on live ArduCopter 4.8 telemetry through the v1.1 stack, phase
+split of a 1753 µs median tick:
+
+```
+sample   181.6 µs   adapter: qualify 18 channels
+convert   25.4 µs   adapter: build core tuples
+core    1542.7 µs   the FROZEN v1 layer          <- 88%
+```
+
+**Consequence.** R13 headroom was never ~6×. Against a 2 ms budget the
+measured core cost alone is ~1.5 ms, and the observed end-to-end median is
+1753 µs — 88% of budget, with 191–276 of 751 ticks *over* it. On a
+companion-class ARM, expected several times slower than this desktop, the
+budget is exceeded outright.
+
+**Not fixed, and not a v1.1 defect.** The core is frozen. Three v1.1-side
+hypotheses were tested and refuted by measurement — dispatch overhead (−6%
+median), message volume (−36% messages, +2% median), and re-feeding stale
+samples (0%, though that was a genuine correctness bug and is fixed). The cost
+is real work inside the frozen core.
+
+**What is NOT established:** why the live figure (1543 µs) exceeds what the
+profile predicts from the replay figure (~525 µs). Live telemetry may exercise
+more edges, or more sensors may be active, than the bench scenario. That gap
+is open and needs profiling under live data, not another hypothesis.
+
+**Deployment consequence.** Gate 2 must measure this on target hardware before
+any timing margin is claimed. The figure to measure is the full drive cost,
+not `latency_us`.
 
 ### W-7 The first heartbeat is discarded on every connection
 
