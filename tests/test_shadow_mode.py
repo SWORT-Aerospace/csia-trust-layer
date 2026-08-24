@@ -224,3 +224,34 @@ def test_advisory_consumer_gets_no_connection(tmp_path):
         assert isinstance(rec, dict)
         assert rec["authority"] == "NONE"
         assert not any(hasattr(v, "mav") for v in rec.values())
+
+
+def test_deploy_never_imports_the_simulator_rigs():
+    """`csia.simulation.rigs` may command a vehicle. Deploy may not touch it.
+
+    The rigs module exists so a qualification probe can arm and climb. Nothing
+    in the deployment path has any business importing it, and the static
+    send-call scan does not cover `csia/simulation`, so this is the check that
+    keeps the two apart.
+    """
+    import ast
+    import os
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    offenders = []
+    for dirpath, _dirs, files in os.walk(os.path.join(root, "csia", "deploy")):
+        for fn in sorted(f for f in files if f.endswith(".py")):
+            path = os.path.join(dirpath, fn)
+            tree = ast.parse(open(path, encoding="utf-8").read())
+            for node in ast.walk(tree):
+                names = []
+                if isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    names = [(node.module or "")] + \
+                            [a.name for a in node.names]
+                if any("rigs" in n for n in names):
+                    offenders.append(f"{fn}:{node.lineno}")
+    assert not offenders, (
+        f"csia/deploy imports the simulator rigs at {offenders}: a shadow "
+        f"deployment must not be able to reach command-capable code")

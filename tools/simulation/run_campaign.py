@@ -28,7 +28,7 @@ from csia.aircraft.adapters import get_adapter                    # noqa: E402
 from csia.simulation.contract import (NullControl, Stage,         # noqa: E402
                                       TrialContract)
 from csia.simulation.profiles import get_profile                  # noqa: E402
-from qualify_platform import (LAUNCHERS, connect, fly)            # noqa: E402
+from csia.simulation.rigs import LAUNCHERS, connect, fly       # noqa: E402
 
 
 def set_param(conn, name, value):
