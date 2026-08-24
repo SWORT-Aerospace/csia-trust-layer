@@ -101,8 +101,6 @@ def main() -> int:
         # a real aircraft that request comes from the GCS or from the FC's own
         # SR*_ parameters -- see docs/deployment/AIRCRAFT_INTEGRATION.md.
         # It is NOT closed early: the streams stop when the requester leaves.
-        rig_conn = connect(RIG_LINK, args.platform)
-
         # THE TELEMETRY TEE. This is what makes an R13 measurement possible.
         #
         # Stream rates are per-link and require a transmit on that link, and
@@ -125,6 +123,8 @@ def main() -> int:
         print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
               f"({len(tee.stats['by_type'])} message types flowing)")
         result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}"}
+        rig_conn = connect(RIG_LINK, args.platform)
+
         print("=== rig commands on SERIAL1 (streams are per-link)")
         if args.fly:
             print("=== rig: arming and climbing (rig authority, not CSIA)")

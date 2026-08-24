@@ -91,8 +91,46 @@ def launch_px4(workdir, speedup=1):
 LAUNCHERS = {"ardupilot": launch_ardupilot, "px4": launch_px4}
 
 
+def wait_for_port(conn_str, timeout=60.0) -> bool:
+    """Wait for a TCP listener to exist before dialling it.
+
+    SITL does not open every serial port at once: SERIAL0 (5760) accepts
+    connections about 3 s after launch, SERIAL1 (5762) about 8 s. Dialling
+    5762 immediately gets ECONNREFUSED, and pymavlink's own retry can burn its
+    heartbeat window on the refused attempts -- which is exactly how a run
+    died with "no heartbeat within 90s" against a port that was working fine
+    five seconds later.
+
+    Non-TCP connection strings return True immediately; there is nothing to
+    wait for.
+    """
+    import socket as _s
+    if not conn_str.startswith("tcp:"):
+        return True
+    host, _, port = conn_str[4:].rpartition(":")
+    host, port = host or "127.0.0.1", int(port)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        sock = _s.socket()
+        sock.settimeout(0.5)
+        try:
+            sock.connect((host, port))
+            sock.close()
+            return True
+        except OSError:
+            time.sleep(0.5)
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+    return False
+
+
 def connect(conn_str, platform, timeout=90):
     from pymavlink import mavutil
+    if not wait_for_port(conn_str, timeout=min(timeout, 60.0)):
+        raise SystemExit(f"no TCP listener on {conn_str}")
     deadline = time.time() + timeout
     m = None
     while time.time() < deadline:
