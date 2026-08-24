@@ -10,6 +10,9 @@ to re-freeze the baseline explicitly and record the before/after in the
 verdict document.
 """
 
+import hashlib
+import json
+import os
 import subprocess
 
 import pytest
@@ -42,6 +45,9 @@ requires_tag = pytest.mark.skipif(
     not _tag_exists(),
     reason=f"{FROZEN_TAG} not present (shallow clone or fresh fork)")
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASELINE = os.path.join(ROOT, "docs", "v1", "FROZEN_BASELINE.json")
+
 
 @requires_tag
 def test_diagnostic_core_is_unchanged_since_the_freeze():
@@ -52,6 +58,51 @@ def test_diagnostic_core_is_unchanged_since_the_freeze():
         "\n\nThis is not a test to update. Either revert the change, or "
         "re-freeze the baseline explicitly and record the before/after in "
         "docs/v1/V1_FINAL_RESEARCH_VERDICT.md.")
+
+
+def test_diagnostic_core_matches_its_recorded_hashes():
+    """The freeze, checkable WITHOUT git history.
+
+    The tag-diff test above skips on a shallow clone or a fork without tags,
+    and a freeze test that silently skips is worse than no freeze test -- it
+    reads as green. This one needs only the working tree, so it runs
+    everywhere, including in CI checkouts that never fetched the tag.
+
+    We hit exactly this: pushing the tag to the remote failed with HTTP 403
+    while the commits went through, leaving the tag local-only.
+    """
+    with open(BASELINE, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    changed = []
+    for rel, expected in sorted(doc["files"].items()):
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            changed.append(f"{rel}: MISSING")
+            continue
+        with open(path, "rb") as fh:
+            got = hashlib.sha256(fh.read()).hexdigest()
+        if got != expected:
+            changed.append(f"{rel}: {expected[:12]} -> {got[:12]}")
+    assert not changed, (
+        "the FROZEN v1 diagnostic core has changed:\n  " +
+        "\n  ".join(changed) + "\n\n" + doc["on_mismatch"])
+
+
+def test_frozen_baseline_covers_every_frozen_path():
+    """A hash list that silently stopped covering a file would be useless."""
+    with open(BASELINE, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    covered = set(doc["files"])
+    for p in FROZEN_PATHS:
+        full = os.path.join(ROOT, p)
+        if os.path.isfile(full):
+            assert p in covered, f"{p} is not covered by FROZEN_BASELINE.json"
+        else:
+            found = {os.path.relpath(os.path.join(d, f), ROOT)
+                     for d, _s, fs in os.walk(full) for f in fs
+                     if f.endswith(".py")}
+            missing = found - covered
+            assert not missing, f"not covered by FROZEN_BASELINE.json: {missing}"
 
 
 def test_deployment_layers_exist():
