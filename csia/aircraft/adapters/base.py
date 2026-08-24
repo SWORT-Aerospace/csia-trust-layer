@@ -30,6 +30,15 @@ from ..sample import (AircraftSample, ChannelValue, MissingReason, Quality,
 # Per-channel maximum age before the value is STALE. Derived from the declared
 # producer rate in CHANNEL_SEMANTICS.yaml with a 5x margin: a channel that has
 # missed five consecutive publications is not "slightly old", it is gone.
+#
+# THIS TABLE IS NOW THE FALLBACK, NOT THE POLICY. It was hand-written from the
+# rule above and could not express a per-platform rate, so PX4 -- whose
+# ESC_STATUS publishes at ~1 Hz, not the 10 Hz the row claimed -- inherited a
+# 0.50 s limit and would have reported its ESC channels STALE for about half
+# of every publish period. The rule is now applied to the contract directly,
+# per platform, and this dict only covers channels with no declared rate.
+MAX_AGE_MARGIN = 5.0
+
 MaxAge = {
     "imu0.accel": 0.20, "imu0.gyro": 0.20,
     "imu1.accel": 0.20, "imu1.gyro": 0.20,
@@ -76,7 +85,7 @@ class PlatformAdapter:
         # channel the airframe does not physically have the same way
         # as one that should be present and is not.
         self.contract = contract or default_contract(self.platform)
-        self.max_age = dict(MaxAge)
+        self.max_age = self._derive_max_age()
         if max_age:
             self.max_age.update(max_age)
         self._clock = clock
@@ -101,6 +110,23 @@ class PlatformAdapter:
         # channel -> when its producer last arrived carrying the sentinel, so
         # the DELIVERED value can say SENTINEL rather than NOT_RECEIVED.
         self._sentinel_at: dict = {}
+
+    def _derive_max_age(self) -> dict:
+        """Apply the stated rule to the contract instead of restating it.
+
+        `5 / declared_rate_hz` for this platform, falling back to the hand
+        table and then to DEFAULT_MAX_AGE. A hand-written table cannot express
+        a per-platform rate, and the moment two platforms publish the same
+        channel at different rates one of them is wrong -- which is exactly
+        what happened to PX4's ESC channels.
+        """
+        derived = dict(MaxAge)
+        key = f"producer_{self.platform}"
+        for channel, row in self.contract.channels.items():
+            rate = (row.raw.get(key) or {}).get("rate_hz")
+            if rate:
+                derived[channel] = MAX_AGE_MARGIN / float(rate)
+        return derived
 
     # -- subclass interface ------------------------------------------------
 

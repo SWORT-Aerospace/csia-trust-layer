@@ -163,6 +163,55 @@ That last figure is why `esc.rpm` stays refused on a second, independent
 ground: 39 samples from one 2.7 m hop is a thin base for promoting a contract
 row, quite apart from the missing source read.
 
+### 2.4c Two declared publish rates were wrong, and freshness inherited it
+
+With honest sample counts, the probe could finally compare the contract's
+declared producer rate against the measured one. Two rows were wrong:
+
+| channel | declared | measured | why |
+|---|---|---|---|
+| `esc.current` / `esc.rpm` | 10 Hz | **0.97 Hz** | the 10 was carried over from the ArduPilot row; PX4 publishes `ESC_STATUS` at ~1 Hz |
+| `mag.field_ut` | 50 Hz | **13.9 Hz** | `HIGHRES_IMU` does arrive at ~49 Hz, but PX4's `fields_updated` bitmask marks the mag fields fresh only about every fourth message |
+
+The magnetometer one is not an adapter bug — honouring `fields_updated` is
+**correct**, because a field whose bit is clear is a repeat and not a
+measurement. The row simply has to state the effective channel rate rather
+than the message rate.
+
+**This decided staleness.** `MaxAge` is documented as "the declared producer
+rate with a 5x margin", but it was a hand-written table that could not express
+a per-platform rate, so PX4 inherited ArduPilot's 0.50 s limit for a 1.03 s
+publish period. Verified with a controlled clock: at age 0.60 s the PX4 ESC
+channel returns `STALE`. On a real PX4 deployment those channels would have
+read stale for about half of every publish period — invisible today only
+because they are blocked for other reasons, and waiting to bite whoever
+promotes the row.
+
+Fixed at the root: `MaxAge` is now **derived from the contract per platform**
+(`5 / declared_rate_hz`), so the rule is applied rather than restated. PX4 ESC
+gets 5.0 s, ArduPilot ESC keeps 0.50 s, PX4 mag gets 0.357 s. The hand table
+is only a fallback for channels with no declared rate.
+
+The probe now measures the rate on every run and reports any channel where
+declared and measured differ by more than 2x. It is gated on the **effective**
+speedup, not the requested one — see 2.4d.
+
+### 2.4d `--speedup` was accepted by the PX4 launcher and never used
+
+`launch_px4(workdir, speedup)` took the argument and ignored it. PX4 SIH runs
+lockstep at 1.0x whatever is asked; the console says so on every run invoked
+with `--speedup 10`.
+
+On its own that is a silently ignored flag. Downstream it was worse: the new
+rate-drift check gates on "is this run real time?", read that from the
+**requested** speedup, and therefore skipped itself on every default PX4 run —
+a guard that guarded nothing, and it printed `rate drift NOT assessed:
+speedup 10` on the very first run that used it.
+
+`HONOURS_SPEEDUP` and `effective_speedup()` now say what each platform
+actually does, the launcher prints a note when it cannot honour a request,
+and the result file records requested and effective side by side.
+
 ### 2.5 The five platform rows, and the rule that keeps them honest
 
 Qualification is per platform instance — `CHANNEL_SEMANTICS.yaml` has said so

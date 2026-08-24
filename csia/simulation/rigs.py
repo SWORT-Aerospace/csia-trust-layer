@@ -71,6 +71,23 @@ PASSIVE_LINKS = {
 }
 
 
+# Which platforms actually honour a speedup request.
+#
+# PX4 SIH does NOT. `launch_px4` accepted a `speedup` argument and never used
+# it -- the console says "Simulation with 1.0x speedup" on a run invoked with
+# --speedup 10 -- so an operator asking for an accelerated PX4 run silently
+# got a real-time one. That is a small defect on its own and a large one
+# downstream: the qualification probe gates its rate-drift check on "is this
+# run real time?", read it from the REQUESTED speedup, and would therefore
+# have skipped the check on every default PX4 run.
+HONOURS_SPEEDUP = {"ardupilot": True, "px4": False}
+
+
+def effective_speedup(platform: str, requested: int) -> int:
+    """What the simulator will ACTUALLY run at, not what was asked for."""
+    return int(requested) if HONOURS_SPEEDUP.get(platform, True) else 1
+
+
 def launch_px4(workdir, speedup=1):
     binary = os.path.join(PX4_ROOT, "build", "px4_sitl_default", "bin", "px4")
     if not os.path.exists(binary):
@@ -79,6 +96,11 @@ def launch_px4(workdir, speedup=1):
                          f"make px4_sitl_default")
     shutil.rmtree(workdir, ignore_errors=True)
     os.makedirs(workdir)
+    if int(speedup) != 1:
+        # Loud, because a silently ignored argument is how a rate check ends
+        # up gated on a number that was never true.
+        print(f"    NOTE: PX4 SIH runs in real time; the requested speedup "
+              f"{speedup} is ignored (lockstep at 1.0x)")
     etc = os.path.join(PX4_ROOT, "build", "px4_sitl_default", "etc")
     env = dict(os.environ)
     # SIH -- Simulation In Hardware. PX4's own rigid-body model, running

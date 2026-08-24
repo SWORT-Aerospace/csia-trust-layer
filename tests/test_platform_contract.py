@@ -174,3 +174,92 @@ def test_a_narrowed_channel_is_delivered_as_missing_not_as_a_value():
     cv = px4.qualify("battery.current", 12.5, unit="A")
     assert cv.value is None
     assert cv.missing is not None
+
+
+# --------------------------------------------------------------------------
+# Freshness derives from the contract, not from a hand-written restatement.
+
+def test_max_age_derives_from_the_declared_rate_per_platform():
+    """A hand table cannot express a per-platform rate.
+
+    PX4 publishes ESC_STATUS at ~1 Hz; the row claimed 10 and the table gave
+    every platform 0.50 s, so PX4's ESC channels would have read STALE for
+    about half of every publish period.
+    """
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.adapters.base import MAX_AGE_MARGIN
+    px4 = get_adapter("px4")
+    ap = get_adapter("ardupilot")
+    assert px4.max_age["esc.rpm"] == MAX_AGE_MARGIN / 1.0
+    assert ap.max_age["esc.rpm"] == MAX_AGE_MARGIN / 10.0
+    assert px4.max_age["esc.rpm"] > ap.max_age["esc.rpm"]
+
+
+def test_every_declared_rate_yields_a_max_age_of_five_periods():
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.adapters.base import MAX_AGE_MARGIN
+    for platform in ("ardupilot", "px4"):
+        ad = get_adapter(platform)
+        for channel, row in ad.contract.channels.items():
+            rate = (row.raw.get(f"producer_{platform}") or {}).get("rate_hz")
+            if rate:
+                assert ad.max_age[channel] == MAX_AGE_MARGIN / float(rate), \
+                    f"{platform}/{channel}"
+
+
+def test_an_explicit_max_age_still_overrides_the_derivation():
+    from csia.aircraft.adapters import get_adapter
+    ad = get_adapter("px4", max_age={"esc.rpm": 0.25})
+    assert ad.max_age["esc.rpm"] == 0.25
+
+
+def test_px4_esc_at_its_real_rate_is_not_stale_between_publications():
+    """The regression, with a controlled clock rather than an argument."""
+    from csia.aircraft.adapters import get_adapter
+    clock = {"t": 0.0}
+    ad = get_adapter("px4", clock=lambda: clock["t"])
+    ad.ingest({"mavpackettype": "ESC_STATUS", "index": 0,
+               "time_usec": 1_000_000,
+               "rpm": [5000] * 4 + [0] * 4,
+               "current": [1.0] * 4 + [0.0] * 4,
+               "voltage": [15.0] * 8})
+    # One full publish period at the MEASURED 0.97 Hz, plus margin.
+    for age in (0.6, 1.03, 2.0):
+        clock["t"] = age
+        cv = ad.sample(t_mono=age).esc["esc.rpm"]
+        assert cv.note != f"age {age:.2f}s exceeds 0.50s"
+        assert "exceeds" not in cv.note, f"stale at {age}s: {cv.note}"
+
+
+def test_the_declared_px4_rates_match_what_was_measured():
+    """Guard against the drift returning.
+
+    Rates are quoted from the committed PX4 qualification result, which runs
+    at speedup 1 so wall rates equal real rates. ArduPilot runs at speedup 10
+    and is deliberately NOT checked here: comparing an accelerated wall rate
+    against a real-time declaration is a category error.
+    """
+    import json
+    path = os.path.join(ROOT, "research", "v1_1", "results",
+                        "qualification_px4.json")
+    if not os.path.exists(path):
+        pytest.skip("no PX4 qualification result committed")
+    result = json.load(open(path, encoding="utf-8"))
+    contract = default_contract("px4")
+    seconds = result.get("seconds") or 0
+    checked = 0
+    for row in result.get("rows", []):
+        n = row.get("samples") or 0
+        if not n or not seconds:
+            continue
+        declared = (contract.channels[row["channel"]].raw
+                    .get("producer_px4") or {}).get("rate_hz")
+        if not declared:
+            continue
+        measured = n / seconds
+        checked += 1
+        assert 0.5 * declared <= measured <= 2.0 * declared, (
+            f"{row['channel']}: declared {declared} Hz, measured "
+            f"{measured:.2f} Hz -- MaxAge derives from the declaration, so "
+            f"this decides staleness")
+    assert checked >= 8, "too few channels checked; the guard would be vacuous"

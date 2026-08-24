@@ -192,7 +192,13 @@ channels:
   scale: "ArduPilot SCALED_IMU xmag is mgauss -> *0.1; PX4 HIGHRES_IMU is gauss -> *100"
   # compass.get_field(0) rides inside RAW_IMU on 4.8 (GCS_Common.cpp:2248).
   producer_ardupilot: {message: [RAW_IMU, SCALED_IMU], fields: [xmag, ymag, zmag], rate_hz: 25}
-  producer_px4: {message: HIGHRES_IMU, fields: [xmag, ymag, zmag], rate_hz: 50}
+  # rate_hz CORRECTED from 50 by measurement: 556 samples in 40 s = 13.9 Hz.
+  # HIGHRES_IMU itself arrives at ~49 Hz (imu0 measured 1947 samples in the
+  # same run), but PX4's fields_updated bitmask marks the mag fields fresh
+  # only about every fourth message. The adapter honouring that bitmask is
+  # CORRECT -- a field whose bit is clear is a repeat, not a measurement --
+  # so the effective channel rate is 14 Hz and the row must say so.
+  producer_px4: {message: HIGHRES_IMU, fields: [xmag, ymag, zmag], rate_hz: 14}
   missing_semantics: "all-zero triple is treated as ABSENT, not as a zero field"
   aggregation: instantaneous sample
   physical_interpretation: >-
@@ -364,7 +370,11 @@ channels:
   frame: n/a
   scale: "ESC_TELEMETRY_1_TO_4 current is cA -> /100; ESC_STATUS current is A"
   producer_ardupilot: {message: ESC_TELEMETRY_1_TO_4, fields: [current], rate_hz: 10}
-  producer_px4: {message: ESC_STATUS, fields: [current], rate_hz: 10}
+  # rate_hz CORRECTED from 10 by measurement: 39 samples in 40 s at
+  # speedup 1 = 0.97 Hz. The 10 was carried over from the ArduPilot row.
+  # MaxAge derives from this, so the error made every PX4 ESC sample STALE
+  # for about half of each publish period.
+  producer_px4: {message: ESC_STATUS, fields: [current], rate_hz: 1}
   missing_semantics: "message absent -> MISSING"
   aggregation: per-motor vector, length 4
   physical_interpretation: >-
@@ -403,7 +413,8 @@ channels:
   frame: n/a
   scale: direct
   producer_ardupilot: {message: ESC_TELEMETRY_1_TO_4, fields: [rpm], rate_hz: 10}
-  producer_px4: {message: ESC_STATUS, fields: [rpm], rate_hz: 10}
+  # rate_hz CORRECTED from 10 by measurement -- see esc.current.
+  producer_px4: {message: ESC_STATUS, fields: [rpm], rate_hz: 1}
   missing_semantics: "message absent -> MISSING"
   aggregation: per-motor vector, length 4
   physical_interpretation: motor speed; drives thrust and the vibration relation

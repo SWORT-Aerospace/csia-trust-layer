@@ -5,11 +5,11 @@
  "PROBE_VALID": true,
  "admissible_stubs": [],
  "counters": {
-  "mapped": 95023,
-  "messages": 116925,
+  "mapped": 95013,
+  "messages": 116929,
   "rejected_sentinel": 0,
   "time_reanchors": 0,
-  "unmapped": 72422
+  "unmapped": 72429
  },
  "decoder": {
   "blind_channels": {},
@@ -31,7 +31,7 @@
   "verdict": "NOT_APPLICABLE"
  },
  "heading_voided_channels": [],
- "messages": 116925,
+ "messages": 116929,
  "observed_stubs": [
   "esc.current",
   "esc.rpm"
@@ -39,9 +39,9 @@
  "platform": "ardupilot",
  "platform_contract_rows": {},
  "positive_control": {
-  "alt_samples": 907,
+  "alt_samples": 906,
   "armed": true,
-  "climbed_m": 13.49,
+  "climbed_m": 13.32,
   "fix_type": 6,
   "gates": "CONSTANCY claims only; PRESENCE claims are motion-independent and are always issued",
   "phase": "climb",
@@ -55,6 +55,8 @@
   "never_arrived_but_admissible": [],
   "sentinel_counts": {}
  },
+ "rate_drift": [],
+ "rate_drift_assessed": false,
  "rows": [
   {
    "admissible": true,
@@ -62,12 +64,14 @@
    "channel": "baro.altitude",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 11.5487, sd 0.728922, n=10024",
+   "declared_rate_hz": 10,
+   "detail": "range 11.5875, sd 0.73077, n=10022",
    "may_use": true,
+   "measured_rate_hz": 250.55,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10024,
-   "spread": 11.548706519017628
+   "samples": 10022,
+   "spread": 11.587462205682073
   },
   {
    "admissible": false,
@@ -75,11 +79,13 @@
    "channel": "baro.temp_c",
    "criterion": "VARIATION",
    "declared": "VALIDATED_SEMANTICS",
-   "detail": "range 0.23, sd 0.0474988, n=10024",
+   "declared_rate_hz": 10,
+   "detail": "range 0.23, sd 0.047492, n=10022",
    "may_use": false,
+   "measured_rate_hz": 250.55,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10024,
+   "samples": 10022,
    "spread": 0.23000000000000043
   },
   {
@@ -88,12 +94,14 @@
    "channel": "battery.current",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 5.22, sd 0.279532, n=2004",
+   "declared_rate_hz": 10,
+   "detail": "range 5.32, sd 0.283458, n=2005",
    "may_use": true,
+   "measured_rate_hz": 50.12,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 2004,
-   "spread": 5.219999999999999
+   "samples": 2005,
+   "spread": 5.32
   },
   {
    "admissible": true,
@@ -101,12 +109,14 @@
    "channel": "battery.voltage",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.052, sd 0.00278766, n=2004",
+   "declared_rate_hz": 10,
+   "detail": "range 0.053, sd 0.00284716, n=2005",
    "may_use": true,
+   "measured_rate_hz": 50.12,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 2004,
-   "spread": 0.0519999999999996
+   "samples": 2005,
+   "spread": 0.053000000000000824
   },
   {
    "admissible": false,
@@ -114,8 +124,10 @@
    "channel": "esc.current",
    "criterion": "VARIATION",
    "declared": "STUB_OR_NONINFORMATIVE",
+   "declared_rate_hz": 10,
    "detail": "constant at 3.2 over 4009 samples",
    "may_use": false,
+   "measured_rate_hz": 100.22,
    "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
    "samples": 4009,
@@ -127,8 +139,10 @@
    "channel": "esc.rpm",
    "criterion": "VARIATION",
    "declared": "STUB_OR_NONINFORMATIVE",
+   "declared_rate_hz": 10,
    "detail": "constant at 0 over 4009 samples",
    "may_use": false,
+   "measured_rate_hz": 100.22,
    "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
    "samples": 4009,
@@ -140,8 +154,10 @@
    "channel": "estimator.flight_mode",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 599, decoded over 400 samples (criterion DECODE, not variation)",
+   "declared_rate_hz": 1,
+   "detail": "latched value 530, decoded over 400 samples (criterion DECODE, not variation)",
    "may_use": false,
+   "measured_rate_hz": 10.0,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
    "samples": 400,
@@ -153,12 +169,14 @@
    "channel": "estimator.variances",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0397017, sd 0.00548553, n=2004",
+   "declared_rate_hz": 5,
+   "detail": "range 0.0341884, sd 0.0053548, n=2005",
    "may_use": false,
+   "measured_rate_hz": 50.12,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 2004,
-   "spread": 0.039701726971543394
+   "samples": 2005,
+   "spread": 0.03418843634426594
   },
   {
    "admissible": true,
@@ -166,12 +184,14 @@
    "channel": "gnss.position",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 11.9811, sd 0.752483, n=4009",
+   "declared_rate_hz": 5,
+   "detail": "range 12.0616, sd 0.779639, n=4009",
    "may_use": true,
+   "measured_rate_hz": 100.22,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
    "samples": 4009,
-   "spread": 11.981132000000027
+   "spread": 12.061552271401423
   },
   {
    "admissible": true,
@@ -179,12 +199,14 @@
    "channel": "gnss.velocity",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0234619, sd 0.00101484, n=4009",
+   "declared_rate_hz": 5,
+   "detail": "range 0.026694, sd 0.00104965, n=4009",
    "may_use": true,
+   "measured_rate_hz": 100.22,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
    "samples": 4009,
-   "spread": 0.023461915970389893
+   "spread": 0.02669403118441842
   },
   {
    "admissible": false,
@@ -192,8 +214,10 @@
    "channel": "gnss.velocity_z",
    "criterion": "VARIATION",
    "declared": "UNAVAILABLE",
+   "declared_rate_hz": 5,
    "detail": "never arrived",
    "may_use": false,
+   "measured_rate_hz": null,
    "nonfinite_samples": 0,
    "observed": "UNAVAILABLE",
    "samples": 0,
@@ -205,12 +229,14 @@
    "channel": "imu0.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1.27486, sd 0.078633, n=10025",
+   "declared_rate_hz": 25,
+   "detail": "range 1.25525, sd 0.0786528, n=10023",
    "may_use": true,
+   "measured_rate_hz": 250.57,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10025,
-   "spread": 1.2748644999999996
+   "samples": 10023,
+   "spread": 1.2552512
   },
   {
    "admissible": true,
@@ -218,12 +244,14 @@
    "channel": "imu0.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.017, sd 0.00214601, n=10025",
+   "declared_rate_hz": 25,
+   "detail": "range 0.014, sd 0.00216876, n=10023",
    "may_use": true,
+   "measured_rate_hz": 250.57,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10025,
-   "spread": 0.017
+   "samples": 10023,
+   "spread": 0.014
   },
   {
    "admissible": true,
@@ -231,12 +259,14 @@
    "channel": "imu1.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1.27486, sd 0.0785837, n=10024",
+   "declared_rate_hz": 25,
+   "detail": "range 1.25525, sd 0.0785861, n=10022",
    "may_use": true,
+   "measured_rate_hz": 250.55,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10024,
-   "spread": 1.2748644999999996
+   "samples": 10022,
+   "spread": 1.2552512
   },
   {
    "admissible": true,
@@ -244,12 +274,14 @@
    "channel": "imu1.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.017, sd 0.00215809, n=10024",
+   "declared_rate_hz": 25,
+   "detail": "range 0.014, sd 0.00218155, n=10022",
    "may_use": true,
+   "measured_rate_hz": 250.55,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10024,
-   "spread": 0.017
+   "samples": 10022,
+   "spread": 0.014
   },
   {
    "admissible": true,
@@ -257,11 +289,13 @@
    "channel": "mag.field_ut",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1, sd 0.279897, n=10025",
+   "declared_rate_hz": 25,
+   "detail": "range 1, sd 0.279675, n=10023",
    "may_use": true,
+   "measured_rate_hz": 250.57,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 10025,
+   "samples": 10023,
    "spread": 1.0
   },
   {
@@ -270,8 +304,10 @@
    "channel": "vehicle_status.armed",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
+   "declared_rate_hz": 1,
    "detail": "latched value 1, decoded over 400 samples (criterion DECODE, not variation)",
    "may_use": true,
+   "measured_rate_hz": 10.0,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
    "samples": 400,
@@ -283,19 +319,23 @@
    "channel": "vibration.rms",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0372932, sd 0.00160382, n=2004",
+   "declared_rate_hz": 10,
+   "detail": "range 0.036183, sd 0.00158009, n=2005",
    "may_use": true,
+   "measured_rate_hz": 50.12,
    "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 2004,
-   "spread": 0.037293215943934956
+   "samples": 2005,
+   "spread": 0.0361830088515083
   }
  ],
  "rows_unscored": [],
  "seconds": 40.0,
+ "speedup_effective": 10,
+ "speedup_requested": 10,
  "undecodable_channels": [],
  "unmapped_types": {
-  "AHRS": 2004,
+  "AHRS": 2005,
   "AHRS2": 4009,
   "ATTITUDE": 4009,
   "GLOBAL_POSITION_INT": 4009,
@@ -303,18 +343,18 @@
   "MEMINFO": 4009,
   "MISSION_CURRENT": 4009,
   "NAV_CONTROLLER_OUTPUT": 4009,
-  "PARAM_VALUE": 27,
+  "PARAM_VALUE": 25,
   "POWER_STATUS": 4009,
-  "SCALED_IMU3": 10024,
-  "SCALED_PRESSURE2": 10024,
+  "SCALED_IMU3": 10022,
+  "SCALED_PRESSURE2": 10022,
   "SIMSTATE": 4009,
-  "SYSTEM_TIME": 2004,
+  "SYSTEM_TIME": 2005,
   "SYS_STATUS": 4009,
-  "TERRAIN_REPORT": 2004,
-  "TERRAIN_REQUEST": 192,
+  "TERRAIN_REPORT": 2005,
+  "TERRAIN_REQUEST": 201,
   "TIMESYNC": 40,
   "VFR_HUD": 4009,
-  "WIND": 2004
+  "WIND": 2005
  },
  "verdict": "PASS"
 }

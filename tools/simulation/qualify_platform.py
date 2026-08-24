@@ -44,7 +44,7 @@ from csia.aircraft.sample import Quality                  # noqa: E402
 from csia.simulation.dialect import (                     # noqa: E402
     blind_channels, message_names, undecodable_frames)
 from csia.simulation.rigs import (                        # noqa: E402
-    LAUNCHERS, ROOTS, connect, dialect_report, fly)
+    LAUNCHERS, ROOTS, connect, dialect_report, effective_speedup, fly)
 from csia.simulation.ulog_check import (                  # noqa: E402
     HEADING_DEPENDENT_CHANNELS, heading_provenance, newest_ulog)
 
@@ -172,7 +172,7 @@ def observe(platform, duration_s, conn, adapter):
 
 
 def analyse(obs, raw_present, contract, nonfinite=None, blind=None,
-            sentinels=None):
+            sentinels=None, duration_s=None, platform=""):
     nonfinite = nonfinite or {}
     blind = blind or {}
     sentinels = sentinels or {}
@@ -243,7 +243,15 @@ def analyse(obs, raw_present, contract, nonfinite=None, blind=None,
                 declared in (Quality.VALIDATED_SEMANTICS,
                              Quality.AVAILABLE_UNVALIDATED)
                 and observed is Quality.INFORMATIVE)
+        # Measured publish rate. The probe has always had the data and never
+        # made the comparison: PX4's ESC_STATUS row claimed 10 Hz and the
+        # platform delivers 0.97, which MaxAge inherited as a 0.50 s limit and
+        # would have marked half of every publish period STALE.
+        rate_hz = (n / duration_s) if (duration_s and n) else None
+        declared_hz = (row.raw.get(f"producer_{platform}") or {}).get("rate_hz")
         rows.append({
+            "measured_rate_hz": round(rate_hz, 2) if rate_hz else None,
+            "declared_rate_hz": declared_hz,
             "channel": ch,
             "declared": declared.value,
             "observed": (observed if isinstance(observed, str)
@@ -301,7 +309,8 @@ def main() -> int:
         blind = blind_channels(adapter.contract, args.platform,
                                undecodable, names)
         rows = analyse(obs, {}, adapter.contract, nonfinite, blind,
-                       adapter.sentinel_counts())
+                       adapter.sentinel_counts(), duration_s=args.seconds,
+                       platform=args.platform)
     finally:
         proc.send_signal(signal.SIGINT)
         try:
@@ -388,6 +397,35 @@ def main() -> int:
         # finding out of a blind spot.
         if r["agrees"] is False:
             disagreements.append(r)
+
+    # RATE DRIFT. Only meaningful at speedup 1: with SITL accelerated, wall
+    # rates are inflated by the speedup factor and comparing them against a
+    # real-time declaration is a category error. ArduPilot runs at speedup 10
+    # by default, so its rates are reported and NOT judged.
+    # The EFFECTIVE speedup, not the requested one. PX4 SIH ignores the flag
+    # and always runs real time, so keying this off args.speedup skipped the
+    # check on every default PX4 run -- the guard silently guarding nothing.
+    eff_speedup = effective_speedup(args.platform, args.speedup)
+    rate_comparable = eff_speedup == 1
+    rate_drift = []
+    if rate_comparable:
+        for r in rows:
+            dec, meas = r["declared_rate_hz"], r["measured_rate_hz"]
+            if dec and meas and not (0.5 * dec <= meas <= 2.0 * dec):
+                rate_drift.append({"channel": r["channel"], "declared_hz": dec,
+                                   "measured_hz": meas,
+                                   "factor": round(meas / dec, 3)})
+    if rate_drift:
+        print(f"\n=== declared rate disagrees with measurement "
+              f"({len(rate_drift)} channel(s)); MaxAge derives from the "
+              f"declared rate, so this decides staleness")
+        for d in rate_drift:
+            print(f"    {d['channel']:22s} declared {d['declared_hz']:>5} Hz  "
+                  f"measured {d['measured_hz']:>7} Hz  ({d['factor']}x)")
+    elif not rate_comparable:
+        print(f"\n=== rate drift NOT assessed: effective speedup "
+              f"{eff_speedup} inflates wall-clock rates; re-run with "
+              f"--speedup 1 to judge them")
 
     stub_rows = [r for r in rows
                  if r["observed"] == Quality.STUB_OR_NONINFORMATIVE.value
@@ -489,6 +527,10 @@ def main() -> int:
         # their evidence. A PASS reached by narrowing must show what it
         # narrowed, in the same file as the PASS.
         "platform_contract_rows": narrowed,
+        "rate_drift": rate_drift,
+        "rate_drift_assessed": rate_comparable,
+        "speedup_requested": args.speedup,
+        "speedup_effective": eff_speedup,
         # What actually did the decoding, and what it could not read. A reader
         # asking "is this row a fact about PX4 or a fact about pymavlink?"
         # must be able to answer it from the result file without rerunning
