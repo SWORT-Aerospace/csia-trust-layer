@@ -86,6 +86,14 @@ class PlatformAdapter:
         self.counters = {"messages": 0, "mapped": 0, "unmapped": 0,
                          "rejected_sentinel": 0, "time_reanchors": 0}
         self._unmapped_types = {}
+        # channel -> how many times its producer arrived carrying the
+        # documented "not measured" sentinel. The global counter above says
+        # 375 rejections happened somewhere; it cannot say WHICH channel, and
+        # the qualification report consequently printed "never arrived" for a
+        # field whose message was arriving at 9 Hz with -1 in it. Those are
+        # different facts about the platform: one is an unimplemented stream,
+        # the other is an implemented stream declaring it has no sensor.
+        self._sentinels: dict = {}
 
     # -- subclass interface ------------------------------------------------
 
@@ -103,6 +111,20 @@ class PlatformAdapter:
         self.counters["mapped"] += 1
         if t_source is not None:
             self._t_source_last = t_source
+
+    def _reject_sentinel(self, *channels: str):
+        """Record that a channel's producer arrived and declared no value.
+
+        Named channels, not just a tally. `MissingReason.SENTINEL` already
+        distinguishes this from FIELD_ABSENT everywhere downstream; the
+        adapter was the one layer that threw the distinction away.
+        """
+        self.counters["rejected_sentinel"] += 1
+        for channel in channels:
+            self._sentinels[channel] = self._sentinels.get(channel, 0) + 1
+
+    def sentinel_counts(self) -> dict:
+        return dict(self._sentinels)
 
     def _note_unmapped(self, type_name: str):
         self.counters["unmapped"] += 1

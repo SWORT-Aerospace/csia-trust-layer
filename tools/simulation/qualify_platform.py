@@ -40,12 +40,42 @@ sys.path.insert(0, ROOT)
 from csia.aircraft.adapters import get_adapter            # noqa: E402
 from csia.aircraft.qualification import default_contract  # noqa: E402
 from csia.aircraft.sample import Quality                  # noqa: E402
-from csia.simulation.rigs import LAUNCHERS, connect, fly  # noqa: E402
+from csia.simulation.dialect import (                     # noqa: E402
+    blind_channels, message_names, undecodable_frames)
+from csia.simulation.rigs import (                        # noqa: E402
+    LAUNCHERS, ROOTS, connect, dialect_report, fly)
+
+# Not a Quality: it is a statement about the INSTRUMENT, not the channel.
+# A channel whose producer arrived as a frame the decoder could not parse is
+# unread, and "unread" must never be recorded as "absent" -- that is how the
+# PX4 ESC_STATUS finding was published backwards.
+UNDECODABLE = "UNDECODABLE"
 
 
 # A channel is INFORMATIVE only if it varies. The floor is deliberately tiny:
 # we are separating "constant" from "not constant", not judging magnitude.
 CONSTANT_EPS = 1e-9
+
+# The process exit code IS the gate: `make sim-px4` and CI read nothing else.
+EXIT_CODES = {"PASS": 0, "FAIL": 1, "PARTIAL": 2,
+              "INVALID_PROBE": 2, "INSTRUMENT_DEAD": 3}
+
+
+def verdict_exit_code(verdict: str):
+    """Derive the exit code FROM the verdict, so the two cannot diverge.
+
+    They did diverge. The exit code was computed from its own conditions
+    (`return 1 if admitted_stub else 0`), and a run whose verdict read
+    "FAIL: a channel the contract admits as evidence never arrived" matched
+    none of them and exited 0. The gate reported success on a failing
+    qualification -- the exact thing a gate exists to prevent.
+
+    Returns None for a token nobody mapped; the caller must treat that as a
+    failure, never as a pass. A verdict string that reaches here unrecognised
+    means someone added a verdict and forgot the gate, and defaulting to 0
+    would hide precisely that.
+    """
+    return EXIT_CODES.get(verdict.split(":", 1)[0].strip())
 
 
 def _scalarize(v):
@@ -116,8 +146,11 @@ def observe(platform, duration_s, conn, adapter):
     return obs, msgs, nonfinite
 
 
-def analyse(obs, raw_present, contract, nonfinite=None):
+def analyse(obs, raw_present, contract, nonfinite=None, blind=None,
+            sentinels=None):
     nonfinite = nonfinite or {}
+    blind = blind or {}
+    sentinels = sentinels or {}
     rows = []
     for ch, row in sorted(contract.channels.items()):
         vals = obs.get(ch, [])
@@ -127,7 +160,17 @@ def analyse(obs, raw_present, contract, nonfinite=None):
         # without this a latched row reported whatever spread the PREVIOUS
         # channel happened to leave behind.
         spread = None
-        if n == 0:
+        if n == 0 and ch in blind:
+            # The producer message DID arrive -- the decoder could not read
+            # it. Reporting UNAVAILABLE here would be a claim about PX4 made
+            # from a fact about pymavlink's bundled common.xml, which is
+            # precisely the error this branch exists to prevent.
+            observed = UNDECODABLE
+            b = blind[ch]
+            detail = (f"{b['message']} (id {b['id']}) arrived {b['frames']} "
+                      f"times and the decoder could not parse it: NO claim "
+                      f"about this channel can be made from this run")
+        elif n == 0:
             if bad:
                 # It DID arrive. It was unusable. Those are different facts and
                 # collapsing them to "never arrived" would misreport PX4's
@@ -137,7 +180,17 @@ def analyse(obs, raw_present, contract, nonfinite=None):
                           f"(NaN/inf) -- present but not measurable")
             else:
                 observed = Quality.UNAVAILABLE
-                detail = "never arrived"
+                sent = sentinels.get(ch, 0)
+                # "Never arrived" and "arrived declaring it has no sensor" are
+                # different facts about a platform, and the report gave both
+                # the same words. PX4's BATTERY_STATUS reaches us at ~9 Hz
+                # with current_battery = -1: the stream is implemented, the
+                # measurement is not. That distinction decides whether the fix
+                # is wiring a message or fitting a sensor.
+                detail = ("never arrived" if not sent else
+                          f"producer arrived {sent} times carrying the "
+                          f"documented not-measured sentinel: the stream is "
+                          f"implemented, the measurement is absent")
         elif row.criterion == "DECODE":
             # A latched enum or boolean. Constancy is its normal state -- a
             # vehicle that stays armed reports the same value all flight --
@@ -155,14 +208,21 @@ def analyse(obs, raw_present, contract, nonfinite=None):
                 sd = statistics.pstdev(vals) if n > 2 else spread
                 detail = f"range {spread:.6g}, sd {sd:.6g}, n={n}"
         declared = row.quality
-        agrees = (observed == declared) or (
-            declared in (Quality.VALIDATED_SEMANTICS,
-                         Quality.AVAILABLE_UNVALIDATED)
-            and observed is Quality.INFORMATIVE)
+        if observed is UNDECODABLE:
+            # NOT False. "Disagrees with the contract" is a finding, and a
+            # run that could not read the message is entitled to neither
+            # agreement nor disagreement. None says so.
+            agrees = None
+        else:
+            agrees = (observed == declared) or (
+                declared in (Quality.VALIDATED_SEMANTICS,
+                             Quality.AVAILABLE_UNVALIDATED)
+                and observed is Quality.INFORMATIVE)
         rows.append({
             "channel": ch,
             "declared": declared.value,
-            "observed": observed.value,
+            "observed": (observed if isinstance(observed, str)
+                         else observed.value),
             "agrees": agrees,
             "may_use": row.may_use,
             "admissible": row.admissible,
@@ -204,7 +264,19 @@ def main() -> int:
                   f"climbed={motion['climbed_m']:.1f} m")
         print(f"=== observing {args.seconds:.0f}s")
         obs, msgs, nonfinite = observe(args.platform, args.seconds, conn, adapter)
-        rows = analyse(obs, {}, adapter.contract, nonfinite)
+        # BEFORE analysis: which channels is this decoder blind to?
+        #
+        # An `UNKNOWN_<id>` in the unmapped counter is not traffic we chose to
+        # ignore. It is a well-framed message the parser could not read, and
+        # if the contract names it as a producer then every claim about that
+        # channel from this run is a claim about the parser.
+        unmapped = adapter.unmapped_types()
+        undecodable = undecodable_frames(unmapped)
+        names = message_names(args.platform, ROOTS[args.platform])
+        blind = blind_channels(adapter.contract, args.platform,
+                               undecodable, names)
+        rows = analyse(obs, {}, adapter.contract, nonfinite, blind,
+                       adapter.sentinel_counts())
     finally:
         proc.send_signal(signal.SIGINT)
         try:
@@ -214,20 +286,37 @@ def main() -> int:
 
     print(f"\n=== {msgs} messages, {adapter.counters['mapped']} mapped, "
           f"{adapter.counters['unmapped']} unmapped")
-    unmapped = adapter.unmapped_types()
     if unmapped:
         top = sorted(unmapped.items(), key=lambda kv: -kv[1])[:8]
         print("    unmapped types: " +
               ", ".join(f"{k}x{v}" for k, v in top))
 
+    dialect = dialect_report(args.platform)
+    print(f"=== decoder: {dialect.name if dialect else 'library default'} "
+          f"({dialect.message_count if dialect else '?'} message types), "
+          f"vehicle definitions "
+          f"{'IN USE' if dialect and dialect.active else 'NOT IN USE'}")
+    if undecodable:
+        print("    UNDECODABLE frames "
+              "(arrived, could not be parsed, NOT absent):")
+        for mid, count in sorted(undecodable.items()):
+            name = names.get(mid, "<not in the vehicle's XML either>")
+            print(f"      id {mid:<5} {name:34s} x{count}")
+    for ch, b in sorted(blind.items()):
+        print(f"    *** {ch} depends on {b['message']}, which this decoder "
+              f"could not read")
+
     print(f"\n{'channel':26s} {'declared':24s} {'observed':24s} agree")
     disagreements = []
     for r in rows:
-        mark = "yes" if r["agrees"] else "NO"
+        mark = {True: "yes", False: "NO", None: "n/a"}[r["agrees"]]
         print(f"{r['channel']:26s} {r['declared']:24s} "
               f"{r['observed']:24s} {mark}")
         print(f"{'':26s}   {r['detail']}")
-        if not r["agrees"]:
+        # `agrees is False`, not `not agrees`: None means the run made no
+        # claim, and folding that into "disagrees" would manufacture a
+        # finding out of a blind spot.
+        if r["agrees"] is False:
             disagreements.append(r)
 
     stub_rows = [r for r in rows
@@ -261,7 +350,19 @@ def main() -> int:
     absent_rows = [r for r in rows if r["observed"] == "UNAVAILABLE"]
     absent_but_expected = [r for r in absent_rows if r["admissible"]]
 
-    if probe_valid:
+    # RULE A applied to the DECODER, and it dominates every other verdict.
+    #
+    # A blind spot is not a result. If the contract depends on a message this
+    # parser could not read, the run cannot say whether the platform provides
+    # that channel, and a PASS or a FAIL would both be assertions the evidence
+    # does not support. INSTRUMENT_DEAD is the existing name for this in
+    # csia/simulation/contract.py and it means the same thing here.
+    if blind:
+        verdict = ("INSTRUMENT_DEAD: the decoder could not read "
+                   + ", ".join(sorted({b["message"] for b in blind.values()}))
+                   + f", which {len(blind)} contract channel(s) depend on; "
+                     "no presence or constancy claim is issued for them")
+    elif probe_valid:
         if admitted_stub:
             verdict = "FAIL: a stub channel is admissible as evidence"
         elif absent_but_expected:
@@ -281,12 +382,32 @@ def main() -> int:
                    "is uninformative; presence findings stand and show no "
                    "missing admissible channel")
 
+    token = verdict.split(":", 1)[0].strip()
+    exit_code = verdict_exit_code(verdict)
+
     result = {
         "platform": args.platform,
         "seconds": args.seconds,
         "messages": msgs,
         "counters": adapter.counters,
         "unmapped_types": unmapped,
+        # What actually did the decoding, and what it could not read. A reader
+        # asking "is this row a fact about PX4 or a fact about pymavlink?"
+        # must be able to answer it from the result file without rerunning
+        # anything -- that question had no answer in the previous format, and
+        # a decoder limitation was published as a platform property because of
+        # it.
+        "decoder": {
+            **(dialect.to_dict() if dialect else
+               {"vehicle_dialect_active": False,
+                "reason": "no dialect report; library default in use"}),
+            "undecodable_frames": {
+                str(mid): {"name": names.get(mid), "frames": count}
+                for mid, count in sorted(undecodable.items())},
+            "blind_channels": blind,
+            "rule": "an undecodable producer makes the channel UNDECODABLE, "
+                    "never UNAVAILABLE",
+        },
         "positive_control": {
             # Everything the rig recorded, not a hand-picked subset.
             #
@@ -311,8 +432,22 @@ def main() -> int:
             "never_arrived": [r["channel"] for r in absent_rows],
             "never_arrived_but_admissible": [r["channel"]
                                              for r in absent_but_expected],
+            # Absent for a DIFFERENT reason: the producer arrived and said it
+            # has nothing. Split out so "PX4 does not publish battery current"
+            # cannot be written from a row that means "PX4 has no current
+            # sensor fitted".
+            "sentinel_counts": adapter.sentinel_counts(),
         },
-        "PROBE_VALID": probe_valid,
+        # THREE flags, because there are three ways a run can be invalid and
+        # collapsing them loses which one happened. PROBE_VALID is the
+        # conjunction and is what a caller should read; the other two say why
+        # it is false. Row-level gating still keys off the motion control
+        # alone -- a blind channel is marked UNDECODABLE in its own row, so
+        # the remaining rows stay readable instead of being voided wholesale.
+        "PROBE_VALID": probe_valid and not blind,
+        "MOTION_CONTROL_SATISFIED": probe_valid,
+        "DECODER_COMPLETE": not blind,
+        "undecodable_channels": sorted(blind),
         "rows": rows if probe_valid else [],
         "rows_unscored": [] if probe_valid else rows,
         "disagreements": disagreements if probe_valid else [],
@@ -328,9 +463,11 @@ def main() -> int:
         json.dump(result, fh, indent=1, sort_keys=True, default=str)
     print(f"\n{result['verdict']}")
     print(f"-> {os.path.relpath(out, ROOT)}")
-    if not probe_valid:
-        return 2
-    return 1 if admitted_stub else 0
+    if exit_code is None:
+        print(f"!!! no exit code mapped for verdict token {token!r} -- "
+              f"treating as failure rather than reporting success")
+        return 1
+    return exit_code
 
 
 if __name__ == "__main__":

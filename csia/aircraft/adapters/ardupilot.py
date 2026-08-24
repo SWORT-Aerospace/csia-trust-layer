@@ -178,7 +178,7 @@ class ArduPilotAdapter(PlatformAdapter):
                 self._put("battery.current", float(cur) / 100.0,
                           t_source=t_src, unit="A")
             else:
-                self.counters["rejected_sentinel"] += 1
+                self._reject_sentinel("battery.current")
             return
 
         if k == "VIBRATION":
@@ -231,7 +231,7 @@ class ArduPilotAdapter(PlatformAdapter):
             # keeps looking fresh for a second is a lie about the present.
             self._latest.pop("gnss.position", None)
             self._latest.pop("gnss.velocity", None)
-            self.counters["rejected_sentinel"] += 1
+            self._reject_sentinel("gnss.position", "gnss.velocity")
             return
         lat, lon, alt = g("lat", None), g("lon", None), g("alt", None)
         if lat is None or lon is None or alt is None:

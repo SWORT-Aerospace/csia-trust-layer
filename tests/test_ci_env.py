@@ -95,12 +95,16 @@ def _local_module_names() -> set:
     for d in SCANNED_DIRS:
         local.add(d)
         base = os.path.join(ROOT, d)
-        for name in os.listdir(base):
-            path = os.path.join(base, name)
-            if name.endswith(".py"):
-                local.add(name[:-3])
-            elif os.path.isdir(path) and name != "__pycache__":
-                local.add(name)
+        # WALK, do not listdir. The first version looked only at the top
+        # level, so `tools/simulation/qualify_platform.py` was invisible to it
+        # and a test importing that module after a sys.path insert -- the
+        # pattern this function's docstring exists to permit -- was reported
+        # as an undeclared PyPI dependency. The rule is "a name importable
+        # from this repository", and depth has nothing to do with it.
+        for dirpath, dirnames, filenames in os.walk(base):
+            dirnames[:] = [n for n in dirnames if n != "__pycache__"]
+            local.update(dirnames)
+            local.update(fn[:-3] for fn in filenames if fn.endswith(".py"))
     return local
 
 

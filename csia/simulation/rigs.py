@@ -21,6 +21,8 @@ import shutil
 import subprocess
 import time
 
+from .dialect import use_vehicle_dialect
+
 AP_ROOT = os.environ.get("CSIA_AP_ROOT", "/home/user/ardupilot/ardupilot")
 PX4_ROOT = os.environ.get("CSIA_PX4_ROOT", "/home/user/px4")
 HOME = "-35.363261,149.165230,584,353"
@@ -143,8 +145,24 @@ def wait_for_port(conn_str, timeout=60.0) -> bool:
     return False
 
 
+ROOTS = {"ardupilot": AP_ROOT, "px4": PX4_ROOT}
+
+# platform -> DialectReport for the decoder actually in use. Read by
+# qualify_platform.py so the result file records whether an "observed
+# UNAVAILABLE" row is a platform fact or a decoder limitation.
+DIALECTS: dict = {}
+
+
+def dialect_report(platform):
+    return DIALECTS.get(platform)
+
+
 def connect(conn_str, platform, timeout=90):
     from pymavlink import mavutil
+    # BEFORE the connection is built: mavfile binds its MAVLink parser at
+    # construction, so a dialect switched afterwards decodes nothing.
+    if platform in ROOTS:
+        DIALECTS[platform] = use_vehicle_dialect(platform, ROOTS[platform])
     if not wait_for_port(conn_str, timeout=min(timeout, 60.0)):
         raise SystemExit(f"no TCP listener on {conn_str}")
     deadline = time.time() + timeout
@@ -283,6 +301,27 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 seen = evidence.setdefault("statustext", [])
                 if txt not in seen:
                     seen.append(txt)
+        elif k in ("EVENT", "CURRENT_EVENT_SEQUENCE"):
+            # PX4 has MOVED ITS DIAGNOSTICS OFF STATUSTEXT.
+            #
+            # "Preflight Fail: no heading reference" appears in the console
+            # log and never on STATUSTEXT, and the reason is visible in the
+            # stream: PX4 publishes CURRENT_EVENT_SEQUENCE (id 411) and the
+            # EVENT protocol (id 410) instead. Both were arriving all along
+            # as UNKNOWN_411/UNKNOWN_410, because the bundled dialect could
+            # not decode them.
+            #
+            # This matters for the null control, not for the messages. An
+            # empty STATUSTEXT list means "PX4 does not use this channel", and
+            # that is a completely different statement from "PX4 had nothing
+            # to say" -- which is what an unqualified silence would imply.
+            evidence["events_seq"] = getattr(m, "sequence", None)
+            evidence["events_frames"] = evidence.get("events_frames", 0) + 1
+            if k == "EVENT":
+                ids = evidence.setdefault("event_ids", [])
+                eid = getattr(m, "id", None)
+                if eid is not None and eid not in ids:
+                    ids.append(eid)
         elif k == "COMMAND_ACK":
             # Evidence, not assumption. A takeoff can be TEMPORARILY_REJECTED
             # (Commander.cpp:1211) and the old code could not tell that apart
@@ -353,14 +392,32 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 phase = "flying"
                 break
         evidence["phase"] = phase
-    # NULL CONTROL on the diagnostic channel. PX4 emits boot and mode banners
-    # constantly, so zero STATUSTEXT over a whole flight means the stream was
-    # never delivered -- not that the vehicle had nothing to say. Recorded so
-    # a future reader cannot mistake a deaf instrument for a quiet vehicle.
+    # NULL CONTROL on the diagnostic channel, and it needs THREE outcomes
+    # rather than two.
+    #
+    # The two-outcome version said "the diagnostic channel is dead" whenever
+    # STATUSTEXT was empty. That was the right instinct and the wrong
+    # conclusion: PX4's diagnostics were arriving the whole time over the
+    # events interface, which the decoder could not read. Silence on one
+    # protocol is not silence from the vehicle.
+    #
+    #   text seen                  -> the channel works, use what it said
+    #   no text, events flowing    -> PX4 uses the events protocol; STATUSTEXT
+    #                                 silence carries NO information, and the
+    #                                 console log is the channel to read
+    #   nothing at all             -> genuinely deaf, and no absence of a
+    #                                 diagnostic may be treated as a finding
     if not evidence.get("statustext"):
-        evidence.setdefault("warnings", []).append(
-            "no STATUSTEXT received: the diagnostic channel is dead, so its "
-            "silence carries no information")
+        if evidence.get("events_frames"):
+            evidence.setdefault("warnings", []).append(
+                f"no STATUSTEXT, but {evidence['events_frames']} EVENT/"
+                f"CURRENT_EVENT_SEQUENCE frames arrived: PX4 publishes "
+                f"diagnostics over the events interface, so STATUSTEXT "
+                f"silence carries no information. Read px4_console.log.")
+        else:
+            evidence.setdefault("warnings", []).append(
+                "no STATUSTEXT and no EVENT frames: the diagnostic channel is "
+                "dead, so its silence carries no information")
     return evidence
 
 

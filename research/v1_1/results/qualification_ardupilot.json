@@ -1,25 +1,41 @@
 {
+ "DECODER_COMPLETE": true,
+ "MOTION_CONTROL_SATISFIED": true,
  "PROBE_VALID": true,
  "admissible_stubs": [],
  "counters": {
-  "mapped": 95027,
-  "messages": 116935,
+  "mapped": 95017,
+  "messages": 116928,
   "rejected_sentinel": 0,
   "time_reanchors": 0,
-  "unmapped": 72430
+  "unmapped": 72426
+ },
+ "decoder": {
+  "blind_channels": {},
+  "dialect": "csia_ardupilot",
+  "message_count": 300,
+  "platform": "ardupilot",
+  "reason": "decoding with the vehicle's own message definitions",
+  "regenerated_this_run": true,
+  "rule": "an undecodable producer makes the channel UNDECODABLE, never UNAVAILABLE",
+  "undecodable_frames": {},
+  "vehicle_dialect_active": true,
+  "xml": "/home/user/ardupilot/ardupilot/modules/mavlink/message_definitions/v1.0/ardupilotmega.xml"
  },
  "disagreements": [],
- "messages": 116935,
+ "messages": 116928,
  "observed_stubs": [
   "esc.current",
   "esc.rpm"
  ],
  "platform": "ardupilot",
  "positive_control": {
-  "alt_samples": 906,
+  "alt_samples": 896,
   "armed": true,
-  "climbed_m": 13.44,
+  "climbed_m": 13.31,
+  "fix_type": 6,
   "gates": "CONSTANCY claims only; PRESENCE claims are motion-independent and are always issued",
+  "phase": "climb",
   "rule": "RULE A -- an informativeness probe needs a positive control; motion is it",
   "satisfied": true
  },
@@ -36,11 +52,12 @@
    "channel": "baro.altitude",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 11.8286, sd 0.728512, n=116932",
+   "detail": "range 11.6085, sd 0.731202, n=116925",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116932,
-   "spread": 11.82860541629941
+   "samples": 116925,
+   "spread": 11.608454808262877
   },
   {
    "admissible": false,
@@ -48,11 +65,12 @@
    "channel": "baro.temp_c",
    "criterion": "VARIATION",
    "declared": "VALIDATED_SEMANTICS",
-   "detail": "range 0.23, sd 0.0474837, n=116932",
+   "detail": "range 0.24, sd 0.0491517, n=116925",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116932,
-   "spread": 0.23000000000000043
+   "samples": 116925,
+   "spread": 0.23999999999999844
   },
   {
    "admissible": true,
@@ -60,11 +78,12 @@
    "channel": "battery.current",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 5.28, sd 0.280661, n=116878",
+   "detail": "range 5.4, sd 0.284343, n=116904",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116878,
-   "spread": 5.279999999999998
+   "samples": 116904,
+   "spread": 5.399999999999999
   },
   {
    "admissible": true,
@@ -72,11 +91,12 @@
    "channel": "battery.voltage",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.052, sd 0.00281463, n=116878",
+   "detail": "range 0.053, sd 0.00285126, n=116904",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116878,
-   "spread": 0.0519999999999996
+   "samples": 116904,
+   "spread": 0.053000000000000824
   },
   {
    "admissible": false,
@@ -84,10 +104,11 @@
    "channel": "esc.current",
    "criterion": "VARIATION",
    "declared": "STUB_OR_NONINFORMATIVE",
-   "detail": "constant at 3.2 over 116913 samples",
+   "detail": "constant at 3.2 over 116911 samples",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
-   "samples": 116913,
+   "samples": 116911,
    "spread": 0.0
   },
   {
@@ -96,10 +117,11 @@
    "channel": "esc.rpm",
    "criterion": "VARIATION",
    "declared": "STUB_OR_NONINFORMATIVE",
-   "detail": "constant at 0 over 116913 samples",
+   "detail": "constant at 0 over 116911 samples",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "STUB_OR_NONINFORMATIVE",
-   "samples": 116913,
+   "samples": 116911,
    "spread": 0.0
   },
   {
@@ -108,11 +130,12 @@
    "channel": "estimator.flight_mode",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 602, decoded over 116645 samples (criterion DECODE, not variation)",
+   "detail": "latched value 82, decoded over 116643 samples (criterion DECODE, not variation)",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116645,
-   "spread": 0.0
+   "samples": 116643,
+   "spread": null
   },
   {
    "admissible": false,
@@ -120,11 +143,12 @@
    "channel": "estimator.variances",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0360237, sd 0.00538625, n=116880",
+   "detail": "range 0.0369003, sd 0.00536506, n=116906",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116880,
-   "spread": 0.03602374452748336
+   "samples": 116906,
+   "spread": 0.03690025946707465
   },
   {
    "admissible": true,
@@ -132,10 +156,11 @@
    "channel": "gnss.position",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 12.0216, sd 0.752077, n=116916",
+   "detail": "range 12.0216, sd 0.777513, n=116914",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116916,
+   "samples": 116914,
    "spread": 12.021552271401346
   },
   {
@@ -144,11 +169,12 @@
    "channel": "gnss.velocity",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0197693, sd 0.00096691, n=116916",
+   "detail": "range 0.0278215, sd 0.00154912, n=116914",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116916,
-   "spread": 0.019769278339913224
+   "samples": 116914,
+   "spread": 0.027821456422011902
   },
   {
    "admissible": false,
@@ -158,6 +184,7 @@
    "declared": "UNAVAILABLE",
    "detail": "never arrived",
    "may_use": false,
+   "nonfinite_samples": 0,
    "observed": "UNAVAILABLE",
    "samples": 0,
    "spread": null
@@ -168,10 +195,11 @@
    "channel": "imu0.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1.26506, sd 0.0787382, n=116935",
+   "detail": "range 1.26506, sd 0.0789971, n=116928",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116935,
+   "samples": 116928,
    "spread": 1.2650578499999998
   },
   {
@@ -180,11 +208,12 @@
    "channel": "imu0.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.014, sd 0.00218665, n=116935",
+   "detail": "range 0.015, sd 0.00217032, n=116928",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116935,
-   "spread": 0.014
+   "samples": 116928,
+   "spread": 0.015
   },
   {
    "admissible": true,
@@ -192,10 +221,11 @@
    "channel": "imu1.accel",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1.26506, sd 0.0787254, n=116934",
+   "detail": "range 1.26506, sd 0.0790118, n=116927",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116934,
+   "samples": 116927,
    "spread": 1.2650578499999998
   },
   {
@@ -204,10 +234,11 @@
    "channel": "imu1.gyro",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.014, sd 0.00219218, n=116934",
+   "detail": "range 0.014, sd 0.00218223, n=116927",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116934,
+   "samples": 116927,
    "spread": 0.014
   },
   {
@@ -216,10 +247,11 @@
    "channel": "mag.field_ut",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 1, sd 0.279007, n=116935",
+   "detail": "range 1, sd 0.279971, n=116928",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116935,
+   "samples": 116928,
    "spread": 1.0
   },
   {
@@ -228,11 +260,12 @@
    "channel": "vehicle_status.armed",
    "criterion": "DECODE",
    "declared": "INFORMATIVE",
-   "detail": "latched value 1, decoded over 116645 samples (criterion DECODE, not variation)",
+   "detail": "latched value 1, decoded over 116643 samples (criterion DECODE, not variation)",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116645,
-   "spread": 1.0
+   "samples": 116643,
+   "spread": null
   },
   {
    "admissible": true,
@@ -240,36 +273,38 @@
    "channel": "vibration.rms",
    "criterion": "VARIATION",
    "declared": "INFORMATIVE",
-   "detail": "range 0.0368, sd 0.00159713, n=116879",
+   "detail": "range 0.0368973, sd 0.00160926, n=116905",
    "may_use": true,
+   "nonfinite_samples": 0,
    "observed": "INFORMATIVE",
-   "samples": 116879,
-   "spread": 0.03679996464825361
+   "samples": 116905,
+   "spread": 0.03689730581462714
   }
  ],
  "rows_unscored": [],
  "seconds": 40.0,
+ "undecodable_channels": [],
  "unmapped_types": {
-  "AHRS": 2004,
+  "AHRS": 2005,
   "AHRS2": 4010,
-  "ATTITUDE": 4010,
-  "GLOBAL_POSITION_INT": 4010,
+  "ATTITUDE": 4009,
+  "GLOBAL_POSITION_INT": 4009,
   "LOCAL_POSITION_NED": 4009,
   "MEMINFO": 4009,
   "MISSION_CURRENT": 4009,
   "NAV_CONTROLLER_OUTPUT": 4009,
   "PARAM_VALUE": 27,
-  "POWER_STATUS": 4010,
-  "SCALED_IMU3": 10025,
-  "SCALED_PRESSURE2": 10025,
+  "POWER_STATUS": 4009,
+  "SCALED_IMU3": 10023,
+  "SCALED_PRESSURE2": 10023,
   "SIMSTATE": 4009,
-  "SYSTEM_TIME": 2004,
-  "SYS_STATUS": 4010,
-  "TERRAIN_REPORT": 2004,
-  "TERRAIN_REQUEST": 192,
+  "SYSTEM_TIME": 2005,
+  "SYS_STATUS": 4009,
+  "TERRAIN_REPORT": 2005,
+  "TERRAIN_REQUEST": 193,
   "TIMESYNC": 40,
-  "VFR_HUD": 4010,
-  "WIND": 2004
+  "VFR_HUD": 4009,
+  "WIND": 2005
  },
  "verdict": "PASS"
 }

@@ -146,6 +146,31 @@ semantic-qualification layer: a field being *present and fresh* is not
 evidence that it *means anything*. Retained as
 `tests/test_channel_semantics.py::test_esc_sitl_stub_is_not_informative`.
 
+**PX4 update, 2026-08-24 — the same two channels, the opposite result.**
+Measured on PX4 SIH with the airframe flying: `esc.rpm` varies over a 5,540
+RPM range (sd 1,323, n=17,167) and `esc.current` is constant at 0. ArduPilot
+SITL, re-measured the same day, is the mirror image: current constant at 3.2 A,
+rpm constant at 0. The contract row declares both `STUB_OR_NONINFORMATIVE`,
+which is right for ArduPilot and **wrong for PX4** — the row was written
+against one simulator and the contract has no per-platform qualification
+field. Neither backend supplies a complete set and they fail in opposite
+places, which is more useful than either alone: a relation that survives both
+has not been validated against one simulator's quirks. This does not admit any
+stub anywhere; `esc.current` stays blocked on both. Evidence and the decision
+still owed to a contract owner: `docs/simulation/PX4_CURRENT.md` §2.2-2.3.
+
+**How that PX4 measurement was nearly missed.** The first PX4 run reported
+both ESC channels as "never arrived" and it was published. PX4 had been
+sending `ESC_STATUS` all along; the pymavlink installed here carries a reduced
+`common.xml` with no message 291, so every frame was counted as `UNKNOWN_291`
+and binned with traffic we ignore on purpose. The instrument could not read
+the message and reported the platform as not sending it — the same error as
+calling a channel a stub because the aircraft never moved. Fixed twice over:
+the rigs now decode with the vehicle's own message definitions
+(`csia/simulation/dialect.py`), and any undecodable frame whose id names a
+contract producer marks that channel `UNDECODABLE`, never `UNAVAILABLE`, and
+voids the run as `INSTRUMENT_DEAD`.
+
 ### W-6 Response is not attribution
 
 Two ledgers, and they diverge:
@@ -286,6 +311,10 @@ difference between the two ingestion paths rather than an accidental one.
 | `SIM_GPS_*` renamed `SIM_GPS1_*` on 4.x | confirmed; Phase-I scripts do not run unmodified on 4.8 |
 | SITL vibration amplitude comes from `SIM_ACC*_RND`, not `SIM_VIB_MOT_MAX` alone | confirmed after two failed probes |
 | `gpsDriftNE` monitor exists in ArduPilot but is gated `&& onGround` | confirmed by source read |
+| PX4 SIH publishes no `SCALED_IMU2`, so `imu1` and the dual-IMU cross-check cannot be evaluated on that backend | confirmed under motion, 2026-08-24 |
+| PX4 SIH publishes `BATTERY_STATUS` at ~9.7 Hz with `current_battery = -1` — implemented stream, no sensor | confirmed; 387 sentinel frames in 40 s |
+| PX4 `MAV_CMD_NAV_TAKEOFF` param7 is AMSL, not height above home | confirmed by source read (`navigator/takeoff.cpp:193-210`) |
+| PX4 has moved diagnostics off `STATUSTEXT` to the `EVENT` protocol (410/411) | confirmed; 0 STATUSTEXT and 15 event frames in the same run |
 
 ---
 
