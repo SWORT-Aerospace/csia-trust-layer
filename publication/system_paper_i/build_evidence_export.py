@@ -157,7 +157,14 @@ def build_state():
 
     return {
         "schema": "csia.publication.repository_state/1",
-        "generated_utc": datetime.now(timezone.utc).isoformat(),
+        # The commit date of HEAD, not wall-clock. Wall-clock made every
+        # rebuild produce different bytes, which meant the SHA-256 of a
+        # released archive identified nothing. Anchored to the commit, an
+        # export rebuilt at the same commit is byte-identical, so a published
+        # hash is checkable. It still changes when the commit changes, which
+        # is correct: the export records the state it was built from.
+        "generated_utc": (git("log", "-1", "--format=%cI", "HEAD")
+                          or datetime.now(timezone.utc).isoformat()),
         "repository": {
             "url": "https://github.com/SWORT-Aerospace/csia-trust-layer",
             "default_branch": "main",

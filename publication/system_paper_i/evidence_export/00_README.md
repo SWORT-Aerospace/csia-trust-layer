@@ -5,7 +5,7 @@ repository.** Everything needed to write CSIA Systems Paper I is here. If a
 value is not in this package, do not invent it: it is marked
 `UNRECOVERABLE` and the reason is stated.
 
-**Generated:** 2026-08-24T00:17:15.298622+00:00
+**Generated:** 2026-08-24T00:25:31+00:00
 **Generator:** `publication/system_paper_i/build_evidence_export.py`
 **Every number was read from a committed artifact at build time.** No value
 was transcribed from a manuscript draft or from conversational memory.
@@ -89,4 +89,4 @@ one and do not import one.
 | `12_ARTIFACT_MAP.yaml` | 20,697 B | 3dc3215f4646e1d0... |
 | `13_REFERENCE_AUDIT.md` | 5,397 B | 0c508d0ce73b38eb... |
 | `14_REPRODUCTION_COMMANDS.md` | 7,159 B | 31242fc1fe096249... |
-| `15_REPOSITORY_STATE.json` | 7,674 B | 1d5b1a16f6b7e750... |
+| `15_REPOSITORY_STATE.json` | 7,667 B | 9ce7e85adc4bb5ac... |

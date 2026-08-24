@@ -36,6 +36,12 @@ jobs:
       - name: secrets scan
         if: always()
         run: python tools/publication/secrets_scan.py
+      # Scratch-builds both public archives from the allowlist and scans what
+      # it built. Nothing is kept, so this works in a fresh clone where the
+      # archives (build products) do not exist.
+      - name: public release allowlist and sanitization
+        if: always()
+        run: python tools/publication/build_public_release.py --check
       # KNOWN RED. refs.bib carries 37 unresolved provenance markers and no
       # entry is marked verified. This is a real submission blocker recorded
       # in RESEARCH_STATE.md open items and in the artifact map as OI-1.

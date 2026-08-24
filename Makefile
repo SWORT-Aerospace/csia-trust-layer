@@ -26,7 +26,7 @@ help:
 	@echo "  make phase-guard     Phase-I papers must not cite Phase-II results"
 	@echo "  make manuscript-rules  csia_systems hard style rules"
 	@echo "  make secrets-scan    credential and local-path scan"
-	@echo "  make release-check   verify built archives against the allowlist"
+	@echo "  make release-check   scratch-build + sanitize the public archives"
 	@echo "  make check           every guard above"
 	@echo "Release:"
 	@echo "  make evidence-export rebuild the 16-file Paper I evidence export"
@@ -91,8 +91,10 @@ manuscript-rules:
 secrets-scan:
 	$(PY) tools/publication/secrets_scan.py
 
-# Verifies the committed archives without rebuilding them: every allowlisted
-# path still exists and is tracked, and the archive on disk is still clean.
+# Verifies a release is buildable and clean without leaving an archive behind:
+# every allowlisted path exists and is tracked, and a scratch build of each
+# archive passes the post-pack scan. Packing is reproducible, so the scratch
+# archive is byte-identical to the one `make public-release` ships.
 .PHONY: release-check
 release-check:
 	$(PY) tools/publication/build_public_release.py --check

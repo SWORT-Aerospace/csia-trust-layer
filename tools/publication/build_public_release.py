@@ -18,7 +18,8 @@ path is missing. On failure the archives are deleted, so a red run cannot
 leave a shippable-looking file behind.
 
 Run:  python tools/publication/build_public_release.py [--check]
-      --check verifies existing archives without rewriting them.
+      --check builds and scans into a scratch directory and keeps nothing, so
+      CI can verify a release is clean without archives being committed.
 """
 
 import argparse
@@ -26,6 +27,7 @@ import gzip
 import hashlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -187,7 +189,7 @@ def sha256(path):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
-                    help="scan existing archives without rebuilding")
+                    help="build and scan into a scratch dir, keep nothing")
     args = ap.parse_args()
 
     man = load()
@@ -210,30 +212,36 @@ def main() -> int:
             rc = 1
             continue
 
+        # --check packs to a scratch path and throws it away. The archives are
+        # build products and are not committed, so "does the file exist" would
+        # fail in every fresh clone and in CI for a reason that has nothing to
+        # do with the release being clean. Because packing is reproducible,
+        # building it IS the check: the scratch archive is byte-identical to
+        # the one `make public-release` would ship, including its SHA-256.
+        scratch = None
         if args.check:
-            if not os.path.isfile(archive):
-                print(f"    FAIL  archive not built: {pkg['archive']}")
-                rc = 1
-                continue
-        else:
-            pack(members, archive)
+            scratch = tempfile.mkdtemp(prefix="csia-release-")
+            archive = os.path.join(scratch, os.path.basename(pkg["archive"]))
+        pack(members, archive)
 
         names, failures = scan_archive(archive, san)
-        print(f"    archive:           {pkg['archive']}")
+        print(f"    archive:           {pkg['archive']}"
+              f"{'  (verified from a scratch build)' if scratch else ''}")
         print(f"    members:           {len(names)}")
         print(f"    sha256:            {sha256(archive)}")
         if failures:
             print(f"    SANITIZATION:      FAIL ({len(failures)})")
             for f in failures:
                 print(f"      {f}")
-            if not args.check:
-                os.remove(archive)
-                print("    archive deleted; a failed release does not ship")
+            os.remove(archive)
+            print("    archive deleted; a failed release does not ship")
             rc = 1
         else:
             print("    SANITIZATION:      PASS "
                   "(no username, home path, credential, strategy document, "
                   "interceptor tooling, .git or unlabelled Phase-II token)")
+        if scratch:
+            shutil.rmtree(scratch, ignore_errors=True)
         print()
 
     print("PUBLIC RELEASE: " + ("PASS" if rc == 0 else "FAIL"))
