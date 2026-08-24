@@ -25,6 +25,13 @@ AP_ROOT = os.environ.get("CSIA_AP_ROOT", "/home/user/ardupilot/ardupilot")
 PX4_ROOT = os.environ.get("CSIA_PX4_ROOT", "/home/user/px4")
 HOME = "-35.363261,149.165230,584,353"
 
+# Motion positive control: the probe needs the airframe to have MOVED,
+# not to have reached a particular altitude. 1.5 m clears the 1.0 m
+# threshold qualify_platform requires with margin, and it is reachable
+# whatever MIS_TAKEOFF_ALT is set to. Keying success off alt_m * 0.5
+# made the loop wait for 12.5 m while PX4 climbed to its 2.5 m default.
+CLIMB_OK_M = 1.5
+
 
 def launch_ardupilot(workdir, speedup=10):
     binary = os.path.join(AP_ROOT, "build", "sitl", "bin", "arducopter")
@@ -173,17 +180,60 @@ def _fly_px4(conn, evidence, alt_m, timeout):
     # real vehicle and are noise for a qualification probe. Relaxing them is
     # legitimate HERE (a simulator, in a tool that may command) and is
     # recorded in the probe evidence.
-    for name, val in (("COM_RCL_EXCEPT", 7), ("NAV_RCL_ACT", 0),
-                      ("NAV_DLL_ACT", 0), ("COM_ARM_WO_GPS", 1),
-                      ("COM_PREARM_MODE", 0), ("COM_ARM_MAG_STR", 0),
-                      ("COM_ARM_EKF_HGT", 1.0), ("COM_ARM_EKF_VEL", 1.0),
-                      ("COM_ARM_EKF_POS", 1.0), ("COM_ARM_EKF_YAW", 1.0),
-                      ("COM_DISARM_LAND", -1), ("COM_DISARM_PRFLT", -1),
-                      ("CBRK_SUPPLY_CHK", 894281), ("CBRK_USB_CHK", 197848),
-                      ("SYS_MC_EST_GROUP", 2)):
+    # Parameter TYPE matters. Every one of these used to be sent as INT32,
+    # including the four COM_ARM_EKF_* thresholds, which PX4 declares as
+    # float. A float parameter written with an integer type is not a rounding
+    # error -- the receiver reinterprets the payload, so 1.0 does not arrive
+    # as 1.0. Each entry now carries its own type.
+    #
+    # MIS_TAKEOFF_ALT is the important one and it was missing entirely.
+    # PX4's NAV_TAKEOFF handler (Commander.cpp:1205) does NOT read param7:
+    # it only switches to NAVIGATION_STATE_AUTO_TAKEOFF. The climb target
+    # comes from MIS_TAKEOFF_ALT, a float defaulting to 2.5 m
+    # (navigator/mission_params.yaml:5-15). So the rig commanded a takeoff to
+    # 25 m, the vehicle aimed for 2.5 m, and the loop waited for
+    # alt_m * 0.5 = 12.5 m that could never arrive -- 120 s of timeout
+    # reported as "climbed 0.43 m".
+    I32 = mavutil.mavlink.MAV_PARAM_TYPE_INT32
+    F32 = mavutil.mavlink.MAV_PARAM_TYPE_REAL32
+    for name, val, ptype in (
+            ("COM_RCL_EXCEPT", 7, I32), ("NAV_RCL_ACT", 0, I32),
+            ("NAV_DLL_ACT", 0, I32), ("COM_ARM_WO_GPS", 1, I32),
+            ("COM_PREARM_MODE", 0, I32), ("COM_ARM_MAG_STR", 0, I32),
+            ("COM_ARM_EKF_HGT", 1.0, F32), ("COM_ARM_EKF_VEL", 1.0, F32),
+            ("COM_ARM_EKF_POS", 1.0, F32), ("COM_ARM_EKF_YAW", 1.0, F32),
+            ("COM_DISARM_LAND", -1.0, F32), ("COM_DISARM_PRFLT", -1.0, F32),
+            ("CBRK_SUPPLY_CHK", 894281, I32), ("CBRK_USB_CHK", 197848, I32),
+            ("SYS_MC_EST_GROUP", 2, I32),
+            ("MIS_TAKEOFF_ALT", float(alt_m), F32)):
         conn.mav.param_set_send(conn.target_system, conn.target_component,
-                                name.encode(), float(val),
-                                mavutil.mavlink.MAV_PARAM_TYPE_INT32)
+                                name.encode(), float(val), ptype)
+    # VERIFY the write the takeoff depends on, rather than sleeping and
+    # hoping. run_campaign.py:46 already does readback for SIM_ parameters;
+    # this path did not, which is the same defect that let eight phantom
+    # SR1_* writes look successful for four runs.
+    time.sleep(1.0)
+    conn.mav.param_request_read_send(conn.target_system,
+                                     conn.target_component,
+                                     b"MIS_TAKEOFF_ALT", -1)
+    t_end = time.time() + 5.0
+    while time.time() < t_end:
+        m = conn.recv_match(type="PARAM_VALUE", blocking=True, timeout=1.0)
+        if m is None:
+            continue
+        pid = m.param_id.decode() if isinstance(m.param_id, bytes) \
+            else m.param_id
+        if pid.strip("\x00") == "MIS_TAKEOFF_ALT":
+            evidence["takeoff_alt_param"] = round(float(m.param_value), 2)
+            break
+    else:
+        evidence["takeoff_alt_param"] = None
+    if evidence.get("takeoff_alt_param") is None:
+        # Not fatal -- the probe still reports what happened -- but a takeoff
+        # target that did not stick is the single most likely reason a climb
+        # fails, and silence about it is what cost the last four runs.
+        log_note = "MIS_TAKEOFF_ALT did not read back; climb target unknown"
+        evidence.setdefault("warnings", []).append(log_note)
     t0, last, phase, fix_t, base_alt = time.time(), 0.0, "wait_fix", None, None
     while time.time() - t0 < timeout:
         m = conn.recv_match(blocking=True, timeout=2.0)
@@ -198,7 +248,17 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 return True
             return False
 
-        if k == "GPS_RAW_INT":
+        if k == "COMMAND_ACK":
+            # Evidence, not assumption. A takeoff can be TEMPORARILY_REJECTED
+            # (Commander.cpp:1211) and the old code could not tell that apart
+            # from a takeoff that was accepted and simply climbed slowly.
+            if getattr(m, "command", None) == \
+                    mavutil.mavlink.MAV_CMD_NAV_TAKEOFF:
+                evidence["takeoff_ack"] = int(getattr(m, "result", -1))
+            elif getattr(m, "command", None) == \
+                    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM:
+                evidence["arm_ack"] = int(getattr(m, "result", -1))
+        elif k == "GPS_RAW_INT":
             evidence["fix_type"] = m.fix_type
             if phase == "wait_fix" and m.fix_type >= 3:
                 fix_t, phase = now, "settle"
@@ -232,7 +292,7 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                         conn.target_system, conn.target_component,
                         mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
                         0, 1, 21196, 0, 0, 0, 0, 0)
-            elif phase == "climb" and evidence["climbed_m"] >= alt_m * 0.5:
+            elif phase == "climb" and evidence["climbed_m"] >= CLIMB_OK_M:
                 phase = "flying"
                 break
         evidence["phase"] = phase
