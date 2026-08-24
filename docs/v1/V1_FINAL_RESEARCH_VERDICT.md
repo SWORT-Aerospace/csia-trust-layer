@@ -164,6 +164,39 @@ completed B0–B4 branch.
 **Deployment consequence.** v1.1 is a qualification and integration programme,
 not a detector programme. That is a deliberate decision, recorded here.
 
+### W-7 The first heartbeat is discarded on every connection
+
+**Found after the freeze**, by the v1.1 equivalence instrument
+(`tests/test_adapter_core_equivalence.py`), not by any v1 test.
+
+`csia/runtime/plugins.py:map_mavlink` has no clock of its own. It stamps an
+untimestamped message with `ctx["t_last"]` and returns `[]` when that is unset.
+`HEARTBEAT` is untimestamped, and on a real link it is the **first** message —
+pymavlink's `wait_heartbeat()` guarantees it. So the first `armed` report is
+thrown away on every connection, and `armed` stays `None` until the next
+heartbeat about a second later.
+
+Measured, both orderings:
+
+| order | `map_mavlink` output |
+|---|---|
+| HEARTBEAT first | `[]` — armed flag discarded |
+| HEARTBEAT after any timestamped message | `['vehicle_status']` |
+
+`armed` gates the motor edges and the failsafe, so this is a real if brief
+startup gap: for up to ~1 s after connecting, v1 does not know whether the
+vehicle is armed.
+
+**Not fixed.** The v1 core is frozen; changing `map_mavlink` would move the
+baseline. It is pinned by `test_v1_drops_the_first_heartbeat` so the behaviour
+stays visible.
+
+**Deployment consequence.** The v1.1 adapter path does not inherit this: it
+uses the monotonic deployment clock, so the armed flag is available from the
+first heartbeat in any order. This is listed in
+`tests/test_adapter_core_equivalence.py::INTENTIONALLY_ADDED` as a named
+difference between the two ingestion paths rather than an accidental one.
+
 ---
 
 ## 4. Known simulator artifacts

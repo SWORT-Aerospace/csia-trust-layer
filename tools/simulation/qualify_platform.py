@@ -202,16 +202,46 @@ def main() -> int:
 
     admitted_stub = [r for r in stub_rows if r["admissible"]]
 
-    # RULE A on the instrument itself. Without demonstrated motion, "constant"
-    # means "nothing happened", not "this channel is a stub", and no channel
-    # verdict may be issued from this run.
+    # RULE A on the instrument itself, applied to the RIGHT claims.
+    #
+    # The first version of this gate voided the whole run when the airframe did
+    # not move, and that threw away findings that do not depend on motion at
+    # all. A PX4 run collected 18,800 samples, established that imu1.*, esc.*
+    # and battery.current never arrive on SIH, and reported none of it.
+    #
+    # Two kinds of claim, two different validity conditions:
+    #
+    #   PRESENCE    "this channel never arrived" -- motion-independent. A
+    #               message that is not published is not published whether or
+    #               not the vehicle flew.
+    #   CONSTANCY   "this channel is a stub" -- motion-DEPENDENT. On a static
+    #               airframe "constant" means "nothing happened", which is a
+    #               statement about the trial, not about the channel.
+    #
+    # So presence findings are always issued and constancy findings are gated.
     probe_valid = bool(motion["armed"] and motion["climbed_m"] >= 1.0)
+    absent_rows = [r for r in rows if r["observed"] == "UNAVAILABLE"]
+    absent_but_expected = [r for r in absent_rows if r["admissible"]]
+
     if probe_valid:
-        verdict = ("FAIL: a stub channel is admissible as evidence"
-                   if admitted_stub else "PASS")
+        if admitted_stub:
+            verdict = "FAIL: a stub channel is admissible as evidence"
+        elif absent_but_expected:
+            verdict = ("FAIL: a channel the contract admits as evidence "
+                       "never arrived")
+        else:
+            verdict = "PASS"
+    elif absent_but_expected:
+        # Motion was not demonstrated, so no constancy claim is made -- but an
+        # admissible channel that never arrived is a contract defect on any
+        # trial, and suppressing it would hide a real integration gap.
+        verdict = ("PARTIAL: no motion, so constancy is not assessed; "
+                   "PRESENCE findings stand and a channel the contract "
+                   "admits as evidence never arrived")
     else:
         verdict = ("INVALID_PROBE: the airframe did not move, so constancy "
-                   "is uninformative and no channel verdict is issued")
+                   "is uninformative; presence findings stand and show no "
+                   "missing admissible channel")
 
     result = {
         "platform": args.platform,
@@ -226,6 +256,14 @@ def main() -> int:
             "satisfied": probe_valid,
             "rule": "RULE A -- an informativeness probe needs a positive "
                     "control; motion is it",
+            "gates": "CONSTANCY claims only; PRESENCE claims are "
+                     "motion-independent and are always issued",
+        },
+        # Motion-independent findings. Reported on every run, valid or not.
+        "presence_findings": {
+            "never_arrived": [r["channel"] for r in absent_rows],
+            "never_arrived_but_admissible": [r["channel"]
+                                             for r in absent_but_expected],
         },
         "PROBE_VALID": probe_valid,
         "rows": rows if probe_valid else [],
