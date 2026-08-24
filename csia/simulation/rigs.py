@@ -161,8 +161,20 @@ def connect(conn_str, platform, timeout=90):
             m.mav.request_data_stream_send(m.target_system,
                                            m.target_component, stream, hz, 1)
     else:
+        # 253 STATUSTEXT and 33 GLOBAL_POSITION_INT were both missing.
+        #
+        # STATUSTEXT is the channel PX4 explains itself on. Without it a
+        # capture of PX4's diagnostics returns an empty list, and an empty
+        # list from an instrument nobody verified is alive is not a finding --
+        # it is the absence of one. That is the RULE A null-control failure,
+        # committed while adding a diagnostic FOR a RULE A positive control.
+        #
+        # 33 is what climbed_m is measured from. It happened to arrive on
+        # PX4's default stream set, so the altitude figures were real, but
+        # depending on a default nobody requested is luck rather than design.
         for mid, hz in ((105, 50), (26, 25), (29, 10), (24, 5),
-                        (147, 10), (241, 10), (230, 5), (0, 1)):
+                        (147, 10), (241, 10), (230, 5), (0, 1),
+                        (253, 10), (33, 10)):
             m.mav.command_long_send(m.target_system, m.target_component,
                                     511, 0, mid, int(1e6 / hz), 0, 0, 0, 0, 0)
     return m
@@ -308,6 +320,14 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 phase = "flying"
                 break
         evidence["phase"] = phase
+    # NULL CONTROL on the diagnostic channel. PX4 emits boot and mode banners
+    # constantly, so zero STATUSTEXT over a whole flight means the stream was
+    # never delivered -- not that the vehicle had nothing to say. Recorded so
+    # a future reader cannot mistake a deaf instrument for a quiet vehicle.
+    if not evidence.get("statustext"):
+        evidence.setdefault("warnings", []).append(
+            "no STATUSTEXT received: the diagnostic channel is dead, so its "
+            "silence carries no information")
     return evidence
 
 
