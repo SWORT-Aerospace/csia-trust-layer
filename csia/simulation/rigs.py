@@ -248,7 +248,19 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 return True
             return False
 
-        if k == "COMMAND_ACK":
+        if k == "STATUSTEXT":
+            # The vehicle's own explanation. Three rounds of hypotheses were
+            # spent on this climb without once reading the channel PX4 uses to
+            # say what is wrong. Capturing it costs nothing and outranks any
+            # guess.
+            txt = getattr(m, "text", "")
+            txt = txt.decode() if isinstance(txt, bytes) else str(txt)
+            txt = txt.strip("\x00").strip()
+            if txt:
+                seen = evidence.setdefault("statustext", [])
+                if txt not in seen:
+                    seen.append(txt)
+        elif k == "COMMAND_ACK":
             # Evidence, not assumption. A takeoff can be TEMPORARILY_REJECTED
             # (Commander.cpp:1211) and the old code could not tell that apart
             # from a takeoff that was accepted and simply climbed slowly.
