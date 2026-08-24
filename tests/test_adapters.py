@@ -219,3 +219,85 @@ def test_estimator_channels_never_enter_the_core():
     assert s.estimator_health["estimator.variances"].missing is not None
     assert all(sensor != "_autopilot_reference"
                for sensor, _t, _ch in ad.to_core_samples(s))
+
+
+# --------------------------------------------------------------------------
+# Contract <-> dispatch consistency.
+#
+# The regression that motivated this: HANDLED_TYPES was added as a fast-path
+# optimization and omitted "RAW_IMU". On ArduCopter 4.8 that message carries
+# inertial instance 0 and compass instance 0, so imu0 and the magnetometer
+# vanished from an 8-node trust graph -- 7,538 messages discarded in a 30 s
+# live run -- while 631 tests passed. Nothing tied the adapter's dispatch to
+# the contract that declares what each channel's producer is.
+
+def test_contract_producers_are_all_handled():
+    """Every producer the contract declares must survive dispatch.
+
+    Catches drift in the dangerous direction: a channel the contract promises
+    but the adapter silently drops.
+    """
+    from csia.aircraft.qualification import default_contract
+    contract = default_contract()
+    for platform, key in (("ardupilot", "producer_ardupilot"),
+                          ("px4", "producer_px4")):
+        ad = get_adapter(platform)
+        handled = getattr(ad, "HANDLED_TYPES", None)
+        if handled is None:
+            continue
+        for name, row in contract.channels.items():
+            producer = row.raw.get(key) or {}
+            message = producer.get("message")
+            if not message or not row.admissible:
+                continue
+            # A list means "any of these can carry it"; at least one must be
+            # handled. A bare string must be handled outright.
+            names = message if isinstance(message, list) else [message]
+            for m in names:
+                assert isinstance(m, str) and m.replace("_", "").isalnum(), (
+                    f"{platform}: {name} producer {m!r} is not a message "
+                    f"name. This field must stay machine-checkable -- prose "
+                    f"here validates nothing.")
+            assert any(m in handled for m in names), (
+                f"{platform}: contract declares {name} comes from {names}, "
+                f"but the adapter's dispatch set handles none of them")
+
+
+def test_raw_imu_carries_imu0_and_the_magnetometer():
+    """ArduCopter 4.8 sends instance 0 as RAW_IMU, not SCALED_IMU.
+
+    Source: GCS_Common.cpp:2237 send_raw_imu() uses ins.get_accel(0),
+    ins.get_gyro(0) and compass.get_field(0), with the comment "we use
+    SCALED_IMU and SCALED_IMU2 for other IMUs". Units are milli-g,
+    milli-rad/s and milligauss (AP_Compass.h:151).
+    """
+    ad = get_adapter("ardupilot")
+    ad.ingest(msg("RAW_IMU", time_usec=1_000_000,
+                  xacc=0, yacc=0, zacc=-1000,
+                  xgyro=1000, ygyro=0, zgyro=0,
+                  xmag=500, ymag=0, zmag=0))
+    s = ad.sample(t_mono=1.0)
+    assert s.get("imu0.accel").value[2] == pytest.approx(G, rel=1e-6)
+    assert s.get("imu0.gyro").value[0] == pytest.approx(1.0, rel=1e-6)
+    assert s.get("mag.field_ut").value[0] == pytest.approx(50.0)
+    assert ad.unmapped_types() == {}
+
+
+def test_raw_imu_and_scaled_imu_agree():
+    """Same physical quantity, two ArduPilot messages, one canonical answer.
+
+    The guard against a silent scaling error: if RAW_IMU were given different
+    units from SCALED_IMU, this diverges by 1000x rather than failing subtly.
+    """
+    fields = dict(xacc=137, yacc=-241, zacc=-993,
+                  xgyro=53, ygyro=-27, zgyro=11,
+                  xmag=421, ymag=-133, zmag=377)
+    a = get_adapter("ardupilot")
+    a.ingest(msg("RAW_IMU", time_usec=1_000_000, **fields))
+    b = get_adapter("ardupilot")
+    b.ingest(msg("SCALED_IMU", time_boot_ms=1000, **fields))
+    for channel in ("imu0.accel", "imu0.gyro", "mag.field_ut"):
+        np.testing.assert_allclose(
+            a.sample(t_mono=1.0).get(channel).value,
+            b.sample(t_mono=1.0).get(channel).value, rtol=1e-12,
+            err_msg=f"{channel} differs between RAW_IMU and SCALED_IMU")

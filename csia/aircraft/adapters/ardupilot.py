@@ -61,8 +61,21 @@ class ArduPilotAdapter(PlatformAdapter):
     # consume (AHRS, ATTITUDE, GLOBAL_POSITION_INT, MEMINFO, PARAM_VALUE,
     # NAV_CONTROLLER_OUTPUT and friends). Each one was paying for the full
     # if-chain before falling through.
+    # Fast-path dispatch. THIS SET MUST MATCH THE BRANCHES BELOW.
+    #
+    # It did not. "RAW_IMU" was omitted when this set was introduced as a
+    # performance optimization, so every RAW_IMU was counted unmapped and
+    # discarded BEFORE reaching the handler written to process it -- 7,538 of
+    # them in a 30 s live run. On ArduCopter 4.8 that message carries
+    # inertial instance 0 AND compass instance 0, so the optimization silently
+    # took imu0 and the magnetometer out of an 8-node trust graph, disabling
+    # the dual-IMU cross-check and the heading_course relation.
+    #
+    # 631 tests passed throughout. `test_contract_producers_are_all_handled`
+    # now ties this set to CHANNEL_SEMANTICS.yaml so the two cannot drift
+    # again in either direction.
     HANDLED_TYPES = frozenset({
-        "HEARTBEAT", "SCALED_IMU", "SCALED_IMU2", "SCALED_IMU3",
+        "HEARTBEAT", "RAW_IMU", "SCALED_IMU", "SCALED_IMU2", "SCALED_IMU3",
         "SCALED_PRESSURE", "GPS_RAW_INT", "BATTERY_STATUS", "VIBRATION",
         "ESC_TELEMETRY_1_TO_4", "ESC_STATUS", "EKF_STATUS_REPORT",
     })

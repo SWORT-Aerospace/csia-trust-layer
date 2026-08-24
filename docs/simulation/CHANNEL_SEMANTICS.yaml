@@ -82,7 +82,12 @@ channels:
   unit: m/s^2
   frame: body z-up (converted from MAVLink FRD)
   scale: "ArduPilot SCALED_IMU xacc is mG -> *9.80665e-3; PX4 HIGHRES_IMU is SI"
-  producer_ardupilot: {message: "RAW_IMU (or SCALED_IMU)", fields: [xacc, yacc, zacc], rate_hz: 25}
+  # A LIST because two messages can carry this, and `message` must stay
+  # machine-checkable: tests/test_adapters.py asserts every producer named
+  # here survives the adapter's dispatch. Prose like "RAW_IMU (or
+  # SCALED_IMU)" reads fine and validates nothing.
+  # ArduCopter 4.8 sends instance 0 as RAW_IMU (GCS_Common.cpp:2237).
+  producer_ardupilot: {message: [RAW_IMU, SCALED_IMU], fields: [xacc, yacc, zacc], rate_hz: 25}
   producer_px4: {message: HIGHRES_IMU, fields: [xacc, yacc, zacc], rate_hz: 50}
   producer_note: >-
     ArduPilot publishes inertial instance 0 as RAW_IMU on the RAW_SENSORS
@@ -105,7 +110,8 @@ channels:
   unit: rad/s
   frame: body z-up (converted from MAVLink FRD)
   scale: "ArduPilot SCALED_IMU xgyro is mrad/s -> *1e-3; PX4 HIGHRES_IMU is SI"
-  producer_ardupilot: {message: SCALED_IMU, fields: [xgyro, ygyro, zgyro], rate_hz: 25}
+  # RAW_IMU on 4.8; SCALED_IMU only if a GCS requests instance 0 explicitly.
+  producer_ardupilot: {message: [RAW_IMU, SCALED_IMU], fields: [xgyro, ygyro, zgyro], rate_hz: 25}
   producer_px4: {message: HIGHRES_IMU, fields: [xgyro, ygyro, zgyro], rate_hz: 50}
   missing_semantics: "message absent -> MISSING"
   aggregation: instantaneous sample
@@ -157,7 +163,8 @@ channels:
   unit: microtesla
   frame: body z-up
   scale: "ArduPilot SCALED_IMU xmag is mgauss -> *0.1; PX4 HIGHRES_IMU is gauss -> *100"
-  producer_ardupilot: {message: SCALED_IMU, fields: [xmag, ymag, zmag], rate_hz: 25}
+  # compass.get_field(0) rides inside RAW_IMU on 4.8 (GCS_Common.cpp:2248).
+  producer_ardupilot: {message: [RAW_IMU, SCALED_IMU], fields: [xmag, ymag, zmag], rate_hz: 25}
   producer_px4: {message: HIGHRES_IMU, fields: [xmag, ymag, zmag], rate_hz: 50}
   missing_semantics: "all-zero triple is treated as ABSENT, not as a zero field"
   aggregation: instantaneous sample
