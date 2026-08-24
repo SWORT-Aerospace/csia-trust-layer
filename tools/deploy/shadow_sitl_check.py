@@ -42,10 +42,15 @@ sys.path.insert(0, ROOT)
 
 from csia.deploy.guard import CommandAuthorityError          # noqa: E402
 from csia.deploy.shadow import Mode, ShadowConfig, ShadowRunner  # noqa: E402
-from csia.simulation.rigs import (LAUNCHERS, PASSIVE_LINKS, connect,  # noqa: E402
-                                  fly)
+from csia.simulation.rigs import LAUNCHERS, connect, fly   # noqa: E402
+from csia.simulation.tee import MavlinkTee               # noqa: E402
 
 R13_BUDGET_US = 2000.0
+# Where the tee publishes and CSIA listens. UDP because a listener
+# binding a port cannot accidentally become a client of anything.
+TEE_OUT = ("127.0.0.1", 14561)
+# The rig commands here; the tee owns SERIAL0.
+RIG_LINK = "tcp:127.0.0.1:5762"
 
 
 def summarise(latencies):
@@ -88,6 +93,7 @@ def main() -> int:
     print(f"=== {args.platform} SITL launched (pid {proc.pid}) -> {conn_str}")
 
     result = {"platform": args.platform, "seconds": args.seconds}
+    tee = None
     try:
         # The rig holds the COMMAND link (SERIAL0) for the whole run. It is
         # what asks the autopilot to stream, because a shadow monitor cannot:
@@ -95,32 +101,31 @@ def main() -> int:
         # a real aircraft that request comes from the GCS or from the FC's own
         # SR*_ parameters -- see docs/deployment/AIRCRAFT_INTEGRATION.md.
         # It is NOT closed early: the streams stop when the requester leaves.
-        rig_conn = connect(conn_str, args.platform)
+        rig_conn = connect(RIG_LINK, args.platform)
 
-        # NO stream-rate configuration happens here, and that is the finding.
+        # THE TELEMETRY TEE. This is what makes an R13 measurement possible.
         #
-        # This block used to write SR1_* parameters and print "rig set SR1_*
-        # stream rates (the documented install step)". Those parameters DO NOT
-        # EXIST on ArduCopter 4.8: a full dump shows 1409 parameters whose only
-        # SR* group is SRTL_* (SmartRTL), and the GCS group is prefixed MAV
-        # (ArduCopter/Parameters.cpp:591) holding no stream rates at all
-        # (GCS.cpp:43-75). A parameter write to an unknown name returns no
-        # error, so the harness asserted success while writing into the void
-        # for four consecutive runs.
+        # Stream rates are per-link and require a transmit on that link, and
+        # CSIA cannot transmit. So the tee takes the GCS role: it holds
+        # SERIAL0, requests the streams there, and forwards every byte to a
+        # UDP endpoint that CSIA merely listens on. CSIA never asks for
+        # anything -- it reads a feed someone else established, which is what
+        # a tee is on a real aircraft.
         #
-        # Stream rates on Copter are per-link runtime state set by a transmit
-        # on that link, and they do not persist (GCS.h:537,
-        # persist_streamrates() == false). The rig cannot configure SERIAL1
-        # from SERIAL0, and CSIA cannot configure its own link without
-        # transmitting -- which SHADOW mode forbids by construction.
-        #
-        # So this harness CANNOT currently produce a valid R13 measurement on
-        # a dedicated passive link. That is a real deployment constraint, not
-        # a harness bug, and it is written up in
-        # docs/deployment/AIRCRAFT_INTEGRATION.md 2.0. The positive control
-        # below reports INVALID_MEASUREMENT rather than a number, which is the
-        # correct outcome until the telemetry-tee arrangement is built.
-        print("=== rig holds the command link")
+        # The rig commands on SERIAL1 instead. Commands work on any link;
+        # only STREAMS are per-link, which is precisely the distinction that
+        # took four runs to establish.
+        tee = MavlinkTee(conn_str, [TEE_OUT], platform=args.platform)
+        tee.start()
+        if not tee.wait_for_traffic(min_types=5, timeout=25.0):
+            raise SystemExit(
+                f"tee never carried sensor traffic: "
+                f"{sorted(tee.stats['by_type'])}. Without it this run would "
+                f"measure an idle loop again.")
+        print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
+              f"({len(tee.stats['by_type'])} message types flowing)")
+        result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}"}
+        print("=== rig commands on SERIAL1 (streams are per-link)")
         if args.fly:
             print("=== rig: arming and climbing (rig authority, not CSIA)")
             ev = fly(rig_conn, args.platform)
@@ -130,10 +135,10 @@ def main() -> int:
 
         from pymavlink import mavutil
 
-        passive = PASSIVE_LINKS[args.platform]
+        passive = f"udpin:{TEE_OUT[0]}:{TEE_OUT[1]}"
 
         def factory():
-            # A SEPARATE, passive link. Not the rig's command link.
+            # The TEED feed. Bound, never dialled; CSIA only listens.
             c = mavutil.mavlink_connection(passive)
             c.wait_heartbeat(timeout=60)
             return c
@@ -228,6 +233,11 @@ def main() -> int:
                   f"{L['median_us']:.1f} us over {L['n']} empty ticks)")
         print(f"=== R13: {result['R13']}")
     finally:
+        try:
+            if tee is not None:
+                tee.stop()
+        except Exception:
+            pass
         try:
             proc.send_signal(signal.SIGTERM)
             proc.wait(timeout=10)
