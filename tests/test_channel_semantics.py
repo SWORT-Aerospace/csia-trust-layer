@@ -20,7 +20,10 @@ from csia.aircraft.sample import (AircraftSample, ChannelValue, MissingReason,
 
 def test_contract_loads_and_every_row_is_complete():
     c = default_contract()
-    assert c.version == 1
+    # ONE place to update, at the bottom of this file next to the content
+    # hash. A literal here was part of why the version never moved: bumping
+    # it broke a test that looked unrelated, so it was easier not to.
+    assert c.version == CONTRACT_VERSION
     assert c.frozen_core == "csia-v1.0-research-final"
     required = ("unit", "quantity", "missing_semantics", "aggregation",
                 "simulator_implementation", "physical_interpretation")
@@ -163,3 +166,55 @@ def test_log_dict_is_json_safe():
     blob = json.dumps(s.to_log_dict())
     assert "9.81" in blob
     assert "INFORMATIVE" in blob
+
+
+# --------------------------------------------------------------------------
+# The version must move when the content does.
+
+CONTRACT_VERSION = 2
+CONTRACT_CONTENT_SHA256 = \
+    "76d8f333bd0e64d842917642ca7d0aa2d6de4bcbc39ffa2033af77d035656489"
+
+
+def _contract_content_hash():
+    """Hash the semantic content, excluding the version field itself.
+
+    Excluded so that bumping the version does not change the hash it is
+    supposed to be paired with -- otherwise the two could never agree.
+    """
+    import hashlib
+    import yaml
+    from csia.aircraft.qualification import CONTRACT_PATH
+    with open(CONTRACT_PATH, encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
+    doc.pop("contract_version", None)
+    return hashlib.sha256(
+        yaml.safe_dump(doc, sort_keys=True).encode()).hexdigest()
+
+
+def test_the_contract_version_moves_when_the_contract_does():
+    """`contract_version` sat at 1 through five commits that changed it.
+
+    Those commits altered what CSIA may consume on PX4 (five
+    platform_qualification rows) and what counts as fresh (two corrected
+    producer rates, which MaxAge derives from). Every flight log stamps this
+    number so a reader can tell which contract produced it; frozen, it made
+    logs from materially different contracts indistinguishable.
+
+    If this fails: decide whether the contract really changed. If it did,
+    bump CONTRACT_VERSION here AND in the YAML, and update the hash. Updating
+    only the hash defeats the purpose.
+    """
+    from csia.aircraft.qualification import default_contract
+    assert default_contract().version == CONTRACT_VERSION
+    assert _contract_content_hash() == CONTRACT_CONTENT_SHA256, (
+        "CHANNEL_SEMANTICS.yaml changed. Bump contract_version (currently "
+        f"{CONTRACT_VERSION}) and update CONTRACT_CONTENT_SHA256 to "
+        f"{_contract_content_hash()}")
+
+
+def test_the_stamped_version_reaches_the_flight_log():
+    """A version nobody records is a version nobody can use."""
+    from csia.aircraft.adapters import get_adapter
+    meta = get_adapter("px4").sample(t_mono=0.0).metadata
+    assert meta["contract_version"] == CONTRACT_VERSION

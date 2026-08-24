@@ -150,3 +150,84 @@ def test_contract_schema_ships_inside_the_package():
 
     from csia.contracts import validate_contract
     assert validate_contract({})["verdict"] == "CSIA_CONTRACT_INVALID"
+
+
+# --------------------------------------------------------------------------
+# A CI step that cannot fail is not a check.
+
+def _workflow_files():
+    wf_dir = os.path.join(ROOT, ".github", "workflows")
+    for fn in sorted(os.listdir(wf_dir)):
+        if fn.endswith((".yml", ".yaml")):
+            yield os.path.join(wf_dir, fn)
+
+
+def test_every_test_path_named_in_a_workflow_exists():
+    """CI ran `pytest tests/test_determinism.py` for weeks. No such file.
+
+    pytest exits 4 on a missing path, `|| true` swallowed it, and a step
+    called "determinism" reported success while testing nothing. A path
+    typo in a workflow is invisible precisely because the step goes green.
+    """
+    missing = []
+    for path in _workflow_files():
+        with open(path, encoding="utf-8") as fh:
+            for lineno, line in enumerate(fh, 1):
+                # COMMANDS ONLY. A comment is allowed to name a path that no
+                # longer exists -- the note explaining this very defect names
+                # tests/test_determinism.py, and flagging that would make the
+                # guard fire on its own documentation.
+                if line.lstrip().startswith("#"):
+                    continue
+                for ref in re.findall(r"tests/[A-Za-z0-9_/]+\.py", line):
+                    if not os.path.exists(os.path.join(ROOT, ref)):
+                        missing.append(
+                            f"{os.path.basename(path)}:{lineno} -> {ref}")
+    assert not missing, (
+        f"workflow steps name test files that do not exist: {missing}. "
+        f"pytest exits 4 for a missing path, which reads as a failure only "
+        f"if nothing swallows it")
+
+
+def test_no_pytest_invocation_swallows_its_own_result():
+    """`|| true` on a test step makes the step decorative.
+
+    Same defect class as the qualification gate that printed FAIL and exited
+    0: a guard whose result nobody can see is not a guard.
+    """
+    offenders = []
+    for path in _workflow_files():
+        with open(path, encoding="utf-8") as fh:
+            for lineno, line in enumerate(fh, 1):
+                if "pytest" not in line:
+                    continue
+                if "|| true" in line or "|| :" in line:
+                    offenders.append(
+                        f"{os.path.basename(path)}:{lineno}: {line.strip()}")
+    assert not offenders, (
+        f"pytest results are being discarded: {offenders}")
+
+
+def test_the_determinism_selection_actually_selects_something():
+    """The replacement must not be vacuous in the other direction.
+
+    `pytest -k determin` over an empty selection exits 5, which is also a
+    failure -- but a selection that quietly shrinks to nothing later would
+    not be. Count the tests that carry the name.
+    """
+    found = []
+    for dirpath, dirnames, filenames in os.walk(os.path.join(ROOT, "tests")):
+        dirnames[:] = [d for d in dirnames if d != "__pycache__"]
+        for fn in filenames:
+            if not fn.endswith(".py"):
+                continue
+            with open(os.path.join(dirpath, fn), encoding="utf-8") as fh:
+                tree = ast.parse(fh.read(), filename=fn)
+            for node in ast.walk(tree):
+                if (isinstance(node, ast.FunctionDef)
+                        and node.name.startswith("test")
+                        and "determin" in node.name):
+                    found.append(f"{fn}::{node.name}")
+    assert len(found) >= 10, (
+        f"only {len(found)} determinism tests found: {found}. The CI step "
+        f"selects by name, so a rename silently shrinks what it covers")

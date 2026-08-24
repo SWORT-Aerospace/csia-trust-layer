@@ -65,9 +65,14 @@ jobs:
       - name: flight log
         if: always()
         run: pytest -q tests/test_flight_log.py
+      # tests/test_determinism.py DOES NOT EXIST and never did. pytest exited
+      # 4 (file not found) on every run and `|| true` turned it green, so a
+      # step named "determinism" tested nothing at all. The 14 determinism
+      # tests live across 10 other files; select them by name and let the step
+      # fail. tests/test_ci_env.py now refuses both mistakes.
       - name: determinism
         if: always()
-        run: pytest -q tests/test_determinism.py -k determin || true
+        run: pytest -q tests/ -k determin
 
   qualification:
     name: SITL qualification (ArduPilot + PX4)

@@ -526,6 +526,12 @@ def main() -> int:
         # The narrowings applied to this run, verbatim from the contract with
         # their evidence. A PASS reached by narrowing must show what it
         # narrowed, in the same file as the PASS.
+        # WHICH contract this run qualified. A result that cannot name the
+        # contract it was measured against cannot be compared with a later
+        # one -- and the version sat at 1 through five commits that changed
+        # what CSIA may consume, so "the contract" was not one thing.
+        "contract_version": adapter.contract.version,
+        "contract_path": os.path.relpath(adapter.contract.path, ROOT),
         "platform_contract_rows": narrowed,
         "rate_drift": rate_drift,
         "rate_drift_assessed": rate_comparable,

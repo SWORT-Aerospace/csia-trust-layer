@@ -60,7 +60,20 @@
 # It is NOT enforced by thresholds inside the diagnostic core, and it does not
 # alter any v1 relation, weight or gate.
 
-contract_version: 1
+# VERSION 2 (2026-08-24). Bump this whenever the semantic content changes.
+#
+# It stayed at 1 through five commits that changed what CSIA may consume:
+# five platform_qualification rows (admissibility on PX4), two corrected
+# producer rates (which decide staleness through MaxAge), and a producer
+# message list. Every flight log stamps contract_version so a post-flight
+# reader can tell which contract produced it -- and with the number frozen,
+# logs recorded under materially different contracts were indistinguishable.
+# tests/test_channel_semantics.py now hashes the content and fails until the
+# version moves with it.
+#
+# v2: per-platform qualification rows; PX4 esc.* rate 10 -> 1 Hz and
+#     mag.field_ut 50 -> 14 Hz, both measured; MaxAge now derived from these.
+contract_version: 2
 applies_to_csia_version: "1.1"
 frozen_core: csia-v1.0-research-final
 
