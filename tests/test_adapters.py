@@ -93,7 +93,10 @@ def test_no_3d_fix_is_missing_not_a_zero_position(platform):
     cv = ad.sample(t_mono=2.0).get("gnss.position")
     assert not cv.usable
     assert cv.value is None
-    assert cv.missing in (MissingReason.NO_3D_FIX, MissingReason.NOT_RECEIVED)
+    # Exactly NO_3D_FIX. NOT_RECEIVED was tolerated here while the adapter
+    # simply dropped the value and let it read as "the message never came";
+    # the message came, and said the fix was lost.
+    assert cv.missing is MissingReason.NO_3D_FIX
 
 
 @pytest.mark.parametrize("platform", sorted(ADAPTERS))

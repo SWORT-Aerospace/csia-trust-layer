@@ -51,12 +51,13 @@ to `/dev/null`.
 ## 2. Qualification status: **PASS**, with five declared platform narrowings
 
 ```
-positive control:  armed=True   climbed=1.52 m   (threshold: >= 1.0 m)
+positive control:  armed=True   climbed=2.72 m   (threshold: >= 1.0 m)
 decoder:           csia_px4, 250 message types, vehicle definitions IN USE
                    0 undecodable frames
 heading:           HEADING_REFERENCE_VALID, source MAGNETOMETER,
-                   aligned at 2.152 s; yaw vs SIH ground truth
-                   mean |err| 0.196 deg, max 0.658 deg over 13,725 samples
+                   aligned at 2.384 s -- 8.4 s BEFORE the vehicle armed;
+                   yaw vs SIH ground truth mean |err| 0.237 deg,
+                   max 1.076 deg over 13,872 samples
 platform rows:     5 in force (section 2.5)
 verdict:           PASS
 ```
@@ -121,7 +122,7 @@ What the decoder had been hiding, on this platform alone: `ESC_STATUS` (291),
 |---|---|---|---|
 | **`imu1.accel`** | INFORMATIVE | **never arrived** | **yes** |
 | **`imu1.gyro`** | INFORMATIVE | **never arrived** | **yes** |
-| **`battery.current`** | INFORMATIVE | **arrived 387× carrying the not-measured sentinel** | **yes** |
+| **`battery.current`** | INFORMATIVE | **arrived 390× carrying the not-measured sentinel** | **yes** |
 | `gnss.velocity_z` | UNAVAILABLE | never arrived | no |
 
 All three were the FAIL until 2026-08-24. They are now **declared platform
@@ -137,6 +138,30 @@ implemented; the measurement is absent. That distinction decides whether the
 fix is wiring a message or fitting a sensor, so the adapters now count
 sentinel rejections **per channel** (`AircraftAdapter.sentinel_counts()`)
 instead of keeping one global tally that could not say which channel it meant.
+
+### 2.4b The sample counts above were wrong by up to 445x
+
+Every `n` in section 2.2 used to be a **message** count, not a sample count.
+The probe reads the adapter's whole channel store after every message, so a
+1 Hz channel was recorded once per arriving message of any type. `esc.rpm`
+was reported with **n=17,346** when ESC_STATUS had arrived **39** times.
+
+Two consequences, and the second is worse. The reported evidence base was
+inflated by one to two orders of magnitude — and it was quoted in a committed
+contract row. And `sd` was **dwell-weighted**: each value counted once per
+message that happened to arrive while it was current, so a slow channel's
+spread was weighted by how long each value sat in the store rather than by how
+often it was measured.
+
+Fixed by sampling only when the store's receive stamp changes. **No verdict
+moved** — range is over the same set of values and the stub test is
+`spread <= EPS` — and every count now matches its declared producer rate:
+`imu0` 1,947 over 40 s (~49 Hz, HIGHRES_IMU at 50), `baro`/`battery` 390
+(~10 Hz), `esc` 39 (~1 Hz), `HEARTBEAT`-derived channels 38 (~1 Hz).
+
+That last figure is why `esc.rpm` stays refused on a second, independent
+ground: 39 samples from one 2.7 m hop is a thin base for promoting a contract
+row, quite apart from the missing source read.
 
 ### 2.5 The five platform rows, and the rule that keeps them honest
 
@@ -197,12 +222,12 @@ one. From the run's own ulog:
 
 | question | answer | from |
 |---|---|---|
-| when did yaw align? | **2.152 s**, and it never regressed over the remaining 53.7 s | `estimator_status_flags.cs_yaw_align` |
+| when did yaw align? | **2.384 s**, and it never regressed over the remaining 53.5 s | `estimator_status_flags.cs_yaw_align` |
 | what aligned it? | **the magnetometer** — `cs_mag` and `cs_mag_heading_consistent` turn true at the *same* timestamp | same topic |
 | any other source? | no: `cs_gnss_yaw`, `cs_ev_yaw`, `cs_yaw_manual` never true | same topic |
 | was the mag healthy? | `cs_mag_fault` never, `cs_mag_field_disturbed` never | same topic |
 | was it actually fused? | **99.87 %** of samples fused after alignment, **0.0 %** innovations rejected | `estimator_aid_src_mag` |
-| was the heading *correct*? | **mean \|err\| 0.196°, max 0.658°** over 13,725 samples | `vehicle_attitude` vs `vehicle_attitude_groundtruth` |
+| was the heading *correct*? | **mean \|err\| 0.237°, max 1.076°** over 13,872 samples | `vehicle_attitude` vs `vehicle_attitude_groundtruth` |
 
 The last row is the one that settles it. Alignment is a claim the estimator
 makes about itself; an estimator can be confidently wrong. SIH publishes
@@ -216,9 +241,14 @@ the sensor is enabled by design — `10040_sihsim_quadx` sets
 `SENS_EN_MAGSIM 1`, and boot assigns `CAL_MAG0_ID`/`CAL_MAG1_ID` at priority
 50.
 
-**The observation window is entirely inside the aligned period.** The probe
-arms at ~10 s and observes for 40 s after, so nothing in section 2.2 was
-measured without a heading reference.
+**The observation window is entirely inside the aligned period, and that is
+now measured rather than asserted.** `vehicle_status.arming_state` puts arming
+at **10.816 s**, so yaw aligned **8.4 s before the vehicle armed** and nothing
+in section 2.2 was measured without a heading reference. If alignment ever
+happens *after* arming, the verdict is `HEADING_REFERENCE_LATE` and the
+heading-dependent channels are voided — a verdict that was declared in the
+module and, until it was wired to the arming time, could never actually be
+issued.
 
 This is now an automatic check, not a one-off investigation.
 `csia/simulation/ulog_check.py` runs on every PX4 qualification, records the
@@ -231,25 +261,25 @@ not check" and "it was fine" must never read the same.
 
 ### 2.2 CONSTANCY findings — now valid verdicts
 
-The airframe climbed 1.52 m, so these are channel verdicts rather than
+The airframe climbed 2.72 m, so these are channel verdicts rather than
 observations. From `research/v1_1/results/qualification_px4.json`.
 
 | channel | observed | verdict |
 |---|---|---|
-| imu0.accel | range 3.95 m/s², sd 0.349, n=17336 | INFORMATIVE |
-| imu0.gyro | range 1.202 rad/s, sd 0.226, n=17336 | INFORMATIVE |
-| mag.field_ut | range 57.9 µT, sd 12.22, n=17325 | INFORMATIVE (heading reference verified — 2.6) |
-| baro.altitude | range 23.1 m, sd 7.13, n=17340 | INFORMATIVE |
-| gnss.position | range 23.0 m, sd 7.11, n=17343 | INFORMATIVE |
-| gnss.velocity | range 0.300 m/s, sd 0.048, n=17343 | INFORMATIVE |
-| vibration.rms | range 0.0130 m/s², sd 0.0023, n=17319 | INFORMATIVE |
-| estimator.variances | range 0.155, sd 0.0286, n=17318 | INFORMATIVE (blocked from use by policy) |
-| estimator.flight_mode | latched, decoded, n=16908 | INFORMATIVE (DECODE criterion) |
-| vehicle_status.armed | latched armed=1, n=16908 | INFORMATIVE (DECODE criterion) |
-| baro.temp_c | range 0.15 °C, sd 0.047, n=17340 | varies, but declared non-informative and not used |
-| **`battery.voltage`** | **range 0.72 V, sd 0.240, n=17326** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
-| **`esc.rpm`** | **range 5447 RPM, sd 1317, n=17346** | **INFORMATIVE — see 2.5; declared AVAILABLE_UNVALIDATED on PX4 and still refused** |
-| `esc.current` | constant at 0 over 17346 samples | STUB_OR_NONINFORMATIVE, as declared |
+| imu0.accel | range 3.84 m/s², sd 0.348, n=1947 | INFORMATIVE |
+| imu0.gyro | range 1.199 rad/s, sd 0.227, n=1947 | INFORMATIVE |
+| mag.field_ut | range 57.9 µT, sd 10.21, n=556 | INFORMATIVE (heading reference verified — 2.6) |
+| baro.altitude | range 22.1 m, sd 6.53, n=390 | INFORMATIVE |
+| gnss.position | range 21.8 m, sd 6.51, n=195 | INFORMATIVE |
+| gnss.velocity | range 0.300 m/s, sd 0.048, n=195 | INFORMATIVE |
+| vibration.rms | range 0.0118 m/s², sd 0.0023, n=390 | INFORMATIVE |
+| estimator.variances | range 0.157, sd 0.0302, n=195 | INFORMATIVE (blocked from use by policy) |
+| estimator.flight_mode | latched, decoded, n=38 | INFORMATIVE (DECODE criterion) |
+| vehicle_status.armed | latched armed=1, n=38 | INFORMATIVE (DECODE criterion) |
+| baro.temp_c | range 0.14 °C, sd 0.043, n=390 | varies, but declared non-informative and not used |
+| **`battery.voltage`** | **range 0.689 V, sd 0.229, n=390** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
+| **`esc.rpm`** | **range 5545 RPM, sd 1320, n=39** | **INFORMATIVE — see 2.5; declared AVAILABLE_UNVALIDATED on PX4 and still refused** |
+| `esc.current` | constant at 0 over 39 samples | STUB_OR_NONINFORMATIVE, as declared |
 
 Two of these change what CSIA can do on PX4.
 
@@ -259,8 +289,8 @@ suspicion rather than a finding, precisely because constancy on a vehicle that
 never moved describes the trial. Under load it varies by 0.689 V. Marking it
 UNCONFIRMED was correct, and recording it as a finding would have been wrong.
 
-**`esc.rpm` is real on PX4 and the base contract is wrong about it.** 5,447
-RPM of range with sd 1,317 over 17,346 samples is a live signal, and the contract row
+**`esc.rpm` is real on PX4 and the base contract is wrong about it.** 5,545
+RPM of range with sd 1,320 over **39** samples is a live signal, and the contract row
 — written against ArduPilot SITL, where `SIM_Frame.cpp:901` derives rpm from
 `vibe_motor` with `VIB_MOT_MAX` defaulting to 0 — declares it
 `STUB_OR_NONINFORMATIVE`. On ArduPilot that row is correct and was
@@ -273,7 +303,7 @@ is **per platform instance**, never global.
 | | ArduPilot SITL | PX4 SIH |
 |---|---|---|
 | `esc.current` | constant 3.2 A (placeholder) | constant 0 (stub) |
-| `esc.rpm` | constant 0 | **varies, 5447 RPM range** |
+| `esc.rpm` | constant 0 | **varies, 5545 RPM range** |
 | `battery.current` | varies, 5.4 A range | not measured (sentinel) |
 | `battery.voltage` | varies, 0.053 V range | varies, 0.689 V range |
 

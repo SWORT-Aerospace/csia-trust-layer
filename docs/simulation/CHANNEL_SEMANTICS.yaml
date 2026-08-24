@@ -153,8 +153,8 @@ channels:
         letting every run FAIL for a reason that is true of the airframe.
       evidence: research/v1_1/results/qualification_px4.json
       measured: >-
-        0 samples over 17,173 messages with the airframe flying (climbed
-        2.69 m), decoder csia_px4 with 0 undecodable frames -- so this is a
+        0 samples over 17,294 messages with the airframe flying (climbed
+        2.72 m), decoder csia_px4 with 0 undecodable frames -- so this is a
         presence fact about PX4, not a parser limitation.
 
 - channel: imu1.gyro
@@ -181,7 +181,7 @@ channels:
         SCALED_IMU2. The imu0/imu1 cross-check relation cannot be evaluated
         on this backend.
       evidence: research/v1_1/results/qualification_px4.json
-      measured: "0 samples over 17,173 messages with the airframe flying"
+      measured: "0 samples over 17,294 messages with the airframe flying"
 
 # --------------------------------------------------------------- MAGNETOMETER
 - channel: mag.field_ut
@@ -350,8 +350,10 @@ channels:
         be a sensor rather than wiring.
       evidence: research/v1_1/results/qualification_px4.json
       measured: >-
-        387 producer frames in 40 s, every one carrying the -1 sentinel;
-        0 usable samples. See presence_findings.sentinel_counts.
+        390 producer frames in 40 s (~9.8 Hz), every one carrying the -1
+        sentinel; 0 usable samples. See presence_findings.sentinel_counts.
+        The adapter now delivers MissingReason.SENTINEL for this, so the
+        flight log distinguishes it from a message that never came.
 
 # ------------------------------------------------------------------- ESC ****
 # The reason this file exists. Read W-5 before changing anything here.
@@ -392,7 +394,7 @@ channels:
         liveness value, simply no current model. Recorded separately so a
         reader does not carry an ArduPilot source citation onto PX4.
       evidence: research/v1_1/results/qualification_px4.json
-      measured: "constant at 0 over 17,167 samples, airframe flying"
+      measured: "constant at 0 over 39 samples (~1 Hz), airframe flying"
 
 - channel: esc.rpm
   node: motor_esc
@@ -432,8 +434,14 @@ channels:
         Promoting this row needs a source read, not another flight.
       evidence: research/v1_1/results/qualification_px4.json
       measured: >-
-        range 5540 rpm, sd 1323.15, n=17167, airframe climbed 2.69 m. Compare
-        ArduPilot the same day: constant at 0 over 116,911 samples.
+        range 5545 rpm, sd 1320.48, n=39, airframe climbed 2.72 m. Compare
+        ArduPilot the same day: constant at 0 over 4,009 samples.
+        NOTE THE SAMPLE COUNT. An earlier version of this row said n=17167,
+        which was the MESSAGE count: the probe read the whole channel store
+        after every message, so a 1 Hz channel was recorded 445x per actual
+        sample. ESC_STATUS arrives at ~1 Hz, so 40 s of flight is 39 samples.
+        That is a thin evidence base, and it is a second reason -- beyond the
+        missing source read -- not to promote this row on one hop.
       to_promote: >-
         read PX4 src/modules/mavlink/streams/ESC_STATUS.hpp and the
         esc_status uORB definition, confirm units and per-motor indexing,

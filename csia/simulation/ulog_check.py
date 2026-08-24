@@ -99,7 +99,8 @@ def _regressed_after(times, values, t_align):
 
 
 def assess(flag_times, flags, aid_fused=None, aid_rejected=None,
-           aid_times=None, yaw_error_deg=None, log_end_s=None) -> dict:
+           aid_times=None, yaw_error_deg=None, log_end_s=None,
+           armed_at_s=None) -> dict:
     """Decide, from already-extracted series, whether heading was valid.
 
     Pure: no file access, no pyulog. `flag_times` are seconds relative to the
@@ -183,7 +184,29 @@ def assess(flag_times, flags, aid_fused=None, aid_rejected=None,
             "a boot transient")
         return out
 
+    # HEADING_REFERENCE_LATE was declared in VERDICTS and returned NOWHERE --
+    # a verdict nobody could issue, which is a false affordance in an API
+    # whose whole job is to distinguish outcomes. It is reachable now, and it
+    # measures the thing the write-up previously ASSERTED in prose: that the
+    # observation window lies entirely inside the aligned period. The probe
+    # arms and then observes, so alignment before arming is exactly that
+    # property, and `vehicle_status.arming_state` gives the moment.
+    out["armed_at_s"] = armed_at_s
+    if armed_at_s is not None and t_align > armed_at_s:
+        out["verdict"] = "HEADING_REFERENCE_LATE"
+        out["notes"].append(
+            f"yaw aligned at {t_align:.3f} s but the vehicle armed at "
+            f"{armed_at_s:.3f} s, so part of the observation window ran "
+            f"WITHOUT a heading reference. Heading-dependent channels from "
+            f"this run are not safe to quote.")
+        return out
+
     out["verdict"] = "HEADING_REFERENCE_VALID"
+    if armed_at_s is not None:
+        out["notes"].append(
+            f"aligned {armed_at_s - t_align:.3f} s BEFORE the vehicle armed, "
+            f"so the whole observation window had a heading reference. "
+            f"Measured, not assumed.")
     out["notes"].append(
         f"cs_yaw_align false for the first {t_align:.3f} s and true for the "
         f"remainder"
@@ -244,7 +267,8 @@ def heading_provenance(ulog_path: str) -> dict:
 
     try:
         u = ULog(ulog_path, ["estimator_status_flags", "estimator_aid_src_mag",
-                             "vehicle_attitude", "vehicle_attitude_groundtruth"])
+                             "vehicle_attitude", "vehicle_attitude_groundtruth",
+                             "vehicle_status"])
     except Exception as exc:                            # pragma: no cover
         result["notes"].append(f"could not read the log: {exc}")
         return result
@@ -288,8 +312,19 @@ def heading_provenance(ulog_path: str) -> dict:
                 j += 1
             yaw_err.append(_wrap_deg(ye[i] - yg[j]))
 
+    # When the vehicle armed, in the same time base. ARMING_STATE_ARMED is 2
+    # in PX4's vehicle_status; anything above 1 is armed.
+    armed_at = None
+    vs = data.get("vehicle_status")
+    if vs is not None and "arming_state" in vs:
+        for i, state in enumerate(vs["arming_state"]):
+            if int(state) >= 2:
+                armed_at = vs["timestamp"][i] / 1e6 - t0
+                break
+
     out = assess(t_flags, flags, aid_fused=aid_f, aid_rejected=aid_r,
                  aid_times=aid_t, yaw_error_deg=yaw_err,
-                 log_end_s=t_flags[-1] if t_flags else None)
+                 log_end_s=t_flags[-1] if t_flags else None,
+                 armed_at_s=armed_at)
     out["log"] = ulog_path
     return out

@@ -1,0 +1,120 @@
+{
+ "R13": "FAIL: 2 ticks over budget",
+ "certifiable": false,
+ "field_mode": true,
+ "host_noise_control": {
+  "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+  "concurrent_with_measurement": false,
+  "iterations_per_tick": 4896,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 509.04999999999995,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 657.9,
+    "median_us": 357.9,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 483.5,
+    "p99_us": 624.5
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 599.0,
+    "median_us": 374.1,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 473.8,
+    "p99_us": 542.6
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 609.7,
+    "median_us": 364.0,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 467.2,
+    "p99_us": 557.8
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 657.9,
+   "median_us": 357.9,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 483.5,
+   "p99_us": 624.5
+  }
+ },
+ "how_to_certify": [
+  "run on the TARGET companion computer, not a workstation",
+  "chrt -f 80 taskset -c 2 python tools/deploy/gate2_timing.py LOG",
+  "set the CPU governor to performance",
+  "isolate the core (isolcpus=/nohz_full=) if the platform allows",
+  "the host-noise control must show 0 ticks over budget, or the measurement is about the scheduler"
+ ],
+ "log": "20260824T143709Z-713280b4.part000.jsonl",
+ "measured_utc": "2026-08-24T15:07:00Z",
+ "median_of_pass_medians_us": 509.0,
+ "median_spread_us": 22.5,
+ "passes": [
+  {
+   "budget_us": 2000.0,
+   "handoffs_per_tick": 4.27,
+   "max_us": 8264.0,
+   "mean_us": 535.5,
+   "median_headroom_x": 3.84,
+   "median_us": 520.3,
+   "min_us": 1.3,
+   "n": 751,
+   "over_budget": 2,
+   "p95_us": 634.2,
+   "p99_us": 768.8
+  },
+  {
+   "budget_us": 2000.0,
+   "handoffs_per_tick": 4.27,
+   "max_us": 2071.0,
+   "mean_us": 504.9,
+   "median_headroom_x": 4.02,
+   "median_us": 497.8,
+   "min_us": 0.9,
+   "n": 751,
+   "over_budget": 1,
+   "p95_us": 617.7,
+   "p99_us": 807.7
+  }
+ ],
+ "platform": {
+  "cpu_count": 4,
+  "device_tree_model": null,
+  "machine": "x86_64",
+  "processor_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "python": "3.12.3",
+  "python_implementation": "CPython",
+  "release": "6.18.44-fc-v21",
+  "system": "Linux"
+ },
+ "requirement": "R13 <= 2 ms per tick",
+ "scheduling": {
+  "affinity": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "cpu_governor": null,
+  "governor_fixed": null,
+  "isolated_cpus": "",
+  "nice": 0,
+  "nohz_full": "",
+  "pinned": false,
+  "policy": "SCHED_OTHER",
+  "priority": 0,
+  "realtime_policy": false,
+  "suitable_for_certification": false
+ },
+ "worst_over_budget": 2
+}

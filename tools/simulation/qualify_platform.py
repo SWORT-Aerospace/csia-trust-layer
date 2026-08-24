@@ -123,6 +123,24 @@ def observe(platform, duration_s, conn, adapter):
     """Collect per-channel observations from the live stream."""
     obs = {ch: [] for ch in adapter.contract.channels}
     nonfinite = {}
+    # channel -> the store's receive stamp at the last time we sampled it.
+    #
+    # WITHOUT THIS THE PROBE COUNTS MESSAGES, NOT SAMPLES. The loop reads the
+    # whole store after every message, so a 25 Hz channel was recorded ~430
+    # times a second and a 40 s PX4 run reported n=17,336 for a channel that
+    # published about 1,000 times. Two consequences, and the second is worse
+    # than the first:
+    #
+    #   * the reported `n` overstated the evidence by more than 17x, and it
+    #     was quoted in the docs as if it were a sample count;
+    #   * `sd` was DWELL-WEIGHTED -- each value counted once per message that
+    #     happened to arrive while it was current -- so a slow channel's
+    #     spread was silently weighted by how long each value sat in the
+    #     store rather than by how often it was measured.
+    #
+    # The verdicts do not change: range is over the same set of values, and
+    # the stub test is `spread <= EPS`. Only the statistics become honest.
+    last_stamp = {}
     t0 = time.time()
     msgs = 0
     while time.time() - t0 < duration_s:
@@ -136,6 +154,10 @@ def observe(platform, duration_s, conn, adapter):
         # the contract row rests on, and a blocked channel never reaches the
         # canonical sample.
         for ch, entry in adapter._latest.items():
+            stamp = entry[1]
+            if last_stamp.get(ch) == stamp:
+                continue           # same arrival as last time: not a sample
+            last_stamp[ch] = stamp
             s = _scalarize(entry[0])
             if s is not None:
                 obs.setdefault(ch, []).append(s)
@@ -299,8 +321,12 @@ def main() -> int:
     if args.platform == "px4":
         provenance = heading_provenance(newest_ulog(workdir))
     heading_verified = provenance["verdict"] == "HEADING_REFERENCE_VALID"
+    # LATE belongs here too: if yaw aligned only after the vehicle armed,
+    # part of the observation window ran without a heading reference, and a
+    # partially contaminated channel is not a usable one.
     heading_broken = provenance["verdict"] in ("NO_HEADING_REFERENCE",
-                                               "HEADING_REFERENCE_LOST")
+                                               "HEADING_REFERENCE_LOST",
+                                               "HEADING_REFERENCE_LATE")
 
     print(f"\n=== {msgs} messages, {adapter.counters['mapped']} mapped, "
           f"{adapter.counters['unmapped']} unmapped")

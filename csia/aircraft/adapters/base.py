@@ -98,6 +98,9 @@ class PlatformAdapter:
         # different facts about the platform: one is an unimplemented stream,
         # the other is an implemented stream declaring it has no sensor.
         self._sentinels: dict = {}
+        # channel -> when its producer last arrived carrying the sentinel, so
+        # the DELIVERED value can say SENTINEL rather than NOT_RECEIVED.
+        self._sentinel_at: dict = {}
 
     # -- subclass interface ------------------------------------------------
 
@@ -112,20 +115,40 @@ class PlatformAdapter:
         if value is None:
             return
         self._latest[channel] = (value, self._clock(), t_source, frame, unit)
+        # A real value supersedes an earlier sentinel: a sensor that starts
+        # reporting must not keep being described as unmeasured.
+        self._sentinel_at.pop(channel, None)
         self.counters["mapped"] += 1
         if t_source is not None:
             self._t_source_last = t_source
 
-    def _reject_sentinel(self, *channels: str):
+    def _reject_sentinel(self, *channels: str,
+                         reason: MissingReason = MissingReason.SENTINEL):
         """Record that a channel's producer arrived and declared no value.
 
-        Named channels, not just a tally. `MissingReason.SENTINEL` already
-        distinguishes this from FIELD_ABSENT everywhere downstream; the
-        adapter was the one layer that threw the distinction away.
+        Named channels AND a delivered reason, not just a tally.
+
+        The first version of this method only counted, and the counting fix
+        was written up as though it had solved the problem. It had not:
+        `MissingReason.SENTINEL` was defined in sample.py and produced
+        NOWHERE, so a PX4 `BATTERY_STATUS` arriving at ~9.7 Hz with
+        `current_battery = -1` reached the flight log as `NOT_RECEIVED` --
+        byte for byte identical to a message that never came. The one
+        distinction the enum exists to carry was still being thrown away, one
+        layer further down than before.
+
+        The REASON is the caller's to name, and that matters. A lost GPS fix
+        and a -1 battery current are both in-band "no value" reports, but
+        `NO_3D_FIX` says something `SENTINEL` does not, and the enum already
+        carries the distinction. Defaulting every case to SENTINEL would have
+        replaced one imprecision with another --
+        `test_no_3d_fix_is_missing_not_a_zero_position` caught exactly that.
         """
+        now = self._clock()
         self.counters["rejected_sentinel"] += 1
         for channel in channels:
             self._sentinels[channel] = self._sentinels.get(channel, 0) + 1
+            self._sentinel_at[channel] = (now, reason)
 
     def sentinel_counts(self) -> dict:
         return dict(self._sentinels)
@@ -149,6 +172,23 @@ class PlatformAdapter:
     def _channel_value(self, channel: str, now: float) -> ChannelValue:
         entry = self._latest.get(channel)
         if entry is None:
+            # "The message never came" and "the message came and declared it
+            # has no sensor" are different facts about the vehicle, and only
+            # the second one tells a post-flight reader that the stream is
+            # wired and the hardware is not. Aged against the same limit as a
+            # real value: a sentinel from a minute ago says nothing about now.
+            record = self._sentinel_at.get(channel)
+            if record is not None:
+                t_sent, sent_reason = record
+                limit = self.max_age.get(channel, DEFAULT_MAX_AGE)
+                if now - t_sent <= limit:
+                    q, _may, _reason, _ = self.contract.effective(channel)
+                    return ChannelValue.absent(
+                        channel, sent_reason,
+                        quality=(Quality.UNAVAILABLE if q.admissible else q),
+                        note="producer arrived carrying the documented "
+                             "not-measured sentinel: stream implemented, "
+                             "measurement absent")
             return self.contract.qualify(channel, None)
         value, t_recv, t_source, frame, unit = entry
         age = now - t_recv

@@ -77,3 +77,119 @@ def test_the_worst_trial_decides():
     out = measure(n_ticks=20, target_us=200.0, budget_us=2000.0, trials=3)
     assert out["worst_trial"]["over_budget"] == max(
         t["over_budget"] for t in out["trials"])
+
+
+# --------------------------------------------------------------------------
+# A verdict nobody could issue is a false affordance.
+
+def test_heading_reference_late_is_reachable():
+    """HEADING_REFERENCE_LATE was declared in VERDICTS and returned nowhere.
+
+    It now measures what the write-up previously only asserted: that the
+    observation window lies entirely inside the aligned period. The probe
+    arms and then observes, so alignment before arming IS that property.
+    """
+    from csia.simulation.ulog_check import VERDICTS, assess
+    t = [0.0, 1.0, 2.0, 3.0, 4.0]
+    flags = {"cs_yaw_align": [0, 0, 0, 1, 1], "cs_mag": [0, 0, 0, 1, 1]}
+    late = assess(t, flags, armed_at_s=1.0)
+    assert late["verdict"] == "HEADING_REFERENCE_LATE"
+    assert late["verdict"] in VERDICTS
+    assert "WITHOUT a heading reference" in " ".join(late["notes"])
+
+
+def test_aligning_before_arming_is_valid_and_reports_the_margin():
+    from csia.simulation.ulog_check import assess
+    t = [0.0, 1.0, 2.0, 3.0, 4.0]
+    flags = {"cs_yaw_align": [0, 1, 1, 1, 1], "cs_mag": [0, 1, 1, 1, 1]}
+    ok = assess(t, flags, armed_at_s=9.0)
+    assert ok["verdict"] == "HEADING_REFERENCE_VALID"
+    assert ok["source"] == "MAGNETOMETER"
+    assert "8.000 s BEFORE" in " ".join(ok["notes"])
+
+
+def test_without_an_arming_time_the_verdict_is_unchanged():
+    # Not every platform logs one. Absence of the check must not invent a
+    # failure, and must not claim the margin either.
+    from csia.simulation.ulog_check import assess
+    t = [0.0, 1.0, 2.0]
+    flags = {"cs_yaw_align": [0, 1, 1], "cs_mag": [0, 1, 1]}
+    out = assess(t, flags)
+    assert out["verdict"] == "HEADING_REFERENCE_VALID"
+    assert out["armed_at_s"] is None
+    assert "BEFORE the vehicle armed" not in " ".join(out["notes"])
+
+
+def test_a_heading_lost_mid_run_outranks_the_late_check():
+    from csia.simulation.ulog_check import assess
+    t = [0.0, 1.0, 2.0, 3.0]
+    flags = {"cs_yaw_align": [0, 1, 1, 0]}
+    assert assess(t, flags, armed_at_s=9.0)["verdict"] == \
+        "HEADING_REFERENCE_LOST"
+
+
+def test_never_aligning_is_still_the_strongest_finding():
+    from csia.simulation.ulog_check import assess
+    out = assess([0.0, 1.0], {"cs_yaw_align": [0, 0]}, armed_at_s=0.5)
+    assert out["verdict"] == "NO_HEADING_REFERENCE"
+
+
+# --------------------------------------------------------------------------
+# Gate 2: the measurement that cannot be taken here, made ready to take there.
+
+def test_gate2_reads_the_real_processor_model_not_the_model_number():
+    """On x86 `/proc/cpuinfo` has `model : 207` one line above `model name`.
+
+    The first version prefix-matched line by line and reported the processor
+    as "207".
+    """
+    sys.path.insert(0, os.path.join(ROOT, "tools", "deploy"))
+    from gate2_timing import platform_identity
+    ident = platform_identity()
+    assert ident["processor_model"] not in ("", "unknown")
+    assert not ident["processor_model"].isdigit()
+    assert ident["cpu_count"] and ident["machine"]
+
+
+def test_gate2_refuses_to_certify_an_unconstrained_scheduler():
+    sys.path.insert(0, os.path.join(ROOT, "tools", "deploy"))
+    from gate2_timing import scheduling_environment
+    env = scheduling_environment()
+    # This container is SCHED_OTHER on 4 shared cores with no cpufreq. Every
+    # certification precondition must be reported false, and the fields must
+    # be present either way so a later run can be compared against them.
+    assert env["suitable_for_certification"] is False
+    for key in ("policy", "realtime_policy", "pinned", "governor_fixed",
+                "affinity", "cpu_governor"):
+        assert key in env
+
+
+def test_gate2_treats_an_unreadable_governor_as_not_certifiable():
+    """Unknown is not acceptable.
+
+    A platform with no cpufreq sysfs has its clock rate decided by something
+    this process cannot see, and a deadline measured under an invisible clock
+    rate is not certifiable -- the same error as reading a silent diagnostic
+    channel as a quiet vehicle.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "tools", "deploy"))
+    import gate2_timing
+    env = gate2_timing.scheduling_environment()
+    if env["cpu_governor"] is None:
+        assert env["governor_fixed"] is None
+        assert env["suitable_for_certification"] is False
+
+
+def test_out_of_range_was_removed_rather_than_left_unproduced():
+    """A vocabulary member with no producer is a promise the system breaks.
+
+    And this one should never gain a producer: dropping "physically
+    impossible" sensor values would discard exactly the evidence CSIA exists
+    to notice.
+    """
+    from csia.aircraft.sample import MissingReason
+    assert not hasattr(MissingReason, "OUT_OF_RANGE")
+    # Every remaining member is emitted by some code path.
+    assert {m.name for m in MissingReason} == {
+        "NOT_RECEIVED", "STALE", "NO_3D_FIX", "SENTINEL",
+        "FIELD_ABSENT", "NOT_QUALIFIED", "STUB"}

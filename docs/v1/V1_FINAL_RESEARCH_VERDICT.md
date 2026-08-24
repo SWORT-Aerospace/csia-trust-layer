@@ -327,6 +327,36 @@ about where it can be discharged. R13 must be measured on the target companion
 computer with a quiet scheduler, and no verdict from this container — pass or
 fail — may be quoted as evidence either way.
 
+**And "measure it at Gate 2" is now a command rather than a sentence.**
+`tools/deploy/gate2_timing.py` runs on the companion itself: no autopilot, no
+SITL, no simulator, no network, no pymavlink — it replays a recorded shadow
+flight log through the frozen core, which drives exactly the per-tick work R13
+constrains, with the data a real flight produced. Copy the repo and one
+`.jsonl` and run it.
+
+It records what makes a result transferable rather than assuming it: CPU model
+and core count, kernel, Python build, and — read from the kernel, never
+assumed — scheduling policy, priority, affinity, CPU governor, isolated CPUs.
+It reports **two** things that must not be confused: the R13 verdict, and
+whether the environment is fit to certify one. A `PASS` under `SCHED_OTHER` on
+a shared core is a measurement, not a deadline result, and the tool says so
+and exits non-zero. An unreadable governor counts as unfit: a deadline
+measured under a clock rate this process cannot see is not certifiable.
+
+Run on the development container it reports, correctly:
+
+```
+=== scheduling: policy SCHED_OTHER prio 0, affinity [0,1,2,3], governor None
+    *** NOT A CERTIFICATION ENVIRONMENT. Missing: a real-time policy
+        (chrt -f 80 ...), CPU pinning (taskset -c N ...), a READABLE CPU
+        governor (none exposed here, so the clock rate is set by something
+        invisible to this process)
+=== CERTIFIABLE AT GATE 2: NO
+```
+
+The ARM number still has to be taken on ARM. Everything else between someone
+holding the hardware and that number is now removed.
+
 ### W-7 The first heartbeat is discarded on every connection
 
 **Found after the freeze**, by the v1.1 equivalence instrument

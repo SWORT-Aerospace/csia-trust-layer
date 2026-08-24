@@ -59,7 +59,17 @@ class MissingReason(enum.Enum):
     FIELD_ABSENT = "FIELD_ABSENT"          # message lacks the field entirely
     NOT_QUALIFIED = "NOT_QUALIFIED"        # semantics not established
     STUB = "STUB"                          # present, well-formed, meaningless
-    OUT_OF_RANGE = "OUT_OF_RANGE"          # physically impossible value
+
+    # OUT_OF_RANGE was here and is deliberately GONE. Nothing produced it, and
+    # nothing should: a plausibility gate that drops "physically impossible"
+    # sensor values would discard exactly the evidence a fault-detection layer
+    # exists to notice. An IMU reading 400 m/s^2 is not noise to be filtered,
+    # it is the finding. Values that cannot be arithmetic at all (NaN, inf)
+    # are handled where they arise, and the reason a channel is unusable is
+    # always one of the reasons above -- each of which some code path actually
+    # emits. A vocabulary member with no producer is a promise the system does
+    # not keep; SENTINEL sat here unproduced for weeks and a real distinction
+    # was being lost the whole time.
 
 
 class SensorFrame(enum.Enum):

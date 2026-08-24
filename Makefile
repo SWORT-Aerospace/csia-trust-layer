@@ -39,6 +39,7 @@ help:
 	@echo "  make qualification   live channel-semantics check, both platforms"
 	@echo "  make sim-ardupilot   qualify against ArduPilot SITL"
 	@echo "  make sim-px4         qualify against PX4 SITL"
+	@echo "  make gate2-timing    R13 on target hardware (LOG=<flight.jsonl>)"
 	@echo "  make campaign        run the scenario suite"
 	@echo "  make shadow-run      run CSIA in SHADOW mode"
 	@echo "  make replay          replay a flight log"
@@ -185,6 +186,17 @@ sim-ardupilot:
 sim-px4:
 	CSIA_PX4_ROOT=$(PX4_ROOT) $(PY) tools/simulation/qualify_platform.py \
 	  --platform px4 --seconds 30
+
+# Gate 2: run this ON THE TARGET companion computer. Needs no autopilot, no
+# simulator and no network -- only a recorded shadow flight log. It reports
+# the R13 verdict AND whether the environment is fit to certify one; a PASS
+# under an unconstrained scheduler is a measurement, not a deadline result.
+#   make gate2-timing LOG=logs/shadow-sitl-ardupilot/....jsonl
+.PHONY: gate2-timing
+gate2-timing:
+	@test -n "$(LOG)" || (echo "usage: make gate2-timing LOG=<flight.jsonl>"; exit 2)
+	chrt -f 80 taskset -c 2 $(PY) tools/deploy/gate2_timing.py "$(LOG)" \
+	  || $(PY) tools/deploy/gate2_timing.py "$(LOG)"
 
 # Both platforms. Reports each; fails if either fails.
 .PHONY: qualification

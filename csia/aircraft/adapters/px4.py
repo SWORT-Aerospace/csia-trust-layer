@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..sample import SensorFrame
+from ..sample import MissingReason, SensorFrame
 from .base import PlatformAdapter, finite
 
 MAV_MODE_FLAG_SAFETY_ARMED = 128
@@ -222,7 +222,8 @@ class PX4Adapter(PlatformAdapter):
         if fix is None or fix < 3:
             self._latest.pop("gnss.position", None)
             self._latest.pop("gnss.velocity", None)
-            self._reject_sentinel("gnss.position", "gnss.velocity")
+            self._reject_sentinel("gnss.position", "gnss.velocity",
+                                  reason=MissingReason.NO_3D_FIX)
             return
         lat, lon, alt = g("lat", None), g("lon", None), g("alt", None)
         if lat is None or lon is None or alt is None:

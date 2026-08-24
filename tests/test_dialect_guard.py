@@ -217,3 +217,61 @@ def test_adapters_name_the_channel_they_rejected():
         # The global tally still moves: nothing downstream that reads it
         # breaks because the per-channel detail was added.
         assert a.counters["rejected_sentinel"] == 1
+
+
+# --------------------------------------------------------------------------
+# The sentinel had a name and no producer.
+
+def test_a_sentinel_reaches_the_sample_as_SENTINEL_not_NOT_RECEIVED():
+    """`MissingReason.SENTINEL` was defined and produced NOWHERE.
+
+    PX4's BATTERY_STATUS arrives at ~9.7 Hz with current_battery = -1. The
+    flight log recorded that as NOT_RECEIVED -- byte for byte identical to a
+    message that never came. The per-channel COUNTER was added first and
+    written up as though it had fixed this; it had not.
+    """
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.sample import MissingReason
+
+    a = get_adapter("ardupilot")
+    a.ingest({"mavpackettype": "BATTERY_STATUS",
+              "voltages": [15300] + [65535] * 9,
+              "current_battery": -1, "time_boot_ms": 1000})
+    s = a.sample(t_mono=0.0)
+    assert s.battery["battery.current"].missing is MissingReason.SENTINEL
+    # The message DID arrive: voltage from the same packet is present.
+    assert s.battery["battery.voltage"].value == 15.3
+
+
+def test_a_channel_that_never_arrived_is_still_NOT_RECEIVED():
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.sample import MissingReason
+    a = get_adapter("ardupilot")
+    assert (a.sample(t_mono=0.0).battery["battery.current"].missing
+            is MissingReason.NOT_RECEIVED)
+
+
+def test_a_real_value_supersedes_an_earlier_sentinel():
+    # A sensor that starts reporting must not keep being described as
+    # unmeasured.
+    from csia.aircraft.adapters import get_adapter
+    a = get_adapter("ardupilot")
+    for cur in (-1, 520):
+        a.ingest({"mavpackettype": "BATTERY_STATUS",
+                  "voltages": [15300] + [65535] * 9,
+                  "current_battery": cur, "time_boot_ms": 1000})
+    cv = a.sample(t_mono=0.0).battery["battery.current"]
+    assert cv.value == 5.2 and cv.missing is None
+
+
+def test_a_sentinel_value_is_still_not_admissible():
+    # SENTINEL is a better reason, not a promotion. The value stays absent.
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.sample import Quality
+    a = get_adapter("ardupilot")
+    a.ingest({"mavpackettype": "BATTERY_STATUS",
+              "voltages": [15300] + [65535] * 9,
+              "current_battery": -1, "time_boot_ms": 1000})
+    cv = a.sample(t_mono=0.0).battery["battery.current"]
+    assert cv.value is None
+    assert cv.quality is not Quality.INFORMATIVE
