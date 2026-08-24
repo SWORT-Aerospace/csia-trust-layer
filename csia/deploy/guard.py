@@ -117,21 +117,51 @@ class ReadOnlyMavlinkConnection:
         Best-effort by design: serial links and file replays have no such
         concept. Failure here is not fatal because layer 1 already denies
         transmission; this only removes a second path.
+
+        **ENOTCONN does not mean it failed.** A MAVLink UDP listener is an
+        UNCONNECTED socket, and Linux applies SHUT_WR to one and *then*
+        returns ENOTCONN. Measured, with a null control:
+
+            no shutdown        -> sendto() succeeds      (instrument alive)
+            shutdown, ENOTCONN -> sendto() EPIPE         (it was applied)
+
+        The first version treated the exception as failure and recorded
+        `write_half_closed: false` into every shadow flight header -- false
+        evidence about a safety control that had in fact worked. Evidence that
+        misreports is worse than no evidence, so the state is now three-valued
+        and names which case it is instead of collapsing to a boolean.
+
+        It is NOT verified by attempting a send: that would put a packet on
+        the wire to the autopilot, which is the exact thing SHADOW mode
+        exists to prevent. The Linux behaviour is pinned by a test with a null
+        control instead (`tests/test_shadow_transport.py`).
         """
+        import errno as _e
         import socket as _s
         sock = getattr(self._conn, "port", None)
-        if isinstance(sock, _s.socket):
-            try:
-                sock.shutdown(_s.SHUT_WR)
-                object.__setattr__(self, "_write_half_closed", True)
-                return
-            except OSError:
-                pass
-        object.__setattr__(self, "_write_half_closed", False)
+        if not isinstance(sock, _s.socket):
+            object.__setattr__(self, "_write_half_state", "NO_SOCKET")
+            return
+        try:
+            sock.shutdown(_s.SHUT_WR)
+            object.__setattr__(self, "_write_half_state", "CLOSED")
+        except OSError as exc:
+            if exc.errno == _e.ENOTCONN:
+                # Applied on Linux despite the error return.
+                object.__setattr__(self, "_write_half_state",
+                                   "CLOSED_ENOTCONN")
+            else:
+                object.__setattr__(self, "_write_half_state",
+                                   f"UNSUPPORTED({exc.errno})")
+
+    @property
+    def write_half_state(self) -> str:
+        """CLOSED | CLOSED_ENOTCONN | NO_SOCKET | UNSUPPORTED(errno)."""
+        return getattr(self, "_write_half_state", "NO_SOCKET")
 
     @property
     def write_half_closed(self) -> bool:
-        return getattr(self, "_write_half_closed", False)
+        return self.write_half_state in ("CLOSED", "CLOSED_ENOTCONN")
 
     @property
     def mode(self) -> str:
@@ -222,6 +252,10 @@ def assert_no_command_capability(conn, mode: str = "SHADOW") -> dict:
         "result": "NO_COMMAND_PATH_REACHABLE",
         "probes": probes,
         "write_half_closed": getattr(conn, "write_half_closed", None),
+        # The reason, not just the boolean: a flight header that says "false"
+        # without saying whether the transport HAS a write half is unreadable
+        # after the fact.
+        "write_half_state": getattr(conn, "write_half_state", "NO_SOCKET"),
     }
 
 

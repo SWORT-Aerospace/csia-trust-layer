@@ -29,6 +29,7 @@ import enum
 import logging
 import os
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -98,6 +99,13 @@ class ShadowRunner:
         self.stats = {"ticks": 0, "messages": 0, "stale_ticks": 0,
                       "max_latency_us": 0.0, "watchdog_trips": 0,
                       "reconnects": 0}
+        # Per-tick latency, for a DISTRIBUTION rather than a mean. A mean
+        # hides the tail and the tail is what misses a deadline. Bounded by a
+        # ring buffer: "no unbounded queues" is an acceptance criterion, and a
+        # 12-hour flight at 25 Hz would otherwise retain a million floats.
+        # `max_latency_us` is kept separately and covers the whole flight, so
+        # nothing is lost when the ring wraps.
+        self.tick_latencies = deque(maxlen=100_000)
         self._running = False
         self._last_msg_mono = None
 
@@ -208,6 +216,7 @@ class ShadowRunner:
         self.stats["ticks"] += 1
         self.stats["max_latency_us"] = max(self.stats["max_latency_us"],
                                            latency_us)
+        self.tick_latencies.append(latency_us)
 
         watchdog_tripped = False
         if self._last_msg_mono is not None:

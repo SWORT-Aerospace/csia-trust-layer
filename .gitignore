@@ -61,3 +61,10 @@ Thumbs.db
 # `make public-release`; the manifest and the build log carry the SHA-256.
 publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz
 publication/system_paper_i/PAPER1_SANITIZED_PACKAGE.tar.gz
+
+# Shadow/advisory flight logs are per-run artifacts, like the archives above:
+# one JSONL file per flight, rotated and gzipped, written by
+# csia.deploy.flight_log. They are EVIDENCE from a specific run, not source --
+# a committed one would be a snapshot of a container that no longer exists.
+# Keep the ones that matter by archiving them deliberately, not by default.
+logs/
