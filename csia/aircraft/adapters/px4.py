@@ -62,6 +62,15 @@ class PX4Adapter(PlatformAdapter):
     platform = "px4"
     verified_against = "PX4-Autopilot @ 547e2ca (px4_sitl_default)"
 
+    # See ArduPilotAdapter.HANDLED_TYPES for the measurement that motivated
+    # this. PX4's set differs: HIGHRES_IMU rather than SCALED_IMU, and
+    # ESTIMATOR_STATUS rather than EKF_STATUS_REPORT.
+    HANDLED_TYPES = frozenset({
+        "HEARTBEAT", "HIGHRES_IMU", "SCALED_IMU2", "SCALED_IMU3",
+        "SCALED_PRESSURE", "GPS_RAW_INT", "BATTERY_STATUS", "VIBRATION",
+        "ESC_STATUS", "ESTIMATOR_STATUS",
+    })
+
     def __init__(self, **kw):
         super().__init__(**kw)
         self._origin = None
@@ -73,6 +82,9 @@ class PX4Adapter(PlatformAdapter):
         # "type" is a real HEARTBEAT field and must not be shadowed.
         k = (msg.get_type() if hasattr(msg, "get_type")
              else msg["mavpackettype"])
+        if k not in self.HANDLED_TYPES:
+            self._note_unmapped(k)
+            return
         g = (lambda n, d=None: getattr(msg, n, d)) if hasattr(msg, "get_type") \
             else (lambda n, d=None: msg.get(n, d))
         t_src = self._source_time(g)

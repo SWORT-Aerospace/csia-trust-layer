@@ -84,6 +84,9 @@ def main() -> int:
     ap.add_argument("--fly", action="store_true",
                     help="arm and climb first, so the stack sees a moving "
                          "airframe rather than a parked one")
+    ap.add_argument("--stream-profile", choices=("full", "companion"),
+                    default="full",
+                    help="companion = only the streams CSIA reads")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -113,7 +116,8 @@ def main() -> int:
         # The rig commands on SERIAL1 instead. Commands work on any link;
         # only STREAMS are per-link, which is precisely the distinction that
         # took four runs to establish.
-        tee = MavlinkTee(conn_str, [TEE_OUT], platform=args.platform)
+        tee = MavlinkTee(conn_str, [TEE_OUT], platform=args.platform,
+                         profile=args.stream_profile)
         tee.start()
         if not tee.wait_for_traffic(min_types=5, timeout=25.0):
             raise SystemExit(
@@ -122,7 +126,8 @@ def main() -> int:
                 f"measure an idle loop again.")
         print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
               f"({len(tee.stats['by_type'])} message types flowing)")
-        result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}"}
+        result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}",
+                         "profile": args.stream_profile}
         rig_conn = connect(RIG_LINK, args.platform)
 
         print("=== rig commands on SERIAL1 (streams are per-link)")

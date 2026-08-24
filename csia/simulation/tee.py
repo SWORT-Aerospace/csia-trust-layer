@@ -52,6 +52,29 @@ ARDUPILOT_STREAMS = (
     ("MAV_DATA_STREAM_EXTRA3", 5),
 )
 
+# What a correctly configured COMPANION link should carry: the streams CSIA
+# actually consumes, and nothing else.
+#
+# POSITION, EXTRA1 and EXTRA2 are dropped entirely. They carry
+# GLOBAL_POSITION_INT, ATTITUDE, NAV_CONTROLLER_OUTPUT and VFR_HUD -- none of
+# which CSIA reads. GNSS comes from GPS_RAW_INT on EXTENDED_STATUS, because an
+# integrity monitor must watch the RAW receiver rather than the EKF-fused
+# solution that has already gated the fault away.
+#
+# This is not only a benchmark knob. Streaming what the consumer discards
+# wastes companion CPU and link bandwidth on a real aircraft, and the
+# measurement below shows how much.
+ARDUPILOT_STREAMS_COMPANION = (
+    ("MAV_DATA_STREAM_RAW_SENSORS", 25),     # RAW_IMU, SCALED_IMU2, PRESSURE
+    ("MAV_DATA_STREAM_EXTENDED_STATUS", 5),  # GPS_RAW_INT, SYS_STATUS
+    ("MAV_DATA_STREAM_EXTRA3", 10),          # BATTERY_STATUS, VIBRATION, EKF
+)
+
+STREAM_PROFILES = {
+    "full": ARDUPILOT_STREAMS,
+    "companion": ARDUPILOT_STREAMS_COMPANION,
+}
+
 
 class MavlinkTee:
     """Drive one MAVLink link and forward every message to UDP listeners.
@@ -63,11 +86,13 @@ class MavlinkTee:
     """
 
     def __init__(self, source: str, outputs, platform: str = "ardupilot",
-                 stream_rate_hz: int = 25):
+                 stream_rate_hz: int = 25, profile: str = "full"):
         self.source = source
         self.outputs = [self._addr(o) for o in outputs]
         self.platform = platform
         self.stream_rate_hz = stream_rate_hz
+        self.profile = profile
+        self.streams = STREAM_PROFILES[profile]
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._conn = None
         self._thread = None
@@ -96,11 +121,12 @@ class MavlinkTee:
         # THE TRANSMIT. This is the whole reason the tee exists, and it happens
         # here rather than anywhere in csia.deploy.
         if self.platform == "ardupilot":
-            for name, hz in ARDUPILOT_STREAMS:
+            for name, hz in self.streams:
                 self._conn.mav.request_data_stream_send(
                     self._conn.target_system, self._conn.target_component,
                     getattr(mavutil.mavlink, name), hz, 1)
-        log.info("tee: requested %d streams", len(ARDUPILOT_STREAMS))
+        log.info("tee: requested %d streams (profile %s)",
+                 len(self.streams), self.profile)
 
         self._running = True
         self._thread = threading.Thread(target=self._pump, daemon=True,

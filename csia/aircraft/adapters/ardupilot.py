@@ -53,6 +53,20 @@ class ArduPilotAdapter(PlatformAdapter):
     platform = "ardupilot"
     verified_against = "ArduCopter V4.8.0-dev @ 01a504b"
 
+    # Every message type this adapter converts. Checked FIRST so an unwanted
+    # type costs one set lookup instead of a walk down the dispatch chain.
+    #
+    # Measured need: a live SITL feed at 3,529 msg/s delivered 105,972
+    # messages in 30 s of which 68,001 -- 64% -- were types CSIA does not
+    # consume (AHRS, ATTITUDE, GLOBAL_POSITION_INT, MEMINFO, PARAM_VALUE,
+    # NAV_CONTROLLER_OUTPUT and friends). Each one was paying for the full
+    # if-chain before falling through.
+    HANDLED_TYPES = frozenset({
+        "HEARTBEAT", "SCALED_IMU", "SCALED_IMU2", "SCALED_IMU3",
+        "SCALED_PRESSURE", "GPS_RAW_INT", "BATTERY_STATUS", "VIBRATION",
+        "ESC_TELEMETRY_1_TO_4", "ESC_STATUS", "EKF_STATUS_REPORT",
+    })
+
     def __init__(self, **kw):
         super().__init__(**kw)
         self._origin = None
@@ -64,6 +78,9 @@ class ArduPilotAdapter(PlatformAdapter):
         # "type" is a real HEARTBEAT field and must not be shadowed.
         k = (msg.get_type() if hasattr(msg, "get_type")
              else msg["mavpackettype"])
+        if k not in self.HANDLED_TYPES:
+            self._note_unmapped(k)
+            return
         g = (lambda n, d=None: getattr(msg, n, d)) if hasattr(msg, "get_type") \
             else (lambda n, d=None: msg.get(n, d))
         t_src = self._source_time(g)
