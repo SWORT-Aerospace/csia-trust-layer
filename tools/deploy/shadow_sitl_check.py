@@ -97,31 +97,29 @@ def main() -> int:
         # It is NOT closed early: the streams stop when the requester leaves.
         rig_conn = connect(conn_str, args.platform)
 
-        # Make SERIAL1 -- the passive link -- actually stream.
+        # NO stream-rate configuration happens here, and that is the finding.
         #
-        # REQUEST_DATA_STREAM is PER-LINK. The rig requesting streams on
-        # SERIAL0 does nothing for SERIAL1, which is why the first run of this
-        # harness saw a flying vehicle and 0 usable channels. Stream rates for
-        # a port are set by its SRn_* parameters, and those are global state
-        # the rig can write from its own link.
+        # This block used to write SR1_* parameters and print "rig set SR1_*
+        # stream rates (the documented install step)". Those parameters DO NOT
+        # EXIST on ArduCopter 4.8: a full dump shows 1409 parameters whose only
+        # SR* group is SRTL_* (SmartRTL), and the GCS group is prefixed MAV
+        # (ArduCopter/Parameters.cpp:591) holding no stream rates at all
+        # (GCS.cpp:43-75). A parameter write to an unknown name returns no
+        # error, so the harness asserted success while writing into the void
+        # for four consecutive runs.
         #
-        # This is not a test trick: it is exactly the installation step
-        # docs/deployment/AIRCRAFT_INTEGRATION.md 2.0 calls the preferred
-        # option -- configure the companion's port on the flight controller,
-        # so CSIA's evidence does not depend on anyone staying connected.
-        if args.platform == "ardupilot":
-            from pymavlink import mavutil as _mav
-            for name, hz in (("SR1_RAW_SENS", 25), ("SR1_EXTRA1", 25),
-                             ("SR1_EXTRA2", 10), ("SR1_EXTRA3", 5),
-                             ("SR1_POSITION", 10), ("SR1_EXT_STAT", 10),
-                             ("SR1_PARAMS", 0), ("SR1_RC_CHAN", 0)):
-                rig_conn.mav.param_set_send(
-                    rig_conn.target_system, rig_conn.target_component,
-                    name.encode(), float(hz),
-                    _mav.mavlink.MAV_PARAM_TYPE_INT32)
-            time.sleep(2.0)
-            print("=== rig set SR1_* stream rates on the passive port "
-                  "(the documented install step)")
+        # Stream rates on Copter are per-link runtime state set by a transmit
+        # on that link, and they do not persist (GCS.h:537,
+        # persist_streamrates() == false). The rig cannot configure SERIAL1
+        # from SERIAL0, and CSIA cannot configure its own link without
+        # transmitting -- which SHADOW mode forbids by construction.
+        #
+        # So this harness CANNOT currently produce a valid R13 measurement on
+        # a dedicated passive link. That is a real deployment constraint, not
+        # a harness bug, and it is written up in
+        # docs/deployment/AIRCRAFT_INTEGRATION.md 2.0. The positive control
+        # below reports INVALID_MEASUREMENT rather than a number, which is the
+        # correct outcome until the telemetry-tee arrangement is built.
         print("=== rig holds the command link")
         if args.fly:
             print("=== rig: arming and climbing (rig authority, not CSIA)")

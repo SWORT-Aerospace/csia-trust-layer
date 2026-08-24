@@ -78,26 +78,57 @@ R13: INVALID_MEASUREMENT -- 1 message, 0 usable channels
 One heartbeat, then silence. Every channel `NOT_RECEIVED`, no error anywhere,
 a flight log full of well-formed empty ticks.
 
-**What this means for installation.** One of these must be true before a
-shadow flight is worth taking:
+**What this means for installation, corrected against ArduPilot source.**
 
-| option | how | check |
+An earlier version of this section said to set `SR2_*` stream-rate parameters
+on the companion's port and called it the preferred option. **That instruction
+was wrong for ArduCopter 4.8 and would have failed silently.** Measured and
+then confirmed in source:
+
+| evidence | result |
+|---|---|
+| full parameter dump, ArduCopter 4.8 SITL | 1409 parameters; the only `SR*` group is `SRTL_*` (SmartRTL) |
+| `SR1_RAW_SENS`, `SR1_EXTRA1` readback | `None` — the names do not resolve |
+| `SERIAL1_PROTOCOL` readback, same loop | `2.0` — so the loop works and the link is MAVLink2 |
+| `ArduCopter/Parameters.cpp:591` | `GOBJECT(_gcs, "MAV", GCS)` — the group is `MAV`, not `SR` |
+| `libraries/GCS_MAVLink/GCS.cpp:43-75` | that group holds only `MAV_SYSID`, `MAV_GCS_SYSID`, `MAV_OPTIONS`, `MAV_TELEM_DELAY`. **No stream rates.** |
+| `libraries/GCS_MAVLink/GCS.h:537` | `virtual bool persist_streamrates() const { return false; }` — overridden `true` only by ArduPlane |
+
+**On ArduCopter 4.8 there is no parameter-based way to make a link stream.**
+Stream rates are per-link runtime state, not persisted configuration, and they
+are established only by a transmit on that link — `REQUEST_DATA_STREAM` or
+`MAV_CMD_SET_MESSAGE_INTERVAL`.
+
+A parameter write to a name that does not exist returns no error. That is why
+this took four SITL runs to notice: the harness printed "rig set SR1_* stream
+rates" while writing eight parameters into the void.
+
+So a strictly-passive monitor on its OWN dedicated link receives only the
+unsolicited messages. Measured on `tcp:5762` over 10 s with the vehicle
+flying:
+
+```
+HEARTBEAT 11, SYS_STATUS 1, GPS_GLOBAL_ORIGIN 1, HOME_POSITION 1, TIMESYNC 1
+```
+
+No IMU, no GNSS, no barometer, no battery. Zero usable channels.
+
+**The remaining options, honestly ranked:**
+
+| option | passivity | cost |
 |---|---|---|
-| **FC parameters** (preferred) | set `SR2_*` on the companion's serial port: `SR2_RAW_SENS`, `SR2_EXTRA1/2/3`, `SR2_POSITION`, `SR2_EXT_STAT` | persists across reboots; nothing else needed in the air |
-| GCS on another link | the ground station requests streams on its own link | fragile: streams stop when the GCS disconnects |
-| a separate requester process | a small tool with command authority | reintroduces a transmit path on the vehicle — needs its own safety case |
+| **CSIA listens to a stream someone else drives** — a telemetry tee, a MAVProxy `--out` forward, or a shared bus the GCS is already polling | **strict** — CSIA never transmits | needs the GCS/link to stay connected; CSIA's evidence depends on another party |
+| a one-time configurator with transmit authority runs on CSIA's link at boot, then exits | broken once | rates do NOT persist (`persist_streamrates()==false`), so it must run every boot, and it puts a transmit path on the vehicle that needs its own safety case |
+| ArduPlane | n/a | it overrides `persist_streamrates()` to `true`; this constraint is Copter-specific |
 
-**Use the first.** It is the only one where CSIA's evidence does not depend on
-another party staying connected.
+**The first is the only one that preserves strict passivity**, and it is what
+a shadow installation should use: CSIA on a tee of an already-driven link, not
+on a private link it cannot bring to life.
 
-The rates the contract expects per channel are in
-`docs/simulation/CHANNEL_SEMANTICS.yaml` (`producer_ardupilot.rate_hz` /
-`producer_px4.rate_hz`). Below those, channels go `STALE` and the layer
-abstains — correctly, but you will have flown for nothing.
-
-**Verify before flight, not after:** `csia.deploy.cli --self-test` reports the
-per-channel arrival state from the live link. Zero usable channels means the
-vehicle is not configured to stream, not that CSIA is broken.
+**This is unresolved for the deployment plan and is a Gate 2 blocker**, not a
+detail. It also means R13 has not been measured through the v1.1 stack: four
+SITL attempts were all correctly refused by the harness positive control as
+`INVALID_MEASUREMENT`, because zero channels reached the core.
 
 ### 2.1 Hardware
 
@@ -116,23 +147,54 @@ relying on the margin.
 
 ### 2.2 Autopilot side
 
-ArduPilot, on the dedicated telemetry port:
+**Port protocol — this part is parameters and does work:**
 
 ```
 SERIAL2_PROTOCOL = 2      # MAVLink2
 SERIAL2_BAUD     = 921    # 921600
-SR2_RAW_SENS     = 25     # RAW_IMU, SCALED_IMU2, SCALED_PRESSURE
-SR2_EXTRA1       = 10     # ATTITUDE, VIBRATION
-SR2_EXTRA2       = 10     # VFR_HUD
-SR2_EXTRA3       = 5      # BATTERY_STATUS, EKF_STATUS_REPORT
-SR2_POSITION     = 10     # GLOBAL_POSITION_INT
-SR2_EXT_STAT     = 10     # GPS_RAW_INT, SYS_STATUS
 ```
 
-**`SR2_RAW_SENS` is not optional.** ArduPilot publishes inertial instance 0 as
-`RAW_IMU` on that stream. A live qualification run against ArduCopter 4.8
-found `imu0` and the magnetometer missing entirely because only `SCALED_IMU2`
-and `SCALED_IMU3` were arriving.
+**Stream rates are NOT parameters on ArduCopter 4.8.** An earlier version of
+this section listed `SR2_RAW_SENS`, `SR2_EXTRA1`, `SR2_EXTRA2`, `SR2_EXTRA3`,
+`SR2_POSITION` and `SR2_EXT_STAT`. **Those parameters do not exist** — see 2.0
+for the source evidence. Pasting that block sets nothing, reports no error,
+and yields a shadow flight with no sensor data.
+
+Rates are established at runtime, per link, by a transmit on that link:
+
+```
+MAV_CMD_SET_MESSAGE_INTERVAL   per message id, interval in microseconds
+REQUEST_DATA_STREAM            older, per stream group  (deprecated upstream)
+```
+
+and they do **not** persist across a reboot on Copter
+(`GCS.h:537`, `persist_streamrates() == false`; ArduPlane overrides it to
+`true`).
+
+So whoever drives the link must re-establish rates every boot, and it cannot
+be CSIA. Use the telemetry-tee arrangement in 2.0.
+
+**What the contract needs on that link**, from
+`docs/simulation/CHANNEL_SEMANTICS.yaml`:
+
+| message | rate | feeds |
+|---|---|---|
+| `RAW_IMU` | 25 Hz | **`imu0` and the magnetometer** |
+| `SCALED_IMU2` | 25 Hz | `imu1` |
+| `SCALED_PRESSURE` | 10 Hz | `baro` |
+| `GPS_RAW_INT` | 5 Hz | `gnss` — raw receiver, deliberately not the fused solution |
+| `BATTERY_STATUS` | 10 Hz | `battery` |
+| `VIBRATION` | 10 Hz | `vibration` |
+| `HEARTBEAT` | 1 Hz | armed state |
+| `EKF_STATUS_REPORT` | 5 Hz | autopilot comparison only, never diagnosis |
+
+**`RAW_IMU` is not optional.** ArduPilot publishes inertial instance 0 there.
+A live qualification run against ArduCopter 4.8 found `imu0` and the
+magnetometer missing entirely because only `SCALED_IMU2` and `SCALED_IMU3`
+were arriving — the primary IMU simply was not on the link.
+
+**Verify, do not assume:** `csia-shadow --self-test` reports which channels
+actually arrive. Zero usable channels means the link is not being driven.
 
 ### 2.3 Process
 
