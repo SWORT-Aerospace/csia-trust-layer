@@ -263,3 +263,113 @@ def test_the_declared_px4_rates_match_what_was_measured():
             f"{measured:.2f} Hz -- MaxAge derives from the declaration, so "
             f"this decides staleness")
     assert checked >= 8, "too few channels checked; the guard would be vacuous"
+
+
+# --------------------------------------------------------------------------
+# Dead vocabulary is a trap: unused, so nothing catches it drifting.
+
+def test_stale_duplicate_constants_stay_deleted():
+    """Three module-level names were defined, referenced NOWHERE, and wrong.
+
+    * `csia.runtime.plugins.MAVLINK_MESSAGE_MAP` claimed imu0 comes from
+      HIGHRES_IMU and the mag from a "SCALED_IMU3/MAG" that is not a MAVLink
+      message. On ArduPilot 4.8 both ride inside RAW_IMU.
+    * `csia.metrics.latency._ISOLATION_OUTCOMES` was a four-item vocabulary
+      beside the ten-member IsolationOutcome enum actually in use.
+    * `csia.simulation.rigs.PASSIVE_LINKS` said an ArduPilot shadow monitor
+      listens on tcp:5762. After the telemetry-tee work, 5762 is the RIG's
+      command link -- exactly backwards.
+
+    An unused constant cannot be wrong in a way any test notices, which is
+    why all three were still asserting a superseded architecture.
+    """
+    import csia.metrics.latency as latency
+    import csia.runtime.plugins as plugins
+    import csia.simulation.rigs as rigs
+    assert not hasattr(plugins, "MAVLINK_MESSAGE_MAP")
+    assert not hasattr(latency, "_ISOLATION_OUTCOMES")
+    assert not hasattr(rigs, "PASSIVE_LINKS")
+
+
+def test_the_qualification_context_is_recorded_everywhere_it_matters():
+    """The contract says a bench must RE-RUN the probe, not inherit a row.
+
+    A reader can only honour that if the evidence says which context produced
+    it. It said nothing: `context` was set on the contract and read only to
+    build a report string.
+    """
+    from csia.aircraft.adapters import get_adapter
+    from csia.aircraft.qualification import CONTEXT_SIMULATOR
+    meta = get_adapter("px4").sample(t_mono=0.0).metadata
+    assert meta["qualification_context"] == CONTEXT_SIMULATOR
+
+
+def test_an_unknown_context_is_refused_rather_than_stamped():
+    # A typo would otherwise be written into every flight log as though it
+    # meant something.
+    from csia.aircraft.qualification import SemanticContract
+    with pytest.raises(ValueError, match="unknown qualification context"):
+        SemanticContract(context="SIMULATO")
+
+
+def test_context_is_recorded_not_enforced_and_the_code_says_so():
+    """Guard against the reverse mistake: someone reading `context` as a gate.
+
+    Enforcement lives in platform_qualification rows. If that ever changes,
+    this test should be the thing that makes the change deliberate.
+    """
+    from csia.aircraft.qualification import (
+        CONTEXT_HARDWARE, CONTEXT_SIMULATOR, SemanticContract)
+    sim = SemanticContract(context=CONTEXT_SIMULATOR, platform="px4")
+    hw = SemanticContract(context=CONTEXT_HARDWARE, platform="px4")
+    assert sim.admissible_channels() == hw.admissible_channels()
+
+
+# --------------------------------------------------------------------------
+# Documented numbers must match the result file they claim to quote.
+
+def test_px4_doc_sample_counts_match_the_committed_result():
+    """The document drifts from the evidence on every re-run.
+
+    docs/simulation/PX4_CURRENT.md section 2.2 says it is "From
+    research/v1_1/results/qualification_px4.json". It was hand-copied, so it
+    said what a previous run had produced -- and after the sampling fix it
+    still carried counts inflated by up to 445x, in the very section that
+    explains that defect.
+
+    Only `n=` is checked. It is the claim that was wrong by orders of
+    magnitude, it is what an evidence base is judged on, and unlike range/sd
+    it does not invite rounding arguments.
+    """
+    import json
+    import re
+    doc = os.path.join(ROOT, "docs", "simulation", "PX4_CURRENT.md")
+    res = os.path.join(ROOT, "research", "v1_1", "results",
+                       "qualification_px4.json")
+    if not (os.path.exists(doc) and os.path.exists(res)):
+        pytest.skip("document or result missing")
+    with open(res, encoding="utf-8") as fh:
+        rows = {r["channel"]: r for r in json.load(fh).get("rows", [])}
+    with open(doc, encoding="utf-8") as fh:
+        text = fh.read()
+
+    wrong, checked = [], 0
+    for channel, row in rows.items():
+        m = re.search(r"n=(\d+)", row.get("detail", "") or "")
+        if not m:
+            continue
+        pat = re.compile(
+            rf"^\|\s*\*?\*?`?{re.escape(channel)}`?\*?\*?\s*\|.*?n=(\d+)", re.M)
+        hit = pat.search(text)
+        if not hit:
+            continue
+        checked += 1
+        if hit.group(1) != m.group(1):
+            wrong.append(f"{channel}: doc says n={hit.group(1)}, "
+                         f"result says n={m.group(1)}")
+    assert checked >= 8, (
+        f"only {checked} table rows matched; the parser has drifted from the "
+        f"document's shape and this guard is no longer checking anything")
+    assert not wrong, (
+        "PX4_CURRENT.md quotes sample counts that do not match "
+        f"qualification_px4.json: {wrong}")

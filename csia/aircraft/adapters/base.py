@@ -244,6 +244,11 @@ class PlatformAdapter:
             "platform": self.platform,
             "adapter_version": self.adapter_version,
             "contract_version": self.contract.version,
+            # WHICH CONTEXT qualified these rows. The contract says a bench
+            # with real hardware must re-run the probe rather than inherit a
+            # simulator row; a reader can only honour that if the record says
+            # which context produced it, and it said nothing.
+            "qualification_context": self.contract.context,
             "frozen_core": self.contract.frozen_core,
             "counters": dict(self.counters),
         }

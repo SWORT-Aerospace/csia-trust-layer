@@ -90,6 +90,8 @@ Hidden by the old decoder: `ESC_STATUS` (291), `ESC_INFO` (290), `EVENT`
 | **`--speedup` accepted by the PX4 launcher and never used** | §2.4 |
 | **A CI step named "determinism" that tested nothing** | §2.5 |
 | **`contract_version` frozen at 1 through five contract changes** | §2.5 |
+| **Three module-level constants defined, referenced nowhere, and wrong** | §2.6 |
+| **`PX4_CURRENT.md` quoting sample counts the result file contradicts** | §2.6 |
 
 ### 2.4 Publish rates, staleness, and a guard that guarded nothing
 
@@ -158,6 +160,48 @@ bumping it broke something that looked unrelated, so it was easier not to.
 The qualification result also now records the contract version and path it
 qualified against. A result that cannot name its contract cannot be compared
 with a later one.
+
+### 2.6 Dead vocabulary, and a document drifting from its own evidence
+
+A sweep for module-level names in `csia/` referenced nowhere found four. Three
+were not merely dead — they had drifted into contradicting the code, and being
+unused is exactly why nothing caught them:
+
+| name | what it claimed | what is true |
+|---|---|---|
+| `runtime.plugins.MAVLINK_MESSAGE_MAP` | imu0 from `HIGHRES_IMU`, mag from `SCALED_IMU3/MAG` | on ArduPilot 4.8 both ride inside `RAW_IMU`; `SCALED_IMU3/MAG` is not a MAVLink message, and PX4 never sends `SCALED_IMU2` |
+| `metrics.latency._ISOLATION_OUTCOMES` | a four-item outcome vocabulary | `IsolationOutcome` has ten members, distinguishing `CORRECT_SINGLE_SOURCE` from `CORRECT_COMMON_CAUSE` and `OVER_` from `UNDER_ISOLATION` |
+| `simulation.rigs.PASSIVE_LINKS` | an ArduPilot shadow monitor listens on `tcp:5762` | after the tee work, 5762 is the **rig's command link**; CSIA listens on the tee's UDP endpoint — exactly backwards |
+
+All three deleted, each replaced by a note naming the single authority. **An
+unused constant cannot be wrong in a way any test notices**, which is why all
+three were still asserting a superseded architecture.
+
+The fourth, `CONTEXT_REPLAY`, exposed something larger. `SemanticContract`
+takes a `context` (SIMULATOR / HARDWARE / REPLAY), the module docstring says
+qualification depends on it, and the field was read only to build a report
+string. It decided nothing, and `CONTEXT_REPLAY` was referenced nowhere at all.
+
+Enforcement genuinely lives in the `platform_qualification` rows, so the fix is
+not to make `context` a gate — that would be a design decision with real
+consequences. The fix is to stop the record being silent about it. The
+contract header says a bench with real hardware must **re-run** the probe
+rather than inherit a simulator row, and a reader can only honour that if the
+evidence says which context produced it. `qualification_context` is now
+stamped into the canonical sample's metadata, the flight log and the
+qualification result; an unknown context is refused rather than written into
+every log as though it meant something; and a test pins that context is
+recorded and *not* enforced, so if that ever changes it will be deliberate.
+
+**And the document was drifting from its own evidence.** `PX4_CURRENT.md` §2.2
+says it quotes `qualification_px4.json`. It was hand-copied, so after the
+sampling fix it still carried counts inflated by up to 445× — in the very
+section that explains that defect — and two paragraphs quoted a superseded
+ArduPilot figure (116,911 samples where the current result says 4,011). Ten
+table rows were refreshed from the result file, and a test now fails whenever
+a quoted `n=` disagrees with it. The guard also asserts it matched at least
+eight rows, so a change to the table's shape cannot silently turn it into a
+no-op.
 
 ---
 
@@ -334,7 +378,9 @@ limitation:
 - a timing harness charging its own GIL contention to the core;
 - a rate guard reading a flag the simulator ignores;
 - a CI step naming a file that does not exist and swallowing the error;
-- a contract version that never moved while the contract did.
+- a contract version that never moved while the contract did;
+- unused constants asserting an architecture two revisions old;
+- a document quoting an evidence file it had stopped agreeing with.
 
 None was visible to a passing test suite. Every one was caught by a control
 rather than by inspection. The guards added all have the same shape: **make

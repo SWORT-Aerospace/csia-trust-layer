@@ -63,12 +63,14 @@ def launch_ardupilot(workdir, speedup=10):
     return proc, "tcp:127.0.0.1:5760"
 
 
-# The passive link per platform: where a shadow monitor listens while the rig
-# or a GCS holds the command link. See launch_ardupilot for why two exist.
-PASSIVE_LINKS = {
-    "ardupilot": "tcp:127.0.0.1:5762",
-    "px4": "udp:127.0.0.1:14550",
-}
+# PASSIVE_LINKS was here and is GONE. It was never referenced, and the
+# telemetry-tee work made it BACKWARDS: it said an ArduPilot shadow monitor
+# listens on tcp:5762, when 5762 is the RIG's command link and CSIA listens on
+# the tee's UDP endpoint. tools/deploy/shadow_sitl_check.py holds the real
+# addresses (TEE_OUT, RIG_LINK) and is the only place that should.
+#
+# An unused constant cannot be wrong in a way any test notices, which is
+# exactly why it was still asserting the pre-tee architecture.
 
 
 # Which platforms actually honour a speedup request.

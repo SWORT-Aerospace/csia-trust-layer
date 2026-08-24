@@ -36,9 +36,23 @@ CONTRACT_PATH = os.path.join(ROOT, "docs", "simulation",
 
 # Qualification depends on where the data comes from, not only on the channel.
 # A simulator row does not transfer to hardware and vice versa.
+#
+# WHAT THIS DOES AND DOES NOT DO, stated because the difference matters and
+# the code did not say it. `context` is RECORDED, not enforced: nothing in
+# this module reads it to change a qualification, and CONTEXT_REPLAY was
+# referenced nowhere at all. The enforcement lives in `platform_qualification`
+# rows, which narrow per platform with measured evidence.
+#
+# Recording it is not decoration. The contract header says a bench with real
+# hardware must RE-RUN the probe rather than inherit the simulator's row, and
+# a reader can only honour that if the evidence says which context produced
+# it. So it is stamped into the canonical sample's metadata, the flight log
+# and the qualification result -- previously it was stamped nowhere, and every
+# committed row looked context-free.
 CONTEXT_SIMULATOR = "SIMULATOR"
 CONTEXT_HARDWARE = "HARDWARE"
 CONTEXT_REPLAY = "REPLAY"
+CONTEXTS = (CONTEXT_SIMULATOR, CONTEXT_HARDWARE, CONTEXT_REPLAY)
 
 
 class ChannelContract:
@@ -153,6 +167,11 @@ class SemanticContract:
         with open(path, encoding="utf-8") as fh:
             doc = yaml.safe_load(fh)
         self.path = path
+        if context not in CONTEXTS:
+            raise ValueError(
+                f"unknown qualification context {context!r}; expected one of "
+                f"{CONTEXTS}. A typo here would be stamped into every flight "
+                f"log as though it meant something")
         self.context = context
         self.platform = platform
         self.version = doc.get("contract_version")

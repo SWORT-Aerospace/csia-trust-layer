@@ -235,8 +235,8 @@ write a platform row and W-5 disappears. Every platform row must also carry a
 `reason`, an `evidence` path that exists, and the `measured` numbers, and
 `tests/test_platform_contract.py` holds all of it.
 
-**`esc.rpm` is the case worth dwelling on.** It moves on PX4 — 5,447 RPM of
-range, sd 1,317, n=17,346 — and it is still refused. INFORMATIVE requires
+**`esc.rpm` is the case worth dwelling on.** It moves on PX4 — 5,558 RPM of
+range, sd 1,307, over **40** samples — and it is still refused. INFORMATIVE requires
 `VALIDATED_SEMANTICS` **and** demonstrated variation, and nobody has read the
 PX4 source for this field's units, indexing or scaling. Variation alone is not
 semantics. Admitting it because it moves would be W-5's mistake with the sign
@@ -315,20 +315,20 @@ observations. From `research/v1_1/results/qualification_px4.json`.
 
 | channel | observed | verdict |
 |---|---|---|
-| imu0.accel | range 3.84 m/s², sd 0.348, n=1947 | INFORMATIVE |
-| imu0.gyro | range 1.199 rad/s, sd 0.227, n=1947 | INFORMATIVE |
-| mag.field_ut | range 57.9 µT, sd 10.21, n=556 | INFORMATIVE (heading reference verified — 2.6) |
-| baro.altitude | range 22.1 m, sd 6.53, n=390 | INFORMATIVE |
-| gnss.position | range 21.8 m, sd 6.51, n=195 | INFORMATIVE |
-| gnss.velocity | range 0.300 m/s, sd 0.048, n=195 | INFORMATIVE |
-| vibration.rms | range 0.0118 m/s², sd 0.0023, n=390 | INFORMATIVE |
-| estimator.variances | range 0.157, sd 0.0302, n=195 | INFORMATIVE (blocked from use by policy) |
+| imu0.accel | range 3.84 m/s², sd 0.348, n=1961 | INFORMATIVE |
+| imu0.gyro | range 1.199 rad/s, sd 0.227, n=1961 | INFORMATIVE |
+| mag.field_ut | range 57.9 µT, sd 10.21, n=561 | INFORMATIVE (heading reference verified — 2.6) |
+| baro.altitude | range 22.1 m, sd 6.53, n=393 | INFORMATIVE |
+| gnss.position | range 21.8 m, sd 6.51, n=197 | INFORMATIVE |
+| gnss.velocity | range 0.300 m/s, sd 0.048, n=197 | INFORMATIVE |
+| vibration.rms | range 0.0118 m/s², sd 0.0023, n=392 | INFORMATIVE |
+| estimator.variances | range 0.157, sd 0.0302, n=196 | INFORMATIVE (blocked from use by policy) |
 | estimator.flight_mode | latched, decoded, n=38 | INFORMATIVE (DECODE criterion) |
 | vehicle_status.armed | latched armed=1, n=38 | INFORMATIVE (DECODE criterion) |
-| baro.temp_c | range 0.14 °C, sd 0.043, n=390 | varies, but declared non-informative and not used |
-| **`battery.voltage`** | **range 0.689 V, sd 0.229, n=390** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
-| **`esc.rpm`** | **range 5545 RPM, sd 1320, n=39** | **INFORMATIVE — see 2.5; declared AVAILABLE_UNVALIDATED on PX4 and still refused** |
-| `esc.current` | constant at 0 over 39 samples | STUB_OR_NONINFORMATIVE, as declared |
+| baro.temp_c | range 0.14 °C, sd 0.043, n=393 | varies, but declared non-informative and not used |
+| **`battery.voltage`** | **range 0.689 V, sd 0.229, n=393** | **INFORMATIVE — the W-5 suspicion is REFUTED** |
+| **`esc.rpm`** | **range 5558 RPM, sd 1307, n=40** | **INFORMATIVE — see 2.5; declared AVAILABLE_UNVALIDATED on PX4 and still refused** |
+| `esc.current` | constant at 0 over 40 samples | STUB_OR_NONINFORMATIVE, as declared |
 
 Two of these change what CSIA can do on PX4.
 
@@ -338,12 +338,12 @@ suspicion rather than a finding, precisely because constancy on a vehicle that
 never moved describes the trial. Under load it varies by 0.689 V. Marking it
 UNCONFIRMED was correct, and recording it as a finding would have been wrong.
 
-**`esc.rpm` is real on PX4 and the base contract is wrong about it.** 5,545
-RPM of range with sd 1,320 over **39** samples is a live signal, and the contract row
+**`esc.rpm` is real on PX4 and the base contract is wrong about it.** 5,558
+RPM of range with sd 1,307 over **40** samples is a live signal, and the contract row
 — written against ArduPilot SITL, where `SIM_Frame.cpp:901` derives rpm from
 `vibe_motor` with `VIB_MOT_MAX` defaulting to 0 — declares it
 `STUB_OR_NONINFORMATIVE`. On ArduPilot that row is correct and was
-re-confirmed on the same day (constant at 0 over 116,911 samples). On PX4 it
+re-confirmed on the same day (constant at 0 over 4,011 samples). On PX4 it
 is not. This is exactly the case the contract header calls out: qualification
 is **per platform instance**, never global.
 
@@ -352,7 +352,7 @@ is **per platform instance**, never global.
 | | ArduPilot SITL | PX4 SIH |
 |---|---|---|
 | `esc.current` | constant 3.2 A (placeholder) | constant 0 (stub) |
-| `esc.rpm` | constant 0 | **varies, 5545 RPM range** |
+| `esc.rpm` | constant 0 | **varies, 5558 RPM range** |
 | `battery.current` | varies, 5.4 A range | not measured (sentinel) |
 | `battery.voltage` | varies, 0.053 V range | varies, 0.689 V range |
 

@@ -211,20 +211,17 @@ def map_mavlink(msg, ctx: dict) -> list:
 
 
 # MAVLink message -> (sensor, channels) mapping for the SOW001 stack.
-# Documented here even when pymavlink is absent, so the integration
-# contract is reviewable without installing it.
-MAVLINK_MESSAGE_MAP = {
-    "HEARTBEAT":     "vehicle_status (armed flag -> motor-edge/failsafe gate)",
-    "GPS_RAW_INT":   "gps pos/vel (raw receiver; no vertical rate -> vz_valid=False)",
-    "HIGHRES_IMU":   "imu0 (accel m/s^2, gyro rad/s)",
-    "SCALED_IMU2":   "imu1 (accel mG -> m/s^2, gyro mrad/s -> rad/s)",
-    "SCALED_PRESSURE": "baro (press_abs hPa -> ISA altitude, temperature)",
-    "SCALED_IMU3/MAG": "mag (xmag/ymag/zmag mgauss -> uT)",
-    "GLOBAL_POSITION_INT": "gps pos (lat/lon/alt -> local m), vel (vx/vy/vz cm/s)",
-    "ESC_STATUS":    "motor_esc (rpm, current A)",
-    "BATTERY_STATUS": "battery (voltages mV, current_battery cA)",
-    "VIBRATION":     "vibration (vibration_x/y/z -> rms m/s^2)",
-}
+# The message -> channel map lived here as a prose dict (MAVLINK_MESSAGE_MAP)
+# and is GONE. Nothing referenced it, and it had drifted into being wrong:
+# it claimed imu0 comes from HIGHRES_IMU and the magnetometer from a
+# "SCALED_IMU3/MAG" that is not a MAVLink message at all. On ArduPilot 4.8
+# imu0 and the mag both ride inside RAW_IMU (GCS_Common.cpp:2237), and PX4
+# never publishes SCALED_IMU2, so `imu1` does not exist there.
+#
+# docs/simulation/CHANNEL_SEMANTICS.yaml is the single authority for what
+# produces each channel, per platform, with declared rates. An unused second
+# copy is worse than none: it cannot be exercised, so nothing catches it
+# drifting, and the next reader believes it.
 
 
 class MavlinkSource(SourcePlugin):
