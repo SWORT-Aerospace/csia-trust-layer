@@ -221,11 +221,13 @@ def _fly_px4(conn, evidence, alt_m, timeout):
             ("COM_RCL_EXCEPT", 7, I32), ("NAV_RCL_ACT", 0, I32),
             ("NAV_DLL_ACT", 0, I32), ("COM_ARM_WO_GPS", 1, I32),
             ("COM_PREARM_MODE", 0, I32), ("COM_ARM_MAG_STR", 0, I32),
-            ("COM_ARM_EKF_HGT", 1.0, F32), ("COM_ARM_EKF_VEL", 1.0, F32),
-            ("COM_ARM_EKF_POS", 1.0, F32), ("COM_ARM_EKF_YAW", 1.0, F32),
+            # COM_ARM_EKF_{HGT,VEL,POS,YAW} and SYS_MC_EST_GROUP are GONE.
+            # The PX4 console rejected all five: "ERROR [mavlink] unknown
+            # param". They were phantom writes -- the same class as the SR1_*
+            # failure -- and the earlier work correcting their wire TYPE was
+            # correcting the type of parameters that do not exist.
             ("COM_DISARM_LAND", -1.0, F32), ("COM_DISARM_PRFLT", -1.0, F32),
             ("CBRK_SUPPLY_CHK", 894281, I32), ("CBRK_USB_CHK", 197848, I32),
-            ("SYS_MC_EST_GROUP", 2, I32),
             ("MIS_TAKEOFF_ALT", float(alt_m), F32)):
         conn.mav.param_set_send(conn.target_system, conn.target_component,
                                 name.encode(), float(val), ptype)
@@ -307,10 +309,32 @@ def _fly_px4(conn, evidence, alt_m, timeout):
                 phase = "arm"
             elif phase == "arm":
                 if armed:
+                    # param7 MUST be NaN, not the desired height.
+                    #
+                    # MAVLink defines NAV_TAKEOFF param7 as an AMSL altitude.
+                    # navigator/takeoff.cpp:194 takes it verbatim when finite:
+                    #
+                    #   if (rep->current.valid && PX4_ISFINITE(rep->current.alt))
+                    #       takeoff_altitude_amsl = rep->current.alt;
+                    #   else
+                    #       takeoff_altitude_amsl = current_alt + MIS_TAKEOFF_ALT;
+                    #
+                    # and then at :207 clamps anything below the vehicle:
+                    #   "Already higher than takeoff altitude".
+                    #
+                    # Sending 25.0 meant "climb to 25 m above SEA LEVEL". SIH
+                    # sits at 489.4 m AMSL (SIH_LOC_H0), so the target was
+                    # 464 m underground, got clamped to the current altitude,
+                    # and the vehicle correctly did nothing. NaN makes the
+                    # navigator use MIS_TAKEOFF_ALT relative to where it is.
+                    #
+                    # Note the rig's HOME="...,584,..." is an ArduPilot --home
+                    # flag and has never applied to PX4; SIH_LOC_H0 is the
+                    # PX4 equivalent.
                     conn.mav.command_long_send(
                         conn.target_system, conn.target_component,
                         mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
-                        0, 0, 0, 0, float("nan"), 0, 0, alt_m)
+                        0, 0, 0, 0, float("nan"), 0, 0, float("nan"))
                     phase = "climb"
                 elif due(1.5):
                     # AUTO.TAKEOFF (main 4, sub 2) first: PX4 will not arm
