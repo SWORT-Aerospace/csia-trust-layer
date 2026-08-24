@@ -43,9 +43,10 @@ jobs:
         if: always()
         run: python tools/publication/build_public_release.py --check
       # KNOWN RED. refs.bib carries 37 unresolved provenance markers and no
-      # entry is marked verified. This is a real submission blocker recorded
-      # in RESEARCH_STATE.md open items and in the artifact map as OI-1.
-      # It is NOT to be cleared by deleting markers or inventing citations.
+      # entry is marked verified. This is a real submission blocker, recorded
+      # as OI-1 in the artifact map and as O-3 in HARNESS_RELEASE_AUDIT.md,
+      # and held open by decision H-6. It is NOT to be cleared by deleting
+      # markers or inventing citations.
       - name: bibliography guard
         if: always()
         run: python tools/publication/bib_guard.py
