@@ -31,6 +31,7 @@ help:
 	@echo "Release:"
 	@echo "  make evidence-export rebuild the 16-file Paper I evidence export"
 	@echo "  make public-release  pack + sanitize the public archives"
+	@echo "  make text-bundles    plain-text transfer bundles (committed)"
 	@echo "Science:"
 	@echo "  make test            full pytest suite (includes doc-count guard)"
 	@echo "  make figures         regenerate all figures from committed results"
@@ -126,6 +127,14 @@ evidence-export:
 .PHONY: public-release
 public-release: evidence-export
 	$(PY) tools/publication/build_public_release.py
+
+# Plain-text transfer bundles. The tarball handoff failed twice; a .txt
+# degrades gracefully where an archive does not -- it can be attached, pasted,
+# split, or read straight from the GitHub blob view. Unlike the archives these
+# ARE committed, so there is always a retrievable copy that needs no transfer.
+.PHONY: text-bundles
+text-bundles:
+	$(PY) publication/system_paper_i/build_text_bundles.py
 
 # ---------------------------------------------------------------------------
 # Science
