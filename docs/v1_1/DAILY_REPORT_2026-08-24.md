@@ -2,7 +2,7 @@
 
 **Branch:** `claude/code-reviewer-repo-export-zicovg`
 **Commits:** `b5e5f17` → HEAD
-**Tests:** 696 passing (634 at start of day)
+**Tests:** 701 passing (634 at start of day)
 **Frozen core:** untouched — `tests/test_v1_frozen.py` green, no `FROZEN_PATHS`
 file in any diff
 
@@ -13,7 +13,7 @@ file in any diff
 The PX4 takeoff is fixed and both platforms now qualify **PASS**. That is the
 smaller half of the day. The larger half is what fixing it exposed: **a chain
 of instruments that were reporting their own limitations as properties of the
-thing they measured.** Eleven of the eighteen defects below are that one
+thing they measured.** Thirteen of the twenty defects below are that one
 shape, and not one of them was visible to a passing test suite.
 
 Every fix in this report was verified before being written up. Where a
