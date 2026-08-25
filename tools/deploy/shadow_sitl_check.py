@@ -70,14 +70,44 @@ TEE_OUT = ("127.0.0.1", 14561)
 #   persist_streamrates() == false), and CSIA cannot transmit. Something with
 #   authority has to drive SERIAL0; the rig commands on SERIAL1.
 #
-#   PX4 DOES NOT. It runs several mavlink instances, each streaming a full
-#   set unprompted. Measured on a live SIH boot, 4 s per link:
+#   PX4 DOES NOT -- FOR PRESENCE. It runs several mavlink instances, each
+#   streaming a full set unprompted. Measured on a live SIH boot, 4 s per link:
 #       Normal   bind 14550 -> heartbeat, 29 message types
 #       Onboard  bind 14540 -> heartbeat, 35 message types, HIGHRES_IMU 50 Hz
 #       Onboard  bind 14030 -> heartbeat, 22 types (4 kB/s cap)
 #   So the rig commands on the Normal link and CSIA binds the Onboard link,
-#   which is what a companion port IS on a real PX4 vehicle. Interposing a
-#   tee there would model a constraint the platform does not have.
+#   which is what a companion port IS on a real PX4 vehicle.
+#
+#   THAT MEASUREMENT COUNTED MESSAGE TYPES, AND RATE IS WHAT DECIDES
+#   STALENESS. A 1 Hz message is present in a 4 s window, so a type count
+#   cannot tell 1 Hz from 10 Hz, and the conclusion originally drawn here --
+#   "interposing a tee would model a constraint the platform does not have" --
+#   does not follow from it. Re-measured over 40 s per link, three arms in one
+#   simulator run (tools/simulation/px4_link_rate_probe.py):
+#
+#                          14540 passive   14550 passive   14550 requesting
+#       SCALED_PRESSURE       1.000 Hz        0.975 Hz         9.800 Hz
+#       BATTERY_STATUS        0.500 Hz        0.475 Hz         9.775 Hz
+#       VIBRATION             0.500 Hz        0.100 Hz         9.775 Hz
+#
+#   PX4 has exactly the constraint ArduPilot has: SET_MESSAGE_INTERVAL is
+#   per-link runtime state, in both directions -- requesting on 14550 leaves
+#   14540 untouched, and a request sent on 14540 raises 14540 alone (baro
+#   1.000 -> 9.825 Hz) while 14550 stays at 0.975. What differs is only the
+#   DEFAULT: ArduPilot's unprompted link carries no sensor data at all, while
+#   PX4's carries all of it slowly. Slowly is still a defect, because
+#   max_age = MAX_AGE_MARGIN / declared_rate is derived from a contract number
+#   measured on the REQUESTING link, so baro gets a 0.50 s budget against a
+#   1.00 s arrival and is stale on half of all ticks. Measured downstream:
+#   the baro node was fresh on 8.2 % of PX4 ticks and `altitude_baro` carried
+#   weight on 8.1 %, against 99.9 % on ArduPilot.
+#
+#   NOT FIXED HERE, deliberately. The fix is to give PX4 the same driven link
+#   ArduPilot has (the tee, with a SET_MESSAGE_INTERVAL profile instead of
+#   MAV_DATA_STREAM_*), and CSIA still must not transmit. That changes how
+#   flights are captured, so it is a decision to take explicitly rather than
+#   a side effect of a comment correction. Recorded in
+#   research/v1_1/PX4_LINK_RATE_FINDING.md.
 RIG_LINKS = {
     "ardupilot": "tcp:127.0.0.1:5762",     # SERIAL1
     "px4": "udp:127.0.0.1:14550",          # Normal instance (the GCS link)

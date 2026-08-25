@@ -24,6 +24,12 @@ csia/native/*.so
 # SITL scratch working directories from research/phase2 campaigns
 research/phase2/results/_wd_*/
 
+# Three PX4 boots' worth of console logs and parameter files (~28 MB) from
+# tools/simulation/px4_link_rate_probe.py. The MEASUREMENT is the artifact
+# (research/v1_1/results/PX4_LINK_RATE_PROBE.json); this is the boot litter,
+# and re-running the probe regenerates it.
+research/v1_1/results/.px4_link_probe/
+
 # P1 per-tick residual streams: regenerable by re-running p1_fault_suite.py,
 # several MB each, and not the scientific record (the analyses are).
 research/phase2/results/p1_streams_*.json

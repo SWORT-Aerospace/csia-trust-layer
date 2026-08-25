@@ -1,0 +1,203 @@
+{
+ "arms": {
+  "passive": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3926,
+      "hz": 98.147
+     },
+     "BATTERY_STATUS": {
+      "count": 20,
+      "hz": 0.5
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1963,
+      "hz": 49.073
+     },
+     "GPS_RAW_INT": {
+      "count": 314,
+      "hz": 7.85
+     },
+     "SCALED_PRESSURE": {
+      "count": 40,
+      "hz": 1.0
+     },
+     "VIBRATION": {
+      "count": 20,
+      "hz": 0.5
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1963,
+      "hz": 49.073
+     },
+     "BATTERY_STATUS": {
+      "count": 19,
+      "hz": 0.475
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1963,
+      "hz": 49.073
+     },
+     "GPS_RAW_INT": {
+      "count": 196,
+      "hz": 4.9
+     },
+     "SCALED_PRESSURE": {
+      "count": 39,
+      "hz": 0.975
+     },
+     "VIBRATION": {
+      "count": 4,
+      "hz": 0.1
+     }
+    }
+   },
+   "seconds": 40.001
+  },
+  "request": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3911,
+      "hz": 97.775
+     },
+     "BATTERY_STATUS": {
+      "count": 20,
+      "hz": 0.5
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1956,
+      "hz": 48.9
+     },
+     "GPS_RAW_INT": {
+      "count": 312,
+      "hz": 7.8
+     },
+     "SCALED_PRESSURE": {
+      "count": 40,
+      "hz": 1.0
+     },
+     "VIBRATION": {
+      "count": 20,
+      "hz": 0.5
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1956,
+      "hz": 48.9
+     },
+     "BATTERY_STATUS": {
+      "count": 391,
+      "hz": 9.775
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 391,
+      "hz": 9.775
+     },
+     "GPS_RAW_INT": {
+      "count": 196,
+      "hz": 4.9
+     },
+     "SCALED_PRESSURE": {
+      "count": 392,
+      "hz": 9.8
+     },
+     "VIBRATION": {
+      "count": 391,
+      "hz": 9.775
+     }
+    }
+   },
+   "seconds": 40.0
+  },
+  "request_onboard": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3923,
+      "hz": 98.073
+     },
+     "BATTERY_STATUS": {
+      "count": 392,
+      "hz": 9.8
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1961,
+      "hz": 49.024
+     },
+     "GPS_RAW_INT": {
+      "count": 314,
+      "hz": 7.85
+     },
+     "SCALED_PRESSURE": {
+      "count": 393,
+      "hz": 9.825
+     },
+     "VIBRATION": {
+      "count": 392,
+      "hz": 9.8
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1962,
+      "hz": 49.049
+     },
+     "BATTERY_STATUS": {
+      "count": 19,
+      "hz": 0.475
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1962,
+      "hz": 49.049
+     },
+     "GPS_RAW_INT": {
+      "count": 196,
+      "hz": 4.9
+     },
+     "SCALED_PRESSURE": {
+      "count": 39,
+      "hz": 0.975
+     },
+     "VIBRATION": {
+      "count": 4,
+      "hz": 0.1
+     }
+    }
+   },
+   "seconds": 40.001
+  }
+ },
+ "channels_in_dispute": {
+  "ATTITUDE": "control (not requested by any arm)",
+  "BATTERY_STATUS": "battery.voltage, battery.current",
+  "GLOBAL_POSITION_INT": "control (requested by connect(), msg 33)",
+  "GPS_RAW_INT": "control (requested by connect(), msg 24)",
+  "SCALED_PRESSURE": "baro.altitude, baro.temp_c",
+  "VIBRATION": "vibration.rms"
+ },
+ "consequence": "CHANNEL_SEMANTICS.yaml declares one rate per (channel, platform) and MAX_AGE_MARGIN derives max_age from it, so a declaration measured on a REQUESTING link starves a channel on a PASSIVE one",
+ "csia_link": "udpin:127.0.0.1:14540 -- passive, never transmits, so nothing ever raises its rates",
+ "finding": "the stream rate is a property of the LINK, set by whoever last transmitted SET_MESSAGE_INTERVAL on it, not a property of the platform or of the mavlink instance",
+ "onboard_requests": [
+  {
+   "hz": 10,
+   "msgid": 29
+  },
+  {
+   "hz": 10,
+   "msgid": 147
+  },
+  {
+   "hz": 10,
+   "msgid": 241
+  }
+ ],
+ "seconds_per_arm": 40.0,
+ "settle_discarded_s": 3.0,
+ "what_this_resolves": "qualification_px4.json and the shadow flight logs disagree by 10x about the same PX4 channel; both are correct"
+}
