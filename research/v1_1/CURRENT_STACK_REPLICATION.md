@@ -2,7 +2,11 @@
 
 **Mechanism B: history-dominated trust-threshold crossing.**
 
-**Status: PREREGISTERED, NOT RUN.** This document is written and frozen before
+**Status: RUN. ArduPilot 4.8 REPLICATED; PX4 SIH INAPPLICABLE.**
+The preregistration below is unchanged from the commit that preceded the
+first trial (blob `0e186117e2dcc014862872934768e06e0a195592`); results are
+appended in section 10 and section 9's table is completed. Originally:
+**PREREGISTERED, NOT RUN.** This document is written and frozen before
 any current-stack trial. It must be committed before the first run so that the
 campaign cannot be widened after seeing results.
 
@@ -326,6 +330,195 @@ outcome.
 |---|---|---|---|
 | fix-loss self-occlusion | YES | YES | YES |
 | fix-preserving contrast | NO | NO | NO |
-| history-dominated threshold crossing | YES | `[PENDING]` | `[PENDING]` |
+| history-dominated threshold crossing | YES | **YES** | **INAPPLICABLE** |
 
 Do not pool platforms. Three columns, three answers.
+
+---
+
+## 10. Results
+
+**ArduPilot 4.8: `REPLICATED`. PX4 SIH: `INAPPLICABLE`.**
+20 of 20 ArduPilot trials valid. Every predeclared expectation met.
+
+Machine-readable: `research/v1_1/results/current_stack_replication.json`.
+Per-trial §4 tick logs: `research/v1_1/results/mechanism_b_gps/ticks/*.csv`.
+
+### 10.1 The campaign
+
+| condition | n | reported offset | S₀ measured | T₀ | T min after onset | crossed | expected |
+|---|---|---|---|---|---|---|---|
+| CLEAN | 5 | 0.000 m | 120.46–120.51 | 0.9541 | 0.9541 (unmoved) | **0/5** | no crossing ✅ |
+| STEP_SMALL | 5 | 4.998–5.009 m | 133.7–135.3 | 0.960 | 0.862–0.870 | **0/5** | no crossing ✅ |
+| STEP_LARGE | 5 | 50.049–50.061 m | 133.3–135.3 | 0.960 | 0.853–0.854 | **0/5** | no crossing ✅ |
+| RAMP_20S | 5 | 46.997–47.056 m | 133.3–136.5 | 0.960 | 0.712–0.725 | **5/5** | crossing ✅ |
+
+Validity, all 20: command authority `NO_COMMAND_PATH_REACHABLE`; `ALT_HOLD`
+confirmed from `HEARTBEAT.custom_mode`; parameter readback CONFIRMED on every
+injected trial (100 writes per ramp, 1 per step); **`gvalid` = 1.0 on every
+tick of every scored window, 0 ticks closed**; **0 ticks with `NO_3D_FIX`**.
+
+That last pair is the whole point of the intervention: the fix never dropped,
+so the evidence stayed applicable and this is a Mechanism B trial rather than a
+Mechanism A trial. Had the gate closed on a single tick the trial would have
+been voided by §2.
+
+### 10.2 Section 5 — the reconstruction
+
+Stepped tick by tick from the **measured** S₀ and T₀ at onset with the
+**measured** per-tick `e_k` and `ρ_k` re-derived from component scores. **The
+constant-ρ closed form was not used anywhere.** No fitted parameters.
+
+| quantity | tolerance | result |
+|---|---|---|
+| `max_k \|T̂(k) − T_runtime(k)\|` | ≤ 1e-6 | **1.0e-15 – 2.0e-15**, all 20 |
+| crossing error | ≤ 2 ticks | **0 ticks**, all 5 ramps |
+| control crossings | 0 of 5 | **0 of 5** |
+| expected-crossing condition | 5 of 5 | **5 of 5** |
+| expected-non-crossing conditions | 0 of 5 | **0 of 5** and **0 of 5** |
+
+The trajectory agreement is at double-precision round-off — nine orders of
+magnitude inside the declared tolerance.
+
+### 10.3 What the zero crossing error does and does not show
+
+**It is not an independent forecast, and must not be reported as one.** A
+reconstruction driven by the runtime's own measured per-tick evidence will
+track the runtime; predicted and observed crossings agreeing to 0 ticks is
+close to guaranteed *if the published recursion is complete*. That is exactly
+what it tests: whether the recursion as written in the paper is the whole of
+the arithmetic the aircraft runs, with no hidden term.
+
+It is a real test because it can fail, and the null controls show by how much.
+Breaking one input at a time, on the five ramp trials:
+
+| reconstruction variant | max \|T̂ − T\| | vs 1e-6 |
+|---|---|---|
+| **measured ρ per tick** (preregistered) | 1.0e-15 – 1.9e-15 | passes by 9 orders |
+| ρ held at ρ_max = 0.998 | **0.122 – 0.133** | fails by 5 orders |
+| ρ held at ρ_min = 0.95 | **0.047 – 0.049** | fails by 5 orders |
+| update gate ignored | 1.0e-15 – 1.9e-15 | **uninformative here** |
+
+The middle two are **correction 9 measured rather than asserted**: on real
+ArduPilot 4.8 data, assuming a constant forgetting factor — at either bound,
+including the 0.95 a constant-ρ derivation would reach for — misses the
+trajectory by five orders of magnitude. §4's insistence that ρ be logged and
+not assumed is vindicated quantitatively.
+
+The fourth control **could not have failed on these flights** and is reported
+as such rather than counted: the `gps` node was fresh on every tick of every
+scored window (`gate_closed_ticks_in_window = 0`), so ignoring the update gate
+changes nothing here. It is retained because it *would* bite on a platform with
+intermittent node freshness — PX4's magnetometer does exactly that in
+`docs/v1_1/PX4_CLEAN_ESCALATION_DIAGNOSIS.md` — and a control that is silent
+for a stated reason is more useful than one quietly dropped.
+
+### 10.4 Section 3's precondition, and section 1's design point
+
+**ArduPilot 4.8 banks S₀ ≈ 120–136**, against Phase-I's S₀ = 475.6775. The
+platform does bank a substantial healthy state, so the precondition holds and
+Mechanism B has something to dominate with — but it banks roughly a quarter of
+what ArduCopter 3.3 banked.
+
+This is precisely why §1 forbids testing against 93.31 ticks. A quarter of the
+banked state is a materially different system, and the test performed was
+whether the recursion given *this* platform's S₀ predicts *this* platform's
+crossing. It does, to 0 ticks, five times out of five.
+
+> **Incidental, and explicitly not the test.** The observed crossings fall at
+> ticks 94, 95, 96, 98, 99 — near the Phase-I figure of 93.31. That proximity
+> is a coincidence of a smaller S₀ meeting a different evidence level and a
+> different ρ; it is recorded because a reader will notice it, and it carries
+> no weight. Had it come out at tick 300 the verdict would be unchanged.
+
+### 10.5 Why the steps did not cross and the ramp did
+
+The contrast is the result, and it was predicted from source before the
+campaign (§3.1). `phys_gps` differences the **reported** position and subtracts
+the receiver's **Doppler** velocity, which the glitch does not touch, so the
+residual equals the glitch *rate*:
+
+* a **step** deposits one sample into `_gps_step_peak` and then returns the
+  residual to zero. It decays at 0.85 per tick — a transient of order 1–2 s.
+  50 m moved trust only from 0.960 to 0.854 and it recovered. **Magnitude alone
+  does not cross**, which is what the STEP_LARGE condition existed to test.
+* a **20 s ramp** holds 2.5 m/s of unexplained motion, so `c_phys` collapses
+  and stays collapsed while the channel keeps arriving and `gvalid` stays 1.
+  Trust walks down over ~96 ticks and crosses.
+
+A 5 m step and a 50 m step differ by an order of magnitude in size and by
+0.016 in the trust minimum they produce. Duration of adverse evidence, not
+amplitude, is what moves this node — the mechanism's own claim, measured.
+
+### 10.6 PX4 — INAPPLICABLE, and no substitute was run
+
+No trials were flown. §2.1's parameter search found no fix-preserving position
+offset on the primary GNSS solution, and §3 forbids substituting another
+intervention. The escape clause of §2.2 (a MAVLink `GPS_INPUT` route) was not
+exercised.
+
+**`INAPPLICABLE` is not `INCONCLUSIVE` and not `NOT RUN`.** The intervention
+cannot be made valid on this platform with what the platform provides; that is
+a statement about PX4 SIH's fault-injection surface, not about CSIA and not
+about the mechanism.
+
+### 10.7 Sentences Systems Paper I is permitted to use
+
+Carried in the JSON for every outcome, so the permitted claim was fixed by the
+rule rather than written to fit the result. In force:
+
+**ArduPilot 4.8 — REPLICATED:**
+
+> The history-dominated threshold-crossing mechanism replicates on ArduPilot
+> 4.8: given the platform's own measured banked state and its measured
+> per-tick evidence and forgetting factor, the source recursion reproduces the
+> runtime trust trajectory and predicts the observed threshold crossing.
+
+> The crossing tick differs from the 2015 ArduCopter 3.3 figure because the
+> banked state differs; the mechanism, not the number, is what replicates.
+
+**PX4 SIH — INAPPLICABLE:**
+
+> The fix-preserving GNSS position offset required to exercise the
+> history-dominated threshold-crossing mechanism cannot be applied on this
+> platform, so the mechanism was not tested there.
+
+> No substitute intervention was run, because substituting one would test a
+> different fault.
+
+### 10.8 Deviations from the preregistration
+
+One, made **before any trial** and recorded in §3.2 in the commit that
+preceded the campaign: the scored window is flown in `ALT_HOLD`. The first
+harness run flew a GNSS-position-controlling mode, where a commanded 50 m ramp
+produced 1.55 m of reported offset because the airframe flew ~48 m the other
+way chasing it — an indirect commanded airframe displacement, which §2's Type
+row excludes, and which makes §2's declared observable unmeasurable. Grid,
+magnitudes, threshold, tolerances and classification rule are untouched.
+
+Nothing else deviates. No ρ, threshold, evidence scale or scenario amplitude
+was adjusted at any point, and the frozen core is untouched.
+
+### 10.9 Limits
+
+* **SITL, not hardware.** W-3 records that detection can be a property of the
+  noise model rather than of the fault.
+* **One node, one fault family.** `gps` under a position glitch. Nothing here
+  says how the recursion behaves for a node whose evidence is intermittent.
+* **`ALT_HOLD` is not how the aircraft flies.** The mode was chosen to isolate
+  the receiver-side fault from the airframe's response to it. On a
+  position-controlling vehicle the same glitch provokes real motion, and while
+  that motion cancels out of `phys_gps` exactly (§3.1), it does not cancel out
+  of everything else.
+* **n = 5 per condition.** Enough to show the contrast is not noise; not a
+  rate.
+
+### 10.10 Reproducing
+
+```bash
+python tools/deploy/mechanism_b_campaign.py --platform ardupilot
+python tools/simulation/current_stack_replication.py --platform ardupilot
+```
+
+The grid is a module constant, not a command-line option. `--platform px4`
+refuses to fly and prints why.
