@@ -44,7 +44,8 @@ sys.path.insert(0, ROOT)
 
 from csia.deploy.guard import CommandAuthorityError          # noqa: E402
 from csia.deploy.shadow import Mode, ShadowConfig, ShadowRunner  # noqa: E402
-from csia.simulation.rigs import LAUNCHERS, connect, fly   # noqa: E402
+from csia.simulation.rigs import (                       # noqa: E402
+    LAUNCHERS, connect, fly, provenance_string, simulator_provenance)
 from csia.simulation.host_noise import (                 # noqa: E402
     measure as measure_host_noise, r13_verdict)
 from csia.simulation.tee import MavlinkTee               # noqa: E402
@@ -738,7 +739,11 @@ def main() -> int:
         cfg = ShadowConfig(platform=args.platform, connection=passive,
                            mode=Mode.SHADOW, tick_hz=25.0, log_dir=logdir,
                            max_runtime_s=args.seconds,
-                           autopilot_version=args.platform,
+                           # NOT args.platform. That field is the flight
+                           # log's firmware provenance and its own test uses
+                           # "4.8.0-dev@01a504b"; passing the platform name
+                           # recorded a constant where the build belonged.
+                           autopilot_version=provenance_string(args.platform),
                            trust_trace_path=args.trust_trace)
         runner = ShadowRunner(cfg, connection_factory=factory)
         runner.connect()
@@ -915,6 +920,7 @@ def main() -> int:
                        for k, v in runner.phase_us.items()},
             "command_authority": runner.authority_evidence,
             "log_dir": os.path.relpath(logdir, ROOT),
+            "simulator_provenance": simulator_provenance(args.platform),
             "trust_trace": (os.path.relpath(args.trust_trace, ROOT)
                             if args.trust_trace else None),
             "trust_trace_steps": getattr(runner, "_trace_rows", 0),

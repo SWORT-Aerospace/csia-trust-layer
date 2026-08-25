@@ -171,6 +171,70 @@ def wait_for_port(conn_str, timeout=60.0) -> bool:
 
 ROOTS = {"ardupilot": AP_ROOT, "px4": PX4_ROOT}
 
+
+def simulator_provenance(platform: str) -> dict:
+    """Firmware version and upstream SHA of the simulator actually built.
+
+    WHY THIS EXISTS. The flight-log header carries an `autopilot_version`
+    field, and `tests/test_flight_log.py:39` shows the shape it was designed
+    for: "4.8.0-dev@01a504b". The SITL harness was filling it with the
+    PLATFORM NAME -- "ardupilot" -- so every flight log recorded a constant
+    where its firmware provenance belonged, and a published campaign could
+    not say which build produced it without an out-of-band note.
+
+    Read from the checkout that was built rather than from any hand-kept
+    document, so it cannot drift. Every field independently degrades to
+    "NOT RECORDED" instead of guessing.
+    """
+    root = ROOTS.get(platform)
+    out = {"platform": platform, "root": root,
+           "firmware": "NOT RECORDED", "sha": "NOT RECORDED",
+           "sha_short": "NOT RECORDED"}
+    if not root or not os.path.isdir(root):
+        return out
+    try:
+        sha = subprocess.run(["git", "-C", root, "rev-parse", "HEAD"],
+                             capture_output=True, text=True, timeout=15)
+        if sha.returncode == 0 and sha.stdout.strip():
+            out["sha"] = sha.stdout.strip()
+            out["sha_short"] = out["sha"][:7]
+    except (OSError, subprocess.SubprocessError):
+        pass
+    if platform == "ardupilot":
+        vh = os.path.join(root, "ArduCopter", "version.h")
+        try:
+            with open(vh, encoding="utf-8", errors="ignore") as fh:
+                for line in fh:
+                    if "THISFIRMWARE" in line and '"' in line:
+                        out["firmware"] = line.split('"')[1].strip()
+                        break
+        except OSError:
+            pass
+    else:
+        try:
+            tag = subprocess.run(["git", "-C", root, "describe", "--tags",
+                                  "--always"], capture_output=True, text=True,
+                                 timeout=15)
+            desc = tag.stdout.strip() if tag.returncode == 0 else ""
+            # `describe --always` falls back to the abbreviated SHA when no
+            # tag is reachable, which would render as "PX4-Autopilot
+            # 547e2ca@547e2ca". Drop the redundant half.
+            if desc and not out["sha"].startswith(desc):
+                out["firmware"] = f"PX4-Autopilot {desc}"
+            elif desc:
+                out["firmware"] = "PX4-Autopilot"
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return out
+
+
+def provenance_string(platform: str) -> str:
+    """`firmware@shortsha` for the flight-log header, or NOT RECORDED."""
+    p = simulator_provenance(platform)
+    if p["firmware"] == "NOT RECORDED" and p["sha_short"] == "NOT RECORDED":
+        return "NOT RECORDED"
+    return f"{p['firmware']}@{p['sha_short']}"
+
 # platform -> DialectReport for the decoder actually in use. Read by
 # qualify_platform.py so the result file records whether an "observed
 # UNAVAILABLE" row is a platform fact or a decoder limitation.
