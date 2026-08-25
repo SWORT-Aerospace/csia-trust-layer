@@ -342,7 +342,7 @@ paper-audit:
 # Each is its own target so a failure names itself instead of hiding behind
 # whichever line ran first. `make -k evidence-audit` runs them all.
 .PHONY: evidence-availability injection-effectiveness provenance-backfill \
-        evidence-coverage evidence-audit
+        evidence-coverage mechanism-a-confound evidence-audit
 evidence-availability:
 	$(PY) tools/simulation/evidence_availability.py
 
@@ -355,8 +355,13 @@ provenance-backfill:
 evidence-coverage:
 	$(PY) tools/simulation/evidence_coverage_ledger.py
 
+# Needs evidence-coverage to have run: it reads the ledger's verdicts to tell
+# harness starvation apart from structural absence and operating-regime gating.
+mechanism-a-confound:
+	$(PY) tools/simulation/mechanism_a_link_confound_audit.py
+
 evidence-audit: evidence-availability injection-effectiveness \
-                provenance-backfill evidence-coverage
+                provenance-backfill evidence-coverage mechanism-a-confound
 
 # Resolves the PX4 rate conflict from scratch: three arms, both links bound in
 # the same boot. NEEDS THE SIMULATOR and takes ~4 min (3 x 40 s plus boots).
