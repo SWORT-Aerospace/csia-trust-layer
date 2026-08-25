@@ -79,21 +79,61 @@ def lambda_from_c(c):
     return 1.0 - 2.0 * math.log(c)
 
 
-def reconstruct_from(steps, i0, cfg):
-    """Section 5: step the recursion from the MEASURED S0, T0 at index i0."""
+def reconstruct_from(steps, i0, cfg, rho_fixed=None, ignore_gate=False):
+    """Section 5: step the recursion from the MEASURED S0, T0 at index i0.
+
+    `rho_fixed` and `ignore_gate` exist only for the null controls below. The
+    preregistered reconstruction uses neither.
+    """
     S = steps[i0]["S_runtime"]
     T = steps[i0]["T_runtime"]
     out = []
     for i in range(i0, len(steps)):
         st = steps[i]
-        if i > i0 and st["updated"]:
+        if i > i0 and (ignore_gate or st["updated"]):
+            rho = st["rho"] if rho_fixed is None else rho_fixed
             S_prev, T_prev = S, T
-            S = st["rho"] * S_prev + 1.0
-            T = (st["rho"] * S_prev * T_prev + st["e"]) / S
+            S = rho * S_prev + 1.0
+            T = (rho * S_prev * T_prev + st["e"]) / S
         row = dict(st)
         row["S_hat"], row["T_hat"] = S, T
         out.append(row)
     return out
+
+
+def reconstruction_null_controls(rows, i0, cfg):
+    """RULE A, turned on the reconstruction itself.
+
+    A reconstruction fed the runtime's own measured per-tick e_k and rho_k
+    SHOULD reproduce the runtime -- so agreement, on its own, could be
+    tautology rather than evidence. These controls show it is not, by breaking
+    one input at a time and measuring how far the trajectory then moves:
+
+      rho_assumed_max   rho held at rho_max instead of measured per tick
+      rho_assumed_min   rho held at rho_min = 0.95, the value a constant-rho
+                        derivation would assume -- this is correction 9,
+                        quantified on real data rather than asserted
+      gate_ignored      the `avail AND fresh` update gate skipped
+
+    If these stay near zero the controls are themselves uninformative on this
+    flight, and that is reported rather than hidden: it means the flight never
+    exercised the input in question.
+    """
+    def worst(**kw):
+        rec = reconstruct_from(rows, i0, cfg, **kw)
+        d = [abs(r["T_hat"] - r["T_runtime"]) for r in rec
+             if not math.isnan(r["T_runtime"])]
+        return float(f"{max(d):.6g}") if d else None
+
+    gated_ticks = sum(1 for r in rows[i0:] if not r["updated"])
+    return {
+        "rho_assumed_max": worst(rho_fixed=cfg["rho_max"]),
+        "rho_assumed_min": worst(rho_fixed=cfg["rho_min"]),
+        "gate_ignored": worst(ignore_gate=True),
+        "gate_closed_ticks_in_window": gated_ticks,
+        "rule": "RULE A on the instrument: agreement is only evidence if "
+                "breaking an input breaks the agreement",
+    }
 
 
 def prepare(steps, cfg):
@@ -293,6 +333,7 @@ def analyse_trial(path: str, condition: str) -> dict:
         "max_abs_delta": float(f"{worst:.6g}"),
         "tolerance": TRAJ_TOL,
         "within_tolerance": bool(deltas) and worst <= TRAJ_TOL,
+        "null_controls": reconstruction_null_controls(rows, i0, cfg),
     }
     if not out["reconstruction"]["within_tolerance"]:
         reasons.append(f"reconstruction error {worst:.3g} > {TRAJ_TOL}")
