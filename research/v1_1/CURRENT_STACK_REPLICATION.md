@@ -1,444 +1,298 @@
-# Do the Phase-I mechanisms replicate on the current stack?
+# CURRENT_STACK_REPLICATION — PREREGISTRATION
 
-**The peer-review objection this answers:** *"The paper's headline mechanisms
-were demonstrated only in the 2015 ArduCopter 3.3 campaign."*
+**Mechanism B: history-dominated trust-threshold crossing.**
 
-Two mechanisms, two current autopilots, two different answers.
+**Status: PREREGISTERED, NOT RUN.** This document is written and frozen before
+any current-stack trial. It must be committed before the first run so that the
+campaign cannot be widened after seeing results.
 
-| mechanism | ArduCopter 3.3 | ArduPilot 4.8 | PX4 SIH |
-|---|---|---|---|
-| **A** — fix-loss self-occlusion (W-1) | YES | **YES** | **YES** |
-| **B** — history-dominated threshold crossing (W-4) | YES | **DOES NOT REPLICATE** | **DOES NOT REPLICATE** |
+Run by: an agent with repository and simulator access.
+Not run by: the manuscript session, which has neither.
 
-**Combined verdict: `MECHANISM_B_DOES_NOT_REPLICATE`.**
-
-Nothing was tuned to reach that. No `rho`, threshold, evidence weight or
-scenario amplitude was adjusted, and the frozen core is untouched —
-`tests/test_v1_frozen.py` passes and no `FROZEN_PATHS` file is in the diff.
-
-Machine-readable: `research/v1_1/results/current_stack_replication.json`,
-generated from the per-platform result files rather than transcribed.
+> **Agent note on the two cells this document delegates.** §2 leaves the PX4
+> parameter and §3 leaves the offset magnitudes to be recorded by the running
+> agent at preregistration time. Both are filled in below, from simulator and
+> core source, **before** any trial. Nothing else in this document has been
+> altered. A separate, earlier `mag_emi` probe at `T* = 0.60` exists in this
+> repository (`research/v1_1/MECHANISM_B_MAG_EMI_PROBE.md`); it is **not** a
+> run of this preregistration and is filed apart so the two cannot be confused.
 
 ---
 
-## 0. What "does not replicate" means here, precisely
+## 1. The scientific question, predeclared
 
-It does **not** mean the trust recursion is wrong. The recursion was
-reconstructed independently on every one of the 18 flights and reproduced the
-runtime to **`max_k |T̂(k) − T_runtime(k)| ≤ 6.3 × 10⁻¹⁰`** — worst case across
-all 18, 18,018 engine steps. That is the round-off floor set by the trace
-storing 9 decimals, not a modelling difference. The preregistered tolerance was
-0.02; the result is seven orders of magnitude inside it.
+For a fault whose relevant evidence **remains applicable**, does the frozen CSIA
+trust recursion on ArduPilot 4.8 and PX4 SIH:
 
-It means something narrower and more useful: **the preregistered intervention
-did not produce a sustained evidence collapse on either current platform, so
-the threshold was never approached and the crossing W-4 describes was never
-exercised.** Sections 5 and 6 say why, mechanistically, with source citations —
-and the reason turns out to be a structural property of the frozen core that
-was not previously written down.
+1. receive adverse evidence;
+2. retain a measurable banked healthy state $S_0$;
+3. evolve according to the source recursion;
+4. cross $T^* = 0.75$ at a time predicted by the **measured** state trajectory?
 
-The honest one-line summary: **the recursion transfers; the fault model does
-not.**
+This is a replication of a *mechanism*, not of a *number*.
+
+> **Critical design point.** Do **not** test whether the crossing occurs at 93.31
+> ticks. That value is specific to the Phase-I banked state
+> $S_0 = 475.6775$, which depends on the length and quality of the preceding calm
+> period on ArduCopter 3.3. A different platform will bank a different $S_0$ and
+> should therefore cross at a different tick. Testing against 93.31 would produce
+> a false non-replication. The test is whether the recursion, given the
+> *measured* $S_0$ and the *measured* per-tick $e_k$ and $\rho_k$ on that
+> platform, predicts that platform's own observed crossing.
 
 ---
 
-## 1. Mechanism A — replicates, and is reported in full elsewhere
+## 2. Intervention selection
 
-`docs/v1_1/MECHANISM_A_MODERN_REPLICATION.md`. Summarised only:
+### Why not fix loss
 
-Fix loss still removes the evidence required to attribute `gps_fault`. The GPS
-gate weight sum goes to **exactly 0.0** on both platforms, GPS trust does not
-fall but *rises slightly*, `gps_fault` never reaches rank 1, and the assurance
-layer escalates on the freshness path instead. Both trials valid: 450 and 448
-`NO_3D_FIX` ticks against clean controls.
+Fix loss closes the validity gate, which removes the GPS physics residual. With
+the evidence removed there is no adverse evidence stream to drive the recursion,
+so Mechanism B cannot be exercised. Reusing it would test Mechanism A again.
 
-That document also states, in its §6, that fix loss **cannot** test Mechanism B
-— self-occlusion removes the evidence, so the node never moves and there is no
-crossing to time. Mechanism B therefore required a different injection, and the
-preregistration was written before one was chosen.
+### Selected intervention: fix-preserving position glitch
 
-## 2. Mechanism B — the design
+Phase-I already contains a characterized evidence-preserving arm. From the
+exposure results, the `glitch` arm records $T_{NA} = 0.0$ and $T_{SOFH} = 0.0$
+on all three status channels, which is the direct measurement that **the target
+hypothesis remained applicable at every tick**. That is exactly the precondition
+this test requires, and it is the reason to prefer this arm over inventing a new
+one.
 
-**Preregistered in `research/v1_1/MECHANISM_B_PREREGISTRATION.md`, committed at
-`5f052dd`, before any trial ran.** The grid, endpoints, tolerances and
-classification rule are fixed in that commit; `git log` on the file against
-this one is the audit trail.
+| Field | Value |
+|---|---|
+| Intervention | fix-preserving GNSS position offset |
+| Family | Phase-I `glitch` arm and the step/ramp sweep of Section 8 |
+| Parameter, ArduPilot 4.8 | **`SIM_GPS1_GLTCH_X`** (REAL32, degrees of latitude). `SIM_GPS.cpp:70-75` `AP_GROUPINFO("GLTCH", 6, GPSParms, glitch, 0)`, a Vector3f in the **per-instance** `GPSParms` group. Applied at `SIM_GPS.cpp:581-583`: `d.latitude += glitch_offsets.x`, `d.longitude += .y`, `d.altitude += .z`. **Not** `SIM_GPS_*`: `SITL.cpp:681` records `// 6 was GPS_GLITCH`, i.e. the old name was removed and writes to it land nowhere |
+| Parameter, PX4 SIH | **none exists — recorded at preregistration time, see §2.1.** PX4 is therefore declared **INAPPLICABLE** in advance for the parameter-based form, with a preregistered escape clause in §2.2 |
+| Type | configured receiver-side position offset, not a commanded airframe displacement |
+| Readback | parameter readback must be captured and must match the request |
+| Expected downstream observable | receiver reports the offset position while fix type and satellite count are unchanged from the control |
+| Validity condition | `gvalid` remains 1 for the whole scored window. **If the gate closes, the trial is void**, because the intervention has become a Mechanism A trial |
+| Null control | identical flight, same window, no parameter applied |
+| Fault truth | the injection schedule, never the layer |
 
-**The claim (W-4).** `S(k) = ρ(k)·S(k−1) + 1`;
-`T(k) = (ρ(k)·S(k−1)·T(k−1) + e(k)) / S(k)`. Banked evidence sits in front of
-new evidence, so a node whose evidence collapses *walks* to the new level over
-a number of ticks set by `S` and `ρ`. W-4 reports `N* = 93.31` ticks.
+### 2.1 PX4: the parameter search, recorded before the campaign
 
-**The intervention.** `mag_emi` — a constant hard-iron offset added to the
-published magnetometer field, equal on all three body axes, mid-flight. Chosen
-because it is the one injection available on both current simulators that is
-**evidence-preserving**: the channel keeps arriving, every mag gate stays open,
-and the residuals move rather than disappearing.
+Four candidate routes were read out of PX4 source at `547e2ca`. **None applies a
+fix-preserving position offset to the primary GNSS solution**, which is what
+CSIA consumes: the PX4 adapter takes `gnss.position` from `GPS_RAW_INT`
+(`csia/aircraft/adapters/px4.py:159,239`), i.e. the published
+`vehicle_gps_position`.
 
-| platform | parameters | type | unit | Δ for `u` µT | source |
-|---|---|---|---|---|---|
-| ArduPilot | `SIM_MAG1_OFS_X/Y/Z` | REAL32 | mGauss | `current − 10·u` | `SITL.cpp:779`; **subtracted** at `AP_Compass_SITL.cpp:124`; compensating `COMPASS_OFS` written once at construction (`:30-32`) and never re-synced |
-| PX4 | `SIM_MAG_OFFSET_X/Y/Z` | REAL32 | Gauss | `current + u/100` | `SensorMagSim.cpp:153-155`, **added**; `ParamFloat`, no `reboot_required`; `updateParams()` on `parameter_update` (`:113-118`) |
-
-Both deltas are chosen so the **published field moves identically**: `+u` µT
-per FRD axis, accounting for the adapters' `×0.1` (mgauss→µT,
-`ardupilot.py:148`) and `×100` (gauss→µT, `px4.py:126`). Writes are relative to
-the current value, so `u = 0` is a genuine no-op — ArduPilot's boot default is
-`(5, 13, −18)`, not zero.
-
-**The grid**, per platform, frozen in advance: `CLEAN` (u = 0, null control),
-`SUB` (u = 0.5, expected non-crossing), `CROSS` (u = 15.0, expected crossing);
-**3 repetitions each, 18 flights total**; 40 s window, injection at t = 15 s,
-1001 ticks per flight.
-
-**The endpoint** is `T_mag(k) ≤ 0.60`, the `heading_caution` constant in
-`csia/runtime/failsafe.py` — **threshold crossing, not escalation**, because
-escalation additionally requires 1.0 s of continuous dwell and node freshness,
-and `docs/v1_1/PX4_CLEAN_ESCALATION_DIAGNOSIS.md` showed the dwell is what
-decides the outcome on PX4.
-
-## 3. Trial validity, and what the controls caught
-
-Every arm carries a per-tick trust trace (one row per **engine step**; the
-flight log keeps only the last step of each shadow tick and cannot reconstruct
-a recursion). Command authority was `NO_COMMAND_PATH_REACHABLE` on all 18
-flights.
-
-**RULE B — the parameter write is not the measurement.** The declared
-downstream observable is the `mag.field_ut` mean vector shift across the
-injection instant, which is exactly `u·√3` µT and attitude-independent because
-the offset is a constant body-frame vector.
-
-| platform | arm | expected shift | observed | valid |
-|---|---|---|---|---|
-| ArduPilot | CLEAN | 0 | 0.006, 0.010, 0.007 µT | ✅ 3/3 |
-| ArduPilot | SUB | 0.866 µT | 0.897, 0.890, 0.880 | ✅ 3/3 |
-| ArduPilot | CROSS | 25.98 µT | 25.52, 25.54, 25.55 | ✅ 3/3 |
-| PX4 | CLEAN | 0 | 0.823, 0.532, 0.490 µT | ✅ 3/3 |
-| PX4 | SUB | 0.866 µT | 1.747, 1.284, 1.543 | ❌ **0/3** |
-| PX4 | CROSS | 25.98 µT | 25.91, 26.05, 26.61 | ✅ 3/3 |
-
-**PX4's `SUB` arm is not a result — it is a failed trial, all three
-repetitions.** `SensorMagSim.cpp:152` adds `noiseGauss3f(0.02, 0.02, 0.03)`
-gauss, i.e. **2–3 µT per sample**. A 0.5 µT injection is well inside that noise
-floor, and the measured "shift" of 1.3–1.7 µT is the noise, not the offset.
-PX4's own `CLEAN` arms show the same thing from the other side: 0.5–0.8 µT of
-apparent shift with nothing injected at all.
-
-The preregistered ±40 % validity condition caught this without anyone having to
-decide after the fact. It contributes nothing to the verdict in either
-direction.
-
-Two of the 18 flights — `px4_CLEAN_2` and `px4_CROSS_2` — exited with the
-harness's `INDETERMINATE` R13 code, meaning the constant-work null control went
-over budget on the same host. No R13 verdict from this container is admissible
-(`csia/simulation/host_noise.py`), and none is claimed; it is unrelated to the
-trial and neither flight's trace is affected.
-
-### 3.1 The injection path cost two defects to get right
-
-Both were found by **harness verification runs**, and both would have been read
-as findings about the mechanism.
-
-1. **The first `PARAM_VALUE` to arrive is not the answer to your request.**
-   Measured on live ArduPilot SITL: three `PARAM_SET` frames all applied
-   correctly, and a readback matching the first arriving `PARAM_VALUE` per name
-   reported the **old** values for two of them. ArduPilot broadcasts acks on a
-   lag of over a second, interleaved with unrelated parameters
-   (`INS_GYROFFS_*`, `ARMING_SKIPCHK`, `EK3_SRC1_POSXY`…). The failure
-   direction is the dangerous one: a correctly applied injection reported as
-   NOT CONFIRMED, i.e. a real effect discarded as a failed trial. Readback now
-   drains, requests, takes the **last** value, and polls until the vehicle's
-   report catches up.
-2. **The three parameter reads inside the injection timer put the field step
-   2.5 s after the commanded time.** `N_obs` is counted from the injection
-   instant, so that would have entered E2 as a **62-tick error attributed to
-   the mechanism**. Reads moved to setup; the timer now sends three frames and
-   nothing else — write burst measured at 0.112–0.222 ms across all 18
-   flights. The analysis takes the injection instant from the **observed field
-   onset**, not the clock.
-
-The Mechanism A readback had the same fragility as (1). Its published results
-stand independently, because the intermediate quantity — 450 and 448
-`NO_3D_FIX` ticks — confirmed the injection landed; the path is fixed so no
-later run inherits it.
-
-**Deviations from the preregistration: none.** The harness verification runs
-used a 10–12 s window and a 4–5 s injection — deliberately *not* any
-preregistered arm configuration — and are disclosed here rather than counted.
-One of them showed a crossing; the grid was not changed after it, and could not
-have been, being already committed at `5f052dd`.
-
-## 4. Result — the recursion reconstructs exactly, and nothing crosses
-
-**E1, recursion fidelity (primary endpoint).** `T̂` integrated forward from
-`α₀ = 8, β₀ = 2` using only the observed `e(k)`, `ρ(k)` re-derived from the
-component scores by the source formula, and the update gate. No runtime trust
-enters the integration; nothing is fitted.
-
-> **`max_k |T̂(k) − T_runtime(k)|` ranges 5.1 × 10⁻¹⁰ to 6.3 × 10⁻¹⁰ across
-> all 18 flights**, against a preregistered tolerance of 0.02.
-
-That residual is the trace's own 9-decimal storage rounding, not a difference
-between the reconstruction and the engine: driven directly by the frozen
-`TrustCore` with full-precision inputs the same code agrees to < 1e-12.
-
-**The recursion in the paper is the recursion in the aircraft.** That is the
-one unambiguous positive result here, and it is the precondition for every
-other claim in this document: a reconstruction that did not match would make
-the crossing analysis a statement about the reconstruction.
-
-**The endpoint.** No arm crossed 0.60. Not one of 18.
-
-| platform | arm | `T` at injection | `T` min after | crossed |
-|---|---|---|---|---|
-| ArduPilot | CLEAN | 0.9733 / 0.9731 / 0.9730 | **unchanged** | no |
-| ArduPilot | SUB | 0.9735 / 0.9731 / 0.9734 | **unchanged** | no |
-| ArduPilot | CROSS | 0.9698 / 0.9713 / 0.9714 | 0.771 / 0.777 / 0.772 | no |
-| PX4 | CLEAN | 0.8719 / 0.8951 / 0.8902 | 0.755 / 0.692 / 0.703 | no |
-| PX4 | CROSS | 0.9190 / 0.8939 / 0.8711 | 0.743 / 0.752 / 0.721 | no |
-
-Two things in that table matter more than the verdict.
-
-**On ArduPilot, the 0.5 µT `SUB` injection moved the trust by nothing at all.**
-`T` min after injection equals `T` at injection to six decimals, and `e_f` is
-exactly 1.0 with `ρ_f` at `rho_max`. The field genuinely moved (0.88–0.90 µT,
-within tolerance) and the trust layer did not notice. `SUB` and `CLEAN` are
-indistinguishable on this platform.
-
-**On PX4, the null control does the entire job.** The `CROSS` arms' trust
-excursion — 0.87–0.92 down to 0.72–0.75 — sits **inside the range the `CLEAN`
-arms produce with nothing injected at all** (0.87–0.90 down to 0.69–0.75).
-Without RULE A's null control, a 15 µT magnetometer fault driving trust from
-0.89 to 0.72 would have looked like a clean detection. It is not distinguishable
-from PX4's own baseline wander.
-
-## 5. Why nothing crossed: the evidence recovers while the fault persists
-
-**First, the fault does persist.** ArduPilot `CROSS_0`, field shift from the
-pre-injection mean, sampled once per second:
-
-```
-t=14.00   0.02 uT      t=20.00  25.47 uT      t=30.00  25.31 uT
-t=15.01   5.22 uT      t=22.00  25.41 uT      t=35.00  25.22 uT
-t=16.00  25.94 uT      t=25.00  25.30 uT      t=40.00  25.05 uT
-```
-
-Twenty-five seconds after injection the offset is still 25 µT. The vehicle did
-not re-absorb it, the parameters read back confirmed, and no compass
-recalibration occurred. **The evidence recovers anyway.**
-
-ArduPilot `CROSS_0`, the `mag` node's four evidence components:
-
-| t | `c_nbr` | `c_phys` | `c_temp` | `c_stat` | `e` | `T` |
-|---|---|---|---|---|---|---|
-| 14.88 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0000 | 0.9727 |
-| **15.36** | **0.479** | 1.000 | **0.000** | **0.000** | **0.4677** | 0.9467 |
-| 15.84 | 0.411 | 1.000 | 0.004 | 0.000 | 0.4449 | 0.8840 |
-| 16.80 | 0.715 | 1.000 | 1.000 | 0.031 | 0.7550 | **0.7713** |
-| 18.24 | 0.916 | 1.000 | 1.000 | 0.881 | 0.9527 | 0.8359 |
-| **19.20** | **1.000** | 1.000 | 1.000 | 1.000 | **1.0000** | 0.8981 |
-| 25.44 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0000 | 0.9760 |
-
-Every evidence source is back to healthy **4.1 s after the step**, and trust
-climbs back to 0.976. The trust minimum, 0.7706, is reached at t ≈ 16.8 s and
-is a *turning point*, not a plateau.
-
-Component by component:
-
-* **`c_temp` and `c_stat` collapse to 0.000 and recover within 1.4 s and
-  3.4 s.** These are change detectors — a Holt predictor and a variance ratio.
-  A step is one large innovation, then the predictor tracks the new level.
-  Working as designed, and structurally incapable of seeing a constant offset.
-* **`c_phys` never moves at all — 1.000 throughout.** `phys_mag` compares
-  `|B|` against a reference (`online.py:582-585`). The injected offset — as
-  published, `(+15.0, −15.1, −15.0)` µT — sits at about 103° to the local field
-  `(22.3, −8.3, 52.8)` µT, so it **rotated** the vector instead of lengthening
-  it: `|B|` went 57.89 → 57.4 µT. A hard-iron offset is visible to a magnitude
-  check only when it points along the field, and its heading effect is largest
-  exactly where its magnitude effect is smallest.
-* **`c_nbr` drops to 0.411 and recovers to 1.000 over 3.4 s.** This is the one
-  that matters, and §6 is about it.
-
-## 6. The finding: the only weighted magnetometer cross-check is mag-slaved
-
-Two edges can carry magnetometer evidence. Measured across every tick of every
-flight in this campaign:
-
-```
-                         [consistency, gate weight]
-attitude_gravity_mag     [1.000, 1.0]  ->  [0.411, 1.0]  ->  [1.000, 1.0]
-heading_course           [0.073, 0.0]      [0.129, 0.0]      [0.501, 0.0]
-                                    ^^^ gate weight 0.0, every tick
-```
-
-* `heading_course` compares the magnetometer heading against **GNSS course**
-  — an independent reference. Its gate is `speed_gate * gvalid`
-  (`online.py:542-545`), and in a hover it is **0.0 for the entire flight**.
-  Its consistency value bounces between 0.07 and 1.0 at random, which is what
-  a ground-track bearing does at zero ground speed. It contributes nothing.
-* `attitude_gravity_mag` compares the magnetometer heading against the
-  **IMU attitude yaw**, `wrap_angle(mag_heading − att0[2])`, gate **1.0,
-  unconditional** (`online.py:538-541`).
-
-And that yaw is driven by the magnetometer. `online.py:351-355`:
-
-```python
-if self._mag_yaw_gain > 0.0 and self.slots["mag"].seen:
-    f = self._att[sensor]
-    err = float(wrap_angle(np.array([self._mag_heading - f.yaw]))[0])
-    f.yaw += self._mag_yaw_gain * err
-```
-
-with field mode forcing the gain on (`online.py:246-248`:
-`self._mag_yaw_gain = max(self._mag_yaw_gain, 0.005)`).
-
-> **In a hover, the only magnetometer cross-check carrying any weight compares
-> the magnetometer against a reference that the magnetometer itself steers.**
-> A persistent magnetometer bias pulls its own reference along with it, and the
-> disagreement decays to zero while the fault remains.
-
-The arithmetic agrees with the observation. Mean-age estimation over the
-1000 logged ticks puts ArduPilot's `imu0` stream at ≈ 93 Hz, so a first-order
-slew at gain 0.005 per IMU sample has `τ = 1/(0.005 × 93.4) ≈ 2.1 s`. Decaying
-an initial ~12° heading error below the 5° residual scale of
-`attitude_gravity_mag` takes ≈ 1.8 τ ≈ 3.8 s. **Observed recovery: 3.4 s.**
-
-This is a **second self-occlusion**, structurally distinct from Mechanism A's.
-Mechanism A occludes by *removing* the evidence. This one occludes by having
-the reference *follow the fault*. Both end with a faulty node that cannot be
-discredited, and this one is arguably worse, because the evidence is still
-flowing and looks healthy.
-
-The mag-aided yaw is deliberate — `online.py:173` documents it as "mag-aided
-yaw (drift immunity)". Its cost had not been written down. **It buys drift
-immunity by giving the magnetometer partial immunity from its own cross-check.**
-
-### 6.1 What this does *not* establish
-
-`c_temp`/`c_stat` recovery and the mag-yaw slaving are **both** present and
-both sufficient on their own timescales. This section attributes the `c_nbr`
-recovery to the slaving on the strength of the edge trace, the source, and the
-time-constant agreement — but the two were not separated experimentally. The
-measurement that would separate them: rerun with `mag_yaw_gain = 0`, which is a
-**core parameter change** and therefore outside this work by construction. It
-is named as the next measurement, not performed.
-
-## 7. E2, and why the closed form predicted a crossing that never came
-
-On the three ArduPilot `CROSS` arms the W-4 closed form, fed the preregistered
-fixed window (ticks inject+2 … inject+26) and `S₀` from the reconstruction,
-predicted a crossing at **N\* = 60, 61, 61 ticks**. No crossing occurred.
-
-This is not the recursion failing — E1 is exact. It is the closed form's
-**constant-coefficient assumption** failing:
-
-| quantity | value in the fixed window | value 4 s later |
+| candidate | what it actually does | why it is not the intervention |
 |---|---|---|
-| `e_f` | 0.4526 | **1.0000** |
-| `ρ_f` | 0.9500 | **0.9980** |
+| `SIM_GPS_USED` | satellite count; `SensorGpsSim.cpp:155-167` sets `fix_type = 0` below 4 | fix loss — this is Mechanism A, excluded by §2 |
+| `SENS_GPS1_OFFX/OFFY` | `SensorGpsSim.cpp:203-217` builds a **second** receiver instance at an offset and publishes it to `_sensor_gps_pub2`; the primary is published unmodified at `:201` | does not move the primary fix |
+| `SENS_GPS0_OFF{X,Y,Z}` | `VehicleGPSPosition.cpp:106-115, 173, 197-200` — the antenna lever arm is passed through as `antenna_offset_x/y/z` **metadata** for the estimator | lat/lon are never modified |
+| `failure_injection::process_gnss` | `Off` (suppress), `Stuck` (replay the last fix), `Wrong` (force `fix_type = 2D` + jamming state) | `Off`/`Wrong` close the validity gate; `Stuck` is a frozen-position fault, a different family, and §3 forbids substituting |
 
-The closed form assumes `e` and `ρ` hold at those values indefinitely, and
-under that assumption `T → e_f = 0.45`, which is below 0.60, so a crossing
-follows. The actual evidence recovered before tick 60. **A step fault in a
-system with adaptive residuals violates the assumption the closed form is
-built on**, and the preregistered 1.0 s window — chosen before any data existed
-— sampled the transient rather than a steady state that never arrived.
+`SIH_LOC_LAT0/LON0` is the simulated world origin, not a receiver error, and
+moving it would be a commanded displacement — excluded by the Type row above.
 
-On PX4 the closed form gave the right answer for the right reason: `e_f` came
-out at 0.657, 0.658, 0.661, **above** the 0.60 threshold, so it predicted *no
-crossing* and none occurred.
+### 2.2 Preregistered escape clause for PX4
 
-E2 is therefore reported as **not evaluable for its intended purpose** on this
-campaign: it never got a genuine sustained evidence collapse to time. The
-tolerance (±25 ticks) was never the binding issue.
+PX4 can be made to take its GNSS from MAVLink `GPS_INPUT` instead of
+`sensor_gps_sim`, which would permit a rig-injected fix-preserving offset. That
+route is **attempted only if** it can be shown valid by the same downstream
+observable as ArduPilot — reported position offset by the commanded amount with
+fix type and satellite count unchanged, `gvalid` = 1 throughout. If that
+demonstration fails, PX4 is recorded **INAPPLICABLE** and no substitute
+intervention is run. This rule is fixed now, before any attempt.
 
-## 8. Verdicts, applied mechanically
+### Step and ramp contrast
 
-Per the preregistration §6, evaluated independently per platform. **Not
-pooled.**
+Retain it. It is valid, it is the Phase-I contrast, and it gives the expected
+non-crossing and expected crossing conditions §3 requires without adding a new
+scenario family.
 
-| platform | valid arms | valid CROSS | CROSS crossed | E1 all pass | CLEAN crossed | verdict |
-|---|---|---|---|---|---|---|
-| ArduPilot | 9/9 | 3 | **0** | ✅ | 0 | **DOES_NOT_REPLICATE** |
-| PX4 | 6/9 | 3 | **0** | ✅ | 0 | **DOES_NOT_REPLICATE** |
+---
 
-> **`MECHANISM_B_DOES_NOT_REPLICATE`**
+## 3. Frozen campaign
 
-E3 (attribution) is **not** confounded on either platform: no `CLEAN` arm
-crossed. The preregistration flagged this as a live risk for PX4, since
-`PX4_CLEAN_ESCALATION_DIAGNOSIS.md` recorded mag trust reaching 0.554 with no
-injected fault on 2 of 4 earlier clean flights. It did not recur across these
-3 clean 40 s flights — `T` min 0.692–0.755. **n = 3 and no rate is claimed**;
-the earlier observation is not retracted by this one.
+Per platform, per condition, **5 repetitions**, declared now and not revisable.
 
-## 9. What follows, and what does not
+| Condition | Magnitude (declared below) | Expectation | Purpose |
+|---|---|---|---|
+| clean control | — | no adverse evidence, no crossing | establishes that $S_0$ banks up on this platform |
+| step offset, small | +5 m north, instantaneous | no crossing | expected non-crossing condition |
+| step offset, large | +50 m north, instantaneous | no crossing | tests whether magnitude alone crosses |
+| ramp, 20 s | 0 → +50 m north, linear over 20 s | crossing | expected crossing condition |
 
-**Follows:**
+Total: 4 conditions x 5 repetitions x 2 platforms = **40 trials**.
 
-1. The trust recursion transfers to both current autopilots. `T̂` reproduces
-   `T_runtime` to within 6.3 × 10⁻¹⁰ across 18 flights and 18,018 engine
-   steps — the storage round-off floor, against a 0.02 tolerance.
-2. A constant hard-iron magnetometer offset — up to 26 µT, sustained 25 s,
-   verified downstream — **does not produce a sustained trust response** in
-   CSIA on either platform.
-3. The reason is structural and is now located: in a hover, the sole weighted
-   magnetometer cross-check is against a mag-slaved reference, and the two
-   change-detector components cannot see a constant offset at all.
-4. On PX4, a 15 µT magnetometer fault is not distinguishable from the
-   platform's own clean baseline wander. The null control is what establishes
-   that.
+Do not widen this grid after seeing results. If a condition is invalid on a
+platform, mark it INAPPLICABLE and say why; do not substitute another.
 
-**Does not follow:**
+### 3.1 Magnitudes, and why these — recorded before the campaign
 
-* That W-4 is wrong. W-4 describes what the recursion does *given* an evidence
-  collapse. This campaign did not produce one, so it did not test the delay.
-  The 2015 result is not contradicted; it is not confirmed on current hardware
-  either.
-* That CSIA cannot detect magnetometer faults. It says a *constant* offset is
-  the wrong fault model for this detector. A drifting or noise-injecting mag
-  fault is a different injection and a separate preregistered trial.
-* Anything about real aircraft. These are SITL flights; W-3 records that
-  detection can be a property of the noise model rather than of the fault, and
-  PX4's 2–3 µT simulated mag noise is exactly that hazard showing up.
+The offset is applied to **latitude only** (`SIM_GPS1_GLTCH_X`), converted with
+the authalic Earth radius ArduPilot itself uses in this file
+(`SIM_GPS.cpp:548`, `earth_rad_inv = 1.569612305760477e-7`, R = 6 371 000 m), so
+**1° latitude = 111 194.9 m** and the write is `metres / 111194.9`.
 
-**Nothing was tuned.** Per preregistration §7, a non-replication on a current
-autopilot is an external-validity finding about a 2015-era characterisation,
-and it is worth more than a replication manufactured by adjustment.
-
-## 10. Reproducing
-
-```bash
-python tools/deploy/mechanism_b_campaign.py --platform ardupilot
-python tools/deploy/mechanism_b_campaign.py --platform px4
-python tools/simulation/mechanism_b_report.py --platform ardupilot \
-    --arm CLEAN research/v1_1/results/mechanism_b/ardupilot_CLEAN_0.json \
-    ...   # one --arm per flight
-python tools/simulation/current_stack_replication.py
-```
-
-The campaign grid is a module constant, not a command-line option: a grid you
-can widen from the shell is not a preregistered grid. `--platform` selects
-which platform to fly and nothing else.
-
-`logs/` is git-ignored, as it is for every other flight campaign here, so the
-18 raw traces (19 MB) are not in the repository. **One is**, gzipped, so E1 can
-be rechecked against real data rather than taken on trust:
+The magnitudes are chosen from the **core's own residual definition**, not by
+eye. `csia/runtime/online.py:562-573`:
 
 ```python
-from mechanism_b_report import read_trace, reconstruct
-h, s = read_trace(
-    "research/v1_1/results/mechanism_b/ardupilot_CROSS_0.trace.jsonl.gz")
-rows = reconstruct(s, "mag", h["engine_config"])
-max(abs(r["T_hat"] - r["T_runtime"]) for r in rows)   # 5.18e-10
+r_raw   = self._gps_fd_vel - vel          # fd of REPORTED position, minus reported Doppler velocity
+lam_gps = self._lam_upd("phys_gps", norm(r_gps), 0.45, ...)   # sigma 0.45 m/s
+lam_step = (self._gps_step_peak / 20.0) ** 2                  # absolute step term, sigma 20 m/s
+self._gps_step_peak *= 0.85                                   # decays ~0.85 per tick
+P["gps"] = (max(lam_gps, lam_step), gvalid * (1.0 if tau > 3.0 else 0.0))
 ```
 
-The engine constants come out of the trace header, written by the engine that
-produced the run, so the reconstruction cannot be handed a different `α₀`,
-`β₀`, `ρ_max` or `ρ_min` than the flight used.
+`_gps_fd_vel = (pos - ppos)/dt` (`online.py:364`) is differenced from the
+**reported** position, while `vel` is the receiver's **Doppler** velocity, which
+`SIM_GPS1_GLTCH` does not touch. So under a position glitch of rate $v$:
 
-`tests/test_mechanism_b_recursion.py` (18 tests) checks the reconstruction
-against the frozen `TrustCore` itself and the closed form against a direct
-numerical iteration of the same recursion, including a test that a
-reconstruction ignoring the update gate would fail E1 — so the gate test cannot
-pass for the wrong reason.
+$$r_{raw} = (\text{true velocity} + v) - \text{true velocity} = v$$
+
+**independently of what the airframe physically does.** That matters, because a
+position glitch on a position-controlling vehicle provokes real motion as it
+chases the offset; that motion cancels out of this residual exactly.
+
+Hence the predeclared expectations:
+
+* **A step** puts one sample of $D/\Delta t$ into `_gps_step_peak` and then
+  returns $r_{raw}$ to zero. At the ArduPilot SITL default `SIM_GPS1_HZ = 5`
+  (`SIM_GPS.cpp:81`), 5 m gives ≈ 25 m/s ($\lambda_{step} ≈ 1.6$) and 50 m gives
+  ≈ 250 m/s ($\lambda_{step} ≈ 156$), both decaying at 0.85 per tick — a
+  transient of order 1–2 s. **No sustained adverse evidence, so no crossing
+  expected, at either magnitude.**
+* **A 20 s ramp to 50 m** is $v = 2.5$ m/s held for 20 s, giving
+  $\lambda_{gps} ≈ (2.5/0.45)^2 ≈ 31$ **sustained**, so $c_{phys} → 0$ while the
+  channel keeps arriving and `gvalid` stays 1.
+
+With $c_{phys} → 0$ and the other three components healthy, the fused evidence
+floor is $e_f ≈ (0.35 + 0.20 + 0.15)/1.0 = 0.70$, which is **below**
+$T^* = 0.75$ — so a crossing is predicted, and predicted to be strongly
+history-dominated because $e_f$ sits only 0.05 under the threshold. That is
+precisely the regime Mechanism B describes, and it is why the ramp is the
+expected-crossing arm.
+
+**Precondition to be checked first, on the control:** measure $S_0$ at the onset
+instant. If a platform does not bank a substantial $S_0$ during its calm period,
+Mechanism B has nothing to dominate with, and the correct finding is a
+platform-level difference in the precondition rather than a failure of the
+recursion. Record that separately; it is a real result.
+
+### 3.2 Fixed flight parameters
+
+Identical for every condition and repetition: 60 s shadow window at 25 Hz
+(≈ 1500 ticks); arm and climb before the window; onset at **t = 20.0 s**,
+leaving 40 s (1000 ticks) after onset — the ramp completes at t = 40 s and is
+held to the end. `field_mode` on, profile `FIELD_DERIVED_NOISE`.
+
+---
+
+## 4. Per-tick logging
+
+Every tick, from 20 ticks before onset to 60 ticks past the observed crossing or
+end of run:
+
+```
+tick, t_s, fault_truth, raw_residual, gate_applicable, e_k, rho_k, S_k, T_k,
+T_le_0_75, failsafe_condition, dwell_state_if_available, assurance_level
+```
+
+No mechanism attribution without these intermediates. In particular $\rho_k$ must
+be logged and not assumed: $\rho = 0.95$ is the lower bound reached under full
+predictor disagreement, and an intervention that does not drive full
+disagreement will run at a higher $\rho$ and a different trajectory. That is not
+a failure, it is a measurement.
+
+---
+
+## 5. Independent reconstruction
+
+From the **measured** $S_0$, $T_0$, and the **measured** per-tick $e_k$ and
+$\rho_k$, step the source recursion tick by tick to obtain $\hat{S}(k)$ and
+$\hat{T}(k)$. Do not use the closed form with a constant $\rho$: assuming
+constant forgetting is the error that invalidated the first Phase-I derivation
+and is recorded as correction 9.
+
+Report per run:
+
+- $\max_k |\hat{T}(k) - T_{\text{runtime}}(k)|$
+- predicted crossing tick
+- observed crossing tick
+- crossing error in ticks
+
+**No fitted parameters.** Every constant comes from source.
+
+### Declared tolerances, fixed now
+
+| Quantity | Tolerance for REPLICATED |
+|---|---|
+| $\max_k \|\hat{T}(k) - T_{\text{runtime}}(k)\|$ | $\le 10^{-6}$ |
+| crossing error | $\le 2$ ticks |
+| control crossings | 0 of 5 |
+| expected-crossing condition | 5 of 5 cross |
+| expected-non-crossing condition | 0 of 5 cross |
+
+The trajectory tolerance is tight because Phase I achieved exactly 0.0 against
+the same recursion; a larger error means the implementation differs, not that
+the platform differs.
+
+> **Agent note on trace precision.** The per-step trace is written by the
+> shadow runner as JSON. It is stored at **15 significant figures** for this
+> campaign so that storage rounding cannot consume the $10^{-6}$ budget; at the
+> 9-decimal rounding used by the earlier `mag_emi` probe the reconstruction
+> floor was ≈ 6 × 10⁻¹⁰, already inside tolerance, but the tighter storage
+> removes the question entirely.
+
+---
+
+## 6. Platform classification
+
+Exactly one per platform, using **threshold crossing only**. Escalation
+completion is not a criterion, because Systems Paper I no longer claims it.
+
+- **REPLICATED** — valid injection with readback, matched control, gate stayed
+  open for the whole window, recursion reproduced the trajectory within
+  tolerance, and predicted and observed crossings agree within tolerance.
+- **PARTIALLY_REPLICATED** — recursion reproduces the trajectory but crossing
+  outcomes differ from expectation, or one condition is invalid.
+- **NOT_REPLICATED** — valid campaign, recursion does not reproduce the
+  trajectory or crossings contradict prediction.
+- **INAPPLICABLE** — the intervention cannot be made valid on this platform.
+- **INCONCLUSIVE** — campaign ran but validity controls failed.
+
+`NOT RUN` is not in this list and must not be recorded as `INCONCLUSIVE`.
+
+---
+
+## 7. Negative results
+
+If Mechanism B does not transfer, keep the result. Do not adjust $\rho$,
+thresholds, evidence scales or scenario amplitudes to recover it. A
+non-replication is an external-validity finding about a mechanism derived from
+one 2015-era autopilot, and it is publishable in exactly the same way the
+positive result is.
+
+---
+
+## 8. Outputs
+
+```
+research/v1_1/CURRENT_STACK_REPLICATION.md          this file, plus results
+research/v1_1/results/current_stack_replication.json
+```
+
+The JSON must carry: preregistration hash, per-trial validity evidence including
+parameter readback, per-trial reconstruction error, per-platform classification,
+and the exact sentences Systems Paper I would be permitted to use under each
+outcome.
+
+---
+
+## 9. Cross-platform table, to be completed
+
+| Mechanism | ArduCopter 3.3 | ArduPilot 4.8 | PX4 SIH |
+|---|---|---|---|
+| fix-loss self-occlusion | YES | YES | YES |
+| fix-preserving contrast | NO | NO | NO |
+| history-dominated threshold crossing | YES | `[PENDING]` | `[PENDING]` |
+
+Do not pool platforms. Three columns, three answers.

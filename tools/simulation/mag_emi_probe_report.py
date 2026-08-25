@@ -84,7 +84,7 @@ def arm_table(res: dict) -> list:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=os.path.join(
-        RESULTS, "current_stack_replication.json"))
+        RESULTS, "mechanism_b_mag_emi_probe.json"))
     args = ap.parse_args()
 
     a_res = {p: _load(f"mechanism_a_{p}.json") for p in PLATFORMS}

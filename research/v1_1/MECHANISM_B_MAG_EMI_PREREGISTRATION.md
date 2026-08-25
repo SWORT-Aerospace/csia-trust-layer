@@ -1,5 +1,17 @@
 # Mechanism B — preregistration
 
+> **SUPERSEDED AS THE MECHANISM B CAMPAIGN.** This document governs a
+> `mag_emi` probe with threshold `T* = 0.60`, its own grid, its own tolerances
+> and its own classification vocabulary. It is **not** a run of the
+> authoritative Mechanism B preregistration, which specifies a fix-preserving
+> GNSS position glitch at `T* = 0.75` — see
+> `research/v1_1/CURRENT_STACK_REPLICATION.md`.
+>
+> Nothing here is retracted. The magnetometer probe stands on its own evidence,
+> and its central finding — that the only weighted magnetometer cross-check in
+> a hover is against a mag-slaved reference — is independent of Mechanism B.
+> It is filed separately so that neither can be mistaken for the other.
+
 **This file is committed BEFORE any Mechanism B trial is executed.** Its
 purpose is to make the campaign falsifiable: the grid, the endpoints, the
 tolerances and the classification rule are fixed here, so a result cannot be
