@@ -701,6 +701,17 @@ def main() -> int:
             print(f"    armed={ev['armed']} climbed={ev['climbed_m']:.2f} m")
             result["rig_flight"] = {"armed": ev["armed"],
                                     "climbed_m": round(ev["climbed_m"], 2)}
+            # Carry the rig's own parameter verification into the result. It
+            # was being computed and discarded, which is the same failure as
+            # not checking: a verification nobody can read afterwards cannot
+            # be used to judge whether a trial was valid.
+            for k in ("failsafe_params", "takeoff_alt_param",
+                      "takeoff_alt_confirmed", "warnings"):
+                if k in ev:
+                    result["rig_flight"][k] = ev[k]
+            bad = [w for w in (ev.get("warnings") or [])]
+            if bad:
+                print("    !! rig parameter warnings: " + "; ".join(bad))
             if args.hold_mode:
                 # WHY THIS EXISTS. A GNSS position glitch on a vehicle that
                 # controls position from GNSS is cancelled by the vehicle:

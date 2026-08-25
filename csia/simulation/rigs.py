@@ -345,18 +345,19 @@ def _fly_px4(conn, evidence, alt_m, timeout):
     conn.mav.param_request_read_send(conn.target_system,
                                      conn.target_component,
                                      b"MIS_TAKEOFF_ALT", -1)
-    t_end = time.time() + 5.0
-    while time.time() < t_end:
-        m = conn.recv_match(type="PARAM_VALUE", blocking=True, timeout=1.0)
-        if m is None:
-            continue
-        pid = m.param_id.decode() if isinstance(m.param_id, bytes) \
-            else m.param_id
-        if pid.strip("\x00") == "MIS_TAKEOFF_ALT":
-            evidence["takeoff_alt_param"] = round(float(m.param_value), 2)
-            break
-    else:
-        evidence["takeoff_alt_param"] = None
+    got = param_readback(conn, ["MIS_TAKEOFF_ALT"])["MIS_TAKEOFF_ALT"]
+    evidence["takeoff_alt_param"] = (None if got is None
+                                     else round(float(got), 2))
+    # THE READBACK MUST BE COMPARED, not merely recorded. This block existed
+    # to "verify the write the takeoff depends on" and then stored whatever
+    # came back without ever checking it against alt_m, so a parameter that
+    # read back as a completely different altitude passed in silence.
+    if got is not None and abs(float(got) - float(alt_m)) > 0.05:
+        evidence.setdefault("warnings", []).append(
+            f"MIS_TAKEOFF_ALT commanded {alt_m}, read back {got}")
+        evidence["takeoff_alt_confirmed"] = False
+    elif got is not None:
+        evidence["takeoff_alt_confirmed"] = True
     if evidence.get("takeoff_alt_param") is None:
         # Not fatal -- the probe still reports what happened -- but a takeoff
         # target that did not stick is the single most likely reason a climb
@@ -509,6 +510,70 @@ def _fly_px4(conn, evidence, alt_m, timeout):
     return evidence
 
 
+def param_readback(conn, names, timeout=6.0, settle=0.5):
+    """Read several parameters back at once. {name: value or None}.
+
+    TAKES THE LAST MATCHING VALUE, NOT THE FIRST. Autopilots broadcast
+    PARAM_VALUE acks on a lag and interleaved with unrelated parameters, so
+    the first frame bearing a name is often a stale ack from an earlier write.
+    Measured on live ArduPilot SITL: three PARAM_SET frames all applied
+    correctly while a first-match readback reported the OLD value for two of
+    them.
+
+    Batched because `fly()` verifies several parameters and one request/settle
+    cycle each would add seconds to every flight in every campaign.
+    """
+    from pymavlink import mavutil as _mv
+    del _mv
+    deadline = time.time() + 0.5
+    while time.time() < deadline:                     # drain stale acks
+        if conn.recv_match(type="PARAM_VALUE", blocking=False) is None:
+            break
+    for n in names:
+        conn.mav.param_request_read_send(conn.target_system,
+                                         conn.target_component,
+                                         n.encode(), -1)
+    seen, last_t = {}, time.time()
+    end = time.time() + timeout
+    while time.time() < end:
+        m = conn.recv_match(type="PARAM_VALUE", blocking=True, timeout=0.2)
+        if m is None:
+            if seen and time.time() - last_t >= settle:
+                break
+            continue
+        pid = m.param_id.decode() if isinstance(m.param_id, bytes) \
+            else str(m.param_id)
+        pid = pid.strip("\x00")
+        if pid in names:
+            seen[pid] = float(m.param_value)
+            last_t = time.time()
+    return {n: seen.get(n) for n in names}
+
+
+def check_params(conn, expected, evidence, label):
+    """Read back `{name: expected}` and record any that did not stick.
+
+    A parameter write nobody confirmed is an assumption. These particular
+    writes are load-bearing: the failsafe disables are what stop an RC or GCS
+    failsafe from changing flight mode mid-trial, and a mode change mid-trial
+    corrupts the trial silently.
+    """
+    got = param_readback(conn, list(expected))
+    stuck, bad = {}, []
+    for name, want in expected.items():
+        val = got.get(name)
+        ok = val is not None and abs(val - float(want)) <= max(
+            1e-4, 1e-4 * abs(float(want)))
+        stuck[name] = {"commanded": float(want), "readback": val,
+                       "confirmed": bool(ok)}
+        if not ok:
+            bad.append(f"{name} commanded {want}, read back {val}")
+    evidence[f"{label}_params"] = stuck
+    if bad:
+        evidence.setdefault("warnings", []).extend(bad)
+    return not bad
+
+
 def fly(conn, platform, alt_m=25.0, timeout=120):
     """Arm and climb, so the airframe is actually in motion while we measure.
 
@@ -534,12 +599,19 @@ def fly(conn, platform, alt_m=25.0, timeout=120):
     if platform == "px4":
         return _fly_px4(conn, evidence, alt_m, timeout)
 
-    for name, val in (("FS_THR_ENABLE", 0), ("FS_GCS_ENABLE", 0),
-                      ("FS_OPTIONS", 0), ("BATT_FS_LOW_ACT", 0),
-                      ("SIM_SPEEDUP", 10)):
+    ap_params = {"FS_THR_ENABLE": 0, "FS_GCS_ENABLE": 0, "FS_OPTIONS": 0,
+                 "BATT_FS_LOW_ACT": 0, "SIM_SPEEDUP": 10}
+    for name, val in ap_params.items():
         conn.mav.param_set_send(conn.target_system, conn.target_component,
                                 name.encode(), float(val),
                                 mavutil.mavlink.MAV_PARAM_TYPE_INT32)
+    # VERIFY THEM. These were written and never read back. The four failsafe
+    # disables are what stop an RC or GCS failsafe from changing flight mode
+    # part way through a trial, and a mode change mid-trial corrupts the trial
+    # without announcing itself. Anything that flies in a non-position mode --
+    # the Mechanism B campaign flies ALT_HOLD precisely so the airframe cannot
+    # chase a GNSS glitch -- depends on these having stuck.
+    check_params(conn, ap_params, evidence, "failsafe")
 
     # Sequence copied from the Phase-II rig, which is the version known to
     # work against 4.8: wait for a real 3D fix, let the EKF settle, GUIDED,
