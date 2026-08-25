@@ -139,7 +139,14 @@ percent of its declaration.
 
 ### 2.5 Two guards that could not fail
 
-**`tests/test_determinism.py` does not exist and never did.** The CI step
+**`tests/test_determinism.py` does not exist and never did.**
+> **Update, 2026-08-25:** it does now. The file was written to close this
+> gap: it replays a committed flight log through the frozen core twice and
+> asserts bit-identical trust trajectories, which is the property every
+> replay-based result here assumes and nothing checked. The CI step names it
+> explicitly. The finding below stands as the historical record of why the
+> step was decorative for the life of the repository.
+ The CI step
 named "determinism" ran `pytest -q tests/test_determinism.py -k determin ||
 true`. pytest exits 4 for a missing path and `|| true` turned it green, so the
 step reported success while testing nothing. The 14 determinism tests live

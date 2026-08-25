@@ -36,6 +36,23 @@ EXPECTED_MANUSCRIPT_MARKERS = (
 )
 
 
+def _generating_commits(campaign):
+    """The commits that ACTUALLY produced a campaign's trials.
+
+    Read from PROVENANCE_BACKFILL.json, which recovers `csia_commit` from each
+    flight-log header. This ledger used to hardcode a single commit per
+    campaign, and for the Mechanism B campaign that was WRONG: 670aa7a is
+    where the results were committed, not where the trials were generated.
+    They ran at seven distinct commits, and the backfill separately proves
+    nothing trial-affecting changed between them.
+    """
+    d = _load("PROVENANCE_BACKFILL.json")
+    if not d:
+        return None
+    c = (d.get("campaigns") or {}).get(campaign) or {}
+    return c.get("distinct_generating_commits") or None
+
+
 def _load(rel):
     p = os.path.join(RESULTS, rel)
     if not os.path.exists(p):
@@ -87,7 +104,13 @@ def ledger():
     d = _load("current_stack_replication.json")
     if d:
         art = "research/v1_1/results/current_stack_replication.json"
-        c = "670aa7a"
+        gen = _generating_commits("mechanism_b_gps")
+        # Recorded as the real set, with the results commit named separately.
+        c = ({"generated_at": gen, "results_committed_at": "670aa7a",
+              "code_invariance": "proven: nothing trial-affecting changed "
+                                 "between the first and last, see "
+                                 "PROVENANCE_BACKFILL.json"}
+             if gen else "670aa7a")
         tool = ("tools/simulation/current_stack_replication.py "
                 "(campaign: tools/deploy/mechanism_b_campaign.py)")
         note_tool = ("the injection-onset defect was fixed AFTER this "

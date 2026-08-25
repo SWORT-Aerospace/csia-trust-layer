@@ -72,16 +72,35 @@ def header_of(result):
     return None
 
 
-def collect(pattern):
+def collect(patterns):
+    """Every trial across every named campaign, with its OWN platform.
+
+    Platform is read per trial rather than passed in, because the mag_emi
+    probe is a mixed campaign: nine ArduPilot arms and nine PX4 arms in one
+    directory. Inferring one autopilot build for the whole set would attach
+    ArduPilot's SHA to PX4 trials.
+    """
     trials = []
-    for path in sorted(glob.glob(os.path.join(ROOT, pattern))):
-        if os.path.basename(path).startswith("campaign_"):
-            continue
-        with open(path, encoding="utf-8") as fh:
-            res = json.load(fh)
-        h = header_of(res) or {}
-        trials.append({
+    seen = set()
+    for pattern in patterns:
+        for path in sorted(glob.glob(os.path.join(ROOT, pattern))):
+            if os.path.basename(path).startswith("campaign_"):
+                continue
+            if path in seen:
+                continue
+            seen.add(path)
+            trials.append(_one(path))
+    return trials
+
+
+def _one(path):
+    with open(path, encoding="utf-8") as fh:
+        res = json.load(fh)
+    h = header_of(res) or {}
+    return {
             "trial": os.path.basename(path).replace(".json", ""),
+            "campaign": os.path.basename(os.path.dirname(path)),
+            "platform": res.get("platform") or h.get("adapter_platform"),
             "result_artifact": os.path.relpath(path, ROOT),
             "flight_id": res.get("flight_id"),
             "generating_commit": h.get("csia_commit"),
@@ -93,8 +112,7 @@ def collect(pattern):
             "autopilot_version_recoverable": (
                 h.get("autopilot_version") not in (None, "", "ardupilot",
                                                    "px4")),
-        })
-    return trials
+    }
 
 
 def invariance(commits):
@@ -122,71 +140,123 @@ def invariance(commits):
     }
 
 
+DEFAULT_CAMPAIGNS = (
+    "research/v1_1/results/mechanism_b_gps/*.json",
+    "research/v1_1/results/mechanism_b/*.json",
+    "research/v1_1/results/shadow_flights/*.json",
+)
+
+
+def per_campaign(trials):
+    """Group by campaign directory: invariance is a per-campaign property."""
+    groups = {}
+    for t in trials:
+        groups.setdefault(t["campaign"], []).append(t)
+    out = {}
+    for name, ts in sorted(groups.items()):
+        order = [t["generating_commit"]
+                 for t in sorted(ts, key=lambda t: t["flight_id"] or "")]
+        inv = invariance(order)
+        tags = sorted({t["frozen_core_tag"] for t in ts
+                       if t["frozen_core_tag"]})
+        contracts = sorted({str(t["contract_version"]) for t in ts
+                            if t["contract_version"] is not None})
+        adapters = sorted({t["adapter_version"] for t in ts
+                           if t["adapter_version"]})
+        out[name] = {
+            "trials": len(ts),
+            "platforms": sorted({t["platform"] for t in ts if t["platform"]}),
+            "distinct_generating_commits": sorted({c for c in order if c}),
+            "code_invariance": inv,
+            "frozen_core_tags_seen": tags,
+            # A campaign whose trials ran against DIFFERENT frozen cores is
+            # not one campaign, and nothing checked this before. The tag is
+            # recorded in every flight-log header; it was simply never
+            # compared across trials.
+            "frozen_core_consistent": len(tags) == 1,
+            "contract_versions_seen": contracts,
+            "contract_consistent": len(contracts) == 1,
+            "adapter_versions_seen": adapters,
+            "adapter_consistent": len(adapters) == 1,
+            "trials_lacking_recorded_autopilot_build": sum(
+                1 for t in ts if not t["autopilot_version_recoverable"]),
+        }
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--results",
-                    default="research/v1_1/results/mechanism_b_gps/*.json")
-    ap.add_argument("--platform", default="ardupilot")
+    ap.add_argument("--results", action="append", default=None,
+                    help="glob of result files; repeatable. Defaults to every "
+                         "committed campaign.")
     ap.add_argument("--out", default=os.path.join(
         ROOT, "research", "v1_1", "results", "PROVENANCE_BACKFILL.json"))
     args = ap.parse_args()
 
-    trials = collect(args.results)
+    patterns = args.results or list(DEFAULT_CAMPAIGNS)
+    trials = collect(patterns)
     if not trials:
-        print(f"no trials found under {args.results}")
+        print(f"no trials found under {patterns}")
         return 2
 
-    order = [t["generating_commit"] for t in
-             sorted(trials, key=lambda t: t["flight_id"] or "")]
-    inv = invariance(order)
-    sim = simulator_provenance(args.platform)
-    distinct = sorted({c for c in order if c})
+    campaigns = per_campaign(trials)
+    # Autopilot build is inferred PER PLATFORM, because a mixed campaign would
+    # otherwise get one platform's SHA attached to the other's trials.
+    builds = {}
+    for plat in sorted({t["platform"] for t in trials if t["platform"]}):
+        sim = simulator_provenance(plat)
+        builds[plat] = {
+            "claim": f"{sim['firmware']}@{sim['sha_short']}",
+            "full_sha": sim["sha"], "checkout_root": sim["root"],
+            "evidence": "read from the simulator checkout these commits ran "
+                        "against; the artifacts do not record it, which is "
+                        "the gap this file exists to close",
+            "strength": "INFERRED_FROM_ENVIRONMENT, not recorded per trial",
+        }
 
     out = {
         "what_this_is": "provenance recovered BESIDE historical artifacts, "
                         "never written into them",
         "why": "the flight-log `autopilot_version` field held the platform "
-               "name, not the firmware build, for every trial of this "
-               "campaign",
+               "name, not the firmware build, for every trial of these "
+               "campaigns",
         "historical_artifacts_modified": False,
+        "campaigns": campaigns,
+        "autopilot_builds": builds,
         "trials": trials,
-        "distinct_generating_commits": distinct,
-        "code_invariance_across_campaign": inv,
-        "autopilot_build": {
-            "claim": f"{sim['firmware']}@{sim['sha_short']}",
-            "full_sha": sim["sha"],
-            "checkout_root": sim["root"],
-            "evidence": "read from the simulator checkout these commits ran "
-                        "against; the artifacts themselves do not record it, "
-                        "which is the gap this file exists to close",
-            "strength": "INFERRED_FROM_ENVIRONMENT, not recorded per trial",
-        },
-        "frozen_core_tags_seen": sorted(
-            {t["frozen_core_tag"] for t in trials if t["frozen_core_tag"]}),
-        "contract_versions_seen": sorted(
-            {str(t["contract_version"]) for t in trials
-             if t["contract_version"] is not None}),
     }
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=1, sort_keys=True, default=str)
 
     print("=== provenance backfill")
-    print(f"  trials                      : {len(trials)}")
-    print(f"  distinct generating commits : {len(distinct)}")
-    print(f"  autopilot build (inferred)  : {out['autopilot_build']['claim']}")
-    print(f"  frozen core tags            : {out['frozen_core_tags_seen']}")
-    if inv["checked"]:
-        print(f"  code invariance {inv['first_generating_commit'][:7]}.."
-              f"{inv['last_generating_commit'][:7]}: "
-              f"{'NOTHING CHANGED' if inv['trials_mutually_comparable'] else 'CHANGED'}")
-        for p, files in inv.get("paths_changed", {}).items():
-            print(f"      !! {p}: {len(files)} file(s)")
-    n_bad = sum(1 for t in trials if not t["autopilot_version_recoverable"])
-    print(f"  trials lacking a recorded autopilot build: {n_bad}/{len(trials)}")
+    bad = 0
+    for name, c in campaigns.items():
+        inv = c["code_invariance"]
+        note = ("NOTHING CHANGED" if inv.get("trials_mutually_comparable")
+                else ("CHANGED" if inv.get("checked") else "not checked"))
+        print(f"  {name}")
+        print(f"    trials {c['trials']:3d}  platforms {c['platforms']}  "
+              f"commits {len(c['distinct_generating_commits'])}")
+        print(f"    code invariance across campaign : {note}")
+        print(f"    frozen core consistent          : "
+              f"{c['frozen_core_consistent']} {c['frozen_core_tags_seen']}")
+        print(f"    contract / adapter consistent   : "
+              f"{c['contract_consistent']} / {c['adapter_consistent']}")
+        print(f"    lacking recorded autopilot build: "
+              f"{c['trials_lacking_recorded_autopilot_build']}/{c['trials']}")
+        if inv.get("checked") and not inv.get("trials_mutually_comparable"):
+            bad += 1
+            for pth, files in inv.get("paths_changed", {}).items():
+                print(f"      !! {pth}: {len(files)} file(s)")
+        if not c["frozen_core_consistent"] or not c["contract_consistent"]:
+            bad += 1
+            print("      !! trials in this campaign did not share a frozen "
+                  "core or contract version")
+    for plat, b in builds.items():
+        print(f"  autopilot build ({plat}, inferred): {b['claim']}")
     print(f"-> {os.path.relpath(args.out, ROOT)}")
-    # Non-comparable trials are a real finding and must not exit 0.
-    return 0 if (not inv["checked"] or inv["trials_mutually_comparable"]) else 1
+    return 0 if not bad else 1
 
 
 if __name__ == "__main__":

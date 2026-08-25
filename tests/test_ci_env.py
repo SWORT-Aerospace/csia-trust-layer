@@ -199,6 +199,12 @@ def test_no_pytest_invocation_swallows_its_own_result():
     for path in _workflow_files():
         with open(path, encoding="utf-8") as fh:
             for lineno, line in enumerate(fh, 1):
+                # A YAML COMMENT CANNOT SWALLOW ANYTHING. This guard scanned
+                # raw lines, so the comment DOCUMENTING the `|| true` defect
+                # was itself reported as the defect -- a guard firing on its
+                # own explanation. Only executable lines can discard a result.
+                if line.lstrip().startswith("#"):
+                    continue
                 if "pytest" not in line:
                     continue
                 if "|| true" in line or "|| :" in line:

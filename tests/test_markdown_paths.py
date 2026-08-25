@@ -40,11 +40,10 @@ SKIP_DIRS = {".venv", ".git", "node_modules", "build", "__pycache__"}
 # Deliberate references to things that do not exist. Each entry must say WHY,
 # because an allowlist without reasons becomes a place to hide real breakage.
 ALLOWED_MISSING = {
-    # The daily report's subject is that this file never existed: the CI step
-    # named "determinism" ran it behind `|| true` and was green for years.
-    # Citing it is the point of the paragraph.
-    "tests/test_determinism.py":
-        "documented as never having existed; the citation IS the finding",
+    # tests/test_determinism.py WAS allowlisted here, as "documented as never
+    # having existed". It exists now -- it was written to close exactly that
+    # gap -- so the exemption is stale and removed. The staleness test is what
+    # caught it, which is the whole reason that test exists.
     # A specification for a measurement tool that is explicitly still to be
     # written -- the spec itself says "Write ... against this spec".
     "research/wp_c5/measure_q_gvalid.py":
@@ -182,3 +181,26 @@ def test_line_number_citations_are_stripped_not_reported_broken():
     base = re.sub(r":[0-9]+(-[0-9]+)?$", "", ref)
     assert base == "csia/runtime/online.py"
     assert os.path.exists(os.path.join(ROOT, base))
+
+
+def test_every_allowlist_entry_carries_a_real_reason():
+    """An allowlist without reasons becomes a place to hide real breakage.
+
+    Every entry today has a reason string, but nothing enforced it, so the
+    next one could arrive bare and the list would quietly become a dumping
+    ground for paths someone could not be bothered to fix.
+    """
+    bare = [p for p, why in ALLOWED_MISSING.items()
+            if not isinstance(why, str) or len(why.strip()) < 20]
+    assert not bare, (
+        "allowlist entries need a reason of at least a short sentence "
+        f"explaining why the path is deliberately absent: {bare}")
+
+
+def test_the_allowlist_stays_small_enough_to_read():
+    """A cap, so growth is a decision someone makes rather than a drift."""
+    assert len(ALLOWED_MISSING) <= 12, (
+        f"{len(ALLOWED_MISSING)} allowlisted missing paths. Past a dozen this "
+        "stops being a list of known exceptions and starts being a way to "
+        "ignore the guard; fix the paths instead, or raise the cap "
+        "deliberately with a reason.")

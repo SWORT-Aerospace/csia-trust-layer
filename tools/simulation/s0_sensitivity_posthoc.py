@@ -128,6 +128,91 @@ def analyse(result_path):
     return out
 
 
+# Thresholds swept. T* = 0.75 is the preregistered one (nav_caution); the
+# others bracket it. If the share of the delay attributable to banked history
+# moves sharply across these, the "large minority" conclusion is an artifact
+# of one threshold and must not be stated without it.
+SWEEP_THRESHOLDS = (0.65, 0.70, 0.75, 0.80, 0.85)
+
+
+def sweep(args) -> int:
+    """POST-HOC: is the S0 conclusion an artifact of T* = 0.75?"""
+    import mechanism_b_report as mb
+    import current_stack_replication as csr
+    trials = sorted(glob.glob(os.path.join(
+        args.results, f"ardupilot_{args.condition}_*.json")))
+    rows, out_rows = [], []
+    for path in trials:
+        with open(path, encoding="utf-8") as fh:
+            res = json.load(fh)
+        trace = os.path.join(ROOT, res.get("trust_trace") or "")
+        if not os.path.exists(trace):
+            continue
+        header, steps = mb.read_trace(trace)
+        r = csr.prepare(steps, header["engine_config"])
+        inj = res.get("injection") or {}
+        i0 = csr.first_index_at_or_after(
+            r, float(inj.get("wrote_at_rel_s") or inj.get("at_s") or 0.0))
+        if i0 is None:
+            continue
+        rows.append((os.path.basename(path).replace(".json", ""), r, i0,
+                     r[i0]["S_runtime"], r[i0]["T_runtime"]))
+
+    print("=== POST-HOC threshold sweep of the S0 sensitivity "
+          "(NOT preregistered)")
+    print("   crossing tick by initial banked state, at each T*\n")
+    print("   " + f"{'T*':>6s}" + "".join(f"{'S0x' + str(f):>11s}"
+                                          for f in FRACTIONS)
+          + f"{'history share':>15s}")
+    for thr in SWEEP_THRESHOLDS:
+        cells, per_frac = "", {}
+        for f in FRACTIONS:
+            ks = []
+            for _n, r, i0, S0, T0 in rows:
+                traj = roll(r, i0, S0 * f, T0)
+                k = next((i for i, (_t, _S, T) in enumerate(traj)
+                          if T <= thr), None)
+                if k is not None:
+                    ks.append(k)
+            per_frac[f] = ks
+            cells += f"{(f'{min(ks)}-{max(ks)}' if ks else 'none'):>11s}"
+        full, zero = per_frac.get(1.0), per_frac.get(0.0)
+        if full and zero and len(full) == len(zero):
+            share = sum(1 - z / c for z, c in zip(zero, full)) / len(full)
+            share_s = f"{share:.3f}"
+        else:
+            share, share_s = None, "n/a"
+        marker = "  <- preregistered" if abs(thr - THRESHOLD) < 1e-9 else ""
+        print(f"   {thr:6.2f}{cells}{share_s:>15s}{marker}")
+        out_rows.append({"threshold": thr,
+                         "crossing_ticks_by_fraction":
+                             {str(k): v for k, v in per_frac.items()},
+                         "history_attributable_share": share})
+
+    shares = [r["history_attributable_share"] for r in out_rows
+              if r["history_attributable_share"] is not None]
+    print(f"\n   history-attributable share across thresholds: "
+          f"{min(shares):.3f} to {max(shares):.3f}"
+          if shares else "\n   no shares computable")
+    if shares:
+        print("   The conclusion that banked history is a LARGE MINORITY of "
+              "the delay\n   holds at every threshold swept."
+              if max(shares) < 0.5 else
+              "   The share crosses 0.5 somewhere in this range; the "
+              "'minority' wording\n   is threshold-dependent and must say so.")
+    path = args.out.replace(".json", "_threshold_sweep.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump({"status": "POST-HOC, NOT PREREGISTERED",
+                   "preregistered_threshold": THRESHOLD,
+                   "thresholds": list(SWEEP_THRESHOLDS),
+                   "fractions": list(FRACTIONS),
+                   "rows": out_rows,
+                   "share_range": [min(shares), max(shares)] if shares else None},
+                  fh, indent=1, sort_keys=True, default=str)
+    print(f"-> {os.path.relpath(path, ROOT)}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--results", default=os.path.join(
@@ -135,7 +220,13 @@ def main() -> int:
     ap.add_argument("--condition", default="RAMP_20S")
     ap.add_argument("--out", default=os.path.join(
         ROOT, "research", "v1_1", "results", "s0_sensitivity_posthoc.json"))
+    ap.add_argument("--threshold-sweep", action="store_true",
+                    help="repeat the S0 sensitivity at several thresholds, to "
+                         "show whether the conclusion depends on T* = 0.75")
     args = ap.parse_args()
+
+    if args.threshold_sweep:
+        return sweep(args)
 
     trials = []
     for p in sorted(glob.glob(os.path.join(

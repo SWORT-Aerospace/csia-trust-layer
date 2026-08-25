@@ -65,14 +65,21 @@ jobs:
       - name: flight log
         if: always()
         run: pytest -q tests/test_flight_log.py
-      # tests/test_determinism.py DOES NOT EXIST and never did. pytest exited
-      # 4 (file not found) on every run and `|| true` turned it green, so a
-      # step named "determinism" tested nothing at all. The 14 determinism
-      # tests live across 10 other files; select them by name and let the step
-      # fail. tests/test_ci_env.py now refuses both mistakes.
+      # tests/test_determinism.py DID NOT EXIST for the life of this repo.
+      # pytest exited 4 (file not found) on every run and `|| true` turned it
+      # green, so a step named "determinism" tested nothing at all -- worse
+      # than absent, because it occupied the slot a real check would use.
+      #
+      # The file now exists and replays a committed flight log through the
+      # frozen core twice, asserting bit-identical trust trajectories. That is
+      # the property every replay-based result here assumes: the escalation
+      # diagnosis, the Mechanism B reconstruction at 1e-15, and the post-hoc
+      # S0 sensitivity all compare replays and would otherwise be measuring
+      # scheduler noise. Named explicitly AND by keyword, so this step fails
+      # loudly if the file is ever deleted again.
       - name: determinism
         if: always()
-        run: pytest -q tests/ -k determin
+        run: pytest -q tests/test_determinism.py && pytest -q tests/ -k determin
 
   qualification:
     name: SITL qualification (ArduPilot + PX4)

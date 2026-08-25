@@ -522,3 +522,58 @@ python tools/simulation/current_stack_replication.py --platform ardupilot
 
 The grid is a module constant, not a command-line option. `--platform px4`
 refuses to fly and prints why.
+
+---
+
+## 11. Post-hoc addenda (NOT preregistered)
+
+Both analyses below were written after the campaign, against traces already on
+disk. No trial was re-run, no threshold moved, no parameter fitted. They are
+reported as post-hoc mechanistic support and nothing stronger.
+
+### 11.1 What the banked state buys
+
+Holding the recorded per-tick `e(k)` and `rho(k)` streams exactly as measured
+and varying only the initial banked state (`alpha0 = S0*T0`,
+`beta0 = S0*(1-T0)`), at the preregistered `T* = 0.75`:
+
+| initial banked state | crossing tick |
+|---|---|
+| S0 = 0 (no history) | 52 to 58 |
+| 0.25 x S0 | 72 to 78 |
+| 0.50 x S0 | 82 to 88 |
+| S0 measured (133 to 136) | 94 to 99 |
+
+Monotone in all five trials, and the unmodified fraction reproduces the runtime
+crossing in all five (positive control). Banked history accounts for **44 %** of
+the crossing delay at this threshold.
+
+### 11.2 That share is threshold-dependent, and saying so matters
+
+Sweeping `T*` over the same traces:
+
+| `T*` | crossing ticks, S0 = 0 | crossing ticks, S0 measured | history share |
+|---|---|---|---|
+| 0.65 | none | none | not computable |
+| 0.70 | none | none | not computable |
+| **0.75 (preregistered)** | 52-58 | 94-99 | **0.440** |
+| 0.80 | 33-37 | 71-74 | 0.520 |
+| 0.85 | 23-25 | 55-58 | 0.566 |
+
+**The share crosses 0.5 inside this range.** At the preregistered threshold
+banked history is a large minority of the delay; at 0.80 and above it is a
+majority. Any statement that history is "a minority contributor" is therefore
+true *at `T* = 0.75`* and must carry that qualifier. The earlier wording in
+this repository did not, and this section is the correction.
+
+Two things follow, and they point the same way:
+
+1. The section 10 naming decision stands, and is strengthened rather than
+   weakened. Naming the current-stack result after "history dominance" would
+   be less defensible once the attributable share is known to move with the
+   threshold: the modern result is a **threshold-crossing persistence
+   contrast**, and Phase-I keeps **history-dominated threshold crossing** as
+   its own analytical result for its own parameter set.
+2. Below `T* = 0.70` this fault produces no crossing at any banked state, so
+   the mechanism is not merely delayed there, it is absent. That bound is a
+   property of the injected evidence level, not of the recursion.
