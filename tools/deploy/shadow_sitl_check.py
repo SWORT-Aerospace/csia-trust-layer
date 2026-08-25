@@ -121,11 +121,56 @@ NEEDS_TEE = {"ardupilot": True, "px4": False}
 # This is the same type defect fixed in `_fly_px4` this morning, reintroduced
 # in new code with the sign reversed. ArduPilot's MAVLink parameter interface
 # is float-based and REAL32 works there; PX4's is typed and does not.
+#
+# MECHANISM B: `mag_emi`, a constant hard-iron offset on the magnetometer.
+#
+# Preregistered in research/v1_1/MECHANISM_B_PREREGISTRATION.md, committed
+# before any trial ran. Fix loss CANNOT test the history/threshold-crossing
+# mechanism -- self-occlusion removes the evidence, the node never moves, and
+# there is no crossing to time. `mag_emi` is the one injection available on
+# both current simulators that PRESERVES the evidence: the channel keeps
+# arriving, every mag gate stays open, and the residuals move instead of
+# disappearing.
+#
+# The two deltas are chosen so the PUBLISHED FIELD MOVES IDENTICALLY on both
+# platforms -- +u uT on each FRD axis -- which is what makes the arms
+# comparable at all:
+#
+#   ArduPilot  SIM_MAG1_OFS_{X,Y,Z}, milligauss (SITL.h:204, boot default
+#              (5,13,-18) at SITL.h:156). AP_Compass_SITL.cpp:124 SUBTRACTS
+#              it, and the compensating COMPASS_OFS is written once at
+#              construction (:30-32) and never re-synced, so a runtime change
+#              is not re-absorbed by calibration. Adapter converts mgauss ->
+#              uT with x0.1 (ardupilot.py:148), hence delta = -10*u.
+#   PX4        SIM_MAG_OFFSET_{X,Y,Z}, gauss, ParamFloat (SensorMagSim.hpp:
+#              101-103), no reboot_required, and SensorMagSim.cpp:113-118
+#              calls updateParams() on parameter_update so the write is live.
+#              :153-155 ADDS it. Adapter converts gauss -> uT with x100
+#              (px4.py:126), hence delta = +u/100. The module runs because
+#              airframe 10040_sihsim_quadx:17 sets SENS_EN_MAGSIM 1, and SIH
+#              itself publishes no magnetometer.
+#
+# The write is RELATIVE to the parameter's current value, read back from the
+# vehicle first. That is what makes u = 0 a genuine no-op null control rather
+# than a small perturbation -- ArduPilot's boot default is not zero.
+#
+# RULE B for this injection is NOT the readback. It is the observed
+# `mag.field_ut` vector shift of u*sqrt(3) uT across the injection instant,
+# which is exact and attitude-independent because the offset is a constant
+# body-frame vector.
 INJECTIONS = {
     "gps_fix_loss": {
         "ardupilot": ("SIM_GPS1_ENABLE", 0, "REAL32"),
         "px4": ("SIM_GPS_USED", 0, "INT32"),
     },
+}
+
+# platform -> (parameter stems, MAV type, delta in native units per uT)
+MAG_EMI = {
+    "ardupilot": (("SIM_MAG1_OFS_X", "SIM_MAG1_OFS_Y", "SIM_MAG1_OFS_Z"),
+                  "REAL32", -10.0),      # milligauss, subtracted by SITL
+    "px4": (("SIM_MAG_OFFSET_X", "SIM_MAG_OFFSET_Y", "SIM_MAG_OFFSET_Z"),
+            "REAL32", 0.01),             # gauss, added by SensorMagSim
 }
 
 # MAVLink reports an INT32 parameter's value in a float field, bit-for-bit.
@@ -147,6 +192,142 @@ def decode_param_value(msg):
     if getattr(msg, "param_type", None) in _INT_PARAM_TYPES:
         return float(struct.unpack("<i", struct.pack("<f", value))[0])
     return value
+
+
+# THE FIRST PARAM_VALUE TO ARRIVE IS NOT THE ANSWER TO YOUR REQUEST.
+#
+# Measured on a live ArduPilot SITL: after three PARAM_SET frames the vehicle
+# applied all three correctly, and a readback that matched the first arriving
+# PARAM_VALUE per name reported the OLD values for two of them. ArduPilot
+# broadcasts PARAM_VALUE acks on a lag of more than a second, interleaved with
+# unrelated parameters (INS_GYROFFS_*, ARMING_SKIPCHK, EK3_SRC1_POSXY ...), so
+# a queued ack from before the write is what a naive read matches.
+#
+# The failure mode is the dangerous direction: a correctly applied injection
+# reported as NOT CONFIRMED, i.e. a real effect discarded as a failed trial.
+# It cost one harness verification run to find, which is what harness
+# verification runs are for.
+def _param_name(msg):
+    pid = msg.param_id
+    pid = pid.decode() if isinstance(pid, bytes) else str(pid)
+    return pid.strip("\x00")
+
+
+def _drain(conn, budget_s=0.5):
+    """Discard buffered PARAM_VALUE traffic so a stale ack cannot be matched."""
+    deadline = time.time() + budget_s
+    while time.time() < deadline:
+        if conn.recv_match(type="PARAM_VALUE", blocking=False) is None:
+            return
+
+
+def read_param(conn, name, timeout=5.0, settle=0.6):
+    """Read one parameter, honouring its declared type. None on timeout.
+
+    Returns the LAST matching value seen within `settle` of the previous one,
+    not the first, for the reason above.
+    """
+    _drain(conn)
+    conn.mav.param_request_read_send(
+        conn.target_system, conn.target_component, name.encode(), -1)
+    last, last_t = None, None
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        m = conn.recv_match(type="PARAM_VALUE", blocking=True, timeout=0.2)
+        if m is None:
+            if last is not None and time.time() - last_t >= settle:
+                break
+            continue
+        if _param_name(m) == name:
+            last, last_t = decode_param_value(m), time.time()
+    return last
+
+
+def confirm_param(conn, name, target, timeout=10.0):
+    """Poll until the vehicle reports `name` == `target`, or give up.
+
+    Polling rather than a single read because the ack lag is longer than any
+    reasonable single-shot timeout. This waits for the vehicle's own report to
+    catch up with a write; it never substitutes the commanded value for an
+    observed one, and a timeout returns the last value actually seen together
+    with False.
+    """
+    deadline = time.time() + timeout
+    last = None
+    while time.time() < deadline:
+        seen = read_param(conn, name, timeout=min(3.0, max(0.5,
+                                                           deadline - time.time())))
+        if seen is not None:
+            last = seen
+            if abs(seen - target) <= 1e-4 * max(1.0, abs(target)):
+                return last, True
+    return last, False
+
+
+def prepare_mag_emi(conn, platform, micro_tesla):
+    """Read the current offsets and compute the targets. BEFORE the run.
+
+    Relative to the current value because u = 0 has to be a genuine no-op
+    write: ArduPilot's boot default for SIM_MAG1_OFS is (5, 13, -18) mG, so
+    writing zeros would itself be a perturbation and the null control would
+    not be null.
+
+    THIS RUNS AT SETUP, NOT AT THE INJECTION INSTANT. A robust read costs
+    about 0.8 s per axis, and doing the three reads inside the injection timer
+    put the actual field step 2.5 s after the commanded time -- measured, on a
+    harness verification run. Since the injection instant is what N_obs is
+    counted from, that offset would have gone straight into E2 as a 62-tick
+    error attributed to the mechanism. The offsets are static before the
+    injection, so reading them early costs nothing and removes the skew.
+    """
+    stems, _ptype, per_ut = MAG_EMI[platform]
+    delta = per_ut * float(micro_tesla)
+    before = {name: read_param(conn, name) for name in stems}
+    return {"stems": stems, "before": before, "delta": delta,
+            "target": {n: (None if v is None else v + delta)
+                       for n, v in before.items()}}
+
+
+def fire_mag_emi(conn, platform, plan):
+    """Send the three writes back-to-back, then confirm. Returns the record.
+
+    THE WRITE BURST IS ATOMIC ON PURPOSE. E2 asks whether a closed form
+    derived for a STEP predicts the crossing; three writes spread over
+    hundreds of milliseconds would be a staircase, i.e. a different question.
+    `write_burst_ms` records how close to atomic it actually was rather than
+    assuming, and confirmation happens afterwards so it cannot delay the step.
+    """
+    from pymavlink import mavutil as _mv
+    stems, ptype, _per_ut = MAG_EMI[platform]
+    mav_ptype = getattr(_mv.mavlink, f"MAV_PARAM_TYPE_{ptype}")
+    target = plan["target"]
+
+    t_burst = time.time()
+    for name in stems:
+        if target[name] is None:
+            continue
+        conn.mav.param_set_send(conn.target_system, conn.target_component,
+                                name.encode(), float(target[name]), mav_ptype)
+    burst_ms = (time.time() - t_burst) * 1e3
+
+    axes, ok = [], True
+    for name in stems:
+        if target[name] is None:
+            after, good = None, False
+        else:
+            after, good = confirm_param(conn, name, target[name])
+        ok = ok and good
+        axes.append({"param": name, "before": plan["before"][name],
+                     "commanded": target[name], "readback": after,
+                     "confirmed": bool(good)})
+    u = abs(plan["delta"] / MAG_EMI[platform][2])
+    return {"axes": axes, "confirmed": bool(ok),
+            "micro_tesla_per_axis": round(u, 6),
+            "native_delta_per_axis": plan["delta"],
+            "native_unit": "mgauss" if platform == "ardupilot" else "gauss",
+            "write_burst_ms": round(burst_ms, 3),
+            "wrote_at_wall": t_burst,
+            "expected_field_shift_ut": round(u * 3 ** 0.5, 6)}
 
 
 def start_tee_process(source, out_addr, platform, profile, status_path,
@@ -227,10 +408,19 @@ def main() -> int:
                          "tick being measured; thread is the old in-process "
                          "arrangement, kept as the null control that shows "
                          "the difference")
-    ap.add_argument("--inject", choices=sorted(INJECTIONS), default=None,
+    ap.add_argument("--inject", choices=sorted(INJECTIONS) + ["mag_emi"],
+                    default=None,
                     help="fault to inject mid-run, sent on the RIG's link")
     ap.add_argument("--inject-at", type=float, default=12.0,
                     help="seconds into the shadow window to inject")
+    ap.add_argument("--emi-ut", type=float, default=0.0,
+                    help="mag_emi magnitude in microtesla PER BODY AXIS; 0.0 "
+                         "is the null control (the write happens, the field "
+                         "does not move)")
+    ap.add_argument("--trust-trace", default=None,
+                    help="write one row per ENGINE STEP to this path -- the "
+                         "flight log keeps only the last step of each shadow "
+                         "tick and cannot reconstruct a recursion")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -337,7 +527,8 @@ def main() -> int:
         cfg = ShadowConfig(platform=args.platform, connection=passive,
                            mode=Mode.SHADOW, tick_hz=25.0, log_dir=logdir,
                            max_runtime_s=args.seconds,
-                           autopilot_version=args.platform)
+                           autopilot_version=args.platform,
+                           trust_trace_path=args.trust_trace)
         runner = ShadowRunner(cfg, connection_factory=factory)
         runner.connect()
         print(f"=== command authority: "
@@ -358,7 +549,46 @@ def main() -> int:
         result["live_transmit_probe"] = denied
 
         inject_timer = None
-        if args.inject:
+        if args.inject == "mag_emi":
+            # MECHANISM B. Three parameters, written relative to their current
+            # values, so u = 0 is a real no-op write and not a small
+            # perturbation of ArduPilot's non-zero boot default. The reads
+            # happen HERE, before the window opens, so the timer does nothing
+            # but send three frames.
+            emi_plan = prepare_mag_emi(rig_conn, args.platform, args.emi_ut)
+            print(f"=== mag_emi prepared: {emi_plan['before']} "
+                  f"delta={emi_plan['delta']}")
+            t_ref = [None]
+
+            def _inject_emi():
+                rec = fire_mag_emi(rig_conn, args.platform, emi_plan)
+                if t_ref[0] is not None:
+                    rec["wrote_at_rel_s"] = round(
+                        rec["wrote_at_wall"] - t_ref[0], 3)
+                result["injection"].update(rec)
+                for a in rec["axes"]:
+                    print(f"      {a['param']}: {a['before']} -> "
+                          f"{a['commanded']} readback={a['readback']} "
+                          f"{'ok' if a['confirmed'] else 'MISMATCH'}")
+                print(f"    [t+{args.inject_at:.1f}s] INJECTED mag_emi "
+                      f"{args.emi_ut} uT/axis (rig authority) -> "
+                      f"{'CONFIRMED' if rec['confirmed'] else 'NOT CONFIRMED'}")
+            t_ref[0] = time.time()
+            inject_timer = threading.Timer(args.inject_at, _inject_emi)
+            inject_timer.daemon = True
+            inject_timer.start()
+            result["injection"] = {
+                "kind": "mag_emi", "at_s": args.inject_at, "sent_by": "rig",
+                "params": list(MAG_EMI[args.platform][0]),
+                "param_type": MAG_EMI[args.platform][1],
+                "arm": ("NULL CONTROL (write happens, field does not move)"
+                        if args.emi_ut == 0.0 else "INJECTED"),
+                "rule": "RULE B -- the intermediate quantity is the observed "
+                        "mag.field_ut vector shift of u*sqrt(3) uT across the "
+                        "injection instant, not the parameter write",
+                "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+            }
+        elif args.inject:
             name, value, ptype = INJECTIONS[args.inject][args.platform]
             mav_ptype = getattr(mavutil.mavlink, f"MAV_PARAM_TYPE_{ptype}")
             def _inject():
@@ -373,20 +603,17 @@ def main() -> int:
                 # is exactly how the first PX4 arm produced a null result that
                 # meant nothing. `fly()` verifies MIS_TAKEOFF_ALT this way for
                 # the same reason.
-                seen, deadline = None, time.time() + 5.0
-                while time.time() < deadline:
-                    m = rig_conn.recv_match(type="PARAM_VALUE", blocking=True,
-                                            timeout=1.0)
-                    if m is None:
-                        continue
-                    pid = m.param_id
-                    pid = pid.decode() if isinstance(pid, bytes) else str(pid)
-                    if pid.strip("\x00") == name:
-                        seen = decode_param_value(m)
-                        break
+                #
+                # This used to match the FIRST arriving PARAM_VALUE, which is
+                # a stale queued ack often enough to matter -- see the comment
+                # on `read_param`. It reported CONFIRMED for the published
+                # Mechanism A arms, and those results stand independently
+                # because the intermediate quantity (450 and 448 NO_3D_FIX
+                # ticks) confirmed the injection landed. The readback is
+                # nonetheless made robust so no later run inherits the flaw.
+                seen, good = confirm_param(rig_conn, name, float(value))
                 result["injection"]["readback"] = seen
-                result["injection"]["confirmed"] = (
-                    seen is not None and abs(seen - float(value)) < 1e-6)
+                result["injection"]["confirmed"] = bool(good)
                 print(f"    [t+{args.inject_at:.1f}s] INJECTED {args.inject}: "
                       f"{name} = {value} (rig authority); readback="
                       f"{seen} -> "
@@ -427,6 +654,9 @@ def main() -> int:
                        for k, v in runner.phase_us.items()},
             "command_authority": runner.authority_evidence,
             "log_dir": os.path.relpath(logdir, ROOT),
+            "trust_trace": (os.path.relpath(args.trust_trace, ROOT)
+                            if args.trust_trace else None),
+            "trust_trace_steps": getattr(runner, "_trace_rows", 0),
         })
 
         print(f"\n=== ticks: {runner.stats['ticks']}  "

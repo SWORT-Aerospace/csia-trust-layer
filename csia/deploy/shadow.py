@@ -26,6 +26,7 @@ Failure posture, in one line each:
 from __future__ import annotations
 
 import enum
+import json
 import logging
 import os
 import time
@@ -75,6 +76,21 @@ class ShadowConfig:
     vehicle_config: dict = field(default_factory=dict)
     log_max_bytes: int = 64 * 1024 * 1024
     heartbeat_timeout_s: float = 10.0
+    # ONE ROW PER ENGINE STEP, not per shadow tick. Optional, off by default.
+    #
+    # The flight log records `states[-1]` -- the LAST engine state of each
+    # shadow tick (see `_tick`). That is the right thing for "what did CSIA
+    # conclude at this instant", and it is NOT sufficient to reconstruct a
+    # recursion: whenever tick jitter fires two engine steps inside one shadow
+    # tick, the first step's evidence and rho are gone, and a reconstruction
+    # from the log alone would silently skip an update. Whenever it fires
+    # none, the log records an empty trust dict.
+    #
+    # So a Mechanism B run writes its own trace. It is not a second flight
+    # log: it carries only the recursion's own quantities, and it is written
+    # AFTER the per-tick latency measurement stops, so tracing cannot inflate
+    # the number R13 is judged on.
+    trust_trace_path: Optional[str] = None
 
 
 class ShadowRunner:
@@ -112,6 +128,71 @@ class ShadowRunner:
                          for k in ("sample", "convert", "core")}
         self._running = False
         self._last_msg_mono = None
+        self._trace_fh = None
+        self._trace_rows = 0
+        self._trace_errors = 0
+
+    # ------------------------------------------------------------------
+    def _trace_open(self):
+        if not self.cfg.trust_trace_path:
+            return
+        path = self.cfg.trust_trace_path
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+        self._trace_fh = open(path, "w", encoding="utf-8")
+        # The reconstruction has to know the constants it is NOT allowed to
+        # fit, and it has to read them from the engine that produced the run
+        # rather than from a copy in the analysis tool.
+        cfg = self.layer.core.cfg
+        self._trace_write({
+            "record": "trace_header",
+            "engine_config": {
+                "w_nbr": cfg.w_nbr, "w_phys": cfg.w_phys,
+                "w_temp": cfg.w_temp, "w_stat": cfg.w_stat,
+                "rho_max": cfg.rho_max, "rho_min": cfg.rho_min,
+                "alpha0": cfg.alpha0, "beta0": cfg.beta0,
+            },
+            "tick_hz": self.cfg.tick_hz,
+            "field_mode": self.cfg.field_mode,
+            "note": "one row per ENGINE STEP; the flight log keeps only the "
+                    "last step of each shadow tick and cannot reconstruct a "
+                    "recursion",
+        })
+
+    def _trace_write(self, row: dict):
+        if self._trace_fh is None:
+            return
+        try:
+            self._trace_fh.write(json.dumps(row, separators=(",", ":"),
+                                            default=str) + "\n")
+        except (OSError, TypeError, ValueError):
+            self._trace_errors += 1
+
+    def _trace_states(self, fired: list):
+        """Record every engine step of this shadow tick.
+
+        `fired` carries (state, S) pairs captured inside the ingest loop -- S
+        has to be read there because alpha/beta advance on every step, so a
+        single read afterwards would attribute the last step's S to all of
+        them. The capture is a handful of float adds and only happens when
+        tracing is on.
+        """
+        for state, S in fired:
+            self._trace_write({
+                "record": "step",
+                "t": round(state.t, 6),
+                "trust": {n: round(float(v), 9)
+                          for n, v in state.trust.items()},
+                "evidence": {n: round(float(v), 9)
+                             for n, v in state.evidence.items()},
+                "components": {n: {c: (None if v is None else round(float(v), 9))
+                                   for c, v in comp.items()}
+                               for n, comp in state.components.items()},
+                "fresh": {n: bool(v) for n, v in state.fresh.items()},
+                "S": (None if S is None else
+                      {n: round(float(v), 9) for n, v in S.items()}),
+                "armed": state.armed,
+            })
+            self._trace_rows += 1
 
     # ------------------------------------------------------------------
     def connect(self):
@@ -157,6 +238,7 @@ class ShadowRunner:
         if self.conn is None:
             self.connect()
         header = self._open_log()
+        self._trace_open()
         self._running = True
         t0 = clock()
         dt = 1.0 / self.cfg.tick_hz
@@ -182,6 +264,15 @@ class ShadowRunner:
                     break
         finally:
             self._running = False
+            if self._trace_fh is not None:
+                self._trace_write({"record": "trace_footer",
+                                   "steps": self._trace_rows,
+                                   "write_errors": self._trace_errors})
+                try:
+                    self._trace_fh.close()
+                except OSError:
+                    pass
+                self._trace_fh = None
             if self.flight_log is not None:
                 self.flight_log.close({"stats": self.stats})
             if self.conn is not None:
@@ -219,10 +310,25 @@ class ShadowRunner:
         # so a stub cannot become evidence -- and no v1 code changed to make
         # that true.
         state = None
+        fired = [] if self._trace_fh is not None else None
+        core = self.layer.core
         for sensor, t, chans in core_samples:
             states = self.layer.ingest(sensor, t, chans)
             if states:
                 state = states[-1]
+                if fired is not None:
+                    # alpha/beta advance on EVERY engine step, and `ingest`
+                    # has already run all of this batch's steps by the time
+                    # it returns. So the S read here belongs to the LAST
+                    # state only; the earlier ones get None rather than a
+                    # value that is not theirs. The reconstruction does not
+                    # need runtime S -- this is a cross-check, and a
+                    # cross-check that quietly mislabels its own data is
+                    # worse than one with fewer points.
+                    S = {n: core.alpha[n] + core.beta[n] for n in state.trust}
+                    for s in states[:-1]:
+                        fired.append((s, None))
+                    fired.append((state, S))
 
         t_core = time.perf_counter()
         latency_us = (t_core - t_wall0) * 1e6
@@ -233,6 +339,10 @@ class ShadowRunner:
         self.stats["max_latency_us"] = max(self.stats["max_latency_us"],
                                            latency_us)
         self.tick_latencies.append(latency_us)
+        # AFTER the measured region closes at t_core. Tracing must not be
+        # able to inflate the number R13 is judged on.
+        if fired:
+            self._trace_states(fired)
 
         watchdog_tripped = False
         if self._last_msg_mono is not None:
