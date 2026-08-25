@@ -167,7 +167,16 @@ class ShadowRunner:
         except (OSError, TypeError, ValueError):
             self._trace_errors += 1
 
-    def _trace_states(self, fired: list):
+    # Edges incident on the `gps` node. Traced in full (consistency AND gate
+    # weight) because the preregistered per-tick schema wants
+    # `gate_applicable`, and the GPS gate IS `gvalid` -- the quantity whose
+    # staying at 1 is the difference between a Mechanism B trial and a
+    # Mechanism A trial. Restricted to these four so a 1500-tick trace stays
+    # a few MB rather than tens.
+    TRACE_EDGES = ("altitude_baro", "velocity_gps_doppler_0",
+                   "velocity_gps_doppler_1", "heading_course")
+
+    def _trace_states(self, fired: list, policy_row=None):
         """Record every engine step of this shadow tick.
 
         `fired` carries (state, S) pairs captured inside the ingest loop -- S
@@ -175,24 +184,63 @@ class ShadowRunner:
         single read afterwards would attribute the last step's S to all of
         them. The capture is a handful of float adds and only happens when
         tracing is on.
+
+        NOTHING IS ROUNDED. The declared reconstruction tolerance is 1e-6, and
+        storage rounding must not be allowed to eat any part of that budget:
+        at 9 decimals the earlier probe's reconstruction floor was 6e-10,
+        inside tolerance but for a reason that has nothing to do with the
+        recursion. json.dumps writes shortest-round-trip repr, so the trace
+        holds exactly the float the engine computed.
+
+        `policy_row` belongs to the LAST state of the tick only -- that is the
+        one the failsafe was actually updated with.
         """
-        for state, S in fired:
-            self._trace_write({
+        last = len(fired) - 1
+        for i, (state, S) in enumerate(fired):
+            row = {
                 "record": "step",
-                "t": round(state.t, 6),
-                "trust": {n: round(float(v), 9)
-                          for n, v in state.trust.items()},
-                "evidence": {n: round(float(v), 9)
-                             for n, v in state.evidence.items()},
-                "components": {n: {c: (None if v is None else round(float(v), 9))
+                "t": state.t,
+                "trust": {n: float(v) for n, v in state.trust.items()},
+                "evidence": {n: float(v) for n, v in state.evidence.items()},
+                "components": {n: {c: (None if v is None else float(v))
                                    for c, v in comp.items()}
                                for n, comp in state.components.items()},
                 "fresh": {n: bool(v) for n, v in state.fresh.items()},
                 "S": (None if S is None else
-                      {n: round(float(v), 9) for n, v in S.items()}),
+                      {n: float(v) for n, v in S.items()}),
                 "armed": state.armed,
-            })
+                "edges": {k: [float(state.edges[k][0]), float(state.edges[k][1])]
+                          for k in self.TRACE_EDGES if k in state.edges},
+            }
+            if i == last and policy_row is not None:
+                row["policy"] = policy_row
+            self._trace_write(row)
             self._trace_rows += 1
+
+    def _policy_row(self, state):
+        """Failsafe conditions, dwell timers and level, for the trace.
+
+        Read straight off the FROZEN FailsafePolicy after it has been updated
+        with this tick's state -- never recomputed by a copy here, because a
+        copy is a second implementation and would be the thing under test.
+        """
+        if state is None:
+            return None
+        try:
+            conds = sorted(self.policy._conditions(state))
+        except Exception:                                  # pragma: no cover
+            conds = None
+        since = getattr(self.policy, "_cond_since", None)
+        return {
+            "conditions": conds,
+            # dwell: how long each active condition has been held. The
+            # failsafe DELETES the entry when a condition clears, so an
+            # absent key is itself the measurement.
+            "dwell_since": (None if not isinstance(since, dict)
+                            else {k: float(v) for k, v in since.items()}),
+            "level": (self.policy.level.name
+                      if hasattr(self.policy, "level") else None),
+        }
 
     # ------------------------------------------------------------------
     def connect(self):
@@ -339,10 +387,6 @@ class ShadowRunner:
         self.stats["max_latency_us"] = max(self.stats["max_latency_us"],
                                            latency_us)
         self.tick_latencies.append(latency_us)
-        # AFTER the measured region closes at t_core. Tracing must not be
-        # able to inflate the number R13 is judged on.
-        if fired:
-            self._trace_states(fired)
 
         watchdog_tripped = False
         if self._last_msg_mono is not None:
@@ -357,6 +401,13 @@ class ShadowRunner:
             level = self.policy.level.name if hasattr(
                 self.policy, "level") else "NORMAL"
             reasons = [getattr(a, "reason", "") for a in actions]
+
+        # AFTER the measured region closed at t_core, so tracing cannot
+        # inflate the number R13 is judged on, and AFTER the policy update,
+        # so the failsafe conditions, dwell timers and level recorded are the
+        # ones this tick actually reached rather than the previous tick's.
+        if fired:
+            self._trace_states(fired, self._policy_row(state))
 
         if not sample.usable_channels():
             self.stats["stale_ticks"] += 1

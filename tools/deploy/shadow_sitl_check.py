@@ -165,6 +165,44 @@ INJECTIONS = {
     },
 }
 
+#
+# MECHANISM B (authoritative): `gps_glitch`, a FIX-PRESERVING GNSS position
+# offset. Preregistered in research/v1_1/CURRENT_STACK_REPLICATION.md, blob
+# 0e186117e2dcc014862872934768e06e0a195592, committed before the first trial.
+#
+# ArduPilot: SIM_GPS1_GLTCH_X, degrees of latitude, REAL32.
+#   SIM_GPS.cpp:70-75  AP_GROUPINFO("GLTCH", 6, GPSParms, glitch, 0) -- a
+#                      Vector3f in the PER-INSTANCE group, hence SIM_GPS1_.
+#   SIM_GPS.cpp:581-583  d.latitude += glitch_offsets.x   (degrees)
+#                        d.longitude += glitch_offsets.y  (degrees)
+#                        d.altitude += glitch_offsets.z   (metres)
+#   NOT SIM_GPS_GLITCH: SITL.cpp:681 records "// 6 was GPS_GLITCH", i.e. the
+#   old name was removed and a write to it lands nowhere. The preregistration
+#   calls this out explicitly.
+#
+# Fix type and satellite count are untouched, so `gvalid` stays 1 and the
+# evidence the mechanism needs remains applicable. That is the whole point:
+# fix loss closes the gate and turns this into a Mechanism A trial.
+#
+# WHY THE RESIDUAL IS IMMUNE TO THE AIRFRAME'S RESPONSE. online.py:364,562:
+#   _gps_fd_vel = (pos - ppos)/dt        finite difference of REPORTED position
+#   r_raw       = _gps_fd_vel - vel      minus the receiver's DOPPLER velocity
+# The glitch adds to position only, never to velocity, so r_raw equals the
+# glitch RATE regardless of what the vehicle physically does while chasing the
+# offset. A position glitch on a position-controlling vehicle always provokes
+# real motion; here that motion cancels out of the residual exactly.
+#
+# PX4 has no equivalent -- four candidate routes were read out of source and
+# all four fail (preregistration section 2.1). It is declared INAPPLICABLE.
+#
+# Authalic Earth radius, the one ArduPilot itself uses in this file
+# (SIM_GPS.cpp:548, earth_rad_inv = 1.569612305760477e-7 -> R = 6371000 m).
+METRES_PER_DEG_LAT = 111194.92664455873          # pi/180 * 6371000
+
+GPS_GLITCH = {
+    "ardupilot": ("SIM_GPS1_GLTCH_X", "REAL32", 1.0 / METRES_PER_DEG_LAT),
+}
+
 # platform -> (parameter stems, MAV type, delta in native units per uT)
 MAG_EMI = {
     "ardupilot": (("SIM_MAG1_OFS_X", "SIM_MAG1_OFS_Y", "SIM_MAG1_OFS_Z"),
@@ -330,6 +368,67 @@ def fire_mag_emi(conn, platform, plan):
             "expected_field_shift_ut": round(u * 3 ** 0.5, 6)}
 
 
+def run_gps_glitch(conn, platform, metres, ramp_s, at_s, t_ref, result):
+    """Drive SIM_GPS1_GLTCH_X on a preregistered schedule. Records the truth.
+
+    `ramp_s == 0` is the step condition: one write. Otherwise the offset is
+    ramped linearly to `metres` over `ramp_s` seconds and then HELD, written at
+    the simulated receiver's own 5 Hz (SIM_GPS.cpp:81) so the commanded value
+    changes no faster than the GPS publishes.
+
+    The schedule this function executes IS the fault truth. It is written into
+    the result so the analysis reads truth from the injection, never from the
+    layer under test.
+    """
+    from pymavlink import mavutil as _mv
+    name, ptype, per_m = GPS_GLITCH[platform]
+    mav_ptype = getattr(_mv.mavlink, f"MAV_PARAM_TYPE_{ptype}")
+    base = read_param(conn, name)
+    if base is None:
+        result["injection"]["confirmed"] = False
+        result["injection"]["error"] = f"could not read {name} before writing"
+        return
+    result["injection"]["before"] = base
+
+    hz, schedule = 5.0, []
+
+    def _write(metres_now):
+        target = base + per_m * metres_now
+        conn.mav.param_set_send(conn.target_system, conn.target_component,
+                                name.encode(), float(target), mav_ptype)
+        schedule.append({"t_rel": round(time.time() - t_ref, 4),
+                         "metres": round(metres_now, 6),
+                         "param_value": target})
+
+    if ramp_s <= 0.0:
+        _write(metres)
+    else:
+        n = int(round(ramp_s * hz))
+        t0 = time.time()
+        for i in range(1, n + 1):
+            _write(metres * i / n)
+            # absolute schedule, so a slow write cannot make the ramp drift
+            nxt = t0 + i / hz
+            gap = nxt - time.time()
+            if gap > 0:
+                time.sleep(gap)
+    result["injection"]["schedule"] = schedule
+    result["injection"]["ramp_s"] = ramp_s
+    result["injection"]["metres"] = metres
+    result["injection"]["wrote_at_rel_s"] = (schedule[0]["t_rel"]
+                                             if schedule else None)
+
+    # Readback AFTER the schedule finishes, against the final commanded value.
+    final = base + per_m * metres
+    seen, good = confirm_param(conn, name, final)
+    result["injection"]["readback"] = seen
+    result["injection"]["commanded_final"] = final
+    result["injection"]["confirmed"] = bool(good)
+    print(f"    [t+{at_s:.1f}s] gps_glitch {metres} m over {ramp_s} s: "
+          f"{name} {base} -> {final} ({len(schedule)} writes); readback="
+          f"{seen} -> {'CONFIRMED' if good else 'NOT CONFIRMED'}")
+
+
 def start_tee_process(source, out_addr, platform, profile, status_path,
                       timeout=30.0, min_types=5):
     """Run the tee in its own interpreter and wait for real traffic.
@@ -408,9 +507,21 @@ def main() -> int:
                          "tick being measured; thread is the old in-process "
                          "arrangement, kept as the null control that shows "
                          "the difference")
-    ap.add_argument("--inject", choices=sorted(INJECTIONS) + ["mag_emi"],
+    ap.add_argument("--inject",
+                    choices=sorted(INJECTIONS) + ["mag_emi", "gps_glitch"],
                     default=None,
                     help="fault to inject mid-run, sent on the RIG's link")
+    ap.add_argument("--glitch-m", type=float, default=0.0,
+                    help="gps_glitch magnitude in metres of latitude; 0.0 is "
+                         "the clean control (no parameter written)")
+    ap.add_argument("--glitch-ramp-s", type=float, default=0.0,
+                    help="0 = step; >0 ramps linearly to --glitch-m over this "
+                         "many seconds and then holds")
+    ap.add_argument("--hold-mode", default=None,
+                    help="flight mode to switch to after the climb, before "
+                         "the scored window. ALT_HOLD keeps the airframe out "
+                         "of the GNSS position loop so a position glitch is "
+                         "not cancelled by the vehicle chasing it")
     ap.add_argument("--inject-at", type=float, default=12.0,
                     help="seconds into the shadow window to inject")
     ap.add_argument("--emi-ut", type=float, default=0.0,
@@ -510,6 +621,38 @@ def main() -> int:
             print(f"    armed={ev['armed']} climbed={ev['climbed_m']:.2f} m")
             result["rig_flight"] = {"armed": ev["armed"],
                                     "climbed_m": round(ev["climbed_m"], 2)}
+            if args.hold_mode:
+                # WHY THIS EXISTS. A GNSS position glitch on a vehicle that
+                # controls position from GNSS is cancelled by the vehicle:
+                # measured on a harness run, a commanded 50 m ramp produced
+                # only 1.55 m of reported offset because the airframe flew
+                # ~48 m the other way chasing it. That is an indirect
+                # COMMANDED AIRFRAME DISPLACEMENT, which the preregistration's
+                # Type row excludes, and it also makes the declared downstream
+                # observable ("receiver reports the offset position")
+                # unmeasurable. ALT_HOLD keeps the airframe out of the GNSS
+                # position loop, so the offset stays in the reported position
+                # where it can be observed. RC and GCS failsafes are already
+                # disabled by fly().
+                mid = rig_conn.mode_mapping().get(args.hold_mode)
+                if mid is None:
+                    raise SystemExit(f"unknown flight mode {args.hold_mode!r}")
+                rig_conn.set_mode(mid)
+                seen, deadline = None, time.time() + 15.0
+                while time.time() < deadline:
+                    m = rig_conn.recv_match(type="HEARTBEAT", blocking=True,
+                                            timeout=1.0)
+                    if m is not None and m.custom_mode == mid:
+                        seen = args.hold_mode
+                        break
+                result["rig_flight"]["hold_mode"] = args.hold_mode
+                result["rig_flight"]["hold_mode_confirmed"] = seen is not None
+                print(f"    hold mode {args.hold_mode} -> "
+                      f"{'CONFIRMED' if seen else 'NOT CONFIRMED'}")
+                if seen is None:
+                    raise SystemExit(
+                        f"vehicle did not enter {args.hold_mode}; a trial "
+                        f"flown in the wrong mode is not a trial")
 
         from pymavlink import mavutil
 
@@ -549,7 +692,47 @@ def main() -> int:
         result["live_transmit_probe"] = denied
 
         inject_timer = None
-        if args.inject == "mag_emi":
+        if args.inject == "gps_glitch":
+            if args.platform not in GPS_GLITCH:
+                raise SystemExit(
+                    f"gps_glitch is INAPPLICABLE on {args.platform}: no "
+                    f"fix-preserving position offset exists (see "
+                    f"research/v1_1/CURRENT_STACK_REPLICATION.md section 2.1). "
+                    f"The preregistration forbids substituting another "
+                    f"intervention.")
+            t_ref = [None]
+
+            def _inject_glitch():
+                run_gps_glitch(rig_conn, args.platform, args.glitch_m,
+                               args.glitch_ramp_s, args.inject_at,
+                               t_ref[0], result)
+            result["injection"] = {
+                "kind": "gps_glitch", "at_s": args.inject_at, "sent_by": "rig",
+                "param": GPS_GLITCH[args.platform][0],
+                "param_type": GPS_GLITCH[args.platform][1],
+                "metres": args.glitch_m, "ramp_s": args.glitch_ramp_s,
+                "metres_per_deg_lat": METRES_PER_DEG_LAT,
+                "arm": ("CLEAN CONTROL (no parameter written)"
+                        if args.glitch_m == 0.0 else
+                        ("RAMP" if args.glitch_ramp_s > 0 else "STEP")),
+                "rule": "RULE B -- the intermediate quantity is the reported "
+                        "gnss.position offset with fix type and satellite "
+                        "count unchanged and gvalid still 1, not the write",
+                "prereg": "research/v1_1/CURRENT_STACK_REPLICATION.md",
+                "prereg_blob":
+                    "0e186117e2dcc014862872934768e06e0a195592",
+            }
+            if args.glitch_m == 0.0:
+                # The clean control writes NOTHING. Section 3 calls for an
+                # identical flight with no parameter applied, so there is no
+                # write to make and none is made.
+                result["injection"]["confirmed"] = None
+            else:
+                t_ref[0] = time.time()
+                inject_timer = threading.Timer(args.inject_at, _inject_glitch)
+                inject_timer.daemon = True
+                inject_timer.start()
+        elif args.inject == "mag_emi":
             # MECHANISM B. Three parameters, written relative to their current
             # values, so u = 0 is a real no-op write and not a small
             # perturbation of ArduPilot's non-zero boot default. The reads

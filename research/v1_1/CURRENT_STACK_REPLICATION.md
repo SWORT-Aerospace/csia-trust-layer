@@ -184,6 +184,39 @@ Identical for every condition and repetition: 60 s shadow window at 25 Hz
 leaving 40 s (1000 ticks) after onset — the ramp completes at t = 40 s and is
 held to the end. `field_mode` on, profile `FIELD_DERIVED_NOISE`.
 
+**Flight mode for the scored window: `ALT_HOLD`.** Amended here **before any
+trial**, on harness evidence, and disclosed rather than quietly applied.
+
+The first harness run flew the scored window in the mode `fly()` leaves the
+vehicle in, which controls horizontal position from GNSS. A commanded 50 m
+ramp then produced only **1.55 m** of reported offset: the airframe flew
+roughly 48 m the other way chasing the glitch and cancelled it in the reported
+frame. Two things are wrong with that, and neither is about the outcome:
+
+1. It makes the intervention **an indirect commanded airframe displacement**,
+   which the §2 Type row excludes by name.
+2. It makes §2's declared downstream observable — *"receiver reports the offset
+   position"* — **unmeasurable**, because the vehicle's response subtracts the
+   thing that was supposed to be observed.
+
+`ALT_HOLD` holds altitude and attitude and takes the airframe out of the GNSS
+position loop. RC and GCS failsafes are already disabled by `fly()`
+(`FS_THR_ENABLE`, `FS_GCS_ENABLE`, `FS_OPTIONS` = 0), so the mode change is
+safe. Re-run on the same non-campaign harness configuration, the reported
+offset then ramps **linearly to 50.57 m and holds there**, with `gvalid` = 1
+throughout — §2's observable, literally.
+
+The mode change is confirmed from `HEARTBEAT.custom_mode` before the window
+opens; a flight that did not enter the mode raises rather than being scored,
+because a trial flown in the wrong mode is not a trial.
+
+**Amendment discipline.** This changes *how the declared intervention is
+realised*, not what it is: the grid, the magnitudes, the threshold, the
+tolerances and the classification rule are untouched, and no trial has been
+run. Harness verification also confirmed the write path itself is sound —
+40 of 40 ramp writes at 5 Hz were applied and acknowledged on schedule, so the
+1.55 m was the airframe, not a dropped parameter.
+
 ---
 
 ## 4. Per-tick logging
