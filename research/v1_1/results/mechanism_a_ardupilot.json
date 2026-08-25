@@ -1,0 +1,326 @@
+{
+ "claim_under_test": "W-1: SOI(gps_fault) = 1.0 -- fix loss removes the evidence required to attribute gps_fault",
+ "control": {
+  "arm": "CONTROL (fix preserved)",
+  "control_clean": true,
+  "flight_id": "20260825T005343Z-6917a1f6",
+  "injection": {
+   "kind": null,
+   "role": "CONTROL: fix preserved"
+  },
+  "intermediate_quantity": {
+   "first_t": null,
+   "name": "gnss.position MISSING with NO_3D_FIX",
+   "rule": "RULE B -- the parameter write is not the measurement",
+   "ticks_observed": 0
+  },
+  "levels_seen": [
+   "NORMAL"
+  ],
+  "result_file": "research/v1_1/results/mechanism_a/ap_CONTROL.json",
+  "snapshots": {
+   "at": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.41615159787200573,
+      1.0
+     ],
+     "heading_course": [
+      1.0,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 12.000016,
+    "trust_gps": 0.9282549692539733
+   },
+   "late": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.7529686424878757,
+      1.0
+     ],
+     "heading_course": [
+      0.5495734810668884,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 22.000035,
+    "trust_gps": 0.9595470083089004
+   },
+   "post": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.5021836339777138,
+      1.0
+     ],
+     "heading_course": [
+      1.0,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 14.003947,
+    "trust_gps": 0.9353347936692326
+   },
+   "pre": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.3191419076117693,
+      1.0
+     ],
+     "heading_course": [
+      1.0,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 10.002893,
+    "trust_gps": 0.9213145990838826
+   }
+  },
+  "ticks": 751
+ },
+ "fault": {
+  "arm": "FAULT (fix lost)",
+  "flight_id": "20260825T005244Z-8c32ffe5",
+  "injection": {
+   "at_s": 12.0,
+   "kind": "gps_fix_loss",
+   "param": "SIM_GPS1_ENABLE",
+   "rule": "RULE B -- the intermediate quantity (gnss.position MISSING/NO_3D_FIX) is what counts, not the parameter write",
+   "sent_by": "rig",
+   "value": 0.0
+  },
+  "intermediate_quantity": {
+   "first_t": 12.043901,
+   "name": "gnss.position MISSING with NO_3D_FIX",
+   "rule": "RULE B -- the parameter write is not the measurement",
+   "ticks_observed": 450
+  },
+  "intervention_effective": true,
+  "levels_seen": [
+   "CAUTION",
+   "NORMAL"
+  ],
+  "result_file": "research/v1_1/results/mechanism_a/ap_FAULT.json",
+  "snapshots": {
+   "at": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.4161552644909747,
+      1.0
+     ],
+     "heading_course": [
+      0.05382827176695063,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 12.003636,
+    "trust_gps": 0.9282431824434155
+   },
+   "late": {
+    "actions": [],
+    "ambiguity": 0.954366,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_REACTED",
+    "gnss_position_missing": "NO_3D_FIX",
+    "gnss_position_usable": false,
+    "gps_fault_p": 0.0227,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 0.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.7851879611233262,
+      0.0
+     ],
+     "heading_course": [
+      0.4829146969505387,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      0.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      0.0
+     ]
+    },
+    "level": "CAUTION",
+    "nominal_p": 0.9771,
+    "nominal_rank": 1,
+    "t": 22.005218,
+    "trust_gps": 0.929953523748942
+   },
+   "post": {
+    "actions": [],
+    "ambiguity": 0.973641,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_REACTED",
+    "gnss_position_missing": "NO_3D_FIX",
+    "gnss_position_usable": false,
+    "gps_fault_p": 0.0131,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 0.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.5156011416483265,
+      0.0
+     ],
+     "heading_course": [
+      0.08254744055118204,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      0.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      0.0
+     ]
+    },
+    "level": "CAUTION",
+    "nominal_p": 0.9867,
+    "nominal_rank": 1,
+    "t": 14.0055,
+    "trust_gps": 0.929953523748942
+   },
+   "pre": {
+    "actions": [],
+    "ambiguity": 0.99968,
+    "diagnosis_top": "nominal",
+    "disagreement": "BOTH_QUIET",
+    "gnss_position_missing": null,
+    "gnss_position_usable": true,
+    "gps_fault_p": 0.0001,
+    "gps_fault_rank": 2,
+    "gps_gate_weight_sum": 3.0,
+    "gps_gates": {
+     "altitude_baro": [
+      0.319145185532124,
+      1.0
+     ],
+     "heading_course": [
+      0.043907101601121316,
+      0.0
+     ],
+     "velocity_gps_doppler_0": [
+      1.0,
+      1.0
+     ],
+     "velocity_gps_doppler_1": [
+      1.0,
+      1.0
+     ]
+    },
+    "level": "NORMAL",
+    "nominal_p": 0.9997,
+    "nominal_rank": 1,
+    "t": 10.003727,
+    "trust_gps": 0.9212972694473038
+   }
+  },
+  "ticks": 751
+ },
+ "platform": "ardupilot",
+ "trial_valid": true
+}

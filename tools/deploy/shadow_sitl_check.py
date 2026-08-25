@@ -36,6 +36,7 @@ import signal
 import statistics
 import subprocess
 import sys
+import threading
 import time
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -85,6 +86,67 @@ DIRECT_PASSIVE = {
     "px4": "udpin:127.0.0.1:14540",        # Onboard instance -- the companion port
 }
 NEEDS_TEE = {"ardupilot": True, "px4": False}
+
+# MECHANISM A: remove the GNSS fix, mid-flight, from the RIG's link.
+#
+# Both interventions were read out of the simulator source before being used,
+# because an injection nobody verified is an assumption:
+#
+#   ArduPilot  SITL's GPS parameter group carries ENABLE
+#              (SIM_GPS.cpp:42, AP_PARAM_FLAG_ENABLE), runtime-settable.
+#   PX4        SENS_EN_GPSSIM is reboot_required:true and therefore USELESS
+#              in flight. SIM_GPS_USED is not, and SensorGpsSim.cpp:155-167
+#              reads:
+#                   if (_sim_gps_used.get() >= 4) fix_type = 3;
+#                   else                          fix_type = 0;
+#              so driving it to 0 produces a genuine no-fix condition.
+#
+# The rig sends this, never CSIA. It is the same authority that arms and
+# climbs, and CSIA's connection remains structurally unable to transmit.
+#
+# RULE B: the injection is not the measurement. The INTERMEDIATE QUANTITY --
+# gnss.position going MISSING with NO_3D_FIX -- is recorded per tick in the
+# flight log, and an injection that did not produce it is a failed trial
+# rather than a result.
+#
+# THE PARAMETER TYPE IS PART OF THE INTERVENTION, not a detail.
+#
+# The first PX4 arm sent SIM_GPS_USED as REAL32. PX4 stores it as INT32, so
+# the write was ignored, no PARAM_VALUE came back, the fix never dropped, and
+# the arm produced a null result that would have read as "PX4 does not show
+# the mechanism". A parameter readback proved otherwise: PX4 echoed
+# SIM_GPS_USED = 1.401298464324817e-44, the float32 reinterpretation of the
+# integer 10, and SENS_EN_GPSSIM = 1.401298464324817e-45, i.e. integer 1.
+#
+# This is the same type defect fixed in `_fly_px4` this morning, reintroduced
+# in new code with the sign reversed. ArduPilot's MAVLink parameter interface
+# is float-based and REAL32 works there; PX4's is typed and does not.
+INJECTIONS = {
+    "gps_fix_loss": {
+        "ardupilot": ("SIM_GPS1_ENABLE", 0, "REAL32"),
+        "px4": ("SIM_GPS_USED", 0, "INT32"),
+    },
+}
+
+# MAVLink reports an INT32 parameter's value in a float field, bit-for-bit.
+# Comparing that float against the integer you sent always fails.
+_INT_PARAM_TYPES = None
+
+
+def decode_param_value(msg):
+    """Return a parameter's value with its declared type honoured."""
+    import struct
+    from pymavlink import mavutil as _mv
+    global _INT_PARAM_TYPES
+    if _INT_PARAM_TYPES is None:
+        _INT_PARAM_TYPES = {
+            getattr(_mv.mavlink, f"MAV_PARAM_TYPE_{n}")
+            for n in ("UINT8", "INT8", "UINT16", "INT16", "UINT32", "INT32")
+            if hasattr(_mv.mavlink, f"MAV_PARAM_TYPE_{n}")}
+    value = float(msg.param_value)
+    if getattr(msg, "param_type", None) in _INT_PARAM_TYPES:
+        return float(struct.unpack("<i", struct.pack("<f", value))[0])
+    return value
 
 
 def start_tee_process(source, out_addr, platform, profile, status_path,
@@ -165,6 +227,10 @@ def main() -> int:
                          "tick being measured; thread is the old in-process "
                          "arrangement, kept as the null control that shows "
                          "the difference")
+    ap.add_argument("--inject", choices=sorted(INJECTIONS), default=None,
+                    help="fault to inject mid-run, sent on the RIG's link")
+    ap.add_argument("--inject-at", type=float, default=12.0,
+                    help="seconds into the shadow window to inject")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -291,7 +357,57 @@ def main() -> int:
         print("=== live transmit probe: " + "; ".join(denied))
         result["live_transmit_probe"] = denied
 
-        print(f"=== running SHADOW for {args.seconds:.0f} s")
+        inject_timer = None
+        if args.inject:
+            name, value, ptype = INJECTIONS[args.inject][args.platform]
+            mav_ptype = getattr(mavutil.mavlink, f"MAV_PARAM_TYPE_{ptype}")
+            def _inject():
+                # The RIG transmits. CSIA's socket is shut for writing and
+                # every send on it raises CommandAuthorityError.
+                rig_conn.mav.param_set_send(
+                    rig_conn.target_system, rig_conn.target_component,
+                    name.encode(), float(value), mav_ptype)
+                # READ IT BACK. A parameter write nobody confirmed is an
+                # assumption, and an unconfirmed injection is indistinguishable
+                # from a platform that does not exhibit the mechanism -- which
+                # is exactly how the first PX4 arm produced a null result that
+                # meant nothing. `fly()` verifies MIS_TAKEOFF_ALT this way for
+                # the same reason.
+                seen, deadline = None, time.time() + 5.0
+                while time.time() < deadline:
+                    m = rig_conn.recv_match(type="PARAM_VALUE", blocking=True,
+                                            timeout=1.0)
+                    if m is None:
+                        continue
+                    pid = m.param_id
+                    pid = pid.decode() if isinstance(pid, bytes) else str(pid)
+                    if pid.strip("\x00") == name:
+                        seen = decode_param_value(m)
+                        break
+                result["injection"]["readback"] = seen
+                result["injection"]["confirmed"] = (
+                    seen is not None and abs(seen - float(value)) < 1e-6)
+                print(f"    [t+{args.inject_at:.1f}s] INJECTED {args.inject}: "
+                      f"{name} = {value} (rig authority); readback="
+                      f"{seen} -> "
+                      f"{'CONFIRMED' if result['injection']['confirmed'] else 'NOT CONFIRMED'}")
+            inject_timer = threading.Timer(args.inject_at, _inject)
+            inject_timer.daemon = True
+            inject_timer.start()
+            result["injection"] = {
+                "kind": args.inject, "param": name, "value": value,
+                "param_type": ptype, "at_s": args.inject_at,
+                "sent_by": "rig", "rule": "RULE B -- the intermediate "
+                "quantity (gnss.position MISSING/NO_3D_FIX) is what counts, "
+                "not the parameter write",
+            }
+        else:
+            result["injection"] = {"kind": None,
+                                   "role": "CONTROL: fix preserved"}
+
+        print(f"=== running SHADOW for {args.seconds:.0f} s"
+              + (f", injecting {args.inject} at t+{args.inject_at:.0f}s"
+                 if args.inject else " (CONTROL, no injection)"))
         t0 = time.time()
         header = runner.run()
         wall = time.time() - t0
@@ -420,6 +536,14 @@ def main() -> int:
                   f"{L['median_us']:.1f} us over {L['n']} empty ticks)")
         print(f"=== R13: {result['R13']}")
     finally:
+        # Cancel before teardown: a timer that fires after rig_conn is gone
+        # would raise inside a daemon thread and be swallowed, which is how a
+        # trial silently becomes a CONTROL.
+        try:
+            if inject_timer is not None:
+                inject_timer.cancel()
+        except NameError:
+            pass
         try:
             if tee is not None:
                 tee.stop()
