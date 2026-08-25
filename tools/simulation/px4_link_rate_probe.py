@@ -175,7 +175,16 @@ def main() -> int:
                 print(f"    {link}  {t:22s} {row[t]['count']:6d} "
                       f"{row[t]['hz']:7.3f} Hz")
 
+    # WITHOUT THIS THE GUARD IS BLIND. tests/test_px4_link_rate.py checks the
+    # contract against this artifact, not against a live simulator, so a PX4
+    # upgrade that changed the default stream rates would leave the test
+    # passing against a stale measurement. Recording the build that produced
+    # these numbers lets the test refuse to testify about a different one.
+    from csia.simulation.rigs import simulator_provenance
     out = {
+        "simulator_provenance": simulator_provenance("px4"),
+        "airframe": {"PX4_SYS_AUTOSTART": "10040",
+                     "PX4_SIM_MODEL": "sihsim_quadx"},
         "what_this_resolves": "qualification_px4.json and the shadow flight "
                               "logs disagree by 10x about the same PX4 "
                               "channel; both are correct",

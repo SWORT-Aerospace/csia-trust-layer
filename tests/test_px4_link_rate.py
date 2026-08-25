@@ -56,6 +56,22 @@ def hz(probe, arm, link, msg):
     return probe["arms"][arm]["links"][link][msg]["hz"]
 
 
+def test_the_artifact_names_the_build_it_measured(probe):
+    """These are defaults of one firmware, and the guard reads the artifact.
+
+    Every other test here checks the contract against a COMMITTED measurement
+    rather than a live simulator, so a PX4 upgrade that moved the default
+    stream rates would leave them all passing against a stale file. Recording
+    the build is what lets a reader tell whether the numbers still apply.
+    """
+    prov = probe.get("simulator_provenance") or {}
+    assert prov.get("firmware") == "PX4-Autopilot", prov
+    assert len(prov.get("sha") or "") == 40, prov
+    assert probe.get("airframe", {}).get("PX4_SIM_MODEL") == "sihsim_quadx", (
+        "the rates were measured on the SIH quadx airframe; another airframe "
+        "may stream differently")
+
+
 def test_the_instance_is_not_the_cause(probe):
     """With neither link requesting, both stream the disputed channels slowly.
 

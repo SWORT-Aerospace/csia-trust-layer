@@ -62,24 +62,32 @@ is made under identical conditions rather than across two boots. 40 s per arm,
 first 3 s discarded as settling. Artifact:
 `research/v1_1/results/PX4_LINK_RATE_PROBE.json`.
 
+Measured on `PX4-Autopilot@547e2ca`, `PX4_SYS_AUTOSTART=10040`,
+`PX4_SIM_MODEL=sihsim_quadx`. The build is recorded in the artifact, because
+these are defaults of *that firmware* and a PX4 upgrade may move them.
+
 | message | passive/14540 | passive/14550 | request/14550 | request_onboard/14540 |
 |---|---|---|---|---|
-| SCALED_PRESSURE | 1.000 | 0.975 | **9.800** | **9.825** |
-| BATTERY_STATUS | 0.500 | 0.475 | **9.775** | **9.800** |
-| VIBRATION | 0.500 | 0.100 | **9.775** | **9.800** |
-| ATTITUDE | 98.147 | 49.073 | 48.900 | 98.073 |
-| GLOBAL_POSITION_INT | 49.073 | 49.073 | 9.775 | 49.024 |
-| GPS_RAW_INT | 7.850 | 4.900 | 4.900 | 7.850 |
+| SCALED_PRESSURE | 1.000 | 1.000 | **9.750** | **9.775** |
+| BATTERY_STATUS | 0.500 | 0.500 | **9.750** | **9.775** |
+| VIBRATION | 0.500 | 0.100 | **9.750** | **9.775** |
+| ATTITUDE | 97.945 | 48.998 | 48.799 | 97.696 |
+| GLOBAL_POSITION_INT | 48.973 | 48.973 | 9.775 | 48.823 |
+| GPS_RAW_INT | 7.850 | 4.900 | 4.875 | 7.825 |
+
+Run three times across independent boots while this was being written. The
+figures move in the third decimal (`SCALED_PRESSURE` requesting: 9.800, 9.825,
+9.775) and the conclusions do not.
 
 Reading the table:
 
 - **The instance cannot explain the 10× conflict.** With neither link requesting,
   both stream the disputed channels far below the declared 10 Hz, and for
-  `SCALED_PRESSURE` — the channel actually in dispute — they are equal within
-  noise (1.000 vs 0.975 Hz).
+  `SCALED_PRESSURE` — the channel actually in dispute — they are equal
+  (1.000 vs 1.000 Hz).
   This is *not* the stronger claim that the instances are identical: their
   defaults genuinely differ (`VIBRATION` 0.500 vs 0.100 Hz, `GPS_RAW_INT` 7.850 vs
-  4.900, `ATTITUDE` 98.147 vs 49.073). The point is narrower and sufficient —
+  4.900, `ATTITUDE` 97.945 vs 48.998). The point is narrower and sufficient —
   no unrequested default on either instance comes near 9.8 Hz, so the instance
   cannot produce the qualification figure and the requests can.
 - **The requests are the cause,** and they are per-link **in both directions**:
