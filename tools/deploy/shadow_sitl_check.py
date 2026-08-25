@@ -610,7 +610,18 @@ def main() -> int:
     print(f"=== {args.platform} SITL launched (pid {proc.pid}) -> {conn_str}")
 
     result = {"platform": args.platform, "seconds": args.seconds}
+    # EVERY NAME THE `finally` BLOCK TOUCHES IS BOUND HERE, before the try.
+    # They used to be assigned inside it, so any failure before the injection
+    # was set up -- a SITL launch that never came up, a tee that would not
+    # start, a refused connection -- reached teardown with `inject_timer`
+    # undefined and raised NameError there. That was papered over with an
+    # `except NameError: pass`, which also swallows a genuine NameError from a
+    # real bug in teardown and turns it into a silent skipped cleanup.
     tee = None
+    tee_proc = None
+    status_path = None
+    inject_timer = None
+    glitch_cancel = None
     try:
         # The rig holds the COMMAND link (SERIAL0) for the whole run. It is
         # what asks the autopilot to stream, because a shadow monitor cannot:
@@ -640,7 +651,7 @@ def main() -> int:
         #
         # It is also the faithful arrangement: on a real aircraft the tee is
         # the GCS or a UART split, never a thread inside CSIA.
-        tee, tee_proc, status_path, types = None, None, None, None
+        types = None
         if not NEEDS_TEE.get(args.platform, True):
             print(f"=== no tee: {args.platform} streams a full set on every "
                   f"mavlink instance without being asked, so CSIA binds a "
@@ -764,8 +775,6 @@ def main() -> int:
         print("=== live transmit probe: " + "; ".join(denied))
         result["live_transmit_probe"] = denied
 
-        inject_timer = None
-        glitch_cancel = None
         if args.inject == "gps_glitch":
             if args.platform not in GPS_GLITCH:
                 raise SystemExit(
@@ -1036,24 +1045,22 @@ def main() -> int:
         # Cancel before teardown: a timer that fires after rig_conn is gone
         # would raise inside a daemon thread and be swallowed, which is how a
         # trial silently becomes a CONTROL.
-        try:
-            if inject_timer is not None:
-                # cancel() alone only stops a timer that has not fired. Once
-                # the ramp callback is running, only the Event stops it -- and
-                # a thread still writing parameters after teardown would be
-                # writing to a vehicle nobody is measuring.
-                inject_timer.cancel()
-                if glitch_cancel is not None:
-                    glitch_cancel.set()
-                inject_timer.join(timeout=10.0)
-                if inject_timer.is_alive():
-                    print("!!! injection thread still alive after teardown -- "
-                          "parameter writes may have continued past the run")
-                    result["injection"]["teardown"] = "THREAD_STILL_ALIVE"
-                else:
-                    result["injection"]["teardown"] = "joined"
-        except NameError:
-            pass
+        if inject_timer is not None:
+            # cancel() alone only stops a timer that has not fired. Once the
+            # ramp callback is running, only the Event stops it -- and a
+            # thread still writing parameters after teardown would be writing
+            # to a vehicle nobody is measuring.
+            inject_timer.cancel()
+            if glitch_cancel is not None:
+                glitch_cancel.set()
+            inject_timer.join(timeout=10.0)
+            if inject_timer.is_alive():
+                print("!!! injection thread still alive after teardown -- "
+                      "parameter writes may have continued past the run")
+                result.setdefault("injection", {})["teardown"] = \
+                    "THREAD_STILL_ALIVE"
+            else:
+                result.setdefault("injection", {})["teardown"] = "joined"
         try:
             if tee is not None:
                 tee.stop()

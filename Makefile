@@ -280,3 +280,12 @@ mechanism-b-mag-emi-report:
 paper-audit:
 	$(PY) tools/simulation/paper_scalar_audit.py
 	$(PY) -m pytest -q tests/test_markdown_paths.py
+
+# Checks refs.bib against Crossref field by field. This is the ONLY route to
+# clearing a provenance marker: the marker means "not checked against the
+# publisher", so only a publisher comparison retires it. Needs network; exits
+# 2 rather than reporting a pass when Crossref is unreachable.
+.PHONY: bib-verify
+bib-verify:
+	$(PY) tools/publication/verify_bibliography.py \
+	  --json research/v1_1/results/bibliography_verification.json

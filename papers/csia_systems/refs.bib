@@ -21,6 +21,24 @@
 %                          a placeholder
 %   VERIFY                 a literal placeholder standing in for a field
 %                          nobody has supplied
+%
+% HOW TO RETIRE A MARKER. Run `make bib-verify`, which compares every entry
+% against the publisher's own Crossref deposit field by field and prints a
+% diff. Clear a marker only for an entry it reports clean, and only after
+% reading that diff. The tool needs api.crossref.org; where egress blocks it
+% the tool exits 2 and clears nothing, which is the correct outcome. A web
+% search result is NOT a publisher record and must not be used here: it is a
+% second unverified source, and swapping one for another while deleting the
+% warning leaves the risk and removes the notice.
+%
+% Three entries carry no DOI (blanke2003ftc, carvalho2012intermittent,
+% yin_phidiagnosability) and cannot be checked this way. They need a manual
+% lookup against the publisher.
+%
+% Two entries are UNCITED by main.tex (kang2024gnss, takai2021diagnosability)
+% and between them hold 9 of the 33 entry markers. Whether to cite them or
+% drop them is an authorial decision, not a mechanical one, so they are left
+% in place and flagged here.
 
 % --- Fault-state-dependent observation loss --------------------------------
 
