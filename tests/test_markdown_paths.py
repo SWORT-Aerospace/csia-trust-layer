@@ -59,6 +59,60 @@ ALLOWED_MISSING = {
 }
 
 
+def _latex_files():
+    r"""LaTeX cites repository paths too, in \code{} and \texttt{}.
+
+    The publication package points readers at source through the manuscript,
+    not only through Markdown, and the rename that broke five Markdown
+    references could break a manuscript citation just as silently.
+    """
+    for dirpath, dirnames, filenames in os.walk(os.path.join(ROOT, "papers")):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for name in filenames:
+            if name.endswith((".tex", ".bib")):
+                yield os.path.join(dirpath, name)
+
+
+# LaTeX escapes underscores, so `csia\_core.c` in source means `csia_core.c`
+# on disk. Without unescaping, every path with an underscore reads as broken.
+LATEX_PATH_RE = re.compile(
+    r'\\(?:code|texttt|path|url)\{((?:docs|tools|csia|tests|research|scripts'
+    r'|papers|reports)/[A-Za-z0-9_./+\\-]+)\}')
+
+
+def _latex_cited_paths():
+    found = {}
+    for tex in _latex_files():
+        try:
+            text = open(tex, encoding="utf-8", errors="ignore").read()
+        except OSError:                                # pragma: no cover
+            continue
+        rel = os.path.relpath(tex, ROOT)
+        for ref in set(LATEX_PATH_RE.findall(text)):
+            ref = ref.replace("\\_", "_").replace("\\", "")
+            base = re.sub(r":[0-9]+(-[0-9]+)?$", "", ref.rstrip(".,;:"))
+            found.setdefault(base, set()).add(rel)
+    return {k: sorted(v) for k, v in found.items()}
+
+
+def test_latex_scan_finds_real_citations():
+    """Guard the guard: a regex that matches nothing would pass forever."""
+    cited = _latex_cited_paths()
+    assert cited, ("no repository paths found in any .tex/.bib -- the LaTeX "
+                   "regex is broken and this guard is vacuous")
+
+
+def test_every_repository_path_cited_in_latex_exists():
+    cited = _latex_cited_paths()
+    broken = {p: f for p, f in cited.items()
+              if p not in ALLOWED_MISSING
+              and not os.path.exists(os.path.join(ROOT, p))}
+    assert not broken, (
+        "the manuscript cites repository paths that do not exist:\n"
+        + "\n".join(f"  {p}\n      cited by {', '.join(f)}"
+                    for p, f in sorted(broken.items())))
+
+
 def _markdown_files():
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]

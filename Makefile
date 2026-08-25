@@ -111,16 +111,58 @@ release-check:
 
 # `check` deliberately runs every guard and reports all of them before
 # failing, so one red guard does not hide the state of the others.
-.PHONY: check
-check:
+# Guards split by WHO CAN CLEAR THEM.
+#
+# BLOCKING guards fail on something a change to this repository can fix, so a
+# red one is a defect to go and fix now.
+#
+# ADVISORY guards fail on something only a human with an outside source can
+# clear. bib-guard is the case in point: its 37 markers mean "not checked
+# against the publisher record", and only a publisher comparison retires them
+# (see `make bib-verify`). Leaving it in the same bucket made the aggregate
+# check permanently red, and a check that is always red is a check everyone
+# learns to ignore -- which is how a genuine blocking failure would slip past.
+#
+# `check` still fails if EITHER bucket fails, so nothing is hidden; it just
+# says which kind of failure it is.
+BLOCKING_GUARDS  = artifact-map figure-sync phase-guard manuscript-rules \
+                   secrets-scan release-check
+ADVISORY_GUARDS  = bib-guard
+
+.PHONY: check-blocking
+check-blocking:
 	@rc=0; \
-	for t in artifact-map figure-sync phase-guard manuscript-rules secrets-scan release-check bib-guard; do \
+	for t in $(BLOCKING_GUARDS); do \
 	  echo ""; echo "############ $$t"; \
 	  $(MAKE) --no-print-directory $$t || rc=1; \
 	done; \
 	echo ""; \
-	if [ $$rc -ne 0 ]; then echo "PUBLICATION CHECK: FAIL"; else echo "PUBLICATION CHECK: PASS"; fi; \
+	if [ $$rc -ne 0 ]; then echo "BLOCKING GUARDS: FAIL"; else echo "BLOCKING GUARDS: PASS"; fi; \
 	exit $$rc
+
+.PHONY: check-advisory
+check-advisory:
+	@rc=0; \
+	for t in $(ADVISORY_GUARDS); do \
+	  echo ""; echo "############ $$t"; \
+	  $(MAKE) --no-print-directory $$t || rc=1; \
+	done; \
+	echo ""; \
+	if [ $$rc -ne 0 ]; then \
+	  echo "ADVISORY GUARDS: FAIL -- needs a human with an outside source"; \
+	else echo "ADVISORY GUARDS: PASS"; fi; \
+	exit $$rc
+
+.PHONY: check
+check:
+	@b=0; a=0; \
+	$(MAKE) --no-print-directory check-blocking || b=1; \
+	$(MAKE) --no-print-directory check-advisory || a=1; \
+	echo ""; \
+	echo "  blocking guards : $$( [ $$b -eq 0 ] && echo PASS || echo FAIL )"; \
+	echo "  advisory guards : $$( [ $$a -eq 0 ] && echo PASS || echo 'FAIL (human verification outstanding)' )"; \
+	if [ $$b -ne 0 ] || [ $$a -ne 0 ]; then echo "PUBLICATION CHECK: FAIL"; else echo "PUBLICATION CHECK: PASS"; fi; \
+	[ $$b -eq 0 ] && [ $$a -eq 0 ]
 
 # ---------------------------------------------------------------------------
 # Release packaging (decisions H-1 .. H-5)

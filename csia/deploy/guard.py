@@ -236,7 +236,12 @@ def assert_no_command_capability(conn, mode: str = "SHADOW") -> dict:
             probes[call] = "DENIED"
             continue
         except AttributeError:
-            probes[call] = "ABSENT"
+            # Name the attribute that was missing. `mav.command_long_send`
+            # absent because `mav` itself is gone is a very different fact
+            # from the send method being absent on a present `mav`, and the
+            # bare "ABSENT" could not tell them apart.
+            probes[call] = ("ABSENT" if attr_name in (None, call)
+                            else f"ABSENT at {attr_name!r}")
             continue
         probes[call] = "REACHABLE"
         failures.append(f"{call} is reachable")
