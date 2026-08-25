@@ -371,12 +371,28 @@ def main() -> int:
                                   "above ~half the tick rate saturates"
                                   if aliased else "below the aliasing ceiling"),
                 }
+            # STRUCTURAL AND SCENARIO DARKNESS ARE NOT THE SAME FINDING, and
+            # the difference decides whether a campaign could ever have seen
+            # this evidence. If EVERY endpoint channel was usable and the
+            # relation is still dark, the platform produced the inputs and the
+            # GATE zeroed the weight -- which is a property of the profile
+            # flown, not of the vehicle. `heading_course` is the case that
+            # exposed this: its gate is `speed_gate * gvalid`, GATE_SPEED_LO is
+            # 2.0 m/s, and the fastest tick in the entire committed corpus is
+            # 0.170 m/s, so it is dark on every flight because every flight is
+            # a hover. Calling that DARK_STRUCTURAL claims the platform cannot
+            # produce the only magnetometer cross-check against an independent
+            # reference. It can; nobody flew forward.
+            endpoints_all_usable = all(
+                ep_info[n]["channel_usable_share"] > 0.5 for n in eps)
             if share > 0.5:
                 verdict = "LIVE"
             elif misdeclared:
                 verdict = "RATE_MISDECLARED"
             elif starved:
                 verdict = "DARK_STARVED"
+            elif share <= LIVE and endpoints_all_usable:
+                verdict = "DARK_BY_GATE"
             elif share <= LIVE:
                 verdict = "DARK_STRUCTURAL"
             else:
@@ -415,8 +431,16 @@ def main() -> int:
            "verdict_meanings": {
                "LIVE": "carried weight on most ticks",
                "INTERMITTENT": "carried weight sometimes",
-               "DARK_STRUCTURAL": "never carried weight and no endpoint is "
-                                  "starved: the platform does not produce it",
+               "DARK_STRUCTURAL": "never carried weight and at least one "
+                                  "endpoint channel was never usable: the "
+                                  "platform does not produce the input",
+               "DARK_BY_GATE": "never carried weight although EVERY endpoint "
+                               "channel was usable: the platform produced the "
+                               "inputs and the gate zeroed the weight. This "
+                               "is a property of the profile flown, not of "
+                               "the vehicle, and a different profile would "
+                               "light it up -- do NOT report it as evidence "
+                               "the platform cannot supply",
                "DARK_STARVED": "endpoint arrives less often than its derived "
                                "max_age allows, so it is stale part of every "
                                "period -- a DEFECT, not a platform fact",

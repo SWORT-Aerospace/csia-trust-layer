@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import json
 import os
 
 import pytest
@@ -74,6 +75,41 @@ def test_loop_bindings_refuses_a_shape_it_cannot_read(ledger):
     assert ledger._loop_bindings(node) == {}
     node = ast.parse('for a, b in ((x, y), (p, q)):\n    E[a] = f(), g\n').body[0]
     assert ledger._loop_bindings(node) == {}
+
+
+def test_heading_course_is_dark_by_gate_and_not_called_structural():
+    """The relation is dark because every flight is a hover, not because of the platform.
+
+    `heading_course` is the only magnetometer cross-check against an
+    INDEPENDENT reference. Its gate is `speed_gate * gvalid`, GATE_SPEED_LO is
+    2.0 m/s, and the fastest tick in the whole committed corpus is 0.170 m/s,
+    so the gate is zero everywhere. Reporting that as DARK_STRUCTURAL would
+    claim the platform cannot supply the evidence. It can; nobody flew forward.
+    """
+    path = os.path.join(ROOT, "research", "v1_1", "results",
+                        "EVIDENCE_COVERAGE_LEDGER.json")
+    if not os.path.exists(path):
+        pytest.skip("run tools/simulation/evidence_coverage_ledger.py first")
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    for plat, rows in data["ledger"].items():
+        verdict = rows["relations"]["heading_course"]["verdict"]
+        assert verdict == "DARK_BY_GATE", (plat, verdict)
+
+
+def test_a_missing_endpoint_still_reads_as_structural():
+    """PX4 publishes no second IMU, so these cannot be scenario darkness."""
+    path = os.path.join(ROOT, "research", "v1_1", "results",
+                        "EVIDENCE_COVERAGE_LEDGER.json")
+    if not os.path.exists(path):
+        pytest.skip("run tools/simulation/evidence_coverage_ledger.py first")
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    px4 = data["ledger"].get("px4")
+    if px4 is None:
+        pytest.skip("no PX4 flights in the ledger")
+    for rel in ("redundant_imu", "velocity_gps_doppler_1"):
+        assert px4["relations"][rel]["verdict"] == "DARK_STRUCTURAL", rel
 
 
 def test_the_aliasing_ceiling_stays_below_half_the_tick_rate(ledger):

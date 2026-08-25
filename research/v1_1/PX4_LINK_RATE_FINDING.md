@@ -73,8 +73,15 @@ first 3 s discarded as settling. Artifact:
 
 Reading the table:
 
-- **The instance is not the cause.** With neither link requesting, both stream the
-  disputed channels slowly (1.000 vs 0.975 Hz).
+- **The instance cannot explain the 10× conflict.** With neither link requesting,
+  both stream the disputed channels far below the declared 10 Hz, and for
+  `SCALED_PRESSURE` — the channel actually in dispute — they are equal within
+  noise (1.000 vs 0.975 Hz).
+  This is *not* the stronger claim that the instances are identical: their
+  defaults genuinely differ (`VIBRATION` 0.500 vs 0.100 Hz, `GPS_RAW_INT` 7.850 vs
+  4.900, `ATTITUDE` 98.147 vs 49.073). The point is narrower and sufficient —
+  no unrequested default on either instance comes near 9.8 Hz, so the instance
+  cannot produce the qualification figure and the requests can.
 - **The requests are the cause,** and they are per-link **in both directions**:
   requesting on 14550 leaves 14540 at 1.000 Hz, and requesting on 14540 leaves
   14550 at 0.975 Hz.
