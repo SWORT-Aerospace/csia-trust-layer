@@ -216,3 +216,56 @@ class TestMedian:
 
     def test_empty_is_nan_not_a_crash(self):
         assert math.isnan(median([]))
+
+
+# ---------------------------------------------------------------------------
+# The GPS-glitch campaign reconstructs from the MEASURED S0/T0 at onset rather
+# than from the Beta prior at t=0, because preregistration section 5 says to.
+# That is a different function with a different failure mode -- it can be
+# handed an S0 that is not the runtime's -- so it gets its own control.
+# ---------------------------------------------------------------------------
+sys.path.insert(0, os.path.join(ROOT, "tools", "simulation"))
+from current_stack_replication import (                     # noqa: E402
+    lambda_from_c, prepare, reconstruct_from)
+
+
+class TestReconstructFromMeasuredState:
+
+    def test_tracks_the_engine_from_a_mid_flight_start(self):
+        steps = _steps_from_core([(1.0, 1.0)] * 300 + [(40.0, 1.0)] * 400,
+                                 node="gps")
+        rows = prepare(steps, CFG_DICT)
+        rec = reconstruct_from(rows, 300, CFG_DICT)
+        worst = max(abs(r["T_hat"] - r["T_runtime"]) for r in rec)
+        # the preregistered tolerance is 1e-6; the arithmetic is far inside it
+        assert worst < 1e-9, worst
+        assert rec[0]["T_hat"] == rows[300]["T_runtime"]
+
+    def test_a_wrong_S0_is_detected(self):
+        """Guards the guard: if S0 were mis-read the error must exceed 1e-6."""
+        steps = _steps_from_core([(1.0, 1.0)] * 300 + [(40.0, 1.0)] * 400,
+                                 node="gps")
+        rows = prepare(steps, CFG_DICT)
+        rows[300] = dict(rows[300], S_runtime=rows[300]["S_runtime"] * 0.5)
+        rec = reconstruct_from(rows, 300, CFG_DICT)
+        worst = max(abs(r["T_hat"] - r["T_runtime"]) for r in rec)
+        assert worst > 1e-6, worst
+
+    def test_carries_S_forward_when_a_step_has_none(self):
+        steps = _steps_from_core([(1.0, 1.0)] * 20, node="gps")
+        steps[5]["S"] = None
+        rows = prepare(steps, CFG_DICT)
+        assert rows[5]["S_runtime"] == pytest.approx(rows[4]["S_runtime"])
+
+
+class TestLambdaInversion:
+
+    def test_inverts_the_source_consistency_map(self):
+        for lam in (1.5, 3.0, 12.0, 40.0):
+            c = math.exp(-0.5 * max(0.0, lam - 1.0))
+            assert lambda_from_c(c) == pytest.approx(lam, rel=1e-9)
+
+    def test_saturation_returns_none_rather_than_a_made_up_number(self):
+        # c == 1 for EVERY lam <= 1, so no single lam can be recovered
+        assert lambda_from_c(1.0) is None
+        assert lambda_from_c(None) is None
