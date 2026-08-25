@@ -63,9 +63,16 @@ EF_WINDOW = (2, 27)
 
 
 # ---------------------------------------------------------------- loading
+def _open_trace(path: str):
+    if path.endswith(".gz"):
+        import gzip
+        return gzip.open(path, "rt", encoding="utf-8")
+    return open(path, encoding="utf-8")
+
+
 def read_trace(path: str):
     header, steps = None, []
-    with open(path, encoding="utf-8") as fh:
+    with _open_trace(path) as fh:
         for line in fh:
             try:
                 rec = json.loads(line)
@@ -294,7 +301,11 @@ def analyse_arm(result_path: str, arm: str) -> dict:
     e1 = bool(deltas) and worst <= E1_TOL
     out["E1_recursion_fidelity"] = {
         "compared": len(deltas),
-        "max_abs_delta": round(worst, 6),
+        # NOT rounded to 6 places: at 6 places a real 5.2e-10
+        # round-off (the trace stores 9 decimals) prints as "0.0",
+        # and "exactly zero" is a stronger claim than the data
+        # supports. Report the magnitude actually measured.
+        "max_abs_delta": float(f"{worst:.3g}"),
         "at_t": rows[worst_i]["t"] if worst_i is not None else None,
         "tolerance": E1_TOL,
         "pass": e1,
@@ -307,7 +318,8 @@ def analyse_arm(result_path: str, arm: str) -> dict:
     sd = [abs(r["S_hat"] - r["S_runtime"]) for r in rows
           if r["S_runtime"] is not None and not math.isnan(r["S_runtime"])]
     out["S_cross_check"] = {"compared": len(sd),
-                            "max_abs_delta": round(max(sd), 6) if sd else None}
+                            "max_abs_delta": (float(f"{max(sd):.3g}")
+                                             if sd else None)}
 
     if not e1:
         reasons.append(f"E1 failed: max|T_hat-T| = {worst:.4f} > {E1_TOL}")

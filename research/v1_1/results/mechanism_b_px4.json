@@ -1,0 +1,1640 @@
+{
+ "arms": [
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 4.36,
+    "compared": 1001,
+    "max_abs_delta": 6.27e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 57.8398,
+    "T0": 0.871943,
+    "applicable": true,
+    "e_f": 0.89344,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.8934 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.980982,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.91e-08
+   },
+   "arm": "CLEAN",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.871943,
+    "T_min_after_injection": 0.754612,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": null,
+    "expected_ut": 0.0,
+    "injection_instant_source": "commanded time (no onset detected)",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 0.8229,
+    "post_samples": 51,
+    "pre_samples": 63,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T015731Z-6a914a4c",
+   "injection": {
+    "arm": "NULL CONTROL (write happens, field does not move)",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.0
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.0,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.0,
+    "native_delta_per_axis": 0.0,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.151,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623066.6320577
+   },
+   "invalid_reason": null,
+   "k_inject": 376,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CLEAN_0.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 79.96,
+     "T_hat": 0.92102,
+     "T_runtime": 0.92102,
+     "e": 0.77728,
+     "fresh": true,
+     "rho": 0.97636,
+     "t": 25.04,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 56.1,
+     "T_hat": 0.87978,
+     "T_runtime": 0.87978,
+     "e": 0.94122,
+     "fresh": true,
+     "rho": 0.98873,
+     "t": 16.04,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 56.1,
+     "T_hat": 0.86904,
+     "T_runtime": 0.86904,
+     "e": 0.71667,
+     "fresh": true,
+     "rho": 0.97336,
+     "t": 17.04,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 30.75,
+     "T_hat": 0.76121,
+     "T_runtime": 0.76121,
+     "e": 0.71555,
+     "fresh": true,
+     "rho": 0.95899,
+     "t": 19.04,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 57.84,
+     "T_hat": 0.87194,
+     "T_runtime": 0.87194,
+     "e": 0.94042,
+     "fresh": true,
+     "rho": 0.98964,
+     "t": 15.04,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 48.1,
+     "T_hat": 0.82857,
+     "T_runtime": 0.82857,
+     "e": 0.98806,
+     "fresh": true,
+     "rho": 0.99418,
+     "t": 14.04,
+     "updated": true
+    }
+   },
+   "u_ut": 0.0,
+   "valid": true
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 0.72,
+    "compared": 1001,
+    "max_abs_delta": 5.69e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 61.7096,
+    "T0": 0.895096,
+    "applicable": true,
+    "e_f": 0.787737,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.7877 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.984241,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.67e-08
+   },
+   "arm": "CLEAN",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.895096,
+    "T_min_after_injection": 0.691824,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.0,
+    "detected_onset_s": null,
+    "expected_ut": 0.0,
+    "injection_instant_source": "commanded time (no onset detected)",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 0.5316,
+    "post_samples": 50,
+    "pre_samples": 62,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T015833Z-e2aa9291",
+   "injection": {
+    "arm": "NULL CONTROL (write happens, field does not move)",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.0
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.0,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.0,
+    "native_delta_per_axis": 0.0,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.141,
+    "wrote_at_rel_s": 15.0,
+    "wrote_at_wall": 1787623128.6483152
+   },
+   "invalid_reason": null,
+   "k_inject": 375,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CLEAN_1.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 59.61,
+     "T_hat": 0.88456,
+     "T_runtime": 0.88456,
+     "e": 0.99639,
+     "fresh": true,
+     "rho": 0.99685,
+     "t": 25.0,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 56.97,
+     "T_hat": 0.87562,
+     "T_runtime": 0.87562,
+     "e": 0.78716,
+     "fresh": true,
+     "rho": 0.97804,
+     "t": 16.0,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 49.65,
+     "T_hat": 0.82623,
+     "T_runtime": 0.82623,
+     "e": 0.78108,
+     "fresh": true,
+     "rho": 0.97635,
+     "t": 17.0,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 36.86,
+     "T_hat": 0.77084,
+     "T_runtime": 0.77084,
+     "e": 0.73605,
+     "fresh": true,
+     "rho": 0.96535,
+     "t": 19.0,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 61.71,
+     "T_hat": 0.8951,
+     "T_runtime": 0.8951,
+     "e": 0.94427,
+     "fresh": true,
+     "rho": 0.98978,
+     "t": 15.0,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 55.32,
+     "T_hat": 0.87665,
+     "T_runtime": 0.87665,
+     "e": 0.9083,
+     "fresh": true,
+     "rho": 0.98395,
+     "t": 14.0,
+     "updated": true
+    }
+   },
+   "u_ut": 0.0,
+   "valid": true
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 17.28,
+    "compared": 1001,
+    "max_abs_delta": 5.26e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 57.9825,
+    "T0": 0.890226,
+    "applicable": true,
+    "e_f": 0.789733,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.7897 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.969163,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 999,
+    "max_abs_delta": 2.16e-08
+   },
+   "arm": "CLEAN",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.890226,
+    "T_min_after_injection": 0.703286,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": null,
+    "expected_ut": 0.0,
+    "injection_instant_source": "commanded time (no onset detected)",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 0.4895,
+    "post_samples": 50,
+    "pre_samples": 63,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T015935Z-dcd50e57",
+   "injection": {
+    "arm": "NULL CONTROL (write happens, field does not move)",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.0
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.0,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.0
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.0,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.0,
+    "native_delta_per_axis": 0.0,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.222,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623190.7342963
+   },
+   "invalid_reason": null,
+   "k_inject": 376,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CLEAN_2.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 87.96,
+     "T_hat": 0.93453,
+     "T_runtime": 0.93453,
+     "e": 1.0,
+     "fresh": true,
+     "rho": 0.998,
+     "t": 25.04,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 44.07,
+     "T_hat": 0.83852,
+     "T_runtime": 0.83852,
+     "e": 0.76273,
+     "fresh": true,
+     "rho": 0.96631,
+     "t": 16.04,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 34.04,
+     "T_hat": 0.76341,
+     "T_runtime": 0.76341,
+     "e": 0.71509,
+     "fresh": true,
+     "rho": 0.96183,
+     "t": 17.04,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 26.07,
+     "T_hat": 0.70489,
+     "T_runtime": 0.70489,
+     "e": 0.71505,
+     "fresh": true,
+     "rho": 0.95919,
+     "t": 19.04,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 57.98,
+     "T_hat": 0.89023,
+     "T_runtime": 0.89023,
+     "e": 0.8266,
+     "fresh": true,
+     "rho": 0.97422,
+     "t": 15.04,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 63.21,
+     "T_hat": 0.90303,
+     "T_runtime": 0.90303,
+     "e": 0.91111,
+     "fresh": true,
+     "rho": 0.98741,
+     "t": 14.04,
+     "updated": true
+    }
+   },
+   "u_ut": 0.0,
+   "valid": true
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 9.48,
+    "compared": 1001,
+    "max_abs_delta": 5.71e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 55.5883,
+    "T0": 0.887802,
+    "applicable": true,
+    "e_f": 0.988501,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.9885 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.995575,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.76e-08
+   },
+   "arm": "SUB",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.887802,
+    "T_min_after_injection": 0.712438,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 14.522,
+    "expected_ut": 0.866,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 1.7475,
+    "post_samples": 51,
+    "pre_samples": 62,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020038Z-815c0ebb",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.004999999888241291
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.866025,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.5,
+    "native_delta_per_axis": 0.005,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.135,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623253.9608157
+   },
+   "invalid_reason": "field shift 1.747 uT outside +/-40% of 0.866 uT",
+   "k_inject": 364,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_SUB_0.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 86.65,
+     "T_hat": 0.92289,
+     "T_runtime": 0.92289,
+     "e": 0.75242,
+     "fresh": true,
+     "rho": 0.97193,
+     "t": 24.56,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 72.86,
+     "T_hat": 0.91882,
+     "T_runtime": 0.91882,
+     "e": 0.99768,
+     "fresh": true,
+     "rho": 0.99726,
+     "t": 15.56,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 67.47,
+     "T_hat": 0.90613,
+     "T_runtime": 0.90613,
+     "e": 0.8109,
+     "fresh": true,
+     "rho": 0.98448,
+     "t": 16.56,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 37.22,
+     "T_hat": 0.78609,
+     "T_runtime": 0.78609,
+     "e": 0.70966,
+     "fresh": true,
+     "rho": 0.95954,
+     "t": 18.56,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 55.59,
+     "T_hat": 0.8878,
+     "T_runtime": 0.8878,
+     "e": 0.948,
+     "fresh": true,
+     "rho": 0.98921,
+     "t": 14.56,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 41.87,
+     "T_hat": 0.83887,
+     "T_runtime": 0.83887,
+     "e": 0.97712,
+     "fresh": true,
+     "rho": 0.99251,
+     "t": 13.56,
+     "updated": true
+    }
+   },
+   "u_ut": 0.5,
+   "valid": false
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 7.88,
+    "compared": 1001,
+    "max_abs_delta": 5.83e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 57.7298,
+    "T0": 0.865065,
+    "applicable": true,
+    "e_f": 0.90516,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.9052 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.985825,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.25e-08
+   },
+   "arm": "SUB",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.865065,
+    "T_min_after_injection": 0.735545,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 14.527,
+    "expected_ut": 0.866,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 1.2839,
+    "post_samples": 49,
+    "pre_samples": 62,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020141Z-cbe7e259",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.004999999888241291
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.866025,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.5,
+    "native_delta_per_axis": 0.005,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.12,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623316.9131863
+   },
+   "invalid_reason": "field shift 1.284 uT outside +/-40% of 0.866 uT",
+   "k_inject": 364,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_SUB_1.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 73.23,
+     "T_hat": 0.91555,
+     "T_runtime": 0.91555,
+     "e": 0.90992,
+     "fresh": true,
+     "rho": 0.98565,
+     "t": 24.56,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 57.96,
+     "T_hat": 0.87866,
+     "T_runtime": 0.87866,
+     "e": 0.86184,
+     "fresh": true,
+     "rho": 0.97585,
+     "t": 15.56,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 62.65,
+     "T_hat": 0.8887,
+     "T_runtime": 0.8887,
+     "e": 0.88249,
+     "fresh": true,
+     "rho": 0.98564,
+     "t": 16.56,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 36.54,
+     "T_hat": 0.78929,
+     "T_runtime": 0.78929,
+     "e": 0.72249,
+     "fresh": true,
+     "rho": 0.95994,
+     "t": 18.56,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 57.73,
+     "T_hat": 0.86507,
+     "T_runtime": 0.86507,
+     "e": 0.88582,
+     "fresh": true,
+     "rho": 0.97786,
+     "t": 14.56,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 39.88,
+     "T_hat": 0.784,
+     "T_runtime": 0.784,
+     "e": 0.97343,
+     "fresh": true,
+     "rho": 0.99118,
+     "t": 13.56,
+     "updated": true
+    }
+   },
+   "u_ut": 0.5,
+   "valid": false
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 4.32,
+    "compared": 1001,
+    "max_abs_delta": 5.66e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 44.2205,
+    "T0": 0.829069,
+    "applicable": true,
+    "e_f": 0.832587,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.8326 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.976473,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 999,
+    "max_abs_delta": 2.36e-08
+   },
+   "arm": "SUB",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.829069,
+    "T_min_after_injection": 0.700714,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 14.521,
+    "expected_ut": 0.866,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 1.5429,
+    "post_samples": 50,
+    "pre_samples": 62,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020245Z-489666e7",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.004999999888241291
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.005,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.004999999888241291
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 0.866025,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 0.5,
+    "native_delta_per_axis": 0.005,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.182,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623380.039917
+   },
+   "invalid_reason": "field shift 1.543 uT outside +/-40% of 0.866 uT",
+   "k_inject": 364,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_SUB_2.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 65.48,
+     "T_hat": 0.90266,
+     "T_runtime": 0.90266,
+     "e": 1.0,
+     "fresh": false,
+     "rho": 0.998,
+     "t": 24.56,
+     "updated": false
+    },
+    "+1s": {
+     "S_hat": 40.33,
+     "T_hat": 0.82901,
+     "T_runtime": 0.82901,
+     "e": 0.80106,
+     "fresh": true,
+     "rho": 0.96806,
+     "t": 15.56,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 44.12,
+     "T_hat": 0.84004,
+     "T_runtime": 0.84004,
+     "e": 0.8008,
+     "fresh": true,
+     "rho": 0.9825,
+     "t": 16.56,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 32.63,
+     "T_hat": 0.74681,
+     "T_runtime": 0.74681,
+     "e": 0.67412,
+     "fresh": true,
+     "rho": 0.95953,
+     "t": 18.56,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 44.22,
+     "T_hat": 0.82907,
+     "T_runtime": 0.82907,
+     "e": 0.79935,
+     "fresh": true,
+     "rho": 0.96534,
+     "t": 14.56,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 37.46,
+     "T_hat": 0.77787,
+     "T_runtime": 0.77787,
+     "e": 0.96814,
+     "fresh": true,
+     "rho": 0.99037,
+     "t": 13.56,
+     "updated": true
+    }
+   },
+   "u_ut": 0.5,
+   "valid": false
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 5.4,
+    "compared": 1001,
+    "max_abs_delta": 5.7e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 71.643,
+    "T0": 0.919041,
+    "applicable": true,
+    "e_f": 0.661301,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.6613 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.950916,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.63e-08
+   },
+   "arm": "CROSS",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.919041,
+    "T_min_after_injection": 0.742749,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 15.123,
+    "expected_ut": 25.9808,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 25.9131,
+    "post_samples": 50,
+    "pre_samples": 63,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020347Z-7b328759",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.15000000596046448
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 25.980762,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 15.0,
+    "native_delta_per_axis": 0.15,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.169,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623442.4304085
+   },
+   "invalid_reason": null,
+   "k_inject": 379,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CROSS_0.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 42.22,
+     "T_hat": 0.84028,
+     "T_runtime": 0.84028,
+     "e": 0.99548,
+     "fresh": true,
+     "rho": 0.99738,
+     "t": 25.16,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 36.37,
+     "T_hat": 0.82045,
+     "T_runtime": 0.82045,
+     "e": 0.70592,
+     "fresh": true,
+     "rho": 0.9551,
+     "t": 16.16,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 28.97,
+     "T_hat": 0.80414,
+     "T_runtime": 0.80414,
+     "e": 0.86803,
+     "fresh": true,
+     "rho": 0.96482,
+     "t": 17.16,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 38.87,
+     "T_hat": 0.83701,
+     "T_runtime": 0.83701,
+     "e": 0.8206,
+     "fresh": true,
+     "rho": 0.97577,
+     "t": 19.16,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 71.64,
+     "T_hat": 0.91904,
+     "T_runtime": 0.91904,
+     "e": 0.66075,
+     "fresh": true,
+     "rho": 0.95002,
+     "t": 15.16,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 64.94,
+     "T_hat": 0.90824,
+     "T_runtime": 0.90824,
+     "e": 0.99092,
+     "fresh": true,
+     "rho": 0.99509,
+     "t": 14.16,
+     "updated": true
+    }
+   },
+   "u_ut": 15.0,
+   "valid": true
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 22.4,
+    "compared": 1001,
+    "max_abs_delta": 5.63e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 61.3523,
+    "T0": 0.893865,
+    "applicable": true,
+    "e_f": 0.657513,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.6575 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.951428,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.32e-08
+   },
+   "arm": "CROSS",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.893865,
+    "T_min_after_injection": 0.75244,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 15.125,
+    "expected_ut": 25.9808,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 26.047,
+    "post_samples": 50,
+    "pre_samples": 62,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020449Z-af77647d",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.15000000596046448
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 25.980762,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 15.0,
+    "native_delta_per_axis": 0.15,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.156,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623504.74352
+   },
+   "invalid_reason": null,
+   "k_inject": 379,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CROSS_1.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 31.08,
+     "T_hat": 0.77882,
+     "T_runtime": 0.77882,
+     "e": 0.85983,
+     "fresh": true,
+     "rho": 0.97878,
+     "t": 25.16,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 35.17,
+     "T_hat": 0.80876,
+     "T_runtime": 0.80876,
+     "e": 0.70511,
+     "fresh": true,
+     "rho": 0.95512,
+     "t": 16.16,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 29.18,
+     "T_hat": 0.79788,
+     "T_runtime": 0.79788,
+     "e": 0.87262,
+     "fresh": true,
+     "rho": 0.965,
+     "t": 17.16,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 41.16,
+     "T_hat": 0.86806,
+     "T_runtime": 0.86806,
+     "e": 0.84995,
+     "fresh": true,
+     "rho": 0.98028,
+     "t": 19.16,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 61.35,
+     "T_hat": 0.89387,
+     "T_runtime": 0.89387,
+     "e": 0.66169,
+     "fresh": true,
+     "rho": 0.95003,
+     "t": 15.16,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 57.5,
+     "T_hat": 0.88113,
+     "T_runtime": 0.88113,
+     "e": 0.93411,
+     "fresh": true,
+     "rho": 0.98871,
+     "t": 14.16,
+     "updated": true
+    }
+   },
+   "u_ut": 15.0,
+   "valid": true
+  },
+  {
+   "E1_recursion_fidelity": {
+    "at_t": 3.96,
+    "compared": 1001,
+    "max_abs_delta": 5.42e-10,
+    "pass": true,
+    "rule": "T_hat is integrated from alpha0/beta0 using only observed e(k), re-derived rho(k) and the update gate; no runtime trust enters the integration and no parameter is fitted",
+    "tolerance": 0.02
+   },
+   "E2_closed_form": {
+    "N_observed": null,
+    "N_predicted": null,
+    "N_predicted_ceil": null,
+    "S0": 53.8325,
+    "T0": 0.871053,
+    "applicable": true,
+    "e_f": 0.656711,
+    "error_ticks": null,
+    "note": "steady evidence e_f=0.6567 is at or above the threshold 0.6: T tends to e_f, so no crossing is predicted at any N",
+    "pass": false,
+    "rho_f": 0.950334,
+    "tolerance_ticks": 25,
+    "window_ticks": [
+     2,
+     27
+    ]
+   },
+   "S_cross_check": {
+    "compared": 1000,
+    "max_abs_delta": 1.18e-08
+   },
+   "arm": "CROSS",
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "crossing": {
+    "N_obs_ticks": null,
+    "T_at_injection": 0.871053,
+    "T_min_after_injection": 0.720731,
+    "at_t": null,
+    "crossed": false,
+    "definition": "first tick at or after injection with T_runtime <= 0.60 (heading_caution); NOT escalation, which also needs 1.0 s of continuous dwell",
+    "threshold": 0.6
+   },
+   "downstream_observable": {
+    "commanded_at_s": 15.001,
+    "detected_onset_s": 15.041,
+    "expected_ut": 25.9808,
+    "injection_instant_source": "observed field onset",
+    "name": "mag.field_ut mean vector shift across the injection instant",
+    "observed_ut": 26.6095,
+    "post_samples": 51,
+    "pre_samples": 63,
+    "rule": "RULE B -- the parameter write is not the measurement"
+   },
+   "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+   },
+   "flight_id": "20260825T020553Z-8d2f100e",
+   "injection": {
+    "arm": "INJECTED",
+    "at_s": 15.0,
+    "axes": [
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_X",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Y",
+      "readback": 0.15000000596046448
+     },
+     {
+      "before": 0.0,
+      "commanded": 0.15,
+      "confirmed": true,
+      "param": "SIM_MAG_OFFSET_Z",
+      "readback": 0.15000000596046448
+     }
+    ],
+    "confirmed": true,
+    "expected_field_shift_ut": 25.980762,
+    "kind": "mag_emi",
+    "micro_tesla_per_axis": 15.0,
+    "native_delta_per_axis": 0.15,
+    "native_unit": "gauss",
+    "param_type": "REAL32",
+    "params": [
+     "SIM_MAG_OFFSET_X",
+     "SIM_MAG_OFFSET_Y",
+     "SIM_MAG_OFFSET_Z"
+    ],
+    "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+    "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+    "sent_by": "rig",
+    "write_burst_ms": 0.187,
+    "wrote_at_rel_s": 15.001,
+    "wrote_at_wall": 1787623568.4348397
+   },
+   "invalid_reason": null,
+   "k_inject": 377,
+   "platform": "px4",
+   "reconstructed_ticks": 1001,
+   "result_file": "research/v1_1/results/mechanism_b/px4_CROSS_2.json",
+   "steps": 1001,
+   "trajectory": {
+    "+10s": {
+     "S_hat": 107.94,
+     "T_hat": 0.94652,
+     "T_runtime": 0.94652,
+     "e": 1.0,
+     "fresh": true,
+     "rho": 0.998,
+     "t": 25.08,
+     "updated": true
+    },
+    "+1s": {
+     "S_hat": 30.09,
+     "T_hat": 0.77015,
+     "T_runtime": 0.77015,
+     "e": 0.68246,
+     "fresh": true,
+     "rho": 0.95326,
+     "t": 16.08,
+     "updated": true
+    },
+    "+2s": {
+     "S_hat": 25.79,
+     "T_hat": 0.76475,
+     "T_runtime": 0.76475,
+     "e": 0.83136,
+     "fresh": true,
+     "rho": 0.96146,
+     "t": 17.08,
+     "updated": true
+    },
+    "+4s": {
+     "S_hat": 29.63,
+     "T_hat": 0.74617,
+     "T_runtime": 0.74617,
+     "e": 0.70931,
+     "fresh": true,
+     "rho": 0.96216,
+     "t": 19.08,
+     "updated": true
+    },
+    "inject": {
+     "S_hat": 53.83,
+     "T_hat": 0.87105,
+     "T_runtime": 0.87105,
+     "e": 0.74172,
+     "fresh": true,
+     "rho": 0.95605,
+     "t": 15.08,
+     "updated": true
+    },
+    "pre": {
+     "S_hat": 45.71,
+     "T_hat": 0.83249,
+     "T_runtime": 0.83249,
+     "e": 0.90044,
+     "fresh": true,
+     "rho": 0.9827,
+     "t": 14.08,
+     "updated": true
+    }
+   },
+   "u_ut": 15.0,
+   "valid": true
+  }
+ ],
+ "claim_under_test": "W-4: banked evidence S delays a trust node's threshold crossing, and the recursion predicts by how much",
+ "platform": "px4",
+ "preregistration": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+ "verdict": {
+  "arms_total": 9,
+  "arms_valid": 6,
+  "clean_arms_crossed": 0,
+  "clean_arms_valid": 3,
+  "cross_arms_crossed": 0,
+  "cross_arms_valid": 3,
+  "e1_pass_on_all_valid": true,
+  "e2_pass_count": 0,
+  "platform": "px4",
+  "reason": "valid CROSS arms with a verified downstream field shift did not cross the threshold",
+  "verdict": "DOES_NOT_REPLICATE"
+ }
+}
