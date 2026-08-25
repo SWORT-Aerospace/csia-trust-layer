@@ -54,6 +54,7 @@ PREREG_BLOB = "0e186117e2dcc014862872934768e06e0a195592"
 GATE_EDGE = "altitude_baro"
 
 CONDITIONS = ("CLEAN", "STEP_SMALL", "STEP_LARGE", "RAMP_20S")
+REPETITIONS = 5                     # preregistration section 3
 EXPECT_CROSS = {"CLEAN": False, "STEP_SMALL": False,
                 "STEP_LARGE": False, "RAMP_20S": True}
 
@@ -379,6 +380,25 @@ def classify(platform, trials):
     }
     expectations_met = all(expectations.values()) and len(expectations) == 4
 
+    # AN INCOMPLETE CAMPAIGN IS NOT A VERDICT. Section 6 says `NOT RUN` is not
+    # in the list and must not be recorded as INCONCLUSIVE -- and a campaign
+    # missing a whole condition is exactly that for the missing rows. Without
+    # this guard a run with the ramp condition absent classified itself
+    # PARTIALLY_REPLICATED, which reads as a finding and is not one.
+    short = {c: counts[c] for c in CONDITIONS if counts[c] != REPETITIONS}
+    if short:
+        return {
+            "platform": platform,
+            "verdict": "CAMPAIGN_INCOMPLETE",
+            "reason": ("not one of the five section 6 classifications: the "
+                       "campaign has not run to the preregistered "
+                       f"{REPETITIONS} repetitions for every condition "
+                       f"({short}), so no verdict is issued"),
+            "trials_total": len(trials),
+            "trials_valid": len(valid),
+            "trials_by_condition": counts,
+        }
+
     if not valid:
         verdict = "INCONCLUSIVE"
         why = ("no trial passed the validity controls, so nothing can be "
@@ -469,6 +489,14 @@ PERMITTED = {
         "The Mechanism B campaign ran on this platform but its validity "
         "controls failed, so no claim is made about the "
         "history-dominated threshold-crossing mechanism there.",
+    ],
+    # Not one of section 6's five. An unfinished campaign permits NO sentence,
+    # and saying so explicitly is the point -- section 6 warns that `NOT RUN`
+    # must not be laundered into INCONCLUSIVE.
+    "CAMPAIGN_INCOMPLETE": [
+        "NO SENTENCE IS PERMITTED. The campaign has not run to the "
+        "preregistered repetitions, which is not one of the five section 6 "
+        "classifications and must not be reported as any of them.",
     ],
 }
 
