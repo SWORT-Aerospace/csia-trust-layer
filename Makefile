@@ -323,6 +323,49 @@ paper-audit:
 	$(PY) tools/simulation/paper_scalar_audit.py
 	$(PY) -m pytest -q tests/test_markdown_paths.py
 
+# Cross-checks over the COMMITTED artifacts: which evidence was actually
+# available, whether every injection reached the vehicle, whether a campaign's
+# trials are mutually comparable, and why each relation was live or dark.
+# Reads artifacts and frozen source; launches no simulator and rewrites no
+# result.
+#
+# THESE TARGETS ARE EXPECTED TO EXIT NON-ZERO TODAY, and that is the point:
+# evidence-coverage reports four starved PX4 relations (altitude_baro,
+# power_thrust, temp_bias_drift, vibration_prop_freq), whose single shared
+# cause is measured and scoped in research/v1_1/PX4_LINK_RATE_FINDING.md and
+# deliberately not yet fixed. Do NOT append `|| true` to make the lane green:
+# a guard that cannot report is not a guard. The same defect class is already
+# guarded for pytest steps in the workflows by
+# tests/test_ci_env.py::test_no_pytest_invocation_swallows_its_own_result;
+# nothing enforces it here, so it is a convention these targets rely on.
+#
+# Each is its own target so a failure names itself instead of hiding behind
+# whichever line ran first. `make -k evidence-audit` runs them all.
+.PHONY: evidence-availability injection-effectiveness provenance-backfill \
+        evidence-coverage evidence-audit
+evidence-availability:
+	$(PY) tools/simulation/evidence_availability.py
+
+injection-effectiveness:
+	$(PY) tools/simulation/injection_effectiveness.py
+
+provenance-backfill:
+	$(PY) tools/publication/provenance_backfill.py
+
+evidence-coverage:
+	$(PY) tools/simulation/evidence_coverage_ledger.py
+
+evidence-audit: evidence-availability injection-effectiveness \
+                provenance-backfill evidence-coverage
+
+# Resolves the PX4 rate conflict from scratch: three arms, both links bound in
+# the same boot. NEEDS THE SIMULATOR and takes ~4 min (3 x 40 s plus boots).
+# Rewrites research/v1_1/results/PX4_LINK_RATE_PROBE.json, which
+# tests/test_px4_link_rate.py checks the contract against.
+.PHONY: px4-link-rate
+px4-link-rate:
+	$(PY) tools/simulation/px4_link_rate_probe.py
+
 # Checks refs.bib against Crossref field by field. This is the ONLY route to
 # clearing a provenance marker: the marker means "not checked against the
 # publisher", so only a publisher comparison retires it. Needs network; exits
