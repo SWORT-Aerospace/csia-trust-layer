@@ -52,8 +52,39 @@ R13_BUDGET_US = 2000.0
 # Where the tee publishes and CSIA listens. UDP because a listener
 # binding a port cannot accidentally become a client of anything.
 TEE_OUT = ("127.0.0.1", 14561)
-# The rig commands here; the tee owns SERIAL0.
-RIG_LINK = "tcp:127.0.0.1:5762"
+
+# THE LINK TOPOLOGY IS PER PLATFORM, and it was not.
+#
+# `RIG_LINK` was a single constant holding ArduPilot's SERIAL1
+# (tcp:127.0.0.1:5762). `--platform px4` was offered and could not run: PX4
+# never opens that port, so the harness died with "no TCP listener on
+# tcp:127.0.0.1:5762" after launching the simulator and starting the tee.
+#
+# The two platforms genuinely differ, and measurement decided the shape
+# rather than symmetry:
+#
+#   ArduPilot NEEDS the tee. Stream rates are per-link runtime state
+#   established only by a transmit on that link (GCS.h:537,
+#   persist_streamrates() == false), and CSIA cannot transmit. Something with
+#   authority has to drive SERIAL0; the rig commands on SERIAL1.
+#
+#   PX4 DOES NOT. It runs several mavlink instances, each streaming a full
+#   set unprompted. Measured on a live SIH boot, 4 s per link:
+#       Normal   bind 14550 -> heartbeat, 29 message types
+#       Onboard  bind 14540 -> heartbeat, 35 message types, HIGHRES_IMU 50 Hz
+#       Onboard  bind 14030 -> heartbeat, 22 types (4 kB/s cap)
+#   So the rig commands on the Normal link and CSIA binds the Onboard link,
+#   which is what a companion port IS on a real PX4 vehicle. Interposing a
+#   tee there would model a constraint the platform does not have.
+RIG_LINKS = {
+    "ardupilot": "tcp:127.0.0.1:5762",     # SERIAL1
+    "px4": "udp:127.0.0.1:14550",          # Normal instance (the GCS link)
+}
+# Where CSIA listens when the platform needs no tee.
+DIRECT_PASSIVE = {
+    "px4": "udpin:127.0.0.1:14540",        # Onboard instance -- the companion port
+}
+NEEDS_TEE = {"ardupilot": True, "px4": False}
 
 
 def start_tee_process(source, out_addr, platform, profile, status_path,
@@ -173,8 +204,12 @@ def main() -> int:
         #
         # It is also the faithful arrangement: on a real aircraft the tee is
         # the GCS or a UART split, never a thread inside CSIA.
-        tee, tee_proc, status_path = None, None, None
-        if args.tee_mode == "process":
+        tee, tee_proc, status_path, types = None, None, None, None
+        if not NEEDS_TEE.get(args.platform, True):
+            print(f"=== no tee: {args.platform} streams a full set on every "
+                  f"mavlink instance without being asked, so CSIA binds a "
+                  f"separate link directly (measured: 35 message types)")
+        elif args.tee_mode == "process":
             status_path = os.path.join(workdir, "tee_status.json")
             tee_proc, types = start_tee_process(
                 conn_str, TEE_OUT, args.platform, args.stream_profile,
@@ -195,15 +230,24 @@ def main() -> int:
             print(f"=== tee: {conn_str} -> udp {TEE_OUT}  "
                   f"({types} message types flowing, IN-PROCESS THREAD -- "
                   f"this contends for the GIL with the measured tick)")
-        result["tee"] = {"source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}",
-                         "profile": args.stream_profile,
-                         "mode": args.tee_mode,
-                         "shares_interpreter_with_csia":
-                             args.tee_mode == "thread",
-                         "types_flowing_before_measurement": types}
-        rig_conn = connect(RIG_LINK, args.platform)
+        if NEEDS_TEE.get(args.platform, True):
+            result["tee"] = {
+                "source": conn_str, "out": f"{TEE_OUT[0]}:{TEE_OUT[1]}",
+                "profile": args.stream_profile, "mode": args.tee_mode,
+                "shares_interpreter_with_csia": args.tee_mode == "thread",
+                "types_flowing_before_measurement": types}
+        else:
+            result["tee"] = {
+                "used": False,
+                "reason": "this platform streams a full set on every mavlink "
+                          "instance unprompted; CSIA binds a separate link "
+                          "directly, which is what a companion port is",
+                "csia_link": DIRECT_PASSIVE[args.platform]}
+        rig_conn = connect(RIG_LINKS[args.platform], args.platform)
 
-        print("=== rig commands on SERIAL1 (streams are per-link)")
+        print(f"=== rig commands on {RIG_LINKS[args.platform]}"
+              + (" (streams are per-link)"
+                 if NEEDS_TEE.get(args.platform, True) else ""))
         if args.fly:
             print("=== rig: arming and climbing (rig authority, not CSIA)")
             ev = fly(rig_conn, args.platform)
@@ -213,7 +257,10 @@ def main() -> int:
 
         from pymavlink import mavutil
 
-        passive = f"udpin:{TEE_OUT[0]}:{TEE_OUT[1]}"
+        passive = (f"udpin:{TEE_OUT[0]}:{TEE_OUT[1]}"
+                   if NEEDS_TEE.get(args.platform, True)
+                   else DIRECT_PASSIVE[args.platform])
+        print(f"=== CSIA listens (read-only) on {passive}")
 
         def factory():
             # The TEED feed. Bound, never dialled; CSIA only listens.
@@ -324,6 +371,18 @@ def main() -> int:
                     "--tee-mode process. See W-8.")
                 print("    NOTE: phases include in-process tee contention -- "
                       "not a clean core figure (see W-8)")
+            elif not NEEDS_TEE.get(args.platform, True):
+                # No tee at all on this platform. Saying "the tee is
+                # out-of-process" on a run that has no tee is the same stale
+                # caveat defect as printing the thread warning on a process
+                # run -- a caveat has to describe the run that produced the
+                # numbers.
+                result["timing_caveat"] = (
+                    "no tee in this configuration: CSIA binds a separate "
+                    "mavlink instance directly. Remaining variance is the "
+                    "host, which also runs the simulator.")
+                print("    NOTE: no tee in this configuration; remaining "
+                      "variance is the host (SITL shares this container)")
             else:
                 result["timing_caveat"] = (
                     "tee ran in a SEPARATE interpreter, so no GIL contention "

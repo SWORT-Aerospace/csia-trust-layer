@@ -1,0 +1,200 @@
+{
+ "R13": "FAIL: 1 ticks over budget",
+ "adapter_counters": {
+  "mapped": 4633,
+  "messages": 13102,
+  "rejected_sentinel": 15,
+  "time_reanchors": 0,
+  "unmapped": 10967
+ },
+ "command_authority": {
+  "checked": 21,
+  "mode": "SHADOW",
+  "probes": {
+   "arducopter_arm": "DENIED",
+   "arducopter_disarm": "DENIED",
+   "mav": "DENIED",
+   "mav.command_long_send": "DENIED",
+   "mav.manual_control_send": "DENIED",
+   "mav.param_set_send": "DENIED",
+   "mav.rc_channels_override_send": "DENIED",
+   "mav.set_actuator_control_target_send": "DENIED",
+   "mav.set_mode_send": "DENIED",
+   "motors_armed_wait": "DENIED",
+   "param_set_send": "DENIED",
+   "reboot_autopilot": "DENIED",
+   "send": "DENIED",
+   "send_mavlink": "DENIED",
+   "set_mode": "DENIED",
+   "set_mode_apm": "DENIED",
+   "set_mode_px4": "DENIED",
+   "set_relay": "DENIED",
+   "set_servo": "DENIED",
+   "waypoint_clear_all_send": "DENIED",
+   "write": "DENIED"
+  },
+  "result": "NO_COMMAND_PATH_REACHABLE",
+  "write_half_closed": true,
+  "write_half_state": "CLOSED_ENOTCONN"
+ },
+ "flight_id": "20260825T001849Z-96841757",
+ "host_noise_control": {
+  "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+  "concurrent_with_measurement": false,
+  "iterations_per_tick": 12786,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 789.13,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1688.1,
+    "median_us": 765.6,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 1037.0,
+    "p99_us": 1212.2
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1234.1,
+    "median_us": 757.6,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 1006.7,
+    "p99_us": 1071.9
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1639.0,
+    "median_us": 770.8,
+    "n": 751,
+    "over_budget": 0,
+    "p95_us": 1065.2,
+    "p99_us": 1323.9
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 1688.1,
+   "median_us": 765.6,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 1037.0,
+   "p99_us": 1212.2
+  }
+ },
+ "latency": {
+  "budget_us": 2000.0,
+  "max_us": 8764.61,
+  "mean_us": 807.92,
+  "median_us": 789.13,
+  "min_us": 155.08,
+  "n": 751,
+  "over_budget": 1,
+  "p95_us": 924.63,
+  "p99_us": 1130.95,
+  "worst_headroom_x": 0.23
+ },
+ "latency_positive_control": {
+  "messages_ingested": 13102,
+  "rule": "a latency figure from an idle tick measures the loop, not the workload",
+  "satisfied": true,
+  "usable_channels_at_end": 6
+ },
+ "live_transmit_probe": [
+  "command_long_send: denied",
+  "set_mode_send: denied",
+  "rc_channels_override_send: denied"
+ ],
+ "log_dir": "logs/shadow-sitl-px4",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 87.72,
+   "mean_us": 25.16,
+   "median_us": 23.48,
+   "min_us": 16.19,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 36.56,
+   "p99_us": 58.49,
+   "worst_headroom_x": 22.8
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 8618.47,
+   "mean_us": 655.64,
+   "median_us": 637.87,
+   "min_us": 0.43,
+   "n": 751,
+   "over_budget": 1,
+   "p95_us": 760.98,
+   "p99_us": 910.58,
+   "worst_headroom_x": 0.23
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 321.65,
+   "mean_us": 127.11,
+   "median_us": 118.98,
+   "min_us": 91.32,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 174.42,
+   "p99_us": 224.4,
+   "worst_headroom_x": 6.22
+  }
+ },
+ "platform": "px4",
+ "rig_flight": {
+  "armed": true,
+  "climbed_m": 1.52
+ },
+ "seconds": 30.0,
+ "stats": {
+  "max_latency_us": 8764.60599999973,
+  "messages": 13102,
+  "reconnects": 0,
+  "stale_ticks": 1,
+  "ticks": 751,
+  "watchdog_trips": 0
+ },
+ "tee": {
+  "csia_link": "udpin:127.0.0.1:14540",
+  "reason": "this platform streams a full set on every mavlink instance unprompted; CSIA binds a separate link directly, which is what a companion port is",
+  "used": false
+ },
+ "timing_caveat": "no tee in this configuration: CSIA binds a separate mavlink instance directly. Remaining variance is the host, which also runs the simulator.",
+ "unmapped_types": {
+  "ALTITUDE": 297,
+  "ATTITUDE": 2962,
+  "ATTITUDE_QUATERNION": 1481,
+  "ATTITUDE_TARGET": 297,
+  "CURRENT_EVENT_SEQUENCE": 10,
+  "CURRENT_MODE": 15,
+  "DISTANCE_SENSOR": 297,
+  "ESC_INFO": 297,
+  "ESTIMATOR_SENSOR_FUSION_STATUS": 30,
+  "EXTENDED_SYS_STATE": 149,
+  "GLOBAL_POSITION_INT": 1481,
+  "GNSS_INTEGRITY": 30,
+  "HOME_POSITION": 15,
+  "LINK_NODE_STATUS": 30,
+  "LOCAL_POSITION_NED": 889,
+  "MISSION_CURRENT": 30,
+  "ODOMETRY": 889,
+  "OPEN_DRONE_ID_LOCATION": 30,
+  "OPEN_DRONE_ID_SYSTEM": 30,
+  "PING": 30,
+  "POSITION_TARGET_GLOBAL_INT": 296,
+  "POSITION_TARGET_LOCAL_NED": 297,
+  "SERVO_OUTPUT_RAW": 297,
+  "SYSTEM_TIME": 30,
+  "SYS_STATUS": 149,
+  "TIMESYNC": 297,
+  "TIME_ESTIMATE_TO_TARGET": 15,
+  "VFR_HUD": 297
+ },
+ "wall_s": 30.02
+}
