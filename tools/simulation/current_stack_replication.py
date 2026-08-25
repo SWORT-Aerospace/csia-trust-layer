@@ -355,19 +355,28 @@ def analyse_trial(path: str, condition: str) -> dict:
     }
     out["valid"] = not reasons
     out["invalid_reason"] = "; ".join(reasons) if reasons else None
-    out["_rows"] = rec          # stripped before serialising
+    # Full prepared trace plus the onset index: section 4 wants 20 ticks
+    # BEFORE onset, which the reconstruction (which starts at onset)
+    # cannot supply. Both stripped before serialising.
+    out["_rows"] = rows
+    out["_i0"] = i0
     return out
 
 
 def write_ticks(trial, out_dir):
-    """Section 4: the per-tick schema, exactly as preregistered."""
+    """Section 4: the per-tick schema, exactly as preregistered.
+
+    "from 20 ticks BEFORE onset" -- so this walks the full prepared trace, not
+    the reconstruction, which starts at onset and has no pre-onset rows to
+    give. Crossing indices are relative to onset and are offset by i0 here.
+    """
     rows = trial.get("_rows") or []
     if not rows:
         return None
-    i0, onset = 0, trial["onset_s"]
+    i0, onset = trial["_i0"], trial["onset_s"]
     cross = trial["crossing"]["observed_tick"]
     lo = max(0, i0 - 20)
-    hi = len(rows) if cross is None else min(len(rows), cross + 61)
+    hi = len(rows) if cross is None else min(len(rows), i0 + cross + 61)
     path = os.path.join(out_dir, f"{trial['trial']}.ticks.csv")
     with open(path, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
@@ -567,6 +576,7 @@ def main() -> int:
         if t.get("_rows"):
             t["tick_log"] = write_ticks(t, tick_dir)
         t.pop("_rows", None)
+        t.pop("_i0", None)
 
     ap_verdict = classify(args.platform, trials)
 
