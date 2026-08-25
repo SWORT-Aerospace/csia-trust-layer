@@ -71,7 +71,7 @@ preregistration was written before one was chosen.
 
 ## 2. Mechanism B — the design
 
-**Preregistered in `research/v1_1/MECHANISM_B_PREREGISTRATION.md`, committed at
+**Preregistered in `research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md`, committed at
 `5f052dd`, before any trial ran.** The grid, endpoints, tolerances and
 classification rule are fixed in that commit; `git log` on the file against
 this one is the audit trail.
@@ -421,12 +421,12 @@ and it is worth more than a replication manufactured by adjustment.
 ## 10. Reproducing
 
 ```bash
-python tools/deploy/mechanism_b_campaign.py --platform ardupilot
-python tools/deploy/mechanism_b_campaign.py --platform px4
+python tools/deploy/mechanism_b_mag_emi_campaign.py --platform ardupilot
+python tools/deploy/mechanism_b_mag_emi_campaign.py --platform px4
 python tools/simulation/mechanism_b_report.py --platform ardupilot \
     --arm CLEAN research/v1_1/results/mechanism_b/ardupilot_CLEAN_0.json \
     ...   # one --arm per flight
-python tools/simulation/current_stack_replication.py
+python tools/simulation/mag_emi_probe_report.py
 ```
 
 The campaign grid is a module constant, not a command-line option: a grid you

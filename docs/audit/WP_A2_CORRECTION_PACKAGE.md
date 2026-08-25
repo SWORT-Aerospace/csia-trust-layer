@@ -1,6 +1,6 @@
 # WP-A2 Correction Package — SWORT_CSIA.pdf (xTech Apex Intercept)
 
-**Prepared:** 2026-08-22 · **Repository baseline:** branch `research/wp-e1`
+**Prepared:** 2026-08-22 · **Repository baseline:** branch `research/wp_e1`
 **Supporting audit:** `WP_A2_CLAIM_PROVENANCE_MATRIX.csv`,
 `CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md`, `WP_A2_THRESHOLD_PROVENANCE.md`
 **Measurements:** `reports/wp_a2/`

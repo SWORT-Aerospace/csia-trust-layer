@@ -12,7 +12,7 @@ over a number of ticks set by `S` and `rho`:
 this: self-occlusion removes the evidence, the node never moves, and there is
 no crossing to time. So Mechanism B uses an EVIDENCE-PRESERVING injection -- a
 constant hard-iron magnetometer offset -- preregistered in
-`research/v1_1/MECHANISM_B_PREREGISTRATION.md` before any trial ran.
+`research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md` before any trial ran.
 
 WHAT MAKES THE RECONSTRUCTION INDEPENDENT. T_hat is integrated forward from the
 FIRST tick of the flight using only:
@@ -478,7 +478,7 @@ def main() -> int:
     print(f"  -> {verdict['verdict']}: {verdict['reason']}")
 
     out = {"platform": args.platform, "arms": arms, "verdict": verdict,
-           "preregistration": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+           "preregistration": "research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md",
            "claim_under_test": "W-4: banked evidence S delays a trust node's "
                                "threshold crossing, and the recursion predicts "
                                "by how much"}

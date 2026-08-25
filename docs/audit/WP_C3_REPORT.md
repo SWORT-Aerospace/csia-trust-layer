@@ -1,6 +1,6 @@
 # WP-C3 — The Effective Signature Matrix and Diagnostic Reliability Structure
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **Not merged to main**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **Not merged to main**
 **Suite:** 463 → **467**. One production change, separately authorized: the
 IMU repair promoted to default.
 **Artifacts:** `research/wp_c3/results/`, `figures/wp_c3_*.png`

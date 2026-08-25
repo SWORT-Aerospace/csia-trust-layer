@@ -247,11 +247,23 @@ feature $f$ carries a gate $g_f \in [0,1]$, and the accumulation is
 followed by exponential smoothing with $\alpha_s = 0.06$, tempering by 1.5,
 and a softmax against a prior placing 0.86 on \code{nominal}.
 
+\textbf{We call the output a normalized hypothesis weight, not a posterior.}
+The three operations just listed each break the Bayesian reading, and any one
+of them alone would suffice: the evidence term is an exponential moving average
+over roughly fifteen ticks rather than the current tick's likelihood, it is
+raised to the power 1.5 before normalization, and $\varepsilon = 0.02$ is a
+floor inside the logarithm rather than a density. The weights sum to one and
+rank the hypotheses, which is what the assurance layer uses them for, but they
+are not $P(h \mid \text{observation at tick } k)$ and we do not report them as
+probabilities. Both the batch and the real-time paths compute the same
+quantity by the same three steps.
+
 \textbf{The load-bearing implementation detail} is that a feature with
 $g_f \le 10^{-9}$ is skipped by a \code{continue}, not down-weighted. It
 therefore contributes to no hypothesis. Two hypotheses whose LOW sets coincide
 over the surviving features accumulate identical likelihood indefinitely, and
-their posterior ratio remains pinned at the prior ratio. This is
+the ratio of their normalized hypothesis weights remains pinned at the
+prior ratio. This is
 indistinguishability, not weak evidence.
 
 \subsection{Gates}
@@ -1013,7 +1025,7 @@ assess this'' surface as health.}
 Two lines of source produce the last two rows. In the diagnosis, a gated
 feature is skipped outright, so when a hypothesis's entire support is gated its
 likelihood ties with \code{nominal} over the surviving features and the prior
-decides; the posterior concentrates on health. In the trust recursion, a node
+decides; the normalized hypothesis weight concentrates on health. In the trust recursion, a node
 that loses every evidence source has its Beta belief held rather than driven
 down, which is the right choice given the available vocabulary. A held belief
 and a confirmed one are the same number at the output.
@@ -1236,15 +1248,15 @@ New collisions across 1232 reachable configurations & --- & \textbf{none} \\
 Pairs with an order-one cut set & 7 & \textbf{6} \\
 Components in any order-one cut set & 9 & \textbf{7} \\
 \code{imu0}/\code{imu1} minimum cut set size & 1 & \textbf{2} \\
-Peak posterior for \code{imu0\_bias\_drift} & 0.9861 & \textbf{0.9203} \\
+Peak hypothesis weight for \code{imu0\_bias\_drift} & 0.9861 & \textbf{0.9203} \\
 \bottomrule
 \end{tabular}
 \caption{The repair. Cut-set analysis follows
 \cite{hurdle2007faulttree,reeves2019sensorselection}.}
 \end{table}
 
-\textbf{The cost is real and we report it.} Peak posterior for the target
-hypothesis falls by 0.066, because a larger LOW set requires more features to
+\textbf{The cost is real and we report it.} Peak normalized hypothesis weight for the
+target hypothesis falls by 0.066, because a larger LOW set requires more features to
 be simultaneously anomalous. Detection latency and minimum trust are unchanged
 on all five scripted fault scenarios, the clean scenario produces zero false
 positives before and after, and the committed campaign artifact regenerates

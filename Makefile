@@ -239,3 +239,44 @@ test-v11:
 	$(PY) -m pytest -q tests/test_channel_semantics.py tests/test_adapters.py \
 	  tests/test_shadow_mode.py tests/test_simulation_contract.py \
 	  tests/test_flight_log.py tests/test_v1_frozen.py
+
+# ---------------------------------------------------------------------------
+# Mechanism campaigns and their analyses. Every other workflow in this file has
+# a target; these were shell-only, which is how the mag_emi runner came to be
+# overwritten without anything noticing.
+#
+# The campaign grids are module constants, NOT command-line options: a grid you
+# can widen from the shell is not a preregistered grid. These targets run the
+# campaigns exactly as preregistered and nothing else.
+# ---------------------------------------------------------------------------
+
+# Mechanism B, authoritative: fix-preserving GNSS position glitch, T* = 0.75.
+# Preregistration research/v1_1/CURRENT_STACK_REPLICATION.md (blob 0e18611).
+.PHONY: mechanism-b
+mechanism-b:
+	$(PY) tools/deploy/mechanism_b_campaign.py --platform ardupilot
+
+.PHONY: mechanism-b-report
+mechanism-b-report:
+	$(PY) tools/simulation/current_stack_replication.py --platform ardupilot
+
+# POST-HOC, not preregistered. Reads existing traces only; runs no flights.
+.PHONY: mechanism-b-s0-sensitivity
+mechanism-b-s0-sensitivity:
+	$(PY) tools/simulation/s0_sensitivity_posthoc.py
+
+# The mag_emi PROBE (T* = 0.60) -- a separate experiment, not Mechanism B.
+.PHONY: mechanism-b-mag-emi
+mechanism-b-mag-emi:
+	$(PY) tools/deploy/mechanism_b_mag_emi_campaign.py --platform ardupilot
+	$(PY) tools/deploy/mechanism_b_mag_emi_campaign.py --platform px4
+
+.PHONY: mechanism-b-mag-emi-report
+mechanism-b-mag-emi-report:
+	$(PY) tools/simulation/mag_emi_probe_report.py
+
+# Publication-package guards that need no simulator.
+.PHONY: paper-audit
+paper-audit:
+	$(PY) tools/simulation/paper_scalar_audit.py
+	$(PY) -m pytest -q tests/test_markdown_paths.py

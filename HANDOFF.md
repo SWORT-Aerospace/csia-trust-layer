@@ -9,7 +9,7 @@ note keeps you both on the same page.
 - `main` already contains **everything from both sessions**:
   - the code-review/integration line (former branch
     `claude/code-reviewer-repo-export-zicovg`) — verified fully contained;
-  - the white-paper/research line (`research/wp-e1`);
+  - the white-paper/research line (`research/wp_e1`);
   - PR #13 (assurance observability, identifiability repair, SITL-measured
     detection limits).
 - The old feature branches are superseded by `main`. Don't keep committing to

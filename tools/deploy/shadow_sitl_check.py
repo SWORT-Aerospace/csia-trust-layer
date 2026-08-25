@@ -124,7 +124,7 @@ NEEDS_TEE = {"ardupilot": True, "px4": False}
 #
 # MECHANISM B: `mag_emi`, a constant hard-iron offset on the magnetometer.
 #
-# Preregistered in research/v1_1/MECHANISM_B_PREREGISTRATION.md, committed
+# Preregistered in research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md, committed
 # before any trial ran. Fix loss CANNOT test the history/threshold-crossing
 # mechanism -- self-occlusion removes the evidence, the node never moves, and
 # there is no crossing to time. `mag_emi` is the one injection available on
@@ -368,29 +368,66 @@ def fire_mag_emi(conn, platform, plan):
             "expected_field_shift_ut": round(u * 3 ** 0.5, 6)}
 
 
-def run_gps_glitch(conn, platform, metres, ramp_s, at_s, t_ref, result):
+def prepare_gps_glitch(conn, platform, metres):
+    """Read the base parameter and compute the target. RUNS AT SETUP.
+
+    THE READ MUST NOT HAPPEN INSIDE THE INJECTION TIMER. A robust parameter
+    read costs the better part of a second -- it drains, requests, and waits
+    out ArduPilot's ack lag -- and doing it in the timer callback put the
+    actual write 2.487 s after the commanded 20.0 s onset in the completed
+    campaign. That campaign remains valid because its analysis counted from
+    the RECORDED write time rather than the commanded one, but the defect is
+    real: a ramp starts late, and on a window shorter than onset + ramp_s it
+    would run off the end of the run.
+
+    Same defect, same fix as `prepare_mag_emi`. The parameter is static before
+    onset, so reading it early costs nothing.
+    """
+    name, ptype, per_m = GPS_GLITCH[platform]
+    base = read_param(conn, name)
+    return {
+        "param": name, "param_type": ptype, "per_m": per_m,
+        "base": base, "metres": float(metres),
+        "target_final": (None if base is None
+                         else base + per_m * float(metres)),
+    }
+
+
+def run_gps_glitch(conn, platform, plan, ramp_s, at_s, t_ref, result,
+                   cancel=None, hz=5.0):
     """Drive SIM_GPS1_GLTCH_X on a preregistered schedule. Records the truth.
 
     `ramp_s == 0` is the step condition: one write. Otherwise the offset is
-    ramped linearly to `metres` over `ramp_s` seconds and then HELD, written at
-    the simulated receiver's own 5 Hz (SIM_GPS.cpp:81) so the commanded value
-    changes no faster than the GPS publishes.
+    ramped linearly to `plan["metres"]` over `ramp_s` seconds and then HELD,
+    written at the simulated receiver's own 5 Hz (SIM_GPS.cpp:81) so the
+    commanded value changes no faster than the GPS publishes.
+
+    NO PARAMETER READS HAPPEN HERE -- see `prepare_gps_glitch`. The callback
+    does nothing but send the write sequence, so the gap between the commanded
+    onset and the first write is a scheduler artefact of milliseconds rather
+    than seconds. Both times are recorded separately (`commanded_at_s` and
+    `wrote_at_rel_s`) so the analysis never has to assume they agree.
+
+    `cancel` is a `threading.Event`. The ramp checks it before every write and
+    before every sleep, so teardown can actually stop a ramp in progress --
+    `Timer.cancel()` cannot, because by then the callback is already running.
 
     The schedule this function executes IS the fault truth. It is written into
     the result so the analysis reads truth from the injection, never from the
     layer under test.
     """
     from pymavlink import mavutil as _mv
-    name, ptype, per_m = GPS_GLITCH[platform]
+    name, ptype, per_m = plan["param"], plan["param_type"], plan["per_m"]
+    base, metres = plan["base"], plan["metres"]
     mav_ptype = getattr(_mv.mavlink, f"MAV_PARAM_TYPE_{ptype}")
-    base = read_param(conn, name)
+    result["injection"]["commanded_at_s"] = at_s
     if base is None:
         result["injection"]["confirmed"] = False
-        result["injection"]["error"] = f"could not read {name} before writing"
+        result["injection"]["error"] = f"could not read {name} at setup"
         return
     result["injection"]["before"] = base
 
-    hz, schedule = 5.0, []
+    schedule, cancelled = [], False
 
     def _write(metres_now):
         target = base + per_m * metres_now
@@ -400,26 +437,57 @@ def run_gps_glitch(conn, platform, metres, ramp_s, at_s, t_ref, result):
                          "metres": round(metres_now, 6),
                          "param_value": target})
 
+    def _stop():
+        return cancel is not None and cancel.is_set()
+
     if ramp_s <= 0.0:
-        _write(metres)
+        if not _stop():
+            _write(metres)
+        else:
+            cancelled = True
     else:
         n = int(round(ramp_s * hz))
         t0 = time.time()
         for i in range(1, n + 1):
+            if _stop():
+                cancelled = True
+                break
             _write(metres * i / n)
             # absolute schedule, so a slow write cannot make the ramp drift
             nxt = t0 + i / hz
-            gap = nxt - time.time()
-            if gap > 0:
-                time.sleep(gap)
+            while True:
+                gap = nxt - time.time()
+                if gap <= 0:
+                    break
+                if _stop():
+                    cancelled = True
+                    break
+                # short naps so cancellation is honoured promptly rather than
+                # after a whole inter-write interval
+                time.sleep(min(gap, 0.05))
+            if cancelled:
+                break
     result["injection"]["schedule"] = schedule
     result["injection"]["ramp_s"] = ramp_s
     result["injection"]["metres"] = metres
+    result["injection"]["cancelled"] = cancelled
+    result["injection"]["writes"] = len(schedule)
     result["injection"]["wrote_at_rel_s"] = (schedule[0]["t_rel"]
                                              if schedule else None)
+    if cancelled:
+        # A cancelled injection did not execute its declared schedule and is
+        # not a trial. Say so in the artifact rather than leaving a short
+        # schedule to be read as a complete one.
+        result["injection"]["confirmed"] = False
+        result["injection"]["error"] = (
+            f"injection cancelled after {len(schedule)} of "
+            f"{int(round(ramp_s * hz)) if ramp_s > 0 else 1} writes")
+        print(f"    [t+{at_s:.1f}s] gps_glitch CANCELLED after "
+              f"{len(schedule)} writes")
+        return
 
     # Readback AFTER the schedule finishes, against the final commanded value.
-    final = base + per_m * metres
+    final = plan["target_final"]
     seen, good = confirm_param(conn, name, final)
     result["injection"]["readback"] = seen
     result["injection"]["commanded_final"] = final
@@ -692,6 +760,7 @@ def main() -> int:
         result["live_transmit_probe"] = denied
 
         inject_timer = None
+        glitch_cancel = None
         if args.inject == "gps_glitch":
             if args.platform not in GPS_GLITCH:
                 raise SystemExit(
@@ -701,11 +770,19 @@ def main() -> int:
                     f"The preregistration forbids substituting another "
                     f"intervention.")
             t_ref = [None]
+            # Reads happen HERE, before the window opens, so the timer
+            # callback does nothing but write. See prepare_gps_glitch.
+            glitch_plan = prepare_gps_glitch(rig_conn, args.platform,
+                                             args.glitch_m)
+            glitch_cancel = threading.Event()
+            print(f"=== gps_glitch prepared: {glitch_plan['param']} "
+                  f"base={glitch_plan['base']} "
+                  f"target={glitch_plan['target_final']}")
 
             def _inject_glitch():
-                run_gps_glitch(rig_conn, args.platform, args.glitch_m,
+                run_gps_glitch(rig_conn, args.platform, glitch_plan,
                                args.glitch_ramp_s, args.inject_at,
-                               t_ref[0], result)
+                               t_ref[0], result, cancel=glitch_cancel)
             result["injection"] = {
                 "kind": "gps_glitch", "at_s": args.inject_at, "sent_by": "rig",
                 "param": GPS_GLITCH[args.platform][0],
@@ -727,6 +804,7 @@ def main() -> int:
                 # identical flight with no parameter applied, so there is no
                 # write to make and none is made.
                 result["injection"]["confirmed"] = None
+                result["injection"]["commanded_at_s"] = args.inject_at
             else:
                 t_ref[0] = time.time()
                 inject_timer = threading.Timer(args.inject_at, _inject_glitch)
@@ -769,7 +847,7 @@ def main() -> int:
                 "rule": "RULE B -- the intermediate quantity is the observed "
                         "mag.field_ut vector shift of u*sqrt(3) uT across the "
                         "injection instant, not the parameter write",
-                "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+                "prereg": "research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md",
             }
         elif args.inject:
             name, value, ptype = INJECTIONS[args.inject][args.platform]
@@ -876,7 +954,7 @@ def main() -> int:
                 f"idle, so the latency below is the empty-loop cost and is "
                 f"NOT an R13 result")
         else:
-            print(f"=== tick latency through the FULL v1.1 stack")
+            print("=== tick latency through the FULL v1.1 stack")
             print(f"    median {L['median_us']:.1f} us | p95 {L['p95_us']:.1f} "
                   f"| p99 {L['p99_us']:.1f} | max {L['max_us']:.1f} us")
             # The tee runs as a THREAD in this interpreter. Under the GIL its
@@ -923,7 +1001,7 @@ def main() -> int:
                 print("    NOTE: tee is out-of-process; remaining variance is "
                       "the host (SITL shares this container)")
             ph = result["phases"]
-            print(f"    phases (median us): "
+            print("    phases (median us): "
                   + "  ".join(f"{k}={ph[k]['median_us']:.1f}"
                               for k in ("sample", "convert", "core")
                               if ph.get(k)))
@@ -954,7 +1032,20 @@ def main() -> int:
         # trial silently becomes a CONTROL.
         try:
             if inject_timer is not None:
+                # cancel() alone only stops a timer that has not fired. Once
+                # the ramp callback is running, only the Event stops it -- and
+                # a thread still writing parameters after teardown would be
+                # writing to a vehicle nobody is measuring.
                 inject_timer.cancel()
+                if glitch_cancel is not None:
+                    glitch_cancel.set()
+                inject_timer.join(timeout=10.0)
+                if inject_timer.is_alive():
+                    print("!!! injection thread still alive after teardown -- "
+                          "parameter writes may have continued past the run")
+                    result["injection"]["teardown"] = "THREAD_STILL_ALIVE"
+                else:
+                    result["injection"]["teardown"] = "joined"
         except NameError:
             pass
         try:

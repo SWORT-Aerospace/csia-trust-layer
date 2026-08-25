@@ -9,7 +9,7 @@ The combined Mechanism B verdict follows mechanically from the two platform
 verdicts. PLATFORMS ARE NOT POOLED: each is classified on its own arms, and the
 combination is a naming of the pair, not a statistic over them.
 
-  python tools/simulation/current_stack_replication.py
+  python tools/simulation/mag_emi_probe_report.py
 """
 
 from __future__ import annotations
@@ -102,7 +102,7 @@ def main() -> int:
                             for p in PLATFORMS],
         },
         "preregistration_b":
-            "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+            "research/v1_1/MECHANISM_B_MAG_EMI_PREREGISTRATION.md",
         "mechanism_a": {
             "claim": "W-1: SOI(gps_fault) = 1.0 -- fix loss removes the "
                      "evidence required to attribute gps_fault",

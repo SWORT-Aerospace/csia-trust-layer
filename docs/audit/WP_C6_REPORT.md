@@ -1,6 +1,6 @@
 # WP-C6 — Test the Containment Correction, and the Gate Trace
 
-**Date:** 2026-08-23 · **Branch:** `research/wp-e1` · **PR #13**
+**Date:** 2026-08-23 · **Branch:** `research/wp_e1` · **PR #13**
 **Suite: 482 → 482, all passing.** No production changes. No repair implemented.
 **Deliverables:** `papers/csia_systems/` (revised), `research/wp_c6/`,
 `docs/audit/WP_C6_REPORT.md`, three figures.
