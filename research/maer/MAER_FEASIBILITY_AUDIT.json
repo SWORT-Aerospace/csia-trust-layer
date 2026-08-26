@@ -1,0 +1,181 @@
+{
+ "4A_structural_rescue": {
+  "criteria_from_brief": {
+   "computable_during_fix_loss": false,
+   "has_defined_nominal_reference": null,
+   "implementable_without_touching_frozen_core": true,
+   "independent_of_state_destroyed_by_fix_loss": false,
+   "placeable_inside_and_outside_gvalid": true
+  },
+  "estimator_variances": {
+   "csia_may_use": "false",
+   "csia_may_use_reason": "deliberately excluded from diagnosis. CSIA must not consume the estimator it is meant to be independent of. Logged for the autopilot-vs-CSIA comparison required by S9, and for nothing else.",
+   "observed_usable_share_during_fix_loss": {
+    "ardupilot": 0.0,
+    "px4": 0.0
+   }
+  },
+  "gnss_channel_usable_share_during_fix_loss": {
+   "ardupilot": {
+    "gnss.position": 0.0,
+    "gnss.velocity": 0.0,
+    "gnss.velocity_z": 0.0
+   },
+   "px4": {
+    "gnss.position": 0.0,
+    "gnss.velocity": 0.0,
+    "gnss.velocity_z": 0.0
+   }
+  },
+  "phys_gate_expressions": {
+   "baro": "1.0",
+   "battery": "1.0",
+   "gps": "gvalid * (1.0 if tau > 3.0 else 0.0)",
+   "mag": "1.0 if mag_ref_ready else 0.0",
+   "motor_esc": "1.0",
+   "vibration": "P['vibration'][1] * float(fresh['motor_esc'])"
+  },
+  "reasons": [
+   "the entire gps_fault evidence set is ['phys_gps'] (csia/diagnosis/bayes.py CAUSES), so attribution has exactly one supporting feature",
+   "P['gps'] gate is 'gvalid * (1.0 if tau > 3.0 else 0.0)', so the one supporting feature is multiplied by the flag the fault zeroes",
+   "no GNSS channel is usable on ANY tick of the fix-loss window on either platform, so the phys_gps residual (_gps_fd_vel - vel) has neither input",
+   "the relations that DO survive use no GNSS input, so nothing makes them sensitive to a GNSS fault: they would be non-discriminating",
+   "the one fault-sensitive quantity that survives, estimator.variances, is contractually forbidden (csia_may_use: false -- deliberately excluded from diagnosis. CSIA must not consume the estimator it is meant to be independent of. Logged for t...), and was observed usable on {'ardupilot': 0.0, 'px4': 0.0} of fix-loss ticks anyway"
+  ],
+  "relations_surviving_fix_loss": {
+   "ardupilot": {
+    "altitude_baro": 0.0267,
+    "attitude_gravity_mag": 1.0,
+    "redundant_imu": 1.0,
+    "temp_bias_drift": 1.0,
+    "velocity_gps_doppler_0": 0.0267,
+    "velocity_gps_doppler_1": 0.0267
+   },
+   "px4": {
+    "altitude_baro": 0.0045,
+    "attitude_gravity_mag": 0.9888,
+    "velocity_gps_doppler_0": 0.0223
+   }
+  },
+  "target_evidence_set": [
+   "phys_gps"
+  ],
+  "target_hypothesis": "gps_fault",
+  "verdict": "FAIL"
+ },
+ "4B_gate_event_likelihood": {
+  "Z": "the missingness reason on gnss.position (NO_3D_FIX vs present) -- a categorical event, not a residual",
+  "flights": [
+   {
+    "no_3d_fix_ticks": 450,
+    "platform": "ardupilot",
+    "ticks": 751,
+    "trial": "ap_FAULT.json"
+   },
+   {
+    "no_3d_fix_ticks": 448,
+    "platform": "px4",
+    "ticks": 751,
+    "trial": "px4_FAULT.json"
+   }
+  ],
+  "flights_without_fix_loss": 28,
+  "independent_flights_with_fix_loss": 2,
+  "reason": "one fault flight per platform cannot calibrate P(Z|H,C), and no calibration/test split is possible; the brief's permitted fallback is taken",
+  "verdict": "INFEASIBLE_FOR_SCORED_EMPIRICAL_CLAIM"
+ },
+ "4C_sequential_detector": {
+  "existing_implementation": "research/phase2/p1_offline_baselines.py (B4)",
+  "note": "validated on Phase-2 offline streams; applying it to current-stack traces needs mu0/sigma0 re-derived on CLEAN current-stack data, for which 28 flights exist, so calibration/test separation IS possible here",
+  "parameters": {
+   "R10_nominal_alarms": 0,
+   "cpu_us_per_tick": 0.618,
+   "decision_h_rule": "smallest h from a fixed grid for which the CLEAN NOMINAL ARM produces zero alarms. Evaluated on the clean arm only, never on a fault outcome \u2014 the same constraint rule B2's k is chosen by.",
+   "decision_h_selected": 500.0,
+   "detector": "one-sided CUSUM on the standardised PRE-TRANSFORM residual (OnlineTrustLayer._lam, read-only)",
+   "drift_k": 0.5,
+   "in_control_stats_from": "the clean nominal arm only",
+   "satisfies_R10": true
+  },
+  "reads_frozen_core": "read-only, on OnlineTrustLayer._lam",
+  "verdict": "PASS"
+ },
+ "4D_transport_starvation": {
+  "evidence": {
+   "controlled_by": "presence/absence of SET_MESSAGE_INTERVAL on the consumer's own link, both arms in the same boot",
+   "passive_hz": 1.0,
+   "requested_hz": 9.775,
+   "same_build": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+   "same_message": "SCALED_PRESSURE"
+  },
+  "reproductions": 3,
+  "verdict": "PASS"
+ },
+ "4E_operating_regime": {
+  "reason": "crossing the 2.0 m/s heading_course gate needs a new commanded-trajectory path in the rig and a new campaign. Feasible on ArduPilot, not cheap, and the brief forbids letting it delay the main experiment",
+  "verdict": "DEFERRED"
+ },
+ "decision": "MAER_NOT_FEASIBLE",
+ "decision_basis": "the brief allows a reduced experiment only if structural rescue, the sequential detector AND transport-starvation control are all feasible. Structural rescue fails, so no reduced form is available either.",
+ "fix_loss_survey": {
+  "flights_with_fix_loss": [
+   {
+    "no_3d_fix_ticks": 450,
+    "platform": "ardupilot",
+    "ticks": 751,
+    "trial": "ap_FAULT.json"
+   },
+   {
+    "no_3d_fix_ticks": 448,
+    "platform": "px4",
+    "ticks": 751,
+    "trial": "px4_FAULT.json"
+   }
+  ],
+  "n_flights_with_fix_loss": 2,
+  "n_flights_without_fix_loss": 28,
+  "per_platform": {
+   "ardupilot": {
+    "channel_usable_share": {
+     "baro.altitude": 1.0,
+     "battery.current": 1.0,
+     "battery.voltage": 1.0,
+     "imu0.accel": 1.0,
+     "imu0.gyro": 1.0,
+     "imu1.accel": 1.0,
+     "imu1.gyro": 1.0,
+     "mag.field_ut": 1.0,
+     "vehicle_status.armed": 1.0,
+     "vibration.rms": 1.0
+    },
+    "lost_ticks": 450,
+    "relation_live_share": {
+     "altitude_baro": 0.0267,
+     "attitude_gravity_mag": 1.0,
+     "redundant_imu": 1.0,
+     "temp_bias_drift": 1.0,
+     "velocity_gps_doppler_0": 0.0267,
+     "velocity_gps_doppler_1": 0.0267
+    }
+   },
+   "px4": {
+    "channel_usable_share": {
+     "baro.altitude": 0.4978,
+     "battery.voltage": 0.25,
+     "imu0.accel": 1.0,
+     "imu0.gyro": 1.0,
+     "mag.field_ut": 1.0,
+     "vehicle_status.armed": 1.0,
+     "vibration.rms": 0.25
+    },
+    "lost_ticks": 448,
+    "relation_live_share": {
+     "altitude_baro": 0.0045,
+     "attitude_gravity_mag": 0.9888,
+     "velocity_gps_doppler_0": 0.0223
+    }
+   }
+  }
+ },
+ "what_this_is": "MAER feasibility audit -- run before any MAER implementation exists, and allowed to return no"
+}
