@@ -1,0 +1,98 @@
+{
+ "candidate_fields_by_platform": {
+  "ardupilot": [],
+  "px4": [
+   "eph",
+   "epv",
+   "h_acc",
+   "satellites_visible",
+   "v_acc",
+   "vel_acc"
+  ]
+ },
+ "platforms": {
+  "ardupilot": {
+   "candidate_fields": [],
+   "intervention": {
+    "param": "SIM_GPS1_ENABLE",
+    "type": "REAL32",
+    "value": 0.0
+   },
+   "messages_nominal": [
+    "GPS_RAW_INT"
+   ],
+   "messages_requested_but_never_seen": [
+    "GPS2_RAW",
+    "GPS_STATUS"
+   ],
+   "messages_surviving_fix_loss": [
+    "GPS_RAW_INT"
+   ],
+   "record_live_under_fix_loss": {
+    "GPS_RAW_INT": false
+   },
+   "rule_b": {
+    "invalid_observed": true,
+    "invalid_span_s": 24.99,
+    "messages_still_valid": 1,
+    "messages_with_invalid_fix": 132
+   },
+   "simulator": "ArduCopter V4.8.0-dev@01a504b"
+  },
+  "px4": {
+   "candidate_fields": [
+    "eph",
+    "epv",
+    "h_acc",
+    "satellites_visible",
+    "v_acc",
+    "vel_acc"
+   ],
+   "intervention": {
+    "param": "SIM_GPS_USED",
+    "type": "INT32",
+    "value": 0
+   },
+   "messages_nominal": [
+    "GPS_RAW_INT"
+   ],
+   "messages_requested_but_never_seen": [
+    "GPS2_RAW",
+    "GPS_STATUS"
+   ],
+   "messages_surviving_fix_loss": [
+    "GPS_RAW_INT"
+   ],
+   "record_live_under_fix_loss": {
+    "GPS_RAW_INT": true
+   },
+   "rule_b": {
+    "invalid_observed": true,
+    "invalid_span_s": 24.99,
+    "messages_still_valid": 0,
+    "messages_with_invalid_fix": 124
+   },
+   "simulator": "PX4-Autopilot@547e2ca"
+  }
+ },
+ "question": "does any contract-permitted raw GNSS receiver-health observable remain available AND potentially discriminating during the tested fix-loss intervention?",
+ "screen": {
+  "gate_event_not_a_residual": [
+   "fix_type"
+  ],
+  "must_change_at_the_fault": true,
+  "non_sentinel_required": 1.0,
+  "present_fraction_min": 0.5,
+  "receiver_health_not_the_invalidated_solution": [
+   "alt",
+   "alt_ellipsoid",
+   "cog",
+   "lat",
+   "lon",
+   "vel",
+   "yaw"
+  ],
+  "record_must_be_live": "time_usec must advance -- a re-transmitted frozen sample is present but says nothing"
+ },
+ "verdict": "MAER_STRUCTURAL_RESCUE_REOPENED"
+}
