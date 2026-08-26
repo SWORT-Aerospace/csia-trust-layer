@@ -11,7 +11,7 @@ costume. That form is withdrawn.
 THE REPLACEMENT REUSES THE EXISTING CONVENTION INSTEAD OF INVENTING ONE.
 `OnlineTrustLayer._lam_upd` (csia/runtime/online.py:426) is:
 
-    lam = EWMA_0.15( (resid / sigma)^2 / df )
+    lam = EWMA_0.15( u^2 / df )
 
 Every relation in the layer is expressed that way, so supplying a `resid` and a
 `sigma` in the same form makes scale compatibility STRUCTURAL rather than
@@ -22,7 +22,7 @@ any fault trace is scored:
             the DECLARED nominal receiver accuracy of the configuration under
             test, read from the simulator parameter, not from a fault trace
 
-    resid = log(1 + max(0, h_acc - h0) / h0)
+    u     = max(0, log(h_acc / h0)) / kappa_h
             one-sided: accuracy better than nominal is not a fault. Zero at
             nominal, and logarithmic so three decades of millimetres become a
             bounded, dimensionless quantity
@@ -43,6 +43,7 @@ hypothesis and tunes nothing.
 from __future__ import annotations
 
 import glob
+import importlib.util
 import json
 import math
 import os
@@ -52,36 +53,14 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MAER = os.path.join(ROOT, "research", "maer")
 
-# ---- the frozen transform constants, declared here -----------------------
-H0_MM = 300.0                 # SIM_GPS1_ACC (0.3 m) * 1000
-SIGMA = math.log(2.0)         # one doubling of excess error = 1 sigma
-EW_ALPHA = 0.15               # the same smoother _lam_upd uses
+# The canonical definition lives in one place so the audits, the tests and the
+# sidecar cannot drift apart.
+_spec = importlib.util.spec_from_file_location(
+    "_maer_hacc", os.path.join(MAER, "maer_hacc_transform.py"))
+T = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(T)
 
-
-def residual(h_acc_mm):
-    """One-sided log excess over declared nominal accuracy."""
-    return math.log(1.0 + max(0.0, float(h_acc_mm) - H0_MM) / H0_MM)
-
-
-def lam_series(h_acc_values):
-    """EWMA((resid/sigma)^2), matching _lam_upd with df=1 and no adaptation."""
-    out, ew = [], None
-    for v in h_acc_values:
-        raw = (residual(v) / SIGMA) ** 2
-        ew = raw if ew is None else ew + EW_ALPHA * (raw - ew)
-        out.append(ew)
-    return out
-
-
-def consistency(lam):
-    """The layer's own lam -> (0,1] map, csia/trust_engine/engine.py.
-
-    This is why a millimetre-valued input cannot dominate the score by unit
-    choice: whatever lam is, the downstream quantity is bounded in (0,1] and
-    saturates. Comparing in THIS space is apples to apples; comparing raw lam
-    against logged consistency scores would not be.
-    """
-    return math.exp(-0.5 * max(0.0, lam - 1.0))
+H0_MM, KAPPA_H, EW_ALPHA = T.H0_MM, T.KAPPA_H, T.EW_ALPHA
 
 
 def _describe(vals):
@@ -137,29 +116,32 @@ def existing_evidence():
 
 
 def proposed_evidence():
-    """The candidate's magnitude on the committed jamming captures."""
-    clean_vals, invalid_vals, valid_vals = [], [], []
+    """The candidate on the committed captures, VALIDITY PREDICATE APPLIED.
+
+    Samples the predicate rejects contribute nothing and are counted
+    separately, rather than entering the distribution as consistency 1.0.
+    """
+    clean_vals, invalid_vals, valid_vals, rejected = [], [], [], 0
     for path in sorted(glob.glob(os.path.join(
             MAER, "MAER_ARDUPILOT_JAM_RAW", "*.json"))):
         with open(path, encoding="utf-8") as fh:
             d = json.load(fh)
-        rows = d.get("rows") or []
-        seq = [r["h_acc"] for r in rows if r.get("h_acc") is not None]
-        lam = lam_series(seq)
-        for r, L in zip([r for r in rows if r.get("h_acc") is not None], lam):
-            c = consistency(L)
+        for r, lam, c, ok in T.lam_stream(d.get("rows") or []):
+            if not ok:
+                rejected += 1
+                continue
             if r["phase"] == "clean":
                 clean_vals.append(c)
             elif (r.get("fix_type") or 0) < 3:
                 invalid_vals.append(c)
             else:
                 valid_vals.append(c)
-    return clean_vals, valid_vals, invalid_vals
+    return clean_vals, valid_vals, invalid_vals, rejected
 
 
 def main() -> int:
     ex_clean, ex_fault = existing_evidence()
-    pr_clean, pr_valid, pr_invalid = proposed_evidence()
+    pr_clean, pr_valid, pr_invalid, pr_rejected = proposed_evidence()
 
     out = {
         "why": "a contribution reported in millimetres must not dominate the "
@@ -175,15 +157,20 @@ def main() -> int:
             "h0_mm": H0_MM,
             "h0_source": "SIM_GPS1_ACC (0.3 m) * 1000 -- the DECLARED nominal "
                          "receiver accuracy of the configuration under test",
-            "residual": "log(1 + max(0, h_acc - h0) / h0)",
+            "residual": "u = max(0, log(h_acc / h0)) / kappa_h",
             "residual_rationale": "one-sided because better-than-nominal "
                                   "accuracy is not a fault; logarithmic "
                                   "because h_acc spans three decades",
-            "sigma": round(SIGMA, 6),
-            "sigma_rationale": "one DOUBLING of excess error over nominal is "
-                               "one sigma -- an engineering statement fixed "
-                               "in advance, not fitted, and chosen without "
-                               "consulting fault separation",
+            "kappa_h": round(KAPPA_H, 6),
+            "kappa_h_rationale": "a declared LOG SCALE, NOT a standard "
+                                 "deviation: one doubling of reported "
+                                 "horizontal uncertainty above nominal is one "
+                                 "normalized degradation unit. The earlier "
+                                 "name `sigma` implied an empirical spread "
+                                 "that was never estimated and that the data "
+                                 "cannot support -- clean SITL h_acc is "
+                                 "constant",
+            "samples_rejected_by_validity_predicate": pr_rejected,
             "lam": "EWMA_0.15((resid/sigma)^2), identical in form to "
                    "OnlineTrustLayer._lam_upd(df=1) so the units match every "
                    "existing relation by construction",
@@ -193,15 +180,22 @@ def main() -> int:
                               "score by unit choice regardless of lam's "
                               "magnitude. This is a structural guarantee, not "
                               "a tuned one",
-            "saturation_note": "consistency falls below 0.01 at lam ~ 10.2, "
-                               "i.e. h_acc ~ 2.8x nominal; beyond that the "
-                               "evidence is saturated and further degradation "
-                               "changes nothing downstream",
-            "worked_points": {
-                "h_acc=300 (nominal)": round((residual(300) / SIGMA) ** 2, 4),
-                "h_acc=600 (2x nominal)": round((residual(600) / SIGMA) ** 2, 4),
-                "h_acc=3000": round((residual(3000) / SIGMA) ** 2, 4),
-                "h_acc=300000": round((residual(300000) / SIGMA) ** 2, 4),
+            "saturation": {
+                "lambda_at_consistency_0.01": round(
+                    T.lam_at_consistency(0.01), 8),
+                "h_acc_over_h0": round(T.ratio_at_consistency(0.01), 4),
+                "h_acc_mm": round(H0_MM * T.ratio_at_consistency(0.01), 1),
+                "CORRECTION": "an earlier report said 2.8x nominal. Wrong: "
+                              "2.9176x is the ratio near consistency 0.5, and "
+                              "the 0.01 threshold is 9.16x. Derived in "
+                              "tests/test_maer_hacc_transform.py rather than "
+                              "quoted",
+            },
+            "worked_points_lam_then_consistency": {
+                f"h_acc={h}": [round(T.degradation_units(h) ** 2, 4),
+                               round(T.consistency(
+                                   T.degradation_units(h) ** 2), 6)]
+                for h in (300, 600, 875, 2748, 300000)
             },
         },
         "existing_evidence_magnitude": {
@@ -236,9 +230,11 @@ def main() -> int:
         json.dump(out, fh, indent=1, sort_keys=True, default=str)
 
     print("=== evidence scale audit")
-    print("  frozen transform worked points (lam, pre-EWMA):")
-    for k, v in out["frozen_transform"]["worked_points"].items():
-        print(f"    {k:26s} {v}")
+    print("  frozen transform worked points  [lam, consistency]:")
+    for k, v in out["frozen_transform"][
+            "worked_points_lam_then_consistency"].items():
+        print(f"    {k:16s} {v}")
+    print(f"  samples rejected by validity predicate: {pr_rejected}")
     print("\n  existing layer evidence:")
     for k, v in out["existing_evidence_magnitude"].items():
         print(f"    {k:16s} {v}")

@@ -1,4 +1,13 @@
-# MAER — Preregistration Review Report
+# MAER — Preregistration Review Report (STAGE 1 — SUPERSEDED)
+
+> **SUPERSEDED by `MAER_FINAL_FREEZE_REPORT.md` (Stage 1.1).** Retained as the
+> record of what was proposed and reviewed, not as current design. Four things
+> in it are corrected there and must not be quoted from here:
+> the saturation ratio (2.8x -> **9.16x**); `sigma` renamed to **`kappa_h`**, a
+> declared log scale rather than a standard deviation; the claim that bounded
+> consistency prevents score domination (**withdrawn** -- the verdict is
+> `DETECTOR_DOMINANT_BUT_DECLARED`); and the absence of an `h_acc` validity
+> predicate. The transport condition has also moved to ArduPilot.
 
 Self-contained. The reviewer is assumed to have no repository access.
 **No scored trial has been run.** The preregistration is committed; the campaign
@@ -125,8 +134,10 @@ Checks: quiet on clean (p50 = 1.0) ✓; separates on fault (p50 = 0.0) ✓; same
 bounded space as existing relations ✓.
 
 **Declared property, not a discovery to be made later:** the contribution
-**saturates**. `consistency` drops below 0.01 at `lam ≈ 10.2`, i.e. `h_acc ≈ 2.8×`
-nominal. Under heavy jamming it is therefore a near-binary indicator, graded
+**saturates**. `consistency` drops below 0.01 at `lam = 10.21034037`, i.e.
+`h_acc = 9.16×` nominal (2748 mm). *(Corrected in Stage 1.1: this section
+originally said 2.8×, which is close to the ratio at consistency 0.5 and is
+wrong for the 0.01 threshold. See MAER_FINAL_FREEZE_REPORT.md.)* Under heavy jamming it is therefore a near-binary indicator, graded
 only near the threshold. This follows from the declared sigma and must not be
 retuned after scoring.
 
@@ -260,7 +271,7 @@ trial; no scored trial exists.
 4. **Trajectory variation is onset timing, not a true seed.** The distribution
    is untouched and the 10 trajectories are genuinely distinct, but they are not
    i.i.d. draws in a formal sense.
-5. **Saturation.** Above ≈2.8× nominal the contribution is near-binary.
+5. **Saturation.** Above 9.16× nominal the contribution is near-binary. *(Corrected from 2.8× in Stage 1.1.)*
 
 None of these blocks the campaign; all must appear in any write-up.
 

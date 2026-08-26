@@ -24,17 +24,39 @@
   "downstream_map": "consistency(lam) = exp(-0.5*max(0, lam-1)), csia/trust_engine/engine.py -- bounded in (0,1], so the contribution CANNOT dominate the score by unit choice regardless of lam's magnitude. This is a structural guarantee, not a tuned one",
   "h0_mm": 300.0,
   "h0_source": "SIM_GPS1_ACC (0.3 m) * 1000 -- the DECLARED nominal receiver accuracy of the configuration under test",
+  "kappa_h": 0.693147,
+  "kappa_h_rationale": "a declared LOG SCALE, NOT a standard deviation: one doubling of reported horizontal uncertainty above nominal is one normalized degradation unit. The earlier name `sigma` implied an empirical spread that was never estimated and that the data cannot support -- clean SITL h_acc is constant",
   "lam": "EWMA_0.15((resid/sigma)^2), identical in form to OnlineTrustLayer._lam_upd(df=1) so the units match every existing relation by construction",
-  "residual": "log(1 + max(0, h_acc - h0) / h0)",
+  "residual": "u = max(0, log(h_acc / h0)) / kappa_h",
   "residual_rationale": "one-sided because better-than-nominal accuracy is not a fault; logarithmic because h_acc spans three decades",
-  "saturation_note": "consistency falls below 0.01 at lam ~ 10.2, i.e. h_acc ~ 2.8x nominal; beyond that the evidence is saturated and further degradation changes nothing downstream",
-  "sigma": 0.693147,
-  "sigma_rationale": "one DOUBLING of excess error over nominal is one sigma -- an engineering statement fixed in advance, not fitted, and chosen without consulting fault separation",
-  "worked_points": {
-   "h_acc=300 (nominal)": 0.0,
-   "h_acc=3000": 11.0352,
-   "h_acc=300000": 99.3169,
-   "h_acc=600 (2x nominal)": 1.0
+  "samples_rejected_by_validity_predicate": 900,
+  "saturation": {
+   "CORRECTION": "an earlier report said 2.8x nominal. Wrong: 2.9176x is the ratio near consistency 0.5, and the 0.01 threshold is 9.16x. Derived in tests/test_maer_hacc_transform.py rather than quoted",
+   "h_acc_mm": 2748.0,
+   "h_acc_over_h0": 9.1601,
+   "lambda_at_consistency_0.01": 10.21034037
+  },
+  "worked_points_lam_then_consistency": {
+   "h_acc=2748": [
+    10.2102,
+    0.01
+   ],
+   "h_acc=300": [
+    0.0,
+    1.0
+   ],
+   "h_acc=300000": [
+    99.3169,
+    0.0
+   ],
+   "h_acc=600": [
+    1.0,
+    1.0
+   ],
+   "h_acc=875": [
+    2.3849,
+    0.500342
+   ]
   }
  },
  "in_same_bounded_space_as_existing": true,
@@ -43,7 +65,7 @@
    "max": 1.0,
    "mean": 1.0,
    "min": 1.0,
-   "n": 3163,
+   "n": 2263,
    "p50": 1.0,
    "p95": 1.0
   },
