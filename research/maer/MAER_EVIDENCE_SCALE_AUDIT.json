@@ -1,0 +1,73 @@
+{
+ "clean_quiet": true,
+ "comparable_criterion": "proposed contribution lives in the same bounded (0,1] space as every existing relation, is quiet on clean data, and moves on fault -- checked without consulting any scored outcome",
+ "existing_evidence_magnitude": {
+  "clean_flights": {
+   "max": 1.0,
+   "mean": 0.919,
+   "min": 0.0001,
+   "n": 48000,
+   "p50": 1.0,
+   "p95": 1.0
+  },
+  "fault_flights": {
+   "max": 1.0,
+   "mean": 0.9179,
+   "min": 0.0002,
+   "n": 12000,
+   "p50": 1.0,
+   "p95": 1.0
+  }
+ },
+ "fault_separates": true,
+ "frozen_transform": {
+  "downstream_map": "consistency(lam) = exp(-0.5*max(0, lam-1)), csia/trust_engine/engine.py -- bounded in (0,1], so the contribution CANNOT dominate the score by unit choice regardless of lam's magnitude. This is a structural guarantee, not a tuned one",
+  "h0_mm": 300.0,
+  "h0_source": "SIM_GPS1_ACC (0.3 m) * 1000 -- the DECLARED nominal receiver accuracy of the configuration under test",
+  "lam": "EWMA_0.15((resid/sigma)^2), identical in form to OnlineTrustLayer._lam_upd(df=1) so the units match every existing relation by construction",
+  "residual": "log(1 + max(0, h_acc - h0) / h0)",
+  "residual_rationale": "one-sided because better-than-nominal accuracy is not a fault; logarithmic because h_acc spans three decades",
+  "saturation_note": "consistency falls below 0.01 at lam ~ 10.2, i.e. h_acc ~ 2.8x nominal; beyond that the evidence is saturated and further degradation changes nothing downstream",
+  "sigma": 0.693147,
+  "sigma_rationale": "one DOUBLING of excess error over nominal is one sigma -- an engineering statement fixed in advance, not fitted, and chosen without consulting fault separation",
+  "worked_points": {
+   "h_acc=300 (nominal)": 0.0,
+   "h_acc=3000": 11.0352,
+   "h_acc=300000": 99.3169,
+   "h_acc=600 (2x nominal)": 1.0
+  }
+ },
+ "in_same_bounded_space_as_existing": true,
+ "proposed_h_acc_evidence_magnitude": {
+  "clean_phase": {
+   "max": 1.0,
+   "mean": 1.0,
+   "min": 1.0,
+   "n": 3163,
+   "p50": 1.0,
+   "p95": 1.0
+  },
+  "jam_fix_invalid": {
+   "max": 1.0,
+   "mean": 0.102,
+   "min": 0.0,
+   "n": 2487,
+   "p50": 0.0,
+   "p95": 1.0
+  },
+  "jam_fix_valid": {
+   "max": 1.0,
+   "mean": 0.0034,
+   "min": 0.0,
+   "n": 4513,
+   "p50": 0.0,
+   "p95": 0.0001
+  }
+ },
+ "units": "all four distributions below are consistency scores in (0,1]; higher means MORE consistent, so a fault drives the score DOWN",
+ "why": "a contribution reported in millimetres must not dominate the score by unit choice; the Stage 0.5 MAD-floor form is withdrawn",
+ "withdrawn_transform": {
+  "defect": "clean SITL h_acc is constant so MAD is 0; the floor is an arbitrary 1000x gain and would let the research arm win on scaling rather than information",
+  "form": "z = (log(h_acc+1) - median_clean) / max(MAD_clean, 1e-3)"
+ }
+}
