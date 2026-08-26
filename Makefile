@@ -330,10 +330,13 @@ paper-audit:
 # result.
 #
 # THESE TARGETS ARE EXPECTED TO EXIT NON-ZERO TODAY, and that is the point:
-# evidence-coverage reports four starved PX4 relations (altitude_baro,
-# power_thrust, temp_bias_drift, vibration_prop_freq), whose single shared
-# cause is measured and scoped in research/v1_1/PX4_LINK_RATE_FINDING.md and
-# deliberately not yet fixed. Do NOT append `|| true` to make the lane green:
+# evidence-coverage reports four PX4 relations STARVED_BY_TRANSPORT
+# (altitude_baro, power_thrust, temp_bias_drift, vibration_prop_freq), whose
+# single shared cause is measured and scoped in
+# research/v1_1/PX4_LINK_RATE_FINDING.md and deliberately not yet fixed. That
+# verdict means the passive shadow LINK under-delivered against the freshness
+# contract -- not that PX4 lacks the channels, and not that the declared rate
+# is wrong. Do NOT append `|| true` to make the lane green:
 # a guard that cannot report is not a guard. The same defect class is already
 # guarded for pytest steps in the workflows by
 # tests/test_ci_env.py::test_no_pytest_invocation_swallows_its_own_result;

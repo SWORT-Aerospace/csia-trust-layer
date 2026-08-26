@@ -115,6 +115,6 @@ def test_a_missing_endpoint_still_reads_as_structural():
 def test_the_aliasing_ceiling_stays_below_half_the_tick_rate(ledger):
     """Arrivals are counted once per tick, so nothing above this is measurable.
 
-    Nine false RATE_MISDECLARED findings came from testifying above it.
+    Nine false rate findings came from testifying above it.
     """
     assert ledger.MEASURABLE_CEILING_HZ < ledger.TICK_HZ / 2.0

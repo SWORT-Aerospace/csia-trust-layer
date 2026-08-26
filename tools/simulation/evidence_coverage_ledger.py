@@ -1,14 +1,14 @@
 """Why is each evidence relation live or dark on this platform? One ledger.
 
-THE RECURRING COST THIS EXISTS TO END. Three times now the declared rate of a
-channel has failed to describe what arrived, and each time it silently starved
-evidence rather than failing:
+THE RECURRING COST THIS EXISTS TO END. Repeatedly, a channel has been DELIVERED
+to the diagnostic consumer more slowly than the freshness contract assumes, and
+each time it silently starved evidence rather than failing:
 
-    esc.current   declared 10 Hz, measured 0.97
-    mag.field_ut  declared 50 Hz, measured 13.9
-    baro.altitude declared 10 Hz, measured 1.00   <- found by this line of work
+    esc.current   declared 10 Hz, delivered 0.97
+    mag.field_ut  declared 50 Hz, delivered 13.9
+    baro.altitude declared 10 Hz, delivered 1.00   <- found by this line of work
 
-Whenever the declaration is FASTER than the arrivals, the derived `max_age`
+Whenever delivery is SLOWER than the declaration, the derived `max_age`
 (MAX_AGE_MARGIN / rate) is shorter than the real inter-arrival, so the channel
 spends part of every period STALE, the NODE stops being fresh, and every
 relation with that node as an endpoint quietly stops carrying weight. The layer
@@ -17,26 +17,39 @@ broken. The consequence only appears if someone thinks to measure which
 relations were actually live -- which has, until now, happened by hand and
 after the fact.
 
-The baro case is the sharpest, and it is NOT a wrong number in the contract.
-Declared 10 Hz gives max_age 0.50 s against a measured 1.00 s inter-arrival, so
-`baro.altitude` was STALE on 505 of 1001 ticks, the baro node was fresh on
-8.2 %, and `altitude_baro` -- the only baro/GNSS cross-check -- carried weight
-on 8.1 % of PX4 ticks against 99.9 % on ArduPilot.
+THE BARO CASE IS THE SHARPEST, AND IT IS NOT A MISDECLARED RATE. An earlier
+version of this file called it RATE_MISDECLARED. A controlled link-rate
+experiment falsified that reading, and the label must not be propagated.
 
-The declaration and the flight logs are BOTH correct, because on PX4 the rate
-is a property of the LINK rather than of the platform: it is set by whoever
-last transmitted SET_MESSAGE_INTERVAL on that link. `qualification_px4.json`
-measured 9.825 Hz on a link that requested 10 Hz; CSIA binds a passive
-companion link and may not transmit, so nothing ever raises its rates and the
-same channel arrives at 1.00 Hz. Measured three ways in one simulator run by
-`tools/simulation/px4_link_rate_probe.py`; see
-`research/v1_1/results/PX4_LINK_RATE_PROBE.json`.
+What is established:
 
-So a flagged rate here means "the declaration does not describe the link CSIA
-bound", which is a real defect with real starvation downstream -- but the fix
-is to drive that link, not to edit the number. Editing the number was tried
-first and was wrong: it would have replaced one link-conditional constant with
-another and broken the qualification probe, which measures the other link.
+  * the qualification/driven connection explicitly REQUESTS the stream, and it
+    is delivered at ~10 Hz;
+  * the passive shadow connection requests nothing and receives a much lower
+    default delivery rate;
+  * PX4 delivery is therefore LINK/CONFIGURATION-CONDITIONED;
+  * the passive shadow consumer was evidence-starved relative to the freshness
+    contract.
+
+What is NOT established, and must never be written:
+
+  * that PX4 intrinsically supplies this channel at 1 Hz;
+  * that the declared 10 Hz is universally wrong.
+
+Declared 10 Hz gives max_age 0.50 s against a 1.00 s delivered interval on the
+passive link, so `baro.altitude` was STALE on 505 of 1001 ticks, the baro node
+was fresh on 8.2 %, and `altitude_baro` -- the only baro/GNSS cross-check --
+carried weight on 8.1 % of PX4 ticks against 99.9 % on ArduPilot. Measured
+three ways in one simulator run by `tools/simulation/px4_link_rate_probe.py`;
+see `research/v1_1/results/PX4_LINK_RATE_PROBE.json` and
+`research/v1_1/PX4_LINK_RATE_FINDING.md`.
+
+So STARVED_BY_TRANSPORT means "this consumer's LINK did not deliver fast enough
+for the freshness contract", which is a real defect with real starvation
+downstream -- but the fix is to drive that link, not to edit the number.
+Editing the number was tried first and was wrong: it would have replaced one
+link-conditional constant with another and broken the qualification probe,
+which measures a differently configured link.
 
 WHAT THIS JOINS, in one table per platform, per relation:
 
@@ -48,13 +61,26 @@ WHAT THIS JOINS, in one table per platform, per relation:
   channel usable    share of ticks the channel was usable
   node fresh        share of ticks the node was fresh
   relation live     share of ticks the relation carried non-zero gate weight
-  verdict           LIVE / DARK_STRUCTURAL / DARK_STARVED / RATE_MISDECLARED
+  verdict           LIVE / DARK_STRUCTURAL / DARK_BY_GATE / DARK_STARVED /
+                    STARVED_BY_TRANSPORT
 
-DARK_STRUCTURAL and DARK_STARVED are different findings and must not be
-confused. Structural means the platform cannot produce the evidence at all --
-PX4 has no second IMU, so `redundant_imu` can never be live, and that is a
-declared platform fact. Starved means the platform DOES produce it and the
-harness threw it away, which is a defect. Only measurement separates them.
+THE DARK VERDICTS ARE THREE DIFFERENT FINDINGS AND MUST NOT BE BLURRED. Only
+measurement separates them, and they have three different remedies:
+
+  DARK_STRUCTURAL       the platform cannot produce the evidence at all. PX4
+                        SIH publishes no second IMU, so `redundant_imu` can
+                        never be live. Nothing fixes this but different
+                        hardware.
+  STARVED_BY_TRANSPORT  the platform produces it and the LINK did not deliver
+                        it fast enough for the freshness contract. Fixed by
+                        driving the link.
+  DARK_BY_GATE          the platform produced the inputs and the gate zeroed
+                        the weight. `heading_course` needs 2.0 m/s and every
+                        committed flight is a hover. Fixed by flying a profile
+                        that enters the operating regime.
+
+Reporting any of the last two as DARK_STRUCTURAL claims a platform limitation
+that the evidence does not support.
 
 Reads committed artifacts and frozen source. Runs nothing, changes nothing.
 
@@ -94,11 +120,10 @@ LIVE = 1e-6
 # imu1, baro, gps, mag, battery and vibration all "measure" 12.5 Hz against
 # declared rates of 5 to 25. They are not all 12.5 Hz; they are all aliased.
 #
-# An earlier version of this file reported nine RATE_MISDECLARED findings on
-# that basis. Every one above the ceiling was an artifact of the instrument.
-# Rates at or above the ceiling are now UNMEASURABLE_AT_TICK_RATE and are
-# never called misdeclared -- a measurement that cannot resolve a quantity
-# must not testify about it.
+# An earlier version of this file reported nine rate findings on that basis.
+# Every one above the ceiling was an artifact of the instrument. Rates at or
+# above the ceiling are now UNMEASURABLE_AT_TICK_RATE and are never flagged --
+# a measurement that cannot resolve a quantity must not testify about it.
 TICK_HZ = 25.0
 MEASURABLE_CEILING_HZ = 0.8 * (TICK_HZ / 2.0)      # 10 Hz
 # Which node each relation needs alive. Read off the edge construction in
@@ -282,7 +307,7 @@ def main() -> int:
         ROOT, "research", "v1_1", "results", "EVIDENCE_COVERAGE_LEDGER.json"))
     ap.add_argument("--rate-tolerance", type=float, default=0.5,
                     help="relative gap between declared and measured rate "
-                         "that counts as a misdeclaration")
+                         "that counts as transport starvation")
     args = ap.parse_args()
 
     gates = gate_expressions()
@@ -325,7 +350,7 @@ def main() -> int:
             live = a["rel_live"].get(rel, 0)
             share = live / a["ticks"] if a["ticks"] else 0.0
             ep_info = {}
-            starved, misdeclared = [], []
+            starved, transport_starved = [], []
             for node in eps:
                 ch = NODE_CHANNEL.get(node)
                 dec = (declared.get(ch) or {}).get(plat)
@@ -355,7 +380,7 @@ def main() -> int:
                         and (1.0 / meas) > max_age):
                     starved.append(node)
                 if bad_rate:
-                    misdeclared.append(node)
+                    transport_starved.append(node)
                 ep_info[node] = {
                     "channel": ch, "declared_hz": dec,
                     "measured_hz": None if meas is None else round(meas, 3),
@@ -364,8 +389,8 @@ def main() -> int:
                     "channel_usable_share": round(usable, 4),
                     "node_stale_timeout_s": STALE_TIMEOUT_S.get(node),
                     "rate_measurable": not aliased,
-                    "rate_overdeclared": bool(over),
-                    "rate_underdeclared_conservative": bool(under),
+                    "declared_exceeds_delivered": bool(over),
+                    "delivered_exceeds_declared_conservative": bool(under),
                     "rate_note": ("UNMEASURABLE_AT_TICK_RATE: arrivals are "
                                   "counted once per tick, so any rate at or "
                                   "above ~half the tick rate saturates"
@@ -387,8 +412,8 @@ def main() -> int:
                 ep_info[n]["channel_usable_share"] > 0.5 for n in eps)
             if share > 0.5:
                 verdict = "LIVE"
-            elif misdeclared:
-                verdict = "RATE_MISDECLARED"
+            elif transport_starved:
+                verdict = "STARVED_BY_TRANSPORT"
             elif starved:
                 verdict = "DARK_STARVED"
             elif share <= LIVE and endpoints_all_usable:
@@ -401,8 +426,9 @@ def main() -> int:
                          "endpoints": ep_info,
                          "relation_live_share": round(share, 4),
                          "verdict": verdict}
-            if verdict in ("RATE_MISDECLARED", "DARK_STARVED"):
-                findings.append((plat, rel, verdict, misdeclared or starved))
+            if verdict in ("STARVED_BY_TRANSPORT", "DARK_STARVED"):
+                findings.append((plat, rel, verdict,
+                                 transport_starved or starved))
         ledger[plat] = {"flights": a["flights"], "ticks": a["ticks"],
                         "relations": rows}
 
@@ -422,7 +448,7 @@ def main() -> int:
         for plat, rel, verdict, nodes in findings:
             print(f"    {plat:10s} {rel:24s} {verdict:17s} via {nodes}")
     else:
-        print("\n  no starved or misdeclared endpoints found")
+        print("\n  no transport-starved endpoints found")
 
     out = {"max_age_margin": MAX_AGE_MARGIN,
            "rate_tolerance": args.rate_tolerance,
@@ -444,14 +470,26 @@ def main() -> int:
                "DARK_STARVED": "endpoint arrives less often than its derived "
                                "max_age allows, so it is stale part of every "
                                "period -- a DEFECT, not a platform fact",
-               "RATE_MISDECLARED": "the declared rate is faster than what "
-                                   "arrived, beyond tolerance. On PX4 this "
-                                   "means the declaration describes a link "
-                                   "that REQUESTED intervals while CSIA bound "
-                                   "a passive one -- the number is not wrong, "
-                                   "it describes the wrong link, and the fix "
-                                   "is to drive CSIA's link rather than to "
-                                   "edit the contract"},
+               "STARVED_BY_TRANSPORT": "this CONSUMER's LINK delivered the "
+                                      "channel more slowly than the freshness "
+                                      "contract assumes, beyond tolerance. On "
+                                      "PX4 the driven qualification link "
+                                      "REQUESTS the stream and receives "
+                                      "~10 Hz while the passive shadow link "
+                                      "requests nothing and receives the "
+                                      "lower default, so delivery is "
+                                      "link/configuration-conditioned. This "
+                                      "is NOT evidence that the platform "
+                                      "intrinsically supplies the channel at "
+                                      "the low rate, and NOT evidence that "
+                                      "the declared rate is universally "
+                                      "wrong. The fix is to drive the "
+                                      "consumer's link, not to edit the "
+                                      "contract",
+               "SUPERSEDED_LABEL": "an earlier artifact called this "
+                                   "RATE_MISDECLARED. A controlled link-rate "
+                                   "experiment falsified that reading; do not "
+                                   "propagate the old label"},
            "rate_is_a_link_property": {
                "measured_by": "tools/simulation/px4_link_rate_probe.py",
                "artifact": "research/v1_1/results/PX4_LINK_RATE_PROBE.json",

@@ -1,5 +1,16 @@
 # PX4 stream rates are a property of the link, not of the platform
 
+> **SUPERSESSION.** An earlier artifact classified the PX4 `altitude_baro`
+> starvation as `RATE_MISDECLARED`. **That label is falsified and must not be
+> propagated.** The controlled link-rate experiment below established that the
+> driven qualification connection explicitly requests the stream at ~10 Hz while
+> the passive shadow connection receives a much lower default, so delivery is
+> **link/configuration-conditioned**. The passive shadow consumer was
+> evidence-starved *relative to the freshness contract*. This is **not** evidence
+> that PX4 intrinsically supplies the channel at 1 Hz, and **not** evidence that
+> the declared 10 Hz is universally wrong.
+> The current label is **`STARVED_BY_TRANSPORT`** (link condition).
+
 **Status:** open defect, cause identified and measured, fix scoped but NOT applied.
 **Affects:** PX4 shadow flights only. No committed scientific result depends on it
 (Mechanism B on PX4 is `INAPPLICABLE` for unrelated reasons, recorded in

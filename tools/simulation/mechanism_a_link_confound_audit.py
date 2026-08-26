@@ -1,12 +1,21 @@
 """Did the PX4 passive-link starvation confound the Mechanism A result?
 
-THE QUESTION. `research/v1_1/PX4_LINK_RATE_FINDING.md` established that CSIA's
-PX4 shadow link is never driven, so `baro.altitude` arrives at 1.00 Hz against a
-declared 10 Hz and `altitude_baro` carries weight on 8.1 % of ticks. Mechanism A
-claims `SOI(gps_fault) = 1.0` -- fix loss removes the evidence required to
-attribute `gps_fault`. If part of that evidence was ALREADY missing because the
-harness starved it, the headline could be an artifact of the harness rather than
-a property of the fault.
+THE QUESTION. `research/v1_1/PX4_LINK_RATE_FINDING.md` established that PX4
+stream delivery is LINK/CONFIGURATION-CONDITIONED: the driven qualification
+connection requests the stream and receives ~10 Hz, while CSIA's passive shadow
+connection requests nothing and receives the lower default. Against a freshness
+contract derived from 10 Hz, that left `baro.altitude` delivered at ~1 Hz to the
+shadow consumer and `altitude_baro` carrying weight on 8.1 % of ticks.
+
+(This is NOT a claim that PX4 intrinsically supplies the channel at 1 Hz, nor
+that the declared 10 Hz is universally wrong. An earlier artifact labelled it
+RATE_MISDECLARED; a controlled link-rate experiment falsified that reading and
+the label is superseded by STARVED_BY_TRANSPORT.)
+
+Mechanism A claims `SOI(gps_fault) = 1.0` -- fix loss removes the evidence
+required to attribute `gps_fault`. If part of that evidence was ALREADY missing
+because the transport starved it, the headline could be an artifact of the link
+configuration rather than a property of the fault.
 
 WHAT DECIDES IT, and it is structural rather than statistical. Every relation
 that feeds `gps_fault` is gated on `gvalid`, the GNSS-validity flag
@@ -23,11 +32,11 @@ instead of concluding.
 
 WHAT STARVATION DOES COST. It narrows the demonstration. On ArduPilot the fault
 removes three relations carrying weight; on PX4 it removes one, because the
-other three were already dark -- one starved by the harness, one structurally
-absent (SIH publishes no second IMU), one closed by the operating regime (every
-flight is a hover, and `heading_course` needs 2.0 m/s). A reader comparing the
-two platforms must be told that, and must not be told that PX4 "lacks" the
-evidence.
+other three were already dark -- one starved by the LINK CONDITION, one
+structurally absent (SIH publishes no second IMU), one closed by the operating
+regime (every flight is a hover, and `heading_course` needs 2.0 m/s). A reader
+comparing the two platforms must be told that, and must not be told that PX4
+"lacks" the evidence.
 
 Reads committed artifacts and frozen source. Runs nothing, re-flies nothing.
 
@@ -53,9 +62,10 @@ _ECL = os.path.join(ROOT, "tools", "simulation", "evidence_coverage_ledger.py")
 
 # The validity flag whose collapse IS the mechanism under test.
 VALIDITY_FLAG = "gvalid"
-# Verdicts that mean "the harness threw this evidence away", as opposed to the
-# platform not producing it or the flight profile not calling for it.
-STARVATION_VERDICTS = ("RATE_MISDECLARED", "DARK_STARVED")
+# Verdicts that mean "the TRANSPORT did not deliver this fast enough", as
+# opposed to the platform not producing it or the flight profile not calling
+# for it. STARVED_BY_TRANSPORT supersedes the falsified RATE_MISDECLARED.
+STARVATION_VERDICTS = ("STARVED_BY_TRANSPORT", "DARK_STARVED")
 
 
 def _load_ledger_module():
@@ -147,7 +157,7 @@ def audit_platform(platform, gates_by_relation, ledger):
                "structurally")
     elif not starved_before:
         conclusion = "UNAFFECTED"
-        why = ("no relation feeding gps_fault was dark from harness "
+        why = ("no relation feeding gps_fault was dark from transport "
                "starvation before the fault")
     else:
         live_before = len(rels) - len(dark_before)
@@ -159,9 +169,10 @@ def audit_platform(platform, gates_by_relation, ledger):
                f"by {live_before} of {len(rels)} relations, because "
                f"{len(dark_before)} were ALREADY dark before it: "
                + "; ".join(f"{v} = {k}" for k, v in sorted(by_cause.items()))
-               + f". {sorted(starved_before)} is dark from harness "
-                 f"starvation, so the demonstration is narrower than the "
-                 f"platform allows. It does not change the post-fault state: "
+               + f". {sorted(starved_before)} is dark from TRANSPORT "
+                 f"starvation on this consumer's link, so the demonstration is "
+                 f"narrower than the platform allows -- which is a statement "
+                 f"about the link configuration, not about PX4. It does not change the post-fault state: "
                  f"every relation feeding gps_fault is gated on "
                  f"{VALIDITY_FLAG!r}, so fix loss drives all of them to zero "
                  f"whether or not they were starved")
@@ -247,7 +258,8 @@ def main() -> int:
 
     verdicts = {p: r["conclusion"] for p, r in rows.items()}
     out = {
-        "question": "did the PX4 passive-link starvation confound Mechanism A?",
+        "question": "did the PX4 passive-link transport starvation confound "
+                    "Mechanism A?",
         "decides_it": (f"every relation feeding gps_fault is gated on "
                        f"{VALIDITY_FLAG!r}; fix loss sets it to zero, which "
                        f"multiplies every such gate to zero regardless of the "
@@ -258,7 +270,13 @@ def main() -> int:
         "cost_of_starvation": ("it narrows the demonstration rather than "
                                "invalidating it, and the narrowing must be "
                                "reported: a smaller PX4 pool is not evidence "
-                               "that PX4 lacks the relations"),
+                               "that PX4 lacks the relations, and not evidence "
+                               "about PX4 at all -- it is a property of the "
+                               "passive link configuration under test"),
+        "superseded_label": ("an earlier artifact called the baro case "
+                             "RATE_MISDECLARED; that reading was falsified by "
+                             "the link-rate experiment and must not be "
+                             "propagated"),
         "verdicts": verdicts,
         "platforms": rows,
     }
