@@ -1,0 +1,173 @@
+{
+  "artifact": "CLAIM_LEDGER",
+  "topic": "intermittent invalidity masking / validity-state persistence",
+  "date": "2026-08-26",
+  "rules": {
+    "evidence_kinds": {
+      "SOURCE_VERIFIED": "resolved from the working tree by source_to_gate_trace.py, which requires each cited pattern to occur exactly once",
+      "MEASURED_REAL": "measured by replaying a recorded ArduPilot SITL episode; N = 1 realisation",
+      "MEASURED_SYNTHETIC": "measured by replaying a programmed validity schedule over a real non-GPS telemetry carrier; deterministic, no sampling",
+      "DERIVED": "algebra from SOURCE_VERIFIED facts",
+      "NOT_ESTABLISHED": "no evidence gathered in this work package"
+    },
+    "no_claim_may_cite_a_number_this_repository_did_not_produce": true
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "claim": "On the deployed v1.1 aircraft-adapter path, a GPS observation with fix_type < 3 never sets the core GPS slot invalid. The hand-off writes chans[\"valid\"] = True unconditionally and slot.valid is written nowhere else.",
+      "status": "SUPPORTED",
+      "evidence": "SOURCE_VERIFIED",
+      "cites": ["H2_VALID_IS_HARDCODED_TRUE", "C6_APPLY_SETS_VALID", "A1_FORGET_POSITION", "A2_FORGET_VELOCITY"],
+      "artifact": "results/SOURCE_TO_GATE_TRACE.json"
+    },
+    {
+      "id": "C2",
+      "claim": "gvalid (online.py:482) contains no staleness term; fresh (online.py:603) contains the same predicate plus a timeout against last_t.",
+      "status": "SUPPORTED",
+      "evidence": "SOURCE_VERIFIED",
+      "cites": ["G1_GVALID_HAS_NO_STALENESS", "G2_FRESH_HAS_STALENESS"],
+      "artifact": "results/SOURCE_TO_GATE_TRACE.json"
+    },
+    {
+      "id": "C3",
+      "claim": "That asymmetry is currently unexploitable, because all four gvalid-carrying relations have gps as an endpoint and are therefore also multiplied by fresh[\"gps\"].",
+      "status": "SUPPORTED",
+      "evidence": "SOURCE_VERIFIED",
+      "note": "This CONTRADICTS the first reading of the source, in which gvalid's missing time term looked like the finding. It is a latent hazard, not the mechanism. Recorded so the stronger, wrong version is not repeated.",
+      "cites": ["G3_EDGES_MULTIPLIED_BY_FRESH", "G4_PHYS_MULTIPLIED_BY_FRESH"],
+      "artifact": "results/SOURCE_TO_GATE_TRACE.json"
+    },
+    {
+      "id": "H1",
+      "hypothesis": "Rejecting an invalid observation rather than propagating it as invalid state causes last-valid retention to MASK the invalidity from the downstream validity gate.",
+      "status": "SUPPORTED",
+      "evidence": ["SOURCE_VERIFIED", "MEASURED_REAL", "MEASURED_SYNTHETIC"],
+      "key_numbers": {
+        "M1_recording_post_onset_raw_observations": 2004,
+        "M1_recording_post_onset_observations_reporting_no_fix": 582,
+        "M1_recording_invalid_fraction": 0.290419,
+        "M1_recording_ticks_with_gvalid_zero": 0,
+        "M1_recording_ticks_with_effective_gate_closed": 0,
+        "M1_recording_masking_fraction": 1.0,
+        "indistinguishability_check_ticks": 1175,
+        "indistinguishability_check_fields": 13,
+        "indistinguishability_check_differing_cells": 0
+      },
+      "strongest_single_demonstration": {
+        "fixture": "P2_PERIODIC_INTERLEAVE at 50 Hz, synthetic validity schedule",
+        "invalid_message_density": 0.800114,
+        "masking_fraction": 1.0,
+        "gate_closed_seconds": 0.0,
+        "reading": "four of every five observations declare no fix, for 35 s, and the validity gate never closes once"
+      },
+      "artifacts": ["results/DIAGNOSTIC_CONSEQUENCES.json", "results/INDISTINGUISHABILITY_CHECK.json", "results/BOUNDARY_SWEEP_RESULTS.csv"]
+    },
+    {
+      "id": "H2",
+      "hypothesis": "Masking depends on the TEMPORAL ARRANGEMENT of invalid observations, not on their density.",
+      "status": "SUPPORTED",
+      "evidence": "MEASURED_SYNTHETIC",
+      "design": "three schedules invalidating the same number of messages (70, 72, 71 of 176) out of the same post-onset stream at the same rate; only the arrangement differs",
+      "key_numbers": {
+        "ONE_CONTIGUOUS_BURST": {"density": 0.397727, "max_accepted_gap_s": 14.2, "masking_fraction": 0.022857, "gate_closed_seconds": 13.68},
+        "CLUSTERED_4_IN_10": {"density": 0.409091, "max_accepted_gap_s": 1.0, "masking_fraction": 0.4, "gate_closed_seconds": 8.64},
+        "INTERLEAVED_2_IN_5": {"density": 0.403409, "max_accepted_gap_s": 0.6, "masking_fraction": 0.8, "gate_closed_seconds": 2.8}
+      },
+      "reading": "at constant density the masking fraction spans 0.023 to 0.800, a factor of 35",
+      "artifact": "results/ARRANGEMENT_AT_FIXED_DENSITY.csv"
+    },
+    {
+      "id": "H3",
+      "hypothesis": "The masking boundary is the staleness timeout applied to ACCEPTED samples: the gate closes iff the gap between consecutive accepted samples exceeds tau_gps = 0.5 s.",
+      "status": "SUPPORTED",
+      "evidence": ["DERIVED", "MEASURED_SYNTHETIC"],
+      "model": "G_gps(t) = 1[A non-empty before t] . 1[t - t_A(t) <= tau_gps], with A the set of ACCEPTED samples",
+      "validation": {
+        "runs": 26,
+        "observation_rates_hz": [5.0, 50.0],
+        "total_disagreeing_ticks": 6,
+        "disagreements_further_than_one_tick_from_a_transition": 0,
+        "max_distance_from_a_disagreement_to_the_nearest_transition_s": 0.0
+      },
+      "reading": "the model reproduces the implementation exactly except at transition instants, where the 0.04 s tick quantisation of last_t and the <= boundary are indistinguishable from it",
+      "artifacts": ["RETAINED_STATE_MODEL.md", "results/BOUNDARY_SWEEP_RESULTS.csv"]
+    },
+    {
+      "id": "H4",
+      "hypothesis": "The masking is caused by the DROP semantics specifically: a control that propagates invalidity instead removes it.",
+      "status": "SUPPORTED",
+      "evidence": "MEASURED_REAL",
+      "design": "one adapter class, one parameter. PROPAGATE_INVALID_HOLD emits the last accepted pos/vel with valid=False, so the only quantity that changes downstream is the validity flag.",
+      "key_numbers": {
+        "masking_fraction_DROP": 1.0,
+        "masking_fraction_PROPAGATE_INVALID_HOLD": 0.003623,
+        "ticks_where_the_gate_differs": 277,
+        "paired_post_onset_ticks": 999
+      },
+      "artifact": "results/DROP_VS_PROPAGATE_INVALID.csv"
+    },
+    {
+      "id": "H5",
+      "hypothesis": "IMPLIED BY THE FRAMING, NOT BY THE BRIEF, AND TESTED ANYWAY: masking the invalidity weakens fault detection.",
+      "status": "REFUTED on the available evidence",
+      "evidence": "MEASURED_REAL",
+      "key_numbers": {
+        "final_gps_fault_posterior_DROP": 0.892201,
+        "final_gps_fault_posterior_PROPAGATE_INVALID_HOLD": 0.722429,
+        "ticks_with_gps_fault_as_top_cause_DROP": 963,
+        "ticks_with_gps_fault_as_top_cause_PROPAGATE_INVALID_HOLD": 836,
+        "min_trust_gps_DROP": 0.197184,
+        "min_trust_gps_PROPAGATE_INVALID_HOLD": 0.234617,
+        "n_ticks": 999
+      },
+      "reading": "On the one real jamming episode available, the MASKING path detects the fault MORE strongly, because closing the gate also withdraws the physics evidence that was detecting it. Propagating invalidity makes the system abstain; abstention is not detection.",
+      "why_this_is_kept": "It runs against the direction the work package was framed in. Deleting it would leave a mechanism claim reading as a harm claim it does not support.",
+      "what_masking_actually_changes": {
+        "max_slot_age_with_open_gate_s_DROP": 0.36,
+        "max_slot_age_with_open_gate_s_PROPAGATE": 0.0,
+        "nominal_message_period_s": 0.02,
+        "reading": "an open gate vouched for a measurement up to 18 nominal periods old"
+      },
+      "artifact": "results/DIAGNOSTIC_CONSEQUENCES.json"
+    },
+    {
+      "id": "C4",
+      "claim": "The repository already contains BOTH semantics for the same raw condition, feeding the same frozen core: csia/runtime/plugins.py and csia/runtime/ulog_source.py propagate invalidity; csia/aircraft/adapters/ drops it.",
+      "status": "SUPPORTED",
+      "evidence": "SOURCE_VERIFIED",
+      "cites": ["X1_V1_MAVLINK_PROPAGATES_INVALID", "X2_V1_MAVLINK_INVALID_PREDICATE", "X4_ULOG_PROPAGATES_INVALID", "A1_FORGET_POSITION"],
+      "reading": "this is an inconsistency between committed ingest paths, independent of which semantics is preferable"
+    },
+    {
+      "id": "C5",
+      "claim": "The v1 live-MAVLink path's propagated invalid sample carries ZEROS, and _apply feeds the GPS step detector and the Holt historical predictor before any validity flag is consulted. So on that path a lost fix perturbs core filter state that outlives the invalid interval.",
+      "status": "SUPPORTED",
+      "evidence": "SOURCE_VERIFIED",
+      "cites": ["X3_V1_MAVLINK_ZERO_PAYLOAD", "S1_STEP_PEAK_UNCONDITIONAL", "S2_HIST_FED_UNCONDITIONAL", "S3_GPS_IN_HIST_CHANNELS"],
+      "not_claimed": "the magnitude of that perturbation was not measured on the v1 path itself; PROPAGATE_INVALID_ZERO reproduces the semantics on the v1.1 cadence, which is not the same experiment"
+    },
+    {
+      "id": "N1",
+      "claim": "NOVELTY",
+      "status": "NOT_ESTABLISHED",
+      "evidence": "NOT_ESTABLISHED",
+      "note": "No literature search was performed in this environment. Intermittent sensor faults, last-value-hold semantics, staleness watchdogs and the absence-versus-invalidity distinction are all long-standing topics. What this package establishes is a verified instance in a specific system, with an exact model and a measured boundary -- not that the phenomenon is new. See PRIOR_ART_SEARCH_TERMS.md."
+    }
+  ],
+  "explicitly_not_claimed": [
+    "that intermittent sensor faults are a new phenomenon",
+    "that last-valid-state retention is a new technique",
+    "that this behaviour is a vulnerability, an attack, or exploitable -- no adversary model was constructed and none is implied by a SITL jamming parameter",
+    "that DROP is worse than PROPAGATE: on the one real episode measured it detects the fault more strongly (H5)",
+    "that these numbers generalise beyond one recorded episode and one synthetic carrier",
+    "that any statistical inference was performed -- there is no sampling here, and no interval or p-value is reported anywhere in this package"
+  ],
+  "superseded_within_this_work_package": [
+    {
+      "was": "gvalid's missing staleness term is the mechanism, so the gate can never close",
+      "now": "every gvalid relation is also multiplied by fresh[\"gps\"], so the effective gate does close -- one timeout after the last ACCEPTED sample. The mechanism is which samples reset that clock (C3, H3).",
+      "how_it_was_caught": "resolving the four relations' endpoints from csia.trust_graph.EDGES instead of assuming them"
+    }
+  ]
+}

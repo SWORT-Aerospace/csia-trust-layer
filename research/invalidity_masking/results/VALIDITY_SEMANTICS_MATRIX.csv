@@ -1,0 +1,23 @@
+ingest_path,layer,raw_fact,what_that_layer_holds,distinguishable_from,cites
+v1_1_AIRCRAFT_ADAPTER,L1_PROTOCOL,OBSERVED_VALID,GPS_RAW_INT with fix_type >= 3,all three,P1_FIX_TYPE_READ
+v1_1_AIRCRAFT_ADAPTER,L1_PROTOCOL,OBSERVED_INVALID,GPS_RAW_INT with fix_type < 3,all three,P2_INVALID_PREDICATE
+v1_1_AIRCRAFT_ADAPTER,L1_PROTOCOL,NOT_OBSERVED,no GPS_RAW_INT on the link,all three,P1_FIX_TYPE_READ
+v1_1_AIRCRAFT_ADAPTER,L2_ADAPTER,OBSERVED_VALID,"gnss.position/velocity present in _latest, usable",all three,H3_GPS_CORE_MAP
+v1_1_AIRCRAFT_ADAPTER,L2_ADAPTER,OBSERVED_INVALID,channels DELETED from _latest; _sentinel_at records NO_3D_FIX and sentinel_counts increments,all three -- the adapter DOES keep the distinction,A1_FORGET_POSITION;A3_REJECT_REASON
+v1_1_AIRCRAFT_ADAPTER,L2_ADAPTER,NOT_OBSERVED,channels absent from _latest with no sentinel record; ages out to MissingReason.STALE or NOT_RECEIVED,all three,H1_ALL_CHANNELS_REQUIRED
+v1_1_AIRCRAFT_ADAPTER,L3_CORE_HANDOFF,OBSERVED_VALID,"one core sample ('gps', t, {..., valid: True})",valid vs the other two,H2_VALID_IS_HARDCODED_TRUE
+v1_1_AIRCRAFT_ADAPTER,L3_CORE_HANDOFF,OBSERVED_INVALID,NO core sample is emitted,NOT distinguishable from NOT_OBSERVED,H1_ALL_CHANNELS_REQUIRED;H3_GPS_CORE_MAP
+v1_1_AIRCRAFT_ADAPTER,L3_CORE_HANDOFF,NOT_OBSERVED,NO core sample is emitted,NOT distinguishable from OBSERVED_INVALID,H1_ALL_CHANNELS_REQUIRED
+v1_1_AIRCRAFT_ADAPTER,L4_CORE_SLOT,OBSERVED_VALID,"valid=True, seen=True, last_t=tick time, latest updated",valid vs the other two,C4_APPLY_SETS_SEEN;C5_APPLY_SETS_LAST_T;C6_APPLY_SETS_VALID
+v1_1_AIRCRAFT_ADAPTER,L4_CORE_SLOT,OBSERVED_INVALID,"UNCHANGED: valid stays True, last_t stays at the last accepted sample",NOT distinguishable from NOT_OBSERVED,C6_APPLY_SETS_VALID
+v1_1_AIRCRAFT_ADAPTER,L4_CORE_SLOT,NOT_OBSERVED,"UNCHANGED: valid stays True, last_t stays at the last accepted sample",NOT distinguishable from OBSERVED_INVALID,C6_APPLY_SETS_VALID
+v1_1_AIRCRAFT_ADAPTER,L5_GATE,OBSERVED_VALID,"gvalid=1, fresh=1",valid vs a LONG absence only,G1_GVALID_HAS_NO_STALENESS;G2_FRESH_HAS_STALENESS
+v1_1_AIRCRAFT_ADAPTER,L5_GATE,OBSERVED_INVALID,gvalid=1 always; fresh=1 until 0.5 s after the last ACCEPTED sample,"NOT distinguishable from NOT_OBSERVED, and not distinguishable from OBSERVED_VALID at all within the timeout",G1_GVALID_HAS_NO_STALENESS;G2_FRESH_HAS_STALENESS;G5_GPS_TIMEOUT_VALUE
+v1_1_AIRCRAFT_ADAPTER,L5_GATE,NOT_OBSERVED,gvalid=1 always; fresh=1 until 0.5 s after the last ACCEPTED sample,NOT distinguishable from OBSERVED_INVALID,G1_GVALID_HAS_NO_STALENESS;G2_FRESH_HAS_STALENESS
+v1_MAVLINK_PLUGIN,L3_CORE_HANDOFF,OBSERVED_VALID,one core sample with valid=True,all three,X2_V1_MAVLINK_INVALID_PREDICATE
+v1_MAVLINK_PLUGIN,L3_CORE_HANDOFF,OBSERVED_INVALID,one core sample with valid=False and ZERO pos/vel,all three,X1_V1_MAVLINK_PROPAGATES_INVALID;X3_V1_MAVLINK_ZERO_PAYLOAD
+v1_MAVLINK_PLUGIN,L3_CORE_HANDOFF,NOT_OBSERVED,no core sample,all three,X1_V1_MAVLINK_PROPAGATES_INVALID
+v1_MAVLINK_PLUGIN,L4_CORE_SLOT,OBSERVED_INVALID,"valid=False, last_t ADVANCES, and the step detector plus the Holt filters are fed the zeros before any validity gate is consulted","all three, but at the cost of injecting a fictitious position step",C6_APPLY_SETS_VALID;S1_STEP_PEAK_UNCONDITIONAL;S2_HIST_FED_UNCONDITIONAL;S3_GPS_IN_HIST_CHANNELS
+v1_MAVLINK_PLUGIN,L5_GATE,OBSERVED_INVALID,gvalid=0 on the NEXT tick; no timeout involved,all three,G1_GVALID_HAS_NO_STALENESS
+v1_ULOG_SOURCE,L3_CORE_HANDOFF,OBSERVED_INVALID,one core sample with valid = (fix_type >= 3) and the REAL pos/vel,all three,X4_ULOG_PROPAGATES_INVALID
+v1_ULOG_SOURCE,L5_GATE,OBSERVED_INVALID,gvalid=0 on the NEXT tick; no timeout involved,all three,G1_GVALID_HAS_NO_STALENESS;C6_APPLY_SETS_VALID

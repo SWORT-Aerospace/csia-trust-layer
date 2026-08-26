@@ -389,3 +389,17 @@ px4-link-rate:
 bib-verify:
 	$(PY) tools/publication/verify_bibliography.py \
 	  --json research/v1_1/results/bibliography_verification.json
+
+# Intermittent invalidity masking. NO SIMULATOR: the source audit is static,
+# and every measurement is a deterministic replay of a recording already in the
+# tree (research/maer/.../NON_SCORED_TEST_FIXTURE_M1.json.gz). About a minute,
+# dominated by the 26-run boundary sweep.
+.PHONY: invalidity-trace
+invalidity-trace:
+	$(PY) research/invalidity_masking/source_to_gate_trace.py
+
+.PHONY: invalidity-masking
+invalidity-masking: invalidity-trace
+	$(PY) research/invalidity_masking/validity_semantics_matrix.py
+	$(PY) research/invalidity_masking/invalid_message_gate_trace.py
+	$(PY) research/invalidity_masking/boundary_sweep.py
