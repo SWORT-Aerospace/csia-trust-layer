@@ -8,14 +8,31 @@ each time it silently starved evidence rather than failing:
     mag.field_ut  declared 50 Hz, delivered 13.9
     baro.altitude declared 10 Hz, delivered 1.00   <- found by this line of work
 
-Whenever delivery is SLOWER than the declaration, the derived `max_age`
-(MAX_AGE_MARGIN / rate) is shorter than the real inter-arrival, so the channel
-spends part of every period STALE, the NODE stops being fresh, and every
-relation with that node as an endpoint quietly stops carrying weight. The layer
-does not complain: absence of evidence is handled correctly, so nothing looks
-broken. The consequence only appears if someone thinks to measure which
-relations were actually live -- which has, until now, happened by hand and
-after the fact.
+THERE ARE TWO FRESHNESS GATES IN SERIES, WITH DIFFERENT BUDGETS, AND THE
+SECOND ONE USUALLY BINDS. This was reported for a while as though `max_age`
+alone were the mechanism. It is not:
+
+  1. CHANNEL   max_age = MAX_AGE_MARGIN / declared_rate, so the declaration
+               buys the budget. For baro at 10 Hz that is 0.50 s.
+  2. NODE      STALE_TIMEOUT_S[node] in the frozen runtime (online.py:603),
+               a FIXED CONSTANT that no declaration feeds. For baro it is
+               0.10 s -- five times stricter than the budget the declaration
+               bought.
+
+A relation's weight is `gate * fresh(endpoint_a) * fresh(endpoint_b)`
+(online.py:610), so it needs the NODES, not merely usable channels. Measured on
+the PX4 shadow corpus, baro delivered at ~1 Hz: channel usable on 0.4949 of
+ticks, node fresh on only 0.0959, `altitude_baro` live on 0.0786. The channel
+gate explains a factor of two; the node gate explains the rest.
+
+Both follow from the same root cause -- delivery an order of magnitude below
+the declaration -- so the diagnosis and the fix are unchanged. But a reader
+told only about `max_age` would predict ~50 % availability and see 8 %.
+
+The layer does not complain about any of it: absence of evidence is handled
+correctly, so nothing looks broken. The consequence only appears if someone
+thinks to measure which relations were actually live -- which has, until now,
+happened by hand and after the fact.
 
 THE BARO CASE IS THE SHARPEST, AND IT IS NOT A MISDECLARED RATE. An earlier
 version of this file called it RATE_MISDECLARED. A controlled link-rate
@@ -36,10 +53,10 @@ What is NOT established, and must never be written:
   * that PX4 intrinsically supplies this channel at 1 Hz;
   * that the declared 10 Hz is universally wrong.
 
-Declared 10 Hz gives max_age 0.50 s against a 1.00 s delivered interval on the
-passive link, so `baro.altitude` was STALE on 505 of 1001 ticks, the baro node
-was fresh on 8.2 %, and `altitude_baro` -- the only baro/GNSS cross-check --
-carried weight on 8.1 % of PX4 ticks against 99.9 % on ArduPilot. Measured
+On the passive link `baro.altitude` was delivered at ~1 Hz, the baro node was
+fresh on ~9.6 % of ticks, and `altitude_baro` -- the only baro/GNSS
+cross-check -- carried weight on ~8 % of PX4 ticks against 99.7 % on
+ArduPilot. Measured
 three ways in one simulator run by `tools/simulation/px4_link_rate_probe.py`;
 see `research/v1_1/results/PX4_LINK_RATE_PROBE.json` and
 `research/v1_1/PX4_LINK_RATE_FINDING.md`.
@@ -58,8 +75,10 @@ WHAT THIS JOINS, in one table per platform, per relation:
   endpoints         which nodes the relation needs alive
   declared rate     what the contract says each endpoint's channel publishes at
   measured rate     what it actually published, counted from flight logs
-  channel usable    share of ticks the channel was usable
-  node fresh        share of ticks the node was fresh
+  channel usable    share of ticks the channel was usable (channel max_age)
+  node fresh        share of ticks the node was fresh (STALE_TIMEOUT_S), which
+                    is what the relation actually requires
+  binding gate      which of the two budgets is the stricter one here
   relation live     share of ticks the relation carried non-zero gate weight
   verdict           LIVE / DARK_STRUCTURAL / DARK_BY_GATE / DARK_STARVED /
                     STARVED_BY_TRANSPORT
@@ -265,6 +284,7 @@ def measure(result):
     if not fid or not ld:
         return None
     chan_usable, chan_arrivals, prev_age = {}, {}, {}
+    node_fresh = {}
     rel_live, ticks = {}, 0
     for path in sorted(glob.glob(os.path.join(ROOT, ld, "*.jsonl"))):
         if fid not in os.path.basename(path):
@@ -279,7 +299,7 @@ def measure(result):
                     continue
                 ticks += 1
                 chans = (rec.get("canonical") or {}).get("channels") or {}
-                for name in set(NODE_CHANNEL.values()):
+                for node, name in NODE_CHANNEL.items():
                     cv = chans.get(name) or {}
                     if cv.get("usable"):
                         chan_usable[name] = chan_usable.get(name, 0) + 1
@@ -291,6 +311,15 @@ def measure(result):
                                 chan_arrivals[name] = \
                                     chan_arrivals.get(name, 0) + 1
                             prev_age[name] = a
+                            # THE SECOND FRESHNESS GATE, and the one that
+                            # actually binds. online.py:603 recomputes
+                            # freshness against STALE_TIMEOUT_S, a fixed
+                            # runtime constant that no declaration feeds --
+                            # 0.1 s for baro against the 0.5 s the declared
+                            # rate buys. A channel can be usable and its NODE
+                            # still stale, and the relation needs the node.
+                            if a <= STALE_TIMEOUT_S.get(node, float("inf")):
+                                node_fresh[node] = node_fresh.get(node, 0) + 1
                 for rel, val in (rec.get("gates") or {}).items():
                     if (isinstance(val, (list, tuple)) and len(val) > 1
                             and float(val[1]) > LIVE):
@@ -298,6 +327,7 @@ def measure(result):
     dur = None
     return {"ticks": ticks, "chan_usable": chan_usable,
             "chan_arrivals": chan_arrivals, "rel_live": rel_live,
+            "node_fresh": node_fresh,
             "duration": result.get("seconds") or dur}
 
 
@@ -327,12 +357,15 @@ def main() -> int:
                 continue
             a = agg.setdefault(plat, {"ticks": 0, "dur": 0.0, "flights": 0,
                                       "chan_usable": {}, "arrivals": {},
+                                      "node_fresh": {},
                                       "rel_live": {}})
             a["ticks"] += m["ticks"]
             a["dur"] += float(m["duration"] or 0)
             a["flights"] += 1
             for k, v in m["chan_usable"].items():
                 a["chan_usable"][k] = a["chan_usable"].get(k, 0) + v
+            for k, v in m["node_fresh"].items():
+                a["node_fresh"][k] = a["node_fresh"].get(k, 0) + v
             for k, v in m["chan_arrivals"].items():
                 a["arrivals"][k] = a["arrivals"].get(k, 0) + v
             for k, v in m["rel_live"].items():
@@ -387,7 +420,15 @@ def main() -> int:
                     "derived_max_age_s": (None if max_age is None
                                           else round(max_age, 4)),
                     "channel_usable_share": round(usable, 4),
+                    "node_fresh_share": round(
+                        a["node_fresh"].get(node, 0) / a["ticks"], 4)
+                    if a["ticks"] else None,
                     "node_stale_timeout_s": STALE_TIMEOUT_S.get(node),
+                    "binding_gate": (
+                        "node_stale_timeout" if (
+                            dec and STALE_TIMEOUT_S.get(node) is not None
+                            and STALE_TIMEOUT_S[node] < (MAX_AGE_MARGIN / dec))
+                        else "channel_max_age"),
                     "rate_measurable": not aliased,
                     "declared_exceeds_delivered": bool(over),
                     "delivered_exceeds_declared_conservative": bool(under),

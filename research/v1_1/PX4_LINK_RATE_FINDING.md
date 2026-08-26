@@ -28,19 +28,36 @@ and both are correct:
 
 `docs/simulation/CHANNEL_SEMANTICS.yaml` declares `producer_px4: rate_hz: 10`.
 
-## 2. Why this matters downstream
+## 2. Why this matters downstream — two gates, not one
 
-`max_age` is derived from the declaration, not measured:
+Evidence availability is gated **twice**, with different budgets, and the second
+gate is the one that binds. An earlier version of this document described only
+the first.
 
-    max_age = MAX_AGE_MARGIN / declared_rate_hz = 5.0 / 10 = 0.50 s
+| # | gate | budget for baro | where it comes from |
+|---|---|---|---|
+| 1 | channel `max_age` | `MAX_AGE_MARGIN / declared_rate` = 5.0/10 = **0.50 s** | bought by the declared rate |
+| 2 | node `STALE_TIMEOUT_S['baro']` | **0.10 s** | a fixed constant in the frozen runtime (`online.py:603`) that **no declaration feeds** |
 
-A channel that actually arrives every 1.00 s is therefore STALE for half of every
-period. Measured consequences, from the committed flight logs:
+A relation's weight is `gate * fresh(endpoint_a) * fresh(endpoint_b)`
+(`online.py:610`), so it requires the **nodes**, not merely usable channels.
+Measured on the PX4 shadow corpus with baro delivered at ~1 Hz:
 
-- `baro.altitude` usable on a minority of ticks; the `baro` node fresh on
-  **82 of 1001 ticks (8.2 %)**
-- `altitude_baro` — the only baro/GNSS cross-check — carried non-zero gate weight
-  on **8.1 %** of PX4 ticks, against **99.9 %** on ArduPilot
+| quantity | PX4 | ArduPilot |
+|---|---|---|
+| `baro.altitude` channel usable | 0.4943 | 0.9992 |
+| `baro` **node fresh** | **0.0967** | 0.9992 |
+| `altitude_baro` relation live | 0.0812 | 0.9984 |
+
+The channel gate explains a factor of about two. The node gate explains the
+rest. Both follow from the same root cause — delivery an order of magnitude
+below the declaration — so the diagnosis and the fix are unchanged, but an
+account mentioning only `max_age` predicts ~50 % availability where the
+measurement shows ~8 %.
+
+This is also a design implication: the channel contract associates a rate with
+`(channel, platform)`, and there is a **second** freshness budget at the node
+layer that the contract does not mention and no declaration can influence.
 
 Nothing fails or warns. Absence of evidence is handled correctly by design, so a
 starved relation is indistinguishable from a relation the platform cannot produce

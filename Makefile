@@ -345,7 +345,8 @@ paper-audit:
 # Each is its own target so a failure names itself instead of hiding behind
 # whichever line ran first. `make -k evidence-audit` runs them all.
 .PHONY: evidence-availability injection-effectiveness provenance-backfill \
-        evidence-coverage mechanism-a-confound evidence-audit
+        evidence-coverage mechanism-a-confound qualification-audit \
+        evidence-audit
 evidence-availability:
 	$(PY) tools/simulation/evidence_availability.py
 
@@ -363,8 +364,14 @@ evidence-coverage:
 mechanism-a-confound:
 	$(PY) tools/simulation/mechanism_a_link_confound_audit.py
 
+# Resolves every current-stack scalar from the artifact that produced it, at
+# run time. Runs last because it reads the outputs of the targets above.
+qualification-audit:
+	$(PY) tools/publication/evidence_qualification_audit.py
+
 evidence-audit: evidence-availability injection-effectiveness \
-                provenance-backfill evidence-coverage mechanism-a-confound
+                provenance-backfill evidence-coverage mechanism-a-confound \
+                qualification-audit
 
 # Resolves the PX4 rate conflict from scratch: three arms, both links bound in
 # the same boot. NEEDS THE SIMULATOR and takes ~4 min (3 x 40 s plus boots).
