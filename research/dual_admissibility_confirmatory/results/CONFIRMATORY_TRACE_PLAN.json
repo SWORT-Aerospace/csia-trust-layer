@@ -1,0 +1,382 @@
+{
+  "artifact": "CONFIRMATORY_TRACE_PLAN",
+  "counts": {
+    "CLEAN": 10,
+    "SENSOR_INVALID": 10,
+    "TRANSPORT_UNAVAILABLE": 10,
+    "matched_pairs": 10,
+    "total": 30
+  },
+  "deferred": {
+    "SENSOR_DEGRADED_BUT_VALID": "item 18's third mechanism. DEFERRED: it cannot be represented without an h_acc-magnitude term, which the status-only ablation forbids, so including it would reintroduce the detector into the primary endpoint. It is listed as future work rather than quietly dropped."
+  },
+  "disjointness_rule": "No trial may reuse, or be built over the carrier of, any file in DEVELOPMENT_TRACE_MANIFEST.json. Each confirmatory trial is a FRESH ArduPilot SITL boot with its own recording, and the disjointness is checked by SHA-256 against the development manifest before scoring.",
+  "hard_stop": "Item 32. The confirmatory campaign must not run until this preregistration has had independent review.",
+  "mechanism_definitions": {
+    "CLEAN": "no injection at any point",
+    "SENSOR_INVALID": "GNSS messages continue at the nominal rate; every one carries fix_type < 3 for the duration",
+    "TRANSPORT_UNAVAILABLE": "no GNSS message is delivered to the consumer for the duration; the receiver is healthy"
+  },
+  "not_iid": "These are deterministic simulator scenarios varying over a preregistered nuisance schedule. They are NOT iid samples and no interval or p-value will be computed from them.",
+  "nuisance_schedule_frozen": {
+    "duration_s": [
+      6.0,
+      9.0,
+      12.0,
+      15.0,
+      18.0,
+      7.5,
+      10.5,
+      13.5,
+      16.5,
+      19.5
+    ],
+    "onset_s": [
+      14.0,
+      17.5,
+      21.0,
+      24.5,
+      28.0,
+      15.5,
+      19.0,
+      22.5,
+      26.0,
+      29.5
+    ],
+    "rule": "onset and duration are paired by index and are IDENTICAL within a matched pair; they were chosen to span the range without reference to any outcome, and may not be changed after the first confirmatory trial"
+  },
+  "status": "PLAN ONLY. NO TRACE HAS BEEN CAPTURED. NOTHING HAS BEEN SCORED.",
+  "trials": [
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 6.0,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 14.0,
+      "pair_id": "PAIR_01",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_01"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 6.0,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 14.0,
+      "pair_id": "PAIR_01",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_01"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 9.0,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 17.5,
+      "pair_id": "PAIR_02",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_02"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 9.0,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 17.5,
+      "pair_id": "PAIR_02",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_02"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 12.0,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 21.0,
+      "pair_id": "PAIR_03",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_03"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 12.0,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 21.0,
+      "pair_id": "PAIR_03",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_03"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 15.0,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 24.5,
+      "pair_id": "PAIR_04",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_04"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 15.0,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 24.5,
+      "pair_id": "PAIR_04",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_04"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 18.0,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 28.0,
+      "pair_id": "PAIR_05",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_05"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 18.0,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 28.0,
+      "pair_id": "PAIR_05",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_05"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 7.5,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 15.5,
+      "pair_id": "PAIR_06",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_06"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 7.5,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 15.5,
+      "pair_id": "PAIR_06",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_06"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 10.5,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 19.0,
+      "pair_id": "PAIR_07",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_07"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 10.5,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 19.0,
+      "pair_id": "PAIR_07",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_07"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 13.5,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 22.5,
+      "pair_id": "PAIR_08",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_08"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 13.5,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 22.5,
+      "pair_id": "PAIR_08",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_08"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 16.5,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 26.0,
+      "pair_id": "PAIR_09",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_09"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 16.5,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 26.0,
+      "pair_id": "PAIR_09",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_09"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 19.5,
+      "gnss_hz": 5.0,
+      "mechanism": "SENSOR_INVALID",
+      "onset_s": 29.5,
+      "pair_id": "PAIR_10",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_SENS_10"
+    },
+    {
+      "capture_tool": "research/dual_admissibility_confirmatory/confirmatory_capture.py (TO BE WRITTEN)",
+      "duration_s": 19.5,
+      "gnss_hz": 5.0,
+      "mechanism": "TRANSPORT_UNAVAILABLE",
+      "onset_s": 29.5,
+      "pair_id": "PAIR_10",
+      "simulator": "ArduPilot SITL, version recorded at capture time",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_TRAN_10"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 6.0,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_01"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 9.0,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_02"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 12.0,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_03"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 15.0,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_04"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 18.0,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_05"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 7.5,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_06"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 10.5,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_07"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 13.5,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_08"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 16.5,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_09"
+    },
+    {
+      "capture_tool": "same",
+      "duration_s": 19.5,
+      "gnss_hz": 5.0,
+      "mechanism": "CLEAN",
+      "onset_s": null,
+      "pair_id": null,
+      "simulator": "same",
+      "status": "NOT CAPTURED",
+      "trial_id": "CONF_CLEAN_10"
+    }
+  ],
+  "why_fresh_boots": "The exploratory synthetic fixtures programmed a GNSS schedule over the NON-GNSS CARRIER of the development recording. Reusing that carrier would carry the contamination even with a new schedule, so the confirmatory conditions are captured end to end."
+}

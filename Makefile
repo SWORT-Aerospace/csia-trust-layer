@@ -420,3 +420,14 @@ dual-admissibility: dual-reproduce
 	$(PY) research/dual_admissibility/formal_analysis.py
 	$(PY) research/dual_admissibility/semantic_search.py
 	$(PY) research/dual_admissibility/cross_sensor_audit.py
+
+# Dual-admissibility CONFIRMATORY STAGE: preregistration preparation only.
+# This target runs NO confirmatory trial and captures NO confirmatory trace --
+# item 32 is a hard stop pending independent review. Everything it runs is a
+# source audit, an instrument self-check, or a design-feasibility measurement
+# on already-contaminated development data.
+.PHONY: dual-confirmatory-prep
+dual-confirmatory-prep:
+	$(PY) research/dual_admissibility_confirmatory/trace_manifest.py
+	$(PY) research/dual_admissibility_confirmatory/tool_self_audit.py
+	$(PY) research/dual_admissibility_confirmatory/design_feasibility.py

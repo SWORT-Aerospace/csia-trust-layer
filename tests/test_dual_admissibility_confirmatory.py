@@ -1,0 +1,133 @@
+"""Preregistration guards. NOTHING HERE SCORES A CONFIRMATORY TRIAL.
+
+These tests protect the things that would silently invalidate the campaign:
+contamination, a broken instrument, and a preregistration that has drifted from
+the artifacts it cites.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+
+import pytest
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PKG = os.path.join(ROOT, "research", "dual_admissibility_confirmatory")
+RES = os.path.join(PKG, "results")
+
+
+def _j(name):
+    with open(os.path.join(RES, name), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _needs(name):
+    return pytest.mark.skipif(not os.path.exists(os.path.join(RES, name)),
+                              reason=f"{name} not built")
+
+
+@_needs("TOOL_SELF_AUDIT.json")
+def test_the_checker_still_catches_the_bug_it_once_caught():
+    d = _j("TOOL_SELF_AUDIT.json")
+    assert d["checker_detects_the_defect"] is True
+    assert d["collapse_with_defect_injected"] is True
+    assert d["collapse_with_correct_implementation"] is False
+    assert d["implementation_restored"] is True
+
+
+@_needs("DESIGN_FEASIBILITY.json")
+def test_matched_A_is_achievable_over_the_scored_interval():
+    d = _j("DESIGN_FEASIBILITY.json")
+    for arm, v in d["Q1_matched_A"].items():
+        assert v["A_mismatches_in_scored_interval"] == 0, arm
+        assert v["A_is_zero_throughout_scored_interval"] is True, arm
+
+
+@_needs("DESIGN_FEASIBILITY.json")
+def test_the_strong_form_of_H1_is_recorded_as_false():
+    """The coupled arm is NOT purely coupled. Freezing the strong form would
+    have frozen a known falsehood."""
+    d = _j("DESIGN_FEASIBILITY.json")
+    c0 = d["Q2_does_the_coupled_arm_alias"]["S1"]
+    assert c0["aliases_at_leading_cause"] is True
+    assert c0["aliases_completely"] is False, (
+        "if C0 aliased completely, C0_STRONG would be pointless and the "
+        "preregistration would need rewriting")
+
+
+@_needs("DEVELOPMENT_TRACE_MANIFEST.json")
+@_needs("CONFIRMATORY_TRACE_PLAN.json")
+def test_no_confirmatory_trial_reuses_a_development_trace():
+    dev = {r["path"] for r in _j("DEVELOPMENT_TRACE_MANIFEST.json")["recordings"]}
+    plan = _j("CONFIRMATORY_TRACE_PLAN.json")
+    for t in plan["trials"]:
+        assert t.get("path") not in dev
+        assert t["status"] == "NOT CAPTURED", (
+            "a captured trial means the hard stop was crossed")
+
+
+@_needs("CONFIRMATORY_TRACE_PLAN.json")
+def test_the_campaign_has_not_been_run():
+    """Item 32 is a hard stop. This test is the tripwire."""
+    plan = _j("CONFIRMATORY_TRACE_PLAN.json")
+    assert all(t["status"] == "NOT CAPTURED" for t in plan["trials"])
+    assert plan["counts"]["total"] == 30
+    assert plan["counts"]["matched_pairs"] == 10
+
+
+@_needs("CONFIRMATORY_TRACE_PLAN.json")
+def test_matched_pairs_share_onset_and_duration():
+    plan = _j("CONFIRMATORY_TRACE_PLAN.json")
+    pairs = {}
+    for t in plan["trials"]:
+        if t["pair_id"]:
+            pairs.setdefault(t["pair_id"], []).append(t)
+    assert len(pairs) == 10
+    for pid, ts in pairs.items():
+        assert len(ts) == 2, pid
+        assert ts[0]["onset_s"] == ts[1]["onset_s"], pid
+        assert ts[0]["duration_s"] == ts[1]["duration_s"], pid
+        assert {t["mechanism"] for t in ts} == {
+            "SENSOR_INVALID", "TRANSPORT_UNAVAILABLE"}, pid
+
+
+@_needs("COUNTEREXAMPLE_GENERATOR_FREEZE.json")
+def test_the_frozen_generator_files_still_hash_as_frozen():
+    import hashlib
+    d = _j("COUNTEREXAMPLE_GENERATOR_FREEZE.json")
+    for path, want in d["files_frozen"].items():
+        got = hashlib.sha256(
+            open(os.path.join(ROOT, path), "rb").read()).hexdigest()
+        assert got == want, (
+            f"{path} changed after the freeze; the campaign is void unless "
+            f"this is a new preregistration")
+
+
+# A banned word is tolerated only on a line that also disclaims it. This is a
+# heuristic guard against writing drift, not a proof of anything -- its job is
+# to fail loudly if someone later writes "this is novel" in a package whose
+# whole conclusion is that it is not.
+DENIALS = ("not ", "no ", "none", "nothing", "never", "cannot", "may not",
+           "subsumed", "known/", "forbidden", "struck", "downgrad",
+           "prior art", "unsupported", "settled", "without")
+
+
+def test_no_novelty_wording_anywhere_in_the_package():
+    banned = ("novel", "first-ever", "unprecedented", "new paradigm",
+              "new theorem", "breakthrough")
+    for fn in sorted(os.listdir(PKG)):
+        if not fn.endswith(".md"):
+            continue
+        raw = open(os.path.join(PKG, fn), encoding="utf-8").read().lower()
+        # markdown emphasis splits words: "**no** novelty claim" has to still
+        # read as a denial, so strip emphasis before matching
+        text = raw.replace("*", "").replace("`", "")
+        for w in banned:
+            if w not in text:
+                continue
+            # allowed only in an explicit denial
+            for line in text.splitlines():
+                if w in line:
+                    assert any(k in line for k in DENIALS), (
+                        fn, w, line[:120])

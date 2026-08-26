@@ -1,0 +1,58 @@
+{
+  "alphabet": {
+    "I": "GPS_RAW_INT with fix_type < 3",
+    "N": "no message delivered",
+    "V": "GPS_RAW_INT with fix_type >= 3"
+  },
+  "artifact": "COUNTEREXAMPLE_GENERATOR_FREEZE",
+  "files_frozen": {
+    "research/dual_admissibility/dual_arms.py": "598d96ce2928911a632e520bc83b6dd407e3399b4c6311385f70fb705bfdf5a2",
+    "research/dual_admissibility/dual_replay.py": "f95a627f34ed0e79c8e1290769986d99aa495108bd545b88580d254f73ee2026",
+    "research/dual_admissibility/semantic_search.py": "5f84bdbe554f1f9f24b760b43f3baa411091b27285cd960c7e032787b8f251c3",
+    "research/invalidity_masking/masking_harness.py": "4cd4abe3d31dd70cb424ab5cc77a9d4afc6ef7190a19ae6a89d3a0859f202c31",
+    "research/maer/maer_hacc_transform.py": "ee5eb5c4d23b6f7b0cb8ba784b93cee3ec4887b3e098af75e0cd7b3c0aed3531"
+  },
+  "frozen_at_commit": "b21b539 (exploratory) plus this preregistration commit",
+  "known_witnesses_it_must_still_find": {
+    "S0_drop_invalid": {
+      "length": 1,
+      "meaning": "a single no-fix message is downstream-identical to no message at all",
+      "pair": [
+        "I",
+        "N"
+      ]
+    },
+    "S1_coupled": {
+      "length": 2,
+      "meaning": "an invalid followed by a valid within the timeout is indistinguishable from two valids",
+      "pair": [
+        "VV",
+        "IV"
+      ]
+    },
+    "S2c2_split": {
+      "length": 3,
+      "meaning": "a gap inside the freshness window is still absorbed",
+      "pair": [
+        "III",
+        "INI"
+      ]
+    }
+  },
+  "not_frozen_and_why": {
+    "csia/": "the production core is unmodified and unfrozen by this document; the v1 freeze tag governs it"
+  },
+  "regression_guard": {
+    "artifact": "results/TOOL_SELF_AUDIT.json",
+    "method": "re-inject the one-message phase misalignment the search originally caught, confirm the checker reports the IV/VV collapse, then restore and confirm it does not",
+    "must_pass_before_each_confirmatory_run": true
+  },
+  "rule": "The generator is frozen as of these hashes. It may NOT be modified in response to a confirmatory failure. If it is found to be wrong, the confirmatory run is void and restarts from a new preregistration -- it is not patched mid-campaign.",
+  "search_parameters": {
+    "gnss_hz": 5.0,
+    "max_word_length_confirmatory": 5,
+    "max_word_length_exploratory": 6,
+    "tick_hz": 25.0,
+    "warmup_s": 6.0
+  }
+}
