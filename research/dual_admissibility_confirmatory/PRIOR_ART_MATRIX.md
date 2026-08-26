@@ -11,22 +11,30 @@ operational validity from diagnostic status is new must be struck.
 
 ---
 
-## The finding that settles it
+> **CORRECTED IN STAGE 2.1.** The ARINC row below originally read "FW vs NCD
+> *is* SENSOR_INVALID vs TRANSPORT_UNAVAILABLE — two bits in a data word".
+> **That was wrong.** See `PRIOR_ART_CORRECTION.md`. The SSM is carried INSIDE
+> a transmitted word, so FW and NCD are both source-side statuses and both map
+> to SENSOR_INVALID; absence has no SSM encoding and is detected by
+> refresh-rate timeout at the receiver. The correction is recorded here rather
+> than silently edited away.
 
-**ARINC 429 Sign/Status Matrix.** Every 32-bit ARINC 429 word carries a
-two-bit SSM with four states: **Normal Operation**, **Functional Test**,
-**Failure Warning** (a failure makes the data suspect), and **No Computed
-Data** (data missing or inaccurate).
+## What actually settles the principle
 
-`Failure Warning` versus `No Computed Data` **is** the
-`SENSOR_INVALID` versus `TRANSPORT_UNAVAILABLE` distinction this work package
-set out to preserve. It is two bits in a data word, standard since the 1970s,
-with a defined priority ordering.
+**SEVA self-validating sensors** and **NAMUR NE 107**, not ARINC 429. Both
+already separate a measurement's value from a status that stays informative
+when the value is unusable, and NE 107 goes further by prescribing an
+operator-summary / technician-detail split of the same device state.
 
-The consequence is not subtle: **a modern consumer that aliases those two
-conditions is a regression against 1970s avionics practice**, not a discovery
-of a new architectural principle. That is the honest frame, and it makes the
-exploratory finding a defect report rather than a contribution.
+So this claim is not available: *"it is new to distinguish operational
+usability from diagnostic utility."* **`KNOWN/SUBSUMED`.**
+
+**What ARINC 429 does show**, once read correctly, is subtler and is retained:
+separating "the source says it has no valid value" from "no word arrived"
+requires an in-band status vocabulary **and** an out-of-band staleness
+monitor, combined. CSIA has both ingredients and routes them into one
+variable. That is the defect, and no standard in this matrix specifies that a
+consumer must keep them distinct downstream.
 
 ---
 
@@ -34,7 +42,7 @@ exploratory finding a defect report rather than a contribution.
 
 | Work | Exact claim | Mathematical relation | Setting | Separate A/D semantics? | Proves a partition condition? | Tests mechanism discrimination under matched A? | Overlap | Surviving difference |
 |---|---|---|---|---|---|---|---|---|
-| **ARINC 429 SSM** | Data words carry NO / FT / FW / NCD; FW = failure makes data suspect, NCD = data missing or inaccurate | none — an encoding | Avionics data bus | **Yes, at the wire.** The producer states both that the value is unusable and which kind of unusable | No | No | **Total** on the distinction itself | Nothing about what a *consumer* does with it downstream |
+| **ARINC 429 SSM** | Data words carry NO / FT / FW / NCD. FW = a failure makes the data suspect; NCD = data missing or inaccurate **for a reason other than failure**. Both are TRANSMITTED. A stopped transmitter is detected out-of-band by refresh-rate timeout (~1.5×T_refresh) | none — an encoding plus a timeout convention | Avionics data bus | **Partly.** Rich source-side status; the value/status split is at the wire | No | No | High on the status taxonomy; **NOT** on invalid-versus-absent, which needs the timeout too | Says nothing about a consumer preserving either distinction downstream |
 | **SEVA self-validating sensors** (Henry & Clarke, Oxford, 1993) | A sensor emits Validated Measurement Value, Validated Uncertainty, and **Measurement Value Status** | Uncertainty propagation | Process instrumentation | **Yes.** Status is explicitly separate from the value and carries fault information | No | No | High on the architecture | Sensor-side; assumes the consumer honours the status |
 | **NAMUR NE 107** | Four status signals — Failure, Function Check, Out of Specification, Maintenance Required — with operators shown the summary and technicians the detailed diagnostics | none | Process automation field devices | **Yes, explicitly two-audience**: operational summary vs diagnostic detail from the same device state | No | No | High — this is the A/D split as a standard | Says nothing about a consumer's admissibility gate destroying it |
 | **OPC UA StatusCode / DataAccess quality** | Value + StatusCode; sub-bits (e.g. LimitBits) carry diagnostic detail; clients are forbidden from altering Quality | none | Industrial data access | **Yes** | No | No | High | Consumer-side loss is a known failure mode in practice (e.g. clients misreading quality codes and discarding values) rather than a studied one |
@@ -49,8 +57,11 @@ exploratory finding a defect report rather than a contribution.
 
 1. **Any claim that separating operational from diagnostic validity is new.**
    ARINC 429, SEVA and NE 107 all do it. `KNOWN/SUBSUMED`.
-2. **Any claim that distinguishing sensor-invalid from no-data is new.**
-   ARINC 429 FW vs NCD. `KNOWN/SUBSUMED`.
+2. ~~**Any claim that distinguishing sensor-invalid from no-data is new.**
+   ARINC 429 FW vs NCD.~~ **WITHDRAWN in Stage 2.1** — FW and NCD are both
+   transmitted source statuses and both map to `SENSOR_INVALID`; absence has
+   no SSM encoding. The distinction still is not claimed as new, but ARINC 429
+   is not the reason. See `PRIOR_ART_CORRECTION.md` §1.
 3. **Any claim that the partition / sufficiency result is new.** Standard in
    DES diagnosability and in sufficiency theory. `KNOWN/SUBSUMED`.
 4. **Any claim that "absence is informative" is new.** Missing-indicator

@@ -1,5 +1,12 @@
 # DUAL-CHANNEL ADMISSIBILITY — PREREGISTRATION REVIEW REPORT
 
+> **SUPERSEDED IN PART BY STAGE 2.1.** §20–21 of this report claimed ARINC
+> 429's FW/NCD pair *is* SENSOR_INVALID vs TRANSPORT_UNAVAILABLE. That was
+> wrong — see `PRIOR_ART_CORRECTION.md`. §26–27's `BLOCKER_REMAINS`
+> recommendation has also been overtaken: the blocking questions were answered
+> in `STAGE2_1_DECISION_REPORT.md`. This document is kept as the record of
+> what was believed at `cea85f1`.
+
 Base exploratory commit `b21b539`. **No confirmatory trial has been run and no
 confirmatory trace has been captured.** Item 32's hard stop is in force, and a
 test asserts it (`tests/test_dual_admissibility_confirmatory.py::test_the_campaign_has_not_been_run`).

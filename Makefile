@@ -431,3 +431,17 @@ dual-confirmatory-prep:
 	$(PY) research/dual_admissibility_confirmatory/trace_manifest.py
 	$(PY) research/dual_admissibility_confirmatory/tool_self_audit.py
 	$(PY) research/dual_admissibility_confirmatory/design_feasibility.py
+
+# Stage 2.1 kill test. Captures SIX held-out SITL traces (three matched pairs)
+# and scores the frozen C0_STRONG and status-only arms against them. This is
+# the 3-pair test item 4 asks for -- it is NOT the 10+10 confirmatory
+# campaign, which remains blocked.
+.PHONY: dual-heldout-capture
+dual-heldout-capture:
+	$(PY) research/dual_admissibility_confirmatory/heldout_capture.py
+
+.PHONY: dual-kill-test
+dual-kill-test:
+	$(PY) research/dual_admissibility_confirmatory/live_vs_inherited.py
+	$(PY) research/dual_admissibility_confirmatory/kill_test.py
+	$(PY) research/dual_admissibility_confirmatory/cross_path_checker.py

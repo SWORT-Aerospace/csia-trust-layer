@@ -1,0 +1,32 @@
+{
+  "alphabet": {
+    "I": "GPS_RAW_INT with fix_type < 3",
+    "N": "no message delivered",
+    "V": "GPS_RAW_INT with fix_type >= 3"
+  },
+  "artifact": "COUNTEREXAMPLE_CROSS_PATH_RESULTS",
+  "downstream_consequence": "On the v1.1 path a no-fix report and a silent link produce identical core state, so `A` closes only via the 0.5 s staleness timeout. On the plugins.py path `A` closes immediately. The same vehicle condition therefore yields a different operational admissibility trajectory depending only on which decoder the deployment happens to use.",
+  "max_word_length": 4,
+  "pairs": {
+    "ulog_source_py": {
+      "emits_a_sample_when_invalid": null,
+      "gps_samples_emitted": 344,
+      "gps_samples_with_valid_false": 0,
+      "invalid_branch": "NOT_EXERCISED",
+      "note": "this log contains no fix_type < 3 samples, so the decoder's invalid branch could not be observed in execution; the mapping is established from source only",
+      "ulog": "research/v1_1/results/.px4_link_probe/passive/log/2026-08-25/22_13_43.ulg"
+    },
+    "v1_1_adapter__vs__plugins_py": {
+      "divergent_field": "core slot `valid` -- the v1.1 adapter never marks the GPS slot invalid; plugins.py does",
+      "executed": true,
+      "semantic_divergences": 79,
+      "shortest_distinguishing_trace": "I",
+      "tick_count_divergences": 106,
+      "tick_count_note": "also moves with the stamping convention (tick time vs message receive time) and is NOT counted as semantic divergence",
+      "verdict": "PATHS_DIVERGE"
+    }
+  },
+  "status": "SEPARATE IMPLEMENTATION-DEFECT RESULT. Not combined with the A/D experiment.",
+  "status_verdict": "IMPLEMENTATION DEFECT / SEMANTIC NON-EQUIVALENCE",
+  "words_tested": 120
+}

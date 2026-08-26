@@ -1,8 +1,434 @@
 {
   "artifact": "CLAIM_LEDGER",
-  "topic": "dual-channel admissibility: do operational admissibility (A) and diagnostic evidential admissibility (D) need to be different state variables?",
   "base_commit": "d4f9cd3",
+  "claims": [
+    {
+      "artifact": "results/SOURCE_VALIDITY_ROLE_AUDIT.json",
+      "assumptions": "'operational' means the only in-tree consumer that emits actions, FailsafePolicy, which is advisory",
+      "cites": [
+        "csia/runtime/online.py:603",
+        "csia/runtime/online.py:610",
+        "csia/runtime/online.py:613",
+        "csia/trust_engine/engine.py:146",
+        "csia/runtime/failsafe.py:100",
+        "csia/runtime/failsafe.py:145"
+      ],
+      "claim": "A and D are the SAME state variable in this implementation. fresh[] is computed once in OnlineTrustLayer._tick and feeds both every relation/physics gate (D), the Beta update (D), and FailsafePolicy._conditions (A).",
+      "evidence": "source, 16 gates resolved and re-verified; 3 coupled",
+      "forbidden_stronger_wording": "assurance architectures couple these in general",
+      "id": "C1",
+      "next_experiment": "none; this is settled by source",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "strongest_allowed_wording": "in this implementation the operational and diagnostic gates are one value"
+    },
+    {
+      "cites": [
+        "csia/aircraft/sample.py:47",
+        "csia/aircraft/qualification.py:138"
+      ],
+      "claim": "The hypothesis is NOT refuted at source level: no existing mechanism represents A and D independently. Quality.admissible is scoped to evidence by its own docstring, and csia_may_use is a second gate whose two halves are both about evidence.",
+      "evidence": "source",
+      "id": "C2",
+      "next_experiment": "none",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "cites": [
+        "csia/runtime/online.py:630"
+      ],
+      "claim": "temp_<sensor> features are already ungated by freshness (gate hard-coded 1.0) and keep contributing a RETAINED score after A closes. D != A already exists for one feature family, by omission rather than by design.",
+      "evidence": "source",
+      "id": "C3",
+      "next_experiment": "measure whether temp_gps materially changes any diagnosis; not done here",
+      "note": "this is the retained-state hazard from the previous work package appearing on the evidence path; it is NOT prior art for a deliberate split",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "artifact": "results/S0_S1_REPRODUCTION.json",
+      "claim": "The motivating S0/S1 tradeoff reproduces EXACTLY through an independently written tick loop: 12/12 checks bit-for-bit against the committed invalidity-masking artifact.",
+      "evidence": "measured",
+      "id": "C4",
+      "numbers": {
+        "S0_final_gps_fault": 0.892201,
+        "S0_leading_ticks": 963,
+        "S1_final_gps_fault": 0.722429,
+        "S1_leading_ticks": 836
+      },
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "claim": "Delta_ab(t) sums only over LOW(a) symmetric-difference LOW(b); if D_j = 0 for every j in that set, the tick carries no information distinguishing a from b.",
+      "evidence": "algebra on csia/diagnosis/bayes.py:102-131",
+      "forbidden_stronger_wording": "novel theorem; new result",
+      "id": "T1",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "claim": "A fault is self-masking under coupling iff the discriminating feature set is contained in the set of relations the fault gates off. gps_fault vs nominal satisfies this by construction, because CAUSES['gps_fault'] is the singleton ['phys_gps'] whose gate carries fresh['gps'].",
+      "evidence": "algebra plus source",
+      "id": "T2",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "claim": "The split restores identifiability during a fault IF AND ONLY IF some observable outside the coupled gate discriminates the pair. Necessity implies the split provably cannot help when the fault removes the SOURCE rather than the value.",
+      "evidence": "algebra; transport control",
+      "id": "T3",
+      "numbers": {
+        "A_closed_seconds_both": 34.0,
+        "P5_PERMANENT_S2a_final": 0.894386,
+        "T_TRANSPORT_STARVED_S2a_final": 0.022723
+      },
+      "reading": "identical operational state, opposite diagnosis; the prediction holds",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED; corollary EMPIRICALLY CONFIRMED (N = 1 fixture pair)"
+    },
+    {
+      "claim": "Under a sustained fault with D = 0, the posterior returns to EXACTLY the prior: log P(a)/P(b) -> log(pi_a/pi_b) with no evidence term at all.",
+      "id": "T4",
+      "numbers": {
+        "abs_diff_coupled": 4e-06,
+        "abs_diff_split": 1.8e-05,
+        "measured_coupled": 0.022723,
+        "measured_split": 0.894386,
+        "predicted_coupled": 0.022727,
+        "predicted_split": 0.894404
+      },
+      "reading": "the closed form predicts the full eight-cause implementation to 1e-5",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED; NUMERICALLY VALIDATED"
+    },
+    {
+      "claim": "A coupled architecture forgets a saturated fault in n = log(threshold/Delta_0)/log(1-alpha) = 7.29 ticks, about 0.29 s at 25 Hz.",
+      "id": "T5",
+      "note": "the reversal TIME was not measured against the replay; only the steady states were. Recorded as an unvalidated consequence of validated premises.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "hypothesis": "S1 and S2 represent explicit raw invalidity more faithfully at the operational-admissibility boundary than S0.",
+      "id": "H1",
+      "numbers": {
+        "failsafe_ticks_at_CAUTION_every_arm": 898,
+        "failsafe_transition_time_s_every_arm": 11.08,
+        "nav_degraded_ticks_every_arm": 31,
+        "objective_O_S0": 0.0,
+        "objective_O_all_propagating_arms": 0.996377,
+        "time_to_nav_degraded_s_every_arm": 3.03558
+      },
+      "reading": "O improves from 0.000 to 0.996. But the FailsafePolicy outcome is bit-identical across all ten arms -- same transition time, same level histogram, same nav_degraded ticks. Only the reason string differs ('GPS trust 0.42' under S0, 'GPS data invalid' otherwise). On this recording, correcting the operational gate changed nothing an operator would see.",
+      "status": "EMPIRICAL ONLY - SUPPORTED at the gate, NULL at the recommendation",
+      "why_this_matters": "it undercuts the premise that the O axis is worth improving, and is the single strongest argument against the strong verdict"
+    },
+    {
+      "hypothesis": "S2 preserves more fault-relevant diagnostic evidence than S1 during explicit invalidity.",
+      "id": "H2",
+      "numbers_M1_intermittent": {
+        "D_top_share_S1": 0.836837,
+        "D_top_share_S2a_status_only": 0.0,
+        "D_top_share_S2b_hacc_only": 0.976977,
+        "D_top_share_S2c": 0.965966
+      },
+      "numbers_P5_sustained": {
+        "D_top_share_S1": 0.0,
+        "D_top_share_S2a_status_only": 0.961143,
+        "D_top_share_S2c2": 0.953143
+      },
+      "reading": "the effect is real in both regimes but comes from different terms: h_acc on the intermittent recording, status under sustained invalidity",
+      "status": "EMPIRICAL ONLY - SUPPORTED, but CONDITIONAL on sustained closure"
+    },
+    {
+      "caveat": "Pareto dominance on axes where one axis (O) has no demonstrated operational consequence is dominance on an assumption. Reported as measured; not read as vindication.",
+      "hypothesis": "Two-objective tradeoff: S0 low-O/high-D, S1 high-O/low-D, S2 high-O/high-D.",
+      "id": "H3",
+      "numbers": {
+        "S0": [
+          0.0,
+          0.963964
+        ],
+        "S1": [
+          0.996377,
+          0.836837
+        ],
+        "S2b": [
+          0.996377,
+          0.976977
+        ],
+        "S2c": [
+          0.996377,
+          0.965966
+        ]
+      },
+      "pareto_classification_S2c": "PARETO_DOMINANT over both S0 and S1",
+      "status": "EMPIRICAL ONLY - the PATTERN reproduces, the INTERPRETATION does not survive H1"
+    },
+    {
+      "design": "each split arm has a matched coupled control carrying identical evidence terms and differing in one boolean: S2a/S1Da, S2b/S1Db, S2c/S1D",
+      "hypothesis": "DETECTOR DOMINANCE: the improvement comes from adding an evidence term, not from decoupling D from A.",
+      "id": "H4",
+      "numbers_M1_intermittent": {
+        "detector_gain_both_S1D_minus_S1": -0.017017,
+        "detector_gain_hacc_S1Db_minus_S1": 0.138138,
+        "detector_gain_status_S1Da_minus_S1": -0.836837,
+        "split_gain_both_S2c_minus_S1D": 0.146146,
+        "split_gain_hacc_S2b_minus_S1Db": 0.002002,
+        "split_gain_status_S2a_minus_S1Da": 0.0
+      },
+      "numbers_synthetic_patterns": {
+        "detector_gain_every_pattern": 0.0,
+        "split_gain_P1_BURST_ABOVE_TAU_status": 0.020571,
+        "split_gain_P5_PERMANENT_status": 0.961143
+      },
+      "reading": "On M1 the h_acc term alone, WITH D coupled to A, recovers +0.138 and the split adds only +0.002 on top: detector-dominant. On every synthetic pattern the detector gain is exactly 0.0000 and the split gain is the whole effect. The difference is how long A stays closed at a stretch.",
+      "resolution": "the split earns its complexity in proportion to SUSTAINED closure duration, not to closed fraction",
+      "status": "EMPIRICAL ONLY - TRUE on the real recording, FALSE under sustained invalidity"
+    },
+    {
+      "caveat": "four points, one fixture family. PROVISIONAL, not a fitted relationship, and no functional form is claimed.",
+      "claim": "The value of the split is governed by the longest CONSECUTIVE A-closed run, not by the fraction of time A is closed.",
+      "id": "H5",
+      "mechanism": "T5: the frozen diagnosis smoother is a ~15-tick EWMA, so evidence that alternates faster than that averages away",
+      "next_experiment": "sweep sustained-closure duration finely and test the T5 time constant directly",
+      "numbers": {
+        "P1_BURST_ABOVE_TAU": {
+          "A_open_frac": 0.9706,
+          "longest_A_closed_run_s": 1.0,
+          "split_gain": 0.020571
+        },
+        "P2_ALTERNATING": {
+          "A_open_frac": 0.5,
+          "longest_A_closed_run_s": 0.2,
+          "split_gain": 0.0
+        },
+        "P4_CLUSTERED": {
+          "A_open_frac": 0.6,
+          "longest_A_closed_run_s": 0.8,
+          "split_gain": 0.0
+        },
+        "P5_PERMANENT": {
+          "A_open_frac": 0.0,
+          "longest_A_closed_run_s": 34.0,
+          "split_gain": 0.961143
+        }
+      },
+      "reading": "P2 has A closed half the time and gains nothing; P1_BURST_ABOVE_TAU has A closed 3% of the time and gains something. Closed fraction is not the predictor.",
+      "status": "EMPIRICAL ONLY - PROVISIONAL"
+    },
+    {
+      "claim": "The binary status encoding is HARMFUL under intermittent invalidity.",
+      "id": "N1",
+      "implication": "S2c is WORSE than S2b on M1 (0.966 vs 0.977) because the status term drags it down. The best arm on the real recording is the one WITHOUT the status feature.",
+      "numbers": {
+        "S1_D_top_share": 0.836837,
+        "S2a_D_top_share": 0.0,
+        "S2a_final_gps_fault": 0.067394
+      },
+      "reading": "c_status = 1 on a valid observation is MAXIMALLY consistent, which is strong evidence for causes that do not contain the feature -- i.e. for nominal. With 71% of M1 observations valid, the status term spends most ticks arguing against the fault. It is decisive under sustained invalidity and actively destructive under intermittent invalidity.",
+      "status": "EMPIRICAL ONLY - NEGATIVE RESULT, KEPT"
+    },
+    {
+      "cause": "the sidecar held 'the last thing I saw' rather than being time-indexed. The core emits the tick at time tau only once a LATER sample arrives, so the sidecar answered a query for tau with state from after tau, and the coupled arm saw evidence at ticks where A was actually closed.",
+      "claim": "The first detector-dominance reading in this study was wrong, because of an instrument bug in this study's own sidecar.",
+      "fix": "an ordered log with as-of lookup; no constant changed",
+      "how_it_was_caught": "the automatic counterexample search reported that the words 'IV' and 'VV' produced identical downstream traces, which cannot be true if the status feature works",
+      "id": "N2",
+      "now": "S1D-S1 = -0.017, S2c-S1D = +0.146",
+      "status": "REFUTED (the earlier reading), corrected",
+      "was": "S1D-S1 = +0.126, S2c-S1D = +0.002, read as detector-dominant on M1"
+    },
+    {
+      "claim": "This study's first h_acc freshness rule reproduced the very retained-state defect the previous work package documented.",
+      "detail": "gating h_acc evidence on ANY message arrival meant a healthy pre-onset accuracy kept being served as current while every arriving message carried h_acc = 0. Under P5_PERMANENT this made S2c report nominal (0.0 top share) while S2a reported gps_fault (0.961).",
+      "fix": "arms S2b2/S2c2 gate on the last message carrying a USABLE h_acc. Labelled POST_HOC everywhere; found by looking at a result.",
+      "id": "N3",
+      "impact_on_the_real_recording": "none. S2b2 == S2b and S2c2 == S2c to six decimals on M1, because messages with usable h_acc keep arriving during the valid gaps. The post-hoc fix cannot be accused of rescuing the M1 result because it does not change it.",
+      "status": "EMPIRICAL ONLY - NEGATIVE RESULT, KEPT, with a POST-HOC fix"
+    },
+    {
+      "caveat": "S2b's 4/4 is an artefact of the N3 bug: it distinguishes SENSOR_INVALID from TRANSPORT_MISSING only because invalid messages keep the stale h_acc alive. S2c2 achieves 4/4 without relying on that.",
+      "claim": "Four upstream conditions, one downstream vocabulary: S0 and S1 alias two pairs; the split arms with an h_acc term alias none.",
+      "id": "C5",
+      "numbers": {
+        "S0": "2/4 distinct; aliases (SENSOR_INVALID, TRANSPORT_MISSING) and (SENSOR_DEGRADED_BUT_VALID, ALL_VALID_NOMINAL)",
+        "S1": "2/4 distinct; same two aliases",
+        "S1D": "3/4; aliases (SENSOR_INVALID, TRANSPORT_MISSING)",
+        "S2a": "3/4; aliases (SENSOR_DEGRADED_BUT_VALID, ALL_VALID_NOMINAL)",
+        "S2c2": "4/4 distinct"
+      },
+      "status": "EMPIRICAL ONLY"
+    },
+    {
+      "artifact": "results/INGEST_PATH_SEMANTIC_EQUIVALENCE.csv",
+      "claim": "The same raw condition means different things depending on which committed ingest path decodes it.",
+      "detail": "the v1.1 aircraft adapter never marks the GPS slot invalid; csia/runtime/plugins.py does, for the same fix_type < 3, into the same frozen core. A single no-fix message is enough to separate them.",
+      "id": "C6",
+      "note": "tick-count differences (106/120 words) also move with the stamping convention and are NOT counted as semantic divergence",
+      "numbers": {
+        "semantically_divergent": 79,
+        "shortest_divergent_word": "I",
+        "words_tested": 120
+      },
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "claim": "Automatic search finds the semantic-collapse witness without being told what to look for, and the minimum distinguishing word length rises across the arms.",
+      "id": "C7",
+      "numbers": {
+        "S0": [
+          "I",
+          "N"
+        ],
+        "S1": [
+          "VV",
+          "IV"
+        ],
+        "S2c2": [
+          "III",
+          "INI"
+        ]
+      },
+      "reading": "S0's witness has length 1: one message reporting no fix is downstream-identical to no message at all",
+      "status": "EMPIRICAL ONLY"
+    },
+    {
+      "claim": "GNSS is the ONLY sensor family in this stack with all four ingredients the split needs.",
+      "detail": "battery's only blocker is that the -1 sentinel reject does not delete the retained value; every other family has no explicit INVALID state at all",
+      "id": "C8",
+      "implication": "Reviewer G is conceded. This result is GNSS-specific in this implementation, and the audit says exactly why.",
+      "numbers": {
+        "barometer": "0/4",
+        "battery": "3/4",
+        "esc/estimator/imu0/imu1/magnetometer": "1/4",
+        "gnss": "4/4",
+        "vibration": "2/4"
+      },
+      "status": "PROVED - NOVELTY NOT ESTABLISHED (source audit only)"
+    },
+    {
+      "claim": "Clean controls: no arm leads with gps_fault on either clean fixture. The added-feature arms drive the clean posterior slightly LOWER (0.0 vs 6.4e-05).",
+      "id": "C9",
+      "note": "the arms are therefore NOT identical on clean data. A healthy h_acc is maximally consistent, which actively pushes gps_fault down. Directionally safe -- fewer false alarms -- but it is a change, and both clean fixtures are short and one holds the GNSS payload constant. Real-flight false-alarm behaviour is untested (see the HIL plan, LEVEL 3).",
+      "status": "EMPIRICAL ONLY"
+    },
+    {
+      "caveat": "wall time includes MAVLink decoding and the whole adapter path, so these are an upper bound on the arm's own cost rather than a measurement of it",
+      "claim": "The split has no measurable compute cost in this implementation.",
+      "id": "C10",
+      "numbers": {
+        "S0_us_per_tick": 1048.22,
+        "S1_us_per_tick": 1080.35,
+        "S2c_us_per_tick": 1050.69,
+        "additional_features_per_tick_S2c": 2,
+        "additional_state_fields_per_source": 3
+      },
+      "status": "EMPIRICAL ONLY"
+    },
+    {
+      "claim": "NOVELTY",
+      "id": "N4",
+      "note": "No literature search was performed. Separating validity from status metadata is long-standing practice in avionics and in real-time middleware; Reviewer B is conceded. What this package establishes is a measured instance in one implemented architecture, with a closed-form model validated to 1e-5, not that any of it is new.",
+      "status": "NOT ESTABLISHED"
+    }
+  ],
   "date": "2026-08-26",
+  "explicitly_not_claimed": [
+    "that A and D need to be separate variables in assurance architectures generally",
+    "that the split is safe: it was tested for false alarms on two short clean fixtures only",
+    "that the status encoding used here is a good one -- it is the strongest the frozen consistency domain permits and it is harmful under intermittent invalidity (N1)",
+    "that any of this generalises beyond GNSS: the cross-sensor audit finds no other 4/4 candidate (C8)",
+    "that anything here is a hardware result -- no hardware was connected",
+    "that S2 should be adopted; no repair is proposed and the coupled alternative wins on the one real recording once the h_acc term is present"
+  ],
+  "global_caveats": [
+    "EXPLORATORY. S2 was designed after seeing the S0/S1 outcome. Nothing here is confirmatory (item 39).",
+    "One real recording, N = 1. Every number tagged M1_JAM is a property of that realisation, not an estimate over runs. No interval and no p-value appears anywhere in this package.",
+    "The frozen production core is unmodified; the only research object is a wrapper on layer.diag and an adapter subclass.",
+    "NOVELTY: NOT ESTABLISHED. No literature search was performed."
+  ],
+  "stage_2_1_update": {
+    "base": "cea85f1",
+    "campaign_recommendation": "DO NOT RUN the 10+10 confirmatory campaign",
+    "corrections_to_earlier_entries": [
+      {
+        "artifact": "research/dual_admissibility_confirmatory/PRIOR_ART_CORRECTION.md",
+        "now": "WRONG and WITHDRAWN. The SSM is carried inside a transmitted word; FW and NCD are both source-side statuses and both map to SENSOR_INVALID. Absence has no SSM encoding and is detected by refresh-rate timeout at the receiver.",
+        "was": "ARINC 429 FW vs NCD IS SENSOR_INVALID vs TRANSPORT_UNAVAILABLE, two bits in a data word"
+      },
+      {
+        "artifact": "results/LIVE_VS_INHERITED_INFORMATION.json",
+        "now": "the leak carries NO live information. Held-out: 0 fields LIVE_INFORMATION; trust_gps FROZEN_STATE; posteriors PRE_CLOSURE_HISTORY that CONVERGE.",
+        "was": "the coupled arm retains a leak, so the confirmatory experiment is non-trivial"
+      },
+      {
+        "artifact": "results/STAGE2_1_KILL_TEST.json",
+        "now": "REFUTED by measurement: temp_gps_component is CONSTANT across both mechanisms.",
+        "was": "predicted temp_gps would leak live mechanism information because it is ungated"
+      },
+      {
+        "artifact": "results/heldout_raw/",
+        "now": "WRONG. The check looked at ~/ardupilot, which resolves to /root for this user. SITL is installed at /home/user/ardupilot/ardupilot @ 01a504b and six held-out traces were captured.",
+        "was": "SITL unavailable in this environment, so held-out capture is impossible"
+      }
+    ],
+    "decision": "IMPLEMENTATION_DEFECTS_ONLY",
+    "defects_banked": {
+      "D1_consumer_side_semantic_collapse": {
+        "status": "IMPLEMENTATION DEFECT",
+        "witness": [
+          "I",
+          "N"
+        ],
+        "witness_length": 1
+      },
+      "D2_cross_ingest_non_equivalence": {
+        "semantic_divergences": 79,
+        "shortest": "I",
+        "status": "IMPLEMENTATION DEFECT",
+        "words_tested": 120
+      },
+      "D3_battery_retained_invalid_current": {
+        "eventual_reason": "STALE not SENTINEL",
+        "retention_s": 0.5,
+        "status": "IMPLEMENTATION DEFECT",
+        "value_served": "5.00 A"
+      }
+    },
+    "hil_criterion_0": {
+      "checked": "no /dev/ttyUSB*, /dev/ttyACM*, /dev/serial*; pyserial reports only /dev/ttyS0 (container console)",
+      "executed_on_hardware": false,
+      "hardware_present": false,
+      "plan": "research/dual_admissibility_confirmatory/HIL_CRITERION_0_PLAN.md",
+      "sitl_analogue": "PASS -- GPS_RAW_INT continues with fix_type=1 throughout (301/451/601 messages)"
+    },
+    "kill_test": {
+      "A_matched_all_pairs": true,
+      "A_trace_hashes_equal": true,
+      "C0_STRONG_heldout_balanced_accuracy": [
+        0.0,
+        0.5,
+        0.5
+      ],
+      "C0_STRONG_in_sample_accuracy": 0.5,
+      "C0_STRONG_mean": 0.333333,
+      "C0_STRONG_theta": 0.937260277,
+      "STATUS_ONLY_heldout_balanced_accuracy": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "case": "CASE B -- the split provides information the coupled arm lacks",
+      "caveat": "the status-only classifier's success is close to definitional; the informative half is C0's failure",
+      "held_out_pairs": 3,
+      "no_significance": "n = 3 pairs. Counts and proportions only.",
+      "recordings": 6,
+      "simulator": "ArduPilot SITL @ 01a504b"
+    },
+    "novelty_by_level": {
+      "CONSUMER_SIDE_SEMANTIC_COLLAPSE": "EMPIRICAL FINDING - NOVELTY NOT ESTABLISHED",
+      "COUNTEREXAMPLE_CHECKER": "KNOWN/SUBSUMED as a technique; feasibility MEDIUM as a tool",
+      "CROSS_INGEST_EQUIVALENCE_AS_CI": "EMPIRICAL FINDING - NOVELTY NOT ESTABLISHED",
+      "MATCHED_A_EXPERIMENT": "EMPIRICAL FINDING - NOVELTY NOT ESTABLISHED",
+      "PRINCIPLE_unusable_but_informative": "KNOWN/SUBSUMED (SEVA, NAMUR NE 107)",
+      "STATUS_TAXONOMY": "KNOWN (ARINC 429 SSM, NE 107, OPC UA, MAV_BATTERY_FAULT)"
+    },
+    "report": "research/dual_admissibility_confirmatory/STAGE2_1_DECISION_REPORT.md"
+  },
   "status_vocabulary": [
     "PROVED - NOVELTY NOT ESTABLISHED",
     "PROVED - POSSIBLE NOVEL CONTRIBUTION",
@@ -12,252 +438,5 @@
     "KNOWN/SUBSUMED",
     "REFUTED"
   ],
-  "global_caveats": [
-    "EXPLORATORY. S2 was designed after seeing the S0/S1 outcome. Nothing here is confirmatory (item 39).",
-    "One real recording, N = 1. Every number tagged M1_JAM is a property of that realisation, not an estimate over runs. No interval and no p-value appears anywhere in this package.",
-    "The frozen production core is unmodified; the only research object is a wrapper on layer.diag and an adapter subclass.",
-    "NOVELTY: NOT ESTABLISHED. No literature search was performed."
-  ],
-  "claims": [
-    {
-      "id": "C1",
-      "claim": "A and D are the SAME state variable in this implementation. fresh[] is computed once in OnlineTrustLayer._tick and feeds both every relation/physics gate (D), the Beta update (D), and FailsafePolicy._conditions (A).",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "source, 16 gates resolved and re-verified; 3 coupled",
-      "cites": ["csia/runtime/online.py:603", "csia/runtime/online.py:610", "csia/runtime/online.py:613", "csia/trust_engine/engine.py:146", "csia/runtime/failsafe.py:100", "csia/runtime/failsafe.py:145"],
-      "artifact": "results/SOURCE_VALIDITY_ROLE_AUDIT.json",
-      "assumptions": "'operational' means the only in-tree consumer that emits actions, FailsafePolicy, which is advisory",
-      "strongest_allowed_wording": "in this implementation the operational and diagnostic gates are one value",
-      "forbidden_stronger_wording": "assurance architectures couple these in general",
-      "next_experiment": "none; this is settled by source"
-    },
-    {
-      "id": "C2",
-      "claim": "The hypothesis is NOT refuted at source level: no existing mechanism represents A and D independently. Quality.admissible is scoped to evidence by its own docstring, and csia_may_use is a second gate whose two halves are both about evidence.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "source",
-      "cites": ["csia/aircraft/sample.py:47", "csia/aircraft/qualification.py:138"],
-      "next_experiment": "none"
-    },
-    {
-      "id": "C3",
-      "claim": "temp_<sensor> features are already ungated by freshness (gate hard-coded 1.0) and keep contributing a RETAINED score after A closes. D != A already exists for one feature family, by omission rather than by design.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "source",
-      "cites": ["csia/runtime/online.py:630"],
-      "note": "this is the retained-state hazard from the previous work package appearing on the evidence path; it is NOT prior art for a deliberate split",
-      "next_experiment": "measure whether temp_gps materially changes any diagnosis; not done here"
-    },
-    {
-      "id": "C4",
-      "claim": "The motivating S0/S1 tradeoff reproduces EXACTLY through an independently written tick loop: 12/12 checks bit-for-bit against the committed invalidity-masking artifact.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "measured",
-      "numbers": {"S0_final_gps_fault": 0.892201, "S1_final_gps_fault": 0.722429, "S0_leading_ticks": 963, "S1_leading_ticks": 836},
-      "artifact": "results/S0_S1_REPRODUCTION.json"
-    },
-    {
-      "id": "T1",
-      "claim": "Delta_ab(t) sums only over LOW(a) symmetric-difference LOW(b); if D_j = 0 for every j in that set, the tick carries no information distinguishing a from b.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "algebra on csia/diagnosis/bayes.py:102-131",
-      "forbidden_stronger_wording": "novel theorem; new result"
-    },
-    {
-      "id": "T2",
-      "claim": "A fault is self-masking under coupling iff the discriminating feature set is contained in the set of relations the fault gates off. gps_fault vs nominal satisfies this by construction, because CAUSES['gps_fault'] is the singleton ['phys_gps'] whose gate carries fresh['gps'].",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "evidence": "algebra plus source"
-    },
-    {
-      "id": "T3",
-      "claim": "The split restores identifiability during a fault IF AND ONLY IF some observable outside the coupled gate discriminates the pair. Necessity implies the split provably cannot help when the fault removes the SOURCE rather than the value.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED; corollary EMPIRICALLY CONFIRMED (N = 1 fixture pair)",
-      "evidence": "algebra; transport control",
-      "numbers": {"P5_PERMANENT_S2a_final": 0.894386, "T_TRANSPORT_STARVED_S2a_final": 0.022723, "A_closed_seconds_both": 34.0},
-      "reading": "identical operational state, opposite diagnosis; the prediction holds"
-    },
-    {
-      "id": "T4",
-      "claim": "Under a sustained fault with D = 0, the posterior returns to EXACTLY the prior: log P(a)/P(b) -> log(pi_a/pi_b) with no evidence term at all.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED; NUMERICALLY VALIDATED",
-      "numbers": {
-        "predicted_coupled": 0.022727, "measured_coupled": 0.022723, "abs_diff_coupled": 4e-06,
-        "predicted_split": 0.894404, "measured_split": 0.894386, "abs_diff_split": 1.8e-05
-      },
-      "reading": "the closed form predicts the full eight-cause implementation to 1e-5"
-    },
-    {
-      "id": "T5",
-      "claim": "A coupled architecture forgets a saturated fault in n = log(threshold/Delta_0)/log(1-alpha) = 7.29 ticks, about 0.29 s at 25 Hz.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "note": "the reversal TIME was not measured against the replay; only the steady states were. Recorded as an unvalidated consequence of validated premises."
-    },
-    {
-      "id": "H1",
-      "hypothesis": "S1 and S2 represent explicit raw invalidity more faithfully at the operational-admissibility boundary than S0.",
-      "status": "EMPIRICAL ONLY - SUPPORTED at the gate, NULL at the recommendation",
-      "numbers": {
-        "objective_O_S0": 0.0,
-        "objective_O_all_propagating_arms": 0.996377,
-        "failsafe_transition_time_s_every_arm": 11.08,
-        "failsafe_ticks_at_CAUTION_every_arm": 898,
-        "nav_degraded_ticks_every_arm": 31,
-        "time_to_nav_degraded_s_every_arm": 3.03558
-      },
-      "reading": "O improves from 0.000 to 0.996. But the FailsafePolicy outcome is bit-identical across all ten arms -- same transition time, same level histogram, same nav_degraded ticks. Only the reason string differs ('GPS trust 0.42' under S0, 'GPS data invalid' otherwise). On this recording, correcting the operational gate changed nothing an operator would see.",
-      "why_this_matters": "it undercuts the premise that the O axis is worth improving, and is the single strongest argument against the strong verdict"
-    },
-    {
-      "id": "H2",
-      "hypothesis": "S2 preserves more fault-relevant diagnostic evidence than S1 during explicit invalidity.",
-      "status": "EMPIRICAL ONLY - SUPPORTED, but CONDITIONAL on sustained closure",
-      "numbers_M1_intermittent": {
-        "D_top_share_S1": 0.836837,
-        "D_top_share_S2c": 0.965966,
-        "D_top_share_S2b_hacc_only": 0.976977,
-        "D_top_share_S2a_status_only": 0.0
-      },
-      "numbers_P5_sustained": {
-        "D_top_share_S1": 0.0,
-        "D_top_share_S2a_status_only": 0.961143,
-        "D_top_share_S2c2": 0.953143
-      },
-      "reading": "the effect is real in both regimes but comes from different terms: h_acc on the intermittent recording, status under sustained invalidity"
-    },
-    {
-      "id": "H3",
-      "hypothesis": "Two-objective tradeoff: S0 low-O/high-D, S1 high-O/low-D, S2 high-O/high-D.",
-      "status": "EMPIRICAL ONLY - the PATTERN reproduces, the INTERPRETATION does not survive H1",
-      "numbers": {"S0": [0.0, 0.963964], "S1": [0.996377, 0.836837], "S2c": [0.996377, 0.965966], "S2b": [0.996377, 0.976977]},
-      "pareto_classification_S2c": "PARETO_DOMINANT over both S0 and S1",
-      "caveat": "Pareto dominance on axes where one axis (O) has no demonstrated operational consequence is dominance on an assumption. Reported as measured; not read as vindication."
-    },
-    {
-      "id": "H4",
-      "hypothesis": "DETECTOR DOMINANCE: the improvement comes from adding an evidence term, not from decoupling D from A.",
-      "status": "EMPIRICAL ONLY - TRUE on the real recording, FALSE under sustained invalidity",
-      "design": "each split arm has a matched coupled control carrying identical evidence terms and differing in one boolean: S2a/S1Da, S2b/S1Db, S2c/S1D",
-      "numbers_M1_intermittent": {
-        "detector_gain_hacc_S1Db_minus_S1": 0.138138,
-        "split_gain_hacc_S2b_minus_S1Db": 0.002002,
-        "detector_gain_status_S1Da_minus_S1": -0.836837,
-        "split_gain_status_S2a_minus_S1Da": 0.0,
-        "detector_gain_both_S1D_minus_S1": -0.017017,
-        "split_gain_both_S2c_minus_S1D": 0.146146
-      },
-      "numbers_synthetic_patterns": {
-        "detector_gain_every_pattern": 0.0,
-        "split_gain_P5_PERMANENT_status": 0.961143,
-        "split_gain_P1_BURST_ABOVE_TAU_status": 0.020571
-      },
-      "reading": "On M1 the h_acc term alone, WITH D coupled to A, recovers +0.138 and the split adds only +0.002 on top: detector-dominant. On every synthetic pattern the detector gain is exactly 0.0000 and the split gain is the whole effect. The difference is how long A stays closed at a stretch.",
-      "resolution": "the split earns its complexity in proportion to SUSTAINED closure duration, not to closed fraction"
-    },
-    {
-      "id": "H5",
-      "claim": "The value of the split is governed by the longest CONSECUTIVE A-closed run, not by the fraction of time A is closed.",
-      "status": "EMPIRICAL ONLY - PROVISIONAL",
-      "numbers": {
-        "P2_ALTERNATING": {"A_open_frac": 0.5, "longest_A_closed_run_s": 0.2, "split_gain": 0.0},
-        "P4_CLUSTERED": {"A_open_frac": 0.6, "longest_A_closed_run_s": 0.8, "split_gain": 0.0},
-        "P1_BURST_ABOVE_TAU": {"A_open_frac": 0.9706, "longest_A_closed_run_s": 1.0, "split_gain": 0.020571},
-        "P5_PERMANENT": {"A_open_frac": 0.0, "longest_A_closed_run_s": 34.0, "split_gain": 0.961143}
-      },
-      "reading": "P2 has A closed half the time and gains nothing; P1_BURST_ABOVE_TAU has A closed 3% of the time and gains something. Closed fraction is not the predictor.",
-      "mechanism": "T5: the frozen diagnosis smoother is a ~15-tick EWMA, so evidence that alternates faster than that averages away",
-      "caveat": "four points, one fixture family. PROVISIONAL, not a fitted relationship, and no functional form is claimed.",
-      "next_experiment": "sweep sustained-closure duration finely and test the T5 time constant directly"
-    },
-    {
-      "id": "N1",
-      "claim": "The binary status encoding is HARMFUL under intermittent invalidity.",
-      "status": "EMPIRICAL ONLY - NEGATIVE RESULT, KEPT",
-      "numbers": {"S1_D_top_share": 0.836837, "S2a_D_top_share": 0.0, "S2a_final_gps_fault": 0.067394},
-      "reading": "c_status = 1 on a valid observation is MAXIMALLY consistent, which is strong evidence for causes that do not contain the feature -- i.e. for nominal. With 71% of M1 observations valid, the status term spends most ticks arguing against the fault. It is decisive under sustained invalidity and actively destructive under intermittent invalidity.",
-      "implication": "S2c is WORSE than S2b on M1 (0.966 vs 0.977) because the status term drags it down. The best arm on the real recording is the one WITHOUT the status feature."
-    },
-    {
-      "id": "N2",
-      "claim": "The first detector-dominance reading in this study was wrong, because of an instrument bug in this study's own sidecar.",
-      "status": "REFUTED (the earlier reading), corrected",
-      "was": "S1D-S1 = +0.126, S2c-S1D = +0.002, read as detector-dominant on M1",
-      "now": "S1D-S1 = -0.017, S2c-S1D = +0.146",
-      "cause": "the sidecar held 'the last thing I saw' rather than being time-indexed. The core emits the tick at time tau only once a LATER sample arrives, so the sidecar answered a query for tau with state from after tau, and the coupled arm saw evidence at ticks where A was actually closed.",
-      "how_it_was_caught": "the automatic counterexample search reported that the words 'IV' and 'VV' produced identical downstream traces, which cannot be true if the status feature works",
-      "fix": "an ordered log with as-of lookup; no constant changed"
-    },
-    {
-      "id": "N3",
-      "claim": "This study's first h_acc freshness rule reproduced the very retained-state defect the previous work package documented.",
-      "status": "EMPIRICAL ONLY - NEGATIVE RESULT, KEPT, with a POST-HOC fix",
-      "detail": "gating h_acc evidence on ANY message arrival meant a healthy pre-onset accuracy kept being served as current while every arriving message carried h_acc = 0. Under P5_PERMANENT this made S2c report nominal (0.0 top share) while S2a reported gps_fault (0.961).",
-      "fix": "arms S2b2/S2c2 gate on the last message carrying a USABLE h_acc. Labelled POST_HOC everywhere; found by looking at a result.",
-      "impact_on_the_real_recording": "none. S2b2 == S2b and S2c2 == S2c to six decimals on M1, because messages with usable h_acc keep arriving during the valid gaps. The post-hoc fix cannot be accused of rescuing the M1 result because it does not change it."
-    },
-    {
-      "id": "C5",
-      "claim": "Four upstream conditions, one downstream vocabulary: S0 and S1 alias two pairs; the split arms with an h_acc term alias none.",
-      "status": "EMPIRICAL ONLY",
-      "numbers": {
-        "S0": "2/4 distinct; aliases (SENSOR_INVALID, TRANSPORT_MISSING) and (SENSOR_DEGRADED_BUT_VALID, ALL_VALID_NOMINAL)",
-        "S1": "2/4 distinct; same two aliases",
-        "S1D": "3/4; aliases (SENSOR_INVALID, TRANSPORT_MISSING)",
-        "S2a": "3/4; aliases (SENSOR_DEGRADED_BUT_VALID, ALL_VALID_NOMINAL)",
-        "S2c2": "4/4 distinct"
-      },
-      "caveat": "S2b's 4/4 is an artefact of the N3 bug: it distinguishes SENSOR_INVALID from TRANSPORT_MISSING only because invalid messages keep the stale h_acc alive. S2c2 achieves 4/4 without relying on that."
-    },
-    {
-      "id": "C6",
-      "claim": "The same raw condition means different things depending on which committed ingest path decodes it.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED",
-      "numbers": {"words_tested": 120, "semantically_divergent": 79, "shortest_divergent_word": "I"},
-      "detail": "the v1.1 aircraft adapter never marks the GPS slot invalid; csia/runtime/plugins.py does, for the same fix_type < 3, into the same frozen core. A single no-fix message is enough to separate them.",
-      "note": "tick-count differences (106/120 words) also move with the stamping convention and are NOT counted as semantic divergence",
-      "artifact": "results/INGEST_PATH_SEMANTIC_EQUIVALENCE.csv"
-    },
-    {
-      "id": "C7",
-      "claim": "Automatic search finds the semantic-collapse witness without being told what to look for, and the minimum distinguishing word length rises across the arms.",
-      "status": "EMPIRICAL ONLY",
-      "numbers": {"S0": ["I", "N"], "S1": ["VV", "IV"], "S2c2": ["III", "INI"]},
-      "reading": "S0's witness has length 1: one message reporting no fix is downstream-identical to no message at all"
-    },
-    {
-      "id": "C8",
-      "claim": "GNSS is the ONLY sensor family in this stack with all four ingredients the split needs.",
-      "status": "PROVED - NOVELTY NOT ESTABLISHED (source audit only)",
-      "numbers": {"gnss": "4/4", "battery": "3/4", "vibration": "2/4", "esc/estimator/imu0/imu1/magnetometer": "1/4", "barometer": "0/4"},
-      "detail": "battery's only blocker is that the -1 sentinel reject does not delete the retained value; every other family has no explicit INVALID state at all",
-      "implication": "Reviewer G is conceded. This result is GNSS-specific in this implementation, and the audit says exactly why."
-    },
-    {
-      "id": "C9",
-      "claim": "Clean controls: no arm leads with gps_fault on either clean fixture. The added-feature arms drive the clean posterior slightly LOWER (0.0 vs 6.4e-05).",
-      "status": "EMPIRICAL ONLY",
-      "note": "the arms are therefore NOT identical on clean data. A healthy h_acc is maximally consistent, which actively pushes gps_fault down. Directionally safe -- fewer false alarms -- but it is a change, and both clean fixtures are short and one holds the GNSS payload constant. Real-flight false-alarm behaviour is untested (see the HIL plan, LEVEL 3)."
-    },
-    {
-      "id": "C10",
-      "claim": "The split has no measurable compute cost in this implementation.",
-      "status": "EMPIRICAL ONLY",
-      "numbers": {"S0_us_per_tick": 1048.22, "S1_us_per_tick": 1080.35, "S2c_us_per_tick": 1050.69, "additional_features_per_tick_S2c": 2, "additional_state_fields_per_source": 3},
-      "caveat": "wall time includes MAVLink decoding and the whole adapter path, so these are an upper bound on the arm's own cost rather than a measurement of it"
-    },
-    {
-      "id": "N4",
-      "claim": "NOVELTY",
-      "status": "NOT ESTABLISHED",
-      "note": "No literature search was performed. Separating validity from status metadata is long-standing practice in avionics and in real-time middleware; Reviewer B is conceded. What this package establishes is a measured instance in one implemented architecture, with a closed-form model validated to 1e-5, not that any of it is new."
-    }
-  ],
-  "explicitly_not_claimed": [
-    "that A and D need to be separate variables in assurance architectures generally",
-    "that the split is safe: it was tested for false alarms on two short clean fixtures only",
-    "that the status encoding used here is a good one -- it is the strongest the frozen consistency domain permits and it is harmful under intermittent invalidity (N1)",
-    "that any of this generalises beyond GNSS: the cross-sensor audit finds no other 4/4 candidate (C8)",
-    "that anything here is a hardware result -- no hardware was connected",
-    "that S2 should be adopted; no repair is proposed and the coupled alternative wins on the one real recording once the h_acc term is present"
-  ]
+  "topic": "dual-channel admissibility: do operational admissibility (A) and diagnostic evidential admissibility (D) need to be different state variables?"
 }
