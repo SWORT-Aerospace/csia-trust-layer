@@ -403,3 +403,20 @@ invalidity-masking: invalidity-trace
 	$(PY) research/invalidity_masking/validity_semantics_matrix.py
 	$(PY) research/invalidity_masking/invalid_message_gate_trace.py
 	$(PY) research/invalidity_masking/boundary_sweep.py
+
+# Dual-channel admissibility: does operational admissibility (A) need to be a
+# different state variable from diagnostic evidential admissibility (D)?
+# NO SIMULATOR. Every measurement is a deterministic replay of recordings
+# already in the tree, or a closed-form derivation. About four minutes.
+.PHONY: dual-reproduce
+dual-reproduce:
+	$(PY) research/dual_admissibility/reproduce_s0_s1.py
+
+.PHONY: dual-admissibility
+dual-admissibility: dual-reproduce
+	$(PY) research/dual_admissibility/source_validity_role_audit.py
+	$(PY) research/dual_admissibility/three_arm_experiment.py
+	$(PY) research/dual_admissibility/pattern_and_transport.py
+	$(PY) research/dual_admissibility/formal_analysis.py
+	$(PY) research/dual_admissibility/semantic_search.py
+	$(PY) research/dual_admissibility/cross_sensor_audit.py

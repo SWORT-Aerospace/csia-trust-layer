@@ -1,0 +1,250 @@
+{
+  "artifact": "CROSS_SENSOR_CANDIDATE_AUDIT",
+  "candidates": [
+    "gnss"
+  ],
+  "criteria": [
+    "an explicit INVALID state the source can report",
+    "a path by which invalid becomes no-update downstream",
+    "one gate controlling both operational and diagnostic use",
+    "a health field that stays meaningful once the value is inadmissible (T3's necessary condition)"
+  ],
+  "next_two_modalities": [
+    "gnss"
+  ],
+  "ranking": [
+    {
+      "blocker": "none",
+      "candidate": true,
+      "criteria_met": 4,
+      "family": "gnss",
+      "rank": 1
+    },
+    {
+      "blocker": "nothing to become a no-update",
+      "candidate": false,
+      "criteria_met": 3,
+      "family": "battery",
+      "rank": 2
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update",
+      "candidate": false,
+      "criteria_met": 2,
+      "family": "vibration",
+      "rank": 3
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no operational consumer reads it, so there is no A to separate D from",
+      "candidate": false,
+      "criteria_met": 1,
+      "family": "esc",
+      "rank": 4
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no operational consumer reads it, so there is no A to separate D from",
+      "candidate": false,
+      "criteria_met": 1,
+      "family": "estimator",
+      "rank": 5
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no health field survives value loss, so T3 says the split provably cannot help",
+      "candidate": false,
+      "criteria_met": 1,
+      "family": "imu0",
+      "rank": 6
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no health field survives value loss, so T3 says the split provably cannot help",
+      "candidate": false,
+      "criteria_met": 1,
+      "family": "imu1",
+      "rank": 7
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no health field survives value loss, so T3 says the split provably cannot help",
+      "candidate": false,
+      "criteria_met": 1,
+      "family": "magnetometer",
+      "rank": 8
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no operational consumer reads it, so there is no A to separate D from; no health field survives value loss, so T3 says the split provably cannot help",
+      "candidate": false,
+      "criteria_met": 0,
+      "family": "barometer",
+      "rank": 9
+    },
+    {
+      "blocker": "no explicit INVALID state in any adapter; nothing to become a no-update; no operational consumer reads it, so there is no A to separate D from; no health field survives value loss, so T3 says the split provably cannot help",
+      "candidate": false,
+      "criteria_met": 0,
+      "family": "rangefinder_or_air_data",
+      "rank": 10
+    }
+  ],
+  "rows": [
+    {
+      "admissible_channels": "gnss.position;gnss.velocity",
+      "candidate_for_split": true,
+      "contract_channels": "gnss.position;gnss.velocity;gnss.velocity_z",
+      "core_sensor": "gps",
+      "explicit_invalid_sites": "csia/aircraft/adapters/ardupilot.py:234;csia/aircraft/adapters/px4.py:225",
+      "family": "gnss",
+      "has_explicit_invalid_state": true,
+      "health_fields_surviving_value_loss": "fix_type;satellites_visible;h_acc;v_acc;eph;epv;vel_acc;hdg_acc",
+      "invalid_becomes_no_update": true,
+      "invalid_reason": "NO_3D_FIX",
+      "no_update_sites": "csia/aircraft/adapters/ardupilot.py:232 pops gnss.position;csia/aircraft/adapters/ardupilot.py:233 pops gnss.velocity;csia/aircraft/adapters/px4.py:223 pops gnss.position;csia/aircraft/adapters/px4.py:224 pops gnss.velocity",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "fresh@csia/runtime/failsafe.py:144;fresh@csia/runtime/failsafe.py:145;fresh@csia/runtime/failsafe.py:146;trust@csia/runtime/failsafe.py:144",
+      "protocol": "GPS_RAW_INT / vehicle_gps_position"
+    },
+    {
+      "admissible_channels": "",
+      "candidate_for_split": false,
+      "contract_channels": "",
+      "core_sensor": "baro",
+      "explicit_invalid_sites": "",
+      "family": "barometer",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": false,
+      "operational_consumer_sites": "",
+      "protocol": "SCALED_PRESSURE / sensor_baro"
+    },
+    {
+      "admissible_channels": "",
+      "candidate_for_split": false,
+      "contract_channels": "",
+      "core_sensor": "mag",
+      "explicit_invalid_sites": "",
+      "family": "magnetometer",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "fresh@csia/runtime/failsafe.py:168;trust@csia/runtime/failsafe.py:168",
+      "protocol": "RAW_IMU / SCALED_IMU* / sensor_mag"
+    },
+    {
+      "admissible_channels": "imu0.accel;imu0.gyro",
+      "candidate_for_split": false,
+      "contract_channels": "imu0.accel;imu0.gyro",
+      "core_sensor": "imu0",
+      "explicit_invalid_sites": "",
+      "family": "imu0",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "trust@csia/runtime/failsafe.py:129;trust@csia/runtime/failsafe.py:130",
+      "protocol": "RAW_IMU / SCALED_IMU / HIGHRES_IMU"
+    },
+    {
+      "admissible_channels": "imu1.accel;imu1.gyro",
+      "candidate_for_split": false,
+      "contract_channels": "imu1.accel;imu1.gyro",
+      "core_sensor": "imu1",
+      "explicit_invalid_sites": "",
+      "family": "imu1",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "trust@csia/runtime/failsafe.py:129;trust@csia/runtime/failsafe.py:130",
+      "protocol": "SCALED_IMU2 / HIGHRES_IMU"
+    },
+    {
+      "admissible_channels": "battery.current;battery.voltage",
+      "candidate_for_split": false,
+      "contract_channels": "battery.current;battery.voltage",
+      "core_sensor": "battery",
+      "explicit_invalid_sites": "csia/aircraft/adapters/ardupilot.py:181;csia/aircraft/adapters/px4.py:174",
+      "family": "battery",
+      "has_explicit_invalid_state": true,
+      "health_fields_surviving_value_loss": "battery_remaining;charge_state;fault_bitmask;time_remaining;temperature",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "SENTINEL",
+      "no_update_sites": "",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "fresh@csia/runtime/failsafe.py:155;trust@csia/runtime/failsafe.py:155",
+      "protocol": "BATTERY_STATUS / battery_status"
+    },
+    {
+      "admissible_channels": "",
+      "candidate_for_split": false,
+      "contract_channels": "esc.current;esc.rpm",
+      "core_sensor": "motor_esc",
+      "explicit_invalid_sites": "",
+      "family": "esc",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "temperature",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": false,
+      "operational_consumer_sites": "",
+      "protocol": "ESC_TELEMETRY_1_TO_4 / ESC_STATUS / esc_status"
+    },
+    {
+      "admissible_channels": "vibration.rms",
+      "candidate_for_split": false,
+      "contract_channels": "vibration.rms",
+      "core_sensor": "vibration",
+      "explicit_invalid_sites": "",
+      "family": "vibration",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "clipping_0;clipping_1;clipping_2",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": true,
+      "operational_consumer_sites": "fresh@csia/runtime/failsafe.py:161;trust@csia/runtime/failsafe.py:161",
+      "protocol": "VIBRATION / vehicle_imu_status"
+    },
+    {
+      "admissible_channels": "",
+      "candidate_for_split": false,
+      "contract_channels": "estimator.flight_mode;estimator.variances",
+      "core_sensor": "",
+      "explicit_invalid_sites": "",
+      "family": "estimator",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "velocity_variance;pos_horiz_variance;pos_vert_variance;compass_variance;flags",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": false,
+      "operational_consumer_sites": "",
+      "protocol": "EKF_STATUS_REPORT / estimator_status"
+    },
+    {
+      "admissible_channels": "",
+      "candidate_for_split": false,
+      "contract_channels": "",
+      "core_sensor": "",
+      "explicit_invalid_sites": "",
+      "family": "rangefinder_or_air_data",
+      "has_explicit_invalid_state": false,
+      "health_fields_surviving_value_loss": "",
+      "invalid_becomes_no_update": false,
+      "invalid_reason": "",
+      "no_update_sites": "",
+      "one_gate_both_roles": false,
+      "operational_consumer_sites": "",
+      "protocol": "NOT MAPPED IN THIS STACK"
+    }
+  ],
+  "scope": "SOURCE AUDIT ONLY. No cross-sensor experiment was run and no generalisation is claimed."
+}
