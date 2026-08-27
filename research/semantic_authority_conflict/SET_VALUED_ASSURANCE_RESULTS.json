@@ -1,0 +1,290 @@
+{
+  "artifact": "SET_VALUED_ASSURANCE_RESULTS",
+  "cases": {
+    "battery.current_not_measured": {
+      "Y_star": {
+        "ACTION": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "()",
+            "C_consumer_B": "()",
+            "C_consumer_C": "()"
+          }
+        },
+        "ASSURANCE": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "(('NORMAL',), None)",
+            "C_consumer_B": "(('NORMAL',), None)",
+            "C_consumer_C": "(('NORMAL',), None)"
+          }
+        },
+        "DIAGNOSIS": {
+          "attributable": false,
+          "control_agrees": false,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(0.9953, 0.9954, 0.9955)",
+            "C_consumer_B": "(0.9613, 0.9615, 0.9618, 0.962, 0.9622, 0.9624, 0.9627, 0.9629, 0.9631, 0.9633, 0.9635, 0.9637, 0.9639)",
+            "C_consumer_C": "(0.9953, 0.9954, 0.9955)"
+          }
+        },
+        "EVIDENCE": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "(True, 0.52)",
+            "C_consumer_B": "(True, 0.52)",
+            "C_consumer_C": "(True, 0.52)"
+          }
+        },
+        "STATE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(('V',), ('V',))",
+            "C_consumer_B": "(('M',), ('V',))",
+            "C_consumer_C": "(('V',), ('V',))"
+          }
+        },
+        "VALUE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 3,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "((5.0,),)",
+            "C_consumer_B": "((0.0,),)",
+            "C_consumer_C": "((-1.0,),)"
+          }
+        }
+      },
+      "authorities": [
+        "C_consumer_A",
+        "C_consumer_B",
+        "C_consumer_C"
+      ],
+      "family": "battery",
+      "minimal_authority_subset": {
+        "ACTION": null,
+        "ASSURANCE": null,
+        "DIAGNOSIS": null,
+        "EVIDENCE": null,
+        "STATE": [
+          "C_consumer_A",
+          "C_consumer_B"
+        ],
+        "VALUE": [
+          "C_consumer_A",
+          "C_consumer_B"
+        ]
+      },
+      "word": "X"
+    },
+    "gnss.no_3d_fix": {
+      "Y_star": {
+        "ACTION": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "('INHIBIT_GPS_MODES', 'SWITCH_NAV_INERTIAL')",
+            "C_consumer_B": "('INHIBIT_GPS_MODES', 'SWITCH_NAV_INERTIAL')",
+            "C_consumer_C": "('INHIBIT_GPS_MODES', 'SWITCH_NAV_INERTIAL')"
+          }
+        },
+        "ASSURANCE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(('NORMAL', 'CAUTION'), 1.36)",
+            "C_consumer_B": "(('NORMAL', 'CAUTION'), 1.04)",
+            "C_consumer_C": "(('NORMAL', 'CAUTION'), 1.04)"
+          }
+        },
+        "DIAGNOSIS": {
+          "attributable": false,
+          "control_agrees": false,
+          "n_distinct": 3,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(0.9953, 0.9954)",
+            "C_consumer_B": "(0.9952,)",
+            "C_consumer_C": "(0.9953,)"
+          }
+        },
+        "EVIDENCE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(True, 0.32)",
+            "C_consumer_B": "(True, np.float64(0.0))",
+            "C_consumer_C": "(True, np.float64(0.0))"
+          }
+        },
+        "STATE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "((), ('V',))",
+            "C_consumer_B": "(('I',), ('I',))",
+            "C_consumer_C": "(('I',), ('I',))"
+          }
+        },
+        "VALUE": {
+          "attributable": false,
+          "control_agrees": false,
+          "n_distinct": 3,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "()",
+            "C_consumer_B": "((0.0, 0.0, 0.0),)",
+            "C_consumer_C": "((0.0, -0.0, 0.0),)"
+          }
+        }
+      },
+      "authorities": [
+        "C_consumer_A",
+        "C_consumer_B",
+        "C_consumer_C"
+      ],
+      "family": "gnss",
+      "minimal_authority_subset": {
+        "ACTION": null,
+        "ASSURANCE": [
+          "C_consumer_A",
+          "C_consumer_B"
+        ],
+        "DIAGNOSIS": null,
+        "EVIDENCE": [
+          "C_consumer_A",
+          "C_consumer_B"
+        ],
+        "STATE": [
+          "C_consumer_A",
+          "C_consumer_B"
+        ],
+        "VALUE": null
+      },
+      "word": "I"
+    },
+    "mag.all_zero_triple": {
+      "Y_star": {
+        "ACTION": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "()",
+            "C_consumer_B": "()",
+            "C_consumer_C": "()"
+          }
+        },
+        "ASSURANCE": {
+          "attributable": false,
+          "control_agrees": true,
+          "n_distinct": 1,
+          "robust": true,
+          "values": {
+            "C_consumer_A": "(('NORMAL',), None)",
+            "C_consumer_B": "(('NORMAL',), None)",
+            "C_consumer_C": "(('NORMAL',), None)"
+          }
+        },
+        "DIAGNOSIS": {
+          "attributable": false,
+          "control_agrees": false,
+          "n_distinct": 3,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(0.9953,)",
+            "C_consumer_B": "(0.9703, 0.9705)",
+            "C_consumer_C": "(0.9937, 0.9921, 0.9905)"
+          }
+        },
+        "EVIDENCE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "(True, 0.08)",
+            "C_consumer_B": "(True, 0.08)",
+            "C_consumer_C": "(True, 0.12)"
+          }
+        },
+        "STATE": {
+          "attributable": true,
+          "control_agrees": true,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "((), ('V',))",
+            "C_consumer_B": "((), ('V',))",
+            "C_consumer_C": "(('V',), ('V',))"
+          }
+        },
+        "VALUE": {
+          "attributable": false,
+          "control_agrees": false,
+          "n_distinct": 2,
+          "robust": false,
+          "values": {
+            "C_consumer_A": "()",
+            "C_consumer_B": "()",
+            "C_consumer_C": "((0.0, -0.0, -0.0),)"
+          }
+        }
+      },
+      "authorities": [
+        "C_consumer_A",
+        "C_consumer_B",
+        "C_consumer_C"
+      ],
+      "family": "mag",
+      "minimal_authority_subset": {
+        "ACTION": null,
+        "ASSURANCE": null,
+        "DIAGNOSIS": null,
+        "EVIDENCE": [
+          "C_consumer_A",
+          "C_consumer_C"
+        ],
+        "STATE": [
+          "C_consumer_A",
+          "C_consumer_C"
+        ],
+        "VALUE": null
+      },
+      "word": "Z"
+    }
+  },
+  "levels": [
+    "VALUE",
+    "STATE",
+    "EVIDENCE",
+    "DIAGNOSIS",
+    "ASSURANCE",
+    "ACTION"
+  ],
+  "note": "Y* is a SET, not a distribution. No authority carries a weight anywhere in this package (item 10)."
+}

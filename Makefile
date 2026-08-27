@@ -523,3 +523,29 @@ ai-contract-defects:
 ai-contract-synthesis: ai-contract-baselines ai-contract-ground \
                        ai-contract-containment ai-contract-score \
                        ai-contract-defects
+
+# ---------------------------------------------------------------------------
+# Semantic-authority conflict (research/semantic_authority_conflict). Verdict
+# is ENGINEERING_INCONSISTENCY_ONLY: the specification and the producer never
+# disagree, every conflict is consumer-side, and none reaches the failsafe
+# action. Read CHATGPT_REVIEW_REPORT.md before quoting any number.
+.PHONY: authority-table
+authority-table:
+	$(PY) research/semantic_authority_conflict/authorities.py
+
+.PHONY: authority-conflicts
+authority-conflicts:
+	$(PY) research/semantic_authority_conflict/conflicts.py
+
+# F(C_a, w) at six levels, with a null control at every level. ~60 s.
+.PHONY: authority-sensitivity
+authority-sensitivity:
+	$(PY) research/semantic_authority_conflict/decision_sensitivity.py
+
+.PHONY: authority-baselines
+authority-baselines:
+	$(PY) research/semantic_authority_conflict/baselines.py
+
+.PHONY: semantic-authority
+semantic-authority: authority-table authority-sensitivity \
+                    authority-conflicts authority-baselines

@@ -1,0 +1,27 @@
+authority_a,authority_b,case,conflict_type,detail,interpretation_a,interpretation_b,raw_state,status
+C_consumer_A,C_consumer_B,battery.current_not_measured,CROSS_CONSUMER,RETAIN_PREVIOUS vs SUBSTITUTE_ZERO,RETAIN_PREVIOUS,SUBSTITUTE_ZERO,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_A,C_consumer_C,battery.current_not_measured,CROSS_CONSUMER,RETAIN_PREVIOUS vs LITERAL_MINUS_ONE,RETAIN_PREVIOUS,LITERAL_MINUS_ONE,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_A,C_producer,battery.current_not_measured,PRODUCER_VS_CONSUMER,RETAIN_PREVIOUS vs NOT_MEASURED,RETAIN_PREVIOUS,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_A,C_spec,battery.current_not_measured,SPEC_VS_CONSUMER,RETAIN_PREVIOUS vs NOT_MEASURED,RETAIN_PREVIOUS,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_B,C_consumer_C,battery.current_not_measured,CROSS_CONSUMER,SUBSTITUTE_ZERO vs LITERAL_MINUS_ONE,SUBSTITUTE_ZERO,LITERAL_MINUS_ONE,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_B,C_producer,battery.current_not_measured,PRODUCER_VS_CONSUMER,SUBSTITUTE_ZERO vs NOT_MEASURED,SUBSTITUTE_ZERO,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_B,C_spec,battery.current_not_measured,SPEC_VS_CONSUMER,SUBSTITUTE_ZERO vs NOT_MEASURED,SUBSTITUTE_ZERO,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_C,C_producer,battery.current_not_measured,PRODUCER_VS_CONSUMER,LITERAL_MINUS_ONE vs NOT_MEASURED,LITERAL_MINUS_ONE,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_consumer_C,C_spec,battery.current_not_measured,SPEC_VS_CONSUMER,LITERAL_MINUS_ONE vs NOT_MEASURED,LITERAL_MINUS_ONE,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,CONFLICT
+C_producer,C_spec,battery.current_not_measured,SPEC_VS_PRODUCER,NOT_MEASURED,NOT_MEASURED,NOT_MEASURED,BATTERY_STATUS.current_battery == -1,AGREEMENT
+C_consumer_A,C_consumer_B,gnss.no_3d_fix,CROSS_CONSUMER,DROP_AND_RECORD_REASON vs SUBSTITUTE_ZERO_MARK_INVALID,DROP_AND_RECORD_REASON,SUBSTITUTE_ZERO_MARK_INVALID,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_A,C_consumer_C,gnss.no_3d_fix,CROSS_CONSUMER,DROP_AND_RECORD_REASON vs PASS_THROUGH_MARK_INVALID,DROP_AND_RECORD_REASON,PASS_THROUGH_MARK_INVALID,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_A,C_producer,gnss.no_3d_fix,PRODUCER_VS_CONSUMER,DROP_AND_RECORD_REASON vs STALE_POSITION_WITH_HONEST_FIX_TYPE,DROP_AND_RECORD_REASON,STALE_POSITION_WITH_HONEST_FIX_TYPE,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_A,C_spec_position_fields,gnss.no_3d_fix,SPEC_VS_CONSUMER,"C_spec_position_fields says nothing about this raw state, so the other is not contradicted",DROP_AND_RECORD_REASON,SILENT,GPS_RAW_INT.fix_type < 3,UNDERSPECIFICATION
+C_consumer_B,C_consumer_C,gnss.no_3d_fix,CROSS_CONSUMER,SUBSTITUTE_ZERO_MARK_INVALID vs PASS_THROUGH_MARK_INVALID,SUBSTITUTE_ZERO_MARK_INVALID,PASS_THROUGH_MARK_INVALID,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_B,C_producer,gnss.no_3d_fix,PRODUCER_VS_CONSUMER,SUBSTITUTE_ZERO_MARK_INVALID vs STALE_POSITION_WITH_HONEST_FIX_TYPE,SUBSTITUTE_ZERO_MARK_INVALID,STALE_POSITION_WITH_HONEST_FIX_TYPE,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_B,C_spec_position_fields,gnss.no_3d_fix,SPEC_VS_CONSUMER,"C_spec_position_fields says nothing about this raw state, so the other is not contradicted",SUBSTITUTE_ZERO_MARK_INVALID,SILENT,GPS_RAW_INT.fix_type < 3,UNDERSPECIFICATION
+C_consumer_C,C_producer,gnss.no_3d_fix,PRODUCER_VS_CONSUMER,PASS_THROUGH_MARK_INVALID vs STALE_POSITION_WITH_HONEST_FIX_TYPE,PASS_THROUGH_MARK_INVALID,STALE_POSITION_WITH_HONEST_FIX_TYPE,GPS_RAW_INT.fix_type < 3,CONFLICT
+C_consumer_C,C_spec_position_fields,gnss.no_3d_fix,SPEC_VS_CONSUMER,"C_spec_position_fields says nothing about this raw state, so the other is not contradicted",PASS_THROUGH_MARK_INVALID,SILENT,GPS_RAW_INT.fix_type < 3,UNDERSPECIFICATION
+C_producer,C_spec_position_fields,gnss.no_3d_fix,SPEC_VS_PRODUCER,"C_spec_position_fields says nothing about this raw state, so the other is not contradicted",STALE_POSITION_WITH_HONEST_FIX_TYPE,SILENT,GPS_RAW_INT.fix_type < 3,UNDERSPECIFICATION
+C_consumer_A,C_consumer_B,mag.all_zero_triple,CROSS_CONSUMER,TREAT_AS_ABSENT_SILENTLY,TREAT_AS_ABSENT_SILENTLY,TREAT_AS_ABSENT_SILENTLY,SCALED_IMU.xmag == ymag == zmag == 0,AGREEMENT
+C_consumer_A,C_consumer_C,mag.all_zero_triple,CROSS_CONSUMER,TREAT_AS_ABSENT_SILENTLY vs LITERAL_ZERO_FIELD,TREAT_AS_ABSENT_SILENTLY,LITERAL_ZERO_FIELD,SCALED_IMU.xmag == ymag == zmag == 0,CONFLICT
+C_consumer_A,C_spec,mag.all_zero_triple,SPEC_VS_CONSUMER,"C_spec says nothing about this raw state, so the other is not contradicted",TREAT_AS_ABSENT_SILENTLY,SILENT,SCALED_IMU.xmag == ymag == zmag == 0,UNDERSPECIFICATION
+C_consumer_B,C_consumer_C,mag.all_zero_triple,CROSS_CONSUMER,TREAT_AS_ABSENT_SILENTLY vs LITERAL_ZERO_FIELD,TREAT_AS_ABSENT_SILENTLY,LITERAL_ZERO_FIELD,SCALED_IMU.xmag == ymag == zmag == 0,CONFLICT
+C_consumer_B,C_spec,mag.all_zero_triple,SPEC_VS_CONSUMER,"C_spec says nothing about this raw state, so the other is not contradicted",TREAT_AS_ABSENT_SILENTLY,SILENT,SCALED_IMU.xmag == ymag == zmag == 0,UNDERSPECIFICATION
+C_consumer_C,C_spec,mag.all_zero_triple,SPEC_VS_CONSUMER,"C_spec says nothing about this raw state, so the other is not contradicted",LITERAL_ZERO_FIELD,SILENT,SCALED_IMU.xmag == ymag == zmag == 0,UNDERSPECIFICATION
