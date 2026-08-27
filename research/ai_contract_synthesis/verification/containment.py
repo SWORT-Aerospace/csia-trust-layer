@@ -66,10 +66,21 @@ DISCARD_MARKERS = ("return None", "pop(", "_reject", "del ", "continue",
                    "raise", "= None")
 
 
+def _is_schema_locator(loc):
+    """`common.xml:GPS_RAW_INT.epv` is a SCHEMA citation, not a file:line.
+
+    The first version tested `loc.endswith(".xml")`, which is false for a
+    schema locator because the field name comes last. It therefore treated
+    `common.xml` as a source path and crashed on the first B2 candidate.
+    Recorded in FREEZE_AMENDMENTS.json rather than quietly corrected.
+    """
+    return ":" in loc and loc.rsplit(":", 1)[0].endswith(".xml")
+
+
 def _file_of(clause):
     for s in clause.get("support") or []:
         loc = s["locator"]
-        if not loc.endswith(".xml") and ":" in loc:
+        if ":" in loc and not _is_schema_locator(loc):
             return loc.rsplit(":", 1)[0]
     return None
 
@@ -185,7 +196,7 @@ def c6_effect_corroboration(clause):
     near = set()
     for s in clause.get("support") or []:
         loc = s["locator"]
-        if loc.endswith(".xml") or ":" not in loc:
+        if _is_schema_locator(loc) or ":" not in loc:
             continue
         ref = loc.rsplit(":", 1)[1]
         m = re.fullmatch(r"(\d+)(?:-(\d+))?", ref)
@@ -202,7 +213,7 @@ def c6_effect_corroboration(clause):
 
 
 def _is_comment_line(locator):
-    if locator.endswith(".xml") or ":" not in locator:
+    if _is_schema_locator(locator) or ":" not in locator:
         return False
     path, ref = locator.rsplit(":", 1)
     if not re.fullmatch(r"\d+", ref):

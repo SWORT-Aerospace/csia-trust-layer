@@ -1,0 +1,20 @@
+{
+  "amendments": [
+    {
+      "amends_a_verifier_not_a_prediction": true,
+      "file": "verification/containment.py",
+      "hash_at_freeze": "f55a297a25ce7d46ce2f9a301ad216ae5462988e3d54b8576d6d285f48b78083",
+      "hash_now": "9bcfd2175435661b265e229c757c18a47656f8ced961ce64473ce75af590b612",
+      "prediction_files_unchanged": [
+        "candidates/B1_CODE_ONLY.json",
+        "candidates/NONSCORED_HALLUCINATION.json"
+      ],
+      "what": "`_file_of` tested `locator.endswith('.xml')` to decide whether a citation was a schema reference. A schema locator is `common.xml:MESSAGE.field`, so the field name comes last and the test was always false: the verifier treated `common.xml` as a source path and raised FileNotFoundError on the first B2 candidate.",
+      "what_it_DOES_affect": "Nothing that was measured before the fix. It made the B2/B3 defect-discovery pass runnable at all; that pass had produced no numbers before.",
+      "when": "after SOURCE_AUDITED_REFERENCE was built",
+      "why_it_is_not_a_result_change": "The hallucination fixtures cite only source files, never schema locators, so the containment path was never reached. Containment was re-run after the fix and every fixture produced the identical phase-1 verdict: 6/6 SOURCE_AMBIGUOUS, 6/6 stopped before phase 2."
+    }
+  ],
+  "artifact": "FREEZE_AMENDMENTS",
+  "why_this_file_exists": "FREEZE.json is left byte-for-byte as it was committed before the reference existed -- it is the ordering evidence and must not be rewritten. Any change to a frozen artifact AFTER that point is recorded here instead, with the reason, so `freeze.py --check` reporting drift is explained rather than explained away."
+}

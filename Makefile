@@ -486,3 +486,40 @@ evidence-px4:
 .PHONY: evidence-semantics
 evidence-semantics: evidence-reproduce evidence-check evidence-self-audit \
                     evidence-sensors evidence-px4
+
+# ---------------------------------------------------------------------------
+# AI-assisted evidence contract synthesis (research/ai_contract_synthesis).
+# Verdict is HEURISTICS_SUFFICIENT: the MAVLink schema already carries the
+# sentinel semantics in a machine-readable `invalid=` attribute, and a ~20-line
+# lookup beats every AI condition on the frozen pilot. Read
+# CHATGPT_REVIEW_REPORT.md section 31 before quoting any number.
+.PHONY: ai-contract-freeze-check
+ai-contract-freeze-check:
+	$(PY) research/ai_contract_synthesis/freeze.py --check
+
+.PHONY: ai-contract-baselines
+ai-contract-baselines:
+	$(PY) research/ai_contract_synthesis/baselines/b0_heuristic.py
+
+.PHONY: ai-contract-ground
+ai-contract-ground:
+	$(PY) research/ai_contract_synthesis/verification/grounding.py
+
+# Six deliberately wrong contracts against six NON-SCORED fixtures. Tool
+# validation, not a scientific result, and the rate is fitted.
+.PHONY: ai-contract-containment
+ai-contract-containment:
+	$(PY) research/ai_contract_synthesis/verification/containment.py
+
+.PHONY: ai-contract-score
+ai-contract-score:
+	$(PY) research/ai_contract_synthesis/score.py
+
+.PHONY: ai-contract-defects
+ai-contract-defects:
+	$(PY) research/ai_contract_synthesis/defect_discovery.py
+
+.PHONY: ai-contract-synthesis
+ai-contract-synthesis: ai-contract-baselines ai-contract-ground \
+                       ai-contract-containment ai-contract-score \
+                       ai-contract-defects

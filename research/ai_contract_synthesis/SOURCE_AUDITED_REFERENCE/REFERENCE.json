@@ -1,0 +1,3099 @@
+{
+  "NOT": [
+    "ground truth",
+    "a gold standard",
+    "human reviewed",
+    "independent of the predictions"
+  ],
+  "artifact": "SOURCE_AUDITED_REFERENCE",
+  "cases": [
+    {
+      "case_id": "BATTERY_STATUS.id",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "id",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Battery ID",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.battery_function",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "battery_function",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Function of the battery",
+        "dialect": "common.xml",
+        "enum": "MAV_BATTERY_FUNCTION",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.type",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:102",
+          "text": "if g(\"type\", MAV_TYPE_GCS) == MAV_TYPE_GCS:"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "type",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [],
+      "schema": {
+        "description": "Type (chemistry) of the battery",
+        "dialect": "common.xml",
+        "enum": "MAV_BATTERY_TYPE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.temperature",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== INT16_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.temperature",
+              "quote": "invalid=\"INT16_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [],
+      "schema": {
+        "description": "Temperature of the battery. INT16_MAX for unknown temperature.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "INT16_MAX",
+        "units": "cdegC"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.voltages",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== [UINT16_MAX]",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.voltages",
+              "quote": "invalid=\"[UINT16_MAX]\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:15",
+          "text": "* `voltages[i] == 65535` means \"cell not present\" and must be excluded from"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:171",
+          "text": "volts = [v for v in (g(\"voltages\", []) or [])"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "voltages",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [],
+      "schema": {
+        "description": "Battery voltage of cells 1 to 10 (see voltages_ext for cells 11-14). Cells in this field above the valid cell count for this battery should have the UINT16_MAX value. If individual cell voltages are unknown or not measured for this battery, then the overall battery voltage should be filled in cell 0, with all others set to UINT16_MAX. If the voltage of the battery is greater than (UINT16_MAX - 1),",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "[UINT16_MAX]",
+        "units": "mV"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.current_battery",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== -1",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.current_battery",
+              "quote": "invalid=\"-1\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:14",
+          "text": "* `BATTERY_STATUS.current_battery == -1` means \"not measured\", not 0 A."
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:176",
+          "text": "cur = g(\"current_battery\", CURRENT_NOT_MEASURED)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "current_battery",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [],
+      "schema": {
+        "description": "Battery current, -1: autopilot does not measure the current. Value may overflow/rollover for very high currents (> 327.67A)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "-1",
+        "units": "cA"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.current_consumed",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== -1",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.current_consumed",
+              "quote": "invalid=\"-1\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "current_consumed",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Consumed charge, -1: autopilot does not provide consumption estimate",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "-1",
+        "units": "mAh"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.energy_consumed",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== -1",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.energy_consumed",
+              "quote": "invalid=\"-1\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "energy_consumed",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Consumed energy, -1: autopilot does not provide energy consumption estimate",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "-1",
+        "units": "hJ"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.battery_remaining",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== -1",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:BATTERY_STATUS.battery_remaining",
+              "quote": "invalid=\"-1\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "battery_remaining",
+      "has_explicit_state": true,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "-1",
+        "units": "%"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.time_remaining",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_remaining",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Remaining battery time, 0: autopilot does not provide remaining battery time estimate",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "s"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.charge_state",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "charge_state",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "State for extent of discharge, provided by autopilot for warning or external reactions",
+        "dialect": "common.xml",
+        "enum": "MAV_BATTERY_CHARGE_STATE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.voltages_ext",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "voltages_ext",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Battery voltages for cells 11 to 14. Cells above the valid cell count for this battery should have a value of 0, where zero indicates not supported (note, this is different than for the voltages field and allows empty byte truncation). If the measured value is 0 then 1 should be sent instead.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mV"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.mode",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "mode",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Battery mode. Default (0) is that battery mode reporting is not supported or battery is in normal-use mode.",
+        "dialect": "common.xml",
+        "enum": "MAV_BATTERY_MODE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "BATTERY_STATUS.fault_bitmask",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "fault_bitmask",
+      "has_explicit_state": false,
+      "message": "BATTERY_STATUS",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Fault/health indications. These should be set when charge_state is MAV_BATTERY_CHARGE_STATE_FAILED or MAV_BATTERY_CHARGE_STATE_UNHEALTHY (if not, fault reporting is not supported).",
+        "dialect": "common.xml",
+        "enum": "MAV_BATTERY_FAULT",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.flags",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:210",
+          "text": "\"flags\": g(\"flags\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "flags",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Flags.",
+        "dialect": "ardupilotmega.xml",
+        "enum": "EKF_STATUS_FLAGS",
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.velocity_variance",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:205",
+          "text": "\"velocity_variance\": g(\"velocity_variance\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "velocity_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Velocity variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.pos_horiz_variance",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:206",
+          "text": "\"pos_horiz_variance\": g(\"pos_horiz_variance\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "pos_horiz_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Horizontal Position variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.pos_vert_variance",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:207",
+          "text": "\"pos_vert_variance\": g(\"pos_vert_variance\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "pos_vert_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Vertical Position variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.compass_variance",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:208",
+          "text": "\"compass_variance\": g(\"compass_variance\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "compass_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Compass variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.terrain_alt_variance",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:209",
+          "text": "\"terrain_alt_variance\": g(\"terrain_alt_variance\", None),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "terrain_alt_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [],
+      "schema": {
+        "description": "Terrain Altitude variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "EKF_STATUS_REPORT.airspeed_variance",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "airspeed_variance",
+      "has_explicit_state": false,
+      "message": "EKF_STATUS_REPORT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Airspeed variance.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.temperature",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [],
+      "schema": {
+        "description": "Temperature.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "degC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.voltage",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:174",
+          "text": "self._put(\"battery.voltage\", sum(volts) / 1e3,"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "voltage",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [],
+      "schema": {
+        "description": "Voltage.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "cV"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.current",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:178",
+          "text": "self._put(\"battery.current\", float(cur) / 100.0,"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:181",
+          "text": "self._reject_sentinel(\"battery.current\")"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:194",
+          "text": "cur = np.asarray(list(g(\"current\", [0] * 4))[:4], dtype=float)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:200",
+          "text": "self._put(\"esc.current\", cur, t_source=t_src, unit=\"A\")"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "current",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [],
+      "schema": {
+        "description": "Current.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "cA"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.totalcurrent",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "totalcurrent",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Total current.",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mAh"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.rpm",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:193",
+          "text": "rpm = np.asarray(list(g(\"rpm\", []))[:4], dtype=float)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:197",
+          "text": "if rpm.size:"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:198",
+          "text": "self._put(\"esc.rpm\", rpm, t_source=t_src, unit=\"rpm\")"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "rpm",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [],
+      "schema": {
+        "description": "RPM (eRPM).",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "rpm"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.count",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "count",
+      "has_explicit_state": false,
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "count of telemetry packets received (wraps at 65535).",
+        "dialect": "ardupilotmega.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.time_usec",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:218",
+          "text": "t_us = g(\"time_usec\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_usec",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "us"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.fix_type",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:12",
+          "text": "* `GPS_RAW_INT.fix_type < 3` is **not** a position of zero. Encoding it as one"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:227",
+          "text": "fix = g(\"fix_type\", 0)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "fix_type",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "GPS fix type.",
+        "dialect": "common.xml",
+        "enum": "GPS_FIX_TYPE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.lat",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:237",
+          "text": "lat, lon, alt = g(\"lat\", None), g(\"lon\", None), g(\"alt\", None)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:238",
+          "text": "if lat is None or lon is None or alt is None:"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:241",
+          "text": "self._origin = (lat, lon, alt / 1e3)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:244",
+          "text": "pos = np.array([(lat - o[0]) * 1e-7 * 111_320.0,"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "lat",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "Latitude (WGS84, EGM96 ellipsoid)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "degE7"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.lon",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:237",
+          "text": "lat, lon, alt = g(\"lat\", None), g(\"lon\", None), g(\"alt\", None)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:238",
+          "text": "if lat is None or lon is None or alt is None:"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:241",
+          "text": "self._origin = (lat, lon, alt / 1e3)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:245",
+          "text": "-(lon - o[1]) * 1e-7 * 111_320.0 * coslat,"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "lon",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "Longitude (WGS84, EGM96 ellipsoid)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "degE7"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.alt",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:157",
+          "text": "alt = float(pressure_to_altitude(np.array([float(p)]))[0])"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:158",
+          "text": "self._put(\"baro.altitude\", alt, t_source=t_src,"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:237",
+          "text": "lat, lon, alt = g(\"lat\", None), g(\"lon\", None), g(\"alt\", None)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:238",
+          "text": "if lat is None or lon is None or alt is None:"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:241",
+          "text": "self._origin = (lat, lon, alt / 1e3)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:246",
+          "text": "(alt / 1e3 - o[2])])"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "alt",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "Altitude (MSL). Positive for up. Note that virtually all GPS modules provide the MSL altitude in addition to the WGS84 altitude.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mm"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.eph",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== UINT16_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.eph",
+              "quote": "invalid=\"UINT16_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "eph",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "GPS HDOP horizontal dilution of position (unitless * 100). If unknown, set to: UINT16_MAX",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "UINT16_MAX",
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.epv",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== UINT16_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.epv",
+              "quote": "invalid=\"UINT16_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "epv",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "GPS VDOP vertical dilution of position (unitless * 100). If unknown, set to: UINT16_MAX",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "UINT16_MAX",
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.vel",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== UINT16_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.vel",
+              "quote": "invalid=\"UINT16_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:250",
+          "text": "vel_cms, cog_cdeg = g(\"vel\", None), g(\"cog\", None)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:257",
+          "text": "vel = np.array([spd * np.cos(cog), -spd * np.sin(cog), 0.0])"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:258",
+          "text": "if all(finite(x) for x in vel):"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:259",
+          "text": "self._put(\"gnss.velocity\", vel, t_source=t_src,"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "vel",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "GPS ground speed. If unknown, set to: UINT16_MAX",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "UINT16_MAX",
+        "units": "cm/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.cog",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== UINT16_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.cog",
+              "quote": "invalid=\"UINT16_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:250",
+          "text": "vel_cms, cog_cdeg = g(\"vel\", None), g(\"cog\", None)"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:253",
+          "text": "cog = float(np.deg2rad(float(cog_cdeg) / 100.0))"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:257",
+          "text": "vel = np.array([spd * np.cos(cog), -spd * np.sin(cog), 0.0])"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "cog",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [],
+      "schema": {
+        "description": "Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "UINT16_MAX",
+        "units": "cdeg"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.satellites_visible",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== UINT8_MAX",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.satellites_visible",
+              "quote": "invalid=\"UINT8_MAX\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "satellites_visible",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Number of satellites visible. If unknown, set to UINT8_MAX",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "UINT8_MAX",
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.alt_ellipsoid",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "alt_ellipsoid",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Altitude (above WGS84, EGM96 ellipsoid). Positive for up.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mm"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.h_acc",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "h_acc",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Position uncertainty.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mm"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.v_acc",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "v_acc",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Altitude uncertainty.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mm"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.vel_acc",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "vel_acc",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Speed uncertainty.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mm/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.hdg_acc",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "hdg_acc",
+      "has_explicit_state": false,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Heading / track uncertainty",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "degE5"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "GPS_RAW_INT.yaw",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== 0",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:GPS_RAW_INT.yaw",
+              "quote": "invalid=\"0\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "yaw",
+      "has_explicit_state": true,
+      "message": "GPS_RAW_INT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Yaw in earth frame from north. Use 0 if this GPS does not provide yaw. Use UINT16_MAX if this GPS is configured to provide yaw and is currently unable to provide it. Use 36000 for north.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "0",
+        "units": "cdeg"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.type",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:102",
+          "text": "if g(\"type\", MAV_TYPE_GCS) == MAV_TYPE_GCS:"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "type",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [],
+      "schema": {
+        "description": "Vehicle or component type. For a flight controller component the vehicle type (quadrotor, helicopter, etc.). For other components the component type (e.g. camera, gimbal, etc.). This should be used in preference to component id for identifying the component type.",
+        "dialect": "minimal.xml",
+        "enum": "MAV_TYPE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.autopilot",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "autopilot",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Autopilot type / class. Use MAV_AUTOPILOT_INVALID for components that are not flight controllers.",
+        "dialect": "minimal.xml",
+        "enum": "MAV_AUTOPILOT",
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.base_mode",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:18",
+          "text": "vehicle's. Reading its `base_mode` asserts an armed state the aircraft never"
+        },
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:104",
+          "text": "armed = bool(g(\"base_mode\", 0) & MAV_MODE_FLAG_SAFETY_ARMED)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "base_mode",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [],
+      "schema": {
+        "description": "System mode bitmap.",
+        "dialect": "minimal.xml",
+        "enum": "MAV_MODE_FLAG",
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.custom_mode",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:106",
+          "text": "cm = g(\"custom_mode\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "custom_mode",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [],
+      "schema": {
+        "description": "A bitfield for use for autopilot-specific flags",
+        "dialect": "minimal.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.system_status",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "system_status",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "System status flag.",
+        "dialect": "minimal.xml",
+        "enum": "MAV_STATE",
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "HEARTBEAT.mavlink_version",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "mavlink_version",
+      "has_explicit_state": false,
+      "message": "HEARTBEAT",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version",
+        "dialect": "minimal.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.time_usec",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:218",
+          "text": "t_us = g(\"time_usec\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_usec",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "us"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.xacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xacc",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "X acceleration (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.yacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "yacc",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Y acceleration (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.zacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zacc",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Z acceleration (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.xgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xgyro",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around X axis (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.ygyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ygyro",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Y axis (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.zgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zgyro",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Z axis (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.xmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xmag",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "X Magnetic field (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.ymag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ymag",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Y Magnetic field (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.zmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zmag",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Z Magnetic field (raw)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.id",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "id",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Id. Ids are numbered from 0 and map to IMUs numbered from 1 (e.g. IMU1 will have a message with id=0)",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "RAW_IMU.temperature",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": false,
+      "message": "RAW_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Temperature, 0: IMU does not provide temperature values. If the IMU is at 0C it must send 1 (0.01C).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.time_boot_ms",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:221",
+          "text": "t_ms = g(\"time_boot_ms\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_boot_ms",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (time since system boot).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "ms"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.xacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "X acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.yacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "yacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Y acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.zacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Z acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.xgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around X axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.ygyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ygyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Y axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.zgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Z axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU.xmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "X Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "SCALED_IMU.ymag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ymag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Y Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "SCALED_IMU.zmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Z Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "DEVELOPMENT"
+    },
+    {
+      "case_id": "SCALED_IMU.temperature",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU",
+      "notes": [],
+      "schema": {
+        "description": "Temperature, 0: IMU does not provide temperature values. If the IMU is at 0C it must send 1 (0.01C).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.time_boot_ms",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:221",
+          "text": "t_ms = g(\"time_boot_ms\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_boot_ms",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (time since system boot).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "ms"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.xacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "X acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.yacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "yacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Y acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.zacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Z acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.xgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around X axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.ygyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ygyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Y axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.zgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Z axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.xmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "X Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.ymag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ymag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Y Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.zmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Z Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU2.temperature",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== 0",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:SCALED_IMU2.temperature",
+              "quote": "invalid=\"0\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": true,
+      "message": "SCALED_IMU2",
+      "notes": [],
+      "schema": {
+        "description": "Temperature, 0: IMU does not provide temperature values. If the IMU is at 0C it must send 1 (0.01C).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "0",
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.time_boot_ms",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:221",
+          "text": "t_ms = g(\"time_boot_ms\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_boot_ms",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (time since system boot).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "ms"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.xacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "X acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.yacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "yacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Y acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.zacc",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:130",
+          "text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zacc",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Z acceleration",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mG"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.xgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around X axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.ygyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ygyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Y axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.zgyro",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:131",
+          "text": "gyr = [g(\"xgyro\", 0), g(\"ygyro\", 0), g(\"zgyro\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zgyro",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Angular speed around Z axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mrad/s"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.xmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "xmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "X Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.ymag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "ymag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Y Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.zmag",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:143",
+          "text": "mag = [g(\"xmag\", 0), g(\"ymag\", 0), g(\"zmag\", 0)]"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "zmag",
+      "has_explicit_state": false,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Z Magnetic field",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "mgauss"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_IMU3.temperature",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== 0",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:SCALED_IMU3.temperature",
+              "quote": "invalid=\"0\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": true,
+      "message": "SCALED_IMU3",
+      "notes": [],
+      "schema": {
+        "description": "Temperature, 0: IMU does not provide temperature values. If the IMU is at 0C it must send 1 (0.01C).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "0",
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.time_boot_ms",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:221",
+          "text": "t_ms = g(\"time_boot_ms\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_boot_ms",
+      "has_explicit_state": false,
+      "message": "SCALED_PRESSURE",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (time since system boot).",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "ms"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.press_abs",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:155",
+          "text": "p = g(\"press_abs\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "press_abs",
+      "has_explicit_state": false,
+      "message": "SCALED_PRESSURE",
+      "notes": [],
+      "schema": {
+        "description": "Absolute pressure",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "hPa"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.press_diff",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "press_diff",
+      "has_explicit_state": false,
+      "message": "SCALED_PRESSURE",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Differential pressure 1",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "hPa"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.temperature",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:160",
+          "text": "temp = g(\"temperature\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature",
+      "has_explicit_state": false,
+      "message": "SCALED_PRESSURE",
+      "notes": [],
+      "schema": {
+        "description": "Absolute pressure temperature",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.temperature_press_diff",
+      "clauses": [
+        {
+          "derivation": "MECHANICAL",
+          "kind": "SENTINEL_CONDITION",
+          "raw_condition": "== 0",
+          "state": "X",
+          "support": [
+            {
+              "locator": "common.xml:SCALED_PRESSURE.temperature_press_diff",
+              "quote": "invalid=\"0\""
+            }
+          ],
+          "support_kind": "PROTOCOL_SCHEMA"
+        }
+      ],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "temperature_press_diff",
+      "has_explicit_state": true,
+      "message": "SCALED_PRESSURE",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "Differential pressure temperature (0, if not available). Report values of 0 (or 1) as 1 cdegC.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": "0",
+        "units": "cdegC"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.time_usec",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:218",
+          "text": "t_us = g(\"time_usec\", None)"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "time_usec",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [],
+      "schema": {
+        "description": "Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number.",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": "us"
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.vibration_x",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:185",
+          "text": "vx, vy, vz = (g(\"vibration_x\", 0.0), g(\"vibration_y\", 0.0),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "vibration_x",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [],
+      "schema": {
+        "description": "Vibration levels on X-axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.vibration_y",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:185",
+          "text": "vx, vy, vz = (g(\"vibration_x\", 0.0), g(\"vibration_y\", 0.0),"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "vibration_y",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [],
+      "schema": {
+        "description": "Vibration levels on Y-axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.vibration_z",
+      "clauses": [],
+      "consumed": true,
+      "consumer_evidence": [
+        {
+          "locator": "csia/aircraft/adapters/ardupilot.py:186",
+          "text": "g(\"vibration_z\", 0.0))"
+        }
+      ],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "vibration_z",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [],
+      "schema": {
+        "description": "Vibration levels on Z-axis",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.clipping_0",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "clipping_0",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "first accelerometer clipping count",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.clipping_1",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "clipping_1",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "second accelerometer clipping count",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    },
+    {
+      "case_id": "VIBRATION.clipping_2",
+      "clauses": [],
+      "consumed": false,
+      "consumer_evidence": [],
+      "derivation": {
+        "consumer_clauses": "JUDGEMENT. Read off the committed adapter by the same model that produced the candidates. Every entry cites a line, but the reading of that line is not independent.",
+        "sentinel": "MECHANICAL: the `invalid=` attribute of the field definition. No model judgement."
+      },
+      "field": "clipping_2",
+      "has_explicit_state": false,
+      "message": "VIBRATION",
+      "notes": [
+        "the committed adapter never names this field, so no consumer-side clause exists and no conformance question is answerable"
+      ],
+      "schema": {
+        "description": "third accelerometer clipping count",
+        "dialect": "common.xml",
+        "enum": null,
+        "invalid": null,
+        "units": null
+      },
+      "split": "HELD_OUT"
+    }
+  ],
+  "consumer_clause_derivation": "MODEL JUDGEMENT over cited lines",
+  "counts": {
+    "cases": 106,
+    "explicit_state_NO": 91,
+    "explicit_state_YES": 15,
+    "named_by_the_adapter": 75,
+    "not_in_schema": 0
+  },
+  "sentinel_clause_derivation": "MECHANICAL, from the protocol schema's `invalid=` attribute"
+}
