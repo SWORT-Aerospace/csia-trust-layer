@@ -1,0 +1,301 @@
+{
+  "artifact": "AI_CANDIDATE_CONTRACTS",
+  "condition": "B1_CODE_ONLY",
+  "prompt_version": "semantic_contract_miner_v1",
+  "visible_evidence": [
+    "csia/aircraft/adapters/ardupilot.py",
+    "csia/aircraft/adapters/base.py",
+    "csia/runtime/plugins.py",
+    "csia/runtime/ulog_source.py",
+    "comments inside those files"
+  ],
+  "forbidden_evidence": [
+    "MAVLink message definition XML (any dialect)",
+    "SOURCE_AUDITED_REFERENCE/",
+    "ArduPilot producer source",
+    "docs/simulation/CHANNEL_SEMANTICS.yaml",
+    "any results JSON from research/evidence_semantics"
+  ],
+  "generated_before_reference": true,
+  "candidates": [
+    {
+      "case_id": "GPS_RAW_INT.lat",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "NO_EXPLICIT_SEMANTIC_STATE_FOUND",
+      "clauses": [
+        {
+          "kind": "VALID_CONDITION",
+          "statement": "The consumer tests only for the FIELD BEING ABSENT from the message, not for any sentinel value of lat itself.",
+          "raw_condition": "lat is None",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:238",
+                       "quote": "if lat is None or lon is None or alt is None:"}],
+          "support_kind": "CONSUMER_SOURCE"
+        },
+        {
+          "kind": "INVALID_CONDITION",
+          "statement": "lat is only reached when the message reports a 3-D fix; the no-fix branch returns before lat is read. So the field's usability is gated by fix_type rather than by any encoding in lat.",
+          "raw_condition": "fix_type < 3 (on the containing message)",
+          "state": "I",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:228",
+                       "quote": "if fix is None or fix < 3:"},
+                      {"locator": "csia/aircraft/adapters/ardupilot.py:237",
+                       "quote": "lat, lon, alt = g(\"lat\", None), g(\"lon\", None), g(\"alt\", None)"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.7,
+      "uncertainties": [
+        "Whether the protocol defines a sentinel for lat is not decidable from consumer source: the consumer never tests one, which is consistent both with no sentinel existing and with the consumer ignoring one."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "RAW_IMU.id",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "The committed consumer source never reads this field. There is no visible evidence of any kind about its semantics.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": ["no consumer evidence exists"],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "SCALED_PRESSURE.press_abs",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [
+        {
+          "kind": "VALID_CONDITION",
+          "statement": "The consumer admits the value only when it is present, finite and strictly positive.",
+          "raw_condition": "p is not None and finite(p) and p > 0",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:156",
+                       "quote": "if p is not None and finite(p) and p > 0:"}],
+          "support_kind": "CONSUMER_SOURCE"
+        },
+        {
+          "kind": "RETENTION",
+          "statement": "On a value that fails the guard the consumer does not _put and does not reject: the previously stored value is left in place and ages out. No reason is recorded.",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:155",
+                       "quote": "p = g(\"press_abs\", None)"},
+                      {"locator": "csia/aircraft/adapters/ardupilot.py:156",
+                       "quote": "if p is not None and finite(p) and p > 0:"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.5,
+      "uncertainties": [
+        "The `p > 0` test cannot be classified from consumer source alone. It is consistent with (a) a protocol sentinel of 0, and (b) a plausibility check the consumer invented. These have different contract consequences and the visible evidence does not separate them."
+      ],
+      "contract_status": "CONTRACT_AMBIGUOUS"
+    },
+    {
+      "case_id": "GPS_RAW_INT.epv",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "SENTINEL_CONDITION",
+          "statement": "epv uses UINT16_MAX (65535) to mean the vertical dilution of precision is unknown.",
+          "raw_condition": "== 65535",
+          "state": "X",
+          "support": [],
+          "support_kind": "NONE"
+        }
+      ],
+      "confidence": 0.85,
+      "uncertainties": [
+        "This clause is recalled from general MAVLink knowledge. NOTHING in the evidence visible under B1 supports it: the committed consumer never reads epv. It is emitted here rather than suppressed precisely so the unsupported-assertion metric can count it."
+      ],
+      "contract_status": "UNSUPPORTED_INFERENCE"
+    },
+    {
+      "case_id": "SCALED_IMU2.xacc",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "NO_EXPLICIT_SEMANTIC_STATE_FOUND",
+      "clauses": [
+        {
+          "kind": "VALID_CONDITION",
+          "statement": "The consumer's only test is finiteness across the whole acceleration triple. There is no per-axis sentinel test.",
+          "raw_condition": "all(finite(x) for x in acc)",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:130",
+                       "quote": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"}],
+          "support_kind": "CONSUMER_SOURCE"
+        },
+        {
+          "kind": "PROVENANCE",
+          "statement": "A missing xacc field defaults to 0 rather than being treated as absent, so a fabricated zero is indistinguishable downstream from a measured zero.",
+          "raw_condition": "field absent -> 0",
+          "state": "M",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:130",
+                       "quote": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.75,
+      "uncertainties": [
+        "Whether the protocol defines an invalid encoding for an accelerometer axis is not decidable from consumer source."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.voltage",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "The consumer reads rpm and current from this message and never reads voltage. No visible evidence about this field.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [
+        "The benchmark split marks this case consumed_by_csia=true, but that flag is a plain string match on the token `voltage`, which also occurs in the BATTERY_STATUS branch. The ESC voltage array is not read."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "SCALED_IMU.zacc",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "NO_EXPLICIT_SEMANTIC_STATE_FOUND",
+      "clauses": [
+        {
+          "kind": "VALID_CONDITION",
+          "statement": "Finiteness across the triple is the only test; no per-axis sentinel.",
+          "raw_condition": "all(finite(x) for x in acc)",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:130",
+                       "quote": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.75,
+      "uncertainties": ["as for SCALED_IMU2.xacc"],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.count",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "Never read by the consumer. No visible evidence.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "RAW_IMU.xacc",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "NO_EXPLICIT_SEMANTIC_STATE_FOUND",
+      "clauses": [
+        {
+          "kind": "VALID_CONDITION",
+          "statement": "RAW_IMU is handled by the same branch as SCALED_IMU; the only test is finiteness of the triple.",
+          "raw_condition": "all(finite(x) for x in acc)",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:124",
+                       "quote": "if k in (\"RAW_IMU\", \"SCALED_IMU\", \"SCALED_IMU2\", \"SCALED_IMU3\"):"},
+                      {"locator": "csia/aircraft/adapters/ardupilot.py:130",
+                       "quote": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]"}],
+          "support_kind": "CONSUMER_SOURCE"
+        },
+        {
+          "kind": "SEMANTIC_STATE",
+          "statement": "RAW_IMU and SCALED_IMU are decoded by ONE branch with ONE unit conversion, although the two messages carry different units. If that is wrong for one of them it is a units defect, not an evidence-semantic one, and this clause does not assert which.",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:124",
+                       "quote": "if k in (\"RAW_IMU\", \"SCALED_IMU\", \"SCALED_IMU2\", \"SCALED_IMU3\"):"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.7,
+      "uncertainties": [
+        "Flagged for the record, not asserted: the shared branch applies one mG scaling to both RAW_IMU and SCALED_IMU. Establishing whether that is correct needs the protocol definition, which B1 may not read."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "HEARTBEAT.autopilot",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "The consumer reads HEARTBEAT.type and base_mode; it never reads autopilot.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "SCALED_IMU3.yacc",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "NO_EXPLICIT_SEMANTIC_STATE_FOUND",
+      "clauses": [
+        {
+          "kind": "RETENTION",
+          "statement": "SCALED_IMU3 maps to a node the core does not have, and the whole message is discarded before any field is read. So no value of yacc ever reaches the pipeline.",
+          "support": [{"locator": "csia/aircraft/adapters/ardupilot.py:127",
+                       "quote": "if node == \"imu2\":"},
+                      {"locator": "csia/aircraft/adapters/ardupilot.py:128",
+                       "quote": "self._note_unmapped(k)       # third IMU is not a CSIA node"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.9,
+      "uncertainties": [
+        "The discard is recorded as an unmapped message type rather than as a semantic decision; a reader of the counters cannot tell a deliberately dropped third IMU from a message type nobody implemented."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "VIBRATION.clipping_0",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "The consumer reads vibration_x/y/z only; the clipping counters are never read.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "SCALED_IMU2.temperature",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "The consumer's only `temperature` read is inside the SCALED_PRESSURE branch. The SCALED_IMU branch never reads temperature, so there is no visible evidence about this field.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [
+        "The benchmark split marks this case consumed_by_csia=true. That flag is a plain string match on `temperature` and is a false positive here. The flag is left as frozen rather than corrected after the pilot was drawn."
+      ],
+      "contract_status": "AI_INFERRED"
+    },
+    {
+      "case_id": "VIBRATION.clipping_2",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": true,
+      "abstain_reason": "Never read by the consumer. No visible evidence.",
+      "explicit_semantic_state_found": "UNKNOWN",
+      "clauses": [],
+      "confidence": 0.0,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED"
+    }
+  ]
+}

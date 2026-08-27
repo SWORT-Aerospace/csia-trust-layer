@@ -1,0 +1,148 @@
+{
+  "artifact": "HELD_OUT_PILOT",
+  "cases": [
+    {
+      "case_id": "GPS_RAW_INT.lat",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "lat",
+      "message": "GPS_RAW_INT",
+      "type": "int32_t",
+      "units": "degE7"
+    },
+    {
+      "case_id": "RAW_IMU.id",
+      "consumed_by_csia": false,
+      "dialect": "common.xml",
+      "field": "id",
+      "message": "RAW_IMU",
+      "type": "uint8_t",
+      "units": ""
+    },
+    {
+      "case_id": "SCALED_PRESSURE.press_abs",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "press_abs",
+      "message": "SCALED_PRESSURE",
+      "type": "float",
+      "units": "hPa"
+    },
+    {
+      "case_id": "GPS_RAW_INT.epv",
+      "consumed_by_csia": false,
+      "dialect": "common.xml",
+      "field": "epv",
+      "message": "GPS_RAW_INT",
+      "type": "uint16_t",
+      "units": ""
+    },
+    {
+      "case_id": "SCALED_IMU2.xacc",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "xacc",
+      "message": "SCALED_IMU2",
+      "type": "int16_t",
+      "units": "mG"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.voltage",
+      "consumed_by_csia": false,
+      "dialect": "ardupilotmega.xml",
+      "field": "voltage",
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "type": "uint16_t[4]",
+      "units": "cV"
+    },
+    {
+      "case_id": "SCALED_IMU.zacc",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "zacc",
+      "message": "SCALED_IMU",
+      "type": "int16_t",
+      "units": "mG"
+    },
+    {
+      "case_id": "ESC_TELEMETRY_1_TO_4.count",
+      "consumed_by_csia": false,
+      "dialect": "ardupilotmega.xml",
+      "field": "count",
+      "message": "ESC_TELEMETRY_1_TO_4",
+      "type": "uint16_t[4]",
+      "units": ""
+    },
+    {
+      "case_id": "RAW_IMU.xacc",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "xacc",
+      "message": "RAW_IMU",
+      "type": "int16_t",
+      "units": "mG"
+    },
+    {
+      "case_id": "HEARTBEAT.autopilot",
+      "consumed_by_csia": false,
+      "dialect": "minimal.xml",
+      "field": "autopilot",
+      "message": "HEARTBEAT",
+      "type": "uint8_t",
+      "units": ""
+    },
+    {
+      "case_id": "SCALED_IMU3.yacc",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "yacc",
+      "message": "SCALED_IMU3",
+      "type": "int16_t",
+      "units": "mG"
+    },
+    {
+      "case_id": "VIBRATION.clipping_0",
+      "consumed_by_csia": false,
+      "dialect": "common.xml",
+      "field": "clipping_0",
+      "message": "VIBRATION",
+      "type": "uint32_t",
+      "units": ""
+    },
+    {
+      "case_id": "SCALED_IMU2.temperature",
+      "consumed_by_csia": true,
+      "dialect": "common.xml",
+      "field": "temperature",
+      "message": "SCALED_IMU2",
+      "type": "int16_t",
+      "units": "cdegC"
+    },
+    {
+      "case_id": "VIBRATION.clipping_2",
+      "consumed_by_csia": false,
+      "dialect": "common.xml",
+      "field": "clipping_2",
+      "message": "VIBRATION",
+      "type": "uint32_t",
+      "units": ""
+    }
+  ],
+  "consumed": 7,
+  "messages": [
+    "ESC_TELEMETRY_1_TO_4",
+    "GPS_RAW_INT",
+    "HEARTBEAT",
+    "RAW_IMU",
+    "SCALED_IMU",
+    "SCALED_IMU2",
+    "SCALED_IMU3",
+    "SCALED_PRESSURE",
+    "VIBRATION"
+  ],
+  "not_consumed": 7,
+  "rule": "stratified on consumed_by_csia and capped at 2 per message; within a stratum ordered by SHA-256(salt|case_id) with salt 'csia-ai-contract-synthesis-pilot-v1'. No case was chosen for being interesting.",
+  "salt": "csia-ai-contract-synthesis-pilot-v1",
+  "selected": 14,
+  "target": 14
+}

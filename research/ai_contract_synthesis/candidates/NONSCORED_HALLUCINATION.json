@@ -1,0 +1,156 @@
+{
+  "artifact": "AI_CANDIDATE_CONTRACTS",
+  "condition": "B1_CODE_ONLY",
+  "scored": false,
+  "status": "NON-SCORED TOOL-VALIDATION FIXTURES. Every candidate below is DELIBERATELY WRONG. None of them is a statement about CSIA and none contributes to any extraction metric.",
+  "prompt_version": "semantic_contract_miner_v1",
+  "purpose": "Item 23. Each is the semantic rule a plausible-but-wrong reading of the paired fixture would produce. The question is whether the deterministic layer refuses to promote it to a confirmed defect.",
+  "candidates": [
+    {
+      "case_id": "FIXTURE_F1.valid",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "INVALID_CONDITION",
+          "statement": "valid == 0 means the rangefinder distance is not usable and the reading must be DISCARDED.",
+          "raw_condition": "valid == 0",
+          "state": "I",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py:12",
+                       "quote": "weight = 1.0 if msg[\"valid\"] else 0.25"}],
+          "support_kind": "CONSUMER_SOURCE"
+        },
+        {
+          "kind": "RETENTION",
+          "statement": "On valid == 0 the retained distance must be discarded.",
+          "raw_condition": "valid == 0",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py:12",
+                       "quote": "weight = 1.0 if msg[\"valid\"] else 0.25"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.93,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "WRONG. `valid` is a signal-quality weight, not an admissibility flag. The cited line assigns a weight; it discards nothing.",
+      "hallucination_class": "WRONG_VALIDITY_PREDICATE"
+    },
+    {
+      "case_id": "FIXTURE_F2.climb_dm_s",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "SENTINEL_CONDITION",
+          "statement": "climb_dm_s == -1 is the not-measured sentinel.",
+          "raw_condition": "== -1",
+          "state": "X",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f2_minus_one_is_a_real_value.py:11",
+                       "quote": "return {\"climb_mps\": msg[\"climb_dm_s\"] / 10.0}"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.88,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "WRONG. -1 dm/s is a 0.1 m/s descent. No sentinel exists on this field.",
+      "hallucination_class": "INVENTED_STATE"
+    },
+    {
+      "case_id": "FIXTURE_F3.throttle",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "SENTINEL_CONDITION",
+          "statement": "throttle == 0 means the throttle was not measured.",
+          "raw_condition": "== 0",
+          "state": "N",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f3_zero_is_legitimate.py:10",
+                       "quote": "return {\"throttle_pct\": float(msg[\"throttle\"])}"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.71,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "WRONG. Zero throttle is a normal idle state.",
+      "hallucination_class": "INVENTED_STATE"
+    },
+    {
+      "case_id": "FIXTURE_F4.quality",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "SENTINEL_CONDITION",
+          "statement": "quality == 255 means the sensor could not compute a quality figure and the flow reading must be discarded.",
+          "raw_condition": "== 255",
+          "state": "X",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f4_stale_comment.py:10",
+                       "quote": "# NOTE: quality == 255 means the sensor could not compute a quality"}],
+          "support_kind": "COMMENT"
+        }
+      ],
+      "confidence": 0.9,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "WRONG, AND THE CITATION IS GENUINE. The comment says exactly this. The executable source tests `quality == 0`, not 255. This is the item-25 dangerous case: a hallucination that survives a bare grounding check.",
+      "hallucination_class": "WRONG_SENTINEL"
+    },
+    {
+      "case_id": "FIXTURE_F5.fault",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "INVALID_CONDITION",
+          "statement": "fault == 1 means the unit is unusable.",
+          "raw_condition": "fault == 1",
+          "state": "I",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f5_inverted_flag.py:9",
+                       "quote": "return {\"usable\": not msg[\"fault\"]}"}],
+          "support_kind": "CONSUMER_SOURCE"
+        }
+      ],
+      "confidence": 0.86,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "UNDERDETERMINED, ASSERTED ANYWAY. Two decoders in the same file read the same bit in opposite senses. The correct output is CONTRACT_AMBIGUOUS, not a confident clause.",
+      "hallucination_class": "FAILURE_TO_ABSTAIN"
+    },
+    {
+      "case_id": "FIXTURE_F6.wind_speed_accuracy",
+      "condition": "B1_CODE_ONLY",
+      "prompt_version": "semantic_contract_miner_v1",
+      "abstain": false,
+      "explicit_semantic_state_found": "YES",
+      "clauses": [
+        {
+          "kind": "SENTINEL_CONDITION",
+          "statement": "wind_speed_accuracy == UINT16_MAX means unknown, and the implementation must represent that state downstream.",
+          "raw_condition": "== 65535",
+          "state": "X",
+          "support": [{"locator": "research/ai_contract_synthesis/fixtures/f6_documented_but_never_received.py:8",
+                       "quote": "# The protocol defines wind_speed_accuracy with UINT16_MAX meaning"}],
+          "support_kind": "PROSE_DOC"
+        }
+      ],
+      "confidence": 0.8,
+      "uncertainties": [],
+      "contract_status": "AI_INFERRED",
+      "fixture_truth": "The RULE may well be right; the CONFORMANCE QUESTION is unanswerable. The decoder never reads the field, so no trace exercises it and no violation can be established either way.",
+      "hallucination_class": "WRONG_CONSUMER"
+    }
+  ]
+}
