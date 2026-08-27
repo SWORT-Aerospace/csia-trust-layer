@@ -445,3 +445,44 @@ dual-kill-test:
 	$(PY) research/dual_admissibility_confirmatory/live_vs_inherited.py
 	$(PY) research/dual_admissibility_confirmatory/kill_test.py
 	$(PY) research/dual_admissibility_confirmatory/cross_path_checker.py
+
+# ---------------------------------------------------------------------------
+# Evidence-semantic equivalence (research/evidence_semantics). Stage 0:
+# prior-art red team, formalization, multi-path feasibility. Verdict is
+# IMPLEMENTATION_DEFECTS_ONLY -- see CHATGPT_REVIEW_REPORT.md before reading
+# any number out of these artifacts.
+#
+# Run `evidence-reproduce` FIRST. It is item 12's hard stop: if 79/120 and the
+# shortest 'I' witness do not reproduce exactly it exits 2 and nothing
+# downstream is valid.
+.PHONY: evidence-reproduce
+evidence-reproduce:
+	$(PY) research/evidence_semantics/reproduce_prior_results.py
+
+# The full bounded check: 3 families x 3 ingest paths x 120 words. ~190 s.
+# Deterministic -- re-running produces byte-identical artifacts.
+.PHONY: evidence-check
+evidence-check:
+	$(PY) research/evidence_semantics/contract_checker.py
+
+# Four deliberately faulty NON-SCORED fixtures the checker must catch. Tool
+# validation, not a scientific result.
+.PHONY: evidence-self-audit
+evidence-self-audit:
+	$(PY) research/evidence_semantics/self_audit.py
+
+# Source audit over every sensor family; every citation regex-pinned and the
+# published line re-read against the match.
+.PHONY: evidence-sensors
+evidence-sensors:
+	$(PY) research/evidence_semantics/cross_sensor_audit.py
+
+# Cross-platform: the same contracts against PX4Adapter, plus the committed
+# 9.6 MB real ULog.
+.PHONY: evidence-px4
+evidence-px4:
+	$(PY) research/evidence_semantics/px4_probe.py
+
+.PHONY: evidence-semantics
+evidence-semantics: evidence-reproduce evidence-check evidence-self-audit \
+                    evidence-sensors evidence-px4

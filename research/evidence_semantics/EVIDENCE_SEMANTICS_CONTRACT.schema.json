@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swort.aero/csia/research/evidence_semantics/contract.schema.json",
+  "title": "Evidence-semantics contract for a sensor ingest path",
+  "description": "A machine-readable statement of what an ingest path is allowed to do to the QUALITY coordinate of an observation E = (x, q). It says nothing about numerical accuracy. NOTE: this schema is a research artifact. It is not a standard, it is not proposed as one, and every field below is a restatement of distinctions that already exist in ARINC 429 SSM, NAMUR NE 107, OPC UA StatusCode and the SQL null literature -- see PRIOR_ART_MATRIX.md.",
+  "type": "object",
+  "required": ["id", "family", "accepted_input_states", "emitted_states_required",
+               "allowed_merges", "forbidden_merges", "freshness", "retention",
+               "sentinel_handling", "diagnostic_visibility", "stage_sites"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string"},
+    "family": {"type": "string", "description": "sensor family this contract governs"},
+    "source": {"type": "string", "description": "protocol/message the input states are read from"},
+    "accepted_input_states": {
+      "type": "array", "minItems": 1,
+      "description": "canonical evidence states the SOURCE can present, with the exact raw condition that produces each",
+      "items": {
+        "type": "object",
+        "required": ["state", "raw_condition"],
+        "additionalProperties": false,
+        "properties": {
+          "state": {"$ref": "#/$defs/state"},
+          "raw_condition": {"type": "string"},
+          "citation": {"type": "string"}
+        }
+      }
+    },
+    "emitted_states_required": {
+      "type": "array", "items": {"$ref": "#/$defs/state"},
+      "description": "states the path MUST be able to emit downstream. A state that appears here and is absent from the path's measured output vocabulary is a contract failure regardless of any trace."
+    },
+    "allowed_merges": {
+      "type": "array",
+      "description": "pairs the path MAY map to one downstream state, each with the reason the distinction does not matter to the declared downstream property. A merge is not a defect on its own -- item 9.",
+      "items": {
+        "type": "object",
+        "required": ["states", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "states": {"type": "array", "minItems": 2, "maxItems": 2,
+                     "items": {"$ref": "#/$defs/state"}},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "forbidden_merges": {
+      "type": "array",
+      "description": "pairs that MUST remain distinguishable, each with the downstream consumer that needs the distinction and a witness word per state",
+      "items": {
+        "type": "object",
+        "required": ["id", "states", "needed_by", "witness_words"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "states": {"type": "array", "minItems": 2, "maxItems": 2,
+                     "items": {"$ref": "#/$defs/state"}},
+          "needed_by": {"type": "string",
+                        "description": "the declared downstream property, cited to source"},
+          "witness_words": {
+            "type": "object",
+            "description": "canonical input word that realises each state",
+            "additionalProperties": {"type": "string"}
+          }
+        }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "required": ["max_age_s", "rule"],
+      "additionalProperties": false,
+      "properties": {
+        "max_age_s": {"type": "number"},
+        "rule": {"type": "string"},
+        "citation": {"type": "string"}
+      }
+    },
+    "retention": {
+      "type": "object",
+      "required": ["rule"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type": "string"},
+        "on_invalid": {"type": "string", "enum": ["DISCARD", "RETAIN", "UNSPECIFIED"]},
+        "citation": {"type": "string"}
+      }
+    },
+    "sentinel_handling": {
+      "type": "object",
+      "required": ["rule"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type": "string"},
+        "must_deliver_reason": {"type": "boolean"},
+        "citation": {"type": "string"}
+      }
+    },
+    "diagnostic_visibility": {
+      "type": "object",
+      "required": ["rule"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type": "string"},
+        "citation": {"type": "string"}
+      }
+    },
+    "stage_sites": {
+      "type": "object",
+      "description": "pipeline stage -> the file:line the checker should name when the collapse is localised there",
+      "additionalProperties": {"type": "string"}
+    }
+  },
+  "$defs": {
+    "state": {
+      "type": "string",
+      "enum": ["V", "I", "N", "S", "X", "R", "M", "E"],
+      "description": "V observed-valid, I observed-invalid, N not-observed, S stale, X sentinel/explicit-not-measured, R retained-after-disavowal, M imputed, E estimator-derived. See CANONICAL_STATE_MODEL.md."
+    }
+  }
+}

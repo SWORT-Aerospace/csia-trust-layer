@@ -1,0 +1,241 @@
+{
+  "package": "research/evidence_semantics",
+  "stage": "NEW FRONTIER STAGE 0 -- prior-art red team, formalization, multi-path feasibility",
+  "base_commit": "9071766",
+  "statuses_used": [
+    "PROVED - NOVELTY NOT ESTABLISHED",
+    "PROVED - POSSIBLE NOVEL CONTRIBUTION",
+    "EMPIRICAL ONLY",
+    "PROVISIONAL",
+    "CONJECTURE",
+    "KNOWN/SUBSUMED",
+    "REFUTED"
+  ],
+  "hard_stops": [
+    {
+      "item": 12,
+      "requirement": "reproduce 79/120 word semantic non-equivalence and shortest 'I' witness, exactly, or STOP",
+      "expected": {"divergences": 79, "words": 120, "shortest": "I"},
+      "observed": {"divergences": 79, "words": 120, "shortest": "I"},
+      "result": "CLEARED",
+      "independent_check": "a separately written stage probe agrees on the one fact both instruments can see: the v1.1 adapter never marks the core GPS slot invalid on word 'I'; plugins.py does",
+      "artifact": "results/PRIOR_RESULT_REPRODUCTION.json"
+    },
+    {
+      "item": 27,
+      "requirement": "do NOT execute physical HIL if no hardware is connected",
+      "observed": "no flight hardware present; pyserial enumerates only /dev/ttyS0",
+      "result": "NOT EXECUTED. A validation plan is specified in TOOLING_FEASIBILITY.md section 3 and nothing in this package is presented as a hardware result."
+    },
+    {
+      "item": 32,
+      "requirement": "no paper, no large campaign, no change to CSIA production behavior",
+      "result": "HONOURED. No file outside research/ and the Makefile was modified. FROZEN_PATHS untouched. Total compute: 191 s for the main check."
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "claim": "Bounded exhaustive search for a shortest distinguishing trace over a finite input alphabet is a solved problem and nothing about the search in this package is a contribution.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "PRIOR_ART_MATRIX.md: trace equivalence, bisimulation, refinement, CEGAR, differential testing; ParDiff (OOPSLA 2024) performs static differential analysis across multiple protocol-parser implementations for exactly this purpose."
+    },
+    {
+      "id": "C2",
+      "claim": "Separating a measurement value from a status coordinate, and specifying how the status must propagate, is standardised prior art.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "ARINC 429 SSM; SEVA (Henry & Clarke 1993); NAMUR NE 107; OPC UA StatusCode. OPC UA Part 8 / OPC 30142 additionally specify the merge rule (worst-of severity across an array), which is an allowed-merge clause in a published conformance specification."
+    },
+    {
+      "id": "C3",
+      "claim": "The state model in CANONICAL_STATE_MODEL.md -- specifically that merging two distinct kinds of absence loses information the consumer needs -- is prior art.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "Codd's A-marks and I-marks (missing-but-applicable vs inapplicable), 1979; SQL's conflation of them and its consequences have been studied for forty years."
+    },
+    {
+      "id": "C4",
+      "claim": "That coarsening an observation can destroy diagnosability is prior art, in exactly this form.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "DES diagnosability under observation masks (Sampath et al. 1995 and successors); abstraction-based failure diagnosis (Schmidt 2009) gives conditions under which abstraction preserves diagnosability."
+    },
+    {
+      "id": "C5",
+      "claim": "That local per-stage preservation guarantees compose to an end-to-end guarantee is a trivial induction, and the general compositional theory is complete.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "COMPOSITIONAL_ANALYSIS.md; assume-guarantee contracts (Benveniste et al.; Pacti, ACM TCPS 2025)."
+    },
+    {
+      "id": "C6",
+      "claim": "This repository ALREADY contains a per-channel machine-readable semantic contract that states the required distinctions in prose, and nothing checks that the pipeline honours them.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "evidence": "docs/simulation/CHANNEL_SEMANTICS.yaml carries missing_semantics per channel: gnss.position 'fix_type < 3 is NOT a zero position. It is MISSING with reason NO_3D_FIX.'; battery.current '-1 means \"not measured\" -> MISSING, not zero current'; mag.field_ut 'all-zero triple is treated as ABSENT, not as a zero field'. The field is loaded at qualification.py:83 and used at exactly one site, qualification.py:243, as a note= string on a NOT_RECEIVED ChannelValue. tests/test_channel_semantics.py:28 checks only that it is non-empty.",
+      "note": "This is the closest prior art of all and it is internal. It means the CONTENT of ARDUPILOT_INGEST_CONTRACTS/*.json is largely a restatement of existing documentation."
+    },
+    {
+      "id": "C7",
+      "claim": "On the v1.1 ArduPilot adapter, an explicit no-3D-fix report and no message at all are indistinguishable at every pipeline stage from the core bridge onward, and the first stage that destroys the distinction is to_core_samples (csia/aircraft/adapters/base.py:306-337), NOT the adapter's GNSS branch.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "CAUSAL_BLAME_TRACES.json, family gnss, clause GNSS-F1: T1-T4 differ, T5-T9 identical. Shortest witness 'I', length 1, exhaustive over 120 words of length <= 4.",
+      "note": "Item 22's illustrative example attributes this collapse to the adapter. Measured, that attribution is wrong for this codebase: the adapter pops the retained fix and records MissingReason.NO_3D_FIX, and both survive to T4."
+    },
+    {
+      "id": "C8",
+      "claim": "The bridge into the frozen core has a two-token output alphabet (emit with valid=True, or emit nothing) while the adapter upstream can express up to six states, so no three-state source distinction can survive it.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "evidence": "base.py:335 writes chans['valid'] = True unconditionally; the only alternative is base.py:312-318's `break`. Measured emitted vocabularies: gnss v1_1_adapter ['V'], plugins_py ['I','V'], ulog_source_py ['I','V'].",
+      "note": "This is the data-processing inequality with the constant made explicit. The inequality is known (item 20 says so); only the identification of the specific line is new information, and it is information about this codebase."
+    },
+    {
+      "id": "C9",
+      "claim": "Three committed decoders give one raw condition (BATTERY_STATUS.current_battery == -1) three different currents into the same frozen core: 5.00 A, 0.00 A and -1.00 A.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "Measured at T5 on word 'X': v1_1_adapter emits (V, 5.0) -- the previous reading retained because ardupilot.py:181 does not pop _latest; plugins_py emits (M, 0.0) from max(msg.current_battery, 0)/100.0 at plugins.py:194; ulog_source_py emits (V, -1.0) because ulog_source.py:196-199 sets valid=True unconditionally. None can emit X; the contract requires ['V','X']."
+    },
+    {
+      "id": "C10",
+      "claim": "The ulog_source.py battery finding is not synthetic: the committed 9.6 MB PX4 log carries current_a == -1.0 on all 216 battery_status samples.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "results/PX4_FEASIBILITY.json, real_log.battery: 216 samples, min -1.0, max -1.0, negative_samples 216. On this real log ulog_source.py would feed -1.00 A into the frozen core as a usable battery current 216 times."
+    },
+    {
+      "id": "C11",
+      "claim": "The magnetometer collapses TWO STAGES EARLIER than GNSS or battery on the same path, at T3_ingest, because ardupilot.py:143 has no else branch at all -- no _put and no _reject_sentinel, so the adapter's state after an all-zero triple is identical to its state after no message.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "CAUSAL_BLAME_TRACES.json, family mag, clause MAG-F1, path v1_1_adapter: first_collapse_stage T3_ingest. Shortest collapsing pair 'Z'/'N', length 1.",
+      "note": "This is the evidence that the stage localisation does work rather than always naming the same boundary: three families on one path give first collapses at T3, T5 and T5."
+    },
+    {
+      "id": "C12",
+      "claim": "Divergence at one equivalence level does not propagate to the next, and this is measured rather than argued.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "EQUIVALENCE_LEVELS.md. Battery word 'X', v1_1_adapter vs ulog_source_py, all five controls clean: VALUE differs (5.00 A vs -1.00 A) while STATE, EVIDENCE, DIAGNOSIS and ASSURANCE are all identical. Battery, adapter vs plugins: 90/120 words diverge at STATE, only 15/120 at EVIDENCE."
+    },
+    {
+      "id": "C13",
+      "claim": "The strongest downstream consequence measured anywhere in this package is a FAILSAFE LATENCY, not a different failsafe decision.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "106 attributable ASSURANCE_STATE rows in DOWNSTREAM_CONSEQUENCES.csv, all gnss. In every one: identical level history NORMAL -> CAUTION, identical action set (SWITCH_NAV_INERTIAL, INHIBIT_GPS_MODES), escalation later by 0.32 s (80 rows) or 0.12 s (26 rows) on the v1.1 adapter. The action sets NEVER differ, on any word, in any family.",
+      "note": "CONTROL_FAILSAFE is not reached and is not claimed. Item 19: do not inflate severity when the consequence stops upstream."
+    },
+    {
+      "id": "C14",
+      "claim": "No battery or magnetometer word produces any failsafe difference at all.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "ASSURANCE attributable divergences 0/120 for every battery pair and every mag pair. power_fault requires T['battery'] < 0.70, which battery trust does not reach in a 15 s run.",
+      "note": "The mechanism by which a CRITICAL could be raised on a disowned current is documented in ../dual_admissibility_confirmatory/BATTERY_DEFECT.md but was NOT observed here."
+    },
+    {
+      "id": "C15",
+      "claim": "The path with careful MissingReason handling is the one that loses the GNSS distinction; the two paths that fabricate or forward a value keep it.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "GNSS-F1: v1_1_adapter FAIL, plugins_py PASS, ulog_source_py PASS.",
+      "note": "They keep it by accident -- neither has any notion of a reason -- but the distinction reaches the failsafe on both."
+    },
+    {
+      "id": "C16",
+      "claim": "The GNSS collapse is a property of the shared core bridge, not of either autopilot: px4.py:220-227 is the same handling as ardupilot.py:226-236 and produces the same collapse at the same stage.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "results/PX4_FEASIBILITY.json: gnss agreement emitted_vocabulary_identical true, clause_results_identical true, first_collapse_identical true."
+    },
+    {
+      "id": "C17",
+      "claim": "The PX4 platform is already protected from the battery defect, by a static per-channel declaration rather than by a preservation check.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "CHANNEL_SEMANTICS.yaml platform_qualification.px4 sets battery.current to UNAVAILABLE with a measured justification; the checker measures the PX4 emitted vocabulary for battery as [] -- nothing crosses into the core."
+    },
+    {
+      "id": "C18",
+      "claim": "The checker detects all four deliberately injected instrument defects, and one of the four predictions about WHICH published quantity would move was wrong.",
+      "status": "EMPIRICAL ONLY",
+      "evidence": "TOOL_SELF_AUDIT.json: all_four_detected true, instrument_restored_exactly true, predictions_held 3/4, refuted D1_one_message_phase_shift.",
+      "note": "The refutation is kept and not re-aimed. It is informative: the A-close delay does not move under a one-message phase shift BECAUSE the no-fix report has no effect on admissibility on that path -- an independent confirmation of C7 arriving from an unexpected direction."
+    },
+    {
+      "id": "C19",
+      "claim": "A domain-specific compositional corollary -- that end-to-end preservation is bounded by the narrowest inter-stage interface, so per-stage contracts are insufficient -- is a restatement of a bottleneck argument.",
+      "status": "KNOWN/SUBSUMED",
+      "evidence": "COMPOSITIONAL_ANALYSIS.md. Worth writing in an engineering guideline; not a theorem and not new."
+    },
+    {
+      "id": "C20",
+      "claim": "An automated end-to-end evidence-semantic checker for autonomy ingest paths is a novel research contribution.",
+      "status": "REFUTED",
+      "evidence": "All four of item 26's kill conditions are met by existing work, individually: evidence semantics by NE 107 / SEVA / OPC UA / Codd; end-to-end status preservation by AUTOSAR E2E and by quality-flag propagation in data-reduction pipelines; minimal counterexamples by differential testing and ParDiff; diagnostic consequence by DES diagnosability under masks. What does not exist in one place is the combination, and a combination of four established techniques applied to one codebase is not a dissertation contribution."
+    },
+    {
+      "id": "C21",
+      "claim": "Runtime verification of autonomy middleware against a formal interface specification is an open area where a sensor-quality-specific monitor would be new.",
+      "status": "REFUTED",
+      "evidence": "RV for robotic middleware is active and published (RTLola ROS adapter RV 2025; RV4JaCa 2023; contract-based RV for modular robotic systems 2022). The shape of the checker here is the shape of those monitors."
+    },
+    {
+      "id": "C22",
+      "claim": "E = ESTIMATED is a source-justified provenance state in this codebase.",
+      "status": "PROVISIONAL",
+      "evidence": "plugins.py:177 feeds GLOBAL_POSITION_INT -- EKF-fused output -- into the same `gps` core slot that otherwise carries raw receiver output, with no marker. The file's own comment (plugins.py:152-154) says why that matters.",
+      "note": "NOT EXERCISED by any word in this package: every alphabet carries GPS_RAW_INT. It is in the model as a state and not as a measurement."
+    },
+    {
+      "id": "C23",
+      "claim": "The prior-art search in this package is complete enough to settle the novelty question.",
+      "status": "PROVISIONAL",
+      "evidence": "PRIOR_ART_MATRIX.md 'Method, and its limit': full-text retrieval was blocked by this environment's egress policy for every scholarly host attempted, so every row rests on title, venue and returned snippet.",
+      "note": "The limitation can only cause prior art to be UNDER-stated, so it does not threaten the KNOWN/SUBSUMED verdicts. It does mean the surviving-difference column may be too generous. IEC 61508 diagnostic coverage, AFDX/MIL-STD-1553 status words, active diagnosis, and the DDS SampleInfo.valid_data semantics remain unsearched."
+    },
+    {
+      "id": "C24",
+      "claim": "The checker would find a defect needing a witness longer than 4 symbols.",
+      "status": "CONJECTURE",
+      "evidence": "No such defect was looked for. The search is exhaustive to length 4 only; length 6 would cost roughly 30 minutes at the current per-word cost.",
+      "note": "Every counterexample found here has length <= 3, so the bound was never binding. That is not evidence that no longer witness exists."
+    }
+  ],
+  "refuted_predictions": [
+    {
+      "prediction": "A one-message phase shift would move the measured GNSS A-close delay.",
+      "outcome": "REFUTED. It does not move, because the no-fix report does not affect admissibility on that path.",
+      "kept": true,
+      "artifact": "TOOL_SELF_AUDIT.json"
+    },
+    {
+      "prediction": "Item 22's example: the adapter is the first collapse for GNSS I vs N.",
+      "outcome": "REFUTED. The adapter preserves the distinction through T3 and T4; the collapse is at T5, the core bridge.",
+      "kept": true,
+      "artifact": "CAUSAL_BLAME_TRACES.json"
+    },
+    {
+      "prediction": "The magnetometer would behave like GNSS and battery.",
+      "outcome": "REFUTED. It collapses two stages earlier, at T3_ingest, because it has no rejection branch at all.",
+      "kept": true,
+      "artifact": "CAUSAL_BLAME_TRACES.json"
+    }
+  ],
+  "corrections_to_earlier_work": [
+    {
+      "what": "The first magnetometer runs were driven at 5 Hz against a 0.1 s core watchdog (STALE_TIMEOUT_S['mag']), so admissibility was closed between every message and no downstream consequence of the word could be observed.",
+      "fix": "Per-family message rates (probe.py FAMILY_HZ); mag now runs at 20 Hz. The reason is recorded in the source so it is not repeated.",
+      "affected": "all mag rows; re-run after the fix"
+    },
+    {
+      "what": "The first version of proj_value returned the quality token rather than the numeric payload, so the VALUE and STATE levels were the same measurement under two names.",
+      "fix": "T5_value is now recorded per path and proj_value compares numbers. This is what made the C12 counterexample visible."
+    },
+    {
+      "what": "The first version of first_collapse compared stage traces without times, so a stage that said the same things 0.5 s later looked identical.",
+      "fix": "_collapse_timed keeps the first-appearance time of each token. This flipped GNSS-F1 from FAIL to PASS on plugins_py and ulog_source_py."
+    },
+    {
+      "what": "The first version named a collapse site in files that paths B and C never execute (they have no T3/T4).",
+      "fix": "Stages absent from a path are skipped as collapse sites and reported as no_representation_stage."
+    }
+  ],
+  "not_done": [
+    "No physical HIL (item 27, no hardware).",
+    "No large campaign (item 32).",
+    "No PX4 SITL run.",
+    "No second ULog; the fix_type == 3 result describes one flight.",
+    "The magnetometer comparison against PX4Adapter was deliberately NOT run: PX4 reads the magnetometer from HIGHRES_IMU behind a fields_updated bitmask, a different source interface (item 24: do not force identical semantics).",
+    "estimator_health was selected as an additional family but probed STRUCTURALLY only: estimator.variances is absent from CORE_MAP, so it never crosses the core boundary and there is no trace to run. The absence IS the finding.",
+    "No search beyond word length 4."
+  ]
+}

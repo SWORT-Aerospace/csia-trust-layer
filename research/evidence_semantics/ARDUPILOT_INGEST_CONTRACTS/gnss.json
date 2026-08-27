@@ -1,0 +1,54 @@
+{
+  "id": "gnss.mavlink.gps_raw_int.v0",
+  "family": "gnss",
+  "source": "MAVLink GPS_RAW_INT",
+  "accepted_input_states": [
+    {"state": "V", "raw_condition": "fix_type >= 3",
+     "citation": "csia/aircraft/adapters/ardupilot.py:228"},
+    {"state": "I", "raw_condition": "a message arrived and reports fix_type < 3 -- the receiver is alive and says it has no position",
+     "citation": "csia/aircraft/adapters/ardupilot.py:228-236"},
+    {"state": "N", "raw_condition": "no GPS_RAW_INT within 1.5x the nominal refresh period; absence has no in-band encoding and is a receiver-side timeout inference",
+     "citation": "research/evidence_semantics/probe.py:t1_protocol"}
+  ],
+  "emitted_states_required": ["V", "I"],
+  "allowed_merges": [
+    {"states": ["N", "S"],
+     "reason": "once a value is older than the channel's max_age, 'never arrived' and 'arrived too long ago' both mean the consumer has no current measurement; no declared downstream property distinguishes them. FailsafePolicy reasons only over state.fresh (csia/runtime/failsafe.py:100)."}
+  ],
+  "forbidden_merges": [
+    {"id": "GNSS-F1",
+     "states": ["I", "N"],
+     "needed_by": "FailsafePolicy raises nav_degraded with the reason string 'GPS data invalid' whenever fresh['gps'] is false (csia/runtime/failsafe.py:145-152). If I and N are indistinguishable the recorded reason is a guess: a dead link and a receiver reporting loss of lock produce the same flight-log entry, and the diagnostic hypotheses they support are different (antenna/receiver fault vs telemetry path fault).",
+     "witness_words": {"I": "I", "N": "N"}}
+  ],
+  "freshness": {
+    "max_age_s": 0.5,
+    "rule": "a channel older than max_age is unusable and reported STALE",
+    "citation": "csia/aircraft/adapters/base.py:220-227; csia/runtime/online.py:48 STALE_TIMEOUT_S['gps']=0.5"
+  },
+  "retention": {
+    "rule": "on an explicit no-fix report the retained position and velocity are discarded rather than allowed to age out",
+    "on_invalid": "DISCARD",
+    "citation": "csia/aircraft/adapters/ardupilot.py:232-233"
+  },
+  "sentinel_handling": {
+    "rule": "an in-band no-value report is recorded with its own reason, not the default",
+    "must_deliver_reason": true,
+    "citation": "csia/aircraft/adapters/ardupilot.py:234-235 passes MissingReason.NO_3D_FIX"
+  },
+  "diagnostic_visibility": {
+    "rule": "the reason a channel is unusable must reach a consumer that can act on it differently from any other reason",
+    "citation": "csia/aircraft/sample.py:53 'Never collapse these to None.'"
+  },
+  "stage_sites": {
+    "T1_protocol": "MAVLink GPS_RAW_INT.fix_type",
+    "T2_decode": "csia/aircraft/adapters/ardupilot.py:226-236 (_ingest_gps)",
+    "T3_ingest": "csia/aircraft/adapters/base.py:140-177 (_put / _reject_sentinel)",
+    "T4_channel": "csia/aircraft/adapters/base.py:198-229 (_channel_value)",
+    "T5_core_bridge": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+    "T6_slot": "csia/runtime/online.py:312-316 (_apply)",
+    "T7_admissible": "csia/runtime/online.py:603-605 (fresh)",
+    "T8_evidence": "csia/trust_engine/engine.py:146 (update gated on fresh)",
+    "T9_assurance": "csia/runtime/failsafe.py:145-152 (nav_degraded)"
+  }
+}
