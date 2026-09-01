@@ -574,3 +574,12 @@ v1-1-defects:
 .PHONY: v1-1-ingest-check
 v1-1-ingest-check:
 	$(PY) -m pytest tests/test_v1_1_canonical_ingest.py -q
+
+# v1.1 Phase 2: support-aware diagnosis. Read-only over the FROZEN core.
+.PHONY: v1-1-support
+v1-1-support:
+	$(PY) engineering/v1_1/support/run_phase2.py
+
+.PHONY: v1-1-support-check
+v1-1-support-check:
+	$(PY) -m pytest tests/test_v1_1_support.py -q

@@ -1,0 +1,38 @@
+{
+  "artifact": "FIXLOSS_SUPPORT_ANALYSIS",
+  "before_fault": {
+    "identifiable_fraction": 1.0,
+    "mean_active_terms": 20.472,
+    "ticks": 375
+  },
+  "during_fault": {
+    "collapse_partners": [
+      "gps_fault"
+    ],
+    "mean_active_terms": 16.025,
+    "non_identifiable_fraction": 0.995025,
+    "non_identifiable_ticks": 200,
+    "ticks": 201
+  },
+  "fault_window_s": [
+    25.0,
+    33.0
+  ],
+  "note": "GNSS fix loss. nominal and gps_fault differ on exactly one feature, phys_gps (csia/diagnosis/bayes.py CAUSES), whose gate is multiplied by fresh['gps'] (csia/runtime/online.py:613). When the fix goes, that term leaves the active set and the pair collapses.",
+  "production_posterior_unchanged": true,
+  "reconstruction_max_abs_error": 2.220446049250313e-16,
+  "scenario": "gps_dropout",
+  "worst_case_unsupported_leader": {
+    "active_terms": 16,
+    "ambiguity": "AMBIGUOUS",
+    "discriminating_terms_vs_gps_fault": 0,
+    "leader": "nominal",
+    "non_identifiable_against": [
+      "gps_fault"
+    ],
+    "posterior": 0.999822,
+    "reading": "v1 reports this as an ordinary high-confidence nominal. v1.1 reports the same posterior AND that no currently active evidence can separate it from gps_fault.",
+    "support_state": "NON_IDENTIFIABLE",
+    "t": 25.0
+  }
+}

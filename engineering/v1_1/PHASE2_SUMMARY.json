@@ -1,0 +1,200 @@
+{
+  "artifact": "PHASE2_SUMMARY",
+  "csia_sha": "e2160ca5f20a3054b38e022a2b8d72966cd0c59c",
+  "design_time_indistinguishable_pairs": [],
+  "frozen_constants": {
+    "EPS": 0.02,
+    "EVIDENCE_MULT": 1.5,
+    "GATE_EPS": 1e-09,
+    "PRIOR_NOMINAL": 0.86,
+    "SMOOTH_ALPHA": 0.06,
+    "TAU_NUM": 1e-12
+  },
+  "generation_command": "python engineering/v1_1/support/run_phase2.py",
+  "hypotheses": [
+    "nominal",
+    "gps_fault",
+    "imu0_bias_drift",
+    "imu1_bias_drift",
+    "mag_interference",
+    "power_fault",
+    "vibration_anomaly",
+    "unexpected_maneuver"
+  ],
+  "matrix": {
+    "CLEAN": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 0,
+      "reconstruction_max_abs_error": 2.220446049250313e-16,
+      "scenario": "clean",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1424,
+        "NON_IDENTIFIABLE": 76
+      },
+      "ticks": 1500
+    },
+    "DUAL_IMU_AMBIGUITY": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 90,
+      "reconstruction_max_abs_error": 9.43689570931383e-16,
+      "scenario": "dual_imu_failure",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1334,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 90
+      },
+      "ticks": 1500
+    },
+    "GNSS_BIAS_RAMP": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 28,
+      "reconstruction_max_abs_error": 3.608224830031759e-16,
+      "scenario": "gps_spoof",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1396,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 28
+      },
+      "ticks": 1500
+    },
+    "GNSS_FIX_LOSS": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 276,
+        "UNIQUE": 1224
+      },
+      "collapse_partners": {
+        "gps_fault": 276
+      },
+      "non_identifiable_fraction": 0.184,
+      "prior_sensitive_ticks": 0,
+      "reconstruction_max_abs_error": 2.220446049250313e-16,
+      "scenario": "gps_dropout",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1224,
+        "NON_IDENTIFIABLE": 276
+      },
+      "ticks": 1500
+    },
+    "HIGH_SPEED_ENVELOPE": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 0,
+      "reconstruction_max_abs_error": 2.220446049250313e-16,
+      "scenario": "high_speed_dash",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1424,
+        "NON_IDENTIFIABLE": 76
+      },
+      "ticks": 1500
+    },
+    "IMU_BIAS": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 106,
+      "reconstruction_max_abs_error": 9.43689570931383e-16,
+      "scenario": "imu0_bias_drift",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1318,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 106
+      },
+      "ticks": 1500
+    },
+    "MAG_DEGRADED": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 6,
+      "reconstruction_max_abs_error": 4.440892098500626e-16,
+      "scenario": "mag_emi",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1418,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 6
+      },
+      "ticks": 1500
+    },
+    "POWER": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 11,
+      "reconstruction_max_abs_error": 9.43689570931383e-16,
+      "scenario": "power_sag",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1413,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 11
+      },
+      "ticks": 1500
+    },
+    "VIBRATION": {
+      "ambiguity_counts": {
+        "AMBIGUOUS": 76,
+        "UNIQUE": 1424
+      },
+      "collapse_partners": {
+        "gps_fault": 76
+      },
+      "non_identifiable_fraction": 0.050667,
+      "prior_sensitive_ticks": 10,
+      "reconstruction_max_abs_error": 4.440892098500626e-16,
+      "scenario": "vibration_anomaly",
+      "support_state_counts": {
+        "EVIDENCE_BACKED": 1414,
+        "NON_IDENTIFIABLE": 76,
+        "PRIOR_SENSITIVE": 10
+      },
+      "ticks": 1500
+    }
+  },
+  "max_reconstruction_abs_error": 9.43689570931383e-16,
+  "rows_not_in_catalogue": {
+    "BATTERY_SENTINEL": "an INGEST-layer condition fixed in Phase 1; it reaches diagnosis only as gate -> 0, the same mechanism GNSS_FIX_LOSS demonstrates",
+    "MAG_SENTINEL": "as BATTERY_SENTINEL",
+    "TRANSPORT_STARVATION": "GNSS_FIX_LOSS exercises the same mechanism (gate -> 0 via fresh[]); no separate transport-starvation scenario exists in csia/scenarios.py, which is FROZEN"
+  }
+}
