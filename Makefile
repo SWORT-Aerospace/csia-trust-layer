@@ -557,3 +557,9 @@ semantic-authority: authority-table authority-sensitivity \
 .PHONY: frontier-check
 frontier-check:
 	$(PY) -m pytest tests/test_frontier_selection.py -q
+
+# Candidate B Stage 0A: prior-art closure and formal problem freeze. No code
+# to run -- documents only (item 34). This checks the honesty guards.
+.PHONY: evidence-independence-check
+evidence-independence-check:
+	$(PY) -m pytest tests/test_effective_evidence_independence.py -q

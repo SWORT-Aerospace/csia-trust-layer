@@ -1,0 +1,168 @@
+{
+  "artifact": "CANDIDATE_B_STAGE0A_CLAIM_LEDGER",
+  "stage": "Stage 0A - prior-art closure and formal problem freeze",
+  "frontier_selection_commit": "65fa17e",
+  "canonical_pre_frontier_base": "76eaa17",
+  "date": "2026-09-01",
+  "prior_art_verdict": "INCONCLUSIVE_MISSING_FULLTEXT",
+  "scientific_verdict": "PROVENANCE_METRIC_INSUFFICIENT",
+  "ready_for_stage_0b": false,
+  "novelty": "NOT ESTABLISHED",
+  "full_texts_read": 0,
+  "allowed_status_vocabulary": [
+    "KNOWN/SUBSUMED",
+    "PROVED - NOVELTY NOT ESTABLISHED",
+    "PROVED - POSSIBLE NOVEL CONTRIBUTION",
+    "EMPIRICAL ONLY",
+    "PROVISIONAL",
+    "CONJECTURE",
+    "REFUTED"
+  ],
+  "claims": [
+    {
+      "id": "E1",
+      "statement": "No scholarly full text could be obtained in this environment, including author-hosted and institutional copies.",
+      "evidence": "WebFetch on arxiv.org returned EGRESS_BLOCKED this stage. Direct probes of isas.iar.kit.edu, ivan.ece.ufl.edu, shemesh.larc.nasa.gov, csl.sri.com, doi.org, citeseerx, researchgate and docs.px4.io all returned 000. Recorded in REQUIRED_READING_MANIFEST.md section 0.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The probes reflect session egress policy rather than transient failure. Two independent mechanisms (WebFetch and curl) agree.",
+      "strongest_allowed_wording": "Zero full texts were read; the prior-art gate of item 1 could not be executed.",
+      "forbidden_stronger_wording": "The prior art was audited. / We reviewed the closest papers.",
+      "next_falsification_test": "Re-probe on a machine with library access; the claim is environment-specific."
+    },
+    {
+      "id": "E2",
+      "statement": "The evidence-provenance topology of ArduPilot changes during flight: the VIBRATION message follows _first_usable_accel, which is reassigned every main-loop iteration from sensor health.",
+      "evidence": "GCS_Common.cpp:3075 calls ins.get_vibration_levels(); AP_InertialSensor.h:312 resolves it to get_vibration_levels(_first_usable_accel); AP_InertialSensor.cpp:2001-2006 reassigns the index inside update() (function opens at 1926) from _accel_healthy[], which is cleared at 1986-1989. ArduPilot 01a504b, the revision csia/aircraft/adapters/ardupilot.py:3 already declares itself verified against.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "The overload resolution is as read; no later override reassigns the index. Only three message families were audited.",
+      "strongest_allowed_wording": "In ArduPilot 01a504b the accelerometer instance behind the VIBRATION message is selected at runtime from sensor health, and the wire message carries no field identifying it (common.xml:6632-6641).",
+      "forbidden_stronger_wording": "Nobody knows which accelerometer VIBRATION comes from. / This is an undiscovered defect.",
+      "next_falsification_test": "Replay a log in which an accel is failed and confirm the vibration series discontinuity - not run in this stage."
+    },
+    {
+      "id": "E3",
+      "statement": "PX4 already represents the same phenomenon as a first-class message, which reframes the ArduPilot finding as a telemetry gap in one stack rather than a conceptual gap in the field.",
+      "evidence": "msg/SensorSelection.msg carries accel_device_id and gyro_device_id and its own comment says it is updated when sensor selection changes; published at src/modules/sensors/voted_sensors_update.cpp:276; consumed to follow the switch at VehicleAngularVelocity.cpp:81-82.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "That publication on change means downstream consumers can observe it. Whether PX4 forwards it over MAVLink was not checked.",
+      "strongest_allowed_wording": "One of the two autopilot stacks audited already publishes the selection identity on change; what ArduPilot lacks is a field on the wire, not the concept.",
+      "forbidden_stronger_wording": "PX4 solves candidate B.",
+      "next_falsification_test": "Check whether any MAVLink message forwards SensorSelection from PX4; if none does, the telemetry gap is common to both stacks."
+    },
+    {
+      "id": "E4",
+      "statement": "The frontier report's claim that kappa = 1 implies the consistency residual has zero power against a fault at the cut vertex is false as stated.",
+      "evidence": "MENGER_CLAIM_COUNTEREXAMPLES.md section 1: with y1 = f1(c), y2 = f2(c), the residual r = y1 - y2 has dr/ddelta = f1'(c) - f2'(c), non-zero whenever f1' differs from f2'. Instantiated on the audited pair: vibration.rms is a high-passed magnitude statistic and imu1.accel a low-passed signed vector, so a step bias at the shared accelerometer moves one and not the other.",
+      "status": "REFUTED",
+      "assumptions": "Differentiability where used; the finite-difference version carries the same argument.",
+      "strongest_allowed_wording": "Shared provenance does not imply diagnostic blindness. Blindness requires residual invariance at the cut vertex, which is a condition on the functional forms and not on the graph.",
+      "forbidden_stronger_wording": "The residual is always sensitive. / The frontier report was worthless.",
+      "next_falsification_test": "None needed; the counterexample is constructive."
+    },
+    {
+      "id": "E5",
+      "statement": "Item 11's hostile null H_KILL_PROVENANCE holds in both directions, so kappa_prov is not sufficient as the central quantity.",
+      "evidence": "MENGER_CLAIM_COUNTEREXAMPLES.md section 1 proves the first clause (same source, distinct constraints, residual still sensitive); section 3 proves the second (distinct sources, shared physical disturbance, residual blind, no software edge to draw).",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "That physical common-mode coupling between co-located transducers is real. This is standard engineering knowledge, not a measurement made here.",
+      "strongest_allowed_wording": "A source-provenance graph alone can neither certify nor refute diagnostic information diversity. kappa_prov is at most a screening heuristic with known false positives and false negatives.",
+      "forbidden_stronger_wording": "Provenance is useless. / kappa_prov has been redefined so that it works.",
+      "next_falsification_test": "Exhibit a class of systems in which both counterexample directions are excluded by construction; none is known."
+    },
+    {
+      "id": "E6",
+      "statement": "The bound direction asserted in the frontier report is wrong: omitted edges make kappa_prov an under-estimate, not an over-estimate, and no single bound direction holds in general.",
+      "evidence": "FORMAL_REDUCTION.md section 4. Removing edges cannot create paths, so by Menger the min cut of a subgraph is <= that of the true graph; worked case {s1->a, s1->b, s2->b} with s2->b omitted gives 1 < 2. Aliasing (modelling one physical object as two nodes) runs the other way. research/frontier_selection/SELECTED_CANDIDATE_FORMAL_TARGET.md section 6 PO-2 asserts the opposite and is superseded.",
+      "status": "REFUTED",
+      "assumptions": "The audit error taxonomy is exhaustive enough for the two directions shown; other error modes may exist.",
+      "strongest_allowed_wording": "kappa_prov is a lower bound only under a no-aliasing assumption and an upper bound only under a no-omission assumption; a source audit discharges neither.",
+      "forbidden_stronger_wording": "kappa_prov is a lower bound.",
+      "next_falsification_test": "None needed; the derivation is constructive. Note the practical consequence: an incomplete audit produces FALSE deficits, the direction that flatters the hypothesis."
+    },
+    {
+      "id": "E7",
+      "statement": "The only formal statement item 9 permits is close to tautological, and graph structure cannot certify the invariance it needs.",
+      "evidence": "FORMAL_REDUCTION.md section 3. The permitted statement restates its own hypothesis. Counterexamples A and B show graph structure is consistent with both blindness and sensitivity, in both directions, so it is neither necessary nor sufficient for invariance.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "None beyond the counterexamples.",
+      "strongest_allowed_wording": "No non-trivial formal result relating graph separation to fault sensitivity was obtained, and the counterexamples indicate none of the proposed form exists.",
+      "forbidden_stronger_wording": "We prove a theorem about evidence structure.",
+      "next_falsification_test": "Find additional structural conditions under which certification becomes possible; none was found here."
+    },
+    {
+      "id": "E8",
+      "statement": "The re-centring forced by the counterexamples moves the candidate onto structural FDI's own ground, worsening its prior-art position.",
+      "evidence": "FORMAL_REDUCTION.md section 5 concludes the only defensible quantity is residual fault sensitivity S_{R,f}. META_DIAGNOSIS_REDUCTION.md section 3 records that fault sensitivity of residuals is structural FDI's core apparatus and that meta-diagnosis asks whether the relation in use is sound.",
+      "status": "PROVISIONAL",
+      "assumptions": "Characterisation of structural FDI and meta-diagnosis from general background knowledge, NOT from full text. This is exactly why the stage cannot conclude.",
+      "strongest_allowed_wording": "After the re-centring, the nearest prior art is closer than it was, and the P4 reduction is now the most serious of the four.",
+      "forbidden_stronger_wording": "Meta-diagnosis subsumes candidate B. / Meta-diagnosis does not subsume candidate B.",
+      "next_falsification_test": "REQUIRED_READING_MANIFEST.md section 1.3."
+    },
+    {
+      "id": "E9",
+      "statement": "Candidate B is not approved for Stage 0B.",
+      "evidence": "Item 1's gate returned INCONCLUSIVE_MISSING_FULLTEXT (REQUIRED_READING_MANIFEST.md section 2). Item 11's null holds (E5). Item 31 permits STAGE0B files only if every gate passes; two did not, so no Stage 0B artifacts were written.",
+      "status": "PROVISIONAL",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "Stage 0B is not authorised. The candidate is neither killed nor cleared; the prior-art question is unanswered and the central metric is insufficient as formulated.",
+      "forbidden_stronger_wording": "Candidate B is dead. / Candidate B is ready to test.",
+      "next_falsification_test": "Execute REQUIRED_READING_MANIFEST.md on a machine with library access, then re-run this stage."
+    }
+  ],
+  "refuted_predictions": [
+    {
+      "id": "RP1",
+      "prediction": "Frontier stage R0.2 predicted that kappa_prov could serve as the central quantity for candidate B, under the name 'effective independence'.",
+      "outcome": "Refuted. The name asserted a relationship to failure and statistical independence that is false in both directions, and the quantity neither measures nor certifies diagnostic diversity. Renamed to kappa_prov / structural evidence diversity per item 5, and demoted to a screening heuristic at best.",
+      "kept": true,
+      "why_kept": "It is the main result of this stage."
+    },
+    {
+      "id": "RP2",
+      "prediction": "Frontier stage R0.2 asserted that kappa is an upper bound on effective independence, so 'a deficit found under an upper bound is real'.",
+      "outcome": "Refuted. Omitted edges deflate kappa_prov, so an incomplete audit manufactures deficits that do not exist - the opposite direction, and the one that flatters the hypothesis. See E6.",
+      "kept": true,
+      "why_kept": "An error in the direction that would have made a false finding look conservative. It must stay visible."
+    },
+    {
+      "id": "RP3",
+      "prediction": "Frontier stage R0.2 ranked the fusion literature (S063, S060) as the most dangerous prior art and ARP4761 as the single most likely cause of death.",
+      "outcome": "Partly refuted. ARP4761 remains unresolved and dangerous, but after the counterexamples the most serious technical threat is meta-diagnosis and structural FDI, which the frontier report ranked lower. The threat ordering changed because the candidate's own centre of gravity moved.",
+      "kept": true,
+      "why_kept": "It shows the prior-art ranking was contingent on a formulation that did not survive."
+    },
+    {
+      "id": "RP4",
+      "prediction": "Predicted at the start of this stage that a source audit would either find no runtime topology change (killing the runtime framing) or find one that mattered.",
+      "outcome": "Neither. The audit found a real runtime topology change AND found that it does not demonstrably matter diagnostically (counterexample A applies to the very pair found) AND found that PX4 already publishes the information. Three outcomes at once, none of them the two predicted.",
+      "kept": true,
+      "why_kept": "The prediction was binary and the result was not."
+    }
+  ],
+  "preserved_prior_verdicts": {
+    "generic semantic-equivalence checking": "KNOWN/SUBSUMED",
+    "shortest-counterexample generation for semantic pipelines": "KNOWN/SUBSUMED",
+    "dual operational/diagnostic admissibility": "KNOWN/SUBSUMED",
+    "intermittent invalidity masking": "KNOWN/SUBSUMED",
+    "AI-assisted contract synthesis": "HEURISTICS_SUFFICIENT",
+    "conflicting semantic authorities": "ENGINEERING_INCONSISTENCY_ONLY",
+    "end-to-end evidence-semantic equivalence verification": "IMPLEMENTATION_DEFECTS_ONLY",
+    "unrestricted self-occlusion theorem": "KILLED",
+    "general graph/coarsening theorem under hypothesis-dependent deletion": "KILLED",
+    "CUSUM / cumulative detector novelty": "KILLED",
+    "slow-ramp detection novelty": "KILLED",
+    "generic validity gating as a new diagnostic idea": "KILLED",
+    "receiver-health rescue / original MAER": "KILLED",
+    "semantic disagreement caused merely by consumer implementation bugs": "KILLED",
+    "effective evidence independence as a graph min-cut quantity": "PROVENANCE_METRIC_INSUFFICIENT - refuted as the central quantity in this stage"
+  },
+  "what_must_be_true_before_stage_0b": [
+    "ARP4761 / ARP4761A Common Cause and Common Mode Analysis read in full; the design-time vs runtime question answered in writing.",
+    "Le Caillec conditional-independence testing read in full; whether a shared-information verdict is ever attached to a decision.",
+    "Meta-diagnosis and structural FDI read in full; whether a formally correct but currently uninformative relation is already in scope.",
+    "Noack et al. ICI and the data-incest graph literature read in full.",
+    "A quantity other than kappa_prov identified as the primary measurand, since kappa_prov is insufficient and may not be redefined to rescue it.",
+    "If any of the above already performs the runtime computation: record the kill and stop."
+  ]
+}
