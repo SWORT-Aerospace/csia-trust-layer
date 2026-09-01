@@ -1,0 +1,184 @@
+{
+  "artifact": "FRONTIER_SELECTION_CLAIM_LEDGER",
+  "stage": "R0.2 - frontier selection gate",
+  "base_commit": "76eaa17",
+  "search_date": "2026-09-01",
+  "novelty": "NOT ESTABLISHED",
+  "novelty_note": "No candidate may be awarded PROVED - POSSIBLE NOVEL CONTRIBUTION out of this stage. Item 42 forbids awarding it because no identical title was found, and SEARCH_PROTOCOL.md section 0 establishes that title-and-snippet reading is all this stage had. Zero full texts were read. Every source is PARTIAL_SOURCE_ONLY. The ceiling is PROVISIONAL.",
+  "allowed_status_vocabulary": [
+    "KNOWN/SUBSUMED",
+    "PROVED - NOVELTY NOT ESTABLISHED",
+    "PROVED - POSSIBLE NOVEL CONTRIBUTION",
+    "EMPIRICAL ONLY",
+    "PROVISIONAL",
+    "CONJECTURE",
+    "REFUTED"
+  ],
+  "claims": [
+    {
+      "id": "F1",
+      "statement": "Full text could not be obtained for any scholarly source in this environment.",
+      "evidence": "Direct probe of 15 scholarly hosts, all returning 000 or 403 CONNECT through the egress proxy; WebFetch on arxiv.org returned EGRESS_BLOCKED; the proxy status endpoint logged the connect rejection. Transcript in SEARCH_PROTOCOL.md section 0.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The probe reflects the session's actual egress policy and is not a transient failure. Probes were run at the start of the session and the arxiv failure was independently confirmed through two different mechanisms.",
+      "strongest_allowed_wording": "In this environment, no scholarly full text was reachable; all 90 indexed sources are PARTIAL_SOURCE_ONLY.",
+      "forbidden_stronger_wording": "The literature was reviewed. / The prior art was audited. / We read the closest papers.",
+      "next_falsification_test": "Re-run the same 15 host probes on a machine with library access; the claim is environment-specific and expected to fail there, which is the point."
+    },
+    {
+      "id": "F2",
+      "statement": "Candidate C (runtime structural ambiguity / online diagnosability) is subsumed by the discrete-event and structural diagnosis literature.",
+      "evidence": "S043, S044 (robust diagnosability against permanent and intermittent loss of observations, Automatica 2012); S047 (dynamic observations); S045 (networked, with delay); S046 (survey); S052 (structural analysis adjusted to a varying measurement set); S049 (2025, diagnosability conditioned on the applied control sequence).",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "Titles and snippets accurately reflect scope. A kill from a snippet can only be too harsh, never too generous, so this direction of error is safe.",
+      "strongest_allowed_wording": "The abstract problem candidate C names is a worked, named area with a survey and a 2025 quantitative formulation.",
+      "forbidden_stronger_wording": "Nobody could contribute anything to online diagnosability.",
+      "next_falsification_test": "Read S049 and S052 in full; if neither conditions diagnosability on realised evidence availability, the kill was too harsh and C reopens."
+    },
+    {
+      "id": "F3",
+      "statement": "Candidates D, E, F, G and I are subsumed by named fields with named methods.",
+      "evidence": "D: S072-S076. E: S077-S082. F: S083-S089. G: S049, S056, S058, S059. I: S060-S063. Each mapping is itemised in REJECTED_CANDIDATES.md with the subsuming abstraction stated.",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "As F2.",
+      "strongest_allowed_wording": "Each of these five candidates reduces to an established abstraction that the search surfaced by name.",
+      "forbidden_stronger_wording": "These areas are closed to all future research.",
+      "next_falsification_test": "For any one of them, obtain the two closest full texts and check whether the reduction is exact."
+    },
+    {
+      "id": "F4",
+      "statement": "Candidate A (a monitor determining online whether its own verdict is evidentially supportable) is at very high risk of being closed by existing runtime-verification work.",
+      "evidence": "S016 (Ain't No Stopping Us Monitoring Now, TOSEM 2025) whose snippet describes moving the monitorability check to runtime; S041 (CoCo, ICCPS 2022) which builds calibrated confidence monitors for verification assumptions; S032 (ConSerts) which shifts certification to runtime; S024, a survey of uncertainty in runtime verification.",
+      "status": "PROVISIONAL",
+      "assumptions": "The S016 snippet paraphrase is accurate. It was produced by a search-side model and is not a verbatim quotation.",
+      "strongest_allowed_wording": "Candidate A is attacked from three directions at once and its PRIOR_ART_RISK is scored 9/10; whether anything survives cannot be determined without full text.",
+      "forbidden_stronger_wording": "S016 solves candidate A. / Candidate A is dead.",
+      "next_falsification_test": "Read S016, S024 and S041 in full. If none computes per-tick verdict determinacy from the realised observation set, A reopens and may outrank B."
+    },
+    {
+      "id": "F5",
+      "statement": "The principle that agreement between channels sharing an upstream source is not evidence of correctness is foundational and cannot be claimed by any candidate here.",
+      "evidence": "S065 Littlewood and Miller (1989), coincident failures in multiversion software, reached through the secondary paraphrase in S064; common-cause failure theory as described in S066 and S069.",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "The Littlewood-Miller result is correctly characterised in the S064 paraphrase and in general background. The original was not reachable.",
+      "strongest_allowed_wording": "The principle is at least 37 years old; candidate B may claim only a runtime measurement, never the principle.",
+      "forbidden_stronger_wording": "We show that agreement is not evidence.",
+      "next_falsification_test": "None needed; this claim constrains rather than supports the selection."
+    },
+    {
+      "id": "F6",
+      "statement": "The fusion literature repairs the consistency of a fused ESTIMATE; whether it also reports the lost power of a monitor's diagnostic TEST is not visible at snippet depth.",
+      "evidence": "S060 (inverse covariance intersection finds and removes a bound on the maximum common information shared by estimates); S061; S062 (data incest); S063 (conditional-independence testing for shared information between fusion inputs).",
+      "status": "PROVISIONAL",
+      "assumptions": "The estimate/test distinction is real and material. A widened covariance does not restore a residual's ability to separate hypotheses - this is argued, not measured.",
+      "strongest_allowed_wording": "At snippet depth, none of the four closest fusion sources visibly attaches a shared-information verdict to a monitor's diagnostic decision.",
+      "forbidden_stronger_wording": "The fusion literature does not address diagnostic test power. / This is a gap in the fusion literature.",
+      "next_falsification_test": "Read S063 in full. It is named in SELECTED_CANDIDATE.md as the single most dangerous source; if it crosses the estimate/test line, candidate B dies."
+    },
+    {
+      "id": "F7",
+      "statement": "Runtime effective independence of an assurance verdict - a per-verdict, per-tick count of distinct upstream sources derived from source-code provenance - was not visible in any source returned by 36 queries.",
+      "evidence": "Absence across the 90 indexed sources.",
+      "status": "PROVISIONAL",
+      "assumptions": "SINGLE ENGINE, SNIPPET DEPTH ONLY, PATENTS EXCLUDED, AEROSPACE STANDARDS UNREAD. Item 3 forbids using absence from a snippet as evidence of novelty, and this claim does not do so: it records what was not seen, not what does not exist.",
+      "strongest_allowed_wording": "No source surfaced by this search visibly computes a runtime effective-independence count for a safety monitor's verdict.",
+      "forbidden_stronger_wording": "This is novel. / Nobody has done this. / There is a gap in the literature here.",
+      "next_falsification_test": "The Stage-0 prior-art gate: read S063, S060, S062, S041 and S016 in full; obtain ARP4761 common-mode analysis; search data-provenance theory and fault-tree minimal cut sets. Any hit kills the candidate."
+    },
+    {
+      "id": "F8",
+      "statement": "The proposition underlying candidate B - that a consistency test over channels sharing a single upstream cut vertex has zero power against a fault at that vertex - is a corollary of Menger's theorem and of d-separation.",
+      "evidence": "SELECTED_CANDIDATE_FORMAL_TARGET.md sections 2 and 3; the equivalence between minimum vertex cut and maximum vertex-disjoint paths is Menger (1927).",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "The provenance graph is a DAG and derivation is functional.",
+      "strongest_allowed_wording": "The formal content of candidate B is a corollary of classical results and is not a contribution.",
+      "forbidden_stronger_wording": "We prove a new theorem about evidence independence.",
+      "next_falsification_test": "None. This claim is conceded in advance to hostile Reviewer D and is stated in three separate artifacts so it cannot drift."
+    },
+    {
+      "id": "F9",
+      "statement": "Candidate B is selected as the single Stage-0 direction, with status PROVISIONAL and a mandatory full-text gate before any code is written.",
+      "evidence": "CANDIDATE_SCORECARD.csv: weighted frontier score 5.900, highest of twelve; SELECTED_CANDIDATE.md sections 1-3; SELECTED_CANDIDATE_STAGE0_PROMPT.md section 1.",
+      "status": "PROVISIONAL",
+      "assumptions": "The 13 dimension scores are subjective 0-10 judgements made by one agent without full-text access. The weighted score is a prioritisation device, not a scientific metric (item 25).",
+      "strongest_allowed_wording": "Candidate B ranks first on the brief's own weighting and is recommended for Stage 0 subject to a prior-art gate that this environment could not perform.",
+      "forbidden_stronger_wording": "Candidate B is the frontier. / Candidate B is novel. / The prior art has been cleared.",
+      "next_falsification_test": "Execute section 1 of the Stage-0 prompt. If the gate fails, record the kill and select again from TOP_THREE.md."
+    },
+    {
+      "id": "F10",
+      "statement": "The most likely outcome of the Stage-0 experiment is the consequence null H0c: independence deficits occur, are undeclared, and change no assurance action.",
+      "evidence": "Three consecutive prior CSIA work packages reached an action-level null on their own phenomena: evidence-semantic equivalence (106 ASSURANCE_STATE rows all latency-only, action sets never differed); AI contract synthesis (0 defects promoted from 42 evaluations); semantic authority conflict (0 of 9 authority pairs reached ACTION).",
+      "status": "CONJECTURE",
+      "assumptions": "That the same downstream insensitivity applies to a structurally different phenomenon. This is a prediction about an experiment that has not been run.",
+      "strongest_allowed_wording": "Based on three prior action-level nulls on this stack, H0c is the most probable Stage-0 outcome and the design is written so it can win.",
+      "forbidden_stronger_wording": "The experiment will fail. / The effect does not exist.",
+      "next_falsification_test": "The Stage-0 ACTION endpoint (secondary endpoint S4). This prediction is recorded now so it can be scored later whichever way it goes."
+    },
+    {
+      "id": "F11",
+      "statement": "Candidate K (gate-conditioned self-confirming evidence loops) scored 4.200, second-highest, and is disqualified on rule rather than on merit.",
+      "evidence": "CANDIDATE_SCORECARD.csv; REJECTED_CANDIDATES.md entry K. Disqualified under item 0 as a rename of killed direction 1 (self-occlusion), and independently already published as S070 (Selection-Induced Contraction of Innovation Statistics in Gated Kalman Filters, 2025).",
+      "status": "REFUTED",
+      "assumptions": "That 'a mechanism suppresses the evidence that would reveal it' is the same argument shape as the killed self-occlusion direction, notwithstanding the different mechanism.",
+      "strongest_allowed_wording": "K outscored two finalists and is excluded by item 0, with its score published so the ranking cannot be accused of hiding it.",
+      "forbidden_stronger_wording": "K was a weak candidate.",
+      "next_falsification_test": "If a reviewer judges that gate-conditioning is materially distinct from self-occlusion, K may be re-argued - but only against S070's full text, which appears to have published the effect already."
+    },
+    {
+      "id": "F12",
+      "statement": "Aerospace certification common-mode analysis (ARP4761 CCA/ZSA/PRA) is the most likely place for candidate B to already exist, and this environment could not check it.",
+      "evidence": "The standards are paywalled and unreachable (SEARCH_PROTOCOL.md section 0). LITERATURE_FRONTIER_MAP.md section 6 records this as the largest known hole in the search.",
+      "status": "PROVISIONAL",
+      "assumptions": "That a minimum vertex cut of a provenance graph is formally close to a minimal cut set, which is the object CCA is built on.",
+      "strongest_allowed_wording": "Whether runtime kappa is common-mode analysis with a clock is unresolved, and it is the first hard gate of Stage 0.",
+      "forbidden_stronger_wording": "Common-mode analysis does not do this.",
+      "next_falsification_test": "Stage-0 prompt section 1.2. If the answer is no or cannot be established, the candidate is killed rather than reworded."
+    }
+  ],
+  "refuted_predictions": [
+    {
+      "id": "RP1",
+      "prediction": "Made at the start of this stage: that at least one of the nine required candidate families would survive prior-art attack on its own terms and could be recommended without qualification.",
+      "outcome": "Refuted. All nine families reduce to an established abstraction that the search surfaced by name. The recommended candidate is a narrowed version of family B, and it is recommended as PROVISIONAL with a mandatory full-text gate, not without qualification.",
+      "kept": true,
+      "why_kept": "The refutation is the main scientific content of this stage and is more informative than the selection."
+    },
+    {
+      "id": "RP2",
+      "prediction": "Made at the start of this stage: that the evidence standard in item 3 could be met, because prior packages had recorded full-text blocking as a limitation rather than as a blocker.",
+      "outcome": "Refuted decisively. Fifteen scholarly hosts were probed and all fifteen were unreachable. Item 3's own fallback (PARTIAL_SOURCE_ONLY) had to be applied to every source without exception, which caps this stage's output at PROVISIONAL.",
+      "kept": true,
+      "why_kept": "This is the reason no novelty claim may be made here, and it must remain visible rather than being softened into a footnote."
+    },
+    {
+      "id": "RP3",
+      "prediction": "Made while scoring: that the top three would separate cleanly under the item-25 weighting.",
+      "outcome": "Refuted. Candidates H and J tied exactly at 3.950, and the disqualified candidate K scored 4.200 - above both. The ranking required a tie-break rule and a disqualification, neither of which the weighted score supplied.",
+      "kept": true,
+      "why_kept": "It shows the weighted score is a prioritisation device and not a discriminating instrument, exactly as item 25 says."
+    }
+  ],
+  "preserved_prior_verdicts": {
+    "generic semantic-equivalence checking": "KNOWN/SUBSUMED",
+    "shortest-counterexample generation for semantic pipelines": "KNOWN/SUBSUMED",
+    "dual operational/diagnostic admissibility": "KNOWN/SUBSUMED",
+    "intermittent invalidity masking": "KNOWN/SUBSUMED",
+    "AI-assisted contract synthesis": "HEURISTICS_SUFFICIENT - the MAVLink schema already carries invalid= machine-readably, and the B0b schema baseline scored 14/14 with zero unsupported claims",
+    "conflicting semantic authorities": "ENGINEERING_INCONSISTENCY_ONLY - zero SPEC_VS_PRODUCER conflicts; all 17 conflicts consumer-side; 0 of 9 pairs reached ACTION",
+    "end-to-end evidence-semantic equivalence verification": "IMPLEMENTATION_DEFECTS_ONLY - action sets never differed across paths",
+    "unrestricted self-occlusion theorem": "KILLED - and candidate K was disqualified in this stage for reproducing its argument shape",
+    "general graph/coarsening theorem under hypothesis-dependent deletion": "KILLED",
+    "CUSUM / cumulative detector novelty": "KILLED",
+    "slow-ramp detection novelty": "KILLED",
+    "generic validity gating as a new diagnostic idea": "KILLED",
+    "receiver-health rescue / original MAER": "KILLED",
+    "semantic disagreement caused merely by consumer implementation bugs": "KILLED"
+  },
+  "what_must_be_true_before_implementation": [
+    "Full text of S063, S060, S062, S041 and S016 obtained and read.",
+    "ARP4761 common-mode analysis obtained; the question 'is runtime kappa just CCA with a clock?' answered in writing.",
+    "Two further prior-art searches run: data-provenance theory, and fault-tree minimal cut sets.",
+    "If any of the above already computes a runtime effective-independence count for a monitor's verdict: STOP, record the kill, do not adjust the candidate to survive."
+  ]
+}

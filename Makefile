@@ -549,3 +549,11 @@ authority-baselines:
 .PHONY: semantic-authority
 semantic-authority: authority-table authority-sensitivity \
                     authority-conflicts authority-baselines
+
+# ---------------------------------------------------------------------------
+# Stage R0.2 frontier selection. There is nothing to run: the stage produced
+# documents only (item 36 forbids implementation). This target checks the
+# honesty guards over those documents.
+.PHONY: frontier-check
+frontier-check:
+	$(PY) -m pytest tests/test_frontier_selection.py -q

@@ -55,6 +55,15 @@ ALLOWED_MISSING = {
     "docs/adr/": "planned directory named in an organisational blueprint",
     "docs/external/reading/":
         "planned directory named in a research request document",
+    # Stage R0.2 selected a candidate and wrote the Stage-0 design and prompt
+    # for it. Item 36 of that brief forbids implementing any of it, and
+    # tests/test_frontier_selection.py asserts that the first of these does
+    # NOT exist -- executing the prompt in the stage that wrote it would be a
+    # violation. Both exemptions must be deleted the moment Stage 0 runs.
+    "research/evidence_independence/":
+        "forward reference; Stage-0 output directory, deliberately not created",
+    "tests/test_evidence_independence.py":
+        "forward reference; specified by the Stage-0 prompt, not yet written",
 }
 
 
