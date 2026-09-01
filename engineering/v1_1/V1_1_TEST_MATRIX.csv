@@ -1,0 +1,20 @@
+gate,requirement,phase,test_or_artifact,status,note
+A,frozen v1 reproduces exactly,1,tests/test_v1_frozen.py,PASS,zero diff on FROZEN_PATHS against csia-v1.0-research-final
+A,frozen core untouched by phase 1,1,tests/test_v1_1_canonical_ingest.py::test_the_frozen_core_was_not_touched_by_phase_one,PASS,restated so a phase-1 regression names phase 1
+B,canonical ingestion tests pass,1,tests/test_v1_1_canonical_ingest.py,PASS,13 tests over rules R1-R5
+C,D1 battery sentinel disappears,1,KNOWN_DEFECTS_POST_FIX.json,PASS,5.0 A present -> absent SENTINEL
+C,D2 magnetometer all-zero disappears,1,KNOWN_DEFECTS_POST_FIX.json,PASS,stale field present -> absent SENTINEL
+C,D3 ULog battery current disappears,1,KNOWN_DEFECTS_POST_FIX.json,PASS,-1.0 valid -> absent invalid
+C,D4 plugins battery current disappears,1,KNOWN_DEFECTS_POST_FIX.json,PASS,0.0 valid -> absent invalid
+C,D5 GNSS no-fix control unchanged,1,tests/test_v1_1_canonical_ingest.py::test_gnss_no_fix_keeps_its_own_reason,PASS,byte-identical pre and post; NO_3D_FIX not folded into SENTINEL
+C,defects reproduced BEFORE fixing,1,KNOWN_DEFECTS_PRE_FIX.json,PASS,sha256 7fdd3d65 differs from post 7fff288a
+C,pre-fix record not regenerated against fixed code,1,tests/test_v1_1_canonical_ingest.py::test_the_pre_fix_record_still_shows_the_defects,PASS,guards the historical evidence
+D,fix-loss reports loss of discriminating support,2,,NOT REACHED,phase 2 not started
+E,graph-vs-flat comparison executable and matched,3,,NOT REACHED,phase 3 not started
+F,sequential baseline executable and matched,3,,NOT REACHED,phase 3 not started
+G,function eligibility deterministic,4,,NOT REACHED,phase 4 not started
+H,assurance ledger reconstructs transitions,4,,NOT REACHED,phase 4 not started
+I,Python/C equivalence,5,,NOT REACHED,phase 5 not started; no C port exists
+J,full test suite passes,1,pytest,PASS,984 passed
+-,ingest equivalence across all five paths,1,,NOT DONE,item 6 asks for five paths; four defect cases on three paths were covered
+-,remeasurement of affected v1 research campaigns,1,,NOT DONE,listed in V1_1_ENGINEERING_MANIFEST.md section 5

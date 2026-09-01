@@ -1,0 +1,68 @@
+{
+  "artifact": "KNOWN_DEFECTS_PRE_FIX",
+  "cases": {
+    "D1_battery_sentinel_ardupilot": {
+      "observed": {
+        "missing_reason": null,
+        "note": "",
+        "present": true,
+        "quality": "INFORMATIVE",
+        "value": 5.0
+      },
+      "raw_condition": "current_battery = -1 (documented not-measured sentinel) arriving 20 ms after a real 5.00 A reading",
+      "sentinel_counts": {
+        "battery.current": 1
+      }
+    },
+    "D2_mag_all_zero_ardupilot": {
+      "observed": {
+        "missing_reason": null,
+        "note": "",
+        "present": true,
+        "quality": "INFORMATIVE",
+        "value": [
+          20.0,
+          -10.0,
+          -40.0
+        ]
+      },
+      "raw_condition": "all-zero magnetometer triple arriving 20 ms after a real field reading",
+      "sentinel_counts": {}
+    },
+    "D3_ulog_battery_current": {
+      "event_count": 3,
+      "first_event": {
+        "current": -1.0,
+        "valid": 1.0,
+        "voltage": 12.0
+      },
+      "raw_condition": "battery_status.current_a == -1.0 for every sample, as in the repository's measured PX4 log"
+    },
+    "D4_plugins_battery_current": {
+      "event_count": 1,
+      "first_event": {
+        "current": 0.0,
+        "valid": 1.0,
+        "voltage": 12.0
+      },
+      "raw_condition": "BATTERY_STATUS.current_battery == -1"
+    },
+    "D5_gnss_no_fix_ardupilot": {
+      "observed": {
+        "missing_reason": "NO_3D_FIX",
+        "note": "producer arrived carrying the documented not-measured sentinel: stream implemented, measurement absent",
+        "present": false,
+        "quality": "UNAVAILABLE",
+        "value": null
+      },
+      "raw_condition": "fix_type = 1 arriving 20 ms after a 3D fix",
+      "role": "CONTROL - already correct in v1; must not change",
+      "sentinel_counts": {
+        "gnss.position": 1,
+        "gnss.velocity": 1
+      }
+    }
+  },
+  "note": "Recorded behaviour of each ingest path on one raw producer condition. This file states what the code DOES, not what is correct; CANONICAL_INGEST_SPEC.md states what is correct.",
+  "sha256_of_cases": "7fdd3d65e1b9c7633255989ec16f10c58e288bae2d024825e1e53fbd57d59d9d"
+}

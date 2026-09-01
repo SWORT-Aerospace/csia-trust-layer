@@ -148,6 +148,19 @@ class ArduPilotAdapter(PlatformAdapter):
                               _frd_to_zup(mag) * 0.1,          # mgauss -> uT
                               t_source=t_src, frame=SensorFrame.BODY_Z_UP,
                               unit="uT")
+                else:
+                    # v1.1 ENGINEERING FIX (defect D2). The condition above
+                    # was correct and had no else, so the all-zero case was
+                    # recognised and then dropped on the floor: nothing was
+                    # emitted, nothing was recorded, and `_latest` still held
+                    # the last real field. Measured pre-fix, with a real field
+                    # followed 20 ms later by an all-zero triple,
+                    # `mag.field_ut` reported the STALE field as present and
+                    # INFORMATIVE.
+                    #
+                    # Recognising a sentinel and saying nothing about it is
+                    # indistinguishable, downstream, from never having looked.
+                    self._reject_sentinel("mag.field_ut")
             return
 
         if k == "SCALED_PRESSURE":

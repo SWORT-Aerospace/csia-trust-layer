@@ -16,6 +16,7 @@ import csv
 import json
 import os
 import re
+import subprocess
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -28,10 +29,26 @@ PLUG = "csia/runtime/plugins.py"
 ULOG = "csia/runtime/ulog_source.py"
 
 
+# The commit at which this package's source facts were taken. Read from git
+# rather than the worktree, because these are facts about the code AS AUDITED.
+# The v1.1 engineering pass fixed the magnetometer and battery-sentinel
+# defects this package documented; the pins stopped matching, which is correct
+# -- the code changed -- but the AUDIT is a record of what v1 did, and must
+# keep resolving. Not the v1.0 tag: that predates the aircraft adapters.
+CITED_REVISION = "2036a2a"
+
+
 def pin(path, pattern):
     """Locate a unique source fact and return (line_no, text)."""
-    with open(os.path.join(ROOT, path), encoding="utf-8") as fh:
-        text = fh.read()
+    text = None
+    if path.replace(os.sep, "/").startswith("csia/"):
+        r = subprocess.run(["git", "show", f"{CITED_REVISION}:{path}"],
+                           cwd=ROOT, capture_output=True, text=True)
+        if r.returncode == 0:
+            text = r.stdout
+    if text is None:
+        with open(os.path.join(ROOT, path), encoding="utf-8") as fh:
+            text = fh.read()
     hits = list(re.finditer(pattern, text, re.M))
     if len(hits) != 1:
         raise AssertionError(

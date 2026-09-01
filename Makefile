@@ -563,3 +563,14 @@ frontier-check:
 .PHONY: evidence-independence-check
 evidence-independence-check:
 	$(PY) -m pytest tests/test_effective_evidence_independence.py -q
+
+# v1.1 Phase 1: canonical ingestion. `v1-1-defects` re-runs the defect
+# reproduction (writes KNOWN_DEFECTS_POST_FIX.json); `v1-1-ingest-check` runs
+# the Gate B/C regression tests.
+.PHONY: v1-1-defects
+v1-1-defects:
+	$(PY) engineering/v1_1/reproduce_defects.py --out post
+
+.PHONY: v1-1-ingest-check
+v1-1-ingest-check:
+	$(PY) -m pytest tests/test_v1_1_canonical_ingest.py -q

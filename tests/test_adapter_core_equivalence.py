@@ -216,25 +216,36 @@ def test_esc_is_the_only_intentional_exclusion():
     assert set(legacy) - new == set(INTENTIONALLY_WITHHELD)
 
 
-def test_battery_current_sentinel_is_a_deliberate_improvement():
-    """v1 turned 'not measured' into 0 A. v1.1 refuses it. Assert both.
+def test_battery_current_sentinel_is_refused_by_both_paths():
+    """`current_battery == -1` means the vehicle is not measuring current.
 
-    This is the one place the paths disagree on a value rather than on
-    presence, and it is a fix, not a drift: `current_battery == -1` means the
-    vehicle is not measuring current, and `max(-1, 0) = 0` presented that to
-    the core as a real reading of zero amps.
+    HISTORY, because this test used to assert the opposite of half of what it
+    now asserts. Until the v1.1 ingestion pass this was the one place the two
+    paths disagreed on a VALUE rather than on presence: `map_mavlink` computed
+    `max(-1, 0) / 100 = 0.0` and handed the core a confident reading of zero
+    amps, while the adapter refused. The test asserted both, and called the
+    disagreement a deliberate improvement.
+
+    It was half an improvement. Zero amps is a claim about the aircraft and
+    "not measured" is a claim about the sensor, and the legacy path was making
+    the first when the producer had made the second. v1.1 fixes the legacy
+    path too, so the paths now AGREE and the agreement is the thing worth
+    protecting. The pre-fix behaviour is preserved, with its hash, in
+    `engineering/v1_1/KNOWN_DEFECTS_PRE_FIX.json` (case D4).
     """
     m = Msg("BATTERY_STATUS", time_boot_ms=1000,
             voltages=[3800, 3800, 3800, 3800] + [65535] * 6,
             current_battery=-1)
     ctx = {"t0": None, "t_last": 1.0}
     legacy = {s: ch for s, _t, ch in map_mavlink(m, ctx)}
-    assert legacy["battery"]["current"] == 0.0      # the v1 behaviour
+    assert legacy["battery"]["current"] is None      # was 0.0 before v1.1
+    assert legacy["battery"]["current_valid"] is False
+    assert legacy["battery"]["valid"] is False
 
     ad = get_adapter("ardupilot")
     ad.ingest(m)
     cv = ad.sample(t_mono=1.0).get("battery.current")
-    assert cv.value is None                          # the v1.1 behaviour
+    assert cv.value is None
     assert not cv.usable
     # and the sensor is withheld rather than fed a fabricated zero
     assert "battery" not in {s for s, _t, _c in

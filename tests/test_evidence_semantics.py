@@ -187,10 +187,27 @@ def test_every_cross_sensor_citation_still_resolves():
     with open(path, encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
     assert rows
+    # Resolved against the revision the audit was taken at, not the worktree.
+    # These rows are facts about what v1 DID; the v1.1 engineering pass changed
+    # some of that code, and a citation to superseded code must still resolve
+    # or the audit becomes unreadable. See cross_sensor_audit.CITED_REVISION.
+    import subprocess
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "_cross_sensor_audit", os.path.join(PKG, "cross_sensor_audit.py"))
+    audit = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(audit)
+    cache = {}
     for r in rows:
         fpath, line_no = r["citation"].rsplit(":", 1)
-        with open(os.path.join(ROOT, fpath), encoding="utf-8") as fh:
-            lines = fh.read().splitlines()
+        if fpath not in cache:
+            got = subprocess.run(
+                ["git", "show", f"{audit.CITED_REVISION}:{fpath}"],
+                cwd=ROOT, capture_output=True, text=True)
+            cache[fpath] = (got.stdout if got.returncode == 0
+                            else open(os.path.join(ROOT, fpath),
+                                      encoding="utf-8").read())
+        lines = cache[fpath].splitlines()
         assert lines[int(line_no) - 1].strip() == r["cited_text"], r["citation"]
 
 

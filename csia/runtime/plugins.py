@@ -189,10 +189,25 @@ def map_mavlink(msg, ctx: dict) -> list:
             "vel": _np.array([msg.vx, -msg.vy, -msg.vz]) / 100.0,
             "valid": True}))
     elif k == "BATTERY_STATUS":
+        # v1.1 ENGINEERING FIX (defect D4). `max(current_battery, 0)` turned
+        # MAVLink's documented not-measured sentinel into a confident 0.00 A.
+        # common.xml declares it machine-readably:
+        #
+        #   <field type="int16_t" name="current_battery" units="cA"
+        #          invalid="-1">
+        #
+        # Measured pre-fix on that exact input: this path emitted
+        # current = 0.0 with valid = True. Zero amps is a claim about the
+        # aircraft. "Not measured" is a claim about the sensor. Clamping
+        # replaced the second with the first.
         v = sum(x for x in msg.voltages if 0 < x < 65535) / 1e3
-        out.append(("battery", t, {"voltage": v,
-                                   "current": max(msg.current_battery, 0) / 100.0,
-                                   "valid": True}))
+        cur_raw = msg.current_battery
+        cur_ok = cur_raw is not None and cur_raw != -1
+        out.append(("battery", t, {
+            "voltage": v,
+            "current": (cur_raw / 100.0) if cur_ok else None,
+            "current_valid": cur_ok,
+            "valid": bool(v > 0 and cur_ok)}))
     elif k == "VIBRATION":
         import numpy as _np
         rms = float(_np.linalg.norm([msg.vibration_x, msg.vibration_y,

@@ -169,12 +169,34 @@ class PlatformAdapter:
         carries the distinction. Defaulting every case to SENTINEL would have
         replaced one imprecision with another --
         `test_no_3d_fix_is_missing_not_a_zero_position` caught exactly that.
+
+        v1.1 ENGINEERING FIX (defects D1, D2). This method used to record the
+        sentinel WITHOUT clearing `_latest`, while `_put` cleared
+        `_sentinel_at`. The asymmetry meant a real value always won:
+        `_channel_value` consults `_latest` first, so a producer saying "not
+        measured now" was masked by whatever it had measured a moment earlier,
+        for as long as the old value stayed inside its max-age window.
+
+        Measured pre-fix, on ArduPilot `BATTERY_STATUS` with a real 5.00 A
+        reading followed 20 ms later by the documented `current_battery = -1`
+        sentinel: `battery.current` reported **5.00 A, present, INFORMATIVE**.
+        The declaration of absence was recorded and then ignored.
+
+        The GNSS path had already worked around this locally by popping
+        `_latest` itself before calling here (`ardupilot.py:232-233`), which is
+        why `NO_3D_FIX` reached the sample correctly while the battery sentinel
+        did not. That workaround is now the general rule, applied once, here.
+
+        A sentinel supersedes an earlier value for the same reason a value
+        supersedes an earlier sentinel: the producer's most recent statement
+        about the channel is the one that describes the present.
         """
         now = self._clock()
         self.counters["rejected_sentinel"] += 1
         for channel in channels:
             self._sentinels[channel] = self._sentinels.get(channel, 0) + 1
             self._sentinel_at[channel] = (now, reason)
+            self._latest.pop(channel, None)
 
     def sentinel_counts(self) -> dict:
         return dict(self._sentinels)

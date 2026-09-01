@@ -3,75 +3,75 @@
   "every_gvalid_relation_has_gps_as_an_endpoint": true,
   "facts": [
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:227",
+      "cite": "csia/aircraft/adapters/ardupilot.py:240",
       "establishes": "the adapter reads GPS_RAW_INT.fix_type",
       "fact_id": "P1_FIX_TYPE_READ",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 227,
+      "line": 240,
       "source": "        fix = g(\"fix_type\", 0)"
     },
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:228",
+      "cite": "csia/aircraft/adapters/ardupilot.py:241",
       "establishes": "fix_type < 3 (or absent) is the invalidity predicate",
       "fact_id": "P2_INVALID_PREDICATE",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 228,
+      "line": 241,
       "source": "        if fix is None or fix < 3:"
     },
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:232",
+      "cite": "csia/aircraft/adapters/ardupilot.py:245",
       "establishes": "the previously accepted position is DELETED, not marked invalid",
       "fact_id": "A1_FORGET_POSITION",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 232,
+      "line": 245,
       "source": "            self._latest.pop(\"gnss.position\", None)"
     },
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:233",
+      "cite": "csia/aircraft/adapters/ardupilot.py:246",
       "establishes": "the previously accepted velocity is DELETED, not marked invalid",
       "fact_id": "A2_FORGET_VELOCITY",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 233,
+      "line": 246,
       "source": "            self._latest.pop(\"gnss.velocity\", None)"
     },
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:235",
+      "cite": "csia/aircraft/adapters/ardupilot.py:248",
       "establishes": "the adapter records the DISTINCT reason NO_3D_FIX for the rejection",
       "fact_id": "A3_REJECT_REASON",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 235,
+      "line": 248,
       "source": "                                  reason=MissingReason.NO_3D_FIX)"
     },
     {
-      "cite": "csia/aircraft/adapters/ardupilot.py:235",
+      "cite": "csia/aircraft/adapters/ardupilot.py:248",
       "establishes": "no channel value of any kind is produced from an invalid fix",
       "fact_id": "A4_EARLY_RETURN",
       "file": "csia/aircraft/adapters/ardupilot.py",
-      "line": 235,
+      "line": 248,
       "source": "                                  reason=MissingReason.NO_3D_FIX)\n            return"
     },
     {
-      "cite": "csia/aircraft/adapters/base.py:317",
+      "cite": "csia/aircraft/adapters/base.py:339",
       "establishes": "a sensor with any unusable channel is withheld entirely",
       "fact_id": "H1_ALL_CHANNELS_REQUIRED",
       "file": "csia/aircraft/adapters/base.py",
-      "line": 317,
+      "line": 339,
       "source": "                    complete = False"
     },
     {
-      "cite": "csia/aircraft/adapters/base.py:335",
+      "cite": "csia/aircraft/adapters/base.py:357",
       "establishes": "EVERY emitted core sample carries valid=True unconditionally: this hand-off has no way to express OBSERVED_INVALID",
       "fact_id": "H2_VALID_IS_HARDCODED_TRUE",
       "file": "csia/aircraft/adapters/base.py",
-      "line": 335,
+      "line": 357,
       "source": "                chans[\"valid\"] = True"
     },
     {
-      "cite": "csia/aircraft/adapters/base.py:270",
+      "cite": "csia/aircraft/adapters/base.py:292",
       "establishes": "both gps core channels come from the two channels the reject deletes, so an invalid fix withholds the whole gps sensor",
       "fact_id": "H3_GPS_CORE_MAP",
       "file": "csia/aircraft/adapters/base.py",
-      "line": 270,
+      "line": 292,
       "source": "        \"gps\": {\"pos\": \"gnss.position\", \"vel\": \"gnss.velocity\"},"
     },
     {
@@ -228,12 +228,12 @@
     }
   ],
   "file_sha256": {
-    "csia/aircraft/adapters/ardupilot.py": "0718de67820ed16a672697eb1616987d8b7e30f428777a2e297cd77e13e5eaff",
-    "csia/aircraft/adapters/base.py": "6a68047c751d67c041ef7f2c59b1aa3d13e2ec8c43c869ec5e631e2346cb380a",
+    "csia/aircraft/adapters/ardupilot.py": "8f74ca08efcc9ce67532cff3b6c90ba6dca5f7dae8ac2f633e873a5cb5a20fb4",
+    "csia/aircraft/adapters/base.py": "f648c6125674b36e1a647f2c9f4a2d4d7602299813887b7194ff52f5ef9b4d15",
     "csia/prediction/predictors.py": "8f279e5f02590ff434b14ea874d31563906fcc862d0370c26543cfe8c0c6a5b4",
     "csia/runtime/online.py": "d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa",
-    "csia/runtime/plugins.py": "c6b06e2e062b310a3b0a3f45548ca4efb7e1119ab286daad3c55d86eb589dad0",
-    "csia/runtime/ulog_source.py": "b262c1d4b96012f6526de74b3f8d632df05fee7352e360f57f7e3d88d8ed0f60",
+    "csia/runtime/plugins.py": "40af026b974b64b8cfeaebc78a3347cdbd3cd47492485ba74f1dacd6b4b285f4",
+    "csia/runtime/ulog_source.py": "5cc6c03d08dfa950296cf65916f25eb07ddafba6fd8f41cb61483d78ce6a8120",
     "csia/trust_engine/engine.py": "4bd01311ab07fd0d508f10be6f9c25f751f9c167e2ecfed88226238b2436f2b6"
   },
   "gvalid_relations": {

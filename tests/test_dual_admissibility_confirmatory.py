@@ -201,8 +201,27 @@ def test_cross_path_defect_reproduces_and_stays_separate():
         "EXERCISED", "NOT_EXERCISED", "UNAVAILABLE")
 
 
-def test_battery_defect_is_reproducible_from_the_committed_adapter():
-    """D3, executed rather than read: a disowned current is served as usable."""
+def test_battery_defect_is_fixed_and_its_pre_fix_record_preserved():
+    """D3, executed rather than read. **The defect is now FIXED.**
+
+    This test used to assert that a disowned current was still served as
+    usable, because it was: `_reject_sentinel` recorded the sentinel without
+    clearing `_latest`, `_channel_value` consults `_latest` first, and the
+    retained 5.00 A won until it aged out as STALE -- the wrong reason.
+
+    That was a real finding about v1 and it is preserved, not deleted:
+
+      * the frozen pre-fix behaviour, with its sha256, is in
+        `engineering/v1_1/KNOWN_DEFECTS_PRE_FIX.json` (case D1);
+      * the research package's own report and citations still resolve, because
+        they are now verified against the revision they were taken at rather
+        than against the worktree
+        (`research/semantic_authority_conflict/authorities.py:CITED_REVISION`).
+
+    What this test now guards is that the fix stayed fixed. Turning a defect
+    reproduction into a defect regression test is the point of the exercise;
+    deleting it would have thrown away the only executable record.
+    """
     from csia.aircraft.adapters.ardupilot import ArduPilotAdapter
     now = {"t": 0.0}
     a = ArduPilotAdapter(clock=lambda: now["t"])
@@ -225,12 +244,14 @@ def test_battery_defect_is_reproducible_from_the_committed_adapter():
 
     now["t"] = 0.30
     cv = a.sample(t_mono=0.30).get("battery.current")
-    assert cv.usable is True, "the retained value is still served"
-    assert cv.value == 5.0
-    # and when it finally goes, the reason is the wrong one
+    assert cv.usable is False, "pre-v1.1 the retained 5.00 A was still served"
+    assert cv.value is None
+    assert cv.missing.value == "SENTINEL", (
+        "the producer's own disavowal must reach the channel; reporting "
+        "STALE instead was the v1 defect this fix removes")
+
+    # and it still ages out: a sentinel from a minute ago says nothing about
+    # now, so the channel must not sit on SENTINEL for ever
     now["t"] = 0.80
     cv = a.sample(t_mono=0.80).get("battery.current")
     assert cv.usable is False
-    assert cv.missing.value == "STALE", (
-        "the sentinel was counted but never delivered; the channel reports "
-        "STALE rather than the producer's own disavowal")

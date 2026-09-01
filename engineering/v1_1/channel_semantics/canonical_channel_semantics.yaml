@@ -1,0 +1,195 @@
+# CANONICAL CHANNEL SEMANTICS -- CSIA v1.1
+#
+# Item 5. Executable channel semantics, preferring AUTHORITATIVE EXISTING
+# METADATA over hand-written duplication. Every rule points at source or
+# schema evidence.
+#
+# Scope: the channels Phase 1 touched. This file is NOT a complete channel
+# inventory and does not pretend to be one -- writing rules for channels
+# Phase 1 did not audit would be duplication of exactly the kind item 5 warns
+# against. Channels are added as the phases that audit them run.
+#
+# evidence_kind:
+#   SCHEMA_ATTRIBUTE   the producer's own machine-readable declaration
+#   PRODUCER_SOURCE    a line in ArduPilot or PX4 that writes the value
+#   CONSUMER_SOURCE    a line in CSIA that interprets it
+
+version: "1.1.0"
+phase: 1
+scope_note: >
+  Phase 1 channels only. Absence from this file means "not yet audited",
+  never "no rule applies".
+
+revisions:
+  ardupilot: "01a504b"
+  px4: "working tree at /home/user/px4"
+  mavlink_schema: "modules/mavlink/message_definitions/v1.0/common.xml @ 01a504b"
+
+channels:
+
+  battery.current:
+    source:
+      mavlink: BATTERY_STATUS.current_battery
+      uorb: battery_status.current_a
+    unit: A
+    validity_rule:
+      rule: finite AND not equal to the declared sentinel
+      evidence_kind: SCHEMA_ATTRIBUTE
+      evidence:
+        - 'common.xml BATTERY_STATUS.current_battery: invalid="-1"'
+        - 'common.xml BATTERY_STATUS.current_battery description:
+           "-1: autopilot does not measure the current"'
+        - 'px4 msg/versioned/BatteryStatus.msg:14
+           float32 current_a # [A] [@invalid -1] Battery current'
+    sentinel_rule:
+      value: -1
+      means: NOT_MEASURED
+      missing_reason: SENTINEL
+      forbidden_interpretations:
+        - 0.0            # v1 plugins path clamped -1 to 0 (defect D4)
+        - -1.0           # v1 ULog path emitted the raw sentinel (defect D3)
+    missing_rule:
+      no_message: NOT_RECEIVED
+    freshness_rule:
+      max_age_s: 0.50
+      evidence_kind: CONSUMER_SOURCE
+      evidence: 'csia/aircraft/adapters/base.py MaxAge["battery.current"]'
+    retention_rule:
+      rule: >
+        A sentinel SUPERSEDES an earlier value, exactly as a value supersedes
+        an earlier sentinel. The producer's most recent statement about the
+        channel is the one that describes the present.
+      evidence_kind: CONSUMER_SOURCE
+      evidence: 'csia/aircraft/adapters/base.py _reject_sentinel (v1.1 fix)'
+      pre_v1_1_behaviour: >
+        The retained value won and was served as INFORMATIVE, then aged out
+        as STALE. Recorded in KNOWN_DEFECTS_PRE_FIX.json case D1.
+    downstream_usability_rule:
+      usable: value present AND fresh AND quality admissible
+      on_sentinel: >
+        withheld from to_core_samples; the battery sensor is not emitted at
+        all rather than emitted with a fabricated current.
+
+  battery.voltage:
+    source:
+      mavlink: BATTERY_STATUS.voltages[]
+      uorb: battery_status.voltage_v
+    unit: V
+    validity_rule:
+      rule: >
+        MAVLink: sum of cells strictly between 0 and 65535 (65535 means
+        "cell not present" and must be excluded, not added as 65 V).
+        uORB: non-zero.
+      evidence_kind: SCHEMA_ATTRIBUTE
+      evidence:
+        - 'common.xml BATTERY_STATUS.voltages: 65535 = cell not present'
+        - 'px4 msg/versioned/BatteryStatus.msg:13
+           float32 voltage_v # [V] [@invalid 0] Battery voltage'
+    sentinel_rule:
+      mavlink_cell_absent: 65535
+      uorb_invalid: 0
+      means: NOT_PRESENT / NOT_MEASURED
+    freshness_rule:
+      max_age_s: 0.50
+    retention_rule: as battery.current
+    downstream_usability_rule:
+      note: >
+        Voltage validity is judged SEPARATELY from current validity. A pack
+        can report voltage with no current shunt fitted; discarding the
+        voltage because the current is unmeasured trades one false statement
+        for another.
+
+  mag.field_ut:
+    source:
+      mavlink: RAW_IMU.xmag/ymag/zmag (milligauss, instance 0)
+    unit: uT
+    validity_rule:
+      rule: all three components finite AND not all three exactly zero
+      evidence_kind: CONSUMER_SOURCE
+      evidence: >
+        csia/aircraft/adapters/ardupilot.py: "An all-zero triple is ABSENT,
+        not a zero field. A real magnetometer never reads exactly zero on all
+        three axes."
+      caveat: >
+        This rule is a CONSUMER convention, not a producer declaration.
+        MAVLink does not carry an invalid= attribute on the RAW_IMU mag
+        fields, so unlike battery.current there is no schema attribute to
+        appeal to. Recorded as a weaker basis than the battery rules.
+    sentinel_rule:
+      value: [0, 0, 0]
+      means: NOT_MEASURED / NOT_FITTED
+      missing_reason: SENTINEL
+    missing_rule:
+      no_message: NOT_RECEIVED
+    freshness_rule:
+      max_age_s: 0.20
+    retention_rule:
+      rule: sentinel supersedes an earlier field
+      pre_v1_1_behaviour: >
+        The all-zero case was recognised and dropped in silence -- no value,
+        no sentinel, not even a counter. The stale field was served as
+        INFORMATIVE. Recorded in KNOWN_DEFECTS_PRE_FIX.json case D2.
+    downstream_usability_rule:
+      on_sentinel: channel absent with reason SENTINEL
+
+  gnss.position:
+    source:
+      mavlink: GPS_RAW_INT.lat/lon/alt gated by fix_type
+      uorb: vehicle_gps_position gated by fix_type
+    unit: m
+    validity_rule:
+      rule: fix_type >= 3
+      evidence_kind: PRODUCER_SOURCE
+      evidence:
+        - 'ardupilot AP_GPS.cpp:1399-1417 sends loc.lat/lng/alt
+           UNCONDITIONALLY with (uint8_t)status(0), so the position fields
+           carry the last known Location even with no fix'
+        - 'csia/runtime/ulog_source.py: valid = fix_type >= 3'
+    sentinel_rule:
+      condition: fix_type < 3
+      means: NO_3D_FIX
+      missing_reason: NO_3D_FIX
+      note: >
+        NO_3D_FIX is deliberately NOT folded into SENTINEL. "The receiver has
+        no fix" says something "the field is not measured" does not, and the
+        enum already carries the distinction.
+      forbidden_interpretations:
+        - "position of zero"     # injects a fictitious ~5000 km jump
+        - NOT_RECEIVED           # a stream that is wired is not a stream that is absent
+    freshness_rule:
+      max_age_s: 1.00
+      known_inconsistency: >
+        MaxAge["gnss.position"] = 1.00 s but the frozen core's
+        STALE_TIMEOUT_S["gps"] = 0.5 s. The two layers disagree about when a
+        fix goes stale. NOT changed in Phase 1: it is not an ingest sentinel
+        defect, and altering a freshness limit changes admissibility for
+        every downstream result. Banked for a later phase.
+    retention_rule:
+      rule: >
+        On fix loss the retained position is cleared explicitly rather than
+        left to age out. This path already did so in v1 and is the shape the
+        Phase 1 fix generalised to every channel.
+      evidence_kind: CONSUMER_SOURCE
+      evidence: 'csia/aircraft/adapters/ardupilot.py _ingest_gps'
+    downstream_usability_rule:
+      on_sentinel: channel absent with reason NO_3D_FIX
+
+# ---------------------------------------------------------------------------
+# CHANNELS DELIBERATELY NOT YET DESCRIBED
+#
+# imu0.accel, imu0.gyro, imu1.accel, imu1.gyro, baro.altitude, baro.temp_c,
+# gnss.velocity, esc.rpm, esc.current, vibration.rms,
+# vehicle_status.armed, estimator.variances, estimator.flight_mode
+#
+# Phase 1 did not audit them. Two are already known to need attention when
+# their phase arrives:
+#
+#   vibration.rms -- its producer instance is selected at RUNTIME from sensor
+#     health (ArduPilot _first_usable_accel), and the VIBRATION message
+#     carries no field identifying which accelerometer it came from. See
+#     research/effective_evidence_independence/RUNTIME_TOPOLOGY_SOURCE_AUDIT.md
+#     This is a provenance question, deferred to Phase 9, and item 33 of the
+#     Stage 0A brief forbids turning it into a production metric.
+#
+#   gnss.velocity -- GPS_RAW_INT carries no vertical rate; the third
+#     component is padding and vz_valid=False already says so.

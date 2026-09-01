@@ -28,6 +28,7 @@ import csv
 import json
 import os
 import re
+import subprocess
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -76,6 +77,49 @@ def _verify_schema(c):
     return False, f"message {msg_name} not in {path}"
 
 
+# The commit at which THIS package's citations were taken. Not the v1.0
+# diagnostic-core tag: that tag predates the adapter work entirely, and
+# `csia/aircraft/adapters/ardupilot.py` does not exist in it.
+CITED_REVISION = "76eaa17"
+
+
+def _v1_source(rel: str, path: str):
+    """Read a cited CSIA file AS IT WAS WHEN THE CITATION WAS TAKEN.
+
+    This package's findings are findings about **v1**. Reading the citation
+    out of the working tree silently re-points a v1 claim at whatever CSIA
+    happens to be today, which is wrong in both directions: an engineering fix
+    makes a true historical claim look unsupported, and an unrelated edit can
+    make a false one look supported.
+
+    The revision is this package's own commit, not the v1.0 tag: the v1.0
+    tag froze the diagnostic core before the aircraft adapters existed, so
+    `csia/aircraft/adapters/ardupilot.py` is absent from it.
+
+    The v1.1 engineering pass proved the point. Fixing the battery-sentinel
+    and magnetometer defects shifted line numbers in
+    `csia/aircraft/adapters/ardupilot.py` and removed the retained-value
+    behaviour entirely, so four citations that were correct about v1 stopped
+    resolving. The claims did not become wrong; the pointer became wrong.
+
+    Non-CSIA citations (ArduPilot, PX4, the MAVLink schema) are read from disk
+    as before: they live outside this repository and are pinned by their own
+    revisions, recorded in the package README.
+    """
+    rel = rel.replace(os.sep, "/")
+    if rel.startswith("csia/"):
+        try:
+            r = subprocess.run(["git", "show", f"{CITED_REVISION}:{rel}"],
+                               cwd=ROOT, capture_output=True, text=True)
+            if r.returncode == 0:
+                return r.stdout
+        except OSError:
+            pass                       # no git; fall through to the worktree
+    if not os.path.exists(path):
+        return None
+    return open(path, encoding="utf-8", errors="replace").read()
+
+
 def verify(c):
     if c["locator"].rsplit(":", 1)[0].endswith(".xml"):
         return _verify_schema(c)
@@ -83,9 +127,10 @@ def verify(c):
     line = int(c["locator"].rsplit(":", 1)[1].split("-")[0])
     last = int(c["locator"].rsplit(":", 1)[1].split("-")[-1])
     path = full if os.path.isabs(full) else os.path.join(c["_base"], full)
-    if not os.path.exists(path):
+    text = _v1_source(full, path)
+    if text is None:
         return False, f"missing file {path}"
-    lines = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    lines = text.splitlines()
     if last > len(lines):
         return False, "line out of range"
     blob = re.sub(r"\s+", " ", " ".join(lines[line - 1:last])).strip()

@@ -1,0 +1,68 @@
+{
+  "artifact": "KNOWN_DEFECTS_POST_FIX",
+  "cases": {
+    "D1_battery_sentinel_ardupilot": {
+      "observed": {
+        "missing_reason": "SENTINEL",
+        "note": "producer arrived carrying the documented not-measured sentinel: stream implemented, measurement absent",
+        "present": false,
+        "quality": "UNAVAILABLE",
+        "value": null
+      },
+      "raw_condition": "current_battery = -1 (documented not-measured sentinel) arriving 20 ms after a real 5.00 A reading",
+      "sentinel_counts": {
+        "battery.current": 1
+      }
+    },
+    "D2_mag_all_zero_ardupilot": {
+      "observed": {
+        "missing_reason": "SENTINEL",
+        "note": "producer arrived carrying the documented not-measured sentinel: stream implemented, measurement absent",
+        "present": false,
+        "quality": "UNAVAILABLE",
+        "value": null
+      },
+      "raw_condition": "all-zero magnetometer triple arriving 20 ms after a real field reading",
+      "sentinel_counts": {
+        "mag.field_ut": 1
+      }
+    },
+    "D3_ulog_battery_current": {
+      "event_count": 3,
+      "first_event": {
+        "current": null,
+        "current_valid": 0.0,
+        "valid": 0.0,
+        "voltage": 12.0
+      },
+      "raw_condition": "battery_status.current_a == -1.0 for every sample, as in the repository's measured PX4 log"
+    },
+    "D4_plugins_battery_current": {
+      "event_count": 1,
+      "first_event": {
+        "current": null,
+        "current_valid": 0.0,
+        "valid": 0.0,
+        "voltage": 12.0
+      },
+      "raw_condition": "BATTERY_STATUS.current_battery == -1"
+    },
+    "D5_gnss_no_fix_ardupilot": {
+      "observed": {
+        "missing_reason": "NO_3D_FIX",
+        "note": "producer arrived carrying the documented not-measured sentinel: stream implemented, measurement absent",
+        "present": false,
+        "quality": "UNAVAILABLE",
+        "value": null
+      },
+      "raw_condition": "fix_type = 1 arriving 20 ms after a 3D fix",
+      "role": "CONTROL - already correct in v1; must not change",
+      "sentinel_counts": {
+        "gnss.position": 1,
+        "gnss.velocity": 1
+      }
+    }
+  },
+  "note": "Recorded behaviour of each ingest path on one raw producer condition. This file states what the code DOES, not what is correct; CANONICAL_INGEST_SPEC.md states what is correct.",
+  "sha256_of_cases": "7fff288ac57f3d91e865ea59e1dfb8bb324628a3b7a918ac96019f1ad830687a"
+}
