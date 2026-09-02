@@ -20,7 +20,7 @@ update is marked**, not silently rewritten.
 | Phase 2 | `95a95e1` support-aware diagnosis |
 | Phase 3A | `1d79b40` GRAPH vs FLAT |
 | Phase 3B gate | `8e5494b` B4 constant verification only |
-| Phase 3B | `SHA_PENDING` five-arm architecture selection (T0–T4) — filled by the immediately following commit, since a commit cannot contain its own hash |
+| Phase 3B | `35409bd` five-arm architecture selection (T0–T4) |
 | tests | 971 → **1040** |
 
 **Frozen core: zero diff.** `csia/trust_engine`, `csia/diagnosis`,
