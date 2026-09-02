@@ -660,3 +660,12 @@ v1-1-staleness:
 .PHONY: v1-1-staleness-check
 v1-1-staleness-check:
 	$(PY) -m pytest tests/test_v1_1_staleness.py -q
+
+# Gate C: the real schema consumer.
+.PHONY: v1-1-consumer
+v1-1-consumer:
+	$(PY) engineering/v1_1/phase4_5/run_gate_c.py
+
+.PHONY: v1-1-consumer-check
+v1-1-consumer-check:
+	$(PY) -m pytest tests/test_v1_1_monitor.py -q
