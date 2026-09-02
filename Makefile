@@ -606,3 +606,13 @@ v1-1-phase3b:
 .PHONY: v1-1-phase3b-check
 v1-1-phase3b-check:
 	$(PY) -m pytest tests/test_v1_1_phase3b.py -q
+
+# ---------------------------------------------------------------- Phase 4
+# v1.1 Phase 4A: trust-mode regression (STOP gate) + architecture freeze.
+.PHONY: v1-1-p4a
+v1-1-p4a:
+	$(PY) engineering/v1_1/phase4/run_p4a.py
+
+.PHONY: v1-1-p4a-check
+v1-1-p4a-check:
+	$(PY) -m pytest tests/test_v1_1_trust_mode.py -q
