@@ -583,3 +583,12 @@ v1-1-support:
 .PHONY: v1-1-support-check
 v1-1-support-check:
 	$(PY) -m pytest tests/test_v1_1_support.py -q
+
+# v1.1 Phase 3A: GRAPH vs FLAT ablation. Read-only over the FROZEN engine.
+.PHONY: v1-1-ablation
+v1-1-ablation:
+	$(PY) engineering/v1_1/ablation/run_phase3a.py
+
+.PHONY: v1-1-ablation-check
+v1-1-ablation-check:
+	$(PY) -m pytest tests/test_v1_1_graph_flat.py -q
