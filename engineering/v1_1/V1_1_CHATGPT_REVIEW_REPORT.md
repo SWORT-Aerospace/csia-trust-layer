@@ -1,292 +1,305 @@
-# CSIA v1.1 — ENGINEERING REVIEW REPORT
+# CSIA v1.1 — ENGINEERING REVIEW REPORT (PHASES 1–3)
 
-**Phase 1 of 6 complete.** Canonical ingestion + known defect fixes.
-Engineering, not research: FIXED / HARDENED / VALIDATED / SIMPLIFIED /
-IMPROVED (item 48).
+Engineering only. FIXED / HARDENED / VALIDATED / SIMPLIFIED / IMPROVED.
+No novelty language, and none is warranted (§31).
 
-The 30 items item 51 requires, in order. Items belonging to phases that have
-not run say so rather than being padded.
+The 30 items §40 requires.
 
 ---
 
-### 1. EXACT BASELINE SHA
+### 1. BASELINE / BRANCH / COMMITS
 
-Frozen v1 diagnostic-core tag `csia-v1.0-research-final` =
-**`ec5acd189295dab9259d4989657d42184d6142a3`**.
-v1.1 starting commit **`1ba69a5`**, tree clean, 971 tests passing.
-ArduPilot `01a504b`; PX4 working tree at `/home/user/px4`.
-
-### 2. EXACT v1.1 SHA
-
-The Phase 1 commit on `claude/code-reviewer-repo-export-zicovg`; the
-`csia-v1.1-engineering` branch exists locally and points at the same work. It
-has not been pushed — the session is pinned to the other branch and pushing a
-second one was not explicitly authorised.
-
-### 3. PRODUCTION FILES CHANGED
-
-Four, 77 insertions, 5 deletions, none in `FROZEN_PATHS`:
-
-| file | change |
+| | |
 |---|---|
-| `csia/aircraft/adapters/base.py` | `_reject_sentinel` clears `_latest` |
-| `csia/aircraft/adapters/ardupilot.py` | all-zero magnetometer `else` branch |
-| `csia/runtime/ulog_source.py` | battery `current_a == -1` no longer valid |
-| `csia/runtime/plugins.py` | `max(current_battery, 0)` clamp removed |
+| frozen v1 | `csia-v1.0-research-final` @ `ec5acd189295dab9259d4989657d42184d6142a3` |
+| engineering branch | `csia-v1.1-engineering` (local; pushes go to `claude/code-reviewer-repo-export-zicovg`) |
+| Phase 1 | `e2160ca` canonical ingestion |
+| Phase 2 | `95a95e1` support-aware diagnosis |
+| Phase 3A | `1d79b40` GRAPH vs FLAT |
+| Phase 3B gate | `8e5494b` B4 constant verification only |
+| tests | 971 → **1022** |
 
-Plus one interface change: the `battery` dict gains `current_valid`, and
-`current` may be `None`.
+**Frozen core: zero diff.** `csia/trust_engine`, `csia/diagnosis`,
+`csia/runtime/online.py`, `csia/runtime/failsafe.py`, `csia/scenarios.py`,
+`csia/profiles.py`. Phases 2 and 3 are entirely read-only over it.
 
-### 4. FROZEN v1 UNTOUCHED?
+### 2. PHASE 1 INTEGRITY
 
-**Yes.** `git diff --stat csia-v1.0-research-final -- <FROZEN_PATHS>` is
-empty. `tests/test_v1_frozen.py` passes, and
-`tests/test_v1_1_canonical_ingest.py::test_the_frozen_core_was_not_touched_by_phase_one`
-restates the check so a Phase 1 regression names Phase 1.
+Intact. Four ingest defects reproduced-and-hashed before fixing
+(`sha256 7fdd3d65…`), fixed, re-run with the same script (`sha256 7fff288a…`).
+The GNSS control is byte-identical across the two records. Guards still pass.
 
-Phase 1 needed no core change. Fixing what reaches the bridge did not require
-touching what is on the other side of it.
+### 3. DIAGNOSIS-SCORE DECOMPOSITION
 
-### 5. INGEST DEFECTS REPRODUCED BEFORE FIX
+`score[h] = log_prior[h] + EVIDENCE_MULT · smoothed[h]`, `posterior =
+softmax(score)`, `contribution_j[h] = gate_j · (lo_j if j ∈ LOW[h] else hi_j)`.
 
-**Four, plus one control**, by `engineering/v1_1/reproduce_defects.py --out pre`
-run against unmodified v1 ingestion.
+Per-term contributions sum to the core's log-likelihood **exactly**
+(`atol=0, rtol=0`). The reconstructed posterior matches production to
+**9.437e-16** over all nine scenarios × 1500 ticks — one to four ULP, from
+summation order, **not bit-identical**, and stated that way. Every constant is
+*imported* from the frozen module, never copied.
 
-    sha256(cases) = 7fdd3d65e1b9c7633255989ec16f10c58e288bae2d024825e1e53fbd57d59d9d
+### 4. SUPPORT-STATE DEFINITION
 
-| | raw condition | v1 observed |
-|---|---|---|
-| **D1** | `current_battery = -1`, 20 ms after 5.00 A | **`5.0 A`, present, INFORMATIVE** — sentinel counted, then ignored |
-| **D2** | all-zero magnetometer triple | **previous field present** — sentinel not even counted |
-| **D3** | ULog `current_a == -1.0` | **`current: -1.0, valid: true`** |
-| **D4** | plugins `current_battery = -1` | **`current: 0.0, valid: true`** |
-| **D5** | GNSS `fix_type < 3` *(control)* | absent, `NO_3D_FIX` — already correct |
+Structural, no tuned threshold. A term is **discriminating** for a pair iff it
+is gated in, the hypotheses disagree about it in `CAUSES`, and `c ≠ 0.5` (the
+core's own likelihood indifference point). A leader is **identifiable** iff at
+least one active discriminating term exists against **every** other modeled
+hypothesis — no filtering by posterior mass, which would be circular.
 
-D2 is the worst-behaved: v1 recognised the sentinel and left no trace at all,
-not even a counter. D1 at least incremented one.
+Output is three independent booleans plus detail, not an overloaded enum,
+because `PRIOR_SENSITIVE` and `NON_IDENTIFIABLE` are not mutually exclusive.
+`PARTIALLY_IDENTIFIABLE` is **not** implemented: it needs a cut-off on how
+many competitors may collapse, which is the forbidden threshold.
 
-### 6. INGEST DEFECTS FIXED
+`TAU_NUM = 1e-12` is a float comparison tolerance; a test asserts the verdict
+is identical across `[1e-15, 1e-9]`. A second test greps both modules for
+threshold-shaped comparisons.
 
-**All four. Control unchanged.** Same script, `--out post`:
+### 5. FIX-LOSS SUPPORT RESULT
 
-    sha256(cases) = 7fff288ac57f3d91e865ea59e1dfb8bb324628a3b7a918ac96019f1ad830687a
+**The point of Phase 2.** `gps_dropout`, 25–33 s: **200 of 201 ticks (99.5%)**
+report the leader as non-identifiable. Worst case at t = 25.0 s:
 
-D1 and D2 → absent with `SENTINEL`. D3 and D4 → `current: null`,
-`current_valid: false`, `valid: false`. D5 byte-identical.
+    leader                              nominal
+    posterior                           0.999822
+    support_state                       NON_IDENTIFIABLE
+    ambiguity                           AMBIGUOUS
+    active evidence terms               16   (20.5 before the fault)
+    discriminating terms vs gps_fault   0
 
-**Three decoders gave three answers to one raw condition — 5.00 A, 0.00 A,
-−1.00 A. They now agree.** That is item 6's criterion, met for this condition.
+Mechanism, from source: `CAUSES["nominal"] = []` and
+`CAUSES["gps_fault"] = ["phys_gps"]`, symmetric difference exactly
+`{phys_gps}` (asserted by test); `online.py:613` multiplies every physics gate
+by its sensor's freshness. Lose the fix, lose the only term that could ever
+separate the pair. Before the fault, 100% identifiable — the control.
 
-The root cause was a single asymmetry. `_put` cleared `_sentinel_at`, so a
-value superseded an earlier sentinel; `_reject_sentinel` did not clear
-`_latest`, so a sentinel never superseded an earlier value. Because
-`_channel_value` consults `_latest` first, the producer's disavowal was
-recorded and then discarded, and the channel eventually died as **STALE** —
-blaming the link for what the producer had said about itself. The GNSS path
-had already worked around this locally by popping `_latest` itself, which is
-why one channel behaved correctly while the others did not. That workaround is
-now the general rule, applied in one place.
+### 6. AMBIGUITY DEFINITION
 
-### 7. CANONICAL STATE MODEL
+`UNIQUE` iff identifiable against every modeled competitor; `AMBIGUOUS`
+otherwise. **Never a posterior margin** (§10). Proven by test: some
+`AMBIGUOUS` ticks have a *larger* margin than some `UNIQUE` ticks, which no
+margin rule could reproduce.
 
-`CANONICAL_INGEST_SPEC.md`. Item 3's required states map onto the existing
-`ChannelValue`:
+### 7. AMBIGUITY RESULTS
 
-`OBSERVED_VALID` = value + admissible quality · `OBSERVED_INVALID` /
-`SENTINEL` = `missing = SENTINEL` · `NOT_OBSERVED` = `NOT_RECEIVED` ·
-`STALE` = `STALE` · GNSS keeps its own `NO_3D_FIX`, deliberately not folded
-into `SENTINEL`.
+`AMBIGUITY_RESULTS.csv`. Every scenario including `clean` has **76**
+non-identifiable ticks at startup, before GPS becomes fresh — initialisation,
+not a fault, and reported as such. `gps_dropout` has **276**; the 200-tick
+difference is the dropout. No two hypotheses share a `LOW` set, so every
+verdict here is a runtime property rather than a design-time one.
 
-`RETAINED` is **not modelled**. In v1 it existed by accident rather than
-design, and v1.1 removes it rather than naming it.
+### 8. PRIOR-SENSITIVITY RESULTS
 
-Five rules: **R1** supersession, both directions · **R2** reason fidelity, a
-disowned value reports `SENTINEL` not `STALE` · **R3** no fabrication — never
-clamp, pass through or default a sentinel into a number · **R4** independent
-constituents, voltage survives an unmeasured current · **R5** sentinels age
-like values.
+Same evidence, uniform prior, leader compared. `PRIOR_SENSITIVE` ticks:
+`imu0_bias_drift` 106, `dual_imu_failure` 90, `gps_spoof` 28, `power_sag` 11,
+`vibration_anomaly` 10, `mag_emi` 6, and **0 on `clean`, `gps_dropout` and
+`high_speed_dash`**. The prior it is detecting is worth 3.761 in log-odds, so
+evidence must move the smoothed log-likelihood difference by 2.507 to overturn
+it. A test asserts the analysis leaves the production posterior bit-identical.
 
-**No new type was added, on purpose.** Item 3 warns twice against ontology
-inflation. `ChannelValue` already carries value, unit, frame, quality,
-`missing`, `t_source`, `age_s`, `note`, and already enforces that exactly one
-of value/missing is set. `usable` and `fresh` exist or are derivable;
-duplicating them as booleans would let the copies disagree. The genuinely
-absent fields are `provenance` / `producer` / `transport`, which belong to
-Phase 9 and have no consumer yet. **The gap was a rule, not a field.**
+### 9. UNKNOWN DECISION
 
-### 8. SUPPORT-STATE IMPLEMENTATION
+    UNKNOWN / UNMODELED: NOT IMPLEMENTED — MODEL ADEQUACY TEST REQUIRED
 
-**NOT REACHED.** Phase 2. No support state, no `EVIDENCE_BACKED` /
-`NON_IDENTIFIABLE` / `PRIOR_DOMINATED`, no discriminating-evidence count.
-Nothing was stubbed.
+Audited, not assumed. A threshold-free criterion was **built and measured**:
+set-adequacy `F_low ⊆ LOW[h]` against the core's own indifference point.
+0% on `clean`, 0% on `gps_dropout` and `imu0_bias_drift`, **39.9% on
+`dual_imu_failure`** (arguably correct — single-fault model, two injected
+faults), 8.3% on `gps_spoof`.
 
-### 9. KNOWN FIX-LOSS RESULT BEFORE/AFTER
+Not adopted for two reasons: containment is strict, so one noisy feature
+outside every `LOW` set flips the system, and adding tolerance is the
+forbidden threshold; and deciding whether the `gps_spoof` 8.3% is right needs
+adjudication against fault labels, which is the circularity §11 forbids. The
+audit script is retained as evidence, wired into nothing.
 
-**NOT MEASURED.** Phase 2 (Gate D). The GNSS no-fix *ingest* path is verified
-as a control (D5, unchanged), but the diagnostic question — does the system
-report loss of discriminating support honestly when the fix goes — is a
-Phase 2 measurement and has not been made.
+### 10. GRAPH BASELINE DEFINITION
 
-### 10. AMBIGUITY / UNKNOWN IMPLEMENTATION
+Production as-is: `w = gate_e · self.trust[other]`. The neighbour's trust
+weights each incident edge, so trust propagates between nodes.
 
-**NOT REACHED.** Phase 2.
+### 11. FLAT BASELINE DEFINITION
 
-### 11. GRAPH ARM
+`w = gate_e`. **`FlatTrustCore` subclasses the frozen `TrustCore` and calls
+`super().step()` verbatim — no method is copied.** Every other line executes
+identically. The edge topology is untouched: all 8 nodes, all 11 relations,
+all gates present in both arms.
 
-**NOT REACHED.** Phase 3.
+### 12. MATCHING PROOF
 
-### 12. FLAT ARM
+Both arms consume the **same `td` object in memory**. The GRAPH arm reproduces
+the frozen pipeline exactly (`np.array_equal` against
+`scenarios.run_pipeline`). A test proves the ablation is exactly the trust
+factor: with neighbour trust already at 1.0, GRAPH and FLAT agree bit-for-bit.
+A test greps `flat.py` for copied frozen body after stripping docstrings. A
+test asserts the class swap is restored.
 
-**NOT REACHED.** Phase 3. No flat baseline exists yet, so item 47's decision
-rule — if FLAT ≈ GRAPH, remove the graph — cannot be applied and is not
-pre-judged here.
+### 13. GRAPH-VS-FLAT RESULTS
 
-### 13. GRAPH-VS-FLAT RESULT
+**Structural first:** `csia/diagnosis/bayes.py` imports only `consistency`
+from the trust engine and reads `td.hist`, never `TrustHistory.trust`. The
+posterior is graph-independent, so **attribution, ambiguity and support cannot
+differ.** Checked against imports and body.
 
-**NOT MEASURED.** Phase 3.
+| | |
+|---|---|
+| max abs Δtrust | **0.047** (worst, `vibration_anomaly`); 0.0014 on `clean` |
+| assurance levels identical | **7 of 9** scenarios |
+| transition count and actions | identical in **all 9** |
 
-### 14. TRUST-ONLY RESULT
+The two that differ move only in timing, **both in FLAT's favour**:
 
-**NOT MEASURED.** Phase 3.
+    mag_emi           CAUTION->NORMAL   40.08 GRAPH / 40.04 FLAT   (one tick)
+    dual_imu_failure  NORMAL->CRITICAL  34.40 GRAPH / 34.12 FLAT   (0.28 s)
+    dual_imu_failure  CRITICAL->EMERG   49.16 GRAPH / 48.56 FLAT   (0.60 s)
 
-### 15. SEQUENTIAL-ONLY RESULT
+### 14. GRAPH COMPLEXITY
 
-**NOT MEASURED.** Phase 3.
+8 nodes, 11 edges. 22 dict lookups and one multiply per tick; 64 bytes of
+inter-tick state. Compute over **7 paired runs with alternating order**:
+paired diffs (G−F) = 8.65, 5.82, 3.60, 3.79, −4.40, −2.57, −5.94. **The sign
+changes; the difference straddles zero.** Reported as no measurable
+difference, not as a FLAT win.
 
-### 16. COMBINED RESULT
+The graph is **cheap**, and the spec says so plainly: a cheap component needs
+less benefit to justify keeping, so the case rests on the benefit being
+absent, not on the cost being high.
 
-**NOT MEASURED.** Phase 3.
+### 15. GRAPH VERDICT
 
-### 17. CLEAN CONTROLS
+    GRAPH_NO_MATERIAL_GAIN
 
-Phase 1 carries one: **D5**, the GNSS no-fix case, which was already correct
-in v1 and had to stay byte-identical through the fixes. It did. Its role is to
-catch a v1.1 edit that breaks a path that already worked, and it is asserted
-both in the JSON comparison and as a standalone test.
+`GRAPH_SIMPLIFICATION_PLAN.md` written. **Nothing removed** — §22 requires
+review first. The plan is explicit that what is proposed for removal is the
+neighbour-trust weighting alone, that the **edge topology stays**, and that a
+reviewer who judges the change not worth touching a frozen core is reading the
+same evidence defensibly.
 
-The clean-flight exposure programme item 35 asks for is Phase 6 and has not
-started. **No false-alarm rate is claimed**, because healthy exposure has not
-been verified.
+### 16. CUSUM DEFINITION
 
-### 18. FUNCTION ELIGIBILITY OUTPUTS
+`z_t = (lam_t − mu0)/sigma0` on the **pre-transform** smoothed chi-square;
+`S_t = max(0, S_{t−1} + z_t − k)`; alarm when `S_t > h`. `k = 0.5`,
+`h = 500`. The rejected invented form `z = max(0, 1−c)·10` is **not** used.
+Gated-out samples do not enter the statistic.
 
-**NOT REACHED.** Phase 4.
+§23's gate: mu0/sigma0 re-derived from the v1.1 clean arm, historical
+selection rule re-applied.
 
-### 19. ASSURANCE LEDGER EXAMPLE
+    h        5    10    20    50   100   200   500   1000
+    clean  2681  2067  1343   503   274   132     0      0
 
-**NOT REACHED.** Phase 4.
+Smallest h with zero clean alarms: **500**, identical to the historical
+selection. **VERDICT: REUSABLE.** The textbook `h = 5.0` fails again, harder,
+and stays a committed negative result.
 
-### 20. API VERSION
+### 17. TRUST-ONLY RESULT
 
-**NOT REACHED** as a versioned schema — `csia_output_v1_1.schema.json` does
-not exist (Phase 4). But Phase 1 **did** change an interface, and item 27's
-"no silent schema drift" applies now:
+**NOT MEASURED.** T0/T1 not run.
 
-> The `battery` channel dict from both decode paths gains `current_valid`, and
-> `current` may be `None`.
+### 18. SEQUENTIAL-ONLY RESULT
 
-That is not silent — it is in the manifest, the changelog and here — but it is
-also not versioned, because the version mechanism is Phase 4 work. Consumers
-outside this repository that read `battery["current"]` unconditionally will
-break. The two inside it were updated and are listed in the manifest §6.
+**NOT MEASURED** as an arm. The constant-verification gate did characterise
+the single detector, and it found something that matters:
 
-### 21. PYTHON/C EQUIVALENCE STATUS
+| scenario | node | first alarm | onset | latency |
+|---|---|---:|---:|---:|
+| `gps_spoof` | gps | 21.16 s | 20.0 | 1.16 s |
+| `mag_emi` | mag | 25.08 s | 25.0 | 0.08 s |
+| `power_sag` | motor_esc / battery | 30.12 / 30.20 s | 30.0 | 0.12 / 0.20 s |
+| `vibration_anomaly` | vibration | 28.08 s | 28.0 | 0.08 s |
+| `gps_dropout` | — | no alarm | — | correct: absence is gated out |
+| `imu0_bias_drift` | — | **no alarm** | — | **structurally blind** |
+| `dual_imu_failure` | — | **no alarm** | — | **structurally blind** |
 
-**NOT REACHED.** Phase 5. No C port exists. No claim is made about embedded
-behaviour.
+There is no per-IMU physics chi-square in this construction.
+
+### 19. COMBINED RESULTS
+
+**NOT MEASURED.** T3/T4 not run.
+
+### 20. MECHANISM-SPECIFIC RESULTS
+
+Phase 2 covered nine scenarios; Phase 3A covered the same nine; the B4 gate
+covered eight. §26's `STEP_SMALL`/`STEP_LARGE`/`INTERMITTENT` rows have no
+scenario in the frozen catalogue and are recorded as such rather than
+invented. Transport starvation, battery sentinel and mag sentinel reach
+diagnosis only as `gate → 0`, the mechanism `gps_dropout` demonstrates.
+
+### 21. CLEAN CONTROLS
+
+`clean`: 0 assurance transitions in **both** arms; 1424/1500 ticks
+`EVIDENCE_BACKED`; 0 prior-sensitive ticks; 0 CUSUM alarms at `h = 500`; 0
+UNKNOWN under the audited criterion. **This is a deterministic replay control,
+not a field false-alarm rate**, and it is not offered as one.
 
 ### 22. COMPUTE
 
-**NOT MEASURED** for v1.1. Phase 1 removes no work from the hot path and adds
-one dict `pop` per sentinel, which is not worth a benchmark claim. The v1
-timing figures stay labelled v1.
+GRAPH vs FLAT: no measurable difference (§14). B4: 0.16–0.70 µs/tick in the
+historical record. No embedded or target-hardware figure exists and none is
+claimed.
 
-### 23. MEMORY
+### 23. RECOMMENDED v1.1 ARCHITECTURE AFTER ABLATION
 
-**NOT MEASURED** for v1.1. Same reasoning.
+**No change yet.** The graph question is answered; the sequential and
+combination questions are not. It is tempting to read "graph doesn't help" +
+"CUSUM fires in 0.08 s" as `FLAT + SEQUENTIAL`, and **the evidence argues
+against the simple version of that**: the sequential detector is structurally
+blind to the IMU faults, which are where the trust arm does its escalation
+work. Sequential cannot replace trust.
 
-### 24. PROVENANCE LOGGING
+### 24. COMPONENTS RECOMMENDED FOR DELETION
 
-**NOT REACHED.** Phase 9. Deliberately so — and there is a live constraint on
-it: the Stage 0A research package (`research/effective_evidence_independence/`)
-found that ArduPilot's `VIBRATION` message follows a **runtime-selected**
-accelerometer instance with no field on the wire identifying it. That is a
-provenance fact Phase 9 should log. Item 33 of the Stage 0A brief forbids
-computing a production κ from it or gating any decision on it, and Phase 1
-does neither.
+One, subject to review: the **neighbour-trust weighting**,
+`csia/trust_engine/engine.py:110`. Nothing else. Not the edge topology, which
+was never ablated.
 
-### 25. VALIDATION DATA AVAILABLE
+### 25. COMPONENTS RETAINED AND WHY
 
-Unchanged by Phase 1: the real 9.6 MB PX4 ULog (345 GNSS samples, 216 battery
-samples, **all `current_a == -1.0`** — which is why D3 matters), the existing
-MAVLink captures, SITL, deterministic replay. The tiered validation programme
-(item 34) is Phase 6 and has not started.
+Everything else. The 11 relations and their gates are the evidence supply and
+were never in question. The trust recursion is retained because the sequential
+alternative cannot cover the IMU family. The diagnosis core is frozen and
+unmodified.
 
-### 26. HIL EXECUTED?
+### 26. G4 STATUS
 
-**No.** No hardware is present in this environment. No HIL claim is made.
+**`VALIDATED_SITL`.** Blocker for higher: not replicated on HIL or real
+flight; not re-run on a denser graph or a distrusted-hub topology (and §21
+forbids inventing one now that the graph is losing).
 
-### 27. PHYSICAL SENSORS TESTED?
+### 27. G5 STATUS
 
-**No.**
+**`VALIDATED_SITL`.** Blocker for higher: not exercised on real telemetry;
+`UNKNOWN` deliberately not implemented.
 
-### 28. SHADOW FLIGHT EXECUTED?
+### 28. EXACT NEXT PHASE
 
-**No.** And item 44's deferral holds: no autonomous RTL, land, motor inhibit,
-mode switch or control override exists or was written. CSIA remains advisory.
+**Phase 3B proper**: build T0–T4, run §26's mechanism matrix, keep
+right-censored no-response cases right-censored rather than converting them to
+an artificial response time, and complete `ARCHITECTURE_DECISION.md`. Only
+then Phase 5 (embedded), because §33 forbids porting an architecture that may
+change.
 
-### 29. REMAINING BLOCKERS
+### 29. BLOCKERS
 
-1. **Research campaigns need remeasurement for v1.1.** The battery three-way
-   split, the mag `T3_ingest` collapse, and the authority-conflict battery rows
-   describe ingestion that no longer exists. The v1 numbers stay labelled v1
-   and were not edited; the v1.1 numbers do not exist yet. Listed in the
-   manifest §5.
-2. **Item 6's five-path equivalence matrix is not built.** Four defect cases on
-   three paths were covered.
-3. **`MaxAge["gnss.position"] = 1.00 s` vs core `STALE_TIMEOUT_S["gps"] =
-   0.5 s`.** Two layers disagree about when a fix goes stale. Banked, not
-   fixed: it is not an ingest sentinel defect and changing a freshness limit
-   moves admissibility for every downstream result.
-4. **Phases 2–6 not started**, so Gates D–I are unreached.
-5. **`current_valid` is an unversioned interface change** (§20).
+1. **Phase 3B arms not run** — blocks the architecture decision, which blocks
+   the C port.
+2. **Research campaigns need remeasurement for v1.1** — Phase 1 changed
+   ingestion; the v1 numbers stay labelled v1 and were not edited.
+3. **No library access** — the sole blocker on G8.
+4. **No hardware** — blocks G1, G2, G3.
+5. **`current_valid` is an unversioned interface change** from Phase 1; the
+   versioned schema is Phase 4.
+6. **`MaxAge["gnss.position"] = 1.00 s` vs core `STALE_TIMEOUT_S["gps"] = 0.5 s`**
+   — two layers disagree about staleness. Banked, not fixed.
 
-### 30. EXACT PRODUCT MATURITY
+### 30. PRODUCT MATURITY
 
-**Research-grade runtime with one hardened layer. Not deployable.**
+**M2 — cross-platform simulation validated**, with the caveat stated rather
+than hidden: ingestion is fixed and tested on the ArduPilot, PX4 and ULog
+paths, but diagnosis and ablation are validated on the **deterministic
+scenario catalogue only**.
 
-What is now true that was not: the ingest layer no longer fabricates
-measurements. A producer that declines to measure is reported as having
-declined, on all three decode paths, with the right reason, and the frozen
-core sees the sensor as unavailable rather than being handed a number the
-vehicle never sent.
-
-What is still true: there is no support state, no ambiguity handling, no
-function eligibility, no assurance ledger, no versioned output schema, no C
-port, no benchmark, no HIL, no shadow flight, and no verified clean-flight
-exposure. Five of the eleven work packages have not begun.
-
-**Maturity: one of six phases.** The honest description is "the ingestion
-layer tells the truth now", not "v1.1 is ready".
-
----
-
-## Two things worth flagging to a reviewer
-
-**The tests that had to change.** Two tests asserted the pre-fix behaviour —
-one calling the divergence between decode paths "a deliberate improvement",
-one reproducing the D1 defect to prove the research finding was real. Fixing
-the defects broke both. Neither was deleted: the first now asserts the
-agreement, the second became a regression test, and the pre-fix evidence lives
-with its hash in `KNOWN_DEFECTS_PRE_FIX.json`. Both renames are in the
-manifest §6.
-
-**The citation verifiers.** Four research citations that were correct about
-the code they were taken from stopped resolving, because the fixes moved lines
-and removed the retained-value behaviour entirely. The claims did not become
-wrong; the pointers did. Two verifiers were repointed at the commit their
-citations were taken at. **Not the v1.0 tag** — that tag predates the aircraft
-adapters, and `csia/aircraft/adapters/ardupilot.py` does not exist in it. This
-makes v1 research more reproducible than before, since a v1 claim was
-previously being checked against whatever CSIA happened to be today. No
-research finding, report, CSV or ledger was edited.
+No C port (M3), no hardware (M4), no aircraft (M5), **zero verified-clean
+hours** (M6). Research maturity: **none established**.
