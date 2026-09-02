@@ -81,6 +81,21 @@ jobs:
         if: always()
         run: pytest -q tests/test_determinism.py && pytest -q tests/ -k determin
 
+      # v2 is built ABOVE the v1.1 output API, never inside the frozen
+      # runtime. Two of these are named separately because they are the
+      # properties that would fail silently if someone edited the wrapper or
+      # a profile table: the SENSOR domain must still reproduce v1.1's
+      # verdict exactly, and the core must stay free of platform vocabulary.
+      - name: v2 plugin framework
+        if: always()
+        run: pytest -q tests/test_v2_framework.py tests/test_v2_domains.py
+      - name: v2 wrapper reproduces v1.1 exactly
+        if: always()
+        run: pytest -q tests/test_v2_navigation_baseline.py
+      - name: v2 cross-domain scenarios and genericity
+        if: always()
+        run: pytest -q tests/test_v2_scenarios.py tests/test_v2_api_ledger.py
+
   qualification:
     name: SITL qualification (ArduPilot + PX4)
     runs-on: ubuntu-latest
