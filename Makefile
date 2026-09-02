@@ -625,3 +625,12 @@ v1-1-p4b:
 .PHONY: v1-1-p4b-check
 v1-1-p4b-check:
 	$(PY) -m pytest tests/test_v1_1_eligibility.py -q
+
+# v1.1 Phase 4C: assurance ledger + reproduction proof.
+.PHONY: v1-1-p4c
+v1-1-p4c:
+	$(PY) engineering/v1_1/phase4/run_p4c.py
+
+.PHONY: v1-1-p4c-check
+v1-1-p4c-check:
+	$(PY) -m pytest tests/test_v1_1_ledger.py -q
