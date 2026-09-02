@@ -3,9 +3,9 @@
 §§23–24. **Known prior art. No algorithmic novelty is claimed** — this is
 Page's 1954 CUSUM, applied as an engineering baseline.
 
-**Status: the §23 constant gate is PASSED. The Phase 3B arm comparison
-(T0–T4) is NOT RUN.** What is below is the frozen definition and the
-verification that licenses it, not a result.
+**Status: the §23 constant gate is PASSED and the Phase 3B arm comparison
+(T0–T4) is COMPLETE.** §§1–4 below are the frozen definition and the
+verification that licensed it; §5 records the outcome.
 
 ---
 
@@ -116,22 +116,29 @@ So "replace trust with the standard method" is **not** an option this evidence
 supports. A combined arm is the only one that could cover both, which is what
 Phase 3B is for.
 
-## 5. WHAT PHASE 3B STILL HAS TO DO — NOT DONE
+## 5. PHASE 3B OUTCOME
 
-§25's five arms over §26's mechanism matrix:
+§25's five arms were run over §26's mechanism matrix. Full data in
+`PHASE3B_ARCHITECTURE_RESULTS.csv` and `PHASE3B_PAIRED_DIFFERENCES.csv`;
+decision in `ARCHITECTURE_DECISION.md`.
 
-    T0  TRUST_ONLY_FLAT
-    T1  TRUST_ONLY_GRAPH
-    T2  SEQUENTIAL_ONLY
-    T3  FLAT_PLUS_SEQUENTIAL
-    T4  GRAPH_PLUS_SEQUENTIAL
+**Sequential is KEPT.** `T3 − T0` improves five of nine mechanisms and
+regresses none:
 
-with §27's endpoints — detection latency, correct/wrong attribution,
-ambiguity, support-state correctness, clean assurance transitions, and
-**right-censored no-response cases kept as right-censored** rather than
-converted into an artificial response time.
+| mechanism | trust-flat | flat+sequential | Δ |
+|---|---:|---:|---:|
+| `GNSS_RAMP_SLOW` | 32.48 s | **24.40 s** | **−8.08 s** |
+| `VIBRATION_ANOMALY` | 34.16 s | **28.08 s** | **−6.08 s** |
+| `MAG_DEGRADED` | 30.04 s | **25.08 s** | **−4.96 s** |
+| `POWER_SAG` | 33.72 s | **30.12 s** | **−3.60 s** |
+| `GNSS_RAMP_FAST` | 24.36 s | **21.16 s** | **−3.20 s** |
 
-**None of that has been run.** §4 above is a single-detector characterisation
-produced by the constant-verification gate, not the arm comparison. The
-architecture decision in `ARCHITECTURE_DECISION.md` is therefore partial: the
-graph question is answered, the sequential question is not.
+with **zero alarms on the clean arm**, reproducing the historical
+zero-clean-alarm condition at `h = 500`.
+
+**It does not replace trust**, for the reason §4 predicted: it is
+right-censored on `GNSS_FIX_LOSS` and `DUAL_IMU_FAILURE`, which trust covers
+at 26.00 s and 34.12 s.
+
+Right-censored no-responses are kept right-censored throughout and never
+converted into a latency; a test enforces it.

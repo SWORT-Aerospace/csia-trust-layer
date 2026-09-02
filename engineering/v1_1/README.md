@@ -9,8 +9,11 @@ IMPROVED. Nothing here is a novelty claim (item 48).
 | v1.1 start | `1ba69a5` |
 | branch | `csia-v1.1-engineering` (local); pushes go to `claude/code-reviewer-repo-export-zicovg` |
 | **Phase 1** | **COMPLETE** — canonical ingestion + known defect fixes |
-| Phases 2–6 | not started |
-| tests | 971 → 984 passing |
+| **Phase 2** | **COMPLETE** — support-aware diagnosis (`95a95e1`) |
+| **Phase 3A** | **COMPLETE** — GRAPH vs FLAT (`1d79b40`); verdict `GRAPH_NO_MATERIAL_GAIN` |
+| **Phase 3B** | **COMPLETE** — five-arm selection T0–T4; decision `E: TRUST_FLAT_PLUS_SEQUENTIAL` |
+| Phases 4–6 | not started. Phase 3C **not recommended** — see `PHASE3C_FEASIBILITY_NOTE.md` |
+| tests | 971 → 1040 passing |
 
 ---
 
@@ -50,10 +53,27 @@ locally; that workaround is now the general rule, applied once.
 | `reproduce_defects.py` | the reproduction harness |
 | `V1_1_CHANGELOG.md` | |
 | `V1_1_TEST_MATRIX.csv` | |
-| `V1_1_CHATGPT_REVIEW_REPORT.md` | the 30-item report |
+| `V1_1_CHATGPT_REVIEW_REPORT.md` | the review report — 30 items for Phases 1–3A, plus items 31–52 for Phase 3B |
+
+### Phase 3B files
+
+| file | |
+|---|---|
+| `ARCHITECTURE_DECISION.md` | **the decision** — `E: TRUST_FLAT_PLUS_SEQUENTIAL` |
+| `MECHANISM_COVERAGE_MATRIX.csv` | 15 rows; 9 APPLICABLE, 6 INAPPLICABLE with a reason on each |
+| `PHASE3B_ARCHITECTURE_RESULTS.csv` | per mechanism × arm, with the three matching hashes |
+| `PHASE3B_PAIRED_DIFFERENCES.csv` | the five paired comparisons; censored pairs carry a note, never a number |
+| `PHASE3B_SUMMARY.json` / `PHASE3B_CLEAN_RESULTS.json` | |
+| `PHASE3B_COMPUTE.json` / `PHASE3B_MEMORY_STATE.json` | |
+| `DETECTOR_COVERAGE_MAP.md` | what covers each mechanism, and where the gaps are |
+| `SEQUENTIAL_DETECTOR_SPEC.md` / `SEQUENTIAL_SELECTION_REPRODUCTION.json` | Page's 1954 CUSUM, `k = 0.5`, `h = 500`; no novelty claimed |
+| `GRAPH_SIMPLIFICATION_PLAN.md` | the one line proposed for removal. **Nothing executed** — review first |
+| `PHASE3C_FEASIBILITY_NOTE.md` | `OPEN_ENGINEERING_QUESTION`; recommendation is **do not start 3C** |
+| `FUNCTION_ELIGIBILITY_INPUT_REQUIREMENTS.md` | Phase 4 preparation only; no policy implemented |
 
 Guards: `tests/test_v1_1_canonical_ingest.py` — `make v1-1-ingest-check`.
 Reproduce: `make v1-1-defects`.
+Phase 3B: `make v1-1-phase3b` to regenerate, `make v1-1-phase3b-check` to guard.
 
 ## The frozen core
 

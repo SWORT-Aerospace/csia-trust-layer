@@ -95,14 +95,19 @@ def test_no_algorithmic_novelty_is_claimed():
     assert "Page's 1954" in t or "Page 1954" in t
 
 
-def test_phase_3b_is_recorded_as_not_run():
-    """The arm comparison T0-T4 has NOT been executed. If a later edit claims
-    a sequential result without running it, this fails."""
+def test_phase_3b_results_exist_and_the_spec_no_longer_says_not_run():
+    """This guard was written while the arms were unrun, asserting the docs
+    said NOT RUN. The arms have since run, so it now asserts the opposite:
+    the results exist and the spec has been updated to match them. A guard
+    that keeps asserting a stalestate is worse than no guard."""
     t = open(os.path.join(ENG, "SEQUENTIAL_DETECTOR_SPEC.md"),
              encoding="utf-8").read()
-    assert "NOT RUN" in t
+    assert "PHASE 3B OUTCOME" in t
+    assert "NOT RUN" not in t
+    for fn in ("PHASE3B_ARCHITECTURE_RESULTS.csv",
+               "PHASE3B_PAIRED_DIFFERENCES.csv",
+               "PHASE3B_SUMMARY.json"):
+        assert os.path.exists(os.path.join(ENG, fn)), fn
     a = open(os.path.join(ENG, "ARCHITECTURE_DECISION.md"),
              encoding="utf-8").read()
-    assert "NOT MEASURED" in a
-    assert not os.path.exists(os.path.join(ENG, "SEQUENTIAL_RESULTS.csv")), (
-        "SEQUENTIAL_RESULTS.csv exists but the spec says the arms were not run")
+    assert "NOT MEASURED" not in a, "the decision still claims unmeasured arms"

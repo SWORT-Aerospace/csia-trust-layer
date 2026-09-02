@@ -1,0 +1,54 @@
+{
+  "artifact": "SEQUENTIAL_SELECTION_REPRODUCTION",
+  "clean_arm": "clean",
+  "degenerate_nodes_excluded": [
+    "baro"
+  ],
+  "grid_clean_alarm_ticks": {
+    "10.0": 2067,
+    "100.0": 274,
+    "1000.0": 0,
+    "20.0": 1343,
+    "200.0": 132,
+    "5.0": 2681,
+    "50.0": 503,
+    "500.0": 0
+  },
+  "h": 500.0,
+  "historical_h_reproduced": true,
+  "in_control_stats": {
+    "battery": {
+      "mu0": 0.037772,
+      "sigma0": 0.023591
+    },
+    "gps": {
+      "mu0": 0.636752,
+      "sigma0": 0.391676
+    },
+    "mag": {
+      "mu0": 0.003894,
+      "sigma0": 0.002566
+    },
+    "motor_esc": {
+      "mu0": 0.128594,
+      "sigma0": 0.033151
+    },
+    "vibration": {
+      "mu0": 0.025427,
+      "sigma0": 0.013756
+    }
+  },
+  "k": 0.5,
+  "purpose": "Reproduces the historical h-selection under v1.1 residual construction, so the frozen constants can be reused without silent drift.",
+  "residual": "z_t = (lam_t - mu0)/sigma0 on the PRE-TRANSFORM smoothed chi-square, gated as production gates it. NOT the rejected z = max(0, 1-c)*10.",
+  "section": "23 / 37",
+  "selection_rule": "smallest h on the fixed grid for which the CLEAN NOMINAL arm produces zero alarms; evaluated only on the clean arm, never on a fault outcome",
+  "smallest_h_with_zero_clean_alarms": 500.0,
+  "textbook_h_negative_result": {
+    "clean_alarm_ticks_v1_1": 2681,
+    "h": 5.0,
+    "historical_clean_alarms": 4,
+    "status": "COMMITTED NEGATIVE RESULT -- retained, never selected"
+  },
+  "verdict": "REUSABLE"
+}

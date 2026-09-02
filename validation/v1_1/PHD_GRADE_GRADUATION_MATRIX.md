@@ -12,9 +12,9 @@ Columns: `NOT_STARTED` · `DESIGNED` · `IMPLEMENTED` · `VALIDATED_SITL`
 | **G1** | physical FC / HIL validation | `NOT_STARTED` | no hardware in this environment; no HIL runbook or scripts written yet |
 | **G2** | real-aircraft shadow flight | `NOT_STARTED` | no aircraft; no shadow runbook, no output firewall test, no preflight automation |
 | **G3** | verified-clean exposure + false-alert denominator | `NOT_STARTED` | no clean protocol, no exclusion rules, no registry. **Zero verified-clean hours.** No rate claim is made or supportable |
-| **G4** | rigorous GRAPH vs FLAT baseline | **`VALIDATED_SITL`** | done on 9 deterministic scenarios. Verdict `GRAPH_NO_MATERIAL_GAIN`. Blocker for higher: not replicated on HIL or real flight; not re-run on a denser graph or a distrusted-hub topology |
+| **G4** | rigorous GRAPH vs FLAT baseline | **`VALIDATED_SITL`** | complete. Phase 3A verdict `GRAPH_NO_MATERIAL_GAIN`, confirmed in Phase 3B with the sequential channel present (`T4 − T3` differs on 1 of 9 and is 0.28 s *worse*). Full five-arm selection done; architecture decided as `E: TRUST_FLAT_PLUS_SEQUENTIAL`. Blocker for higher: not replicated on HIL or real flight; no GNSS step mechanism exists in the frozen injector; not re-run on a denser graph or a distrusted-hub topology |
 | **G5** | support / ambiguity-aware diagnosis | **`VALIDATED_SITL`** | implemented and validated on 9 scenarios. Blocker for higher: not exercised on real telemetry; `UNKNOWN`/unmodeled deliberately not implemented pending a model-adequacy test |
-| **G6** | Python ↔ embedded C/C++ equivalence | `NOT_STARTED` | deliberately deferred: §33 forbids porting before the architecture decision, and that decision is still partial (sequential arms not run) |
+| **G6** | Python ↔ embedded C/C++ equivalence | `NOT_STARTED` | **unblocked**: the architecture decision is complete, so §33 no longer prohibits the port. Blocker is now simply that no C code, golden-trace corpus or tolerance spec exists yet |
 | **G7** | multi-platform + multi-sensor replication | `NOT_STARTED` | Phase 1 fixed ingestion on ArduPilot **and** PX4 paths, but no replication matrix has been run. Phases 2/3A used the ArduPilot-derived scenario catalogue only |
 | **G8** | contribution surviving a full-text prior-art audit | `NOT_STARTED` | candidate B closed as formulated (`PROVENANCE_METRIC_INSUFFICIENT`); the prior-art gate returned `INCONCLUSIVE_MISSING_FULLTEXT` because no scholarly host is reachable from this environment. **Blocker is library access, not analysis** |
 | **G9** | formal + empirical result that is not an implementation defect | `NOT_STARTED` | no surviving research candidate. Everything delivered in v1.1 is engineering and is labelled as such |
@@ -47,6 +47,8 @@ question is unanswered rather than answered favourably.
 ## What would move the most rows, in order
 
 1. **Library access** — unblocks G8 alone, and it is the only blocker for it.
-2. **Run Phase 3B (T0–T4)** — completes the architecture decision, which
-   unblocks G6 (§33 forbids porting before it).
+2. ~~Run Phase 3B (T0–T4)~~ — **done.** Architecture decided, so §33 no
+   longer blocks the C port. Phase 4 (eligibility / ledger / API) then
+   Phase 5 (embedded) is the recommended order; Phase 3C is **not**
+   recommended (see `PHASE3C_FEASIBILITY_NOTE.md`).
 3. **A Pixhawk-class FC on a bench** — unblocks G1, then G2, then G3.

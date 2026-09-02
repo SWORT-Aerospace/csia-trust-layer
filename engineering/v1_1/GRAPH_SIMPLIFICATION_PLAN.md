@@ -1,6 +1,9 @@
 # GRAPH SIMPLIFICATION PLAN
 
-Required by §22 because the Phase 3A verdict is `GRAPH_NO_MATERIAL_GAIN`.
+Required by §22 (Phase 3A) and §30 (Phase 3B). The Phase 3A verdict was
+`GRAPH_NO_MATERIAL_GAIN`; **Phase 3B confirms it with the sequential channel
+present**, and the final architecture decision is
+`E: TRUST_FLAT_PLUS_SEQUENTIAL`.
 
 > **Nothing in this plan has been executed.** §22: *"Do not remove graph in
 > the same commit before ChatGPT review."* The production trust engine is
@@ -24,6 +27,32 @@ endpoints. They were never ablated and there is no evidence against them.
 
 Anyone reading "the graph does not earn its complexity" as "delete
 `csia/trust_graph`" would be acting on a claim this experiment did not make.
+
+## 1b. THE EXACT PRODUCTION LINE TO CHANGE (§30)
+
+    file:  csia/trust_engine/engine.py
+    line:  110
+    from:  w = float(gate_e) * self.trust[other]
+    to:    w = float(gate_e)
+
+That is the entire change. One line. Nothing else in the file, and no other
+file.
+
+**PRESERVE, explicitly:** relation topology (`csia/trust_graph/graph.py`, 8
+nodes and 11 edges), node definitions, relation ownership, the diagnosis
+feature set (`csia/diagnosis/bayes.py CAUSES`), and the source mappings in
+`csia/aircraft/adapters/`. None of these was ablated and none is implicated.
+
+## 1c. PHASE 3B CONFIRMATION
+
+`T4 − T3` — the incremental value of neighbour-trust propagation **after** the
+sequential channel is present — differs on exactly one of nine mechanisms:
+
+    DUAL_IMU_FAILURE   T4 (graph) 34.40 s   vs   T3 (flat) 34.12 s
+
+Propagation is **0.28 s later**. It is identical on the other eight. All four
+of §18's removal conditions hold, including the tie-breaker that FLAT is equal
+or earlier on every meaningful response.
 
 ## 2. WHY
 

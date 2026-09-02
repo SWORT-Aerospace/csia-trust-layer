@@ -597,3 +597,12 @@ v1-1-ablation-check:
 .PHONY: v1-1-b4-verify
 v1-1-b4-verify:
 	$(PY) engineering/v1_1/ablation/b4_verify.py
+
+# v1.1 Phase 3B: five-arm architecture selection (T0-T4).
+.PHONY: v1-1-phase3b
+v1-1-phase3b:
+	$(PY) engineering/v1_1/ablation/run_phase3b.py
+
+.PHONY: v1-1-phase3b-check
+v1-1-phase3b-check:
+	$(PY) -m pytest tests/test_v1_1_phase3b.py -q
