@@ -185,12 +185,17 @@ def attribute(records, relations=()) -> Attribution:
             for r in nominal
             if r.domain == only.domain and r.component != only.component))
         if discriminators:
+            # Same field as the AMBIGUOUS path below, so a consumer reads
+            # "what was ruled out" the same way under either verdict.
+            excluded = sorted({r.domain for r in nominal} - {only.domain})
+            detail = {"domains_excluded": excluded,
+                      "domains_excluded_note":
+                          "affirmatively NOMINAL, contributing no candidate"}
+            if same_domain:
+                detail["same_domain_discriminators"] = list(same_domain)
             return Attribution(verdict=UNIQUE, candidates=candidates,
                                discriminators=discriminators,
-                               unsupported=unsupported,
-                               detail={"same_domain_discriminators":
-                                       list(same_domain)}
-                               if same_domain else {})
+                               unsupported=unsupported, detail=detail)
         # One candidate and nothing affirmatively nominal elsewhere: we have
         # not ruled anything out, so we do not claim to have.
         return Attribution(
@@ -199,8 +204,26 @@ def attribute(records, relations=()) -> Attribution:
                            "evidence from another domain to exclude an "
                            "alternative"})
 
+    # §17 asks the output to say, in as many words, "sensor failure
+    # unsupported, transport failure unsupported, compute deadline violation
+    # supported". The first two are not `unsupported` in §29's sense -- that
+    # word is reserved for a component a relation NAMED and the evidence did
+    # not support. A domain that was looked at and found affirmatively fine
+    # is a stronger statement, and it deserves to be said rather than
+    # inferred from an absence.
+    candidate_domains = {c.domain for c in candidates}
+    excluded = sorted({r.domain for r in nominal} - candidate_domains)
+    discriminators = tuple(sorted(
+        f"{r.domain}/{r.component}:{r.relation}"
+        for r in nominal if r.domain in excluded))
     detail = {"why": "several components carry adverse evidence and nothing "
-                     "separates them"}
+                     "separates them",
+              "domains_excluded": excluded,
+              "domains_excluded_note":
+                  "affirmatively NOMINAL, contributing no candidate -- these "
+                  "explanations were looked at and found unsupported by the "
+                  "evidence, which is not the same as not having been "
+                  "considered"}
     if shared:
         detail["shared_adverse_dependencies"] = list(shared)
         detail["common_cause_note"] = (
@@ -209,6 +232,7 @@ def attribute(records, relations=()) -> Attribution:
             "fault and two coincident faults downstream of it produce the "
             "same evidence here")
     return Attribution(verdict=AMBIGUOUS, candidates=candidates,
+                       discriminators=discriminators,
                        common_cause=common, unsupported=unsupported,
                        detail=detail)
 

@@ -1,0 +1,1089 @@
+{
+  "aircraft": {
+    "coverage": {
+      "complete": true,
+      "functions": [
+        "AUTONOMOUS_MISSION",
+        "COARSE_NAVIGATION",
+        "GEOFENCE_SUPPORT",
+        "INERTIAL_CONTINUATION",
+        "LOGGING",
+        "POSITION_HOLD",
+        "PRECISION_NAVIGATION",
+        "PROPULSION",
+        "SENSING",
+        "TELEMETRY"
+      ],
+      "functions_with_unserved_required_domains": {},
+      "registered_domains": [
+        "ACTUATION",
+        "COMMUNICATION",
+        "COMPUTE",
+        "POWER",
+        "SENSOR",
+        "TIMING"
+      ]
+    },
+    "declarations": {
+      "cross_domain_relations": [
+        {
+          "description": "actuator demand implies an expected current draw; a commanded actuator drawing nothing implicates the power path OR the actuator, and these signals do not separate them",
+          "domains": [
+            "ACTUATION",
+            "POWER"
+          ],
+          "implicates": [
+            "POWER/battery",
+            "ACTUATION/motor_0"
+          ],
+          "relation_id": "actuation_power.demand_vs_current"
+        },
+        {
+          "description": "CPU saturation produces processing latency produces a missed output deadline; the timing finding and the compute finding are one event seen twice",
+          "domains": [
+            "COMPUTE",
+            "TIMING"
+          ],
+          "implicates": [
+            "COMPUTE/cpu",
+            "COMPUTE/state_estimator"
+          ],
+          "relation_id": "compute_timing.saturation_vs_latency"
+        },
+        {
+          "description": "a source that has gone quiet behind a failing link is a communication candidate, not a sensor fault",
+          "domains": [
+            "COMMUNICATION",
+            "SENSOR"
+          ],
+          "implicates": [
+            "COMMUNICATION/gnss_serial"
+          ],
+          "relation_id": "comm_sensor.link_vs_source"
+        },
+        {
+          "description": "sources sharing a rail degrade together when the rail sags; the rail is retained as a common-cause alternative rather than replacing the sensor explanation",
+          "domains": [
+            "POWER",
+            "SENSOR"
+          ],
+          "implicates": [
+            "POWER/rail_5v"
+          ],
+          "relation_id": "power_sensor.shared_rail"
+        }
+      ],
+      "domains": [
+        {
+          "actuators": [
+            {
+              "affected_functions": [
+                "PROPULSION",
+                "AUTONOMOUS_MISSION"
+              ],
+              "depends_on": [
+                "POWER/battery",
+                "COMMUNICATION/esc_can"
+              ],
+              "name": "motor_0"
+            }
+          ],
+          "affected_functions": [
+            "AUTONOMOUS_MISSION",
+            "PROPULSION"
+          ],
+          "domain_id": "ACTUATION",
+          "implementation": "ActuationAssuranceDomain",
+          "optional_inputs": [
+            "command_transmitted",
+            "current_a",
+            "rpm",
+            "<physical_signal>"
+          ],
+          "reason_codes": [
+            "ACT_COMMAND_NOT_TRANSMITTED",
+            "ACT_NO_ELECTRICAL_RESPONSE",
+            "ACT_STALLED",
+            "ACT_RESPONSE_LOW",
+            "ACT_OVERCURRENT",
+            "ACT_NO_PHYSICAL_RESPONSE",
+            "ACT_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "actuation.command_path",
+            "actuation.electrical_response",
+            "actuation.mechanical_response",
+            "actuation.physical_response"
+          ],
+          "required_inputs": [
+            "ACTUATION/<actuator>/command"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "AUTONOMOUS_MISSION",
+            "PROPULSION",
+            "SENSING",
+            "TELEMETRY"
+          ],
+          "domain_id": "COMMUNICATION",
+          "implementation": "CommunicationAssuranceDomain",
+          "links": [
+            {
+              "affected_functions": [
+                "SENSING"
+              ],
+              "carries": [
+                "gps"
+              ],
+              "depends_on": [
+                "POWER/rail_3v3"
+              ],
+              "name": "gnss_serial",
+              "transport": "UART"
+            },
+            {
+              "affected_functions": [
+                "TELEMETRY"
+              ],
+              "carries": [],
+              "depends_on": [
+                "POWER/rail_5v"
+              ],
+              "name": "telemetry_radio",
+              "transport": "MAVLink"
+            },
+            {
+              "affected_functions": [
+                "PROPULSION",
+                "AUTONOMOUS_MISSION"
+              ],
+              "carries": [
+                "motor_esc"
+              ],
+              "depends_on": [
+                "POWER/battery"
+              ],
+              "name": "esc_can",
+              "transport": "CAN"
+            }
+          ],
+          "optional_inputs": [
+            "observed_rate_hz",
+            "sequence_gaps",
+            "messages_expected",
+            "messages_received",
+            "loss_frac",
+            "duplicates",
+            "reordered",
+            "crc_errors",
+            "bus_off",
+            "reconnects",
+            "queue_delay_s"
+          ],
+          "reason_codes": [
+            "COMM_LINK_DOWN",
+            "COMM_BUS_OFF",
+            "COMM_RATE_LOW",
+            "COMM_RATE_MARGINAL",
+            "COMM_PACKET_LOSS",
+            "COMM_CRC_ERRORS",
+            "COMM_DUPLICATES",
+            "COMM_REORDERING",
+            "COMM_QUEUE_DELAY",
+            "COMM_RECONNECTING",
+            "COMM_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "comm.link_state",
+            "comm.rate",
+            "comm.loss",
+            "comm.integrity",
+            "comm.ordering",
+            "comm.queue"
+          ],
+          "required_inputs": [
+            "COMMUNICATION/<link>/link_up"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "AUTONOMOUS_MISSION",
+            "LOGGING",
+            "POSITION_HOLD",
+            "PRECISION_NAVIGATION",
+            "SENSING"
+          ],
+          "domain_id": "COMPUTE",
+          "implementation": "ComputeAssuranceDomain",
+          "optional_inputs": [
+            "heartbeat_age_s",
+            "output_age_s",
+            "runtime_s",
+            "deadline_misses",
+            "queue_depth",
+            "restart_count",
+            "COMPUTE/<resource>/cpu_load",
+            "COMPUTE/<resource>/memory_used_frac",
+            "COMPUTE/<resource>/throttled",
+            "COMPUTE/<resource>/reset_reason"
+          ],
+          "processes": [
+            {
+              "affected_functions": [
+                "PRECISION_NAVIGATION",
+                "POSITION_HOLD",
+                "AUTONOMOUS_MISSION"
+              ],
+              "deadline_s": 0.02,
+              "depends_on": [
+                "COMPUTE/cpu",
+                "SENSOR/source.imu0"
+              ],
+              "name": "state_estimator"
+            },
+            {
+              "affected_functions": [
+                "SENSING"
+              ],
+              "deadline_s": 0.01,
+              "depends_on": [
+                "COMPUTE/cpu"
+              ],
+              "name": "csia"
+            },
+            {
+              "affected_functions": [
+                "LOGGING"
+              ],
+              "deadline_s": 0.1,
+              "depends_on": [
+                "COMPUTE/cpu"
+              ],
+              "name": "logger"
+            }
+          ],
+          "reason_codes": [
+            "COMPUTE_PROCESS_DEAD",
+            "COMPUTE_HEARTBEAT_STALE",
+            "COMPUTE_NO_OUTPUT",
+            "COMPUTE_DEADLINE_MISSED",
+            "COMPUTE_DEADLINE_MARGINAL",
+            "COMPUTE_CPU_SATURATED",
+            "COMPUTE_MEMORY_PRESSURE",
+            "COMPUTE_QUEUE_BACKLOG",
+            "COMPUTE_THERMAL_THROTTLED",
+            "COMPUTE_RESTARTED",
+            "COMPUTE_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "compute.process_alive",
+            "compute.process_producing",
+            "compute.deadline_met",
+            "compute.resource_headroom",
+            "compute.stability"
+          ],
+          "required_inputs": [
+            "COMPUTE/<process>/alive"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "AUTONOMOUS_MISSION",
+            "COARSE_NAVIGATION",
+            "GEOFENCE_SUPPORT",
+            "INERTIAL_CONTINUATION",
+            "LOGGING",
+            "POSITION_HOLD",
+            "PRECISION_NAVIGATION",
+            "PROPULSION",
+            "SENSING",
+            "TELEMETRY"
+          ],
+          "battery": "battery",
+          "domain_id": "POWER",
+          "implementation": "PowerAssuranceDomain",
+          "optional_inputs": [
+            "power_w",
+            "voltage_reference_v",
+            "cell_voltages",
+            "temperature_c",
+            "POWER/<rail>/voltage_v",
+            "POWER/<load>/demand_frac"
+          ],
+          "rails": [
+            {
+              "affected_functions": [
+                "SENSING",
+                "TELEMETRY",
+                "COARSE_NAVIGATION",
+                "POSITION_HOLD",
+                "PRECISION_NAVIGATION",
+                "GEOFENCE_SUPPORT",
+                "AUTONOMOUS_MISSION"
+              ],
+              "depends_on": [
+                "POWER/battery"
+              ],
+              "fail_frac": 0.05,
+              "name": "rail_5v",
+              "nominal_v": 5.0,
+              "warn_frac": 0.02
+            },
+            {
+              "affected_functions": [
+                "SENSING",
+                "COARSE_NAVIGATION",
+                "POSITION_HOLD",
+                "PRECISION_NAVIGATION",
+                "GEOFENCE_SUPPORT",
+                "INERTIAL_CONTINUATION",
+                "AUTONOMOUS_MISSION"
+              ],
+              "depends_on": [
+                "POWER/rail_5v"
+              ],
+              "fail_frac": 0.05,
+              "name": "rail_3v3",
+              "nominal_v": 3.3,
+              "warn_frac": 0.02
+            }
+          ],
+          "reason_codes": [
+            "POWER_TELEMETRY_MISSING",
+            "POWER_RAIL_MARGINAL",
+            "POWER_RAIL_OUT_OF_TOLERANCE",
+            "POWER_RAIL_UNAVAILABLE",
+            "POWER_BALANCE_INCONSISTENT",
+            "POWER_CELL_IMBALANCE",
+            "POWER_EXCESS_DROOP",
+            "POWER_DISTRIBUTION_SUSPECT",
+            "POWER_LOAD_WITHOUT_CURRENT"
+          ],
+          "relations": [
+            "power.source_health",
+            "power.p_equals_vi",
+            "power.droop_vs_current",
+            "power.cell_balance",
+            "power.rail_tolerance",
+            "power.load_current_response"
+          ],
+          "required_inputs": [
+            "POWER/<battery>/voltage_v",
+            "POWER/<battery>/current_a"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "SENSING",
+            "AUTONOMOUS_MISSION"
+          ],
+          "domain_id": "SENSOR",
+          "implementation": "NavigationAssuranceDomain",
+          "note": "consumes csia_output_v1_1 schema 1.1.0; imports no v1.1 producer and computes no v1.1 quantity",
+          "optional_inputs": [],
+          "reason_codes": [
+            "V1_1_PAYLOAD_MISSING",
+            "V1_1_PAYLOAD_REJECTED",
+            "V1_1_FUNCTION_NOT_ELIGIBLE",
+            "SOURCE_NOT_FRESH",
+            "SOURCE_TRUST_LOW",
+            "SUPPORT_NOT_IDENTIFIABLE",
+            "SEQUENTIAL_ALARM"
+          ],
+          "relations": [
+            "v1_1.function_eligibility",
+            "v1_1.source_health",
+            "v1_1.support",
+            "v1_1.sequential",
+            "sensor.aggregate"
+          ],
+          "required_inputs": [
+            "v1_1_payload"
+          ],
+          "schema_version": "2.0.0",
+          "source_dependencies": {
+            "baro": [
+              "POWER/rail_3v3"
+            ],
+            "battery": [
+              "POWER/battery"
+            ],
+            "gps": [
+              "POWER/rail_5v"
+            ],
+            "imu0": [
+              "POWER/rail_3v3"
+            ],
+            "imu1": [
+              "POWER/rail_3v3"
+            ],
+            "mag": [
+              "POWER/rail_3v3"
+            ],
+            "motor_esc": [
+              "POWER/battery"
+            ],
+            "vibration": [
+              "POWER/rail_3v3"
+            ]
+          }
+        },
+        {
+          "affected_functions": [
+            "AUTONOMOUS_MISSION",
+            "POSITION_HOLD",
+            "PRECISION_NAVIGATION",
+            "TELEMETRY",
+            "TIMELINESS"
+          ],
+          "channels": [
+            {
+              "affected_functions": [
+                "PRECISION_NAVIGATION",
+                "POSITION_HOLD",
+                "AUTONOMOUS_MISSION"
+              ],
+              "depends_on": [
+                "COMPUTE/state_estimator",
+                "COMPUTE/cpu"
+              ],
+              "end_to_end_deadline_s": 0.05,
+              "name": "nav_solution"
+            },
+            {
+              "affected_functions": [
+                "TELEMETRY"
+              ],
+              "depends_on": [
+                "COMMUNICATION/telemetry_radio"
+              ],
+              "end_to_end_deadline_s": 1.0,
+              "name": "telemetry_downlink"
+            }
+          ],
+          "domain_id": "TIMING",
+          "implementation": "TimingAssuranceDomain",
+          "optional_inputs": [
+            "t_arrival",
+            "t_processed",
+            "t_decision",
+            "interval_s",
+            "jitter_s"
+          ],
+          "reason_codes": [
+            "TIMING_SEGMENT_OVER_BUDGET",
+            "TIMING_SEGMENT_MARGINAL",
+            "TIMING_DEADLINE_MISSED",
+            "TIMING_DEADLINE_MARGINAL",
+            "TIMING_JITTER_EXCESSIVE",
+            "TIMING_RATE_LOW",
+            "TIMING_CLOCK_INCONSISTENT",
+            "TIMING_STAMPS_MISSING"
+          ],
+          "relations": [
+            "timing.clock_consistency",
+            "timing.segment_budget",
+            "timing.end_to_end",
+            "timing.rate",
+            "timing.jitter"
+          ],
+          "required_inputs": [
+            "TIMING/<channel>/t_validity"
+          ],
+          "schema_version": "2.0.0",
+          "segment_classes": [
+            "SENSOR_SLOW",
+            "TRANSPORT_DELAY",
+            "PROCESSING_DELAY",
+            "DECISION_DELAY"
+          ]
+        }
+      ],
+      "functions": [
+        {
+          "acceptable_degradation": "",
+          "fallback": "operator-supervised flight",
+          "name": "AUTONOMOUS_MISSION",
+          "no_degradation_domains": [
+            "TIMING"
+          ],
+          "required_domains": [
+            "SENSOR",
+            "COMPUTE",
+            "TIMING",
+            "POWER",
+            "ACTUATION"
+          ],
+          "summary": "the vehicle can execute a mission without an operator",
+          "supporting_domains": [
+            "COMMUNICATION"
+          ]
+        },
+        {
+          "acceptable_degradation": "latency and compute pressure degrade but do not remove it",
+          "fallback": "INERTIAL_CONTINUATION",
+          "name": "COARSE_NAVIGATION",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "SENSOR",
+            "POWER"
+          ],
+          "summary": "position good enough to hold a corridor",
+          "supporting_domains": [
+            "COMPUTE",
+            "TIMING"
+          ]
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": null,
+          "name": "GEOFENCE_SUPPORT",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "SENSOR",
+            "POWER"
+          ],
+          "summary": "boundary enforcement",
+          "supporting_domains": [
+            "COMPUTE"
+          ]
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": null,
+          "name": "INERTIAL_CONTINUATION",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "SENSOR",
+            "POWER"
+          ],
+          "summary": "dead reckoning through an outage",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "a late log entry is still a log entry",
+          "fallback": null,
+          "name": "LOGGING",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "COMPUTE",
+            "POWER"
+          ],
+          "summary": "an assurance record is being written",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": "attitude hold",
+          "name": "POSITION_HOLD",
+          "no_degradation_domains": [
+            "TIMING"
+          ],
+          "required_domains": [
+            "SENSOR",
+            "COMPUTE",
+            "TIMING",
+            "POWER"
+          ],
+          "summary": "station keeping against drift",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "none: a late position is a wrong position at speed",
+          "fallback": "COARSE_NAVIGATION",
+          "name": "PRECISION_NAVIGATION",
+          "no_degradation_domains": [
+            "TIMING"
+          ],
+          "required_domains": [
+            "SENSOR",
+            "COMPUTE",
+            "TIMING",
+            "POWER"
+          ],
+          "summary": "metre-class positioning for guided flight",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": null,
+          "name": "PROPULSION",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "POWER",
+            "ACTUATION"
+          ],
+          "summary": "commanded thrust is being produced",
+          "supporting_domains": [
+            "COMPUTE"
+          ]
+        },
+        {
+          "acceptable_degradation": "a degraded source set still senses",
+          "fallback": null,
+          "name": "SENSING",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "SENSOR",
+            "POWER",
+            "COMMUNICATION"
+          ],
+          "summary": "sources are being received and are usable at all",
+          "supporting_domains": [
+            "COMPUTE"
+          ]
+        },
+        {
+          "acceptable_degradation": "latency and loss degrade telemetry; they do not stop it",
+          "fallback": "onboard log only",
+          "name": "TELEMETRY",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "COMMUNICATION",
+            "POWER"
+          ],
+          "summary": "the ground station is being kept informed",
+          "supporting_domains": [
+            "COMPUTE",
+            "TIMING"
+          ]
+        }
+      ]
+    },
+    "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e"
+  },
+  "artifact": "V2_DECLARATIONS",
+  "generation_command": "python engineering/v2/run_v2.py",
+  "note": "the two profiles register the SAME domain classes with different declarations; the test stand registers no SENSOR domain at all",
+  "test_stand": {
+    "coverage": {
+      "complete": true,
+      "functions": [
+        "DATA_LOGGING",
+        "SPEED_MEASUREMENT",
+        "TEST_SEQUENCE_EXECUTION",
+        "TORQUE_DELIVERY"
+      ],
+      "functions_with_unserved_required_domains": {},
+      "registered_domains": [
+        "ACTUATION",
+        "COMMUNICATION",
+        "COMPUTE",
+        "POWER",
+        "TIMING"
+      ]
+    },
+    "declarations": {
+      "cross_domain_relations": [
+        {
+          "description": "commanded torque implies a current draw; a commanded motor drawing nothing implicates the supply path or the drive, and these signals do not separate them",
+          "domains": [
+            "ACTUATION",
+            "POWER"
+          ],
+          "implicates": [
+            "POWER/dc_supply",
+            "ACTUATION/dyno_motor"
+          ],
+          "relation_id": "actuation_power.demand_vs_current"
+        },
+        {
+          "description": "controller saturation produces loop latency produces a missed control deadline",
+          "domains": [
+            "COMPUTE",
+            "TIMING"
+          ],
+          "implicates": [
+            "COMPUTE/cpu",
+            "COMPUTE/controller"
+          ],
+          "relation_id": "compute_timing.saturation_vs_latency"
+        }
+      ],
+      "domains": [
+        {
+          "actuators": [
+            {
+              "affected_functions": [
+                "TORQUE_DELIVERY",
+                "SPEED_MEASUREMENT",
+                "TEST_SEQUENCE_EXECUTION"
+              ],
+              "depends_on": [
+                "POWER/dc_supply",
+                "COMMUNICATION/encoder_bus"
+              ],
+              "name": "dyno_motor"
+            }
+          ],
+          "affected_functions": [
+            "SPEED_MEASUREMENT",
+            "TEST_SEQUENCE_EXECUTION",
+            "TORQUE_DELIVERY"
+          ],
+          "domain_id": "ACTUATION",
+          "implementation": "ActuationAssuranceDomain",
+          "optional_inputs": [
+            "command_transmitted",
+            "current_a",
+            "rpm",
+            "<physical_signal>"
+          ],
+          "reason_codes": [
+            "ACT_COMMAND_NOT_TRANSMITTED",
+            "ACT_NO_ELECTRICAL_RESPONSE",
+            "ACT_STALLED",
+            "ACT_RESPONSE_LOW",
+            "ACT_OVERCURRENT",
+            "ACT_NO_PHYSICAL_RESPONSE",
+            "ACT_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "actuation.command_path",
+            "actuation.electrical_response",
+            "actuation.mechanical_response",
+            "actuation.physical_response"
+          ],
+          "required_inputs": [
+            "ACTUATION/<actuator>/command"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "DATA_LOGGING",
+            "SPEED_MEASUREMENT",
+            "TEST_SEQUENCE_EXECUTION"
+          ],
+          "domain_id": "COMMUNICATION",
+          "implementation": "CommunicationAssuranceDomain",
+          "links": [
+            {
+              "affected_functions": [
+                "SPEED_MEASUREMENT",
+                "TEST_SEQUENCE_EXECUTION"
+              ],
+              "carries": [
+                "shaft_speed"
+              ],
+              "depends_on": [
+                "POWER/rail_5v"
+              ],
+              "name": "encoder_bus",
+              "transport": "RS-485"
+            },
+            {
+              "affected_functions": [
+                "DATA_LOGGING"
+              ],
+              "carries": [],
+              "depends_on": [
+                "POWER/rail_5v"
+              ],
+              "name": "host_ethernet",
+              "transport": "Ethernet"
+            }
+          ],
+          "optional_inputs": [
+            "observed_rate_hz",
+            "sequence_gaps",
+            "messages_expected",
+            "messages_received",
+            "loss_frac",
+            "duplicates",
+            "reordered",
+            "crc_errors",
+            "bus_off",
+            "reconnects",
+            "queue_delay_s"
+          ],
+          "reason_codes": [
+            "COMM_LINK_DOWN",
+            "COMM_BUS_OFF",
+            "COMM_RATE_LOW",
+            "COMM_RATE_MARGINAL",
+            "COMM_PACKET_LOSS",
+            "COMM_CRC_ERRORS",
+            "COMM_DUPLICATES",
+            "COMM_REORDERING",
+            "COMM_QUEUE_DELAY",
+            "COMM_RECONNECTING",
+            "COMM_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "comm.link_state",
+            "comm.rate",
+            "comm.loss",
+            "comm.integrity",
+            "comm.ordering",
+            "comm.queue"
+          ],
+          "required_inputs": [
+            "COMMUNICATION/<link>/link_up"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "DATA_LOGGING",
+            "TEST_SEQUENCE_EXECUTION",
+            "TORQUE_DELIVERY"
+          ],
+          "domain_id": "COMPUTE",
+          "implementation": "ComputeAssuranceDomain",
+          "optional_inputs": [
+            "heartbeat_age_s",
+            "output_age_s",
+            "runtime_s",
+            "deadline_misses",
+            "queue_depth",
+            "restart_count",
+            "COMPUTE/<resource>/cpu_load",
+            "COMPUTE/<resource>/memory_used_frac",
+            "COMPUTE/<resource>/throttled",
+            "COMPUTE/<resource>/reset_reason"
+          ],
+          "processes": [
+            {
+              "affected_functions": [
+                "TEST_SEQUENCE_EXECUTION",
+                "TORQUE_DELIVERY"
+              ],
+              "deadline_s": 0.005,
+              "depends_on": [
+                "COMPUTE/cpu"
+              ],
+              "name": "controller"
+            },
+            {
+              "affected_functions": [
+                "DATA_LOGGING"
+              ],
+              "deadline_s": 0.05,
+              "depends_on": [
+                "COMPUTE/cpu"
+              ],
+              "name": "recorder"
+            }
+          ],
+          "reason_codes": [
+            "COMPUTE_PROCESS_DEAD",
+            "COMPUTE_HEARTBEAT_STALE",
+            "COMPUTE_NO_OUTPUT",
+            "COMPUTE_DEADLINE_MISSED",
+            "COMPUTE_DEADLINE_MARGINAL",
+            "COMPUTE_CPU_SATURATED",
+            "COMPUTE_MEMORY_PRESSURE",
+            "COMPUTE_QUEUE_BACKLOG",
+            "COMPUTE_THERMAL_THROTTLED",
+            "COMPUTE_RESTARTED",
+            "COMPUTE_TELEMETRY_MISSING"
+          ],
+          "relations": [
+            "compute.process_alive",
+            "compute.process_producing",
+            "compute.deadline_met",
+            "compute.resource_headroom",
+            "compute.stability"
+          ],
+          "required_inputs": [
+            "COMPUTE/<process>/alive"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "DATA_LOGGING",
+            "SPEED_MEASUREMENT",
+            "TEST_SEQUENCE_EXECUTION",
+            "TORQUE_DELIVERY"
+          ],
+          "battery": "dc_supply",
+          "domain_id": "POWER",
+          "implementation": "PowerAssuranceDomain",
+          "optional_inputs": [
+            "power_w",
+            "voltage_reference_v",
+            "cell_voltages",
+            "temperature_c",
+            "POWER/<rail>/voltage_v",
+            "POWER/<load>/demand_frac"
+          ],
+          "rails": [
+            {
+              "affected_functions": [
+                "TORQUE_DELIVERY",
+                "TEST_SEQUENCE_EXECUTION"
+              ],
+              "depends_on": [
+                "POWER/dc_supply"
+              ],
+              "fail_frac": 0.05,
+              "name": "rail_24v",
+              "nominal_v": 24.0,
+              "warn_frac": 0.02
+            },
+            {
+              "affected_functions": [
+                "SPEED_MEASUREMENT",
+                "DATA_LOGGING",
+                "TEST_SEQUENCE_EXECUTION"
+              ],
+              "depends_on": [
+                "POWER/rail_24v"
+              ],
+              "fail_frac": 0.05,
+              "name": "rail_5v",
+              "nominal_v": 5.0,
+              "warn_frac": 0.02
+            }
+          ],
+          "reason_codes": [
+            "POWER_TELEMETRY_MISSING",
+            "POWER_RAIL_MARGINAL",
+            "POWER_RAIL_OUT_OF_TOLERANCE",
+            "POWER_RAIL_UNAVAILABLE",
+            "POWER_BALANCE_INCONSISTENT",
+            "POWER_CELL_IMBALANCE",
+            "POWER_EXCESS_DROOP",
+            "POWER_DISTRIBUTION_SUSPECT",
+            "POWER_LOAD_WITHOUT_CURRENT"
+          ],
+          "relations": [
+            "power.source_health",
+            "power.p_equals_vi",
+            "power.droop_vs_current",
+            "power.cell_balance",
+            "power.rail_tolerance",
+            "power.load_current_response"
+          ],
+          "required_inputs": [
+            "POWER/<battery>/voltage_v",
+            "POWER/<battery>/current_a"
+          ],
+          "schema_version": "2.0.0"
+        },
+        {
+          "affected_functions": [
+            "SPEED_MEASUREMENT",
+            "TEST_SEQUENCE_EXECUTION"
+          ],
+          "channels": [
+            {
+              "affected_functions": [
+                "SPEED_MEASUREMENT",
+                "TEST_SEQUENCE_EXECUTION"
+              ],
+              "depends_on": [
+                "COMMUNICATION/encoder_bus",
+                "COMPUTE/cpu"
+              ],
+              "end_to_end_deadline_s": 0.005,
+              "name": "encoder"
+            }
+          ],
+          "domain_id": "TIMING",
+          "implementation": "TimingAssuranceDomain",
+          "optional_inputs": [
+            "t_arrival",
+            "t_processed",
+            "t_decision",
+            "interval_s",
+            "jitter_s"
+          ],
+          "reason_codes": [
+            "TIMING_SEGMENT_OVER_BUDGET",
+            "TIMING_SEGMENT_MARGINAL",
+            "TIMING_DEADLINE_MISSED",
+            "TIMING_DEADLINE_MARGINAL",
+            "TIMING_JITTER_EXCESSIVE",
+            "TIMING_RATE_LOW",
+            "TIMING_CLOCK_INCONSISTENT",
+            "TIMING_STAMPS_MISSING"
+          ],
+          "relations": [
+            "timing.clock_consistency",
+            "timing.segment_budget",
+            "timing.end_to_end",
+            "timing.rate",
+            "timing.jitter"
+          ],
+          "required_inputs": [
+            "TIMING/<channel>/t_validity"
+          ],
+          "schema_version": "2.0.0",
+          "segment_classes": [
+            "SENSOR_SLOW",
+            "TRANSPORT_DELAY",
+            "PROCESSING_DELAY",
+            "DECISION_DELAY"
+          ]
+        }
+      ],
+      "functions": [
+        {
+          "acceptable_degradation": "a late sample is still a sample",
+          "fallback": null,
+          "name": "DATA_LOGGING",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "COMPUTE",
+            "COMMUNICATION"
+          ],
+          "summary": "the run is being recorded for later analysis",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "jitter degrades the measurement; loss of the encoder link removes it",
+          "fallback": null,
+          "name": "SPEED_MEASUREMENT",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "ACTUATION",
+            "COMMUNICATION",
+            "TIMING"
+          ],
+          "summary": "shaft speed is being measured and is trustworthy",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": "operator-driven single run",
+          "name": "TEST_SEQUENCE_EXECUTION",
+          "no_degradation_domains": [
+            "TIMING"
+          ],
+          "required_domains": [
+            "COMPUTE",
+            "TIMING",
+            "POWER",
+            "ACTUATION",
+            "COMMUNICATION"
+          ],
+          "summary": "the bench can run its profile unattended",
+          "supporting_domains": []
+        },
+        {
+          "acceptable_degradation": "",
+          "fallback": "hold the run point and alarm",
+          "name": "TORQUE_DELIVERY",
+          "no_degradation_domains": [],
+          "required_domains": [
+            "POWER",
+            "ACTUATION"
+          ],
+          "summary": "the motor produces the commanded torque at the shaft",
+          "supporting_domains": [
+            "COMPUTE"
+          ]
+        }
+      ]
+    },
+    "plugin_manifest_hash": "85e90325e4bad539e8454ab9e0105b95d22bc45fff11868bf757423bd8b1d2b8"
+  }
+}

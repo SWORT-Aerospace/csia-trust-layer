@@ -340,3 +340,66 @@ def test_the_test_stand_needs_neither_v1_1_nor_the_aircraft_profile_loaded():
                          capture_output=True, text=True, cwd=ROOT)
     assert out.returncode == 0, out.stderr
     assert "OK" in out.stdout
+
+
+def test_scenario_d_names_the_explanations_it_ruled_out():
+    """§17 asks the output to say "sensor failure unsupported, transport
+    failure unsupported, compute deadline violation supported".
+
+    The first two are NOT `unsupported` in §29's sense — that word is
+    reserved for a component a relation named and the evidence did not
+    support. A domain looked at and found affirmatively fine is a stronger
+    statement, and the output says it in `domains_excluded` rather than
+    leaving a reader to infer it from an absence.
+    """
+    a = final("ESTIMATOR_LATE")
+    excluded = a.attribution.detail["domains_excluded"]
+    assert "SENSOR" in excluded
+    assert "COMMUNICATION" in excluded
+    assert "COMPUTE" not in excluded, "COMPUTE is the supported explanation"
+    assert a.attribution.discriminators, (
+        "the records that did the excluding must be named, so a reader can "
+        "check what actually ruled the alternatives out")
+    assert any(d.startswith("SENSOR/") for d in a.attribution.discriminators)
+
+
+# ------------------------------- §28 SCENARIO E, in its literal form
+def test_scenario_e_literal_two_sensors_on_one_shared_node():
+    """§28-E says "shared rail fault affects TWO SENSORS".
+
+    `SHARED_RAIL` demonstrates the mechanism with one source and two links,
+    because the two committed v1.1 examples have at most one adverse source.
+    This runs the literal form against the one REAL payload in the whole
+    corpus that has two — `battery` and `motor_esc`, both alarming, both
+    declared on `POWER/battery`. Nothing about the payload was edited; it was
+    found by searching all 13500 of them.
+    """
+    a = final("SHARED_SOURCE")
+    ids = [c.id for c in a.attribution.candidates]
+    sensors = [i for i in ids if i.startswith("SENSOR/")]
+    assert len(sensors) >= 2, f"§28-E needs two sensors; got {ids}"
+    assert a.attribution.verdict == "AMBIGUOUS"
+    assert a.attribution.common_cause == "POWER/battery"
+    assert "POWER/battery" in ids
+
+
+def test_scenario_e_literal_leaves_the_v1_1_verdicts_exactly_alone():
+    """The payload's own function eligibility is ELIGIBLE across the board —
+    a sequential alarm is not a cause attribution (Phase 4 §11) — while v2
+    calls the same functions INELIGIBLE on POWER evidence.
+
+    Both are true at once, and the SENSOR column is where v1.1's answer
+    survives intact. This is the case that would expose a leak if one
+    existed, because the two answers disagree.
+    """
+    from csia.v2.domains.navigation import _STATE
+    from csia.v2.profiles.aircraft import V1_1_FUNCTIONS
+    from csia.v2.profiles.aircraft_scenarios import load_v1_1_example
+    inverse = {v.value: k for k, v in _STATE.items()}
+    payload = load_v1_1_example("shared_source")
+    a = final("SHARED_SOURCE")
+    for name in V1_1_FUNCTIONS:
+        assert payload["function_eligibility"][name]["state"] == "ELIGIBLE"
+        assert inverse[a.functions[name].domain_states["SENSOR"]] == "ELIGIBLE"
+        assert a.functions[name].state == "INELIGIBLE"
+        assert a.functions[name].limiting_domain == "POWER"

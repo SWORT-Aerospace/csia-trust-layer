@@ -1,0 +1,169 @@
+{
+  "ambiguity": "UNIQUE",
+  "assurance": {
+    "armed": true,
+    "level": "NORMAL",
+    "level_value": 0,
+    "transition_time": null
+  },
+  "diagnosis": {
+    "active_evidence_count": 21,
+    "ambiguity": "UNIQUE",
+    "discriminating_evidence_count": 1,
+    "identifiable": true,
+    "leader": "nominal",
+    "non_identifiable_against": [],
+    "posterior": 0.995334239,
+    "prior_sensitive": false,
+    "runner_up": "unexpected_maneuver",
+    "score_margin": 5.376823471,
+    "support_state": "EVIDENCE_BACKED",
+    "unknown_fault_model": "NOT_IMPLEMENTED"
+  },
+  "evidence": {
+    "active_evidence_count": 21,
+    "active_relations": [
+      "accel_esc_rpm",
+      "accel_motor_current",
+      "altitude_baro",
+      "attitude_gravity_mag",
+      "heading_course",
+      "power_thrust",
+      "redundant_imu",
+      "temp_bias_drift",
+      "velocity_gps_doppler",
+      "vibration_prop_freq"
+    ],
+    "current_valid": null,
+    "fresh": {
+      "baro": true,
+      "battery": true,
+      "gps": true,
+      "imu0": true,
+      "imu1": true,
+      "mag": true,
+      "motor_esc": true,
+      "vibration": true
+    },
+    "missing_reason": {},
+    "suppressed_relations": [],
+    "suppression_reasons": {}
+  },
+  "function_eligibility": {
+    "COARSE_NAVIGATION": {
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "state": "ELIGIBLE",
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "GEOFENCE_SUPPORT": {
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "state": "ELIGIBLE",
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "INERTIAL_CONTINUATION": {
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "state": "ELIGIBLE",
+      "support_sufficient": true,
+      "transition_time": null
+    },
+    "POSITION_HOLD": {
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "state": "ELIGIBLE",
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "PRECISION_NAVIGATION": {
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "state": "ELIGIBLE",
+      "support_sufficient": true,
+      "transition_time": 8.04
+    }
+  },
+  "ledger_event": {
+    "content_sha256": "c41bcba5d7f157bcc3fba2b4af523e51825259a99cc4e69e87c09489cf882fe2",
+    "event_id": "e0d9fc413e57cd3f141c5faf797f878c",
+    "event_type": "SEQUENTIAL_STATE_CHANGED",
+    "new_state": "battery|motor_esc",
+    "previous_event_hash": "849d68884528426813c9d3f98cceaab91b80b0ce307f596c4929f4e3d1b7d9c2",
+    "previous_state": "motor_esc",
+    "reason_codes": [],
+    "subject": "sequential"
+  },
+  "platform": "ardupilot-derived deterministic simulator",
+  "provenance_summary": {
+    "authority": "READ_ONLY",
+    "configuration_hash": "47c62639d672ba660b5afcf7c92b3317737a99d9d25fe08765c2d09630f08b4c",
+    "frozen_core_tag": "csia-v1.0-research-final",
+    "input_trace_hash": "8d5b27f6a31a31cb10c646f490c44c90c7a015a4242ede737714dceef5355c41",
+    "software_sha": "EXTRACTED",
+    "trust_mode": "FLAT_V1_1"
+  },
+  "recommendations": [],
+  "schema_version": "1.1.0",
+  "sequential": {
+    "S": {},
+    "alarming": [
+      "battery",
+      "motor_esc"
+    ],
+    "covered_nodes": [
+      "battery",
+      "gps",
+      "mag",
+      "motor_esc",
+      "vibration"
+    ],
+    "h": 500.0,
+    "k": 0.5,
+    "nodes_without_residual": {
+      "baro": "clean-arm sigma0 is degenerate (0.0 over 1500 ticks)",
+      "imu0": "no per-IMU physics chi-square exists in this construction",
+      "imu1": "no per-IMU physics chi-square exists in this construction"
+    }
+  },
+  "support": {
+    "discriminating_evidence": {
+      "gps_fault": 1,
+      "imu0_bias_drift": 3,
+      "imu1_bias_drift": 2,
+      "mag_interference": 4,
+      "power_fault": 5,
+      "unexpected_maneuver": 1,
+      "vibration_anomaly": 3
+    },
+    "leader_identifiable": true,
+    "non_identifiable_against": [],
+    "state": "EVIDENCE_BACKED"
+  },
+  "timestamp": 30.2,
+  "trust": {
+    "mode": "FLAT_V1_1",
+    "nodes": {
+      "baro": 0.996467947,
+      "battery": 0.99183743,
+      "gps": 0.978631516,
+      "imu0": 0.979715652,
+      "imu1": 0.997100347,
+      "mag": 0.968666958,
+      "motor_esc": 0.986025444,
+      "vibration": 0.998877245
+    }
+  }
+}

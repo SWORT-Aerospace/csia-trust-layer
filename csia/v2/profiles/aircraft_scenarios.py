@@ -175,6 +175,19 @@ def _estimator_late(sig, frac, t):
     sig["TIMING"]["nav_solution"]["processing_s"] = over
 
 
+def _shared_source(sig, frac, t):
+    # §28 SCENARIO E, LITERAL FORM. Paired with the one REAL v1.1 payload in
+    # the corpus that has two sources adverse on a single declared node --
+    # `battery` and `motor_esc`, both alarming, both declared on
+    # POWER/battery (see engineering/v2/extract_shared_source_payload.py).
+    #
+    # Only the source droops. The rails are untouched, so the candidate set
+    # stays tight and the shared node is the only thing both sensors reach.
+    v = ramp(frac, 0.30, 22.2, 21.3)          # past droop_fail_v = 0.60
+    sig["POWER"]["battery"]["voltage_v"] = v
+    sig["POWER"]["battery"]["power_w"] = v * sig["POWER"]["battery"]["current_a"]
+
+
 def _shared_rail(sig, frac, t):
     # §28 SCENARIO E. One rail out of tolerance, with several things declared
     # downstream of it. Nothing downstream is injected -- their own evidence
@@ -253,6 +266,14 @@ AIRCRAFT_SCENARIOS = (
                  "what v1.1 said it was",
                  inject=_estimator_late, tags=("compute", "timing",
                                                "scenario_d")),
+        Scenario("SHARED_SOURCE", "aircraft", "28E",
+                 "battery droops past its declared limit while the REAL v1.1 "
+                 "payload has two sources alarming on that same node",
+                 "AMBIGUOUS with POWER/battery retained as the common cause "
+                 "of two SENSOR candidates; v1.1's own function verdicts are "
+                 "unchanged, because a sequential alarm is not a cause",
+                 inject=_shared_source, v1_1_variant="shared_source",
+                 tags=("power", "scenario_e")),
         Scenario("SHARED_RAIL", "aircraft", "28E",
                  "one rail out of tolerance with several dependants",
                  "AMBIGUOUS with the rail retained as a common-cause "
@@ -277,13 +298,25 @@ V1_1_EXAMPLES = {
     "fixloss": "csia_output_fixloss_example.json",
 }
 
+#: A third real payload, extracted rather than committed by v1.1: the only
+#: shape in the whole corpus with TWO sources adverse on one declared power
+#: node, which is what §28-E asks for literally. Written to engineering/v2/
+#: so nobody mistakes it for a v1.1-owned artifact -- v1.1's directory, code
+#: and schema are untouched by v2 (§19). Regenerate with
+#: `python engineering/v2/extract_shared_source_payload.py`.
+V2_EXAMPLES = {"shared_source": "v1_1_shared_source_payload.json"}
+
 
 def load_v1_1_example(variant: str = "clean") -> dict:
     import json
     import os
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(os.path.dirname(os.path.dirname(here)))
-    path = os.path.join(root, "engineering", "v1_1", V1_1_EXAMPLES[variant])
+    if variant in V2_EXAMPLES:
+        path = os.path.join(root, "engineering", "v2", V2_EXAMPLES[variant])
+    else:
+        path = os.path.join(root, "engineering", "v1_1",
+                            V1_1_EXAMPLES[variant])
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 

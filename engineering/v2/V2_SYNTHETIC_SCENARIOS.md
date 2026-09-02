@@ -70,21 +70,42 @@ all five tags exist so a case cannot be dropped by deleting its test.
 | **C** command sent, ESC receives, current rises, RPM does not | `STALLED_ACTUATOR` | actuation/mechanical issue | UNIQUE `ACTUATION/motor_0` with `ACT_STALLED`, **not** `ACT_NO_ELECTRICAL_RESPONSE`; POWER and COMMUNICATION affirmatively NOMINAL |
 | **D** sensor fresh, estimator late | `ESTIMATOR_LATE` | compute/timing limitation, not sensor failure | SENSOR NOMINAL; COMPUTE + TIMING adverse; `PRECISION_NAVIGATION` INELIGIBLE, `COARSE_NAVIGATION` ELIGIBLE; no SENSOR or COMMUNICATION candidate |
 | **E** shared rail affects several dependants | `SHARED_RAIL` | common power cause **retained as an alternative** | AMBIGUOUS with `common_cause = POWER/rail_5v`; the rail and its dependants all candidates; the rail is **not** adopted as the answer |
+| **E** literal: two sensors on one shared node | `SHARED_SOURCE` | same, with two SENSORS | AMBIGUOUS with `common_cause = POWER/battery`; candidates are the source plus `SENSOR/source.battery` and `SENSOR/source.motor_esc`, from a real unedited payload |
 
-### A note on §28-E's wording
+### §28-E in its literal form, and how it was found
 
-§28-E says "shared rail fault affects **two sensors**". The scenario runs the
-real GNSS-fix-loss payload — one adverse source — alongside two links declared
-on the same 5 V rail, so the common cause is found under **one source and two
-links** rather than two sources.
+§28-E says "shared rail fault affects **two sensors**". The `SHARED_RAIL`
+scenario runs the real GNSS-fix-loss payload — one adverse source — alongside
+two links declared on the same 5 V rail, so its common cause is found under
+one source and two links.
 
-`run_v2.py` searches every real v1.1 payload for a tick where two or more
-sources on the *same declared rail* are adverse simultaneously, and
-`V2_BASELINE_V1_1.json` reports what it found. A payload was not edited to
-manufacture the literal case; the mechanism under test — transitive
-common-cause detection over the declared dependency graph — is the same either
-way, and `tests/test_v2_framework.py` exercises the two-sensor form directly
-on constructed records.
+That was initially reported as the best available, on the strength of a search
+for ticks where two or more sources on one declared node were **unfresh**
+together. **That search was too narrow and the conclusion drawn from it was
+wrong.** The v1.1 wrapper calls a source adverse when it is unfresh *or* named
+in `sequential.alarming`, and searching on the wrapper's own definition finds
+**745 ticks** in the real corpus: `battery` and `motor_esc`, both alarming,
+both declared on `POWER/battery`, in the POWER_SAG mechanism.
+
+So `SHARED_SOURCE` was added, running §28-E literally:
+
+- the v1.1 payload is **real and unedited**, extracted by
+  `engineering/v2/extract_shared_source_payload.py` from the same
+  `run_p4d.py:_payloads` that produced the two committed examples
+- the only injection is a battery droop past its declared limit; the rails are
+  untouched, so the shared node is the only thing both sensors reach
+- the result is `AMBIGUOUS` with `common_cause = POWER/battery` and **two
+  SENSOR candidates** plus the source itself
+
+It is also the sharpest §36 case in the set. The payload's own
+`function_eligibility` is `ELIGIBLE` across all five functions — a sequential
+alarm is not a cause attribution (Phase 4 §11) — while v2 calls the same five
+`INELIGIBLE` on POWER evidence. Both are true at once, and
+`domain_states["SENSOR"]` still reads exactly what v1.1 said. A leak in the
+wrapper would show here, because this is the case where the two answers
+disagree.
+
+Both scenarios are kept and both are tagged `scenario_e`.
 
 ## 6. §37's SIX — THE TEST STAND
 

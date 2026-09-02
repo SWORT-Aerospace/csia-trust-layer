@@ -1937,3 +1937,20 @@ Resolved since Phase 4: the propagation review (§75), the staleness rule
 
 **Product maturity: M2, unchanged.** Freezing the deployment semantics is a
 precondition for the port, not the port.
+
+---
+
+## WHERE v2 PICKS UP
+
+Everything above describes CSIA v1.1 and remains true of it. CSIA v2 does not
+change any of it: v2 is built **above** output API 1.1.0, wraps v1.1 as its
+SENSOR domain, and imports no v1.1 producer. The frozen v1 core diff is still
+zero and schema 1.1.0 is unchanged.
+
+The v2 architecture, its five other domains, and the evidence for whether CSIA
+is now reusable assurance middleware rather than aircraft sensor assurance are
+in `engineering/v2/V2_CHATGPT_REVIEW_REPORT.md`.
+
+**None of v2's work moves product maturity past M2.** It adds architecture,
+not evidence about a vehicle: no hardware has been measured, every v2
+threshold is declared configuration, and every v2 scenario is synthetic.

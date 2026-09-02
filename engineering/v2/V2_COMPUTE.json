@@ -1,0 +1,72 @@
+{
+  "artifact": "V2_COMPUTE",
+  "correction_note": "AN EARLIER VERSION OF THIS MEASUREMENT WAS WRONG AND IS RECORDED HERE RATHER THAN QUIETLY REPLACED. It timed all six domains as one phase and reported ~28000 us as 'core'. That number was almost entirely csia.v1_1.monitor.parse running inside the SENSOR domain -- the same class of mistake Phase 4 caught in its own compute figure. Each domain is now timed separately and the headline is reported twice.",
+  "generation_command": "python engineering/v2/run_v2.py",
+  "headline": "the v2 decision over six domains costs 722.987 us/tick; ingesting the v1.1 payload costs 28234.7 us/tick, of which 28028.5 us is JSON Schema validation",
+  "measured_on": "REGULATOR_FAILURE, 200 ticks, six domains, CPython on a general-purpose host",
+  "note": "CORE and REPORTING are separated for the same reason Phase 4 separated them: folding logging and serialisation into a decision-path figure would overstate what an embedded port must carry. NO TARGET-HARDWARE FIGURE EXISTS AND NONE IS CLAIMED. The v1.1 core figure from Phase 4 is NOT comparable -- it measured a different thing on a different scenario.",
+  "phases_us_per_tick": {
+    "api_build": {
+      "max_us": 18625.326,
+      "mean_us": 1144.365,
+      "median_us": 998.809
+    },
+    "api_serialize": {
+      "max_us": 1072.809,
+      "mean_us": 619.233,
+      "median_us": 590.211
+    },
+    "attribution": {
+      "max_us": 250.421,
+      "mean_us": 71.344,
+      "median_us": 91.602
+    },
+    "domain_ACTUATION": {
+      "max_us": 121.721,
+      "mean_us": 41.741,
+      "median_us": 38.646
+    },
+    "domain_COMMUNICATION": {
+      "max_us": 284.318,
+      "mean_us": 115.323,
+      "median_us": 104.564
+    },
+    "domain_COMPUTE": {
+      "max_us": 168.046,
+      "mean_us": 83.379,
+      "median_us": 75.602
+    },
+    "domain_POWER": {
+      "max_us": 147.581,
+      "mean_us": 69.794,
+      "median_us": 68.763
+    },
+    "domain_SENSOR": {
+      "max_us": 44957.024,
+      "mean_us": 29007.55,
+      "median_us": 28234.715
+    },
+    "domain_TIMING": {
+      "max_us": 494.116,
+      "mean_us": 154.898,
+      "median_us": 142.349
+    },
+    "functions": {
+      "max_us": 443.668,
+      "mean_us": 218.933,
+      "median_us": 201.461
+    },
+    "ledger": {
+      "max_us": 843.126,
+      "mean_us": 27.534,
+      "median_us": 18.832
+    }
+  },
+  "records_per_tick": 68,
+  "reporting_us_per_tick": 1607.852,
+  "total_including_v1_1_ingest_us_per_tick": 28957.702,
+  "v1_1_ingest_note": "csia.v1_1.monitor.parse validates the payload against engineering/v1_1/csia_output_v1_1.schema.json on EVERY call, and that dominates the tick by roughly two orders of magnitude. It is a property of ingesting schema 1.1.0 strictly, NOT of the v2 decision, and an integration that validates once at ingest rather than once per consumer does not pay it repeatedly. NOTHING WAS CHANGED IN v1.1 TO IMPROVE THIS NUMBER (section 19); it is reported as measured.",
+  "v1_1_ingest_us_per_tick": 28234.715,
+  "v1_1_payload_parse_us_measured_alone": 28028.5,
+  "v2_decision_us_per_tick_excluding_v1_1_ingest": 722.987
+}

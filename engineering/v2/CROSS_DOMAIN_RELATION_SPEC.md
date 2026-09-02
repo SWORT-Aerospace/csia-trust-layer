@@ -101,6 +101,32 @@ carries no adverse evidence, and appears in `unsupported`. The operator reads
 "the rail is the candidate; the battery was looked at and is fine" rather than
 "POWER: FAULT".
 
+## 5b. WHAT WAS RULED OUT, SAID RATHER THAN IMPLIED
+
+§17's example output ends:
+
+> sensor failure **unsupported**, transport failure **unsupported**, compute
+> deadline violation **supported**
+
+The first two are *not* `unsupported` in §29's sense. That word is reserved
+for a component a relation **named** and the evidence did not support. A
+domain that was looked at and found affirmatively fine is a stronger
+statement, and it deserves to be said rather than inferred from an absence.
+
+So an `AMBIGUOUS` verdict also carries `detail.domains_excluded` — domains
+with affirmatively NOMINAL evidence and no candidate — and populates
+`discriminators` with the records that did the excluding, by name. On the
+ESTIMATOR_LATE scenario that reads `["ACTUATION", "COMMUNICATION", "POWER",
+"SENSOR"]`, with COMPUTE and TIMING carrying the candidates.
+
+The distinction is worth keeping sharp, because the two words mean opposite
+things about how much work was done:
+
+| | meaning |
+|---|---|
+| `unsupported` | a relation pointed here; there is no evidence for it |
+| `domains_excluded` | this was measured, and it is fine |
+
 ## 6. DERIVED STATEMENTS ARE NOT CANDIDATES
 
 Records marked `attributable=False` — roll-ups, aggregates, transcribed v1.1

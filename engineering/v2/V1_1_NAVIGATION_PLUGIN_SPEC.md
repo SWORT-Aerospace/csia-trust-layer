@@ -108,6 +108,14 @@ for every applicable v1.1 mechanism using the Phase 4D machinery — the same
 
 Results, with the stride and the counts, are in `V2_BASELINE_V1_1.json`.
 
+**The sharpest case is `SHARED_SOURCE`.** Its real payload calls all five v1.1
+functions `ELIGIBLE` while two of its sources are raising sequential alarms —
+because a sequential alarm is not a cause attribution (Phase 4 §11) — and v2
+calls the same five `INELIGIBLE` on POWER evidence. Both are true at once, and
+`domain_states["SENSOR"]` still reads exactly `ELIGIBLE`. That is the input a
+leak in the wrapper would show up in, because it is the one where the two
+answers disagree.
+
 ## 9. THE COST OF THE SEAM
 
 Measured, not estimated: `csia.v1_1.monitor.parse` re-validates the payload

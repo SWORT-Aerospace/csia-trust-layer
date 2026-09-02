@@ -417,3 +417,20 @@ def test_a_snapshot_is_a_plain_mapping_not_a_typed_vehicle():
     assert s.has("POWER", "battery", "voltage_v")
     assert not s.has("POWER", "battery", "current_a")
     assert s.v1_1_payload is None, "v1.1 is optional, not required"
+
+
+def test_both_verdicts_report_what_was_ruled_out_the_same_way():
+    """A consumer should not need two code paths to read "what was excluded"
+    depending on whether the verdict came out UNIQUE or AMBIGUOUS."""
+    one = rec(observation_state=ObservationState.VIOLATED)
+    elsewhere = rec(domain="COMPUTE", component="cpu")
+    unique = attribute([one, elsewhere])
+    assert unique.verdict == UNIQUE
+    assert unique.detail["domains_excluded"] == ["COMPUTE"]
+
+    two = rec(domain="TIMING", component="nav",
+              observation_state=ObservationState.VIOLATED)
+    ambiguous = attribute([one, two, elsewhere])
+    assert ambiguous.verdict == AMBIGUOUS
+    assert ambiguous.detail["domains_excluded"] == ["COMPUTE"]
+    assert ambiguous.discriminators == ("COMPUTE/cpu:power.x",)

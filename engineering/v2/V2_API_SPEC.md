@@ -36,6 +36,11 @@ functions        {name: {state, limiting_domain, domain_states,
 limiting_domains the distinct domains limiting anything
 attribution      {verdict, candidates, candidate_detail, discriminators,
                   common_cause, unsupported, detail}
+                 detail.domains_excluded lists domains measured and found
+                 affirmatively fine — §17's "sensor failure unsupported,
+                 transport failure unsupported", said rather than implied,
+                 and kept distinct from `unsupported` (which means a relation
+                 pointed somewhere and the evidence did not support it)
 evidence         every record, with provenance, dependencies, latencies
 unevaluated      what could not be looked at, and why
 ledger_events    the events this tick opened

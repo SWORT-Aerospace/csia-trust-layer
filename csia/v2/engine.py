@@ -69,8 +69,12 @@ class SystemAssurance:
         if a.common_cause:
             lines.append(f"    common-cause alternative retained: "
                          f"{a.common_cause}")
+        if a.detail.get("domains_excluded"):
+            lines.append(f"    ruled out by affirmative evidence: "
+                         f"{a.detail['domains_excluded']}")
         if a.unsupported:
-            lines.append(f"    unsupported: {list(a.unsupported)}")
+            lines.append(f"    implicated but unsupported: "
+                         f"{list(a.unsupported)}")
         return "\n".join(lines)
 
 
