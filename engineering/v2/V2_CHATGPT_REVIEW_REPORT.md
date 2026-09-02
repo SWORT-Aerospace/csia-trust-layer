@@ -13,7 +13,7 @@ question. §22 is what is still wrong.
 | v1.1 | unchanged; output schema `1.1.0` unchanged |
 | branch | `claude/code-reviewer-repo-export-zicovg` |
 | V2A | `ecfb0ca` framework, six domains, two profiles, specs, tests |
-| V2B | this report and the run artifacts |
+| V2B | `e05c9c8` this report and the run artifacts |
 | tests | 1211 → **1,388** (177 new, all v2) |
 | documents | 18 specs in `engineering/v2/` + this report |
 
