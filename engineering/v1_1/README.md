@@ -13,8 +13,9 @@ IMPROVED. Nothing here is a novelty claim (item 48).
 | **Phase 3A** | **COMPLETE** — GRAPH vs FLAT (`1d79b40`); verdict `GRAPH_NO_MATERIAL_GAIN` |
 | **Phase 3B** | **COMPLETE** — five-arm selection T0–T4; decision `E: TRUST_FLAT_PLUS_SEQUENTIAL` |
 | **Phase 4** | **COMPLETE** — architecture freeze, function eligibility, assurance ledger, versioned read-only output API. Runtime status `V1_1_ARCHITECTURE_FROZEN` |
-| Phases 5–6 | not started. Phase 3C **not recommended** — see `PHASE3C_FEASIBILITY_NOTE.md` |
-| tests | 971 → 1133 passing |
+| **Phase 4.5** | **COMPLETE** — trust-mode decision, staleness closure, first real consumer, golden corpus frozen. `PHASE5_READY: YES` |
+| Phases 5–6 | not started. **No C source exists.** Phase 3C **not recommended** — see `PHASE3C_FEASIBILITY_NOTE.md` |
+| tests | 971 → 1211 passing |
 
 ---
 
@@ -54,7 +55,7 @@ locally; that workaround is now the general rule, applied once.
 | `reproduce_defects.py` | the reproduction harness |
 | `V1_1_CHANGELOG.md` | |
 | `V1_1_TEST_MATRIX.csv` | |
-| `V1_1_CHATGPT_REVIEW_REPORT.md` | the review report — items 1–30 (Phases 1–3A), 31–52 (Phase 3B), 53–74 (Phase 4) |
+| `V1_1_CHATGPT_REVIEW_REPORT.md` | the review report — items 1–30 (Phases 1–3A), 31–52 (Phase 3B), 53–74 (Phase 4), 75–92 (Phase 4.5) |
 
 ### Phase 3B files
 
@@ -97,6 +98,22 @@ Guards: `tests/test_v1_1_canonical_ingest.py` — `make v1-1-ingest-check`.
 Reproduce: `make v1-1-defects`.
 Phase 3B: `make v1-1-phase3b` to regenerate, `make v1-1-phase3b-check` to guard.
 Phase 4: `make v1-1-p4a` … `v1-1-p4d`; `make v1-1-p4-check` runs all four gates.
+Phase 4.5: `make v1-1-staleness`, `v1-1-consumer`, `v1-1-p45-compute`,
+`v1-1-golden`; `make v1-1-p45-check` runs all three gates.
+
+### Phase 4.5 files
+
+| file | |
+|---|---|
+| `TRUST_MODE_FINAL_DECISION.md` | Gate A. `TRUST_MODE_REVIEW: PASS` |
+| `STALENESS_RUNTIME_SPEC.md` | Gate B. One canonical rule, and the correction to Phase 4 §68 |
+| `API_CONSUMER_SPEC.md` / `API_CONSUMER_RESULTS.json` | Gate C. `csia-monitor` |
+| `PHASE4_5_COMPUTE.json` | ~10 µs once at startup; **zero** per tick |
+| `../../validation/v1_1/deployment/` | the reproduction, the 128-row matrix, the Phase 4 regression |
+| `../../embedded/v1_1/golden/` | 11 cases, 13 500 ticks, hashed manifest |
+| `../../embedded/v1_1/NUMERIC_EQUIVALENCE_SPEC.md` | Tier-B tolerance, derived **before any C** |
+| `../../embedded/v1_1/DECISION_MARGIN_AUDIT.csv` | the 2 near-boundary ticks |
+| `../../embedded/v1_1/PHASE5_AUTHORIZATION.md` | **`PHASE5_READY: YES`** |
 
 ## The frozen core
 

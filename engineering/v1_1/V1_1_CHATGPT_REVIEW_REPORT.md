@@ -1,12 +1,16 @@
-# CSIA v1.1 — ENGINEERING REVIEW REPORT (PHASES 1–4)
+# CSIA v1.1 — ENGINEERING REVIEW REPORT (PHASES 1–4.5)
 
 Engineering only. FIXED / HARDENED / VALIDATED / SIMPLIFIED / IMPROVED.
 No novelty language, and none is warranted (§31).
 
 Items **1–30** are the Phases 1–3A report, **31–52** the Phase 3B additions,
-**53–74** the Phase 4 additions. Where an earlier item was written while a
-later phase was still unrun, it has been **updated in place and the update is
-marked**, not silently rewritten.
+**53–74** the Phase 4 additions and **75–92** the Phase 4.5 additions. Where an
+earlier item was written while a later phase was still unrun, it has been
+**updated in place and the update is marked**, not silently rewritten.
+
+**Two Phase 4 claims are corrected by Phase 4.5**, in §77 and §78, rather than
+quietly dropped: the predicted PX4 `motor_esc` exposure is not reachable, and
+the node-timeout rule is `max` over required channels rather than `min`.
 
 ---
 
@@ -24,13 +28,18 @@ marked**, not silently rewritten.
 | Phase 4A | `b9fc5d6` versioned trust mode + architecture freeze |
 | Phase 4B | `8260736` function eligibility |
 | Phase 4C | `3ca0f32` assurance ledger |
-| Phase 4D | this commit — output API, firewall, freeze |
-| tests | 971 → **1133** |
+| Phase 4D | `bf6a19e` output API, firewall, freeze |
+| Phase 4.5 A+B | `5490cce` trust-mode decision + staleness closure |
+| Phase 4.5 C | `dfedac5` csia-monitor, the first real consumer |
+| Phase 4.5 freeze | this commit — golden corpus, numeric spec, Phase 5 authorization |
+| tests | 971 → **1211** |
 
 **Frozen core: zero diff.** `csia/trust_engine`, `csia/diagnosis`,
 `csia/runtime/online.py`, `csia/runtime/failsafe.py`, `csia/scenarios.py`,
-`csia/profiles.py`. Phases 2, 3 and 4 are entirely read-only over it — Phase 4
-adds `csia/v1_1/`, one level above the freeze, and touches nothing inside it.
+`csia/profiles.py`. Phases 2, 3, 4 and 4.5 are entirely read-only over it —
+they add `csia/v1_1/` one level above the freeze and touch nothing inside it.
+Phase 4.5's staleness fix is an argument passed to `OnlineTrustLayer`, which
+already accepted it; the frozen default table is unedited.
 
 ### 2. PHASE 1 INTEGRITY
 
@@ -1468,3 +1477,463 @@ an interface is not evidence about the world.
 **Research maturity: none established.**
 
 G4 `VALIDATED_SITL`, G5 `VALIDATED_SITL`, every other row unchanged.
+
+---
+
+# PHASE 4.5 ADDITIONS (§34, items 75–92)
+
+Three deployment gates closed, then the golden corpus frozen. Produced by
+`validation/v1_1/deployment/run_staleness.py`,
+`engineering/v1_1/phase4_5/run_gate_c.py` and `embedded/v1_1/build_golden.py`,
+guarded by `test_v1_1_staleness.py` (26), `test_v1_1_monitor.py` (29) and
+`test_v1_1_golden.py` (23).
+
+### 75. TRUST-MODE FINAL DECISION
+
+    TRUST_MODE_REVIEW:  PASS
+
+`TRUST_MODE_FINAL_DECISION.md`. `FLAT_V1_1` is the v1.1 default;
+`LEGACY_NEIGHBOR_PROPAGATION` is retained solely for historical and research
+reproduction. **Exactly one mechanism is rejected** — the neighbour's trust
+multiplying a relation's weight at `engine.py:110`. Relation topology, all 11
+relations, node definitions, relation ownership and the trust recursion itself
+are retained, and nothing is deleted.
+
+Four things carry it:
+
+1. **Zero incremental benefit.** `T1 − T0` and `T4 − T3` are both 0.00 on six
+   mechanisms and censored on two.
+2. **A 0.28 s regression** on `dual_imu_failure`, the one safety-critical
+   mechanism where the modes differ, with the same sign again downstream
+   (`CRITICAL → EMERGENCY` 0.60 s later). There is no mechanism anywhere in
+   the catalogue on which propagation is earlier.
+3. **Attribution cannot be affected, structurally.** `bayes.py` is 172 lines
+   and imports four things, one of them `consistency` — a pure function of one
+   residual. `TrustHistory` does not occur in the file and no attribute named
+   `trust` is read anywhere in it, verified by AST rather than grep. No
+   experiment could have shown propagation improving attribution.
+4. **Legacy reproduction is exact** — bit-identical, tolerance declared 0.0
+   and needed 0.0 — because LEGACY returns the frozen class itself rather than
+   a re-implementation.
+
+Per §2, **Phase 5 ports `FLAT_V1_1` only.** Legacy stays reference-only: there
+is no product requirement to run historical propagation on an embedded target,
+and a second trust weighting in C is dead complexity in the most expensive
+place to carry it.
+
+### 76. THE STALENESS PROBLEM
+
+`MaxAge` (adapter, v1.1) and `STALE_TIMEOUT_S` (frozen core, v1) answer the
+**same** question — how many producer periods of silence before a measurement
+stops being evidence — and both apply a margin of five periods. They disagree
+because one derives the period from the channel contract per platform and the
+other has it baked into a constant, which the frozen core cannot avoid because
+it knows nothing about adapters.
+
+Six of eight nodes disagree; `battery` and `vibration` agree, and they are
+exactly the two whose declared rate is the 10 Hz the frozen table assumed.
+
+**§6's question is answered: same concept, one authoritative rule.** Two
+undocumented meanings are not retained.
+
+### 77. PX4 `motor_esc` PRE-FIX REPRODUCTION — A NEGATIVE RESULT
+
+**Phase 4 §68 was wrong, and reproducing it is what found that.**
+
+It predicted `motor_esc` stale for ~0.9 s of every 1.0 s on a live PX4 shadow
+flight. It would not be, because **`motor_esc` never reaches the frozen core
+on either platform**:
+
+| platform | `esc.rpm` | `esc.current` |
+|---|---|---|
+| ArduPilot | `STUB_OR_NONINFORMATIVE` | `STUB_OR_NONINFORMATIVE` |
+| PX4 | `AVAILABLE_UNVALIDATED` | `STUB_OR_NONINFORMATIVE` |
+
+`to_core_samples` emits a sensor only when every required channel is usable,
+and usability is decided by the **qualification contract before any watchdog
+runs**. The arithmetic was right; the conclusion skipped a layer.
+
+`PX4_MOTOR_ESC_STALENESS_PRE_FIX.csv` and `..._POST_FIX.csv` are the record:
+`motor_esc_reached_core` is **False on every tick in both arms**, at 0.1 s and
+at 5.0 s. **Two opposite timeouts, one identical outcome** — which is how you
+tell the timeout is not the cause. Both files carry the channel qualification
+columns so the file explains itself.
+
+The reproduction produced a negative result and it is committed as one.
+
+### 78. THE CANONICAL TIMEOUT RULE
+
+    runtime_stale_timeout[node] = max over required channels of max_age[channel]
+    max_age[channel] = MAX_AGE_MARGIN / declared_rate_hz  (per platform)
+
+**In one sentence: the runtime watchdog agrees with the ingestion layer that
+feeds it.**
+
+**No new constant.** `MAX_AGE_MARGIN = 5.0` is *imported* from the adapter,
+where it was already declared and justified; the same factor already appears
+in `ulog_source.stale_timeouts(factor=5.0)`. §9 forbids optimising a
+multiplier after seeing the matrix, and the way to make that impossible is to
+have none: a test parses `csia/v1_1/staleness.py` and asserts it contains no
+numeric literal of its own (rounding precision excluded by position, not by
+being small enough to overlook), and a second test asserts `channel_max_age`
+agrees with a live adapter's `_derive_max_age` on every channel.
+
+**A second Phase 4 correction.** §68 said "node timeout = **min** over the
+required channels". `max` is correct — a node stops arriving when its
+slowest-permitted channel does. **No published number changes**, because every
+node's required channels share a declared rate on both platforms, so `min` and
+`max` coincide throughout the table. Recorded anyway: a justification that
+happens to give the right answer is still the wrong justification.
+
+| node | ArduPilot | PX4 | frozen |
+|---|---:|---:|---:|
+| `imu0` | 0.200 | 0.100 | 0.05 |
+| `imu1` | 0.200 | 0.200 | 0.05 |
+| `baro` | 0.500 | 0.500 | 0.10 |
+| `mag` | 0.200 | 0.357 | 0.10 |
+| `gps` | 1.000 | 1.000 | 0.50 |
+| `motor_esc` | 0.500 | 5.000 | 0.10 |
+| `battery` | 0.500 | 0.500 | 0.50 |
+| `vibration` | 0.500 | 0.500 | 0.50 |
+
+### 79. STALENESS MATRIX
+
+`STALENESS_MATRIX.csv` — 8 nodes × 4 conditions × 2 platforms × 2 arms = 128
+rows, all present.
+
+**Inadmissible nodes carry null metrics, not a 100% false-stale rate.**
+Reporting one would blame the watchdog for a qualification decision taken a
+layer earlier. Inadmissible: `motor_esc` on both platforms; `imu1` and
+`battery` additionally on PX4, whose `imu1.accel`, `imu1.gyro` and
+`battery.current` are `UNAVAILABLE`. **A PX4 shadow flight today runs on five
+nodes, not eight.**
+
+Over the admissible nodes:
+
+| condition | `FROZEN_DEFAULT` | `DERIVED_RULE` |
+|---|---|---|
+| `NOMINAL_RATE` | **0.00%** everywhere | **0.00%** everywhere |
+| `RATE_JITTER` ±30% | `baro` **2.77%** (AP) / **3.69%** (PX4) | **0.00%** everywhere |
+
+**At exactly nominal rates nothing false-stales.** The frozen defaults are
+adequate when the wire is perfect. The reproduced defect is one node, ~3% of
+ticks, only under jitter — because the frozen `baro` timeout of 0.10 s equals
+the 10 Hz nominal period exactly, leaving zero margin, so any positive jitter
+trips it.
+
+Also found: **`mag` is not an independent stream on either platform.** It
+rides `SCALED_IMU` on ArduPilot and `HIGHRES_IMU` on PX4, so its declared
+25 / 14 Hz cannot be realised separately — the magnetometer arrives exactly as
+often as `imu0`.
+
+### 80. POST-FIX RESULTS
+
+`csia/deploy/shadow.py` now passes `stale_timeout_s=build_runtime_stale_
+timeouts(cfg.platform)`. **The frozen core is untouched and its default table
+is unedited** — `OnlineTrustLayer` already accepted the argument, and the ULog
+CLI already used one.
+
+    GATE B  nominal-rate  PASS
+    GATE B  jitter        PASS
+    GATE C  hard-dropout  PASS
+
+A test constructs a real `ShadowRunner` on both platforms and asserts
+`runner.layer._stale` equals the derived map; another parses the module and
+asserts `STALE_TIMEOUT_S` is neither imported nor referenced and that the sole
+`OnlineTrustLayer(...)` call passes `stale_timeout_s`.
+
+### 81. DROPOUT LATENCY TRADEOFF — §7
+
+Every derived timeout is **longer**, so the risk is delayed detection of a
+genuinely dead source. Both controls were measured, not just the one that
+looks good.
+
+| platform | node | timeout frozen → derived | latency frozen → derived |
+|---|---|---|---|
+| AP | `imu0`, `imu1` | 0.05 → 0.20 | 0.08 → **0.24 s** |
+| AP | `mag` | 0.10 → 0.20 | 0.12 → **0.24 s** |
+| AP / PX4 | `baro` | 0.10 → 0.50 | 0.16 → **0.56 s** |
+| AP / PX4 | `gps` | 0.50 → 1.00 | 0.56 → **1.08 s** |
+| PX4 | `imu0` | 0.05 → 0.10 | 0.08 → **0.12 s** |
+| PX4 | `mag` | 0.10 → 0.357 | 0.12 → **0.36 s** |
+| both | `battery`, `vibration` | unchanged | 0.56 s, unchanged |
+
+**Every admissible node still detects a hard dropout**, and the latency is
+bounded *by construction* rather than by luck: detection fires on the first
+tick where `age > timeout`, so latency ∈ `(timeout, timeout + 1/tick_hz]`. A
+test asserts that inequality on every row rather than checking a table of
+measured numbers.
+
+Worst case moves **0.56 s → 1.08 s**, on `gps`. The largest relaxation is
+`baro` at 5×, buying 0.40 s of extra detection latency to remove a 3%
+false-stale rate. **The false-stale problem was not fixed by making detection
+arbitrarily slow.**
+
+### 82. PHASE 4 FUNCTION REGRESSION — §12
+
+**No Phase 4 result moved.** Checked two independent ways, because "we re-ran
+it and it looked the same" is not an answer.
+
+**Structural.** The three Phase 4 runners are parsed and contain no reference
+to `OnlineTrustLayer`, `get_adapter`, `PlatformAdapter`, `ShadowRunner` or
+`build_runtime_stale_timeouts`. The nine scenarios take freshness from the
+deterministic simulator's `td.fresh`, so a runtime watchdog **cannot** reach
+them. **PASS.**
+
+**Behavioural.** All ten Phase 4 artifacts regenerated and compared field by
+field. `FUNCTION_ELIGIBILITY_RESULTS.csv`, `PHASE4_CLEAN_RESULT.json`,
+`PHASE4_FIXLOSS_RESULT.json`, `PHASE4_DUAL_IMU_RESULT.json` and
+`PHASE4_API_VALIDATION.json` are **byte-identical**. Five differ in bytes only
+and only in provenance: `software_sha` moved with the commit, and it sits
+inside every ledger event's context by design, so every content hash
+downstream moved with it. The excluded fields are named in the artifact rather
+than filtered silently.
+
+    VERDICT: NO_BEHAVIOURAL_CHANGE
+
+### 83. API CONSUMER
+
+`csia/v1_1/monitor.py` — `csia-monitor`, a JSONL/terminal consumer.
+`API_CONSUMER_SPEC.md`, `API_CONSUMER_RESULTS.json`.
+
+**It imports no producer** — not the trust engine, diagnosis, eligibility
+policy, ledger or adapters — and a test parses its imports and fails on any of
+them. That is the whole experiment: a consumer that could reach into the
+system would recompute what the payload failed to carry, and the schema would
+never be tested for sufficiency.
+
+**Result: every §14 field was already in the schema.** Nothing had to be added
+to make an external consumer work, which is what Gate C was asking.
+
+It consumes a real file (`api_consumer_stream.jsonl`), 2 payloads accepted, 0
+rejected.
+
+### 84. CONSUMER FIX-LOSS INTERPRETATION — §15
+
+The payload says `trust["gps"] = 0.987` and `nominal` at `p = 0.9925`. What
+the monitor prints:
+
+    t=   26.00  4 OF 5 FUNCTIONS UNAVAILABLE — support NON_IDENTIFIABLE
+      assurance          CAUTION
+      diagnosis          nominal p=0.9925 [NON_IDENTIFIABLE, 0 discriminating, AMBIGUOUS]
+      evidence           16 active, 0 discriminating
+      COARSE_NAVIGATION      INELIGIBLE  REQUIRED_SOURCE_NOT_FRESH, ...
+      INERTIAL_CONTINUATION  ELIGIBLE    ALL_REQUIREMENTS_MET
+      advisory           RESTRICT_PRECISION_NAV, INHIBIT_GPS_MODES, SWITCH_NAV_INERTIAL
+
+Not "GPS healthy". Not "nominal 99%".
+
+**The primary status is computed from eligibility and support, and the
+posterior is not an input to it** — enforced structurally, not by wording. A
+test parses two views differing *only* in the posterior (0.9925 against
+0.0001) and asserts the primary status is identical.
+
+**The posterior is shown, and never bare.** `format_leader` cannot emit
+`p=0.9925` without the support state, the discriminating-evidence count and
+the ambiguity beside it. Suppressing it would have been the easy answer and
+the wrong one — it is real information; what it must not do is travel alone.
+
+### 85. CONSUMER NEGATIVE TESTS — §16
+
+Six rejection paths, each perturbing exactly one thing, **all refused**:
+
+| case | outcome |
+|---|---|
+| `schema_version: "2.0.0"` | refused — no coercion |
+| a string where an object belongs | refused |
+| `diagnosis.posterior` deleted | refused — not defaulted |
+| `sequential.h = 5.0` | refused — a **differently configured detector** |
+| `trust.mode = FLAT_V2_EXPERIMENTAL` | refused |
+| `function state = PROBABLY_FINE` | refused |
+
+Plus unknown reason codes. **No permissive path**: every failure raises
+`PayloadRejected`, there is no best-effort degradation and no default for a
+missing field. At stream level a rejection is *recorded* rather than raised,
+so one bad line does not end the run and `evidence()` says which.
+
+The `k`/`h` check matters more than it looks: a payload carrying `h = 5.0`
+came from the detector whose textbook value produced 2681 clean alarm ticks,
+and reading it as this one would mix two detectors' outputs in one log.
+
+### 86. FIREWALL INTEGRATION — §18
+
+Every action goes through `OutputFirewall.request`, including accepting a
+payload. No branch bypasses it.
+
+`SET_FLIGHT_MODE`, `WRITE_PARAMETER`, `RTL`, `LAND` and an unrecognised
+operation: **all denied**, all recorded before raising, all present in
+`evidence()`. `READ_TELEMETRY`, `WRITE_LOG`, `EMIT_OUTPUT`: permitted. A test
+also asserts the module imports no `socket`, `pymavlink`, `serial`,
+`requests`, `urllib`, `http` or `subprocess` — it could not transmit if the
+firewall were removed.
+
+**§17 compatibility:** a modelled v1 consumer accepts `project_v1` output and
+**refuses** a raw v1.1 payload; a version mismatch raises before projection.
+The projection carries `trust_mode`, which v1 never had, so `FLAT_V1_1`
+trajectories cannot be received as v1's. **No silent reinterpretation.**
+
+### 87. GOLDEN CORPUS
+
+`embedded/v1_1/golden/`, 11 cases, **13 500 ticks**.
+
+    corpus sha256  f183f0355a0ab966fa0ab3b2a696f3af8adae5473220ff7bef75002820060e0f
+
+`build_golden.py` **re-checks the §20 preconditions itself and refuses to
+write a corpus** if any is missing. A gate kept in a person's memory is not a
+gate, and freezing traces for an architecture still in motion is the failure
+this phase exists to prevent.
+
+Frozen inputs (§22), all hashed: per-case `raw_trace` / `canonical_input` /
+`relation_bank` hashes, plus the SHA-256 of the requirements, reason codes,
+output schema, the six v1.1 runtime modules and the frozen `scenarios.py`,
+`bayes.py`, `engine.py`, `failsafe.py`. A test re-hashes every one against the
+working tree, so a corpus describing a system that no longer exists fails
+rather than sits there.
+
+The two ingest cases (`BATTERY_SENTINEL`, `MAG_SENTINEL`) are in the corpus
+because they exercise R1–R5 rather than the trust update, and a port that
+skipped them would ship the ingest rules untested. They have **no Tier B** —
+there is no trust tick — and the manifest says so rather than padding an empty
+numeric file.
+
+### 88. TIER-A FREEZE — §23
+
+Per tick, EXACT: assurance state, every function's eligibility state and
+reason-code set, leader, identifiability, ambiguity, support state,
+non-identifiable set, sequential alarming set, per-node freshness, missing
+reasons, active and suppressed relation sets with their suppression reasons,
+and the ledger event sequence.
+
+Stored **run-length encoded and losslessly.** The discrete series is piecewise
+constant, so change-points plus run lengths reconstruct it exactly. **This is
+not a truncation**: the manifest carries the SHA-256 of the *full per-tick
+series* as well as of the stored file, and a test reconstructs all 13 500
+ticks and checks them against that hash rather than taking the encoding on
+trust. It took the corpus from **20 MB to 964 KB without discarding a tick**,
+and the corpus hash is byte-identical to the uncompressed build's.
+
+Tier B is a continuous trajectory and does not compress: stored at **stride
+10** with the full-series hash beside it, so the stride localises a divergence
+to a ten-tick window and the hash settles whether the whole series matches.
+
+**Tier C is excluded from the frozen ledger files entirely** — the generator
+writes `TIER_C_NOT_COMPARED` into the software and configuration hash fields,
+so a port cannot accidentally be graded on this build's identity. A test
+asserts `event_id`, `content_sha256`, `previous_event_hash` and `software_sha`
+do not appear in any frozen ledger row.
+
+### 89. TIER-B NUMERIC SPECIFICATION — §§24–25
+
+`NUMERIC_EQUIVALENCE_SPEC.md`. **Derived before any C exists**, and a test
+asserts `embedded/` contains no `.c`, `.h`, `.cpp` or `.hpp`.
+
+From IEEE-754 binary32 unit roundoff `u = 2⁻²⁴ = 5.96e-8`, the recurrence
+structure, and a 1500-tick run:
+
+| quantity | recurrence | derived | **DECLARED** |
+|---|---|---:|---:|
+| `trust` | decaying, `u/(1−ρ_max)`, ρ=0.998 | 3.0e-5 abs | **1e-4 abs** |
+| `alpha`, `beta` | same | 3.0e-5 rel | **1e-4 rel** |
+| `smoothed`, `score` | decaying, `u/α`, α=0.06, `\|ll\|≤82` | 1.22e-4 abs | **1e-3 abs** |
+| `posterior` | softmax, Jacobian ≤ ½ | 6.1e-5 abs | **1e-3 abs** |
+| `sequential.S` | **no forgetting factor** | 4.49e-2 abs | **0.5 abs** |
+
+The CUSUM is the worst case precisely because it has no decay — the only
+quantity whose bound grows with run length. Its `Σ|z|` term stays small
+through a self-limiting property worth stating: a large `|z|` reaches `h` in
+few steps and a small one takes many, so the product is pinned near `h`
+either way.
+
+`posterior` deliberately **inherits** the score's 1e-3 rather than getting a
+bound of its own, since its error is derived from the score's and the softmax
+contracts. That puts it at 16× headroom, the widest in the table, as a
+consequence of keeping the two consistent rather than a separate decision.
+
+**The tolerance is never widened after seeing C.** If a port exceeds it, the
+port is wrong until proven otherwise; if the reference turns out to be wrong,
+that is a v1.1 defect with its own commit and its own remeasurement.
+
+### 90. DECISION-MARGIN AUDIT — §26
+
+Numeric error only matters where it can flip a **discrete** state.
+`DECISION_MARGIN_AUDIT.csv` computes, per tick, the distance to every
+inherited trust threshold, the CUSUM `h`, and the diagnosis ranking boundary.
+
+**2 ticks of 13 500 — 0.0148% — are `NUMERICALLY_NEAR_BOUNDARY`:**
+
+| case | t | boundary | distance | tolerance |
+|---|---:|---|---:|---:|
+| `DUAL_IMU_FAILURE` | 47.52 s | `att_emergency` (0.70) | **1.26e-5** | 1e-4 |
+| `MAG_DEGRADED` | 35.04 s | `heading_caution` (0.60) | **8.74e-5** | 1e-4 |
+
+Both are trust-threshold crossings where a conforming binary32 port could
+legitimately land on the other side and produce a Tier-A difference from
+arithmetic rather than from a logic error. **These are where Phase 5 looks
+first** — enumerated in advance, which is the difference between debugging a
+port and arguing about one. Neither is excused: a Tier-A difference there is
+still a Tier-A difference and still has to be explained.
+
+No tick is near the CUSUM `h` boundary (closest 477.6 against a 0.5 tolerance)
+or a ranking boundary (closest 4.80 against 1e-3). **Only trust thresholds are
+in reach**, which is what makes the two flagged ticks tractable.
+
+### 91. PHASE 5 READINESS
+
+    PHASE5_READY:  YES
+
+`embedded/v1_1/PHASE5_AUTHORIZATION.md`. All nine gates pass:
+
+| | gate | status |
+|---|---|---|
+| A | trust-mode review | PASS |
+| B | staleness, nominal rate | PASS |
+| C | staleness, hard dropout | PASS |
+| D | Phase 4 function regression | PASS |
+| E | API consumer | PASS |
+| F | firewall | PASS |
+| G | golden corpus frozen | PASS |
+| H | numeric spec before C | PASS |
+| I | full test suite | PASS — **1211 passed, 0 failed** |
+
+The three items Phase 4 §72 named as blocking are the three this phase
+closed: the propagation review was open (Gate A closed it), the staleness rule
+was proposed but unadopted (Gate B adopted and measured it), and the schema
+had never been consumed (Gate C consumed it).
+
+**Compute (§19).** The timeout map costs **~10 µs once, at construction**. Its
+per-tick cost is **zero**: the watchdog compares against a float either way
+and only the value differs — measured 0.711 µs against 0.692 µs, a −0.019 µs
+delta that is noise. The consumer is reporting-only and is not folded into any
+core figure: `render` 5.5 µs, but `parse` **22.6 ms**, dominated by full
+JSON-schema validation. That last number is worth stating plainly — **a
+consumer cannot schema-validate every payload at 25 Hz**, and a real
+integration will need to validate on connect and spot-check thereafter. It is
+a consumer-side design constraint, not a core-path cost.
+
+### 92. REMAINING BLOCKERS
+
+1. **No C code.** G6 remains `NOT_STARTED`; Phase 4.5 ends with frozen traces
+   and no port, as §29 requires.
+2. **No live MAVLink link was ever exercised.** Tier A evidence is unavailable
+   in this environment; the matrix is `SYNTHETIC_DEPLOYMENT_REGRESSION` and is
+   labelled so everywhere.
+3. **Platform qualification, not staleness:** `motor_esc` is inadmissible on
+   both platforms; `imu1` and `battery.current` are `UNAVAILABLE` on PX4. A
+   PX4 shadow flight runs on **five of eight nodes**. Promoting `esc.rpm`
+   needs a source read, not another flight — the contract says so itself.
+4. **One consumer, written by the same author as the producer.** Gate C proved
+   sufficiency, not independence.
+5. **No transport specified** for the output API, and no authentication.
+6. **No GNSS step mechanism** exists in the frozen injector.
+7. **`UNKNOWN` / unmodeled fault** remains unimplemented.
+8. **Research campaigns still need remeasurement for v1.1.**
+9. **No library access** — the sole blocker on G8.
+10. **No hardware** — blocks G1, G2, G3.
+11. **Zero verified-clean hours.** No false-alert rate is claimed or
+    supportable.
+
+Resolved since Phase 4: the propagation review (§75), the staleness rule
+(§78–81), and the schema's first consumer (§83–86).
+
+**Product maturity: M2, unchanged.** Freezing the deployment semantics is a
+precondition for the port, not the port.

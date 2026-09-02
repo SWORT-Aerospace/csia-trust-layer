@@ -669,3 +669,17 @@ v1-1-consumer:
 .PHONY: v1-1-consumer-check
 v1-1-consumer-check:
 	$(PY) -m pytest tests/test_v1_1_monitor.py -q
+
+# Phase 4.5 compute + golden corpus freeze.
+.PHONY: v1-1-p45-compute
+v1-1-p45-compute:
+	$(PY) engineering/v1_1/phase4_5/run_compute.py
+
+.PHONY: v1-1-golden
+v1-1-golden:
+	$(PY) embedded/v1_1/build_golden.py
+
+.PHONY: v1-1-p45-check
+v1-1-p45-check:
+	$(PY) -m pytest tests/test_v1_1_staleness.py tests/test_v1_1_monitor.py \
+	  tests/test_v1_1_golden.py -q
