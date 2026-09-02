@@ -31,7 +31,7 @@ the node-timeout rule is `max` over required channels rather than `min`.
 | Phase 4D | `bf6a19e` output API, firewall, freeze |
 | Phase 4.5 A+B | `5490cce` trust-mode decision + staleness closure |
 | Phase 4.5 C | `dfedac5` csia-monitor, the first real consumer |
-| Phase 4.5 freeze | this commit — golden corpus, numeric spec, Phase 5 authorization |
+| Phase 4.5 freeze | `6358b92` golden corpus, numeric spec, Phase 5 authorization |
 | tests | 971 → **1211** |
 
 **Frozen core: zero diff.** `csia/trust_engine`, `csia/diagnosis`,
