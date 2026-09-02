@@ -1,0 +1,146 @@
+# CSIA v1.1 — REASON CODES
+#
+# Phase 4 section 19. Reasons are deterministic structured codes. Generated
+# prose is NEVER the canonical evidence: a human-readable line is rendered
+# FROM a code, and the code is what the ledger stores and what a test asserts.
+#
+# This file is the single source of truth. `csia/v1_1/reason_codes.py` loads
+# it, and a test fails if the policy or the ledger ever emits a code that is
+# not defined here -- so a new code cannot appear in a flight record without
+# also appearing in this table.
+#
+# `severity` is the eligibility state the code forces when it fires. Codes
+# whose severity is `POLICY` take it from the function's declared
+# `support_policy` instead, because the same evidence means different things
+# to a function that assumes its position is correct and one that does not.
+
+version: "1.1.0"
+
+states:
+  ELIGIBLE:   Every stated requirement is met.
+  DEGRADED:   The function is available, with a stated reduction in the evidence behind it.
+  INELIGIBLE: A stated requirement is not met.
+  UNKNOWN: >
+    The policy cannot determine eligibility from the available evidence.
+    DISTINCT from the unmodeled-fault hypothesis also spelled UNKNOWN, which
+    remains NOT IMPLEMENTED (section 34). The two never share a field.
+
+eligibility:
+
+  ALL_REQUIREMENTS_MET:
+    severity: ELIGIBLE
+    render: "all stated requirements met"
+
+  REQUIRED_SOURCE_NOT_OBSERVABLE:
+    severity: UNKNOWN
+    render: "{source} is not observable on this platform"
+    note: >
+      The channel is absent from the input entirely, not merely stale. In the
+      deterministic scenario catalogue every node is always present, so this
+      code does not fire there; it is covered by a unit test on a synthetic
+      observation rather than claimed as scenario coverage.
+
+  SUPPORT_ANALYSIS_UNAVAILABLE:
+    severity: UNKNOWN
+    render: "no active evidence terms; support cannot be evaluated"
+    note: >
+      Fires only for functions declaring REQUIRE_IDENTIFIABLE, which cannot be
+      evaluated at all without support metadata.
+
+  REQUIRED_SOURCE_NOT_FRESH:
+    severity: INELIGIBLE
+    render: "{source} is not fresh"
+
+  SOURCE_ABSENT_SENTINEL:
+    severity: INELIGIBLE
+    render: "{source} producer declared the value not measured (SENTINEL)"
+    note: >
+      Section 33. A refinement of REQUIRED_SOURCE_NOT_FRESH used where the
+      canonical ingest layer can distinguish the reason. The scenario
+      catalogue does not run the ingest layer, so this code is exercised by
+      the adapter-level regression, not by the scenario matrix.
+
+  SOURCE_ABSENT_STALE:
+    severity: INELIGIBLE
+    render: "{source} last sample is older than its declared max age"
+    note: as SOURCE_ABSENT_SENTINEL
+
+  SOURCE_ABSENT_NOT_RECEIVED:
+    severity: INELIGIBLE
+    render: "{source} has never been received"
+    note: as SOURCE_ABSENT_SENTINEL
+
+  SOURCE_ABSENT_NO_3D_FIX:
+    severity: INELIGIBLE
+    render: "{source} reports no 3D fix"
+    note: as SOURCE_ABSENT_SENTINEL
+
+  REQUIRED_SOURCE_GROUP_EXHAUSTED:
+    severity: INELIGIBLE
+    render: "no member of the redundant group {group} is available"
+
+  REDUNDANT_SOURCE_UNAVAILABLE:
+    severity: DEGRADED
+    render: "{source} unavailable; the redundant group is no longer redundant"
+
+  REQUIRED_RELATION_NOT_APPLICABLE:
+    severity: INELIGIBLE
+    render: "none of the required relations {relations} is gated in"
+
+  TRUST_BELOW_INHERITED_REQUIREMENT:
+    severity: INELIGIBLE
+    render: "{subject} trust {value} is below the inherited {inherits} requirement {limit}"
+
+  ASSURANCE_BEYOND_FUNCTION_BOUNDARY:
+    severity: INELIGIBLE
+    render: "assurance {level} is beyond the declared boundary {boundary}"
+
+  SUPPORT_LOST_FOR_REQUIRED_INFORMATION:
+    severity: POLICY
+    render: "the leader cannot be separated from {hypotheses}, which this function depends on being false"
+    note: >
+      Section 10. INELIGIBLE for a REQUIRE_IDENTIFIABLE function, DEGRADED for
+      a TOLERATE_AMBIGUITY one. This code is what stops a high posterior on
+      `nominal` from carrying a function it has no discriminating evidence
+      for, and it fires independently of freshness.
+
+  NAMED_CAUSE_AFFECTS_FUNCTION:
+    severity: DEGRADED
+    render: "diagnosis names {leader}, which this function depends on being false"
+    note: >
+      The cause IS identified, so this is not an ambiguity problem. The
+      function is degraded rather than removed because a named, bounded fault
+      with working redundancy is a different situation from an unresolved one.
+
+  PRIOR_SENSITIVE_LEADER:
+    severity: DEGRADED
+    render: "the leader changes under a uniform prior; the naming is prior-driven"
+    note: >
+      Fires only for REQUIRE_IDENTIFIABLE functions. A prior-driven name is
+      not a reason to remove a function, but it is a reason not to present it
+      as fully evidence-backed.
+
+  SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE:
+    severity: DEGRADED
+    render: "sequential detector alarm on {source}"
+    note: >
+      Section 11. A CUSUM alarm means the sequential evidence CHANGED. It is
+      not a named cause and must never be used as one. Reacting
+      conservatively -- degrade, do not attribute -- is the whole of the
+      permitted response.
+
+# --------------------------------------------------------------------------
+# Ledger event types (section 15). The ledger records a transition in any of
+# these; the eligibility codes above travel with it as the reason.
+# --------------------------------------------------------------------------
+ledger_events:
+  ASSURANCE_STATE_CHANGED:
+    render: "assurance {previous_state} -> {new_state}"
+  FUNCTION_ELIGIBILITY_CHANGED:
+    render: "{function} {previous_state} -> {new_state}"
+  SUPPORT_STATE_CHANGED:
+    render: "support {previous_state} -> {new_state}"
+  AMBIGUITY_CHANGED:
+    render: "ambiguity {previous_state} -> {new_state}"
+  SEQUENTIAL_STATE_CHANGED:
+    render: "sequential alarm set {previous_state} -> {new_state}"

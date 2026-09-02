@@ -1,0 +1,1262 @@
+{
+  "artifact": "FUNCTION_TRANSITIONS",
+  "generation_command": "python engineering/v1_1/phase4/run_p4b.py",
+  "csia_sha": "b9fc5d611c03eaba41e5085a391ef188ac96970c",
+  "requirements_sha256": "62d9f1f35ce414de57a7dd3d48b2983828de03b408537858ccfde836f4382962",
+  "trust_mode": "FLAT_V1_1",
+  "note": "The eligibility series is piecewise constant, so the per-tick record required by section 13 is fully reconstructable from these transitions plus the tick counts in FUNCTION_ELIGIBILITY_RESULTS.csv. A test rebuilds it and checks the counts agree.",
+  "functions": [
+    "COARSE_NAVIGATION",
+    "GEOFENCE_SUPPORT",
+    "INERTIAL_CONTINUATION",
+    "POSITION_HOLD",
+    "PRECISION_NAVIGATION"
+  ],
+  "omitted": {
+    "PRECISION_LANDING": "Requires a landing-reference sensor -- rangefinder, optical flow, or a landing beacon. None exists in the node set (imu0, imu1, baro, mag, gps, motor_esc, battery, vibration), in any of the 11 relations, or in any adapter channel. A requirement written from the available signals would describe a different function and call it precision landing. Omitted until such a source exists.\n"
+  },
+  "transitions": [
+    {
+      "mechanism": "CLEAN",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "CLEAN",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "CLEAN",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "CLEAN",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 23.76,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "PRIOR_SENSITIVE_LEADER"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "PRECISION_NAVIGATION",
+      "t": 23.76,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "PRIOR_SENSITIVE_LEADER"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "COARSE_NAVIGATION",
+      "t": 25.4,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "POSITION_HOLD",
+      "t": 25.4,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "COARSE_NAVIGATION",
+      "t": 32.48,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.6949,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 32.48,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "PRIOR_SENSITIVE_LEADER",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.6949,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "POSITION_HOLD",
+      "t": 32.48,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.6949,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "PRECISION_NAVIGATION",
+      "t": 32.48,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "PRIOR_SENSITIVE_LEADER",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.6949,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "COARSE_NAVIGATION",
+      "t": 42.28,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 42.28,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "POSITION_HOLD",
+      "t": 42.28,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_SLOW",
+      "function": "PRECISION_NAVIGATION",
+      "t": 42.28,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 21.72,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "PRECISION_NAVIGATION",
+      "t": 21.72,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "COARSE_NAVIGATION",
+      "t": 22.16,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "POSITION_HOLD",
+      "t": 22.16,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "COARSE_NAVIGATION",
+      "t": 24.36,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.7155,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 24.36,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.7155,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "POSITION_HOLD",
+      "t": 24.36,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.7155,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "PRECISION_NAVIGATION",
+      "t": 24.36,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "gps",
+          "value": 0.7155,
+          "inherits": "nav_caution",
+          "limit": 0.75
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "gps_fault"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "COARSE_NAVIGATION",
+      "t": 42.88,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 42.88,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "POSITION_HOLD",
+      "t": 42.88,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_RAMP_FAST",
+      "function": "PRECISION_NAVIGATION",
+      "t": 42.88,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "gps"
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "COARSE_NAVIGATION",
+      "t": 26.0,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "detail": {
+        "REQUIRED_SOURCE_NOT_FRESH": {
+          "source": "gps"
+        },
+        "REQUIRED_RELATION_NOT_APPLICABLE": {
+          "relations": [
+            "velocity_gps_doppler"
+          ]
+        },
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION": {
+          "hypotheses": [
+            "gps_fault"
+          ]
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 26.0,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "detail": {
+        "REQUIRED_SOURCE_NOT_FRESH": {
+          "source": "gps"
+        },
+        "REQUIRED_RELATION_NOT_APPLICABLE": {
+          "relations": [
+            "velocity_gps_doppler"
+          ]
+        },
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION": {
+          "hypotheses": [
+            "gps_fault"
+          ]
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "POSITION_HOLD",
+      "t": 26.0,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "detail": {
+        "REQUIRED_SOURCE_NOT_FRESH": {
+          "source": "gps"
+        },
+        "REQUIRED_RELATION_NOT_APPLICABLE": {
+          "relations": [
+            "velocity_gps_doppler",
+            "altitude_baro"
+          ]
+        },
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION": {
+          "hypotheses": [
+            "gps_fault"
+          ]
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "PRECISION_NAVIGATION",
+      "t": 26.0,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "detail": {
+        "REQUIRED_SOURCE_NOT_FRESH": {
+          "source": "gps"
+        },
+        "REQUIRED_RELATION_NOT_APPLICABLE": {
+          "relations": [
+            "velocity_gps_doppler",
+            "heading_course"
+          ]
+        },
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION": {
+          "hypotheses": [
+            "gps_fault"
+          ]
+        }
+      }
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "COARSE_NAVIGATION",
+      "t": 38.0,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 38.0,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "POSITION_HOLD",
+      "t": 38.0,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "GNSS_FIX_LOSS",
+      "function": "PRECISION_NAVIGATION",
+      "t": 38.0,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "INERTIAL_CONTINUATION",
+      "t": 34.04,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "imu0_bias_drift"
+        }
+      }
+    },
+    {
+      "mechanism": "IMU0_BIAS_DRIFT",
+      "function": "INERTIAL_CONTINUATION",
+      "t": 42.2,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "INERTIAL_CONTINUATION",
+      "t": 32.64,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "imu0_bias_drift"
+        }
+      }
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "POSITION_HOLD",
+      "t": 34.12,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "max(imu0, imu1)",
+          "value": 0.7671,
+          "inherits": "att_caution",
+          "limit": 0.82
+        }
+      }
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "PRECISION_NAVIGATION",
+      "t": 34.12,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "max(imu0, imu1)",
+          "value": 0.7671,
+          "inherits": "att_caution",
+          "limit": 0.82
+        },
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+          "level": "CRITICAL",
+          "boundary": "CAUTION"
+        }
+      }
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "INERTIAL_CONTINUATION",
+      "t": 48.56,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "max(imu0, imu1)",
+          "value": 0.6601,
+          "inherits": "att_emergency",
+          "limit": 0.7
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "imu1_bias_drift"
+        }
+      }
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "COARSE_NAVIGATION",
+      "t": 49.56,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+      ],
+      "detail": {
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+          "level": "EMERGENCY",
+          "boundary": "CRITICAL"
+        }
+      }
+    },
+    {
+      "mechanism": "DUAL_IMU_FAILURE",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 49.56,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+      ],
+      "detail": {
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+          "level": "EMERGENCY",
+          "boundary": "CRITICAL"
+        }
+      }
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "PRECISION_NAVIGATION",
+      "t": 26.08,
+      "previous_state": "ELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "mag_interference"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "mag"
+        }
+      }
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "PRECISION_NAVIGATION",
+      "t": 30.04,
+      "previous_state": "DEGRADED",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "TRUST_BELOW_INHERITED_REQUIREMENT",
+        "NAMED_CAUSE_AFFECTS_FUNCTION",
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "TRUST_BELOW_INHERITED_REQUIREMENT": {
+          "subject": "mag",
+          "value": 0.4993,
+          "inherits": "heading_caution",
+          "limit": 0.6
+        },
+        "NAMED_CAUSE_AFFECTS_FUNCTION": {
+          "leader": "mag_interference"
+        },
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "mag"
+        }
+      }
+    },
+    {
+      "mechanism": "MAG_DEGRADED",
+      "function": "PRECISION_NAVIGATION",
+      "t": 40.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "DEGRADED",
+      "reason_codes": [
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE"
+      ],
+      "detail": {
+        "SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE": {
+          "source": "mag"
+        }
+      }
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "PRECISION_NAVIGATION",
+      "t": 34.72,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+      ],
+      "detail": {
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+          "level": "CRITICAL",
+          "boundary": "CAUTION"
+        }
+      }
+    },
+    {
+      "mechanism": "POWER_SAG",
+      "function": "PRECISION_NAVIGATION",
+      "t": 52.36,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "COARSE_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "DEGRADED",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "GEOFENCE_SUPPORT",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "POSITION_HOLD",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "PRECISION_NAVIGATION",
+      "t": 8.04,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "PRECISION_NAVIGATION",
+      "t": 35.16,
+      "previous_state": "ELIGIBLE",
+      "new_state": "INELIGIBLE",
+      "reason_codes": [
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+      ],
+      "detail": {
+        "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+          "level": "CRITICAL",
+          "boundary": "CAUTION"
+        }
+      }
+    },
+    {
+      "mechanism": "VIBRATION_ANOMALY",
+      "function": "PRECISION_NAVIGATION",
+      "t": 53.0,
+      "previous_state": "INELIGIBLE",
+      "new_state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "detail": {}
+    }
+  ]
+}

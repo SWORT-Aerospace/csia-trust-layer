@@ -616,3 +616,12 @@ v1-1-p4a:
 .PHONY: v1-1-p4a-check
 v1-1-p4a-check:
 	$(PY) -m pytest tests/test_v1_1_trust_mode.py -q
+
+# v1.1 Phase 4B: function eligibility over the nine mechanisms.
+.PHONY: v1-1-p4b
+v1-1-p4b:
+	$(PY) engineering/v1_1/phase4/run_p4b.py
+
+.PHONY: v1-1-p4b-check
+v1-1-p4b-check:
+	$(PY) -m pytest tests/test_v1_1_eligibility.py -q

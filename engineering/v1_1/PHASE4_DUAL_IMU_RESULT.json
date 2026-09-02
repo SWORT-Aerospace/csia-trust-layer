@@ -1,0 +1,282 @@
+{
+  "dual_imu": {
+    "mechanism": "DUAL_IMU_FAILURE",
+    "per_function_tick_counts": {
+      "COARSE_NAVIGATION": {
+        "DEGRADED": 201,
+        "ELIGIBLE": 1038,
+        "INELIGIBLE": 261
+      },
+      "GEOFENCE_SUPPORT": {
+        "ELIGIBLE": 1038,
+        "INELIGIBLE": 462
+      },
+      "INERTIAL_CONTINUATION": {
+        "DEGRADED": 398,
+        "ELIGIBLE": 816,
+        "INELIGIBLE": 286
+      },
+      "POSITION_HOLD": {
+        "ELIGIBLE": 652,
+        "INELIGIBLE": 848
+      },
+      "PRECISION_NAVIGATION": {
+        "ELIGIBLE": 652,
+        "INELIGIBLE": 848
+      }
+    },
+    "transitions": [
+      {
+        "detail": {},
+        "function": "COARSE_NAVIGATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "ELIGIBLE",
+        "previous_state": "DEGRADED",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "GEOFENCE_SUPPORT",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "POSITION_HOLD",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "PRECISION_NAVIGATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {
+          "NAMED_CAUSE_AFFECTS_FUNCTION": {
+            "leader": "imu0_bias_drift"
+          }
+        },
+        "function": "INERTIAL_CONTINUATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "DEGRADED",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "NAMED_CAUSE_AFFECTS_FUNCTION"
+        ],
+        "t": 32.64
+      },
+      {
+        "detail": {
+          "TRUST_BELOW_INHERITED_REQUIREMENT": {
+            "inherits": "att_caution",
+            "limit": 0.82,
+            "subject": "max(imu0, imu1)",
+            "value": 0.7671
+          }
+        },
+        "function": "POSITION_HOLD",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "INELIGIBLE",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "TRUST_BELOW_INHERITED_REQUIREMENT"
+        ],
+        "t": 34.12
+      },
+      {
+        "detail": {
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+            "boundary": "CAUTION",
+            "level": "CRITICAL"
+          },
+          "TRUST_BELOW_INHERITED_REQUIREMENT": {
+            "inherits": "att_caution",
+            "limit": 0.82,
+            "subject": "max(imu0, imu1)",
+            "value": 0.7671
+          }
+        },
+        "function": "PRECISION_NAVIGATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "INELIGIBLE",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "TRUST_BELOW_INHERITED_REQUIREMENT",
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+        ],
+        "t": 34.12
+      },
+      {
+        "detail": {
+          "NAMED_CAUSE_AFFECTS_FUNCTION": {
+            "leader": "imu1_bias_drift"
+          },
+          "TRUST_BELOW_INHERITED_REQUIREMENT": {
+            "inherits": "att_emergency",
+            "limit": 0.7,
+            "subject": "max(imu0, imu1)",
+            "value": 0.6601
+          }
+        },
+        "function": "INERTIAL_CONTINUATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "INELIGIBLE",
+        "previous_state": "DEGRADED",
+        "reason_codes": [
+          "TRUST_BELOW_INHERITED_REQUIREMENT",
+          "NAMED_CAUSE_AFFECTS_FUNCTION"
+        ],
+        "t": 48.56
+      },
+      {
+        "detail": {
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+            "boundary": "CRITICAL",
+            "level": "EMERGENCY"
+          }
+        },
+        "function": "COARSE_NAVIGATION",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "INELIGIBLE",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+        ],
+        "t": 49.56
+      },
+      {
+        "detail": {
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY": {
+            "boundary": "CRITICAL",
+            "level": "EMERGENCY"
+          }
+        },
+        "function": "GEOFENCE_SUPPORT",
+        "mechanism": "DUAL_IMU_FAILURE",
+        "new_state": "INELIGIBLE",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "ASSURANCE_BEYOND_FUNCTION_BOUNDARY"
+        ],
+        "t": 49.56
+      }
+    ]
+  },
+  "single_imu": {
+    "mechanism": "IMU0_BIAS_DRIFT",
+    "per_function_tick_counts": {
+      "COARSE_NAVIGATION": {
+        "DEGRADED": 201,
+        "ELIGIBLE": 1299
+      },
+      "GEOFENCE_SUPPORT": {
+        "ELIGIBLE": 1299,
+        "INELIGIBLE": 201
+      },
+      "INERTIAL_CONTINUATION": {
+        "DEGRADED": 204,
+        "ELIGIBLE": 1296
+      },
+      "POSITION_HOLD": {
+        "ELIGIBLE": 1299,
+        "INELIGIBLE": 201
+      },
+      "PRECISION_NAVIGATION": {
+        "ELIGIBLE": 1299,
+        "INELIGIBLE": 201
+      }
+    },
+    "transitions": [
+      {
+        "detail": {},
+        "function": "COARSE_NAVIGATION",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "ELIGIBLE",
+        "previous_state": "DEGRADED",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "GEOFENCE_SUPPORT",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "POSITION_HOLD",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {},
+        "function": "PRECISION_NAVIGATION",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "ELIGIBLE",
+        "previous_state": "INELIGIBLE",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 8.04
+      },
+      {
+        "detail": {
+          "NAMED_CAUSE_AFFECTS_FUNCTION": {
+            "leader": "imu0_bias_drift"
+          }
+        },
+        "function": "INERTIAL_CONTINUATION",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "DEGRADED",
+        "previous_state": "ELIGIBLE",
+        "reason_codes": [
+          "NAMED_CAUSE_AFFECTS_FUNCTION"
+        ],
+        "t": 34.04
+      },
+      {
+        "detail": {},
+        "function": "INERTIAL_CONTINUATION",
+        "mechanism": "IMU0_BIAS_DRIFT",
+        "new_state": "ELIGIBLE",
+        "previous_state": "DEGRADED",
+        "reason_codes": [
+          "ALL_REQUIREMENTS_MET"
+        ],
+        "t": 42.2
+      }
+    ]
+  }
+}
