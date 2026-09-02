@@ -12,8 +12,9 @@ IMPROVED. Nothing here is a novelty claim (item 48).
 | **Phase 2** | **COMPLETE** — support-aware diagnosis (`95a95e1`) |
 | **Phase 3A** | **COMPLETE** — GRAPH vs FLAT (`1d79b40`); verdict `GRAPH_NO_MATERIAL_GAIN` |
 | **Phase 3B** | **COMPLETE** — five-arm selection T0–T4; decision `E: TRUST_FLAT_PLUS_SEQUENTIAL` |
-| Phases 4–6 | not started. Phase 3C **not recommended** — see `PHASE3C_FEASIBILITY_NOTE.md` |
-| tests | 971 → 1040 passing |
+| **Phase 4** | **COMPLETE** — architecture freeze, function eligibility, assurance ledger, versioned read-only output API. Runtime status `V1_1_ARCHITECTURE_FROZEN` |
+| Phases 5–6 | not started. Phase 3C **not recommended** — see `PHASE3C_FEASIBILITY_NOTE.md` |
+| tests | 971 → 1133 passing |
 
 ---
 
@@ -53,7 +54,7 @@ locally; that workaround is now the general rule, applied once.
 | `reproduce_defects.py` | the reproduction harness |
 | `V1_1_CHANGELOG.md` | |
 | `V1_1_TEST_MATRIX.csv` | |
-| `V1_1_CHATGPT_REVIEW_REPORT.md` | the review report — 30 items for Phases 1–3A, plus items 31–52 for Phase 3B |
+| `V1_1_CHATGPT_REVIEW_REPORT.md` | the review report — items 1–30 (Phases 1–3A), 31–52 (Phase 3B), 53–74 (Phase 4) |
 
 ### Phase 3B files
 
@@ -71,9 +72,31 @@ locally; that workaround is now the general rule, applied once.
 | `PHASE3C_FEASIBILITY_NOTE.md` | `OPEN_ENGINEERING_QUESTION`; recommendation is **do not start 3C** |
 | `FUNCTION_ELIGIBILITY_INPUT_REQUIREMENTS.md` | Phase 4 preparation only; no policy implemented |
 
+### Phase 4 files
+
+The runtime lives in **`csia/v1_1/`** — outside the frozen path, deliberately.
+See `TRUST_MODE_VERSIONING.md` §2 for why the trust-mode flag is not in the
+engine.
+
+| file | |
+|---|---|
+| `V1_1_ARCHITECTURE_FREEZE.md` / `.json` | **the input to Phase 5.** What is frozen, and an explicit list of what is not |
+| `TRUST_MODE_VERSIONING.md` / `TRUST_MODE_REGRESSION.json` | `FLAT_V1_1` default, `LEGACY_NEIGHBOR_PROPAGATION` preserved; both reproduce Phase 3A/3B **bit-identically** |
+| `FUNCTION_REQUIREMENTS.yaml` | **preregistered**, hashed before any outcome. Not one new number |
+| `FUNCTION_ELIGIBILITY_SPEC.md` | the rules, and §6 records a rule that was wrong and was changed after seeing results |
+| `FUNCTION_ELIGIBILITY_RESULTS.csv` / `FUNCTION_TRANSITIONS.json` | 9 mechanisms × 5 functions, 83 transitions |
+| `REASON_CODES.yaml` | single source of truth for every code |
+| `ASSURANCE_LEDGER_SPEC.md` / `_EXAMPLE.json` / `_REPRODUCTION.json` | 159 events, 9/9 reproduce including every hash |
+| `csia_output_v1_1.schema.json` / `API_COMPATIBILITY.md` | schema 1.1.0; 13 500 payloads validate |
+| `STALENESS_LAYER_AUDIT.md` | the banked blocker is six of eight nodes. Proposes a canonical rule, **changes nothing** |
+| `PHASE4_COMPUTE.json` | core 90 µs/tick vs reporting 541 µs/tick, separated on purpose |
+| `PHASE4_API_VALIDATION.json`, `PHASE4_{CLEAN,FIXLOSS,DUAL_IMU}_RESULT.json` | the acceptance controls |
+| `../../embedded/v1_1/GOLDEN_TRACE_PLAN.md` | cases and comparison rule. **No C code, no frozen numbers** |
+
 Guards: `tests/test_v1_1_canonical_ingest.py` — `make v1-1-ingest-check`.
 Reproduce: `make v1-1-defects`.
 Phase 3B: `make v1-1-phase3b` to regenerate, `make v1-1-phase3b-check` to guard.
+Phase 4: `make v1-1-p4a` … `v1-1-p4d`; `make v1-1-p4-check` runs all four gates.
 
 ## The frozen core
 
@@ -110,6 +133,10 @@ was wrong in both directions, and the v1.1 fixes proved it.
   `STALE_TIMEOUT_S["gps"] = 0.5 s` — the two layers disagree about when a fix
   goes stale. Not an ingest sentinel defect, and changing a freshness limit
   moves admissibility for every downstream result.
+  **Phase 4 audited this** (`STALENESS_LAYER_AUDIT.md`) and found it is six of
+  eight nodes rather than one row, with PX4 `motor_esc` materially worse than
+  the banked case. Still not changed — a canonical rule is proposed and not
+  adopted, because every v1/v1.1 result was computed with the current values.
 - `csia/runtime/ulog_source.py:66` — unused local `u`. Pre-existing; verified
   by lint on the stashed tree.
 - `vibration.rms` provenance: its producer instance is selected at runtime

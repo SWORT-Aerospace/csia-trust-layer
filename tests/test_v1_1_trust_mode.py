@@ -164,6 +164,31 @@ def test_the_trust_mode_regression_passed_on_every_axis():
         assert r["flat_transitions_match"] is True, mech
 
 
+def test_the_default_mode_reproduces_the_phase_3b_t3_arm():
+    """Phase 4 gate B. T3 = earliest of the flat-trust transition and the
+    sequential alarm, so reproducing both components must reproduce T3.
+    Checked against the Phase 3B results file, not against a copied list."""
+    import csv
+    p = os.path.join(ENG, "PHASE3B_ARCHITECTURE_RESULTS.csv")
+    if not os.path.exists(p):
+        pytest.skip("Phase 3B results unavailable")
+    want = {}
+    for row in csv.DictReader(open(p, encoding="utf-8")):
+        if row["arm"] == "T3_TRUST_FLAT_PLUS_SEQ":
+            want[row["mechanism"]] = (
+                None if row["detection_censored"] == "True"
+                else round(float(row["detection_response_s"]), 4))
+
+    for mech, r in _regression()["per_mechanism"].items():
+        trust_t = (r["transitions_flat"][0][0] if r["transitions_flat"]
+                   else None)
+        seq_idx = r["sequential_first_alarm_index"]
+        seq_t = round(min(seq_idx.values()) * 0.04, 4) if seq_idx else None
+        cands = [x for x in (trust_t, seq_t) if x is not None]
+        got = round(min(cands), 4) if cands else None
+        assert got == want[mech], (mech, got, want[mech])
+
+
 def test_the_regression_reproduces_the_phase_3b_detection_times():
     """If these drift, Phase 3B's architecture decision no longer describes
     the shipped default. Fix the code, not the numbers."""
@@ -197,12 +222,15 @@ def test_the_imu_nodes_have_no_sequential_residual():
 def test_the_frozen_in_control_stats_are_the_clean_arm_stats():
     """They are constants so the runtime cannot re-estimate them mid-fault.
     Constants that nothing checks are constants that quietly go wrong."""
-    import sys
-    p = os.path.join(ENG, "ablation")
-    if p not in sys.path:
-        sys.path.insert(0, p)
+    import importlib.util
     from csia.scenarios import run_scenario
-    import b4_verify as B4
+    # Loaded BY PATH, as every sibling v1.1 test does. A bare `import
+    # b4_verify` after a sys.path insert reads to the CI dependency scanner
+    # as an undeclared PyPI package, and it caught exactly that here.
+    spec = importlib.util.spec_from_file_location(
+        "b4_verify", os.path.join(ENG, "ablation", "b4_verify.py"))
+    B4 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(B4)
     _t, _f, td, _h, _d = run_scenario("clean")
     for n, (lam, act) in B4.lam_streams(td).items():
         v = lam[act]

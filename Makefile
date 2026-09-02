@@ -634,3 +634,18 @@ v1-1-p4c:
 .PHONY: v1-1-p4c-check
 v1-1-p4c-check:
 	$(PY) -m pytest tests/test_v1_1_ledger.py -q
+
+# v1.1 Phase 4D: output API validation + compute split.
+.PHONY: v1-1-p4d
+v1-1-p4d:
+	$(PY) engineering/v1_1/phase4/run_p4d.py
+
+.PHONY: v1-1-p4d-check
+v1-1-p4d-check:
+	$(PY) -m pytest tests/test_v1_1_output_api.py -q
+
+# All four Phase 4 gates.
+.PHONY: v1-1-p4-check
+v1-1-p4-check:
+	$(PY) -m pytest tests/test_v1_1_trust_mode.py tests/test_v1_1_eligibility.py \
+	  tests/test_v1_1_ledger.py tests/test_v1_1_output_api.py -q

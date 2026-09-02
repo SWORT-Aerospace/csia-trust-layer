@@ -1,12 +1,12 @@
-# CSIA v1.1 — ENGINEERING REVIEW REPORT (PHASES 1–3B)
+# CSIA v1.1 — ENGINEERING REVIEW REPORT (PHASES 1–4)
 
 Engineering only. FIXED / HARDENED / VALIDATED / SIMPLIFIED / IMPROVED.
 No novelty language, and none is warranted (§31).
 
-Items 1–30 are the Phases 1–3A report. Items **31–52** are the Phase 3B
-additions required by §38 of the Phase 3B brief. Where a Phase 1–3A item was
-written while Phase 3B was still unrun, it has been **updated in place and the
-update is marked**, not silently rewritten.
+Items **1–30** are the Phases 1–3A report, **31–52** the Phase 3B additions,
+**53–74** the Phase 4 additions. Where an earlier item was written while a
+later phase was still unrun, it has been **updated in place and the update is
+marked**, not silently rewritten.
 
 ---
 
@@ -21,11 +21,16 @@ update is marked**, not silently rewritten.
 | Phase 3A | `1d79b40` GRAPH vs FLAT |
 | Phase 3B gate | `8e5494b` B4 constant verification only |
 | Phase 3B | `35409bd` five-arm architecture selection (T0–T4) |
-| tests | 971 → **1040** |
+| Phase 4A | `b9fc5d6` versioned trust mode + architecture freeze |
+| Phase 4B | `8260736` function eligibility |
+| Phase 4C | `3ca0f32` assurance ledger |
+| Phase 4D | this commit — output API, firewall, freeze |
+| tests | 971 → **1133** |
 
 **Frozen core: zero diff.** `csia/trust_engine`, `csia/diagnosis`,
 `csia/runtime/online.py`, `csia/runtime/failsafe.py`, `csia/scenarios.py`,
-`csia/profiles.py`. Phases 2 and 3 are entirely read-only over it.
+`csia/profiles.py`. Phases 2, 3 and 4 are entirely read-only over it — Phase 4
+adds `csia/v1_1/`, one level above the freeze, and touches nothing inside it.
 
 ### 2. PHASE 1 INTEGRITY
 
@@ -832,3 +837,634 @@ remeasurement for v1.1; `current_valid` is still an unversioned interface
 change; the `MaxAge` / `STALE_TIMEOUT_S` disagreement is still banked; library
 access is still the sole blocker on G8; and hardware is still the blocker on
 G1–G3.
+
+---
+
+# PHASE 4 ADDITIONS (§46, items 53–74)
+
+Everything below is produced by `engineering/v1_1/phase4/run_p4{a,b,c,d}.py`
+(`make v1-1-p4a` … `v1-1-p4d`) and guarded by four test files:
+`test_v1_1_trust_mode.py` (24), `test_v1_1_eligibility.py` (27),
+`test_v1_1_ledger.py` (17), `test_v1_1_output_api.py` (25).
+
+### 53. PHASE 3 ARCHITECTURE APPROVAL
+
+`E: TRUST_FLAT_PLUS_SEQUENTIAL` was approved and Phase 4 implemented it as
+approved. Nothing in the decision was revisited.
+
+    KEEP    11 relations, topology, node definitions, flat trust recursion,
+            diagnosis core, sequential CUSUM bank, support-aware diagnosis,
+            canonical ingestion
+    REMOVE  neighbour-trust propagation FROM THE DEFAULT
+
+**`csia/trust_engine/engine.py:110` still contains
+`w = float(gate_e) * self.trust[other]`. Nothing was deleted.** The frozen
+core carries **zero diff** against `csia-v1.0-research-final` at this commit,
+enforced by both the git-diff and the recorded-SHA-256 guards. The default
+simply no longer selects that line.
+
+### 54. TRUST-MODE VERSIONING
+
+    LEGACY_NEIGHBOR_PROPAGATION   w = float(gate_e) * self.trust[other]
+    FLAT_V1_1                     w = float(gate_e)          <-- DEFAULT
+
+**The flag is not in the engine, and that is a decision, not an omission.**
+The brief asks for both "FLAT is the default" and "frozen v1 must remain
+reproducible"; editing the frozen engine would have satisfied the first by
+breaking the second. `GRAPH_SIMPLIFICATION_PLAN.md` §4 S2 named this
+alternative in advance — carry the flag in a layer above the freeze — and that
+is what `csia/v1_1/trust_mode.py` does.
+
+**LEGACY returns the frozen `TrustCore` class itself, not a copy.** There is
+no second implementation of the v1 trust update to keep in sync, so legacy
+behaviour cannot drift from v1. FLAT subclasses it and neutralises one factor;
+a test parses the AST and fails if the frozen `step` body is ever copied in.
+
+`trust_mode_of()` **raises** on an unknown string rather than defaulting: a
+typo that silently selected FLAT would change which architecture produced a
+flight record. The resolved mode rides on every ledger event and every API
+payload.
+
+Real-time selection is a plain attribute assignment (`OnlineTrustLayer.core`);
+the batch path substitutes the class `TrustEngine.run` looks up, scoped and
+restored in a `finally`, with a test asserting the restoration. The
+alternative was copying `run()`, which is the drift this design exists to
+prevent.
+
+### 55. ARCHITECTURE FREEZE
+
+`V1_1_ARCHITECTURE_FREEZE.md` + `.json`. Written only after §3's regression
+returned PASS.
+
+**§3's STOP gate. Tolerance declared 0.0 BEFORE running.**
+
+| axis | LEGACY vs Phase 3A/3B GRAPH | FLAT_V1_1 vs Phase 3A/3B FLAT |
+|---|---|---|
+| raw trace / canonical input / relation bank hashes | identical | identical |
+| trust trajectory | **bit-identical**, max abs Δ **0.0** | **bit-identical**, max abs Δ **0.0** |
+| assurance transitions | identical, times and levels | identical, times and levels |
+
+    VERDICT: PASS.  Tolerance needed: 0.0.
+
+No tolerance was needed, which is the expected result of the construction: if
+one had been, something would have been re-implemented that should not have
+been.
+
+FLAT reproduces the Phase 3B detection times exactly — 32.48 / 24.36 / 26.00 /
+34.12 / 30.04 / 33.72 / 34.16 s, nothing on `CLEAN` or `IMU0_BIAS_DRIFT` — and
+a separate test derives **T3** from the two reproduced components and compares
+it against `PHASE3B_ARCHITECTURE_RESULTS.csv` rather than a copied list.
+
+The CUSUM bank was promoted from the ablation harness to `csia/v1_1/
+sequential.py` as the stateful per-tick form Phase 5 ports. Same statistic,
+`k = 0.5`, `h = 500`; the online bank's first-alarm index equals the batch
+statistic on every mechanism. In-control statistics are **frozen constants**,
+not re-estimated at runtime — an in-control statistic re-estimated during a
+fault stops being in-control — and a test re-derives them from the clean arm.
+
+Frozen: source SHA, trust mode, `k`/`h`/covered nodes, 11 relations, 8
+hypotheses, support semantics, ingest rules R1–R5, schema version 1.1.0.
+**Explicitly not frozen: golden-trace numbers, embedded timing, the production
+line removal, `UNKNOWN`.**
+
+### 56. FUNCTION SET
+
+Five specified, one omitted.
+
+| function | needs | support policy | assurance boundary |
+|---|---|---|---|
+| `COARSE_NAVIGATION` | gps | TOLERATE_AMBIGUITY | CRITICAL |
+| `POSITION_HOLD` | gps, baro, one IMU | TOLERATE_AMBIGUITY | CRITICAL |
+| `PRECISION_NAVIGATION` | gps, mag, one IMU | **REQUIRE_IDENTIFIABLE** | CAUTION |
+| `GEOFENCE_SUPPORT` | gps | **REQUIRE_IDENTIFIABLE** | CRITICAL |
+| `INERTIAL_CONTINUATION` | baro, one IMU — **no GNSS** | TOLERATE_AMBIGUITY | EMERGENCY |
+
+**`PRECISION_LANDING` is omitted**, per §6's instruction to omit rather than
+invent: it needs a rangefinder, optical flow or landing beacon, and none
+exists in the node set, in the 11 relations, or in any adapter channel.
+
+`GEOFENCE_SUPPORT` is deliberately **stricter than `COARSE_NAVIGATION` on the
+same inputs**. A boundary decision made on a spoofed position is worse than no
+boundary decision: it reports "inside" with authority while the vehicle
+leaves.
+
+### 57. FUNCTION REQUIREMENT DEFINITIONS
+
+**There is not one new number in `FUNCTION_REQUIREMENTS.yaml`.**
+
+Every trust requirement names a field of the **frozen** `FailsafeConfig` and
+inherits its value **by name, resolved at construction** — `nav_caution` 0.75,
+`heading_caution` 0.60, `att_caution` 0.82, `att_emergency` 0.70, plus
+`dwell_up` 1.0 s and `dwell_down` 5.0 s for the hysteresis. No value is
+copied, so the two cannot drift, and a test asserts every `inherits` resolves.
+§12 permits a threshold only when it already comes from a declared engineering
+requirement; these are the v1 safety path's own.
+
+**Where no declared threshold exists, none is invented.**
+`INERTIAL_CONTINUATION` requires barometer *freshness* and states in the file
+that it gates on no barometer trust value, because `FailsafeConfig` declares
+no barometer threshold.
+
+Requirements are stated as requirements — required sources, redundant groups,
+required relations, sensitive hypotheses, support policy, assurance boundary —
+never as `if gps_trust > 0.8`.
+
+**Preregistered (§12, gate C).** The file was written and hashed
+(`62d9f1f3…`) before any mechanism was evaluated; the runner refuses to run
+and a test fails if the hash no longer matches.
+
+### 58. FUNCTION ELIGIBILITY RESULTS
+
+Nine mechanisms × five functions, 83 transitions
+(`FUNCTION_ELIGIBILITY_RESULTS.csv`, `FUNCTION_TRANSITIONS.json`).
+
+Transitions **after** the 201-tick startup every mechanism shares (§59).
+`E`/`D`/`I` = ELIGIBLE / DEGRADED / INELIGIBLE, with the time in seconds.
+
+| mechanism | COARSE_NAV | POSITION_HOLD | PRECISION_NAV | GEOFENCE | INERTIAL_CONT |
+|---|---|---|---|---|---|
+| `CLEAN` | — | — | — | — | — |
+| `GNSS_RAMP_SLOW` | E→D 25.40, D→I 32.48, I→D 42.28 | E→D 25.40, D→I 32.48, I→D 42.28 | E→D 23.76, D→I 32.48, I→D 42.28 | E→D 23.76, D→I 32.48, I→D 42.28 | — |
+| `GNSS_RAMP_FAST` | E→D 22.16, D→I 24.36, I→D 42.88 | E→D 22.16, D→I 24.36, I→D 42.88 | E→D 21.72, D→I 24.36, I→D 42.88 | E→D 21.72, D→I 24.36, I→D 42.88 | — |
+| `GNSS_FIX_LOSS` | **E→I 26.00**, I→E 38.00 | **E→I 26.00**, I→E 38.00 | **E→I 26.00**, I→E 38.00 | **E→I 26.00**, I→E 38.00 | **— (ELIGIBLE throughout)** |
+| `IMU0_BIAS_DRIFT` | — | — | — | — | **E→D 34.04**, D→E 42.20 |
+| `DUAL_IMU_FAILURE` | E→I 49.56 | **E→I 34.12** | **E→I 34.12** | E→I 49.56 | **E→D 32.64, D→I 48.56** |
+| `MAG_DEGRADED` | — | — | E→D 26.08, D→I 30.04, I→D 40.04 | — | — |
+| `POWER_SAG` | — | — | E→I 34.72, I→E 52.36 | — | — |
+| `VIBRATION_ANOMALY` | — | — | E→I 35.16, I→E 53.00 | — | — |
+
+Three details worth reading rather than skimming, each taken from the recorded
+reason codes rather than inferred:
+
+- **On both ramps a function degrades well before it is removed**, and the
+  `D→I` is always `TRUST_BELOW_INHERITED_REQUIREMENT`. What drives the earlier
+  `E→D` differs by mechanism and by function:
+
+      GNSS_RAMP_SLOW  23.76  PRECISION, GEOFENCE   PRIOR_SENSITIVE_LEADER
+                      25.40  COARSE, POSITION      SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE
+      GNSS_RAMP_FAST  21.72  PRECISION, GEOFENCE   NAMED_CAUSE + SEQUENTIAL_ALARM
+                      22.16  COARSE, POSITION      NAMED_CAUSE + SEQUENTIAL_ALARM
+
+  On the **slow** ramp the two `REQUIRE_IDENTIFIABLE` functions move 1.64 s
+  earlier than the others, and not because of the detector: the leader is
+  prior-driven before it is trusted. That is a Phase 2 signal doing work the
+  sequential channel could not do, on the one mechanism where Phase 3B found
+  the diagnosis never attributes at all.
+- **The sequential channel buys function-level time, not just detection
+  time.** On `GNSS_RAMP_SLOW`, `COARSE_NAVIGATION` degrades at 25.40 s —
+  the 24.40 s CUSUM alarm plus the inherited 1.0 s `dwell_up` — against a
+  `D→I` at 32.48 s driven by trust. **7.08 s of warning that the trust path
+  alone would not have given.**
+- **The ramps recover to DEGRADED, not to ELIGIBLE.** The `I→D` at 42.28 /
+  42.88 s carries `SEQUENTIAL_ALARM_ON_REQUIRED_SOURCE`: trust has recovered
+  above `nav_caution` but the CUSUM is still latched. The function is
+  available again and the record still says the evidence behind it is reduced.
+
+`POWER_SAG` and `VIBRATION_ANOMALY` go straight `E→I` with no degraded stage,
+because what removes `PRECISION_NAVIGATION` there is
+`ASSURANCE_BEYOND_FUNCTION_BOUNDARY` — a CRITICAL assurance level against a
+declared CAUTION boundary — which is a step, not a slide.
+
+The shape is the one the requirements predict: a GNSS problem removes the GNSS
+functions and leaves the inertial fallback; a power or vibration fault
+restricts precision work through the assurance boundary while position
+knowledge survives; a magnetometer fault touches only the function that needs
+heading.
+
+**A rule that was wrong and was changed after seeing results**, disclosed in
+`FUNCTION_ELIGIBILITY_SPEC.md` §6 rather than absorbed. The first
+implementation fired `PRIOR_SENSITIVE_LEADER` on **any** prior-sensitive
+leader, degrading `PRECISION_NAVIGATION` and `GEOFENCE_SUPPORT` for 310 ticks
+of `IMU0_BIAS_DRIFT` on a leader neither declares sensitive. §7 says
+"affecting **the required information**", so the rule now fires only when the
+leader or the uniform-prior leader is one of the function's sensitive
+hypotheses. 90 → 83 transitions; every changed cell is a DEGRADED → ELIGIBLE
+reclassification on an IMU mechanism, and nothing moved out of INELIGIBLE. The
+requirements file did not change, so the preregistration hash stands.
+
+### 59. CLEAN FUNCTION BEHAVIOUR
+
+| | |
+|---|---|
+| CUSUM alarms | **0** |
+| assurance transitions | **0** |
+| eligibility transitions | **one per function**, all at t = 8.04 s |
+| after that | **stable to the end of the run** |
+
+**The startup window is exactly explained**, which §30 asks for:
+
+    76 ticks   genuine -- before GPS is fresh the leader cannot be separated
+               from `gps_fault`, the same 76-tick window Phase 2 measured on
+               every scenario including `clean`
+  + 125 ticks  dwell_down (5.0 s at 25 Hz), the inherited relaxation delay
+  = 201 ticks  = 8.04 s
+
+`COARSE_NAVIGATION` spends them DEGRADED rather than INELIGIBLE because it is
+`TOLERATE_AMBIGUITY`; `INERTIAL_CONTINUATION` is unaffected because it does
+not require GNSS. **No oscillation anywhere** — the dwell inherits the frozen
+failsafe hysteresis rather than introducing one.
+
+This is a **deterministic replay control, not a field false-alarm rate.**
+
+### 60. GNSS FIX-LOSS FUNCTION BEHAVIOUR
+
+The acceptance test, and the reason the layer exists.
+
+At **t = 26.00 s** all four GNSS functions go INELIGIBLE carrying
+
+    REQUIRED_SOURCE_NOT_FRESH
+    REQUIRED_RELATION_NOT_APPLICABLE
+    SUPPORT_LOST_FOR_REQUIRED_INFORMATION
+
+`INERTIAL_CONTINUATION` stays ELIGIBLE throughout. Support loss is detected at
+25.00 s and the eligibility transition follows at 26.00 s — the inherited
+`dwell_up` of 1.0 s — coinciding with the assurance transition.
+
+**§10 is proven independently of freshness.** A regression holds GNSS *fresh,
+trusted, relations gated in and assurance NORMAL*, changing only the support
+verdict:
+
+    leader                        nominal
+    posterior                     0.9998
+    discriminating vs gps_fault   0
+    -> PRECISION_NAVIGATION       INELIGIBLE
+    -> required_inputs_available  True     <-- the inputs were all present
+    -> GEOFENCE_SUPPORT           INELIGIBLE
+    -> COARSE_NAVIGATION          DEGRADED (TOLERATE_AMBIGUITY)
+    -> INERTIAL_CONTINUATION      ELIGIBLE
+
+The control test changes only the support verdict back and gets ELIGIBLE. **A
+high posterior alone never carries a function.**
+
+### 61. IMU FUNCTION BEHAVIOUR
+
+§32's distinction, and the two cases do not look the same.
+
+| | `IMU0_BIAS_DRIFT` | `DUAL_IMU_FAILURE` |
+|---|---|---|
+| `POSITION_HOLD` | **ELIGIBLE** — untouched | **INELIGIBLE at 34.12 s** |
+| `PRECISION_NAVIGATION` | **ELIGIBLE** — untouched | **INELIGIBLE at 34.12 s** |
+| `INERTIAL_CONTINUATION` | **DEGRADED at 34.04 s** | **DEGRADED 32.64 s → INELIGIBLE 48.56 s** |
+| reason | `NAMED_CAUSE_AFFECTS_FUNCTION` | `TRUST_BELOW_INHERITED_REQUIREMENT` |
+
+One IMU degrading is **redundancy working**: the requirement is on
+`max(imu0, imu1)` against `att_caution`, exactly as the frozen failsafe policy
+computes it, so no navigation function is removed. What *is* recorded is that
+the fallback is degraded — the diagnosis names `imu0_bias_drift`
+identifiably on 104 ticks, and redundancy has been consumed.
+
+Losing both crosses `att_caution` (nav functions) and then `att_emergency`
+(the fallback). **The system says plainly that there is no inertial fallback
+left**, which is the honest and uncomfortable answer.
+
+### 62. ASSURANCE LEDGER
+
+`csia/v1_1/ledger.py`, spec in `ASSURANCE_LEDGER_SPEC.md`.
+
+Five things open an event: assurance state, function eligibility, support
+state, ambiguity, sequential alarm set. **Per-tick sampling is not a ledger** —
+1500 ticks × nine mechanisms produced **159 events**, every one a state change
+with a reason. Order within a tick is fixed (assurance, functions in sorted
+name order, support, ambiguity, sequential) because a ledger whose event order
+depended on dict iteration would not reproduce.
+
+Every §16 field is carried. Two are easy to lose and are not:
+
+- **`suppression_reasons`** distinguishes `GATE_CLOSED` (the check did not
+  apply) from `ENDPOINT_NOT_FRESH:<node>` (a sensor went away). The frozen
+  runtime multiplies every edge gate by both endpoints' freshness
+  (`online.py:610`), so both produce a zero gate and collapsing them would
+  lose the distinction Phase 2 exists to preserve.
+- **`configuration_hash`** covers the requirements, the reason codes and the
+  five v1.1 runtime modules. A ledger that looked identical across a policy
+  change would be worthless.
+
+**The event the whole layer exists for** — `GNSS_FIX_LOSS`, t = 26.00 s:
+
+    trust["gps"]                     0.987      <-- the sensor looks healthy
+    fresh["gps"]                     false
+    leader / posterior               nominal / 0.992
+    discriminating_evidence_count    0
+    support_state                    NON_IDENTIFIABLE
+    suppressed_relations             altitude_baro, heading_course,
+                                     velocity_gps_doppler
+    suppression_reasons              all: ENDPOINT_NOT_FRESH:gps
+    function_eligibility             four GNSS functions INELIGIBLE,
+                                     INERTIAL_CONTINUATION ELIGIBLE
+    recommendations                  RESTRICT_PRECISION_NAV,
+                                     INHIBIT_GPS_MODES, SWITCH_NAV_INERTIAL
+
+**GPS trust is 0.987 and every GNSS function is ineligible.** A trust-only
+system reading the first number would have reported the GPS healthy.
+
+### 63. LEDGER DETERMINISM
+
+    event_id = sha256({"seq": n, "content": content_sha256})[:32]
+
+Hashes of content and timing. **No random UUIDs**, as §17 requires — an
+identifier that changed on replay would make reproduction unprovable. A test
+parses the AST rather than grepping, because the module's docstring uses the
+word "random" precisely to explain that none is used.
+
+Every mechanism is built **twice**, in two independent `AssuranceLedger`
+instances, and compared including every id and hash:
+
+| | |
+|---|---|
+| mechanisms | 9 |
+| total events | **159** |
+| identical on rerun | **9 of 9** |
+| chain verified | **9 of 9**, zero problems |
+
+`verify_chain()` re-derives every hash from the stored content rather than
+trusting the stored hash, so it fails on a hand-edited file. A test tampers
+with an event and swaps two events, and both are caught.
+
+**The hash chain is a hash chain and nothing more** (§18): `content_sha256`
+plus `previous_event_hash`, genesis of 64 zeros, for detecting a missing or
+reordered event. It is **not a blockchain**, not distributed, not tamper-proof
+against anyone who can rewrite the file. Stated in the module, in the spec and
+in the artifact's own `chain_note`, and a test asserts the word only ever
+appears in a denial.
+
+### 64. REASON CODES
+
+`REASON_CODES.yaml` is the single source of truth: 17 eligibility codes and 5
+ledger event types. A test fails if the policy or the ledger emits a code the
+table does not define, so a new code cannot reach a flight record without
+reaching the table.
+
+`SUPPORT_LOST_FOR_REQUIRED_INFORMATION` carries severity `POLICY` — INELIGIBLE
+for a `REQUIRE_IDENTIFIABLE` function, DEGRADED for a `TOLERATE_AMBIGUITY`
+one. The same evidence means different things to a function that assumes its
+position is correct and one that does not.
+
+`Event.render()` produces a sentence for a display —
+`"PRECISION_NAVIGATION ELIGIBLE -> INELIGIBLE"`. **The sentence is never
+stored as canonical evidence**, and a test asserts `render` is absent from the
+serialised event.
+
+Three codes (`SOURCE_ABSENT_STALE`, `_NOT_RECEIVED`, `_NO_3D_FIX`) are defined
+but not reachable from the scenario catalogue, which has no ingest layer.
+That is stated rather than hidden, and the test that checks for unreachable
+codes allows exactly those three by name.
+
+### 65. OUTPUT SCHEMA
+
+`engineering/v1_1/csia_output_v1_1.schema.json`, version **1.1.0**, JSON
+Schema draft 2020-12. **13 500 payloads — every tick of all nine mechanisms —
+validate.**
+
+`additionalProperties: false` at the top level and on every nested object, so
+an unrecognised field is a validation failure rather than a silent pass. `k`
+and `h` are schema `const`s, so a payload cannot carry a re-tuned detector.
+
+**Two naming decisions that are not cosmetic:**
+
+**`posterior`, never `confidence`** (§22). It is a posterior probability under
+a stated prior and likelihood; "confidence" would assert a calibration nothing
+here establishes. `GNSS_FIX_LOSS` is exactly where that would mislead — the
+leader sits at 0.992 with zero discriminating evidence. A consumer reading
+`posterior` next to `discriminating_evidence_count: 0` and
+`support_state: NON_IDENTIFIABLE` has what it needs not to be fooled. A test
+walks the whole payload and fails on any key containing "confidence".
+
+**`UNKNOWN` means two things and never shares a field.**
+`function_eligibility[*].state == "UNKNOWN"` is *the policy cannot determine
+eligibility*; `diagnosis.unknown_fault_model` is the `const`
+`"NOT_IMPLEMENTED"`, so a payload cannot claim an unknown-fault capability
+that was never built.
+
+### 66. API COMPATIBILITY
+
+Exactly **two** behaviours for an existing consumer, and no third:
+`project_v1(payload)` returns the v1-shaped subset, or
+`assert_schema_version()` raises. **No field is ever silently reinterpreted.**
+
+The projection deliberately carries one field v1 never had: `trust_mode`. A v1
+consumer quietly receiving `FLAT_V1_1` trajectories believing them to be v1's
+would be precisely the silent reinterpretation §26 forbids, so the mode is
+made unmissable rather than dropped.
+
+**`current_valid` versioning (§28) closes the last unversioned semantic
+change.** Phase 1 changed what the battery current channel means and
+introduced `current_valid` as a bare field — blocker 5 in the Phases 1–3
+report. It is now `evidence.current_valid`, typed `boolean|null` where `null`
+means *the ingest layer did not report on it* rather than `false`, sitting
+beside `missing_reason` as a closed enum, with its meaning fixed by
+`schema_version`.
+
+Provenance rides on **every** payload — `software_sha`, `configuration_hash`,
+`input_trace_hash`, `trust_mode`, `frozen_core_tag` — so a payload extracted
+from a log by itself is still attributable.
+
+### 67. OUTPUT FIREWALL
+
+`csia/v1_1/firewall.py`, **default-deny**. `request()` permits only what is
+explicitly allow-listed, so a MAVLink command added upstream tomorrow is
+denied today. A deny-list would be one missing entry away from arming an
+aircraft.
+
+Permitted: `READ_TELEMETRY`, `READ_PARAMETERS`, `WRITE_LOG`, `READ_LOG`,
+`EMIT_OUTPUT`, `EMIT_RECOMMENDATION`.
+
+Denied and unit-tested by name — all fourteen: `WRITE_PARAMETER`,
+`SET_FLIGHT_MODE`, `WRITE_MISSION`, `CLEAR_MISSION`, `ACTUATOR_COMMAND`,
+`SET_SERVO`, `ARM`, `DISARM`, **`RTL`**, **`LAND`**, `TAKEOFF`,
+`REBOOT_AUTOPILOT`, `SET_HOME`, `CALIBRATE`. Plus unrecognised strings, empty
+strings and lower-case variants.
+
+Every denial is **recorded before it raises** and appears in `evidence()`: a
+shadow deployment that silently swallowed a command attempt would hide the
+more important half of the event, which is that one was attempted.
+
+This is the layer **above** the existing transport guard, not a replacement
+for it. `csia/deploy/guard.py` already denies the MAVLink transmit surface —
+`conn.mav` raises on every attribute, the socket's write half is shut where
+the transport has one, the process asserts its own inability at startup, and a
+static scan backs it. `attach()` composes the two, and a test shows both
+layers refusing.
+
+**No hardware was required for any of this**, as §25 says.
+
+### 68. STALENESS-LAYER AUDIT
+
+The banked blocker was one row. **It is six of eight nodes, with one common
+cause.**
+
+`MaxAge` (adapter, v1.1) derives `5 / declared_rate_hz` **per platform** from
+the channel contract. `STALE_TIMEOUT_S` (frozen core) applies the same rule
+with the rate baked into a constant, and cannot derive it because the frozen
+core knows nothing about adapters. They are the same property measured at two
+points, disagreeing because they assume different producer rates.
+
+| node | `MaxAge` | declared (AP/PX4) | `STALE_TIMEOUT_S` | rate it implies | agree? |
+|---|---:|---:|---:|---:|---|
+| `imu0` | 0.20 | 25 / **50** | 0.05 | 100 Hz | no |
+| `imu1` | 0.20 | 25 / 25 | 0.05 | 100 Hz | no |
+| `baro` | 0.50 | 10 / 10 | 0.10 | 50 Hz | no |
+| `mag` | 0.20 | 25 / **14** | 0.10 | 50 Hz | no |
+| `gps` | 1.00 | 5 / 5 | 0.50 | 10 Hz | no — *the banked row* |
+| `motor_esc` | 0.50 | 10 / **1** | 0.10 | 50 Hz | **no — worst** |
+| `battery` | 0.50 | 10 / 10 | 0.50 | 10 Hz | yes |
+| `vibration` | 0.50 | 10 / 10 | 0.50 | 10 Hz | yes |
+
+**The finding that is worse than the banked one: PX4 `motor_esc`.**
+`ESC_STATUS` publishes at 1 Hz — already discovered and fixed once on the
+adapter side, never available to the frozen layer. Three facts make the
+exposure real, and all three hold: `to_core_samples` emits a sensor only when
+it has new data, so `last_t` advances once per second; the frozen watchdog is
+an arrival-age test on exactly that value; and `csia/deploy/shadow.py:109`
+constructs `OnlineTrustLayer` **without** `stale_timeout_s`, while the ULog
+CLI does pass it. On a live PX4 shadow flight `motor_esc` would be stale for
+~0.9 s of every 1.0 s.
+
+**Deployment-layer defect, not a frozen-core defect — and not fixed here.** It
+changes live behaviour on a path with no coverage in this environment, which
+is the regression analysis §27 requires first.
+
+**The canonical rule needs no freeze break.** `OnlineTrustLayer` already
+accepts `stale_timeout_s`; deriving the per-node timeout from the same
+contract and passing it at construction is the whole change. Every derived
+value is *more* tolerant than today's, so the risk it introduces is
+under-detection of a dead sensor — the right direction to be careful about,
+and the reason it is proposed and not applied.
+
+**The design decision the audit forces:** eligibility reads the **frozen
+layer's** freshness, and the adapter's `missing_reason` only refines the
+`SOURCE_ABSENT_*` code. Anything else could declare a function ELIGIBLE on a
+node whose evidence the trust layer had already withdrawn.
+
+### 69. PHASE 4 COMPUTE
+
+`PHASE4_COMPUTE.json`. Clean scenario, first 400 ticks, CPython on a
+general-purpose host. **CORE and REPORTING are separated because §29 forbids
+folding logging and serialization into an embedded-core claim.**
+
+| phase | median µs/tick |
+|---|---:|
+| `core_trust_step` | 82.7 |
+| `core_sequential_step` | 7.8 |
+| **CORE total** | **90.5** |
+| `support_metadata` | 168.2 |
+| `function_eligibility` | 119.8 |
+| `ledger_event` | 126.9 |
+| `api_build` | 51.3 |
+| `api_serialize` | 74.9 |
+| **REPORTING total** | **541.0** |
+
+**Reporting is 86% of the per-tick cost** — six times the core. That is the
+number that must never appear in an embedded claim, and it is the reason §29
+insists on the split. The sequential channel, the component Phase 3B added,
+costs **7.8 µs and 5 floats**; it remains the cheapest thing in the system.
+
+A first version of this measurement labelled the CUSUM step alone as "core"
+and reported 11 µs. That was wrong — it omitted the trust update — and the
+measurement was rebuilt to step `FlatTrustCore` directly rather than reusing
+the batch result.
+
+**No target-hardware figure exists and none is claimed.**
+
+### 70. FINAL v1.1 ARCHITECTURE
+
+    canonical ingestion (R1-R5)
+      -> 11-relation evidence bank, 8 nodes
+      -> FLAT persistent trust          float alpha[8], beta[8], trust[8]
+      -> mechanism-specific CUSUM       float S[5], k=0.5, h=500
+      -> frozen diagnosis posterior     float smoothed[8]
+      -> support / identifiability / ambiguity
+      -> deterministic function eligibility  (5 functions, 0 new thresholds)
+      -> deterministic assurance policy      (frozen v1 failsafe)
+      -> reproducible assurance ledger
+      -> read-only versioned output API      (schema 1.1.0)
+
+    STATUS: V1_1_ARCHITECTURE_FROZEN
+
+**No AI, no GNN, no learned policy, no unknown-fault detector, no new
+diagnosis algorithm, no direct aircraft control, and no research novelty
+claimed** (§43). The one statistic added is Page's 1954 CUSUM, used as a
+baseline.
+
+### 71. GOLDEN-TRACE READINESS
+
+`embedded/v1_1/GOLDEN_TRACE_PLAN.md`. **Cases and comparison rule only; no
+numbers frozen, no C code written**, per §37 and §36.
+
+Eleven cases: the nine mechanisms plus `BATTERY_SENTINEL` and `MAG_SENTINEL`,
+which run from the Phase 1 fixtures because they exercise the ingest rules
+rather than the trust update and would otherwise be ported untested.
+
+Three comparison tiers, because they cannot share a tolerance:
+
+- **Tier A — EXACT.** Assurance level, every function state and reason-code
+  set, leader, ambiguity, identifiability, support state, alarming set,
+  freshness, active/suppressed relations, and the ledger event sequence.
+  There is no such thing as an off-by-a-little failsafe level.
+- **Tier B — NUMERIC**, tolerance **deliberately not declared yet**. It must
+  come from an arithmetic argument (float32 epsilon, accumulation length, the
+  smoothing constants) plus a measured distribution — never from whatever the
+  first port happens to produce. The CUSUM `S` is a running sum and is the
+  worst case in the set.
+- **Tier C — NOT COMPARED.** Event ids and content hashes hash the
+  *implementation*, not the behaviour.
+
+The rule: a tier-A difference on any tick of any case fails the port, and the
+**maximum** tier-B deviation is reported, never the mean — a mean hides
+exactly the excursion that matters. **A tier-A difference is never resolved by
+relaxing tier A.**
+
+### 72. PHASE 5 READINESS
+
+**Not ready, and the plan says why.** Three things must settle first, and none
+is a measurement:
+
+1. **The §30 review of the propagation removal.** The default is `FLAT_V1_1`
+   and the frozen engine still contains the legacy line. If the review changes
+   the decision, every trace changes.
+2. **The staleness rule.** §68 proposes a canonical timeout and does not adopt
+   it. Adopting it changes admissibility on every tick, so freezing traces
+   first would waste them.
+3. **The schema has never met a real consumer.** It validates 13 500 payloads
+   and zero integrations.
+
+Freezing numbers before those settle would freeze the wrong ones.
+
+### 73. REMAINING BLOCKERS
+
+1. **No C code, no golden-trace values, no declared tolerance.** G6.
+2. **PX4 `motor_esc` staleness** — the most concrete known deployment defect;
+   needs a PX4 replay or bench regression this environment cannot run.
+3. **The §30 propagation review** is still open; nothing has been deleted.
+4. **Research campaigns still need remeasurement for v1.1.** Phase 1 changed
+   ingestion; the v1 numbers stay labelled v1 and were not edited.
+5. **No library access** — the sole blocker on G8.
+6. **No hardware** — blocks G1, G2, G3.
+7. **No GNSS step mechanism exists** in the frozen injector; the ramp results
+   do not cover steps.
+8. **`UNKNOWN` / unmodeled fault** remains unimplemented, pending a
+   model-adequacy test.
+9. **Zero verified-clean hours.** No false-alert rate is claimed or
+   supportable.
+
+Resolved since the Phases 1–3 report: the Phase 3B arms (§29.1) and
+`current_valid` versioning (§29.5).
+
+### 74. PRODUCT MATURITY
+
+**M2 — cross-platform simulation validated.** Unchanged, and Phase 4 does not
+claim to move it: **freezing an architecture is a precondition for the port,
+not the port.**
+
+    M3 embedded-equivalent     no C port exists
+    M4 physical-FC HIL         no hardware
+    M5 real-aircraft shadow    no aircraft
+    M6 clean exposure          ZERO verified-clean hours
+
+What changed is the runtime architecture's status:
+**`V1_1_ARCHITECTURE_FROZEN`**, recorded in the graduation matrix as an
+engineering milestone and deliberately not as a matrix row, because freezing
+an interface is not evidence about the world.
+
+**Research maturity: none established.**
+
+G4 `VALIDATED_SITL`, G5 `VALIDATED_SITL`, every other row unchanged.

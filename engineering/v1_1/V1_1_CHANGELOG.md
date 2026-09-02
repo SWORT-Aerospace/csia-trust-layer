@@ -67,3 +67,97 @@ result that uses v1 stays labelled v1. Any v1.1 result must be newly measured.
 ### TEST COUNT
 
 971 -> 984.
+
+---
+
+# PHASES 2-3B (summary; full detail in V1_1_CHATGPT_REVIEW_REPORT.md)
+
+### ADDED
+- Phase 2 `engineering/v1_1/support/` — support state, identifiability,
+  ambiguity, prior sensitivity. Diagnostic METADATA only; the production
+  posterior is bit-identical with and without it.
+- Phase 3A `engineering/v1_1/ablation/` — GRAPH vs FLAT. Verdict
+  `GRAPH_NO_MATERIAL_GAIN`.
+- Phase 3B five-arm architecture selection T0-T4. Decision
+  `E: TRUST_FLAT_PLUS_SEQUENTIAL`.
+
+### NOT CHANGED
+- The frozen v1 core. Zero diff throughout.
+- `csia/trust_engine/engine.py:110` still contains the neighbour-trust
+  weighting. Nothing was deleted.
+
+### TEST COUNT
+984 -> 1040.
+
+---
+
+# PHASE 4 — ARCHITECTURE FREEZE, ELIGIBILITY, LEDGER, OUTPUT API
+
+### ADDED
+
+- **`csia/v1_1/`** — the v1.1 runtime layer, outside the frozen path.
+  - `trust_mode.py` — `LEGACY_NEIGHBOR_PROPAGATION` / `FLAT_V1_1`,
+    default FLAT. LEGACY returns the FROZEN `TrustCore` class itself, so v1
+    replay cannot drift from v1.
+  - `sequential.py` — the CUSUM bank as the stateful per-tick form Phase 5
+    ports. `k = 0.5`, `h = 500`, five covered nodes, in-control statistics
+    frozen as constants. Page 1954; no algorithmic novelty claimed.
+  - `eligibility.py` — deterministic function-eligibility policy.
+  - `reason_codes.py` — loads `REASON_CODES.yaml`, the single source of truth.
+  - `ledger.py` — the assurance ledger and its hash chain.
+  - `advisory.py` — four advisory strings; imports no transport.
+  - `output_api.py` — builds and validates the versioned payload.
+  - `firewall.py` — operation-level default-deny read-only policy.
+- **`engineering/v1_1/`** — `V1_1_ARCHITECTURE_FREEZE.md`/`.json`,
+  `TRUST_MODE_VERSIONING.md`, `TRUST_MODE_REGRESSION.json`,
+  `FUNCTION_REQUIREMENTS.yaml`, `FUNCTION_ELIGIBILITY_SPEC.md`,
+  `FUNCTION_ELIGIBILITY_RESULTS.csv`, `FUNCTION_TRANSITIONS.json`,
+  `REASON_CODES.yaml`, `ASSURANCE_LEDGER_SPEC.md`,
+  `ASSURANCE_LEDGER_EXAMPLE.json`, `ASSURANCE_LEDGER_REPRODUCTION.json`,
+  `csia_output_v1_1.schema.json`, `API_COMPATIBILITY.md`,
+  `STALENESS_LAYER_AUDIT.md`, `PHASE4_COMPUTE.json`,
+  `PHASE4_API_VALIDATION.json`, `PHASE4_CLEAN_RESULT.json`,
+  `PHASE4_FIXLOSS_RESULT.json`, `PHASE4_DUAL_IMU_RESULT.json`.
+- **`embedded/v1_1/GOLDEN_TRACE_PLAN.md`** — cases and comparison rule only.
+  No C code, no frozen numbers.
+
+### CHANGED (BEHAVIOUR, v1.1 CONSUMERS)
+
+- **The default neighbour-edge weight is now `w = gate_e`.** A v1.1 consumer
+  that names no trust mode gets FLAT. A v1 or research replay must name
+  `LEGACY_NEIGHBOR_PROPAGATION` explicitly.
+- **`current_valid` is now a versioned schema field**, not a bare one. This
+  closes the last unversioned semantic change from Phase 1.
+
+### FIXED
+
+- A rule defect found after first evaluation and disclosed rather than
+  absorbed: `PRIOR_SENSITIVE_LEADER` fired on any prior-sensitive leader
+  instead of only one the function depends on. 90 -> 83 transitions; every
+  changed cell a DEGRADED -> ELIGIBLE reclassification on an IMU mechanism.
+  Recorded in `FUNCTION_ELIGIBILITY_SPEC.md` §6.
+
+### NOT CHANGED
+
+- **The frozen v1 core. Zero diff on `FROZEN_PATHS`**, still enforced by both
+  the git-diff and the recorded-hash guards.
+- `csia/trust_engine/engine.py:110`. The legacy line is still there; the
+  default simply no longer selects it. Nothing was deleted.
+- `STALE_TIMEOUT_S` and `MaxAge`. `STALENESS_LAYER_AUDIT.md` finds the
+  disagreement is six of eight nodes, names PX4 `motor_esc` as the worst case,
+  proposes one canonical rule and **does not adopt it**.
+- `UNKNOWN` / unmodeled fault. Still NOT IMPLEMENTED.
+- Every v1 research finding, report, CSV and claim ledger.
+
+### VALIDATED
+
+- Trust-mode regression: LEGACY and FLAT reproduce the Phase 3A/3B GRAPH and
+  FLAT arms **bit-identically**, tolerance declared 0.0 and needed 0.0.
+- 13 500 output payloads validate against schema 1.1.0.
+- 159 ledger events over 9 mechanisms; 9/9 reproduce identically including
+  every id and hash; 9/9 chains verify.
+- Gates A-J all pass.
+
+### TEST COUNT
+
+1040 -> 1133.
