@@ -592,3 +592,8 @@ v1-1-ablation:
 .PHONY: v1-1-ablation-check
 v1-1-ablation-check:
 	$(PY) -m pytest tests/test_v1_1_graph_flat.py -q
+
+# v1.1 Phase 3B: section-23 gate on the frozen B4 CUSUM constants.
+.PHONY: v1-1-b4-verify
+v1-1-b4-verify:
+	$(PY) engineering/v1_1/ablation/b4_verify.py
