@@ -37,6 +37,7 @@ from typing import Callable, Optional
 from ..aircraft.adapters import get_adapter
 from ..runtime.failsafe import FailsafePolicy
 from ..runtime.online import OnlineTrustLayer
+from ..v1_1.staleness import build_runtime_stale_timeouts
 from .flight_log import FlightLog, make_header
 from .guard import (CommandAuthorityError, ReadOnlyMavlinkConnection,
                     assert_no_command_capability)
@@ -106,8 +107,22 @@ class ShadowRunner:
         self.consumer = consumer
         self._connection_factory = connection_factory
         self.adapter = get_adapter(cfg.platform)
+        # Phase 4.5 Gate B. The frozen core's STALE_TIMEOUT_S table has a
+        # producer rate baked into a constant; the adapter derives MaxAge per
+        # platform from the channel contract. Six of eight nodes disagree, and
+        # the live path used to take the frozen defaults while the ULog CLI
+        # already passed an override. A `baro` stream at its declared 10 Hz
+        # against a 0.10 s watchdog false-staled on 2.8-3.7% of ticks under
+        # +/-30% jitter, measured -- see validation/v1_1/deployment/.
+        #
+        # The override makes the runtime watchdog agree with the ingestion
+        # layer that feeds it. It introduces no constant: the rule is
+        # `max over required channels of the adapter's own MaxAge`.
+        # The FROZEN core is not modified; it already accepts this argument.
+        self.stale_timeouts = build_runtime_stale_timeouts(cfg.platform)
         self.layer = OnlineTrustLayer(tick_hz=cfg.tick_hz,
-                                      field_mode=cfg.field_mode)
+                                      field_mode=cfg.field_mode,
+                                      stale_timeout_s=self.stale_timeouts)
         self.policy = FailsafePolicy()
         self.conn = None
         self.flight_log: Optional[FlightLog] = None

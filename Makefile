@@ -649,3 +649,14 @@ v1-1-p4d-check:
 v1-1-p4-check:
 	$(PY) -m pytest tests/test_v1_1_trust_mode.py tests/test_v1_1_eligibility.py \
 	  tests/test_v1_1_ledger.py tests/test_v1_1_output_api.py -q
+
+# ---------------------------------------------------------------- Phase 4.5
+# Gate B: staleness reproduction, matrix, and the Phase 4 regression.
+.PHONY: v1-1-staleness
+v1-1-staleness:
+	$(PY) validation/v1_1/deployment/run_staleness.py
+	$(PY) validation/v1_1/deployment/verify_phase4_unaffected.py
+
+.PHONY: v1-1-staleness-check
+v1-1-staleness-check:
+	$(PY) -m pytest tests/test_v1_1_staleness.py -q
