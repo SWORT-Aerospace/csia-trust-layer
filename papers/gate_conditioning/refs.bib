@@ -1,13 +1,138 @@
-% Bibliography for the gate-conditioning paper.
+% Gate-conditioning (mathematical) paper bibliography.
 %
-% EMPTY BY DESIGN. The manuscript has not landed; papers/gate_conditioning/
-% main.tex is a build scaffold and cites nothing. Entries arrive with the
-% manuscript.
+% PROVENANCE, READ BEFORE SUBMITTING
+% ----------------------------------
+% EVERY ENTRY IN THIS FILE IS UNVERIFIED. Not one has been checked against a
+% publisher record.
 %
-% RULE, enforced by tools/publication/bib_guard.py: an entry may not carry an
-% unresolved provenance marker. The guard's own MARKERS tuple is the list; it
-% is deliberately not repeated here, because a comment quoting the markers
-% trips the guard on itself. That happened once already.
+% The authoring environment's egress policy denies api.crossref.org, doi.org
+% and dblp.org (403 at CONNECT), so `make bib-verify` exits 2 and clears
+% nothing -- which is the correct outcome. Candidate details came from web
+% search, and the rule this repository already applies to the systems paper's
+% bibliography applies here unchanged:
 %
-% Add an entry only after checking it against the publisher record. Do not
-% fabricate a citation to make the guard pass.
+%   A web search result is NOT a publisher record and must not be used to
+%   retire a marker. It is a second unverified source, and swapping one for
+%   another while deleting the warning leaves the risk and removes the notice.
+%
+% Search-derived candidates and the reasoning behind each are recorded in
+% papers/csia_systems/BIB_VERIFICATION_CANDIDATES.md, which is a research note
+% and never enters a submission bundle.
+%
+% WHY CITATIONS EXIST AT ALL IN A PAPER THAT CLAIMS NOTHING NEW. Precisely
+% because it claims nothing new: research/math-paper/NOVELTY_AUDIT.md labels
+% every proposition KNOWN, and a paper that labels a result KNOWN and then
+% cites nothing is claiming novelty by omission. Adding these entries makes
+% the bibliography a submission blocker for this paper as well as for the
+% systems paper. That is the honest state, not a regression.
+%
+% Verification status legend:
+%   FROM-BRIEF-UNVERIFIED  details carried over from the systems paper's
+%                          bibliography, themselves never independently
+%                          confirmed against the publisher
+%   RECONSTRUCTED          assembled from search results only
+
+% --- Coarsening at random: the prior art for Proposition 5 (constant w) ----
+%
+% RECONSTRUCTED. This is the single most important citation in the paper: it
+% is what makes Proposition 5 KNOWN rather than a contribution, and the
+% novelty audit turns on it. It MUST be verified before submission. If the
+% details below are wrong the paper's central concession is attached to the
+% wrong work, which is worse than having no citation at all.
+@article{heitjan1991car,
+  author  = {Heitjan, Daniel F. and Rubin, Donald B.},
+  title   = {Ignorability and Coarse Data},
+  journal = {The Annals of Statistics},
+  volume  = {19},
+  number  = {4},
+  pages   = {2244--2253},
+  year    = {1991},
+  note    = {RECONSTRUCTED from search results. Volume, number, pages and year
+             all require verification against the publisher record before
+             submission. Proposition 5's KNOWN label depends on this entry.}
+}
+
+% --- Diagnosis under state-dependent and unreliable observation -----------
+%
+% The four entries below are carried over from papers/csia_systems/refs.bib
+% with their markers intact. They are cited here for the related-work section
+% and inherit that file's unverified status; two of them additionally carry a
+% VERIFY placeholder for a title nobody supplied.
+
+% FROM-BRIEF-UNVERIFIED. Owns the general mechanism of fault-state-dependent
+% observation loss. This paper asserts no priority over it.
+@article{dong2024statedependent,
+  author  = {Dong, Wei and Yin, Xiang and Li, Shaoyuan},
+  title   = {Verification of diagnosability for discrete-event systems under
+             state-dependent observations},
+  journal = {IEEE Transactions on Automatic Control},
+  volume  = {69},
+  number  = {1},
+  pages   = {145--160},
+  year    = {2024},
+  doi     = {10.1109/TAC.2023.3266021},
+  note    = {FROM-BRIEF-UNVERIFIED. Title rendering not independently
+             confirmed; volume, number, pages, year and DOI as supplied.}
+}
+
+% FROM-BRIEF-UNVERIFIED
+@article{carvalho2012intermittent,
+  author  = {Carvalho, Lilian K. and Basilio, Jo{\~a}o C. and
+             Moreira, Marcos V.},
+  title   = {Robust diagnosis of discrete event systems against intermittent
+             loss of observations},
+  journal = {Automatica},
+  volume  = {48},
+  number  = {9},
+  pages   = {2068--2078},
+  year    = {2012},
+  note    = {FROM-BRIEF-UNVERIFIED. No DOI was supplied.}
+}
+
+% FROM-BRIEF-UNVERIFIED
+@article{carvalho2013permanent,
+  author  = {Carvalho, Lilian K. and Moreira, Marcos V. and
+             Basilio, Jo{\~a}o C. and Lafortune, St{\'e}phane},
+  title   = {Robust diagnosis of discrete-event systems against permanent
+             loss of observations},
+  journal = {Automatica},
+  volume  = {49},
+  number  = {1},
+  pages   = {223--231},
+  year    = {2013},
+  doi     = {10.1016/j.automatica.2012.09.017},
+  note    = {FROM-BRIEF-UNVERIFIED}
+}
+
+% FROM-BRIEF-UNVERIFIED. The title here is a search-derived CANDIDATE and is
+% NOT the placeholder the systems paper's copy still carries; see
+% BIB_VERIFICATION_CANDIDATES.md finding 2. It remains unverified.
+@article{takai2021diagnosability,
+  author  = {Takai, Shigemasa},
+  title   = {A general framework for diagnosis of discrete event systems
+             subject to sensor failures},
+  journal = {Automatica},
+  volume  = {129},
+  pages   = {109669},
+  year    = {2021},
+  doi     = {10.1016/j.automatica.2021.109669},
+  note    = {FROM-BRIEF-UNVERIFIED. Volume, article number, year and DOI as
+             supplied; the title is a search-derived candidate and is NOT a
+             publisher-confirmed value.}
+}
+
+% --- Structural isolability and sensor placement --------------------------
+
+% FROM-BRIEF-UNVERIFIED
+@article{krysander2008sensorplacement,
+  author  = {Krysander, Mattias and Frisk, Erik},
+  title   = {Sensor placement for fault diagnosis},
+  journal = {IEEE Transactions on Systems, Man, and Cybernetics -- Part A:
+             Systems and Humans},
+  volume  = {38},
+  number  = {6},
+  pages   = {1398--1410},
+  year    = {2008},
+  doi     = {10.1109/TSMCA.2008.2003968},
+  note    = {FROM-BRIEF-UNVERIFIED}
+}

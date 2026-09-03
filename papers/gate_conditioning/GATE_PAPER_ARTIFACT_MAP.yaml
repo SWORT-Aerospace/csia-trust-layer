@@ -2,12 +2,11 @@
 ---
 # Gate-conditioning (mathematical) paper — artifact map.
 #
-# STATUS: the manuscript has not landed. papers/gate_conditioning/main.tex is
-# a BUILD SCAFFOLD, not the paper. This map therefore binds what exists today:
-# the formal sources, the claim register, the verification script, and the
-# numerical values that script produces. When the manuscript arrives, its
-# figures, tables and scalars are added here and the check tightens
-# automatically.
+# STATUS: THE MANUSCRIPT HAS LANDED. papers/gate_conditioning/main.tex is the
+# paper. Its subject is POSTERIOR DISTORTION (P1-P6, C2, C3), which is the
+# canonical title's scope; the anytime-valid e-process work (T-1..T-5) is a
+# DIFFERENT body of work, keeps its own register at docs/math/PROOF_STATUS.md,
+# and is explicitly named in the manuscript as not part of it.
 #
 # Validated by `python tools/publication/artifact_map_check.py`.
 
@@ -16,7 +15,7 @@ paper: Gate Conditioning and Anytime-Valid Evidence
 short_name: gate_conditioning
 manuscript: main.tex
 phase: 1
-manuscript_status: SCAFFOLD_ONLY
+manuscript_status: DRAFT_COMPLETE_BIBLIOGRAPHY_UNVERIFIED
 
 naming_collision_warning: >-
   docs/research/PAPER1_EMPIRICAL_SECTION.md belongs to THIS paper, not to CSIA
@@ -41,8 +40,24 @@ formal_sources:
     what: mission-level error control, e-BH and alpha spending
     path: docs/math/T2_MISSION_ERROR_CONTROL.md
   - id: M-REG
-    what: the authoritative claim register; governs the scaffold's table
+    what: >-
+      the authoritative claim register for the ANYTIME-VALID work (T-1..T-5).
+      It does NOT govern P1-P6; a reader who assumes it does will look for
+      Proposition 3 here and not find it.
     path: docs/math/PROOF_STATUS.md
+  - id: M-CORE
+    what: >-
+      THE MANUSCRIPT'S OWN FORMAL SOURCE. P1-P6, C2 and C3 with assumptions
+      stated exactly, proofs, and the counterexamples to weakened assumptions.
+    path: research/math-paper/FORMAL_CORE.md
+  - id: M-NOV
+    what: >-
+      the novelty audit. Every proposition is labelled KNOWN; the forbidden
+      phrase list is enforced by tests/test_math_paper_proofs.py.
+    path: research/math-paper/NOVELTY_AUDIT.md
+  - id: M-PRIOR
+    what: prior-art matrix; every row WEB_SEARCH_ONLY, one NOT_FOUND_NEEDS_HUMAN
+    path: research/math-paper/PRIOR_ART_MATRIX.csv
   - id: M-EMP
     what: empirical section drafted for this paper (coarsening from channel
       unavailability, explicitly NOT a measurement of gate conditioning)
@@ -52,6 +67,18 @@ formal_sources:
 # VERIFICATION
 # ---------------------------------------------------------------------------
 verification:
+  - id: V-2
+    what: >-
+      symbolic (sympy, n=4, exact) and numeric (20000 instances) verification
+      of every proposition in the manuscript. This is the verification
+      Table 1 of the manuscript transcribes.
+    script: research/math-paper/proof_audit.py
+    regenerate: PYTHONPATH=. python research/math-paper/proof_audit.py
+    determinism: >-
+      numpy default_rng(20260903); N_TRIALS=20000, H=5 fixed in source. The
+      symbolic pass needs sympy, which is deliberately NOT a project
+      dependency; without it the script runs the numeric pass and says so.
+    emits: research/math-paper/results/proof_audit.json
   - id: V-1
     what: >-
       Monte-Carlo check of the calibrator's admissibility and of Ville's bound
@@ -111,14 +138,47 @@ figures: []
 
 tables:
   - id: GT01
-    label: claim register
-    what: the claim register transcribed from PROOF_STATUS.md
-    artifact: docs/math/PROOF_STATUS.md
-    script: docs/math/proofs/eprocess_null_simulation.py
+    label: setting -- concentration versus discriminating support
+    what: >-
+      the two-row definition table in section 6. Definitional, no values.
+    artifact: research/math-paper/FORMAL_CORE.md
+    script: research/math-paper/FORMAL_CORE.md
     derivation: >-
-      transcription, not a computation. PROOF_STATUS.md governs; if the table
-      and it disagree, the table is stale.
-    values: [2.87, 0.442, 0.05, 0.0248, 0.0498, 0.0088, 0.4467, 0.7850, 0.196]
+      definitional, taken from FORMAL_CORE.md section 6. No generating script
+      exists; `script` names the source document because the checker resolves
+      this field as a path.
+    values: []
+  - id: GT02
+    label: verification
+    what: >-
+      symbolic and numeric verification of every proposition
+    artifact: research/math-paper/results/proof_audit.json
+    script: research/math-paper/proof_audit.py
+    derivation: >-
+      transcribed from proof_audit.json. Worst absolute deviations for the
+      identities, max slack and violation counts for the bounds, and the
+      P4 condition-met / agreed counts.
+    values: [4.44, 1.78, 8.88, 1.33, 1.53, 8.38, 2721]
+  - id: GT03
+    label: independent checker against production
+    what: >-
+      the 378000 tick-by-pair comparison, and the zero occurrences of the one
+      known disagreement class
+    artifact: research/systems-paper/results/checker_agreement.json
+    script: research/systems-paper/compare_checker_vs_production.py
+    derivation: transcribed from checker_agreement.json totals.
+    values: [378000, 0]
+  - id: GT04
+    label: novelty audit
+    what: >-
+      per-proposition novelty status. Every row reads KNOWN.
+    artifact: research/math-paper/NOVELTY_AUDIT.md
+    script: research/math-paper/NOVELTY_AUDIT.md
+    derivation: >-
+      transcription; no generating script. NOVELTY_AUDIT.md governs and is enforced by
+      tests/test_math_paper_proofs.py; if the table and it disagree, the table
+      is stale.
+    values: []
 
 scalars: []
 
@@ -143,15 +203,34 @@ open_items:
       counterexample above to a json_pointer, as the systems paper does.
   - id: OI-M2
     what: the manuscript itself has not been delivered
-    blocker: true
-    owner: manuscript agent
-    resolution: >-
-      replace the body of main.tex. Until then `make paper-math` builds the
-      scaffold and no gate-paper release tag may be cut.
-  - id: OI-M3
-    what: >-
-      papers/gate_conditioning/refs.bib is empty of entries. The scaffold
-      cites nothing, so the bibliography guard passes trivially; it will start
-      doing real work when the manuscript adds citations.
     blocker: false
     owner: manuscript agent
+    status: CLOSED
+    resolution: >-
+      DONE. main.tex is the manuscript; `make paper-math` builds an 8-page PDF
+      with every citation resolved. The e-process register it used to
+      transcribe is named in the manuscript as a separate body of work.
+  - id: OI-M4
+    what: >-
+      EVERY entry in papers/gate_conditioning/refs.bib is UNVERIFIED, and the
+      most important of them -- the coarsening-at-random reference that makes
+      Proposition 5 KNOWN rather than a contribution -- is RECONSTRUCTED from
+      search results alone.
+    blocker: true
+    owner: a human with publisher access
+    resolution: >-
+      run `make bib-verify` from a host whose egress permits api.crossref.org,
+      read each diff, and clear a marker only for an entry it reports clean.
+      A web search result is not a publisher record.
+  - id: OI-M3
+    what: >-
+      papers/gate_conditioning/refs.bib was empty, so the bibliography guard
+      passed trivially.
+    blocker: false
+    owner: manuscript agent
+    status: CLOSED
+    resolution: >-
+      DONE, and it now does real work: six entries, all carrying markers, so
+      `make bib-guard` reports this paper as blocked too. That is the honest
+      state -- a paper that labels every proposition KNOWN and cites nothing
+      would be claiming novelty by omission. See OI-M4.

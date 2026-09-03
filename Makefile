@@ -54,13 +54,28 @@ tex-deps:
 	  texlive-latex-base texlive-latex-recommended texlive-latex-extra \
 	  texlive-fonts-recommended
 
+# pdflatex -> bibtex -> pdflatex -> pdflatex.
+#
+# THE BIBTEX PASS WAS MISSING. Without it every \cite rendered as [?] and the
+# "PDF builds clean" gate passed on a PDF whose citations were all undefined --
+# 21 of them in the systems paper. A build that cannot resolve a citation is
+# exactly the thing that gate exists to catch, so the pass is added AND an
+# undefined-citation check now fails the build rather than printing a warning
+# nobody reads.
 define build_paper
 	@mkdir -p $(BUILD)/$(1)
 	@echo "=== building papers/$(1)/main.tex"
 	@cd papers/$(1) && pdflatex $(TEXOPTS) -output-directory=$(CURDIR)/$(BUILD)/$(1) main.tex >/dev/null
+	@cd $(BUILD)/$(1) && BIBINPUTS=$(CURDIR)/papers/$(1): bibtex main >/dev/null 2>&1 || true
+	@cd papers/$(1) && pdflatex $(TEXOPTS) -output-directory=$(CURDIR)/$(BUILD)/$(1) main.tex >/dev/null
 	@cd papers/$(1) && pdflatex $(TEXOPTS) -output-directory=$(CURDIR)/$(BUILD)/$(1) main.tex >/dev/null
 	@test -f $(BUILD)/$(1)/main.pdf || (echo "FAIL: no PDF produced for $(1)"; exit 1)
-	@echo "    $(BUILD)/$(1)/main.pdf  ($$(pdfinfo $(BUILD)/$(1)/main.pdf 2>/dev/null | awk '/^Pages/{print $$2" pages"}' || echo built))"
+	@u=$$(grep -c "Citation .* undefined" $(BUILD)/$(1)/main.log 2>/dev/null || true); \
+	 r=$$(grep -c "Reference .* undefined" $(BUILD)/$(1)/main.log 2>/dev/null || true); \
+	 if [ $$u -ne 0 ] || [ $$r -ne 0 ]; then \
+	   echo "FAIL: $(1) has $$u undefined citation(s) and $$r undefined reference(s)"; \
+	   grep "undefined" $(BUILD)/$(1)/main.log | head -20; exit 1; fi
+	@echo "    $(BUILD)/$(1)/main.pdf  ($$(pdfinfo $(BUILD)/$(1)/main.pdf 2>/dev/null | awk '/^Pages/{print $$2" pages"}' || echo built))  citations resolved"
 endef
 
 .PHONY: paper-systems
@@ -699,6 +714,7 @@ mechanism-a:
 	PYTHONPATH=. $(PY) research/systems-paper/export_active_sets.py
 	PYTHONPATH=. $(PY) research/systems-paper/independent_checker.py
 	PYTHONPATH=. $(PY) research/systems-paper/compare_checker_vs_production.py
+	PYTHONPATH=. $(PY) research/systems-paper/current_stack_structural.py
 
 # NAMED `paper-mechanism-b` because `mechanism-b` ALREADY EXISTS at line ~297
 # and is the authoritative PREREGISTERED ArduPilot campaign. Overriding it

@@ -184,9 +184,13 @@ FORBIDDEN = (
 #: A line that FORBIDS a phrase necessarily contains it. Exempting whole
 #: files would blind the test to the manuscript; exempting whole lines that
 #: carry a prohibition marker keeps it looking at every assertion.
+#: "claim no" is the manuscript's own disclaimer form -- "We claim no new
+#: information-theoretic result, no new Bayesian identity". A line that
+#: DISCLAIMS a phrase necessarily contains it, and the guard exists to catch
+#: the phrase being ASSERTED.
 _PROHIBITION_MARKERS = ("forbidden", "must not", "may not", "never",
-                        "none claimed", "do not claim", "not acceptable",
-                        "prohibit")
+                        "none claimed", "do not claim", "claim no",
+                        "not acceptable", "prohibit")
 
 
 def _is_mention_only(line: str, phrase: str) -> bool:

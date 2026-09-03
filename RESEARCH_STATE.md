@@ -95,9 +95,19 @@ artifact has drifted from `848f556`.
 
 ## 3. The mathematical paper (gate conditioning)
 
-**Status: SOURCES AND CLAIM REGISTER COMPLETE. MANUSCRIPT NOT DELIVERED.**
+**Status: MANUSCRIPT DELIVERED. BIBLIOGRAPHY UNVERIFIED, WHICH BLOCKS
+SUBMISSION.**
 **Artifact path: `papers/gate_conditioning/`.**
-**Build: `make paper-math` compiles a scaffold, not the paper.**
+**Build: `make paper-math` compiles an 8-page manuscript, every citation
+resolved.**
+
+**A scope change worth stating plainly.** The manuscript's subject is the
+canonical title's: POSTERIOR DISTORTION from hypothesis-dependent validity
+gating (P1-P6, C2, C3), whose formal source is
+`research/math-paper/FORMAL_CORE.md`. The ANYTIME-VALID e-process work
+(T-1..T-5) registered in §3.2 below is a **different body of work**, keeps its
+own register, and is named in the manuscript as explicitly not part of it.
+Every proposition in the manuscript is labelled **KNOWN**.
 
 ### 3.1 Scope
 

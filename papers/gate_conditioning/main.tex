@@ -1,24 +1,31 @@
 % ---------------------------------------------------------------------------
-% BUILD SCAFFOLD -- THIS IS NOT THE MANUSCRIPT.
+% Posterior Distortion from Hypothesis-Dependent Validity Gating in Runtime
+% Diagnosis.
 %
-% The gate-conditioning paper is being written elsewhere. This file exists so
-% that `make paper-math` has something to compile from a clean checkout, so
-% that the bibliography guard and the artifact-map check have a target, and so
-% that the claim inventory the paper must respect is visible as a compiled
-% artifact rather than only as markdown.
+% This file WAS a build scaffold. It is now the manuscript.
 %
-% When the manuscript arrives it replaces the body below. The preamble, the
-% bibliography style and the artifact map are the parts intended to survive.
+% EVERY PROPOSITION IN THIS PAPER IS LABELLED KNOWN. See
+% research/math-paper/NOVELTY_AUDIT.md, which is enforced by
+% tests/test_math_paper_proofs.py. The contribution claimed is the runtime
+% formulation, the static checkability of the condition, and the implemented
+% instance -- not the algebra.
 %
-% Do NOT cite this document. Do NOT treat the table below as a result: it is a
-% transcription of docs/math/PROOF_STATUS.md, which is the authoritative
-% register.
+% Sources:
+%   research/math-paper/FORMAL_CORE.md        the proofs
+%   research/math-paper/proof_audit.py        symbolic + numeric verification
+%   research/math-paper/PRIOR_ART_MATRIX.csv  novelty status of each result
+%   research/systems-paper/                   the implemented instance
+%
+% BIBLIOGRAPHY STATUS: every entry in refs.bib is UNVERIFIED. Egress from the
+% authoring environment denies api.crossref.org, doi.org and dblp.org. This is
+% a submission blocker and `make bib-guard` reports it. Do not remove a marker
+% without checking the publisher record.
 % ---------------------------------------------------------------------------
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -27,10 +34,14 @@
 \usepackage[hidelinks]{hyperref}
 
 \newcommand{\code}[1]{\texttt{\small #1}}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}[proposition]{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}
 
-\title{Gate Conditioning and Anytime-Valid Evidence in a Cross-Sensor\\
-Diagnostic Layer\\[6pt]
-\large BUILD SCAFFOLD, NOT THE MANUSCRIPT}
+\title{Posterior Distortion from Hypothesis-Dependent Validity Gating\\
+in Runtime Diagnosis}
 
 \author{SWORT Aerospace}
 \date{}
@@ -39,90 +50,534 @@ Diagnostic Layer\\[6pt]
 \maketitle
 
 \begin{abstract}
-This file is a build scaffold. It is committed so the publication toolchain
-has a compilable target for the mathematical paper before the manuscript
-itself lands, and so that the claim register the manuscript must respect is
-carried in the build rather than only in prose. It contains no results and
-must not be cited. The authoritative sources are listed in
-\code{papers/gate\_conditioning/GATE\_PAPER\_ARTIFACT\_MAP.yaml}.
+A runtime diagnostic layer decides, tick by tick, which of its evidence is
+\emph{applicable}. That decision is a coarsening mechanism the system designed
+for itself, and whether it may be ignored is a property of the software rather
+than of the data. We give the exact algebra. Writing $q$ for the posterior
+obtained from the active evidence alone and $p$ for the posterior actually
+produced, $p_h = q_h w_h / \mathbb{E}_q[w]$, so every pairwise log-posterior
+ratio acquires an additive, evidence-independent offset $\log(w_a/w_b)$ that
+further data of the same kind cannot argue with. When no active term
+distinguishes two hypotheses their ratio is pinned to the prior ratio exactly,
+for as long as the gate stays shut, however concentrated the posterior becomes.
+We give the ignorability condition, its multivalued caveat, a sufficient
+condition for the MAP to be unchanged, and exact divergence identities:
+$\mathrm{KL}(q\Vert p)$ is precisely the Jensen gap of $\log w$ under $q$, so
+the distortion is zero exactly when the validity factors do not vary across
+hypotheses.
+
+\textbf{We claim no new mathematics.} Each result is an instance of something
+known --- self-normalised reweighting, coarsening at random, argmax stability
+under bounded perturbation --- and the paper says so for each one. What we
+offer is the runtime-diagnostic formulation, the observation that the
+condition is decidable \emph{statically, from a signature table, before the
+system runs}, and a deployed layer that fails it: an independently written
+checker that imports none of the production analysis agrees with it on
+$378{,}000$ of $378{,}000$ tick-by-pair comparisons and finds one hypothesis
+pair pinned to its prior for $200$ consecutive ticks.
 \end{abstract}
 
-\section{Scope of the mathematical paper}
+%======================================================================
+\section{The problem}
 
-The paper concerns \emph{gate conditioning}: the statistical consequences of a
-validity gate whose closure depends on the vehicle state, potentially
-including the state produced by the fault under diagnosis. The distinction the
-paper turns on is between \emph{endogenous} coarsening, where a gate closes as
-a function of that state, and \emph{exogenous} coarsening, where a channel is
-absent from the record for reasons unrelated to the fault. The coarsening
-index $\kappa$ is agnostic to which mechanism applies; results that turn on
-the cause of unavailability apply only to the first.
+Diagnostic systems that run online do not evaluate every test at every
+instant. A test whose preconditions are unmet is \emph{not applicable}, and a
+common and natural implementation is to skip it: the corresponding term is
+removed from the score. This is not a bug. Scoring a test whose preconditions
+are unmet would inject noise, and down-weighting it requires a weight nobody
+has measured.
 
-Source material, all committed:
-\begin{itemize}
-\item \code{docs/math/CSIA\_EVIDENCE\_FORMAL\_SPEC.md}, the formal setting.
-\item \code{docs/math/ANYTIME\_VALID\_EVIDENCE.md}, the e-value framing.
-\item \code{docs/math/T1\_BLOCKWISE\_EPROCESS.md}, the blockwise construction.
-\item \code{docs/math/T2\_MISSION\_ERROR\_CONTROL.md}, mission-level control.
-\item \code{docs/math/PROOF\_STATUS.md}, the authoritative claim register.
-\item \code{docs/research/PAPER1\_EMPIRICAL\_SECTION.md}, the empirical
-      section drafted for \emph{this} paper. The filename says
-      \code{PAPER1} and refers to the mathematical paper, not to CSIA Systems
-      Paper~I. The collision is recorded in \code{RESEARCH\_STATE.md}.
-\end{itemize}
+The difficulty is that applicability is often \emph{hypothesis-relative}, and
+that the condition producing the fault may be the same condition that removes
+the applicability. A receiver that loses its fix stops emitting the observable
+that would have named the loss. The diagnostic layer is then reasoning about a
+hypothesis using evidence the hypothesis itself destroyed.
 
-\section{Claim register, transcribed}
+Two questions follow, and this paper answers them exactly.
 
-Transcribed from \code{docs/math/PROOF\_STATUS.md}. That file governs; if this
-table and it disagree, this table is stale.
+\begin{enumerate}
+\item How far can the produced posterior be from the posterior the surviving
+      evidence supports, and in what direction?
+\item When is the difference nil, and is that condition checkable?
+\end{enumerate}
+
+\paragraph{What this paper does not do.} It makes no observability claim: the
+physical fault may be perfectly detectable by other means, and in the system we
+measure it is. It offers no new inequality, no new estimator and no
+calibration. It does not show that any system was unsafe.
+
+%======================================================================
+\section{Setting}
+\label{sec:setting}
+
+Let $H=\{h_1,\dots,h_n\}$, $n\ge 2$, be a finite set of mutually exclusive
+hypotheses. Let $\pi_h$ be the prior, $L_h$ the likelihood of the
+\emph{active} evidence under $h$, and $w_h>0$ the hypothesis-dependent
+validity factor: everything the gating contributes to $h$'s score that is not
+already in $L_h$. Define
+\begin{equation}
+q_h \;=\; \frac{\pi_h L_h}{\sum_j \pi_j L_j},
+\qquad
+p_h \;=\; \frac{\pi_h w_h L_h}{\sum_j \pi_j w_j L_j}.
+\label{eq:qp}
+\end{equation}
+
+\begin{assumption}[strict positivity]\label{a:pos}
+$\pi_h, L_h, w_h \in (0,\infty)$ for all $h$.
+\end{assumption}
+\begin{assumption}[finiteness]\label{a:fin}
+$n<\infty$.
+\end{assumption}
+\begin{assumption}[no independence is assumed]\label{a:indep}
+Nothing below assumes the gate is independent of the residual, or of the
+fault. The gate may be an arbitrary function of the same state the evidence is
+a function of.
+\end{assumption}
+\begin{assumption}[$w$ is exogenous to the algebra]\label{a:w}
+$w$ is whatever the implementation makes it. We say what follows \emph{given}
+$w$; we do not model how $w$ arises, except in
+Section~\ref{sec:ignorable} where a structural condition on it is stated
+explicitly.
+\end{assumption}
+
+Assumption~\ref{a:indep} is worth dwelling on. A reader familiar with
+missing-data arguments will expect an independence or ignorability condition
+to be doing the work somewhere. It is not. The identities below are
+unconditional; ignorability appears only in Section~\ref{sec:ignorable}, as
+the special case in which the distortion vanishes.
+
+Write $\mathbb{E}_q[w]=\sum_h q_h w_h$, $w_{\max}=\max_h w_h$,
+$w_{\min}=\min_h w_h$, and
+\begin{equation}
+R \;=\; \log\frac{w_{\max}}{w_{\min}} \;\ge\; 0 ,
+\end{equation}
+the \emph{log range} of the validity factors.
+
+%======================================================================
+\section{The reweighting identity}
+
+\begin{proposition}[reweighting]\label{p:reweight}
+Under Assumptions~\ref{a:pos}--\ref{a:fin}, for every $h$,
+\begin{equation}
+p_h \;=\; q_h\,\frac{w_h}{\mathbb{E}_q[w]} .
+\label{eq:p1}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Let $Z_q=\sum_j \pi_j L_j$ and $Z_p=\sum_j \pi_j w_j L_j$, both finite and
+positive. Then
+$q_h w_h/\mathbb{E}_q[w]
+= (\pi_h L_h/Z_q)\,w_h \big/ \sum_j (\pi_j L_j / Z_q) w_j
+= \pi_h w_h L_h / Z_p = p_h$.
+\end{proof}
+
+The normalising constants cancel, and that cancellation is the whole content:
+$p$ is the \emph{self-normalised} reweighting of $q$ by $w$.
+
+\begin{proposition}[log-ratio decomposition]\label{p:logratio}
+For any $a,b\in H$,
+\begin{equation}
+\log\frac{p_a}{p_b}
+\;=\;
+\log\frac{q_a}{q_b}
+\;+\;
+\log\frac{w_a}{w_b} .
+\label{eq:p2}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+By \eqref{eq:p1}, $p_a/p_b=(q_a/q_b)(w_a/w_b)$; $\mathbb{E}_q[w]$ cancels.
+\end{proof}
+
+Equation~\eqref{eq:p2} is the object the rest of the paper is about. The
+gating contributes an \textbf{additive, evidence-independent} shift to every
+pairwise log-posterior ratio. It does not scale the evidence, does not
+interact with it, and does not diminish as evidence accumulates.
+$\log(w_a/w_b)$ is a constant offset the data cannot argue with.
+
+%======================================================================
+\section{Pinning, and the condition that causes it}
+\label{sec:pinning}
+
+\begin{proposition}[pinned to the prior]\label{p:pin}
+If $L_a=L_b$ and $w_a=w_b$, then $p_a/p_b=\pi_a/\pi_b$ exactly, for every
+value of the observed evidence.
+\end{proposition}
+
+\begin{proof}
+$q_a/q_b=\pi_a/\pi_b$ since $L_a=L_b$; apply \eqref{eq:p2} with
+$\log(w_a/w_b)=0$.
+\end{proof}
+
+Proposition~\ref{p:pin} is stronger than "the evidence is weak". The ratio is
+not merely slow to move; it \emph{cannot} move. No quantity of further
+evidence of this kind changes it.
+
+\paragraph{When does $L_a=L_b$ hold in practice?} For an additive score over
+per-feature terms --- the naive-Bayes signature form used by the system in
+Section~\ref{sec:instance}, and by many runtime diagnostic layers --- write
+$\ell_j(h)$ for feature $j$'s log-likelihood contribution under $h$ and
+$g_j\ge 0$ for its gate. Then
+\begin{equation}
+\log L_a - \log L_b
+\;=\;
+\sum_{j \in \mathrm{ACTIVE}} \big(\ell_j(a) - \ell_j(b)\big),
+\qquad
+\mathrm{ACTIVE}=\{j: g_j>0\}.
+\end{equation}
+Every feature contributing identically to $a$ and $b$ vanishes from this sum
+identically, for every value of the observation. Define the
+\emph{active distinguishing set}
+\begin{equation}
+D(a,b) \;=\; \{\, j \in \mathrm{ACTIVE} : \ell_j(a) \neq \ell_j(b) \,\}.
+\label{eq:D}
+\end{equation}
+If $D(a,b)=\emptyset$ then $L_a=L_b$.
+
+\paragraph{The static-checkability observation.} For a signature model in
+which $h$ is characterised by the feature set $\mathrm{LOW}(h)$ it drives low,
+$\ell_j(a)\neq\ell_j(b)$ exactly when $j$ lies in the symmetric difference, so
+\begin{equation}
+D(a,b) \;=\; \big(\mathrm{LOW}(a) \,\triangle\, \mathrm{LOW}(b)\big)
+\;\cap\; \mathrm{ACTIVE} .
+\label{eq:Dsym}
+\end{equation}
+The first factor is a property of the \emph{signature table} and can be
+computed before the system runs. The second is the gate state. So the question
+"can this pair ever be pinned?" is answered by a set operation on a
+configuration file, and the question "is it pinned now?" costs one
+intersection. This is the observation we regard as the paper's practical
+contribution, and Section~\ref{sec:instance} is what it buys.
+
+%======================================================================
+\section{Ignorability, and a caveat that is easy to get wrong}
+\label{sec:ignorable}
+
+\begin{proposition}[constant validity factor]\label{p:c2}
+If $w_h=c$ for all $h$ and some $c>0$, then $p=q$ identically.
+\end{proposition}
+\begin{proof}
+$\mathbb{E}_q[w]=c$, so $p_h=q_h c/c=q_h$ by \eqref{eq:p1}.
+\end{proof}
+
+\begin{remark}[this is coarsening at random]
+Proposition~\ref{p:c2} is recognisably the ignorability condition for a
+coarsening mechanism~\cite{heitjan1991car}. We claim it as \textbf{known} and
+cite it as such. What we add is the reading: here the coarsening mechanism is
+a component of the diagnostic software, so its ignorability is a property
+somebody wrote, can inspect, and can test.
+\end{remark}
+
+\paragraph{The caveat.} The condition is that $w$ be \emph{constant across
+hypotheses}, not that the gate be random, and not that the gate be
+conditionally independent of the fault. With a binary gate applied uniformly
+to all hypotheses, the surviving-evidence factorisation yields a single shared
+$w$ and Proposition~\ref{p:c2} applies. With a \emph{multivalued or partial}
+gate --- $g_j\in[0,1]$, as real implementations often have --- the per-feature
+contribution is $g_j\,\ell_j(h)$, and the hypothesis dependence re-enters
+through $\ell_j$ even when $g_j$ itself is hypothesis-blind. Constancy of $w$
+then requires the gate-weighted likelihood difference to vanish, which is
+Proposition~\ref{p:pin}'s condition and not an independence statement.
+
+\begin{remark}
+\textbf{Conditional independence of the gate from the fault does not by itself
+give $p=q$ in the multivalued case.} We state this because the binary
+intuition is strong and the multivalued case is the common one.
+\end{remark}
+
+%======================================================================
+\section{Concentration is not discriminating support}
+\label{sec:support}
+
+\begin{corollary}\label{c:support}
+If $D(a,b)=\emptyset$ and $w_a=w_b$, then
+$\log(p_a/p_b)=\log(\pi_a/\pi_b)$ regardless of $\max_h p_h$. In particular
+$p_a$ may be arbitrarily close to $1$ --- driven by the prior and by
+likelihood terms that do not distinguish $a$ from $b$ --- while the evidence
+contains nothing separating them.
+\end{corollary}
+
+Two different quantities are in play and an implementation that reports only
+one of them will mislead its consumer:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\emph{posterior concentration} & a function of all hypotheses' scores and of
+the prior \\
+\emph{discriminating support} & a function of which terms are active \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}[terminology]
+We do not call the posterior a \emph{confidence}. A value of $0.9998$ with
+$D(a,b)=\emptyset$ carries no information about $a$ versus $b$, and the word
+invites a reader to think it does.
+\end{remark}
+
+Corollary~\ref{c:support} says what \emph{cannot} be concluded. It does not
+say $a$ and $b$ are indistinguishable in principle: another sensor, another
+relation, or an ungated version of the same relation may separate them. The
+distinction matters practically, because it points at instrumentation rather
+than at inference.
+
+%======================================================================
+\section{MAP robustness}
+
+\begin{proposition}[sufficient condition]\label{p:map}
+Let $\Delta=\log q_{(1)}-\log q_{(2)}$ be the log margin between the top two
+hypotheses under $q$. If $\Delta>R$ then
+$\arg\max_h p_h=\arg\max_h q_h$.
+\end{proposition}
+
+\begin{proof}
+By \eqref{eq:p1}, $\log p_h=\log q_h+\log w_h-\log\mathbb{E}_q[w]$, and the
+last term is common to all $h$; ranking under $p$ is the ranking of
+$\log q_h+\log w_h$. For the $q$-argmax $a$ and any $b\ne a$,
+$(\log q_a+\log w_a)-(\log q_b+\log w_b)\ge \Delta-R>0$.
+\end{proof}
+
+\begin{remark}[sufficient, not necessary]
+Over $20{,}000$ random instances the condition held in $2{,}721$, and in every
+one of those the argmax agreed. In $6{,}877$ instances the argmax moved
+\emph{while the condition did not hold}, which is permitted. We report the
+second number so the proposition is not read as a characterisation.
+\end{remark}
+
+Proposition~\ref{p:map} is an instance of the standard argument that an
+optimiser is unchanged when the decision margin exceeds the perturbation bound;
+we claim it as known.
+
+%======================================================================
+\section{Exact divergences, and bounds}
+
+\begin{proposition}\label{p:kl}
+$\mathrm{KL}(q\Vert p)=\log \mathbb{E}_q[w]-\mathbb{E}_q[\log w]$ and
+$\mathrm{KL}(p\Vert q)=\mathbb{E}_p[\log w]-\log \mathbb{E}_q[w]$.
+\end{proposition}
+\begin{proof}
+$\sum_h q_h\log(q_h/p_h)=\sum_h q_h\log(\mathbb{E}_q[w]/w_h)$ by
+\eqref{eq:p1}, and symmetrically for the second.
+\end{proof}
+
+The first is exactly the Jensen gap of $\log w$ under $q$. It is non-negative,
+and zero if and only if $w$ is $q$-almost-surely constant --- which is
+Proposition~\ref{p:c2}. So:
+
+\begin{center}
+\emph{the gating distorts the posterior precisely to the extent that the
+validity factors vary across hypotheses, and by exactly the Jensen gap.}
+\end{center}
+
+\begin{proposition}\label{p:bounds}
+For every pair $a,b$,
+$\big|\log(p_a/p_b)-\log(q_a/q_b)\big|\le R$, and
+$\mathrm{TV}(p,q)\le (w_{\max}-w_{\min})/(4\,\mathbb{E}_q[w])$.
+\end{proposition}
+\begin{proof}
+The first is immediate from \eqref{eq:p2}. For the second,
+$\mathrm{TV}(p,q)=\tfrac12\sum_h q_h\,|w_h/\mathbb{E}_q[w]-1|
+=\mathbb{E}_q|w-\mathbb{E}_q[w]|/(2\mathbb{E}_q[w])$, and the mean absolute
+deviation of a variable supported on $[w_{\min},w_{\max}]$ is at most
+$(w_{\max}-w_{\min})/2$.
+\end{proof}
+
+The first bound is attained; the audit's worst slack over $20{,}000$ instances
+is $+1.78\times10^{-15}$, equality to floating-point precision. \textbf{We make
+no sharpness claim for the second}, and no claim that either is the sharpest
+available: both steps are elementary.
+
+%======================================================================
+\section{Verification}
+
+Every proposition above is checked two ways, and the artifact is committed.
+Symbolically with a computer-algebra system at $n=4$
+(\code{simplify(lhs$-$rhs)$\,=\,$0}, exact), and numerically over $20{,}000$
+random instances. Worst absolute deviations:
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{p{0.56\textwidth}ll}
+\begin{tabular}{llr}
 \toprule
-Claim & Status & Evidence \\
+Result & Symbolic ($n=4$) & Numeric worst deviation \\
 \midrule
-Calibrator $\kappa p^{\kappa-1}$ is an e-value for super-uniform $p$
-  & PROVED & T-1 Lemma 1 \\
-Predictable convex combination across dependent residuals
-  & PROVED & T-1 Lemma 2 \\
-Product across dependent residuals
-  & REFUTED & measured mean 2.87 \\
-Naive per-tick temporal product under CSIA smoothing
-  & REFUTED & measured 0.442 vs 0.05 \\
-T-1 blockwise product given block conditional super-uniformity
-  & PROVED given A3 & T-1 \S5 \\
-A3 itself at $L=50$ for $\rho \le 0.94$
-  & EMPIRICAL ONLY & 0.0248 / 0.0498 \\
-LR e-process under correct conditional null
-  & PROVED & measured 0.0088 \\
-LR e-process under misspecified null
-  & REFUTED & measured 0.4467 \\
-Context-ignorant calibration under regime switching
-  & REFUTED & measured 0.7850 \\
-Restart validity without first-observation conditioning
-  & REFUTED & measured 0.196 \\
-T-2 mission-level error control
-  & OPEN & e-BH pre-registered \\
-T-3 non-double-counting formalization
-  & OPEN & Lemma 2 is the base \\
-T-4 identifiability-constrained isolation
-  & OPEN & v1 \code{classify\_isolation} \\
-T-5 bounded shadow arbitration
-  & OPEN & --- \\
+Prop.~\ref{p:reweight} reweighting          & exact & $4.44\times10^{-16}$ \\
+Prop.~\ref{p:logratio} log-ratio            & exact & $1.78\times10^{-15}$ \\
+Prop.~\ref{p:pin} pinned to prior           & exact & $8.88\times10^{-16}$ \\
+Prop.~\ref{p:c2} constant $w$               & exact & --- \\
+Prop.~\ref{p:kl} $\mathrm{KL}(q\Vert p)$    & exact & $1.33\times10^{-15}$ \\
+Prop.~\ref{p:kl} $\mathrm{KL}(p\Vert q)$    & exact & $1.53\times10^{-15}$ \\
+Prop.~\ref{p:bounds} $R$ bound              & ---   & 0 violations, slack $+1.78\times10^{-15}$ \\
+Prop.~\ref{p:bounds} TV bound               & ---   & 0 violations, slack $-8.38\times10^{-5}$ \\
+Prop.~\ref{p:map} MAP condition             & ---   & held in $2{,}721/2{,}721$ \\
 \bottomrule
 \end{tabular}
-\caption{Claim register for the mathematical paper. Six entries are REFUTED
-and are retained: they are counterexamples that shaped the construction, and
-one of them was found by the verification suite against the project's own
-proposal.}
+\caption{Verification. The symbolic pass is at $n=4$; the hand proofs are for
+general $n$ and the machine check is not.}
+\label{tab:verify}
 \end{table}
 
-\section{What this scaffold deliberately does not contain}
+%======================================================================
+\section{An implemented instance}
+\label{sec:instance}
 
-No theorem statements, no proofs, no numerical examples, and no empirical
-results. Those belong to the manuscript. Committing a placeholder that looked
-like a paper would be worse than committing one that plainly is not.
+The condition in \eqref{eq:Dsym} is not hypothetical. A deployed cross-sensor
+diagnostic layer for small uncrewed aircraft maintains a naive-Bayes diagnosis
+over eight mutually exclusive causes, with a per-feature gate. For the pair
+$(\texttt{nominal},\texttt{gps\_fault})$ the symmetric difference is a single
+feature: the GNSS internal-physics consistency check. Its gate closes when the
+receiver reports no valid fix. So a fault that removes the fix removes the only
+term that could name it, and \eqref{eq:Dsym} is empty for the duration.
+
+To test that reading without circularity, a checker was written that evaluates
+\eqref{eq:Dsym} directly from the committed signature table and a per-tick
+record of which features were active. It imports none of the production
+analysis --- a test runs it in a fresh interpreter and asserts that no module
+of the diagnostic layer, and no part of its support analysis, appears in
+\code{sys.modules} afterwards. Its input carries no leader, no posterior and no
+support label. Against the production computation of the same quantity, over
+nine scenarios, $1500$ ticks each and all $28$ unordered hypothesis pairs:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+Tick-by-pair comparisons & $378{,}000$ \\
+Agreements & $378{,}000$ \\
+Disagreements & $0$ \\
+Cases in the one known disagreement class & $0$ \\
+\bottomrule
+\end{tabular}
+\caption{Independent checker against production. The two definitions differ in
+exactly one degenerate case, when a feature's consistency is exactly $0.5$ and
+a structurally distinguishing term contributes zero numerically. That class was
+predicted before the comparison, counted separately, and did not occur.}
+\label{tab:checker}
+\end{table}
+
+What it found:
+
+\begin{itemize}
+\item $(\texttt{nominal},\texttt{gps\_fault})$ is the \emph{only} pair among
+      the $28$ that ever collapses.
+\item It collapses for $76$ ticks at the start of \emph{every} scenario,
+      including fault-free flight, because the gate is deliberately closed
+      during a smoother warm-up. A structural property, not a fault.
+\item Under injected fix loss it collapses for a further $200$ consecutive
+      ticks --- exactly the injected window --- during which
+      Proposition~\ref{p:pin} says the posterior ratio equals the prior ratio.
+\end{itemize}
+
+\paragraph{A negative control on a current stack.} The same predicate was run
+over $15{,}595$ ticks from $20$ trials on a current-generation autopilot in
+software-in-the-loop, in a campaign whose validity criterion was that the fix
+never dropped. Under our account the predicate must then report the pair
+distinguishable at every tick, and a single collapse would falsify it. It
+reports $0$ collapses in $15{,}595$ ticks. This is a control, not a
+replication of the fix-loss behaviour, and we do not present it as one: no
+fix-loss arm exists on that platform in our data.
+
+\paragraph{The implemented consequence.} The layer now reports a support state
+separately from the posterior, and a leader above $0.999$ with an empty
+$D(a,b)$ against a required competitor is emitted as
+\emph{support lost for required information} rather than as eligibility ---
+independently of freshness, so removing the freshness rule would not rescue
+it.
+
+%======================================================================
+\section{What is new, stated plainly}
+
+Nothing in Sections 3--7 is new mathematics, and we do not want a reader to
+have to work that out. Table~\ref{tab:novelty} is the audit.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llp{0.42\textwidth}}
+\toprule
+Result & Status & Prior art \\
+\midrule
+Prop.~\ref{p:reweight}, \ref{p:logratio} & KNOWN & self-normalised importance
+weighting \\
+Prop.~\ref{p:pin}, Cor.~\ref{c:support} & KNOWN as algebra & --- \\
+Prop.~\ref{p:c2} & KNOWN & coarsening at random~\cite{heitjan1991car} \\
+Prop.~\ref{p:map} & KNOWN & argmax stability under bounded perturbation \\
+Prop.~\ref{p:kl}, \ref{p:bounds} & KNOWN & Jensen; bounded-support mean
+absolute deviation \\
+\bottomrule
+\end{tabular}
+\caption{Novelty audit. Every proposition is labelled KNOWN.}
+\label{tab:novelty}
+\end{table}
+
+What we claim is: the exact runtime-diagnostic formulation; the connection
+between hypothesis-dependent validity and posterior distortion stated as
+\eqref{eq:p2}; the structural-support reading and its
+\emph{static checkability} from a signature table; and the implemented
+counterexample of Section~\ref{sec:instance}.
+
+We claim no new information-theoretic result, no new Bayesian identity, and no
+sharper bound than what is already available.
+
+%======================================================================
+\section{Related work}
+
+The mechanism by which a fault removes its own observability is studied in
+discrete-event systems under state-dependent observation
+maps~\cite{dong2024statedependent} and, for observation loss imposed from
+outside, under intermittent and permanent
+loss~\cite{carvalho2012intermittent,carvalho2013permanent} and general sensor
+failure~\cite{takai2021diagnosability}. We assert no priority over the general
+mechanism. Our setting differs in being a continuous-signal Bayesian layer in
+which applicability is hypothesis-relative and decided by the diagnostic system
+itself, so the condition is a property of its configuration rather than of an
+automaton.
+
+The ignorability question is the coarsening-at-random
+condition~\cite{heitjan1991car}. Which faults a given instrumentation can
+separate is the subject of structural isolability and sensor
+placement~\cite{krysander2008sensorplacement}; that literature answers the
+question our Section~\ref{sec:support} raises but does not answer, namely what
+to instrument.
+
+%======================================================================
+\section{Limitations}
+
+\begin{enumerate}
+\item The symbolic verification is at $n=4$. The hand proofs are general; the
+      machine check is not.
+\item The implemented instance is $n=1$: one deployed layer, whose skip-style
+      gate is a natural implementation choice but whose prevalence we do not
+      establish. A structural-analysis FDI design would mark the fault set
+      unisolable instead, and would not exhibit this.
+\item The quantities the layer reports are model states, not calibrated
+      probabilities, and we do not calibrate them. The results are invariant to
+      the layer's tempering constant, which scales $\log q$ for every
+      hypothesis alike.
+\item No claim of operational harm is made, and none is supported by our data.
+\item \textbf{Every bibliographic entry in this manuscript is unverified.} The
+      authoring environment could not reach a publisher record. This is a
+      submission blocker and is reported as one.
+\end{enumerate}
+
+%======================================================================
+\section*{A separate body of work, not in this paper}
+
+This project also holds results on \emph{anytime-valid} evidence --- e-value
+calibration, blockwise e-processes and mission-level error control --- with
+their own register at \code{docs/math/PROOF\_STATUS.md}. That register contains
+six refutations, several of them counterexamples to constructions this project
+itself proposed, and four open items. It is a different body of work from the
+one above and is deliberately \textbf{not} part of this manuscript. We name it
+here so that a reader who encounters the register does not mistake its open
+items for gaps in the results proved above.
+
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}

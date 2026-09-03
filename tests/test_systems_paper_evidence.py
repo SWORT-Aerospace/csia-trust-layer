@@ -173,6 +173,44 @@ def test_only_the_fix_loss_scenario_has_a_second_blind_window():
             assert blind == 76, (label, blind)
 
 
+# ================================= mechanism A on real current-stack ticks
+def test_the_current_stack_control_is_labelled_as_a_control():
+    """SC-26. The one way this result could be misused is by being read as a
+    replication of self-occlusion. It is not one and the artifact says so in
+    a machine-readable field, not only in prose."""
+    doc = _load("current_stack_structural.json")
+    assert doc["is_a_replication_of_self_occlusion"] is False
+    assert "fix-PRESERVING" in doc["why_not"] or "REMOVES" in doc["why_not"]
+    assert doc["campaign_verdicts"]["ardupilot"] == "REPLICATED"
+    assert doc["campaign_verdicts"]["px4"] == "INAPPLICABLE"
+
+
+def test_the_current_stack_predicate_never_collapsed():
+    """The falsification test, declared in the artifact before the numbers:
+    on a fix-preserving trial a collapse would show the account is wrong."""
+    doc = _load("current_stack_structural.json")
+    assert doc["ticks"] > 10_000, doc["ticks"]
+    assert doc["gate_closed_ticks"] == 0
+    assert doc["pair_not_distinguishable_ticks"] == 0
+    assert doc["falsifying_ticks"] == []
+    assert doc["consistent_with_the_structural_account"] is True
+
+
+def test_the_current_stack_analysis_is_reproducible():
+    """Re-derive it rather than trusting the committed numbers."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "_sp_current_stack",
+        os.path.join(SP, "current_stack_structural.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    fresh = mod.analyse()
+    committed = _load("current_stack_structural.json")
+    for field in ("ticks", "trials", "gate_closed_ticks",
+                  "pair_not_distinguishable_ticks", "per_condition"):
+        assert fresh[field] == committed[field], field
+
+
 # ================================================================ mechanism B
 def test_mechanism_b_reports_the_clean_arm_crossings_as_false_alarms():
     doc = _load("mechanism_b.json")

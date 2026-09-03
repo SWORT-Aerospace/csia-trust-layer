@@ -54,13 +54,14 @@ and `math-paper-submission-candidate`. Not one. Both.
 
 | # | gate | status |
 |---|---|---|
-| 1 | all claims traceable | **PASS** — `research/systems-paper/CLAIMS.csv`, 25 rows, no empty field; `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` binds every figure, table and headline scalar |
+| 1 | all claims traceable | **PASS** — `research/systems-paper/CLAIMS.csv`, 26 rows, no empty field; `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` binds every figure, table and headline scalar |
 | 2 | source versions exact | **PASS** — Phase-I at `848f556` / ArduCopter 3.3 SITL; new artifacts record their own commit and are marked NOT Phase-I |
 | 2b | current-stack replication | **PASS for Mechanism B** — preregistered campaign `research/v1_1/CURRENT_STACK_REPLICATION.md`: ArduPilot 4.8 `REPLICATED` (20/20, 0-tick crossing error), PX4 SIH `INAPPLICABLE` with the reason recorded. **Mechanism A has no current-stack replication** (`SC-23`, `PROVISIONAL`) |
 | 3 | all figures regenerated | **PASS** — `make figures` |
 | 4 | all tables regenerated | **PASS** |
 | 5 | real-log study reproducible | **BLOCKED** — not run. `review.px4.io`, `logs.px4.io` denied by egress policy (403). Plan committed: `research/systems-paper/PUBLIC_LOG_STUDY_PLAN.md`. Claim `SC-22` is `PROVISIONAL` |
 | 6 | independent checker agrees | **PASS** — 378,000 / 378,000, 0 real disagreements, 0 degenerate cases. `research/systems-paper/results/checker_agreement.json` |
+| 6b | predicate tested on current-stack data | **PASS as a negative control** — 15,595 real ArduPilot 4.8 ticks, 0 collapses, on fix-preserving trials where a collapse would have falsified the account (`SC-26`). NOT a self-occlusion replication |
 | 7 | bibliography verified | **BLOCKED** — 11 of 11 entries unverified, 37 markers. `api.crossref.org`, `doi.org`, `dblp.org` all denied. `make bib-guard` fails, correctly |
 | 8 | no unresolved TODO citation | **BLOCKED** — same as 7 |
 | 9 | reviewer red team answered | **PASS** — `research/systems-paper/REVIEWER_RED_TEAM.md`, 4 reviewers, 11 objections, 4 recorded as **not adequately answered** |
@@ -80,11 +81,19 @@ to `review.px4.io`). Neither is a research problem.
 | 4 | novelty language audited | **PASS** — `research/math-paper/NOVELTY_AUDIT.md`; every proposition labelled **KNOWN**; forbidden phrases enforced by test |
 | 5 | notation internally consistent | **PASS** — one symbol table in `FORMAL_CORE.md` §1 |
 | 6 | proof reviewer simulation complete | **PASS** — `REVIEWER_RED_TEAM.md` Reviewer 3 (statistical) and Reviewer 4 (hostile on novelty) |
-| 7 | PDF builds clean | **PASS for the scaffold. THE MANUSCRIPT DOES NOT EXIST** — `papers/gate_conditioning/main.tex` is a build scaffold and says so |
+| 7 | PDF builds clean | **PASS** — `make paper-math` builds an 8-page manuscript with **every citation resolved**. The scaffold is gone; `OI-M2` is CLOSED |
+| 8 | bibliography verified | **BLOCKED (NEW)** — the manuscript cites 6 entries, all unverified, and the coarsening-at-random reference that makes Proposition 5 KNOWN is RECONSTRUCTED from search alone. `OI-M4` |
 
-**MATHEMATICAL PAPER: BLOCKED.** Blockers: gate 7 (no manuscript;
-`GATE_PAPER_ARTIFACT_MAP.yaml` `OI-M2`) and gate 3 (prior art unverifiable
-from here).
+**MATHEMATICAL PAPER: BLOCKED.** Blocker: gate 8 — the bibliography. Gate 7 is
+now PASS: the manuscript exists and builds clean.
+
+**This is a net improvement that LOOKS like a new blocker, and it is worth
+being explicit about why.** The scaffold cited nothing, so `make bib-guard`
+passed trivially. A manuscript that labels every proposition KNOWN and cites
+nothing would be claiming novelty by omission, so citations were added — and
+they are unverifiable from here, exactly as the systems paper's are. The paper
+went from *no manuscript* to *a manuscript with an honest, reported
+bibliography blocker*.
 
 ## 5. Tags — DO NOT CREATE EARLY
 
@@ -117,6 +126,9 @@ from here).
 | `research/math-paper/PRIOR_ART_MATRIX.csv` | this commit | **narrows C2 to KNOWN**; opens `NOT_FOUND_NEEDS_HUMAN` |
 | `papers/csia_systems/BIB_VERIFICATION_CANDIDATES.md` | this commit | finds `kang2024gnss` is probably filed under the wrong subject |
 | `research/systems-paper/CURRENT_STACK_BLOCKERS.md` | this commit | **corrects an earlier draft of itself**: Mechanism B IS replicated on ArduPilot 4.8. New rows `SC-24` (REPLICATED) and `SC-25` (PX4 INAPPLICABLE) |
+| `research/systems-paper/results/current_stack_structural.json` | this commit | `SC-26` — new. 15,595 real ArduPilot 4.8 ticks, 0 collapses |
+| `papers/gate_conditioning/main.tex` | this commit | **math gate 7 BLOCKED → PASS.** The manuscript exists |
+| `papers/gate_conditioning/refs.bib` | this commit | **opens math gate 8**: 6 entries, all unverified |
 
 ## 8. Known blockers nobody in this environment can clear
 
@@ -124,7 +136,8 @@ from here).
 |---|---|
 | bibliography verification | a host with access to `api.crossref.org` or a publisher, plus a human to read each diff |
 | public PX4 log study | a host with access to `review.px4.io` |
-| the gate-conditioning manuscript | a manuscript author |
+| the gate-conditioning manuscript | **CLEARED.** It exists and builds clean |
+| the gate-conditioning bibliography | a host with publisher access; the coarsening-at-random entry is the critical one |
 | PX4 Mechanism B replication | **not a blocker: recorded INAPPLICABLE.** No fix-preserving GNSS offset exists on PX4 SIH; four source routes checked; substitution is forbidden by the preregistration |
 | Mechanism A current-stack replication | an ArduPilot/PX4 SITL environment; `SC-23` is PROVISIONAL |
 | EAR/ITAR classification (`ECCN_PENDING`) | counsel |

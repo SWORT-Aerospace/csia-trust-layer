@@ -111,6 +111,37 @@ predicted before the comparison was run, is counted separately, and **occurred
 zero times** in this corpus. It is reported as a known disagreement class that
 was not observed, not folded into the agreement count.
 
+## 4b. A negative control on real current-stack data
+
+`research/systems-paper/results/current_stack_structural.json`, claim `SC-26`.
+
+The predicate above was run over **15,595 ticks from 20 real ArduPilot 4.8
+SITL trials** — the per-trial tick logs of the preregistered Mechanism B
+campaign (`research/v1_1/CURRENT_STACK_REPLICATION.md`). That campaign's
+validity criterion was that the **fix never dropped**: `gvalid = 1.0` on every
+scored tick.
+
+| condition | trials | ticks | gate-closed ticks | pair collapsed |
+|---|---|---|---|---|
+| CLEAN | 5 | 5,100 | 0 | **0** |
+| RAMP | 5 | 887 | 0 | **0** |
+| STEP | 10 | 9,608 | 0 | **0** |
+| **total** | **20** | **15,595** | **0** | **0** |
+
+**The test was declared before the run and it is the direction that could have
+falsified the account.** Under §1, the pair is distinguishable exactly when
+`phys_gps` is active. On a fix-preserving trial the gate is open, so the
+predicate *must* report "distinguishable" at every tick. **A single collapse
+would have shown the structural account is wrong.** There are none in 15,595.
+
+**This is a control, not a replication, and it is not presented as one.**
+Self-occlusion requires a fault that **removes** the fix. These trials are
+fix-preserving by construction and therefore *cannot* exhibit it; no fix-loss
+arm exists on ArduPilot 4.8 in this repository and none was constructed. What
+the run establishes is narrower and still worth having: the predicate has been
+exercised against real current-stack traces rather than only against the bench
+simulator, and it behaved as the theory requires.
+
 ## 5. Posterior is not confidence
 
 At every tick of the pinned window, `p_nominal` is high and rising while
@@ -171,7 +202,13 @@ independent checker and full agreement. Gate state, active relations,
 suppressed relations and the discriminating-evidence count are all recorded
 and independently re-derived.
 
-**What is NOT done, and why:** no ArduPilot or PX4 SITL is available in this
-environment, and Phase-II ArduCopter 4.8 results are excluded from Paper I by
-`tools/publication/phase_guard.py`. See `CURRENT_STACK_BLOCKERS.md`. No
-current-stack replication was fabricated.
+**What is partly done:** §4b runs the predicate over 15,595 real ArduPilot 4.8
+ticks as a negative control. Those tick logs live in `research/v1_1/`, which
+the phase guard does **not** exclude, so they are citable by Paper I.
+
+**What is NOT done, and why:** no fix-loss arm exists on ArduPilot 4.8 here, so
+self-occlusion itself has not been reproduced on a current stack, and no PX4
+SITL is available. The per-tick leader, posterior, ambiguity and function
+eligibility that §B2 also asks for are not in those tick logs, which carry a
+single gate column. See `CURRENT_STACK_BLOCKERS.md`. **No current-stack
+replication was fabricated.**
