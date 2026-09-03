@@ -732,3 +732,11 @@ proof-audit:
 
 .PHONY: paper-evidence
 paper-evidence: mechanism-a paper-mechanism-b proof-audit
+
+# The on-ramp a consumer meets first. Every step asserts its own result, so
+# running it IS the check; `tests/test_quickstart.py` additionally runs it
+# from a temporary directory to catch anything that only works from the
+# repository root.
+.PHONY: quickstart
+quickstart:
+	$(PY) engineering/v2/quickstart.py

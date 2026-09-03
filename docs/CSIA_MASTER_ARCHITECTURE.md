@@ -102,6 +102,12 @@ because a README saying "generic" is not evidence.
 
 ## 7. Reading order for someone new
 
+0. **`python engineering/v2/quickstart.py`** — six steps, each asserting its
+   own result, runnable from anywhere with the package installed. Start with
+   step 1: the obvious first program returns `UNKNOWN` functions and looks
+   broken, and understanding why it is correct is the whole contract in one
+   page. Then `docs/product/CSIA_READINESS.md` for what this is and is not
+   ready for.
 1. `docs/CURRENT_PROGRAM_STATE.md` — what is happening right now
 2. `RESEARCH_STATE.md` — what is established, refuted and withdrawn
 3. `CLAIMS_INDEX.md` — which of the claim registers governs what

@@ -22,6 +22,12 @@ governs.
 `RESEARCH_STATE.md` remains authoritative for *what is scientifically
 established*. This file is authoritative for *what may be worked on*.
 
+**Evaluating rather than developing?** Run
+`python engineering/v2/quickstart.py` and read
+`docs/product/CSIA_READINESS.md`. The short version: maturity **M2**,
+simulation/research prototype, **not flight software**, and neither paper is
+blocked by anything in the code.
+
 ---
 
 ## 1. What may be worked on
