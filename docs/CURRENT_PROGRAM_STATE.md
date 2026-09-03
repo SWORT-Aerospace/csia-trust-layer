@@ -113,6 +113,7 @@ bibliography blocker*.
 | artifact SHA-256 | printed by the generating script; freeze records carry them |
 | date | the commit date |
 | claim impact | a row in `research/systems-paper/CLAIMS.csv` or `docs/math/PROOF_STATUS.md` or `research/math-paper/PRIOR_ART_MATRIX.csv` |
+| every headline number it puts into prose | a row in `research/PROSE_NUMERIC_BINDINGS.yaml`, enforced by `tests/test_prose_numeric_bindings.py` |
 
 ## 7. Results added since the Phase C freeze
 
