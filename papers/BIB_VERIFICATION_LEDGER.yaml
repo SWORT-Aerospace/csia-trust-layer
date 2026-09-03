@@ -1,0 +1,256 @@
+%YAML 1.2
+---
+# BIBLIOGRAPHY VERIFICATION LEDGER
+#
+# THE HOLE THIS CLOSES
+# --------------------
+# `tools/publication/bib_guard.py` fails while a marker exists. It cannot fail
+# when a marker is DELETED, and deleting one is the single easiest way to make
+# the build green without doing any verification. The guard's own docstring
+# says "Deleting a marker without doing that check is falsification, not a
+# fix" -- and until now nothing enforced that sentence.
+#
+# THE RULE, ENFORCED BY tests/test_bib_verification_ledger.py
+# -----------------------------------------------------------
+#   A bibliography entry that carries NO marker MUST have a row here with
+#   status VERIFIED, an accepted route, a named checker, a date, and the
+#   record consulted.
+#
+# So the two states are:
+#
+#   marker present  +  status UNVERIFIED   ->  honest, and blocks submission
+#   marker absent   +  status VERIFIED     ->  honest, and does not
+#   marker absent   +  status UNVERIFIED   ->  FAILS. A marker was retired
+#                                              without a verification record.
+#   marker present  +  status VERIFIED     ->  FAILS. Contradictory.
+#
+# WHAT COUNTS AS VERIFICATION
+# ---------------------------
+# accepted_routes below are records produced by the publisher. A web search
+# result is NOT one, and `rejected_routes` names it explicitly so that
+# recording it is a deliberate, visible act rather than an oversight. This is
+# the rule papers/csia_systems/refs.bib already states in its own header; the
+# ledger makes it checkable.
+#
+# HOW TO VERIFY AN ENTRY
+# ----------------------
+#   1. From a host whose egress permits it, run `make bib-verify`, or open the
+#      publisher's own record for the DOI.
+#   2. Compare EVERY field: authors, title, venue, volume, number, pages,
+#      year, DOI.
+#   3. Fix any field that differs. Then, and only then, delete the marker from
+#      refs.bib AND set this row to VERIFIED with route, checked_by,
+#      checked_on and record filled in.
+#
+# Both edits in the same commit. The guard fails if only the first is made.
+
+schema: csia.publication.bib_verification_ledger/1
+
+accepted_routes:
+  - CROSSREF_DEPOSIT      # api.crossref.org, the publisher's own deposit
+  - PUBLISHER_PAGE        # the publisher's landing page for the DOI
+  - PUBLISHED_PDF         # the version of record itself
+
+rejected_routes:
+  - WEB_SEARCH            # a second unverified source, not a publisher record
+  - SECONDARY_INDEX       # dblp, Semantic Scholar, Google Scholar, a mirror
+  - BRIEF                 # supplied to this project by an upstream document
+  - MEMORY                # recalled rather than looked up
+
+# Why everything below is UNVERIFIED, measured this session:
+#
+#   api.crossref.org:443   CONNECT -> 403   (organisation egress policy)
+#   doi.org:443            CONNECT -> 403
+#   dblp.org:443           CONNECT -> 403
+#
+# Every publisher route is denied from the authoring environment, so
+# `make bib-verify` exits 2 and clears nothing. That is the correct outcome
+# and no marker was retired.
+
+entries:
+
+  # ================================================== papers/csia_systems
+  - paper: csia_systems
+    key: dong2024statedependent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      All numeric fields supplied by the WP-C6 brief; the title rendering was
+      not independently confirmed. Cited in the related-work section, where the
+      paper concedes priority over the general mechanism -- so a wrong
+      attribution here would misdirect a concession, not just a citation.
+
+  - paper: csia_systems
+    key: carvalho2012intermittent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete except that no DOI was supplied, so bib-verify cannot key on one.
+
+  - paper: csia_systems
+    key: carvalho2013permanent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete with a DOI; needs confirmation only.
+
+  - paper: csia_systems
+    key: takai2021diagnosability
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      Title is a literal VERIFY placeholder here. A search-derived CANDIDATE
+      exists in BIB_VERIFICATION_CANDIDATES.md finding 2; it was NOT copied
+      into this file, because a candidate is not a verification.
+
+  - paper: csia_systems
+    key: yin_phidiagnosability
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      THE WEAKEST ENTRY IN EITHER FILE. Reconstructed from brief prose; venue
+      and year are placeholders and no candidate was found by search. Either
+      locate it or drop the citation and the sentence depending on it.
+
+  - paper: csia_systems
+    key: krysander2024multimode
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      Title is a placeholder. Candidate in BIB_VERIFICATION_CANDIDATES.md
+      finding 3, including a possible OASIcs volume number the entry lacks.
+
+  - paper: csia_systems
+    key: krysander2008sensorplacement
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete with a DOI; needs confirmation only.
+
+  - paper: csia_systems
+    key: hurdle2007faulttree
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      The title was reconstructed from WP-C5 prose and not restated in WP-C6;
+      the entry's own note says to treat it as VERIFY.
+
+  - paper: csia_systems
+    key: reeves2019sensorselection
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      Title is a placeholder. Candidate in BIB_VERIFICATION_CANDIDATES.md
+      finding 4; every numeric field already matches it.
+
+  - paper: csia_systems
+    key: kang2024gnss
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      PROBABLY FILED UNDER THE WRONG SUBJECT. It sits under a GNSS integrity
+      heading, but a search for its DOI returns a discrete-event-systems
+      sensor-attack paper (BIB_VERIFICATION_CANDIDATES.md finding 1). It is
+      also UNCITED by main.tex. Verify and re-file, or drop it.
+
+  - paper: csia_systems
+    key: blanke2003ftc
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      Reconstructed. A later edition is known to exist, so the year, edition
+      and publisher location may all be wrong together.
+
+  # ============================================== papers/gate_conditioning
+  - paper: gate_conditioning
+    key: heitjan1991car
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      THE CRITICAL ENTRY OF THE MATHEMATICAL PAPER. It is what makes
+      Proposition 5 KNOWN rather than a contribution, so the paper's central
+      concession is attached to it. Reconstructed from search results alone:
+      volume, number, pages and year all require a publisher record. If these
+      details are wrong the concession points at the wrong work, which is
+      worse than making no citation at all.
+
+  - paper: gate_conditioning
+    key: dong2024statedependent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.
+
+  - paper: gate_conditioning
+    key: carvalho2012intermittent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.
+
+  - paper: gate_conditioning
+    key: carvalho2013permanent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.
+
+  - paper: gate_conditioning
+    key: takai2021diagnosability
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      This copy carries the search-derived candidate title rather than the
+      placeholder, and its own note says so. That makes it MORE informative
+      and NO more verified than the systems paper's copy.
+
+  - paper: gate_conditioning
+    key: krysander2008sensorplacement
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.

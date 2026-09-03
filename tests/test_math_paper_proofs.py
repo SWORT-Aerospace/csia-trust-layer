@@ -246,6 +246,69 @@ def test_every_proposition_is_labelled_known():
         assert f"| {pid} |" in text, pid
 
 
+#: The literature search the brief requires "at minimum". Coverage of this
+#: list is checkable; VERIFICATION of the rows is not, and the two must not be
+#: confused -- every row is WEB_SEARCH_ONLY and the matrix says so.
+REQUIRED_PRIOR_ART_TOPICS = (
+    "unreliable observations",
+    "loss of observations",
+    "robust diagnosability",
+    "partial observations",
+    "maximum-likelihood diagnosis under unreliable observations",
+    "missing data / selection mechanisms",
+    "likelihood reweighting",
+    "bounded likelihood ratios",
+    "posterior sensitivity",
+    "runtime validity gating",
+)
+
+
+def _prior_art_rows():
+    import csv as _csv
+    path = os.path.join(MP, "PRIOR_ART_MATRIX.csv")
+    return list(_csv.DictReader(open(path, encoding="utf-8")))
+
+
+def test_every_required_search_topic_has_at_least_one_row():
+    """C6 asks for a search covering these at minimum. A topic with no row is
+    a topic nobody looked at, and 'I did not find it' is not the same as
+    'nothing exists' -- so an EMPTY row is not an acceptable substitute
+    either. Both states are failures here."""
+    rows = _prior_art_rows()
+    covered = {r["topic"].strip() for r in rows}
+    missing = [t for t in REQUIRED_PRIOR_ART_TOPICS if t not in covered]
+    assert not missing, (
+        f"prior-art topics with no row: {missing}. Either search them and add "
+        f"a row, or remove them from REQUIRED_PRIOR_ART_TOPICS with a reason.")
+
+
+def test_every_prior_art_row_is_complete():
+    for r in _prior_art_rows():
+        for field in ("topic", "reference", "result", "assumptions",
+                      "closest_csia_statement", "subsumes", "difference",
+                      "claim_consequence", "verification_route", "status"):
+            assert (r.get(field) or "").strip(), \
+                f"{r.get('reference', '?')[:50]}: {field} is empty"
+
+
+def test_an_unsuccessful_search_is_not_recorded_as_a_gap():
+    """The one way this matrix could lie: reporting 'not found' as 'nothing
+    exists'. Any row whose status says the search came up short must say so
+    in its own claim_consequence rather than asserting a gap."""
+    weak = {"NOT_FOUND_NEEDS_HUMAN", "TOPIC_SEARCHED_NO_CLOSE_MATCH",
+            "NOT_READ_HIGH_PRIORITY"}
+    for r in _prior_art_rows():
+        if r["status"] not in weak:
+            continue
+        text = (r["claim_consequence"] + " " + r["difference"]).lower()
+        assert any(w in text for w in
+                   ("not established", "do not cite", "weak evidence",
+                    "must not be", "has not been read", "never as establishing",
+                    "before submission")), (
+            f"{r['reference'][:60]}: status {r['status']} but the row does "
+            f"not say what may NOT be concluded from an unsuccessful search")
+
+
 def test_the_prior_art_matrix_records_the_unfound_reference():
     """A reference the brief named and the search could not find is an open
     hole. Silently dropping it would be the dishonest outcome."""

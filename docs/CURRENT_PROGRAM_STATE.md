@@ -47,7 +47,7 @@ and `math-paper-submission-candidate`. Not one. Both.
 |---|---|---|
 | CSIA v1 | `csia-v1.0-research-final` @ `ec5acd189295dab9259d4989657d42184d6142a3` — **zero diff** | `tests/test_v1_frozen.py` (git diff + SHA-256) |
 | CSIA v1.1 | output schema `1.1.0`, unchanged | schema + golden corpus |
-| CSIA v2 Phase C | `50c5d3576e9084e7c2789167628392c5de992b6f`, local tag proposal `csia-v2-phasec-frozen` (**not pushed**) | `engineering/v2/V2_PHASEC_FREEZE.md` |
+| CSIA v2 Phase C | `50c5d3576e9084e7c2789167628392c5de992b6f`, local tag proposal `csia-v2-phasec-frozen` (**not pushed**) | `engineering/v2/V2_PHASEC_FREEZE.md`, now **enforced** by `tests/test_phase_c_freeze.py`: the 8 reproducible artifact hashes, the recorded commit, and the record's headline verdict against the gate artifact |
 | Systems Paper I baseline | `main @ 848f556` | `tools/publication/phase_guard.py` |
 
 ## 3. Submission gate — SYSTEMS PAPER
@@ -62,7 +62,7 @@ and `math-paper-submission-candidate`. Not one. Both.
 | 5 | real-log study reproducible | **BLOCKED** — not run. `review.px4.io`, `logs.px4.io` denied by egress policy (403). Plan committed: `research/systems-paper/PUBLIC_LOG_STUDY_PLAN.md`. Claim `SC-22` is `PROVISIONAL` |
 | 6 | independent checker agrees | **PASS** — 378,000 / 378,000, 0 real disagreements, 0 degenerate cases. `research/systems-paper/results/checker_agreement.json` |
 | 6b | predicate tested on current-stack data | **PASS as a negative control** — 15,595 real ArduPilot 4.8 ticks, 0 collapses, on fix-preserving trials where a collapse would have falsified the account (`SC-26`). NOT a self-occlusion replication |
-| 7 | bibliography verified | **BLOCKED** — 11 of 11 entries unverified, 37 markers. `api.crossref.org`, `doi.org`, `dblp.org` all denied. `make bib-guard` fails, correctly |
+| 7 | bibliography verified | **BLOCKED** — 11 of 11 entries unverified, 37 markers. `api.crossref.org`, `doi.org`, `dblp.org` all denied. `make bib-guard` fails, correctly. A marker can no longer be silently deleted to make it pass: `papers/BIB_VERIFICATION_LEDGER.yaml` + `tests/test_bib_verification_ledger.py` |
 | 8 | no unresolved TODO citation | **BLOCKED** — same as 7 |
 | 9 | reviewer red team answered | **PASS** — `research/systems-paper/REVIEWER_RED_TEAM.md`, 4 reviewers, 11 objections, 4 recorded as **not adequately answered** |
 | 10 | PDF builds clean | **PASS** — `make paper-systems` |
@@ -77,7 +77,7 @@ to `review.px4.io`). Neither is a research problem.
 |---|---|---|
 | 1 | all propositions proven | **PASS** — P1–P6, C2, C3 in `research/math-paper/FORMAL_CORE.md`; symbolic (sympy, n=4) and numeric (20 000 instances) in `results/proof_audit.json` |
 | 2 | all counterexamples checked | **PASS** — `FORMAL_CORE.md` §11; P4's 6,877 audited instances where the argmax moved with the condition violated |
-| 3 | prior-art matrix complete | **PARTIAL** — `research/math-paper/PRIOR_ART_MATRIX.csv`, 12 rows. Every row is `WEB_SEARCH_ONLY`; one row is `NOT_FOUND_NEEDS_HUMAN` |
+| 3 | prior-art matrix complete | **COVERAGE COMPLETE, VERIFICATION BLOCKED** — 18 rows over all **10** topics the brief requires at minimum, asserted by `tests/test_math_paper_proofs.py`. Every row is still `WEB_SEARCH_ONLY`; one is `NOT_FOUND_NEEDS_HUMAN` and one is `NOT_READ_HIGH_PRIORITY` (arXiv:2405.15141, *Likelihood distortion and Bayesian local robustness* — the title alone makes it the most important unread reference in the matrix) |
 | 4 | novelty language audited | **PASS** — `research/math-paper/NOVELTY_AUDIT.md`; every proposition labelled **KNOWN**; forbidden phrases enforced by test |
 | 5 | notation internally consistent | **PASS** — one symbol table in `FORMAL_CORE.md` §1 |
 | 6 | proof reviewer simulation complete | **PASS** — `REVIEWER_RED_TEAM.md` Reviewer 3 (statistical) and Reviewer 4 (hostile on novelty) |
@@ -114,6 +114,7 @@ bibliography blocker*.
 | date | the commit date |
 | claim impact | a row in `research/systems-paper/CLAIMS.csv` or `docs/math/PROOF_STATUS.md` or `research/math-paper/PRIOR_ART_MATRIX.csv` |
 | every headline number it puts into prose | a row in `research/PROSE_NUMERIC_BINDINGS.yaml`, enforced by `tests/test_prose_numeric_bindings.py` |
+| every bibliography entry, verified or not | a row in `papers/BIB_VERIFICATION_LEDGER.yaml`, enforced by `tests/test_bib_verification_ledger.py` |
 
 ## 7. Results added since the Phase C freeze
 
@@ -130,6 +131,21 @@ bibliography blocker*.
 | `research/systems-paper/results/current_stack_structural.json` | this commit | `SC-26` — new. 15,595 real ArduPilot 4.8 ticks, 0 collapses |
 | `papers/gate_conditioning/main.tex` | this commit | **math gate 7 BLOCKED → PASS.** The manuscript exists |
 | `papers/gate_conditioning/refs.bib` | this commit | **opens math gate 8**: 6 entries, all unverified |
+
+## 7b. What can no longer be defeated by deletion
+
+Three failure modes were reachable by editing one file and are now not. Each
+guard was verified by breaking it and confirming the break is caught.
+
+| the shortcut | what stops it |
+|---|---|
+| delete a bibliography marker to make `bib-guard` pass | `tests/test_bib_verification_ledger.py` — an entry with no marker must have a `VERIFIED` ledger row naming an **accepted route**, a checker and a date. `WEB_SEARCH` is a named `rejected_route`, so claiming it is a visible act |
+| regenerate a frozen Phase C artifact | `tests/test_phase_c_freeze.py` — the 8 reproducible hashes in the freeze record must still match, and the exclusion for the one wall-clock artifact is asserted by name so it cannot be widened |
+| let prose drift from the artifact it quotes | `tests/test_prose_numeric_bindings.py` — 25 numbers bound to an artifact and a JSON pointer, checked in both directions |
+
+None of these can tell whether a human who wrote `VERIFIED` actually read the
+publisher record. Nothing can. What they do is force the falsification to be
+**written down** rather than performed by deletion.
 
 ## 8. Known blockers nobody in this environment can clear
 
