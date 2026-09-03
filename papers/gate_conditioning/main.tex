@@ -53,13 +53,18 @@ in Runtime Diagnosis}
 A runtime diagnostic layer decides, tick by tick, which of its evidence is
 \emph{applicable}. That decision is a coarsening mechanism the system designed
 for itself, and whether it may be ignored is a property of the software rather
-than of the data. We give the exact algebra. Writing $q$ for the posterior
-obtained from the active evidence alone and $p$ for the posterior actually
-produced, $p_h = q_h w_h / \mathbb{E}_q[w]$, so every pairwise log-posterior
-ratio acquires an additive, evidence-independent offset $\log(w_a/w_b)$ that
-further data of the same kind cannot argue with. When no active term
-distinguishes two hypotheses their ratio is pinned to the prior ratio exactly,
-for as long as the gate stays shut, however concentrated the posterior becomes.
+than of the data. We give the exact algebra. Writing $q$ for the posterior the
+system would have obtained from \emph{all} the evidence it could in principle
+have scored and $p$ for the posterior it actually produces,
+$p_h = q_h w_h / \mathbb{E}_q[w]$, so every pairwise log-posterior ratio
+acquires an additive, evidence-independent offset $\log(w_a/w_b)$ that further
+data of the same kind cannot argue with. For the additive gated scores runtime
+layers compute, $w_h$ is exhibited in closed form and the offset is exactly the
+withheld distinguishing contribution. When no active term distinguishes two
+hypotheses their ratio is pinned to the prior ratio exactly, for as long as the
+gate stays shut, however concentrated the posterior becomes --- a statement
+about the produced posterior alone, which does not depend on the choice of
+baseline.
 We give the ignorability condition, its multivalued caveat, a sufficient
 condition for the MAP to be unchanged, and exact divergence identities:
 $\mathrm{KL}(q\Vert p)$ is precisely the Jensen gap of $\log w$ under $q$, so
@@ -111,10 +116,8 @@ calibration. It does not show that any system was unsafe.
 \label{sec:setting}
 
 Let $H=\{h_1,\dots,h_n\}$, $n\ge 2$, be a finite set of mutually exclusive
-hypotheses. Let $\pi_h$ be the prior, $L_h$ the likelihood of the
-\emph{active} evidence under $h$, and $w_h>0$ the hypothesis-dependent
-validity factor: everything the gating contributes to $h$'s score that is not
-already in $L_h$. Define
+hypotheses, $\pi_h$ the prior, $L_h$ a likelihood under $h$, and $w_h>0$ a
+hypothesis-dependent validity factor. Define
 \begin{equation}
 q_h \;=\; \frac{\pi_h L_h}{\sum_j \pi_j L_j},
 \qquad
@@ -125,6 +128,15 @@ p_h \;=\; \frac{\pi_h w_h L_h}{\sum_j \pi_j w_j L_j}.
 \begin{assumption}[strict positivity]\label{a:pos}
 $\pi_h, L_h, w_h \in (0,\infty)$ for all $h$.
 \end{assumption}
+
+\noindent
+\textbf{A closed gate does not violate Assumption~\ref{a:pos}.} The reader has
+just met the word \emph{skip}, and it is natural to read a skipped feature as
+$w_h=0$. It is not: by \eqref{eq:wgate} a shut gate gives
+$w_h=\exp(-\ell_j(h))$, strictly positive and finite for any finite
+$\ell_j(h)$. What Assumption~\ref{a:pos} excludes is a zero \emph{likelihood}
+--- the \emph{exclusion} of a hypothesis, a different operation with different
+semantics, and out of scope here.
 \begin{assumption}[finiteness]\label{a:fin}
 $n<\infty$.
 \end{assumption}
@@ -145,6 +157,53 @@ missing-data arguments will expect an independence or ignorability condition
 to be doing the work somewhere. It is not. The identities below are
 unconditional; ignorability appears only in Section~\ref{sec:ignorable}, as
 the special case in which the distortion vanishes.
+
+\subsection{What $q$ is measured against, and why it matters}
+\label{sec:baseline}
+
+Everything below compares two posteriors, so the \emph{baseline} $q$ must be
+named. There are two candidates and they are not interchangeable.
+
+\begin{description}
+\item[Reading A --- active-evidence baseline.] $L_h$ is the likelihood of the
+      evidence that survived the gate. Then the gating is already inside
+      $L_h$, there is nothing left for $w$ to carry, $w_h\equiv 1$, and
+      $p=q$ identically.
+\item[Reading B --- full-evidence baseline.] $L_h$ is the likelihood of
+      \emph{all} the evidence the system could in principle have used, and
+      $w_h$ carries what the gate withheld. Then $p\ne q$ in general.
+\end{description}
+
+\textbf{Reading A makes every result in this paper vacuous, and we say so
+before a reader discovers it.} Under Reading A, Propositions
+\ref{p:reweight}, \ref{p:logratio}, \ref{p:kl} and \ref{p:bounds} are true and
+empty: they describe a reweighting by the constant $1$. An earlier draft of
+this paper defined $L_h$ that way and presented Section~\ref{sec:instance} as
+an instance of the framework; it was not one.
+
+\textbf{Everything below uses Reading B}, and Proposition~\ref{p:gated} makes
+it concrete for the additive scores that runtime diagnostic layers actually
+compute --- including the one in Section~\ref{sec:instance}, whose $w$ we
+exhibit in closed form.
+
+\begin{remark}[$q$ is counterfactual, and the main claim does not need it]
+\label{r:counterfactual}
+Under Reading B the baseline $q$ is generally \emph{not computable at runtime},
+and in the case Section~\ref{sec:instance} measures it is not computable at
+all: the gate closes because the receiver has stopped reporting, so the
+withheld $\ell_j(h)$ has no observed value to take. $q$ is a reference point,
+not a quantity we claim to evaluate, and $w_h$ is the exact bookkeeping of what
+separates the two --- no more than that.
+
+This matters less than it appears, because \textbf{the paper's empirical claim
+does not mention $q$}. Proposition~\ref{p:pin} and Corollary~\ref{c:pinned}
+relate $p$ to the \emph{prior}, both of which the system computes. A reader who
+rejects Reading B entirely still owes an answer to Section~\ref{sec:instance},
+where a posterior ratio sat at its prior value for $200$ consecutive ticks.
+What such a reader loses is the quantitative apparatus ---
+Propositions~\ref{p:kl} and \ref{p:bounds} measure a distance to a baseline,
+and a baseline that cannot be evaluated cannot be measured against.
+\end{remark}
 
 Write $\mathbb{E}_q[w]=\sum_h q_h w_h$, $w_{\max}=\max_h w_h$,
 $w_{\min}=\min_h w_h$, and
@@ -236,6 +295,60 @@ D(a,b) \;=\; \{\, j \in \mathrm{ACTIVE} : \ell_j(a) \neq \ell_j(b) \,\}.
 \end{equation}
 If $D(a,b)=\emptyset$ then $L_a=L_b$.
 
+\subsection{The gated-score form, which is what runtime layers compute}
+\label{sec:gated}
+
+The abstract $w_h$ of Section~\ref{sec:setting} is not something an
+implementer recognises. This makes it concrete, and closes the gap
+Section~\ref{sec:baseline} opened.
+
+\begin{proposition}[gated score]\label{p:gated}
+Let the score be additive over per-feature terms, $\log L_h^{\mathrm{gated}}
+= \sum_j g_j\,\ell_j(h)$ with gates $g_j\in[0,1]$, and let $q$ be the
+posterior from the ungated score ($g_j\equiv 1$, Reading B). Then $p$ is the
+reweighting of $q$ by
+\begin{equation}
+w_h \;=\; \exp\!\Big(-\sum_j (1-g_j)\,\ell_j(h)\Big),
+\label{eq:wgate}
+\end{equation}
+Proposition~\ref{p:reweight} applies, and for any pair
+\begin{equation}
+\log\frac{p_a}{p_b} - \log\frac{q_a}{q_b}
+\;=\;
+-\sum_j (1-g_j)\big(\ell_j(a)-\ell_j(b)\big).
+\label{eq:withheld}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+$\log L_h^{\mathrm{gated}} = \sum_j \ell_j(h) - \sum_j (1-g_j)\ell_j(h)
+= \log L_h + \log w_h$ with $w_h$ as in \eqref{eq:wgate}, which is strictly
+positive and finite. Apply Proposition~\ref{p:reweight}, then
+Proposition~\ref{p:logratio}.
+\end{proof}
+
+Equation~\eqref{eq:withheld} says the shift is \textbf{exactly the withheld
+distinguishing contribution}: a fully open gate contributes all of its term,
+a fully closed one contributes none, and a partial gate contributes in
+proportion. And $w_h$ is hypothesis-dependent precisely when some gated
+feature contributes differently to two hypotheses --- which is the ordinary
+case, not a contrived one.
+
+\begin{corollary}[Proposition~\ref{p:pin}, recovered]\label{c:pinned}
+If $g_j=0$ for every $j$ with $\ell_j(a)\ne\ell_j(b)$, then
+$\log(p_a/p_b)=\log(\pi_a/\pi_b)$.
+\end{corollary}
+\begin{proof}
+By \eqref{eq:withheld},
+$\log(p_a/p_b) = \log(\pi_a/\pi_b) + \sum_j g_j(\ell_j(a)-\ell_j(b))$, and
+every surviving summand has $\ell_j(a)=\ell_j(b)$.
+\end{proof}
+
+So Proposition~\ref{p:pin} is not a separate result: it is the corner of
+Proposition~\ref{p:logratio} in which the gate withholds every distinguishing
+term. We state it separately only because it is the case
+Section~\ref{sec:instance} measures.
+
 \paragraph{The static-checkability observation.} For a signature model in
 which $h$ is characterised by the feature set $\mathrm{LOW}(h)$ it drives low,
 $\ell_j(a)\neq\ell_j(b)$ exactly when $j$ lies in the symmetric difference, so
@@ -281,6 +394,13 @@ through $\ell_j$ even when $g_j$ itself is hypothesis-blind. Constancy of $w$
 then requires the gate-weighted likelihood difference to vanish, which is
 Proposition~\ref{p:pin}'s condition and not an independence statement.
 
+This is not hypothetical for the layer in Section~\ref{sec:instance}.
+Equation~\eqref{eq:wgate} gives $w_a/w_b=\exp(-S)$ with
+$S=\sum_j(\ell_j(a)-\ell_j(b))$ over the withheld features, so $w_a\ne w_b$
+exactly when the gate withholds something that separates the pair --- which is
+the case we measure. The ignorability condition fails computably, not merely
+in principle.
+
 \begin{remark}
 \textbf{Conditional independence of the gate from the fault does not by itself
 give $p=q$ in the multivalued case.} We state this because the binary
@@ -292,12 +412,25 @@ intuition is strong and the multivalued case is the common one.
 \label{sec:support}
 
 \begin{corollary}\label{c:support}
-If $D(a,b)=\emptyset$ and $w_a=w_b$, then
-$\log(p_a/p_b)=\log(\pi_a/\pi_b)$ regardless of $\max_h p_h$. In particular
-$p_a$ may be arbitrarily close to $1$ --- driven by the prior and by
-likelihood terms that do not distinguish $a$ from $b$ --- while the evidence
-contains nothing separating them.
+If $D(a,b)=\emptyset$ --- equivalently, if the gate withholds every feature
+that distinguishes $a$ from $b$ --- then $\log(p_a/p_b)=\log(\pi_a/\pi_b)$
+regardless of $\max_h p_h$. In particular $p_a$ may be arbitrarily close to
+$1$ --- driven by the prior and by likelihood terms that do not distinguish
+$a$ from $b$ --- while the evidence contains nothing separating them.
 \end{corollary}
+\begin{proof}
+Corollary~\ref{c:pinned}; the conclusion involves no property of $\max_h p_h$.
+\end{proof}
+
+\begin{remark}[why this is stated through $D$ and not through $w$]
+In the abstract setting, pinning is Proposition~\ref{p:pin}: $L_a=L_b$
+\emph{and} $w_a=w_b$. Under Reading B that pair of hypotheses is the wrong one
+to reach for, because a gate that withholds a distinguishing feature makes
+$L_a\ne L_b$ and $w_a\ne w_b$ \emph{both} --- and the ratio is pinned anyway,
+because by \eqref{eq:wgate} the two inequalities cancel exactly. The
+gate-level statement, Corollary~\ref{c:pinned}, is the one that holds in the
+implemented case; Proposition~\ref{p:pin} is its abstract shadow.
+\end{remark}
 
 Two different quantities are in play and an implementation that reports only
 one of them will mislead its consumer:
@@ -350,6 +483,34 @@ second number so the proposition is not read as a characterisation.
 Proposition~\ref{p:map} is an instance of the standard argument that an
 optimiser is unchanged when the decision margin exceeds the perturbation bound;
 we claim it as known.
+
+\begin{remark}[the proposition is silent exactly where the paper is loudest]
+\label{r:mapblind}
+$R$ is the spread of the withheld log-likelihood across hypotheses, so it is
+\emph{largest} in the regime Section~\ref{sec:instance} measures. Sharply: let
+$a,b$ be a pinned pair carrying equal prior mass, and suppose they are the top
+two under $q$. Writing $S=\sum_j(\ell_j(a)-\ell_j(b))$, \eqref{eq:wgate} gives
+$\log w_a-\log w_b=-S$, so $R\ge|S|$, while
+$\Delta=|\log(\pi_a/\pi_b)+S|=|S|$. Hence $\Delta\le R$ \emph{always}, with
+equality when the pair attains the extremes of $w$: \textbf{Proposition
+\ref{p:map} can never certify a pinned pair.} The audit measures this over the
+$2{,}282$ sampled instances in which such a pair was the top two and finds a
+worst slack of $+8.88\times10^{-16}$, equality to floating-point precision and
+no violation.
+
+The equal-prior hypothesis is doing real work and there is an escape, which is
+worth naming because it makes the position worse rather than better. Since
+$\Delta\le|\log(\pi_a/\pi_b)|+|S|$, the condition $\Delta>R$ forces
+$|\log(\pi_a/\pi_b)|>R-|S|\ge 0$: the prior log-odds must carry the entire
+excess on their own. So $\Delta>R$ \emph{can} fire on a pinned pair, and when
+it does the certificate has been bought with prior mass rather than with
+evidence --- a MAP that Corollary~\ref{c:support} has already said carries no
+discriminating support.
+
+We state this because it is the honest limit of the result. The MAP condition
+is informative when the gate withholds little --- which is when the phenomenon
+this paper is about is absent.
+\end{remark}
 
 %======================================================================
 \section{Exact divergences, and bounds}
@@ -408,12 +569,16 @@ Result & Symbolic ($n=4$) & Numeric worst deviation \\
 Prop.~\ref{p:reweight} reweighting          & exact & $4.44\times10^{-16}$ \\
 Prop.~\ref{p:logratio} log-ratio            & exact & $1.78\times10^{-15}$ \\
 Prop.~\ref{p:pin} pinned to prior           & exact & $8.88\times10^{-16}$ \\
+Prop.~\ref{p:gated} gated score is a reweighting & --- & $5.55\times10^{-16}$ \\
+Prop.~\ref{p:gated} shift $=$ withheld contribution & --- & $3.55\times10^{-15}$ \\
+Cor.~\ref{c:pinned} pinned when all distinguishing gated & --- & $1.78\times10^{-15}$ \\
 Prop.~\ref{p:c2} constant $w$               & exact & --- \\
 Prop.~\ref{p:kl} $\mathrm{KL}(q\Vert p)$    & exact & $1.33\times10^{-15}$ \\
 Prop.~\ref{p:kl} $\mathrm{KL}(p\Vert q)$    & exact & $1.53\times10^{-15}$ \\
 Prop.~\ref{p:bounds} $R$ bound              & ---   & 0 violations, slack $+1.78\times10^{-15}$ \\
 Prop.~\ref{p:bounds} TV bound               & ---   & 0 violations, slack $-8.38\times10^{-5}$ \\
 Prop.~\ref{p:map} MAP condition             & ---   & held in $2{,}721/2{,}721$ \\
+Rem.~\ref{r:mapblind} pinned pair never certifiable & --- & 0 violations, slack $+8.88\times10^{-16}$ \\
 \bottomrule
 \end{tabular}
 \caption{Verification. The symbolic pass is at $n=4$; the hand proofs are for
@@ -441,6 +606,16 @@ of the diagnostic layer, and no part of its support analysis, appears in
 \code{sys.modules} afterwards. Its input carries no leader, no posterior and no
 support label. Against the production computation of the same quantity, over
 nine scenarios, $1500$ ticks each and all $28$ unordered hypothesis pairs:
+
+\paragraph{What the agreement does and does not establish.} It rules out that
+the collapse is an artefact of the production analysis pipeline: two
+implementations sharing no code reach the same verdict every time. It does
+\textbf{not} validate the signature table. Both evaluate
+$\mathrm{LOW}(a)\triangle\mathrm{LOW}(b)$ from the same committed
+configuration, so a table that misdescribes what the features measure would be
+misdescribed identically $378{,}000$ times. Whether $\mathrm{LOW}(h)$ is
+faithful to the sensors is a separate question that no quantity of agreement
+can answer, and the structural argument above is downstream of it.
 
 \begin{table}[h]
 \centering
@@ -470,7 +645,11 @@ What it found:
       during a smoother warm-up. A structural property, not a fault.
 \item Under injected fix loss it collapses for a further $200$ consecutive
       ticks --- exactly the injected window --- during which
-      Proposition~\ref{p:pin} says the posterior ratio equals the prior ratio.
+      Corollary~\ref{c:pinned} says the posterior ratio equals the prior
+      ratio. (Corollary~\ref{c:pinned} rather than Proposition~\ref{p:pin}:
+      the layer's gate is a skip, so it withholds a term that contributes
+      differently to the two hypotheses, and the pinning arises from the
+      exact cancellation in \eqref{eq:withheld} rather than from $L_a=L_b$.)
 \end{itemize}
 
 \paragraph{A negative control on a current stack.} The same predicate was run
@@ -492,7 +671,7 @@ it.
 %======================================================================
 \section{What is new, stated plainly}
 
-Nothing in Sections 3--7 is new mathematics, and we do not want a reader to
+Nothing in Sections 3--8 is new mathematics, and we do not want a reader to
 have to work that out. Table~\ref{tab:novelty} is the audit.
 
 \begin{table}[h]
@@ -505,6 +684,8 @@ Result & Status & Prior art \\
 Prop.~\ref{p:reweight}, \ref{p:logratio} & KNOWN & self-normalised importance
 weighting \\
 Prop.~\ref{p:pin}, Cor.~\ref{c:support} & KNOWN as algebra & --- \\
+Prop.~\ref{p:gated}, Cor.~\ref{c:pinned} & KNOWN & reparameterisation of a
+log-linear score; one line of algebra \\
 Prop.~\ref{p:c2} & KNOWN & coarsening at random~\cite{heitjan1991car} \\
 Prop.~\ref{p:map} & KNOWN & argmax stability under bounded perturbation \\
 Prop.~\ref{p:kl}, \ref{p:bounds} & KNOWN & Jensen; bounded-support mean
@@ -549,8 +730,18 @@ to instrument.
 \section{Limitations}
 
 \begin{enumerate}
+\item \textbf{The baseline $q$ is counterfactual and, in the measured case, not
+      evaluable} (Remark~\ref{r:counterfactual}). Propositions~\ref{p:kl} and
+      \ref{p:bounds} therefore quantify a distance to a reference point rather
+      than to anything the system computes. The pinning result does not depend
+      on this and is stated in terms of $p$ and the prior alone.
+\item \textbf{Proposition~\ref{p:map} is vacuous in the regime we measure}
+      (Remark~\ref{r:mapblind}): a pinned pair with equal prior mass satisfies
+      $\Delta\le R$ always, so the sufficient condition cannot fire. We have
+      no MAP-stability result for the case the paper is about.
 \item The symbolic verification is at $n=4$. The hand proofs are general; the
-      machine check is not.
+      machine check is not. Propositions~\ref{p:gated} and \ref{p:map} and
+      Remark~\ref{r:mapblind} are checked numerically only.
 \item The implemented instance is $n=1$: one deployed layer, whose skip-style
       gate is a natural implementation choice but whose prevalence we do not
       establish. A structural-analysis FDI design would mark the fault set

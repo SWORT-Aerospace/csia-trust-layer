@@ -22,8 +22,8 @@ is entitled to ask whether the paper reports a defect that upstream fixed
 years ago, and if so the contribution collapses to a historical note.
 
 **Evidence response.** Two parts. (a) The *mechanism* is structural, not
-version-dependent: P3 in `FORMAL_CORE.md` follows from the signature table and
-the gate, and holds for any system with hypothesis-relative applicability and
+version-dependent: P7c in `FORMAL_CORE.md` §9a follows from the signature
+table and the gate, and holds for any system with hypothesis-relative applicability and
 a skip-style gate. (b) Phase II re-ran on **ArduCopter 4.8.0-dev**, and the
 finding did not vanish — E1 records three validated significant GNSS cells
 escalated by neither the estimator nor CSIA. Phase II is *excluded* from Paper
@@ -199,7 +199,7 @@ do arithmetic that is not licensed.
 they are calibrated. **The word "confidence" is not used for the posterior
 anywhere**, and a test enforces that. The mathematical results (P1–P6) are
 invariant to the tempering: `EVIDENCE_MULT` scales `log q` for every
-hypothesis, so P2's decomposition and P3's pinning are unaffected.
+hypothesis, so P2's decomposition and P7c's pinning are unaffected.
 
 **Remaining weakness.** The scalars are still reported to four decimal places,
 which implies a precision the construction does not have.

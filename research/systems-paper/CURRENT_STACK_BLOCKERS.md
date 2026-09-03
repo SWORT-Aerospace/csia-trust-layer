@@ -78,7 +78,7 @@ different `ACTIVE` sequence for the same physical fault.
 **Consequence for the paper:** the 76-tick and 200-tick windows in
 `MECHANISM_A.md` are properties of *this pipeline at 25 Hz with this
 comparator*, and the manuscript must say so rather than presenting them as
-properties of the mechanism. The mechanism (P3) is rate-independent; the
+properties of the mechanism. The mechanism (P7c) is rate-independent; the
 *numbers* are not.
 
 ## B6-3 — Staleness semantics

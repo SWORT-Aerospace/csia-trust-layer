@@ -135,6 +135,130 @@ def test_P4_is_sufficient_and_is_not_claimed_to_be_necessary(instances):
         "longer distinguish 'sufficient' from 'necessary'")
 
 
+# ============================================ the gated-score form (P7, P8)
+#
+# THE PROPOSITIONS THAT MAKE THE FRAMEWORK NON-VACUOUS, AND THE ONE THAT SAYS
+# WHAT THAT COSTS. See research/math-paper/FORMAL_CORE.md 1.1 and 9a. If L_h
+# is read as the ACTIVE-evidence likelihood, w is identically 1 and every test
+# above passes while saying nothing about the system. These tests use the
+# full-evidence baseline and therefore have content.
+
+
+def _gated(rng, h=5, j=6, gates=(0.0, 0.4, 1.0)):
+    """(pi, ell, g): a prior, per-feature log-likelihood contributions, and
+    gates in [0,1]. Built here rather than imported, like everything else in
+    this file."""
+    pi = rng.dirichlet(np.ones(h))
+    ell = rng.normal(0.0, 1.0, (j, h))
+    g = rng.choice(np.asarray(gates), j)
+    return pi, ell, g
+
+
+def _post(pi, logL):
+    n = pi * np.exp(logL)
+    return n / n.sum()
+
+
+@pytest.fixture(scope="module")
+def gated_instances():
+    rng = np.random.default_rng(70707)
+    return [_gated(rng) for _ in range(2000)]
+
+
+def test_P7_the_gated_score_is_a_reweighting_of_the_full_evidence_posterior():
+    """w_h = exp(-sum_j (1-g_j) l_j(h)), and it is NOT identically 1."""
+    rng = np.random.default_rng(70707)
+    varied = 0
+    for _ in range(2000):
+        pi, ell, g = _gated(rng)
+        q = _post(pi, ell.sum(axis=0))
+        p = _post(pi, (g[:, None] * ell).sum(axis=0))
+        w = np.exp(-((1.0 - g)[:, None] * ell).sum(axis=0))
+        assert np.max(np.abs(p - q * w / (q @ w))) < TOL
+        varied += int(w.max() / w.min() > 1.0 + 1e-9)
+    assert varied > 1500, (
+        f"w varied across hypotheses in only {varied}/2000 instances. If it "
+        f"stops varying, the framework has collapsed back to Reading A and "
+        f"P1-P6 are describing a reweighting by the constant 1.")
+
+
+def test_P7b_the_shift_is_exactly_the_withheld_distinguishing_contribution(
+        gated_instances):
+    for pi, ell, g in gated_instances:
+        q = _post(pi, ell.sum(axis=0))
+        p = _post(pi, (g[:, None] * ell).sum(axis=0))
+        for a, b in ((0, 1), (2, 3), (1, 4)):
+            shift = np.log(p[a] / p[b]) - np.log(q[a] / q[b])
+            withheld = -float(((1.0 - g) * (ell[:, a] - ell[:, b])).sum())
+            assert abs(shift - withheld) < TOL
+
+
+def test_P7c_gating_every_distinguishing_feature_pins_the_ratio(
+        gated_instances):
+    """THE STATEMENT THE SYSTEMS PAPER ACTUALLY MEASURES -- P3's conclusion
+    reached without P3's hypotheses, which do NOT hold in the implemented
+    case under the full-evidence baseline."""
+    for pi, ell, g in gated_instances:
+        a, b = 0, 1
+        g2 = g.copy()
+        g2[np.abs(ell[:, a] - ell[:, b]) > 1e-12] = 0.0
+        p = _post(pi, (g2[:, None] * ell).sum(axis=0))
+        assert abs(np.log(p[a] / p[b]) - np.log(pi[a] / pi[b])) < TOL
+
+
+def test_P7c_case_has_L_a_neq_L_b_and_w_a_neq_w_b():
+    """The point of P7c. FORMAL_CORE.md once claimed the skip made w_a = w_b
+    'by construction'; it does not, and this test is why that claim cannot
+    come back. Both P3 hypotheses FAIL and the ratio is pinned anyway."""
+    rng = np.random.default_rng(70708)
+    both_fail = 0
+    for _ in range(2000):
+        pi, ell, g = _gated(rng)
+        a, b = 0, 1
+        dist = np.abs(ell[:, a] - ell[:, b]) > 1e-12
+        if not dist.any():
+            continue
+        g2 = g.copy()
+        g2[dist] = 0.0
+        logL = ell.sum(axis=0)                       # full evidence
+        w = np.exp(-((1.0 - g2)[:, None] * ell).sum(axis=0))
+        both_fail += int(abs(logL[a] - logL[b]) > 1e-9
+                         and abs(np.log(w[a]) - np.log(w[b])) > 1e-9)
+    assert both_fail > 1900, (
+        f"only {both_fail}/2000 pinned instances had BOTH L_a != L_b and "
+        f"w_a != w_b; if this drops, the reading has silently reverted")
+
+
+def test_P8_the_MAP_condition_can_never_certify_a_pinned_pair():
+    """A NEGATIVE RESULT ABOUT OUR OWN PROPOSITION P4, asserted rather than
+    hoped for. Delta <= R always, so 'Delta > R' cannot fire on the pair the
+    systems paper measures."""
+    rng = np.random.default_rng(70709)
+    tested = 0
+    worst = -np.inf
+    for _ in range(4000):
+        pi, ell, g = _gated(rng, gates=(0.0, 0.5, 1.0))
+        a, b = 0, 1
+        g = g.copy()
+        g[np.abs(ell[:, a] - ell[:, b]) > 1e-12] = 0.0
+        pi = pi.copy()
+        pi[b] = pi[a]
+        pi = pi / pi.sum()
+        q = _post(pi, ell.sum(axis=0))
+        w = np.exp(-((1.0 - g)[:, None] * ell).sum(axis=0))
+        order = np.argsort(q)[::-1]
+        if {int(order[0]), int(order[1])} != {a, b}:
+            continue
+        tested += 1
+        R = float(np.log(w.max()) - np.log(w.min()))
+        Delta = float(np.log(q[order[0]]) - np.log(q[order[1]]))
+        worst = max(worst, Delta - R)
+    assert tested > 100, tested
+    assert worst <= TOL, (
+        f"found a pinned pair with Delta > R by {worst:.3e}; either P8's "
+        f"proof is wrong or the construction no longer pins the pair")
+
+
 # =================================================== the committed artifact
 def test_the_committed_audit_agrees_with_this_test():
     path = os.path.join(MP, "results", "proof_audit.json")
@@ -169,6 +293,48 @@ def test_P4_reports_a_denominator_not_only_a_numerator():
     assert p4["argmax_agreed_when_condition_met"] \
         == p4["condition_Delta_gt_R_met"]
     assert p4["argmax_moved_when_condition_violated"] > 0
+
+
+#: The two P4 counts PRINTED IN THE MANUSCRIPT, pinned.
+#:
+#: This is not a numerical claim -- both counts are artefacts of one seed and
+#: carry no meaning beyond "sufficient, not necessary". It is a STABILITY
+#: check. Adding the P7 block to proof_audit.py drew from the shared generator
+#: and moved these from 2721/6877 to 2692/7031: a published number changed
+#: because an unrelated proposition was added. The script now gives each such
+#: block its own stream; this test is what makes a future regression loud
+#: instead of silent. If it fails, either restore stream independence or
+#: update the manuscript, FORMAL_CORE.md 7 and 10, and PROSE_NUMERIC_BINDINGS
+#: PB-17/PB-18 together -- never the artifact alone.
+P4_PUBLISHED = {"condition_Delta_gt_R_met": 2721,
+                "argmax_moved_when_condition_violated": 6877}
+
+
+def test_the_P4_counts_the_manuscript_prints_are_stream_stable():
+    path = os.path.join(MP, "results", "proof_audit.json")
+    if not os.path.exists(path):
+        pytest.skip("proof_audit.json not generated")
+    p4 = json.load(open(path, encoding="utf-8"))["numeric"]["P4"]
+    got = {k: p4[k] for k in P4_PUBLISHED}
+    assert got == P4_PUBLISHED, (
+        f"the audit's P4 counts moved: published {P4_PUBLISHED}, artifact "
+        f"{got}. A proposition added upstream of the P4 block probably drew "
+        f"from the shared generator. See the note above this test.")
+
+
+def test_P8_is_reported_as_a_bound_that_holds_with_no_room():
+    """The negative result about P4 must be present and must not have been
+    quietly softened into a bound with slack."""
+    path = os.path.join(MP, "results", "proof_audit.json")
+    if not os.path.exists(path):
+        pytest.skip("proof_audit.json not generated")
+    num = json.load(open(path, encoding="utf-8"))["numeric"]
+    key = "P8_pinned_pair_margin_never_exceeds_R"
+    assert num["bound_violations_beyond_1e-9"][key] == 0
+    assert num["bound_max_slack"][key] < 1e-9
+    assert num["P8"]["pinned_pairs_that_were_the_top_two_under_q"] > 0, (
+        "P8 was never evaluated on a single instance, so its 0 violations "
+        "mean nothing")
 
 
 # ======================================================== the novelty audit
@@ -242,7 +408,7 @@ def test_every_proposition_is_labelled_known():
     assert "Every mathematical proposition in this paper is labelled KNOWN" \
         in text
     for pid in ("P1", "P2", "P3", "C2", "C3", "P4", "P5a", "P5b",
-                "P6a", "P6b"):
+                "P6a", "P6b", "P7", "P7b", "P7c", "P8"):
         assert f"| {pid} |" in text, pid
 
 

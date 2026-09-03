@@ -25,9 +25,9 @@ exhaustive by construction of the diagnostic model.
 | symbol | meaning | assumption |
 |---|---|---|
 | `π_h` | prior on `H` | `π_h > 0` for every `h`; `Σ_h π_h = 1` |
-| `L_h` | likelihood of the **active** (ungated) evidence under `h` | `L_h > 0` |
+| `L_h` | likelihood of the **full** evidence, gated and ungated alike, under `h` | `L_h > 0` |
 | `w_h` | the hypothesis-dependent validity factor: everything the gating contributes to `h`'s score that is not in `L_h` | `w_h > 0`, finite |
-| `q_h` | the posterior from active evidence alone | `q_h = π_h L_h / Σ_j π_j L_j` |
+| `q_h` | the posterior from the full evidence | `q_h = π_h L_h / Σ_j π_j L_j` |
 | `p_h` | the posterior actually produced | `p_h = π_h w_h L_h / Σ_j π_j w_j L_j` |
 
 **A1 (strict positivity).** `π_h, L_h, w_h ∈ (0, ∞)` for all `h`. Needed for
@@ -49,6 +49,42 @@ assumed, and it is stated there.
 
 Notation: `E_q[w] = Σ_h q_h w_h`, `w_max = max_h w_h`, `w_min = min_h w_h`,
 and `R = log(w_max / w_min) ≥ 0` is the **log range** of the validity factors.
+
+### 1.1 What `q` is measured against — a defect found in red team, and closed
+
+**The first version of this document defined `L_h` as the likelihood of the
+ACTIVE evidence.** Under that definition the framework is vacuous for the very
+system it was written about, and the vacuity is total, not partial:
+
+- CSIA's score is additive over per-feature terms, `log L_h = Σ_j g_j ℓ_j(h)`.
+- If `L_h` is the likelihood of the evidence that survived the gate, the gate
+  is **already inside** `L_h`.
+- Then `w_h ≡ 1`, `E_q[w] = 1`, `p = q` identically, `R = 0`.
+- P1, P2, P5a, P5b, P6a and P6b are then all TRUE and all EMPTY: they describe
+  a reweighting by the constant 1. Both readings were computed before this
+  section was written; Reading A gives `w ≡ 1` exactly.
+
+The two readings:
+
+| | `L_h` is | `w_h` | status |
+|---|---|---|---|
+| **Reading A** | the likelihood of the evidence that survived the gate | `≡ 1` | framework vacuous |
+| **Reading B** | the likelihood of all the evidence that could in principle have been scored | `exp(−Σ_j (1−g_j) ℓ_j(h))` (P7) | framework applies |
+
+**Everything below uses Reading B**, and P7 (§9a) derives the `w_h` that makes
+it concrete.
+
+**The cost of Reading B, stated here and not buried.** `q` is then a
+*counterfactual*: the system does not compute it, and in the case the systems
+paper measures it cannot — the gate closes *because the receiver stopped
+reporting*, so the withheld `ℓ_j(h)` has no observed value to take. `w_h` is
+exact bookkeeping for the difference between two posteriors, one of which is
+hypothetical.
+
+What survives that objection intact is the pinning claim. P3 and P7c relate
+`p` to the **prior**; both are quantities the implementation holds. A reader
+who rejects Reading B outright loses P5 and P6 — which measure a distance to
+the counterfactual baseline — and keeps the result the systems paper reports.
 
 ---
 
@@ -109,14 +145,32 @@ exactly, for every value of the observed evidence.
 `log(p_a/p_b) = log(π_a/π_b) + log(w_a/w_b) = log(π_a/π_b)` since
 `w_a = w_b`. ∎
 
-**Why both hypotheses hold in the implemented system.** In CSIA the gate is a
-**skip**: a gated feature is removed from the sum for *every* hypothesis
-identically, so `w_a = w_b` by construction — the implementation's gating is
-*not* hypothesis-dependent at the level of the multiplicative factor. What
-*is* hypothesis-dependent is which surviving features can separate a given
-pair. `L_a = L_b` holds exactly when every remaining feature contributes the
-same log-likelihood to `a` and to `b`, which for the naive-Bayes signature
-model is exactly the condition
+**Do P3's hypotheses hold in the implemented system? NOT AS STATED — and an
+earlier version of this section claimed they did.** The claim was: "in CSIA the
+gate is a skip, a gated feature is removed from the sum for every hypothesis
+identically, so `w_a = w_b` by construction." That reasoning is Reading A
+(§1.1) wearing Reading B's clothes. The *decision* to skip is hypothesis-blind;
+the *term* that gets skipped is not. Skipping feature `j` removes `ℓ_j(a)` from
+`a`'s score and `ℓ_j(b)` from `b`'s, and those differ exactly when `j`
+distinguishes the pair — which, when `j` is the last distinguishing feature, is
+precisely the case of interest. So under Reading B, in the measured case,
+
+    L_a ≠ L_b   AND   w_a ≠ w_b,
+
+and **the ratio is pinned anyway**, because by P7 the two inequalities cancel
+exactly: `w_a/w_b = exp(−S) = L_b/L_a` where `S = Σ_j (ℓ_j(a) − ℓ_j(b))`. That
+is P7c (§9a), and P7c — not P3 — is what the systems paper measures.
+
+P3 remains true and remains the abstract statement. Its hypotheses are
+satisfied under Reading A, where everything else is vacuous, and under
+Reading B whenever the withheld contribution happens to be pair-symmetric.
+**The two propositions have the same conclusion by different routes, which is
+why the error survived a first reading.**
+
+The structural condition below is unaffected: it is a statement about which
+features are active, not about `w`. `L_a = L_b` (Reading A) and
+"every distinguishing feature is gated" (Reading B, P7c) are the same set
+condition, namely
 
     ( LOW(a) △ LOW(b) ) ∩ ACTIVE = ∅
 
@@ -310,6 +364,86 @@ located it, and must not claim sharpness in its absence.
 
 ---
 
+## 9a. P7 — the gated-score form, and what it costs P4
+
+§1.1 says the framework needs Reading B. This section supplies the `w_h` that
+makes Reading B concrete, for the additive scores runtime diagnostic layers
+actually compute. **It is one line of algebra and is claimed as KNOWN** — a
+reparameterisation of a log-linear score. It earns its place by closing the
+gap between the abstract `w_h` and an implementation, not by being difficult.
+
+**Proposition P7 (gated score).** Let the score be additive over per-feature
+terms, `log L_h^gated = Σ_j g_j ℓ_j(h)` with gates `g_j ∈ [0,1]`, and let `q`
+be the posterior from the ungated score (`g_j ≡ 1`, Reading B). Then `p` is the
+self-normalised reweighting of `q` by
+
+    w_h = exp( − Σ_j (1 − g_j) ℓ_j(h) ) ,                                (P7)
+
+P1 applies, and for any pair `a, b`,
+
+    log(p_a/p_b) − log(q_a/q_b) = − Σ_j (1 − g_j)( ℓ_j(a) − ℓ_j(b) ).    (P7b)
+
+*Proof.* `log L_h^gated = Σ_j ℓ_j(h) − Σ_j (1−g_j) ℓ_j(h) = log L_h + log w_h`
+with `w_h` as in (P7), strictly positive and finite, so A1 holds. Apply P1,
+then P2. ∎
+
+**P7b in words.** The shift is **exactly the withheld distinguishing
+contribution**. A fully open gate contributes all of its term, a fully closed
+one contributes none, a partial gate contributes in proportion. And `w_h` is
+hypothesis-dependent precisely when some gated feature contributes differently
+to two hypotheses — the ordinary case, not a contrived one.
+
+**Corollary P7c (P3, recovered).** If `g_j = 0` for every `j` with
+`ℓ_j(a) ≠ ℓ_j(b)`, then `log(p_a/p_b) = log(π_a/π_b)`.
+
+*Proof.* By (P7b), `log(p_a/p_b) = log(π_a/π_b) + Σ_j g_j (ℓ_j(a) − ℓ_j(b))`,
+and every surviving summand has `ℓ_j(a) = ℓ_j(b)`. ∎
+
+So P3 is not an independent result: it is the corner of P2 in which the gate
+withholds every distinguishing term. It is stated separately only because it
+is the case the systems paper measures — and, as §4 records, the case the
+systems paper measures satisfies **P7c**, not P3's literal hypotheses.
+
+### P8 — a negative result about P4, derived from P7
+
+P4 certifies the MAP when `Δ > R`. Under (P7), `R` is the spread of the
+**withheld** log-likelihood across hypotheses, so `R` is *largest* exactly in
+the regime this project cares about. Sharply:
+
+**Proposition P8.** Let `a, b` be a pinned pair (every distinguishing feature
+gated shut) with `π_a = π_b`, and suppose `a, b` are the top two under `q`.
+Then `Δ ≤ R`, with equality attained. Consequently **P4 can never certify a
+pinned pair.**
+
+*Proof.* Write `S = Σ_j (ℓ_j(a) − ℓ_j(b))`. Every `j` with
+`ℓ_j(a) ≠ ℓ_j(b)` has `g_j = 0`, so by (P7)
+`log w_a − log w_b = −Σ_j (1−g_j)(ℓ_j(a) − ℓ_j(b)) = −S`, giving
+`R = log w_max − log w_min ≥ |log w_a − log w_b| = |S|`. Since `a, b` are the
+top two under `q`, `Δ = |log(q_a/q_b)| = |log(π_a/π_b) + S| = |S|` using
+`π_a = π_b`. Hence `Δ = |S| ≤ R`. Equality holds when the pair attains the
+extremes of `w`. ∎
+
+*Verified numerically:* over the sampled instances in which such a pair was
+the top two (**2 282** of 20 000), worst slack `Δ − R` is
+**+8.882 × 10⁻¹⁶** — equality to floating-point precision — with **0**
+instances exceeding tolerance.
+
+**The equal-prior hypothesis is load-bearing, and the escape makes P4 look
+worse, not better.** Since `Δ ≤ |log(π_a/π_b)| + |S|`, the condition `Δ > R`
+forces `|log(π_a/π_b)| > R − |S| ≥ 0`: the prior log-odds must carry the whole
+excess unaided. So `Δ > R` *can* fire on a pinned pair — **1 224 of 20 130**
+sampled instances (6.08 %) under a lopsided `Dirichlet(0.3)` prior, so the
+escape is non-empty rather than a technicality — and when it fires, the
+certificate was bought with **prior mass, not evidence**. C3 has already said
+what such a MAP is worth: nothing, as discriminating support.
+
+**This is a limitation of our own proposition and it is reported as one.** P4
+is informative when the gate withholds little, which is when the phenomenon
+this project is about is absent. We have no MAP-stability result for the
+pinned regime, and the manuscript's Limitations section says so.
+
+---
+
 ## 10. Verification summary
 
 `research/math-paper/results/proof_audit.json`, regenerated by
@@ -320,12 +454,17 @@ located it, and must not claim sharpness in its absence.
 | P1 reweighting identity | exact | 4.441e−16 |
 | P2 log-ratio decomposition | exact | 1.776e−15 |
 | P3 pinned to prior | exact | 8.882e−16 |
+| P7 gated score is a reweighting | — | 5.551e−16 |
+| P7b shift = withheld contribution | — | 3.553e−15 |
+| P7c pinned when all distinguishing gated | — | 1.776e−15 |
 | C2 constant `w` ⇒ `p = q` | exact | — |
 | P5a KL(q‖p) = Jensen gap | exact | 1.332e−15 |
 | P5b KL(p‖q) identity | exact | 1.533e−15 |
 | P6a `R` bound | — | 0 violations, max slack +1.78e−15 (tight) |
 | P6b TV bound | — | 0 violations, max slack −8.38e−05 |
 | P4 sufficient condition | — | held in 2721/2721 instances where Δ > R |
+| P8 pinned pair never certifiable by P4 | — | 0 violations, max slack +8.88e−16 over 2282 instances |
+| P8's escape, with unequal priors | — | fired in 1224 of 20130 instances (6.08 %); the prior, not the evidence, supplied the margin |
 
 The numeric pass is the one CI re-runs (`tests/test_math_paper_proofs.py`);
 sympy is not a declared project dependency and adding one to CI so a research
@@ -342,3 +481,5 @@ algebra runs `pip install sympy` and re-runs the script.
 | read P4's condition as necessary | false | 6 877 audited instances where the argmax moved with `Δ ≤ R` |
 | read P3 as "the fault is undetectable" | false | CSIA's failsafe reaches CAUTION through the freshness disjunct in exactly the window where P3 holds |
 | read concentration as support | false | C3; and the measured `p_nominal → 1` with `D(nominal, gps_fault) = ∅` |
+| read `L_h` as the ACTIVE-evidence likelihood (Reading A) | the whole framework goes vacuous: `w ≡ 1`, `p = q`, `R = 0`, and P1/P2/P5/P6 describe a reweighting by 1 | §1.1; this was the document's own first formulation |
+| expect P4 to certify the MAP in the pinned regime | false, and not merely unproved: `Δ ≤ R` always for a pinned pair with equal prior mass | P8, §9a |

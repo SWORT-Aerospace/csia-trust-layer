@@ -60,13 +60,14 @@ two scope corrections the project's own campaign forced.
     why it can happen                     where it does happen
     algebra + one condition               measurement of one layer
     no vehicle                            one multirotor, one bench
-    P3: pinned to the prior         -->   200 consecutive ticks, measured
+    P7c: pinned to the prior        -->   200 consecutive ticks, measured
+      (P3 is its abstract form; see below)
     C3: concentration != support    -->   SUPPORT_LOST_FOR_REQUIRED_INFORMATION
     the condition is static         -->   the checker evaluates it from a
                                           committed YAML table
 ```
 
-The systems paper may **cite** P3 and C3 as the closed-form account of what it
+The systems paper may **cite** P7c and C3 as the closed-form account of what it
 measures. The mathematical paper may **cite** the measurement as an
 implemented instance. Neither is load-bearing for the other:
 
@@ -87,7 +88,7 @@ implemented instance. Neither is load-bearing for the other:
 
 | artifact | owner | the other paper's use |
 |---|---|---|
-| `research/math-paper/results/proof_audit.json` | mathematical | cited by the systems paper for P3 |
+| `research/math-paper/results/proof_audit.json` | mathematical | cited by the systems paper for P7c (formerly P3 — see `REVIEWER_RED_TEAM_MATH.md` §4.2 for why the pointer moved and why no number did) |
 | `research/systems-paper/results/checker_agreement.json` | systems | cited by the mathematical paper as the implemented instance |
 | `research/formalization/diagnostic_signature_matrix.yaml` | shared | the structural input to both |
 | `docs/math/PROOF_STATUS.md` | mathematical, **for the e-process work (T-1…T-5)** | **not** the register for P1–P6; `FORMAL_CORE.md` is |

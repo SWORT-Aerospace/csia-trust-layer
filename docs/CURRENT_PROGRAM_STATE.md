@@ -81,13 +81,13 @@ to `review.px4.io`). Neither is a research problem.
 
 | # | gate | status |
 |---|---|---|
-| 1 | all propositions proven | **PASS** — P1–P6, C2, C3 in `research/math-paper/FORMAL_CORE.md`; symbolic (sympy, n=4) and numeric (20 000 instances) in `results/proof_audit.json` |
+| 1 | all propositions proven | **PASS** — P1–P8, C2, C3 in `research/math-paper/FORMAL_CORE.md`; symbolic (sympy, n=4) and numeric (20 000 instances) in `results/proof_audit.json`. P7/P7b/P7c and P8 were added by the red team pass and are numeric-only |
 | 2 | all counterexamples checked | **PASS** — `FORMAL_CORE.md` §11; P4's 6,877 audited instances where the argmax moved with the condition violated |
 | 3 | prior-art matrix complete | **COVERAGE COMPLETE, VERIFICATION BLOCKED** — 18 rows over all **10** topics the brief requires at minimum, asserted by `tests/test_math_paper_proofs.py`. Every row is still `WEB_SEARCH_ONLY`; one is `NOT_FOUND_NEEDS_HUMAN` and one is `NOT_READ_HIGH_PRIORITY` (arXiv:2405.15141, *Likelihood distortion and Bayesian local robustness* — the title alone makes it the most important unread reference in the matrix) |
 | 4 | novelty language audited | **PASS** — `research/math-paper/NOVELTY_AUDIT.md`; every proposition labelled **KNOWN**; forbidden phrases enforced by test |
 | 5 | notation internally consistent | **PASS** — one symbol table in `FORMAL_CORE.md` §1 |
-| 6 | proof reviewer simulation complete | **PASS** — `REVIEWER_RED_TEAM.md` Reviewer 3 (statistical) and Reviewer 4 (hostile on novelty) |
-| 7 | PDF builds clean | **PASS** — `make paper-math` builds an 8-page manuscript with **every citation resolved**. The scaffold is gone; `OI-M2` is CLOSED |
+| 6 | proof reviewer simulation complete | **PASS, and it found something** — `research/math-paper/REVIEWER_RED_TEAM_MATH.md`, 4 reviewers, 11 objections. **One defect found that would have been fatal in review**: §2's baseline definition made Propositions 1, 2, 5 and 6 vacuous for the paper's own worked example. Fixed with a new section, a new proposition (gated score) and a rewritten abstract. **One negative result about the paper's own P4** (P8: the MAP condition provably cannot certify a pinned pair). **One of our own supporting claims withdrawn** (`FORMAL_CORE.md` §4's "`w_a = w_b` by construction"). 6 open items listed and not closed |
+| 7 | PDF builds clean | **PASS** — `make paper-math` builds a 10-page manuscript with **every citation resolved**. The scaffold is gone; `OI-M2` is CLOSED |
 | 8 | bibliography verified | **BLOCKED (NEW)** — the manuscript cites 6 entries, all unverified, and the coarsening-at-random reference that makes Proposition 5 KNOWN is RECONSTRUCTED from search alone. `OI-M4` |
 
 **MATHEMATICAL PAPER: BLOCKED.** Blocker: gate 8 — the bibliography. Gate 7 is

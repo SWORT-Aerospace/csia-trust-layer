@@ -17,10 +17,16 @@ WHAT IS BEING PROVED, IN WORDS
 -------------------------------
 A runtime diagnosis multiplies each hypothesis's likelihood by a factor that
 depends on WHICH HYPOTHESIS IT IS -- because whether a piece of evidence is
-"applicable" is itself hypothesis-relative. Write q for the posterior you
-would get from the active evidence alone and p for the one you actually get.
-The propositions say exactly how far apart they can be, and exactly when they
-coincide.
+"applicable" is itself hypothesis-relative. Write q for the posterior from the
+FULL evidence the system could in principle have scored, and p for the one it
+actually produces after gating. The propositions say exactly how far apart
+they can be, and exactly when they coincide.
+
+THE BASELINE MATTERS AND THE FIRST DRAFT GOT IT WRONG. If q is instead read
+as "the posterior from the ACTIVE evidence alone", the gate is already inside
+L, w is identically 1, p == q, and P1/P2/P5/P6 are true and empty. P7 below
+exhibits the w that makes the framework non-vacuous for the additive gated
+scores runtime layers actually compute, and P8 records what that costs P4.
 
 NONE OF THIS IS CLAIMED AS NEW MATHEMATICS. P1-P3 are one line of algebra
 each; P4 is a standard perturbation-of-argmax bound; P5-P6 are elementary
@@ -48,6 +54,24 @@ RNG = np.random.default_rng(20260903)
 N_TRIALS = 20000
 H = 5                     # hypotheses per random instance
 
+#: A proposition that needs randomness BEYOND the shared (pi, L, w) instance
+#: draws from its own generator, never from RNG.
+#:
+#: This is not stylistic. P4 reports COUNTS, not a max deviation, and counts
+#: depend on the exact draws. When the P7 block was first written it drew from
+#: RNG, which advanced the shared stream, which silently moved P4's reported
+#: counts from 2721/6877 to 2692/7031 -- a change in a published number caused
+#: by adding an unrelated proposition. Nothing was wrong with either figure,
+#: and that is precisely the problem: a reader who reran the audit after a
+#: later addition would find a number in the paper that no longer reproduced,
+#: with no way to tell a stream shift from an error. Separate streams remove
+#: the failure mode; `test_math_paper_proofs.py` pins the counts so a future
+#: addition that reintroduces the coupling fails loudly.
+RNG_P7 = np.random.default_rng(20260903 + 7)
+RNG_P8 = np.random.default_rng(20260903 + 8)
+RNG_P8E = np.random.default_rng(20260903 + 88)
+N_ESCAPE = 200000
+
 
 def _git(*args):
     r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
@@ -57,7 +81,7 @@ def _git(*args):
 
 # ===================================================================== setup
 def _instance(rng, h=H, w_positive=True):
-    """(pi, L, w) with pi a prior, L active-evidence likelihoods, w the
+    """(pi, L, w) with pi a prior, L the full-evidence likelihoods, w the
     hypothesis-dependent gating factors. All strictly positive."""
     pi = rng.dirichlet(np.ones(h))
     L = np.exp(rng.normal(0.0, 2.0, h))
@@ -84,12 +108,17 @@ def numeric() -> dict:
     worst = {k: 0.0 for k in
              ("P1_reweighting_identity", "P2_log_ratio_identity",
               "P5a_KL_q_p_is_jensen_gap", "P5b_KL_p_q_identity",
-              "P3_pinned_to_prior")}
+              "P3_pinned_to_prior",
+              "P7_gated_score_is_a_reweighting",
+              "P7b_shift_is_the_withheld_contribution",
+              "P7c_pinned_when_all_distinguishing_gated")}
     slack = {k: -np.inf for k in
-             ("P6a_log_ratio_bounded_by_R", "P6b_TV_bound")}
+             ("P6a_log_ratio_bounded_by_R", "P6b_TV_bound",
+              "P8_pinned_pair_margin_never_exceeds_R")}
     violations = {k: 0 for k in slack}
     p4_tested = p4_condition_met = p4_held = 0
     p4_counterexample_when_violated = 0
+    p8_pairs_that_were_top_two = 0
 
     for _ in range(N_TRIALS):
         pi, L, w = _instance(RNG)
@@ -149,6 +178,87 @@ def numeric() -> dict:
             worst["P3_pinned_to_prior"],
             float(abs(np.log(p2[a] / p2[b]) - np.log(pi[a] / pi[b]))))
 
+        # -- P7: the GATED-SCORE form, and why the paper needs it --------
+        # A hostile reading of the manuscript's own section 2 kills the whole
+        # apparatus: if L_h is "the likelihood of the ACTIVE evidence" then
+        # the gate is already inside L, w_h is identically 1, p == q, and
+        # P1/P2/P5/P6 say NOTHING about the worked example. That reading is
+        # correct and it was the paper's first formulation.
+        #
+        # The framework applies under the OTHER reading: q from the FULL
+        # evidence, p from the gated score, and then
+        #
+        #     w_h = exp( - sum_j (1 - g_j) l_j(h) )
+        #
+        # which IS hypothesis-dependent whenever a gated feature contributes
+        # differently to two hypotheses. This block verifies that, and
+        # verifies that P3 is the CORNER of P2 rather than a separate result.
+        J = 6
+        ell = RNG_P7.normal(0.0, 1.0, (J, H))
+        g = RNG_P7.choice([0.0, 0.4, 1.0], J)
+        full = ell.sum(axis=0)
+        gated = (g[:, None] * ell).sum(axis=0)
+        qn = pi * np.exp(full)
+        q_full = qn / qn.sum()
+        pn = pi * np.exp(gated)
+        p_gated = pn / pn.sum()
+        w_gate = np.exp(-((1.0 - g)[:, None] * ell).sum(axis=0))
+        worst["P7_gated_score_is_a_reweighting"] = max(
+            worst["P7_gated_score_is_a_reweighting"],
+            float(np.max(np.abs(
+                p_gated - q_full * w_gate / (q_full @ w_gate)))))
+
+        # P7b: the pairwise shift is EXACTLY the withheld distinguishing
+        # contribution, so a fully gated distinguishing term contributes
+        # nothing and a fully open one contributes all of itself.
+        a, b = 0, 1
+        shift = (np.log(p_gated[a] / p_gated[b])
+                 - np.log(q_full[a] / q_full[b]))
+        expect = -float(((1.0 - g) * (ell[:, a] - ell[:, b])).sum())
+        worst["P7b_shift_is_the_withheld_contribution"] = max(
+            worst["P7b_shift_is_the_withheld_contribution"],
+            abs(shift - expect))
+
+        # P7c: gate EVERY term that distinguishes a from b, and the ratio is
+        # pinned to the prior -- P3, recovered from P2 rather than assumed.
+        g2 = g.copy()
+        distinguishing = np.abs(ell[:, a] - ell[:, b]) > 1e-12
+        g2[distinguishing] = 0.0
+        pn2 = pi * np.exp((g2[:, None] * ell).sum(axis=0))
+        p2 = pn2 / pn2.sum()
+        worst["P7c_pinned_when_all_distinguishing_gated"] = max(
+            worst["P7c_pinned_when_all_distinguishing_gated"],
+            abs(np.log(p2[a] / p2[b]) - np.log(pi[a] / pi[b])))
+
+        # -- P8: WHAT P7 COSTS P4. A NEGATIVE RESULT ABOUT OUR OWN BOUND.
+        # P4 certifies the MAP when Delta > R. Under the gated form, R is the
+        # spread of the WITHHELD log-likelihood across hypotheses, so the
+        # regime the systems paper measures -- every distinguishing term
+        # gated shut -- is exactly the regime where R is largest. Concretely:
+        # for a pinned pair carrying equal prior mass, log w_a - log w_b is
+        # the whole distinguishing sum S, so R >= |S|, while the q-margin
+        # between them is |log(pi_a/pi_b) + S| = |S|. Hence Delta <= R
+        # ALWAYS, with equality attained, and P4 can NEVER certify a pinned
+        # pair. Measured as slack = Delta - R; it must not exceed 0.
+        pi8 = RNG_P8.dirichlet(np.ones(H))
+        pi8[1] = pi8[0]
+        pi8 = pi8 / pi8.sum()
+        ell8 = RNG_P8.normal(0.0, 1.0, (6, H))
+        g8 = RNG_P8.choice([0.0, 0.5, 1.0], 6)
+        g8[np.abs(ell8[:, 0] - ell8[:, 1]) > 1e-12] = 0.0   # pin the pair 0,1
+        qn8 = pi8 * np.exp(ell8.sum(axis=0))
+        q8 = qn8 / qn8.sum()
+        w8 = np.exp(-((1.0 - g8)[:, None] * ell8).sum(axis=0))
+        ord8 = np.argsort(q8)[::-1]
+        if {int(ord8[0]), int(ord8[1])} == {0, 1}:
+            p8_pairs_that_were_top_two += 1
+            R8 = float(np.log(w8.max()) - np.log(w8.min()))
+            D8 = float(np.log(q8[ord8[0]]) - np.log(q8[ord8[1]]))
+            s = D8 - R8
+            slack["P8_pinned_pair_margin_never_exceeds_R"] = max(
+                slack["P8_pinned_pair_margin_never_exceeds_R"], s)
+            violations["P8_pinned_pair_margin_never_exceeds_R"] += int(s > 1e-9)
+
         # -- P4: Delta > R  =>  argmax p == argmax q ---------------------
         order = np.argsort(q)[::-1]
         Delta = float(np.log(q[order[0]]) - np.log(q[order[1]]))
@@ -170,8 +280,54 @@ def numeric() -> dict:
                    "note": "the last row is ALLOWED: the condition is "
                            "sufficient, not necessary. It is reported so the "
                            "bound is not mistaken for a characterisation."},
+            "P8": {"pinned_pairs_that_were_the_top_two_under_q":
+                       p8_pairs_that_were_top_two,
+                   "note": "a NEGATIVE result about P4. For a pinned pair "
+                           "carrying equal prior mass the margin Delta never "
+                           "exceeds R, so P4's sufficient condition can never "
+                           "certify the pair the systems paper measures. "
+                           "Max slack is reported in bound_max_slack."},
+            "P8_escape": p8_escape(),
             "trials": N_TRIALS, "hypotheses_per_instance": H,
             "seed": 20260903}
+
+
+# =============================================== P8's escape, measured
+def p8_escape() -> dict:
+    """P8 assumes the pinned pair carries EQUAL prior mass. Drop that and the
+    condition Delta > R CAN fire -- but only because
+    |log(pi_a/pi_b)| > R - |S|, i.e. the prior log-odds carried the whole
+    excess unaided. This measures how often, so the escape is reported as
+    non-empty rather than dismissed as a technicality.
+
+    A MAP certified this way is a MAP the prior decided. C3 already says what
+    that is worth as discriminating support: nothing.
+    """
+    tested = fired = 0
+    for _ in range(N_ESCAPE):
+        pi = RNG_P8E.dirichlet(np.ones(H) * 0.3)      # deliberately lopsided
+        ell = RNG_P8E.normal(0.0, 1.0, (6, H))
+        g = RNG_P8E.choice([0.0, 0.5, 1.0], 6)
+        g[np.abs(ell[:, 0] - ell[:, 1]) > 1e-12] = 0.0
+        qn = pi * np.exp(ell.sum(axis=0))
+        q = qn / qn.sum()
+        w = np.exp(-((1.0 - g)[:, None] * ell).sum(axis=0))
+        o = np.argsort(q)[::-1]
+        if {int(o[0]), int(o[1])} != {0, 1}:
+            continue
+        tested += 1
+        R = float(np.log(w.max()) - np.log(w.min()))
+        D = float(np.log(q[o[0]]) - np.log(q[o[1]]))
+        fired += int(D > R + 1e-9)
+    return {"draws": N_ESCAPE,
+            "pinned_pairs_that_were_the_top_two_under_q": tested,
+            "P4_condition_fired_anyway": fired,
+            "fired_fraction": (fired / tested) if tested else None,
+            "prior": "Dirichlet(0.3), deliberately lopsided",
+            "note": "P8's equal-prior hypothesis is load-bearing. When the "
+                    "condition fires here the prior log-odds supplied the "
+                    "whole margin, so the certificate was bought with prior "
+                    "mass rather than evidence."}
 
 
 # =========================================================== symbolic checks

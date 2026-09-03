@@ -156,9 +156,12 @@ tables:
     script: research/math-paper/proof_audit.py
     derivation: >-
       transcribed from proof_audit.json. Worst absolute deviations for the
-      identities, max slack and violation counts for the bounds, and the
-      P4 condition-met / agreed counts.
-    values: [4.44, 1.78, 8.88, 1.33, 1.53, 8.38, 2721]
+      identities, max slack and violation counts for the bounds, the P4
+      condition-met / agreed counts, and -- added by the math-paper red team
+      pass -- the P7 gated-score deviations (5.55e-16, 3.55e-15, 1.78e-15) and
+      P8's denominator (2282), the sampled instances in which a pinned pair
+      with equal prior mass was the top two under q.
+    values: [4.44, 1.78, 8.88, 1.33, 1.53, 8.38, 2721, 5.55, 3.55, 2282]
   - id: GT03
     label: independent checker against production
     what: >-

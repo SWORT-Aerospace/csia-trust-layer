@@ -33,9 +33,19 @@ the log prior ratio:
     log(p_a / p_b)  =  log(π_a / π_b)      exactly, at every tick.
 
 The pair is not weakly separated. It is **pinned**, and no further evidence of
-this kind can move it. The formal statement is P3 in
-`research/math-paper/FORMAL_CORE.md`, verified symbolically and to
-8.882 × 10⁻¹⁶ numerically.
+this kind can move it. The formal statement is **P7c** in
+`research/math-paper/FORMAL_CORE.md` §9a — *every distinguishing feature gated
+⇒ pinned to the prior* — verified to 1.776 × 10⁻¹⁵ numerically.
+
+**This document used to cite P3, and P3 is the wrong pointer.** P3 assumes
+`L_a = L_b` **and** `w_a = w_b`. Measured against the full evidence the layer
+could in principle have scored, the implemented case satisfies **neither**:
+the withheld feature contributes differently to the two hypotheses, so
+`L_a ≠ L_b` and `w_a ≠ w_b`, and the ratio is pinned because the two
+inequalities cancel exactly. P7c reaches the same conclusion from the gate
+condition, which is the thing this document actually measures. The correction
+is recorded in `research/math-paper/REVIEWER_RED_TEAM_MATH.md` §4.2; **no
+number in this document changes.**
 
 **Gating causes this by shrinking `ACTIVE`.** `D(a,b)` can be non-empty at one
 tick and empty at the next with no change to the model, purely because a gate
