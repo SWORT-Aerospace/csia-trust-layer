@@ -299,8 +299,10 @@ def build_aircraft_engine() -> AssuranceEngine:
                      full_current_a=30.0, full_rpm=9000.0,
                      depends_on=("POWER/battery", "COMMUNICATION/esc_can")),
     ), affected_functions=("PROPULSION",)))
+    from ..signatures import PREDICATES, SYMPTOMS
     return AssuranceEngine(reg, FunctionGraph(AIRCRAFT_FUNCTIONS),
-                           AIRCRAFT_RELATIONS)
+                           AIRCRAFT_RELATIONS,
+                           symptoms=SYMPTOMS, predicates=PREDICATES)
 
 
 def build_v1_1_baseline_engine() -> AssuranceEngine:

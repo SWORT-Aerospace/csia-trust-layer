@@ -438,7 +438,12 @@ def _degraded_position_functions(index):
     """Functions v1.1 names that are not fully available somewhere."""
     out = set()
     for rec in index.by_relation("v1_1.function_eligibility"):
-        name = rec.component.split(".", 1)[1]
+        # The wrapper's FAILURE record uses component "v1_1" with no
+        # function suffix. A symptom detector must survive a domain that
+        # could not report -- that is exactly when it is most needed.
+        _, _, name = rec.component.partition(".")
+        if not name:
+            continue
         if "NAVIGATION" not in name and "POSITION" not in name:
             continue
         if (_adverse(rec) or _estimator_ok(index, name) is False

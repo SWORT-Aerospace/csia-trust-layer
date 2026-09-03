@@ -40,6 +40,11 @@ _MODULES = {
     "test_stand": ("TEST_STAND_FUNCTIONS", "TEST_STAND_RELATIONS",
                    "build_test_stand_engine"),
     "test_stand_scenarios": ("TEST_STAND_NOMINAL", "TEST_STAND_SCENARIOS"),
+    "pump_skid": ("PUMP_SKID_FUNCTIONS", "PUMP_SKID_RELATIONS",
+                  "PUMP_SKID_NOMINAL", "PUMP_SKID_SCENARIOS",
+                  "build_pump_skid_engine"),
+    "matched_scenarios": ("MATCHED_SCENARIOS", "MATCHED_BY_NAME",
+                          "MATCHED_SETS", "SET_SYMPTOM"),
 }
 _EXPORTS = {name: mod for mod, names in _MODULES.items() for name in names}
 
@@ -53,15 +58,20 @@ __all__ = sorted(set(_EXPORTS) | set(_DERIVED) | {"build_engine_for"})
 
 def _scenarios():
     from .aircraft_scenarios import AIRCRAFT_SCENARIOS
+    from .matched_scenarios import MATCHED_SCENARIOS
+    from .pump_skid import PUMP_SKID_SCENARIOS
     from .test_stand_scenarios import TEST_STAND_SCENARIOS
-    return {s.name: s for s in AIRCRAFT_SCENARIOS + TEST_STAND_SCENARIOS}
+    return {s.name: s for s in (AIRCRAFT_SCENARIOS + TEST_STAND_SCENARIOS
+                                + PUMP_SKID_SCENARIOS + MATCHED_SCENARIOS)}
 
 
 def _engine_builders():
     from .aircraft import build_aircraft_engine
+    from .pump_skid import build_pump_skid_engine
     from .test_stand import build_test_stand_engine
     return {"aircraft": build_aircraft_engine,
-            "test_stand": build_test_stand_engine}
+            "test_stand": build_test_stand_engine,
+            "pump_skid": build_pump_skid_engine}
 
 
 def build_engine_for(scenario):

@@ -299,7 +299,7 @@ def test_the_decision_path_imports_nothing_beyond_the_standard_library():
     in the decision path would make the answer depend on its version."""
     allowed = {"csia", "dataclasses", "enum", "abc", "json", "hashlib",
                "typing", "__future__", "os", "collections", "math",
-               "importlib", "types", "itertools", "csv"}
+               "importlib", "types", "itertools", "csv", "time"}
     offenders = []
     for base, _dirs, files in os.walk(V2):
         for name in sorted(files):

@@ -155,5 +155,7 @@ def build_test_stand_engine() -> AssuranceEngine:
                      depends_on=("POWER/dc_supply",
                                  "COMMUNICATION/encoder_bus")),
     ), affected_functions=("TORQUE_DELIVERY",)))
+    from ..signatures import PREDICATES, SYMPTOMS
     return AssuranceEngine(reg, FunctionGraph(TEST_STAND_FUNCTIONS),
-                           TEST_STAND_RELATIONS)
+                           TEST_STAND_RELATIONS,
+                           symptoms=SYMPTOMS, predicates=PREDICATES)
