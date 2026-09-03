@@ -186,8 +186,10 @@ AIRCRAFT_RELATIONS = (
 SOURCE_DEPENDENCIES = {
     "imu0": ("POWER/rail_3v3",), "imu1": ("POWER/rail_3v3",),
     "mag": ("POWER/rail_3v3",), "baro": ("POWER/rail_3v3",),
-    "gps": ("POWER/rail_5v",), "vibration": ("POWER/rail_3v3",),
-    "motor_esc": ("POWER/battery",), "battery": ("POWER/battery",),
+    "gps": ("POWER/rail_5v", "COMMUNICATION/gnss_serial"),
+    "vibration": ("POWER/rail_3v3",),
+    "motor_esc": ("POWER/battery", "COMMUNICATION/esc_can"),
+    "battery": ("POWER/battery",),
 }
 
 _ALL = tuple(f.name for f in AIRCRAFT_FUNCTIONS)
@@ -258,7 +260,14 @@ def build_aircraft_engine() -> AssuranceEngine:
                     decision_budget_s=0.010,
                     end_to_end_deadline_s=0.050,
                     expected_period_s=0.020, jitter_limit_s=0.010,
-                    depends_on=("COMPUTE/state_estimator", "COMPUTE/cpu")),
+                    # The position this channel carries arrives over the
+                    # GNSS link and is computed on the CPU by the estimator.
+                    # Declaring the link is what lets a healthy link REFUTE
+                    # the transport explanation for a late value -- without
+                    # it, "the source was slow" and "the link was slow" are
+                    # not separable, because both live in validity->arrival.
+                    depends_on=("COMPUTE/state_estimator", "COMPUTE/cpu",
+                                "COMMUNICATION/gnss_serial")),
         ChannelSpec("telemetry_downlink", affected_functions=("TELEMETRY",),
                     transport_budget_s=0.500, processing_budget_s=0.100,
                     end_to_end_deadline_s=1.000,
