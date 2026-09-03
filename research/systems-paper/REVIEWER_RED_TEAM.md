@@ -35,9 +35,13 @@ breaking its own phase guard, so the referee has to take §Limitations' word
 for it. That is genuinely unsatisfying and there is no way to fix it inside
 Paper I's scope.
 
-**Manuscript change.** §Limitations must state the baseline date, name the
-4.8 replication and its exclusion, and give the artifact path so a referee can
-look — rather than only saying "3.3".
+**Manuscript change. DONE.** §Limitations now names *ArduCopter 3.3 SITL
+(dronekit-assets prebuilt, 2015-10-22)* explicitly, and a new paragraph —
+"One mechanism has been repeated on a current stack, and this paper
+deliberately does not report it" — gives the ArduPilot 4.8 result (20 valid
+trials, zero tick crossing error), the PX4 SIH `INAPPLICABLE` verdict with its
+reason, why the omission is enforced rather than promised, and the artifact
+path so a referee can read it there.
 
 ### 1.2 "The vehicle was never actually in danger."
 
@@ -57,8 +61,10 @@ a defect in the thing it exists to produce.
 **Remaining weakness.** No evidence is offered that a misattribution ever cost
 anything operationally. The paper cannot supply it and does not claim it.
 
-**Manuscript change.** State once, explicitly, that no operational harm is
-demonstrated and none is claimed.
+**Manuscript change. DONE.** §Limitations gains "No operational harm is
+demonstrated, and none is claimed": the vehicle completes every scenario, we
+lack the data that would establish harm, and what is reported is a defect in
+the product the layer exists to produce rather than a demonstrated hazard.
 
 ### 1.3 "5.1% of every clean flight is 'indistinguishable'. Why is that not a
 false-alarm story about your own metric?"
@@ -79,8 +85,13 @@ is a property of `ACTIVE`, and it correctly reads the same in clean flight.
 5.1 points of startup plus 13.3 points of fault. The paper must present the
 decomposition, not the pooled figure.
 
-**Manuscript change.** Report the two windows separately in the table. Never
-quote 18.4% alone.
+**Manuscript change. SATISFIED BY CONSTRUCTION.** The 18.4% figure is a
+`research/systems-paper/` number and appears nowhere in `main.tex`, so there is
+no pooled figure in the manuscript to decompose. Where it IS quoted --
+`MECHANISM_A.md` §3 -- the table gives every scenario's 76 and the fix-loss
+276 separately, and the two windows are described as "different in kind" with
+their causes named. `research/PROSE_NUMERIC_BINDINGS.yaml` rows PB-04 and
+PB-05 bind both to the artifact, so neither can drift into the other.
 
 ---
 
@@ -130,8 +141,11 @@ sense if the mistake is one someone would make.
 **Remaining weakness.** n = 1 implementation. The paper cannot claim the class
 of systems that share the defect is large, and it does not.
 
-**Manuscript change.** State that the finding is about one deployed layer and
-that the design rule is offered as a check, not as evidence of prevalence.
+**Manuscript change. DONE.** §Limitations gains "The gated naive-Bayes design
+is one implementation, and we do not claim it is representative", which states
+outright that a structural-analysis FDI design would mark the fault set
+unisolable and would not exhibit this, that $n=1$, and that the design rule is
+a check rather than evidence of prevalence.
 
 ### 2.3 "Your CUSUM comparison is unfair to the trust path."
 
@@ -146,11 +160,25 @@ detector-plus-policy.
 two λ series precisely so the reader can see which is which. The `dwell_up`
 of 1.0 s is part of the trust path's latency by design.
 
-**Remaining weakness.** The paper does not decompose the trust latency into
-detector time plus dwell time. It could and should.
+**Remaining weakness. NONE — this objection is CLOSED.** It was correct, the
+decomposition was computed, and the conclusion survived it.
 
-**Manuscript change.** Report `trust_latency − dwell_up` as well, or state
-plainly that the trust figure includes policy dwell.
+**Manuscript change. DONE, and the objection changed a number.**
+`mechanism_b.json` now carries a `policy_dwell` block per arm with
+`dwell_up = 1.0 s` (read from `FailsafeConfig`, not restated) and
+`trust_detector_only_latency_s`. Detector to detector:
+
+| arm | trust, detector only | CUSUM |
+|---|---|---|
+| slow_ramp | 7.72 | 2.96 |
+| spoof_3ms | 2.36 | 1.16 |
+| fast_ramp | 2.24 | 0.72 |
+
+The raw comparison flattered the CUSUM by one dwell period, exactly as the
+objection said. It is still ahead in all three arms, so the finding holds —
+but `MECHANISM_B.md` §6 now says the detector-only figure is the one to
+quote, and quoting 8.72 against 2.96 is named as the error this objection
+identified.
 
 ---
 
@@ -176,9 +204,13 @@ hypothesis, so P2's decomposition and P3's pinning are unaffected.
 **Remaining weakness.** The scalars are still reported to four decimal places,
 which implies a precision the construction does not have.
 
-**Manuscript change.** Add one sentence saying these are model states, not
-calibrated probabilities, and that no calibration is claimed. Consider fewer
-significant figures.
+**Manuscript change. DONE.** §Limitations gains "The reported scalars are
+model states, not calibrated probabilities", naming the Beta recursion and the
+tempered softmax, stating that no calibration is claimed anywhere, and saying
+why the posterior is never called a *confidence*. The significant-figure
+question is left open: the figures are what the artifacts contain, and
+rounding them in prose would break the binding in
+`research/PROSE_NUMERIC_BINDINGS.yaml`.
 
 ### 3.2 "20,000 random instances is not a proof."
 
@@ -289,9 +321,28 @@ prior-art coverage, and the paper is weaker for it.
 
 Listed separately so they are not lost among the ones that were answered.
 
-| # | objection | why it is not answered |
-|---|---|---|
-| 2.2 | naive Bayes with a skip-gate may be a straw man | n = 1 implementation; prevalence is not shown and cannot be |
-| 1.2 | no operational harm is demonstrated | no data exists; not claimable |
-| 4.3 | the named bounded-likelihood-ratio prior art was not located | egress-blocked; needs a human |
-| — | every bibliography entry is unverified | egress-blocked; **blocks submission** |
+**These are the ones no amount of further work in this environment can
+close.** They are separated from the answered objections so they are not lost
+among them, and each is now also stated in the manuscript itself rather than
+only here.
+
+| # | objection | why it is not answered | stated in the manuscript? |
+|---|---|---|---|
+| 2.2 | naive Bayes with a skip-gate may be a straw man | n = 1 implementation; prevalence is not shown and **cannot be** from this evidence base | **yes** — §Limitations, "one implementation… we do not claim it is representative" |
+| 1.2 | no operational harm is demonstrated | the data that would establish it does not exist | **yes** — §Limitations, "No operational harm is demonstrated, and none is claimed" |
+| 4.3 | the named bounded-likelihood-ratio prior art was not located | egress-blocked; needs a human. `PRIOR_ART_MATRIX.csv` row `NOT_FOUND_NEEDS_HUMAN`, and no sharpness is claimed for P6 in its absence | n/a — it is a *math* paper concern |
+| — | every bibliography entry is unverified | egress-blocked; **blocks submission for both papers** | n/a — reported by `make bib-guard` |
+
+### What changed in this revision
+
+Objection **2.3 moved from open to CLOSED**: it was right, the correction was
+computed, and the result held. Objections **1.1, 1.2, 2.2 and 3.1** had
+"manuscript change" actions that had been *identified but not made*; all four
+are now made and §Limitations carries them. Objection **1.3**'s action —
+never quote the pooled 18.4% figure without its 5.1-point startup
+decomposition — is satisfied by construction: that figure is a
+`research/systems-paper/` number and does not appear in `main.tex` at all.
+
+The honest count is therefore: **11 objections, 7 answered, 1 closed by
+correction, 3 that cannot be answered from here and are stated as such in the
+paper.**

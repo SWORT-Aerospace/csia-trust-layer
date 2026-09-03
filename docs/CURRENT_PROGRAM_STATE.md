@@ -70,7 +70,7 @@ and `math-paper-submission-candidate`. Not one. Both.
 | 6b | predicate tested on current-stack data | **PASS as a negative control** — 15,595 real ArduPilot 4.8 ticks, 0 collapses, on fix-preserving trials where a collapse would have falsified the account (`SC-26`). NOT a self-occlusion replication |
 | 7 | bibliography verified | **BLOCKED** — 11 of 11 entries unverified, 37 markers. `api.crossref.org`, `doi.org`, `dblp.org` all denied. `make bib-guard` fails, correctly. A marker can no longer be silently deleted to make it pass: `papers/BIB_VERIFICATION_LEDGER.yaml` + `tests/test_bib_verification_ledger.py` |
 | 8 | no unresolved TODO citation | **BLOCKED** — same as 7 |
-| 9 | reviewer red team answered | **PASS** — `research/systems-paper/REVIEWER_RED_TEAM.md`, 4 reviewers, 11 objections, 4 recorded as **not adequately answered** |
+| 9 | reviewer red team answered | **PASS** — 4 reviewers, 11 objections: **7 answered, 1 CLOSED by correction** (2.3, the CUSUM-vs-trust comparison — the objection was right, the dwell decomposition was computed, and the conclusion survived), **3 that cannot be answered from here and are now stated in the manuscript itself** rather than only in the red-team file |
 | 10 | PDF builds clean | **PASS** — `make paper-systems` |
 
 **SYSTEMS PAPER: BLOCKED.** Blockers: gate 7/8 (bibliography — needs a human

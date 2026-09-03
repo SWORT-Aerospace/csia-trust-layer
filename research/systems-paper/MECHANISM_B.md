@@ -106,9 +106,22 @@ crosses again on the clean arm after t = 20 s with no fault present. The two
 paths the layer actually uses — trust and CUSUM — produce **zero** false
 alarms in the clean window and **no** crossing at all on the clean arm.
 
-**CUSUM beats the trust threshold in every faulted arm**: 2.96 vs 8.72 s,
-1.16 vs 3.36 s, 0.72 vs 3.24 s. The gap is largest on the slowest ramp
-(5.76 s), which is where accumulation is worth most.
+**CUSUM beats the trust threshold in every faulted arm** — and it still does
+after the comparison is made fair. Red-team objection 2.3 was that comparing
+these two latencies compares a *detector* against a *detector plus policy*:
+the failsafe requires a condition to persist for `dwell_up = 1.0 s` before it
+escalates, and the CUSUM has no dwell. That is correct, so the decomposition
+is reported:
+
+| arm | trust, raw | − dwell | trust, detector only | CUSUM |
+|---|---|---|---|---|
+| slow_ramp (1 m/s) | 8.72 | 1.0 | **7.72** | **2.96** |
+| spoof_3ms (3 m/s) | 3.36 | 1.0 | **2.36** | **1.16** |
+| fast_ramp (6 m/s) | 3.24 | 1.0 | **2.24** | **0.72** |
+
+The raw comparison flattered the CUSUM by one dwell period. **The conclusion
+survives the correction**: detector-to-detector it is still ahead in all three
+arms, by 4.76 s on the slowest ramp where accumulation is worth most.
 
 ## 6. Prior art, and no novelty claim
 
@@ -126,9 +139,14 @@ something the result extends. `research/math-paper/PRIOR_ART_MATRIX.csv` row
 `Page 1954` carries status `KNOWN`.
 
 **What may be claimed:** the *measurement* — that on this deployed layer, with
-these frozen constants, accumulation converts a 8.72 s trust latency into a
-2.96 s alarm on a 1 m/s ramp while adding zero clean-flight false alarms. That
-is an engineering measurement of a known detector on a specific system.
+these frozen constants, accumulation reaches an alarm at 2.96 s on a 1 m/s ramp
+against **7.72 s** for the trust path's detector alone (8.72 s including the
+1.0 s policy dwell), while adding zero clean-flight false alarms. That is an
+engineering measurement of a known detector on a specific system.
+
+The detector-only figure is the one to quote. §5 explains why, and quoting
+8.72 against 2.96 without saying it includes a dwell the CUSUM does not have
+is the error red-team objection 2.3 identified.
 
 ## 7. Limits, stated with the result
 

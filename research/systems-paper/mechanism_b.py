@@ -211,6 +211,24 @@ def run_arm(name: str, drift) -> dict:
             "cusum_alarming": int(((S > CUSUM_H) & (t > 5.0)
                                    & (t < ONSET_S)).sum()),
         },
+        # RED TEAM 2.3, answered rather than conceded. The objection is that
+        # comparing the CUSUM's first crossing against the trust threshold's
+        # compares a DETECTOR against a DETECTOR PLUS POLICY: the failsafe
+        # requires a condition to persist for `dwell_up` before it escalates.
+        # That is correct, so the decomposition is reported. The CUSUM has no
+        # dwell, so its latency is already detector-only.
+        "policy_dwell": {
+            "dwell_up_s": float(cfg.dwell_up),
+            "source": "csia/runtime/failsafe.py FailsafeConfig.dwell_up",
+            "trust_latency_includes_dwell": True,
+            "cusum_latency_includes_dwell": False,
+            "trust_detector_only_latency_s": (
+                None if t_trust is None
+                else round(t_trust - ONSET_S - float(cfg.dwell_up), 4)),
+            "note": "trust_detector_only = trust_latency - dwell_up. The "
+                    "CUSUM figure needs no such adjustment. Comparing the raw "
+                    "latencies flatters the CUSUM by one dwell period.",
+        },
         "crossing": {
             "instantaneous_lambda_t_s": t_inst,
             "instantaneous_lambda_latency_s": _lat(t_inst),

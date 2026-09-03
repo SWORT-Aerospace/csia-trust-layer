@@ -287,3 +287,48 @@ bindings:
     documents:
       - engineering/v2/V2_PHASEC_FREEZE.md
       - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+
+  # --------------------------------------- mechanism B, the 2.3 correction
+  - id: PB-26
+    what: >-
+      the failsafe policy dwell. Red-team objection 2.3: the trust latency
+      includes it and the CUSUM latency does not, so the raw comparison
+      flatters the CUSUM by exactly this much.
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/policy_dwell/dwell_up_s
+    renderings: ["1.0"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+
+  - id: PB-27
+    what: >-
+      trust-path latency NET of policy dwell, 1 m/s ramp. The figure to quote
+      against the CUSUM's 2.96.
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/policy_dwell/trust_detector_only_latency_s
+    renderings: ["7.72"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-28
+    what: trust-path latency net of dwell, 3 m/s spoof
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/spoof_3ms/policy_dwell/trust_detector_only_latency_s
+    renderings: ["2.36"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-29
+    what: trust-path latency net of dwell, 6 m/s ramp
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/fast_ramp/policy_dwell/trust_detector_only_latency_s
+    renderings: ["2.24"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv

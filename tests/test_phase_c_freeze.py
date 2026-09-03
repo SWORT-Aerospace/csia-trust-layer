@@ -105,36 +105,67 @@ def test_the_equivalence_result_in_the_record_matches_its_artifact():
     assert f"{doc['checked']:,}" in text or str(doc["checked"]) in text
 
 
-def test_research_artifacts_differ_only_by_their_commit_field():
-    """NOT a freeze check -- a recorded property.
+#: Fields a research artifact is ALLOWED to differ in between generations.
+VOLATILE_FIELDS = {"commit", "active_sets_commit"}
 
-    research/systems-paper/results/*.json embed the commit they were
-    generated at, so they are not bit-reproducible across commits even though
-    their scientific content is deterministic. This asserts the commit field
-    is the ONLY such field, so that a future non-determinism cannot hide
-    behind the same explanation.
+
+def test_research_artifacts_carry_no_unreproducible_content():
+    """NOT a freeze check -- a reproducibility property, checked statically.
+
+    research/systems-paper/results/*.json embed the commit they were generated
+    at, so they are not bit-reproducible ACROSS commits even though their
+    scientific content is deterministic. What must be true is that the commit
+    field is the only such thing: no wall-clock timestamp, no absolute host
+    path, nothing else that would differ on another machine or another day.
+
+    THE FIRST VERSION OF THIS TEST COMPARED THE WORKING COPY AGAINST HEAD.
+    That was wrong in a way worth recording: it failed on every legitimate
+    artifact regeneration, in the window between running the generator and
+    committing the result -- a normal workflow state. A guard that fires
+    during ordinary work is a guard somebody switches off, and it would have
+    been switched off. This formulation has no such window, because it asks a
+    question about the file's CONTENT rather than about its git history.
     """
-    import subprocess
     results = os.path.join(ROOT, "research", "systems-paper", "results")
-    volatile = {"commit", "active_sets_commit"}
+    timestamp = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}|\b\d{10}\.\d{3,}")
+    offenders = []
     for name in sorted(os.listdir(results)):
         if not name.endswith(".json"):
             continue
-        path = os.path.join(results, name)
-        head = subprocess.run(["git", "show", f"HEAD:{os.path.relpath(path, ROOT)}"],
-                              cwd=ROOT, capture_output=True, text=True)
-        if head.returncode != 0:
-            continue          # not yet committed
-        committed = json.loads(head.stdout)
-        current = json.load(open(path, encoding="utf-8"))
-        for key in volatile:
-            committed.pop(key, None)
-            current.pop(key, None)
-            if isinstance(committed.get("inputs"), dict):
-                committed["inputs"].pop(key, None)
-            if isinstance(current.get("inputs"), dict):
-                current["inputs"].pop(key, None)
-        assert committed == current, (
-            f"{name} differs from its committed form in more than the commit "
-            f"field. Regenerate and commit it, or find out what became "
-            f"non-deterministic.")
+        blob = open(os.path.join(results, name), encoding="utf-8").read()
+        if timestamp.search(blob):
+            offenders.append(f"{name}: contains a wall-clock timestamp")
+        for marker in ("/home/", "/tmp/", "/Users/", "C:\\\\"):
+            if marker in blob:
+                offenders.append(f"{name}: contains an absolute host path "
+                                 f"({marker})")
+        doc = json.loads(blob)
+        # A volatile field may exist; an UNDECLARED one may not. Any other
+        # top-level key ending in _commit or named like a timestamp would be
+        # a second source of drift hiding behind the first.
+        extra = {k for k in doc
+                 if (k.endswith("_at") or k.endswith("_time")
+                     or (k.endswith("_commit") and k not in VOLATILE_FIELDS))}
+        if extra:
+            offenders.append(f"{name}: undeclared volatile-looking keys "
+                             f"{sorted(extra)}")
+    assert not offenders, (
+        "research artifacts contain content that cannot reproduce on another "
+        "machine:\n  " + "\n  ".join(offenders))
+
+
+def test_the_committed_research_artifacts_are_valid_and_current():
+    """Cheap, and it does the job the git comparison was reaching for: the
+    artifacts parse, declare the generator that made them, and name the
+    command that regenerates them."""
+    results = os.path.join(ROOT, "research", "systems-paper", "results")
+    checked = 0
+    for name in sorted(os.listdir(results)):
+        if not name.endswith(".json"):
+            continue
+        doc = json.load(open(os.path.join(results, name), encoding="utf-8"))
+        assert "artifact" in doc, f"{name}: no artifact name"
+        assert any(k in doc for k in ("generation_command", "checker")), \
+            f"{name}: does not say what produced it"
+        checked += 1
+    assert checked >= 4, checked

@@ -1351,12 +1351,64 @@ report it as such. Wind was intended as a second axis of variation and turned
 out to apply no force in this build, so the campaign varied one axis and was
 described as varying two.
 
-\paragraph{Replication remains the binding constraint.} One deployed-system
-episode and two simulator campaigns against a single autopilot build, from
-2015, is not a replication base. Every SITL number here should be repeated on a
-current ArduPilot and on PX4 before it is relied on, and the satellite-ladder
-result in particular is a statement about one simulator's GNSS model rather
-than about receivers.
+\paragraph{Replication remains the binding constraint, and the baseline is
+named.} Every measurement in this paper is against \textbf{ArduCopter 3.3
+SITL} (dronekit-assets prebuilt, 2015-10-22) and the bench simulator. One
+deployed-system episode and two simulator campaigns against a single autopilot
+build, from 2015, is not a replication base. Every SITL number here should be
+repeated on a current ArduPilot and on PX4 before it is relied on, and the
+satellite-ladder result in particular is a statement about one simulator's
+GNSS model rather than about receivers.
+
+\paragraph{One mechanism has been repeated on a current stack, and this paper
+deliberately does not report it.} The history-dominated threshold-crossing
+mechanism of Section~\ref{sec:algebra} was re-run under a preregistration
+frozen before its first trial, on \textbf{ArduPilot 4.8} SITL: twenty valid
+trials, the source recursion reproducing the runtime trust trajectory from the
+platform's own measured banked state, and the observed threshold crossing
+predicted with zero tick error on every ramp. On \textbf{PX4 SIH} the
+intervention is \emph{inapplicable} --- no fix-preserving GNSS position offset
+exists there, four candidate routes were read out of source and all four fail,
+and the preregistration forbids substituting another intervention, so no trials
+were run.
+
+None of that appears in this paper's tables, and the omission is enforced
+rather than promised: this manuscript's baseline is 3.3, mixing two autopilot
+builds into one table is the error the project's phase guard exists to prevent,
+and it fails the build if a Phase-I artifact references a later phase. The
+record is \code{research/v1\_1/CURRENT\_STACK\_REPLICATION.md} with results in
+\code{research/v1\_1/results/current\_stack\_replication.json}. A referee who
+wants the current-stack evidence should read it there rather than infer its
+absence.
+
+\paragraph{No operational harm is demonstrated, and none is claimed.} The
+vehicle completes every scenario in this paper. The failsafe escalates, the
+navigation reconfigures, and nothing is lost. We have no evidence that a
+misattribution ever cost anything operationally, we do not have the data that
+would establish it, and we make no such claim. What we report is that a layer
+whose product is a cause distribution reported \code{nominal} at occupancy
+$1.0$ for an entire fault window --- a defect in the thing it exists to
+produce, not a demonstrated hazard.
+
+\paragraph{The gated naive-Bayes design is one implementation, and we do not
+claim it is representative.} A structural-analysis FDI design would not exhibit
+this at all: it would mark the fault set unisolable rather than treat an
+unavailable residual as absent evidence. Our finding is about one deployed
+layer whose gate \emph{skips} a term, which is a natural way to implement ``not
+applicable'' and is why we think the design rule of
+Section~\ref{sec:rule} is worth stating --- but $n=1$, and nothing here
+establishes how common the pattern is. The rule is offered as a check, not as
+evidence of prevalence.
+
+\paragraph{The reported scalars are model states, not calibrated
+probabilities.} The trust coefficient is a Beta-recursion state under adaptive
+forgetting. The diagnosis posterior is a tempered softmax over exponentially
+smoothed pseudo-log-likelihoods. Neither is calibrated, we do not calibrate
+them, and no claim of calibration is made anywhere in this paper. We
+deliberately do not call the posterior a \emph{confidence}: a leader at
+$0.9998$ with no evidence distinguishing it from its nearest rival carries no
+information about that pair, and the word invites a reader to do arithmetic
+that is not licensed.
 
 \paragraph{The abstaining policy is measured, not validated.} It is research
 code scored on three flights per arm against one simulator. Its zero nuisance
