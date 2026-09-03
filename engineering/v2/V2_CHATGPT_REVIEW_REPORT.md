@@ -7,6 +7,13 @@ separate workstream and nothing here contributes to it.
 The twenty items §40 asks for are §§1–20 below. §21 answers §38's product
 question. §22 is what is still wrong.
 
+> **Phase C superseded parts of this report.** Cross-domain causal
+> localization, function dependency assurance and the internal interface are
+> in `V2_PHASEC_REVIEW_REPORT.md`. In particular the ~28 ms figure in §16
+> below **was a defect**, not the cost of validation, and is now 9.2 µs on the
+> internal path and 673.6 µs with a cached validator; and the v2 test count
+> has risen from 1,388 to 1,512.
+
 | | |
 |---|---|
 | frozen v1 | `csia-v1.0-research-final` @ `ec5acd189295dab9259d4989657d42184d6142a3` — **zero diff** |

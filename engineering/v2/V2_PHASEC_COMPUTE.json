@@ -1,38 +1,38 @@
 {
   "artifact": "V2_PHASEC_COMPUTE",
   "generation_command": "python engineering/v2/run_phase_c.py",
-  "hot_path_after_us": 9.4,
-  "hot_path_before_us": 23531.0,
-  "hot_path_reduction_factor": 2503.3,
+  "hot_path_after_us": 9.2,
+  "hot_path_before_us": 22130.0,
+  "hot_path_reduction_factor": 2405.4,
   "ingest_us_per_tick": {
-    "cached_validator_validate_us": 648.6,
-    "external_full_parse_us": 623.3,
-    "external_typed_ingest_us": 633.1,
-    "internal_typed_ingest_us": 9.4,
-    "phase_b_uncached_jsonschema_validate_us": 23531.0
+    "cached_validator_validate_us": 673.6,
+    "external_full_parse_us": 691.8,
+    "external_typed_ingest_us": 644.0,
+    "internal_typed_ingest_us": 9.2,
+    "phase_b_uncached_jsonschema_validate_us": 22130.0
   },
   "measured_on": "REGULATOR_FAILURE, 60 ticks, six domains, CPython on a general-purpose host",
   "note": "TWO INDEPENDENT IMPROVEMENTS, reported separately because they are different claims. (1) jsonschema.validate re-compiles the schema on every call; a validator built once does the SAME full validation for ~1/37th the cost, and validation is not weakened at all. (2) the internal typed path removes the schema walk entirely, and is legitimate ONLY between in-process, version-locked components (\u00a720). NO TARGET-HARDWARE FIGURE EXISTS AND NONE IS CLAIMED.",
   "phases_us_per_tick": {
     "api_build_and_evaluate": {
       "max_us": null,
-      "median_us": 2315.308
+      "median_us": 2745.363
     },
     "domains_total": {
-      "max_us": 1024.634,
-      "median_us": 668.755
+      "max_us": 982.422,
+      "median_us": 747.05
     },
     "explanation": {
-      "max_us": 123.531,
-      "median_us": 80.038
+      "max_us": 167.157,
+      "median_us": 87.303
     },
     "ledger": {
-      "max_us": 631.06,
-      "median_us": 12.095
+      "max_us": 743.798,
+      "median_us": 14.065
     },
     "localization_alone": {
       "max_us": null,
-      "median_us": 37.68
+      "median_us": 45.83
     }
   },
   "records_per_tick": 68,

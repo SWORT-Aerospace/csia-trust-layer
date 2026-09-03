@@ -509,6 +509,39 @@ def test_13b_a_symptom_appearing_is_itself_a_ledger_event():
     assert loc_events[0].localization["symptom"] == "OUTPUT_STALE"
 
 
+# ================================================ the signature matrix (§4)
+def test_every_can_explain_cell_names_a_mechanism_and_its_evidence():
+    """§4's rule. A domain that 'might be involved' with no stated mechanism
+    is how a candidate set becomes a list of everything."""
+    rows = SIG.matrix_rows()
+    assert rows
+    explaining = [r for r in rows if r["cell"] == SIG.CAN_EXPLAIN]
+    assert explaining
+    for r in explaining:
+        assert r["mechanism"].strip(), r
+        assert r["confirming_evidence"].strip(), r
+
+
+def test_the_matrix_is_generated_from_the_declarations_the_runtime_uses():
+    """A hand-maintained matrix drifts from behaviour and stops being
+    evidence of anything. Every cell must be reachable from SYMPTOMS."""
+    declared = {(s.symptom_id, h.domain)
+                for s in SIG.SYMPTOMS for h in s.hypotheses}
+    for r in SIG.matrix_rows():
+        if r["cell"] == SIG.CAN_EXPLAIN:
+            assert (r["symptom"], r["domain"]) in declared, r
+    for symptom, domain in declared:
+        assert any(r["symptom"] == symptom and r["domain"] == domain
+                   for r in SIG.matrix_rows()), (symptom, domain)
+
+
+def test_the_written_matrix_matches_the_declarations(tmp_path):
+    import csv as _csv
+    path = SIG.write_matrix_csv(str(tmp_path / "m.csv"))
+    written = list(_csv.DictReader(open(path, encoding="utf-8")))
+    assert len(written) == len(SIG.matrix_rows())
+
+
 # ============================================== the explanation object (§1)
 def test_the_explanation_separates_limiting_possible_and_cleared():
     engine, results = _run("MS_D1_NAV_SOURCE", ticks=30)
