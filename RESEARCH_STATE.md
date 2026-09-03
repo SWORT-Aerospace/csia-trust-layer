@@ -21,7 +21,10 @@ artifacts.
 | `research/wp_a2`, `research/wp_c1..c8`, `research/wp_e1` | **Phase I.** The measurement campaigns behind Systems Paper I |
 | `research/formalization` | Phase-I formal work |
 | `research/phase2/` | **Phase II.** Ongoing, on ArduCopter 4.8. Excluded from both papers |
-| `docs/math/` | the mathematical paper's formal sources and claim register |
+| `docs/math/` | the mathematical paper's ANYTIME-VALID (e-process) sources and claim register |
+| `research/math-paper/` | the mathematical paper's POSTERIOR-DISTORTION core: P1-P6, the proof audit, the prior-art matrix and the novelty audit |
+| `research/systems-paper/` | the systems paper's claim register, the independent checker, and the Mechanism A / Mechanism B evidence |
+| `forge/` | **documentation and prior art only.** No code, asserted by test |
 | `docs/audit/` | per-work-package audit reports and correction packages |
 | `papers/csia_systems/` | **CSIA Systems Paper I** manuscript and artifact map |
 | `papers/gate_conditioning/` | **the mathematical paper**: build scaffold, artifact map, no manuscript yet |
@@ -244,6 +247,26 @@ MANUSCRIPT SUBMISSION:   BLOCKED (bibliography)
 | SEAD runbook and interceptor tooling held at `COUNSEL_REQUIRED` | counsel | nothing in the papers; they are excluded from every package |
 | run B2/B4 on the E1 slow-slew cells | Phase II | completeness of §5, not the papers |
 | E2 confirmatory replication, preregistered and frozen | Phase II | F3's bound |
+
+### 7.1 Added after the v2 Phase C freeze
+
+The programme is under a **dual-paper lock**: product development is frozen at
+v2 Phase C and `docs/CURRENT_PROGRAM_STATE.md` is authoritative for what may
+be worked on. Work since then is paper work only.
+
+| what | where | effect on this file |
+|---|---|---|
+| an independent structural checker for Mechanism A, agreeing with production 378,000/378,000 | `research/systems-paper/` | strengthens the self-occlusion finding in 2.1 from a measurement to a measurement plus an independently derived structural account |
+| the closed-form account of that finding (P3), proved and machine-checked | `research/math-paper/FORMAL_CORE.md` | new; the mathematical paper gains a second body of results alongside the e-process work |
+| C2 identified as **coarsening at random** (Heitjan & Rubin 1991) | `research/math-paper/PRIOR_ART_MATRIX.csv` | **narrows** the mathematical paper's novelty claim. Every proposition is now labelled KNOWN |
+| `kang2024gnss` found to be filed under the wrong subject | `papers/csia_systems/BIB_VERIFICATION_CANDIDATES.md` | a defect in the bibliography, not a new blocker: the entry was already unverified |
+
+**A correction to this session's own work.** A first draft of
+`research/systems-paper/CURRENT_STACK_BLOCKERS.md` stated that Mechanism B was
+demonstrated on the bench simulator only. That was wrong:
+`research/v1_1/CURRENT_STACK_REPLICATION.md` is a preregistered campaign whose
+verdict is **ArduPilot 4.8 REPLICATED, PX4 SIH INAPPLICABLE**. The document
+now says so and records the correction rather than quietly fixing it.
 
 **Closed since the last revision.** The operator username that appeared in
 `docs/runbooks/UAV_SEAD_MAC_ACQUISITION.md`, and was asserted by

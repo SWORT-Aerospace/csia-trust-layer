@@ -683,3 +683,36 @@ v1-1-golden:
 v1-1-p45-check:
 	$(PY) -m pytest tests/test_v1_1_staleness.py tests/test_v1_1_monitor.py \
 	  tests/test_v1_1_golden.py -q
+
+# ---------------------------------------------------------------------------
+# Paper evidence (dual-paper lock; see docs/CURRENT_PROGRAM_STATE.md)
+#
+# `mechanism-a` is the one worth understanding. It runs three scripts in
+# order, and the ORDER is the argument: the exporter is production-side and
+# writes only which features were active; the checker imports no csia module
+# and reaches its own verdict from the committed signature table; the
+# comparison imports both and diffs them. Run out of order, the checker would
+# read a stale export and the agreement would mean nothing.
+# ---------------------------------------------------------------------------
+.PHONY: mechanism-a
+mechanism-a:
+	PYTHONPATH=. $(PY) research/systems-paper/export_active_sets.py
+	PYTHONPATH=. $(PY) research/systems-paper/independent_checker.py
+	PYTHONPATH=. $(PY) research/systems-paper/compare_checker_vs_production.py
+
+# NAMED `paper-mechanism-b` because `mechanism-b` ALREADY EXISTS at line ~297
+# and is the authoritative PREREGISTERED ArduPilot campaign. Overriding it
+# would have silently replaced a preregistered experiment with a bench script.
+.PHONY: paper-mechanism-b
+paper-mechanism-b:
+	PYTHONPATH=. $(PY) research/systems-paper/mechanism_b.py
+
+# The symbolic pass needs sympy, which is deliberately NOT a project
+# dependency: adding one to CI so a research script can run is the wrong
+# trade. Without it the script still runs its numeric pass and says so.
+.PHONY: proof-audit
+proof-audit:
+	PYTHONPATH=. $(PY) research/math-paper/proof_audit.py
+
+.PHONY: paper-evidence
+paper-evidence: mechanism-a paper-mechanism-b proof-audit

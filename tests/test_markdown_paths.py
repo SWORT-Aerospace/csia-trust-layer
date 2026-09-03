@@ -64,6 +64,13 @@ ALLOWED_MISSING = {
         "forward reference; Stage-0 output directory, deliberately not created",
     "tests/test_evidence_independence.py":
         "forward reference; specified by the Stage-0 prompt, not yet written",
+    # The public-log exposure study was NOT RUN: review.px4.io and
+    # logs.px4.io are denied by this environment's egress policy. The plan
+    # names the manifest it would write. Delete this exemption the moment the
+    # study runs -- an existing manifest makes it stale, and the staleness
+    # test will say so.
+    "research/systems-paper/results/public_logs/MANIFEST.csv":
+        "forward reference; the study is blocked, see PUBLIC_LOG_STUDY_PLAN.md",
 }
 
 

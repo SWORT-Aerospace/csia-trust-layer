@@ -16,7 +16,10 @@ registries are the failure mode this file exists to prevent.
 
 | register | governs | format | status |
 |---|---|---|---|
-| `docs/math/PROOF_STATUS.md` | **mathematical-paper claims**: theorems, lemmas, counterexamples | markdown table | authoritative |
+| `docs/math/PROOF_STATUS.md` | **mathematical-paper claims about ANYTIME-VALID EVIDENCE**: T-1 … T-5, e-processes, Ville's inequality, and their counterexamples | markdown table | authoritative |
+| `research/math-paper/FORMAL_CORE.md` §10 | **mathematical-paper claims about POSTERIOR DISTORTION**: P1–P6, C2, C3. A DIFFERENT body of work from the row above, under the same paper | markdown table + `results/proof_audit.json` | authoritative |
+| `research/math-paper/PRIOR_ART_MATRIX.csv` | **novelty status** of every proposition in either row above | CSV, machine-checked | authoritative |
+| `research/systems-paper/CLAIMS.csv` | **systems-paper claims at CLAIM granularity**, each with counter-evidence and an alternative explanation | CSV, machine-checked | authoritative |
 | `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` | **systems-paper claims**: every figure, table and headline scalar, bound to a committed artifact | YAML, machine-checked | authoritative |
 | `research/phase2/claims.yaml` | **Phase-II research candidates**: C1–C25, including withdrawn ones | YAML, machine-readable | authoritative, ongoing |
 | `docs/audit/WP_A2_CLAIM_PROVENANCE_MATRIX.csv` | **outward-facing prose claims** audited for scope inflation and prohibited framing | CSV | authoritative, historical |
@@ -24,6 +27,20 @@ registries are the failure mode this file exists to prevent.
 Two further documents are records, not registers, and are cited by the above:
 `docs/audit/CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md` and
 `docs/traceability/traceability_matrix.md`.
+
+**A trap worth naming.** `docs/math/PROOF_STATUS.md` and
+`research/math-paper/FORMAL_CORE.md` are BOTH "the mathematical paper's
+claims" and they govern **different, non-overlapping** results — e-processes
+in the first, posterior distortion in the second. A reader who assumes one
+covers both will look for P3 in `PROOF_STATUS.md`, not find it, and conclude
+something is missing. Nothing is. See `research/PAPER_RELATIONSHIP.md`.
+
+**And a second one.** `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` binds
+NUMBERS to artifacts; `research/systems-paper/CLAIMS.csv` binds CLAIMS to
+evidence, counter-evidence and alternative explanations. A number can be
+correctly bound and the claim built on it still wrong, which is why both
+exist. Where they overlap, the artifact map governs the number and CLAIMS.csv
+governs the claim.
 
 ---
 
