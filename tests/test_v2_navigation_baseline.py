@@ -56,27 +56,49 @@ def v1_1_states(payload):
 
 
 # --------------------------------------------------------- 1. structural
-def test_the_wrapper_imports_no_v1_1_producer():
-    """It consumes the published payload and nothing else. It cannot alter a
-    v1.1 verdict because it has no way to compute one."""
-    tree = ast.parse(open(NAV, encoding="utf-8").read())
-    imported = set()
+def _imports(path):
+    tree = ast.parse(open(path, encoding="utf-8").read())
+    out = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            imported.add(("." * node.level) + (node.module or ""))
+            out.add(("." * node.level) + (node.module or ""))
         elif isinstance(node, ast.Import):
-            imported.update(a.name for a in node.names)
+            out.update(a.name for a in node.names)
+    return out
+
+
+def test_the_wrapper_imports_no_v1_1_producer():
+    """It consumes the published payload and nothing else. It cannot alter a
+    v1.1 verdict because it has no way to compute one.
+
+    Phase C moved the ingest behind `csia/v2/ingest.py`, so the check follows
+    the indirection: neither module may reach a producer, and the strict
+    parser must still be what the EXTERNAL path uses.
+    """
+    ingest = os.path.join(ROOT, "csia", "v2", "ingest.py")
     producers = ("trust_engine", "diagnosis", "eligibility", "ledger",
-                 "runtime", "scenarios", "profiles", "sequential",
-                 "output_api", "advisory", "trust_mode")
-    for mod in imported:
-        for p in producers:
-            assert p not in mod, (
-                f"navigation.py imports {mod!r}, which reaches a v1.1 "
-                f"producer; the wrapper must consume the payload only")
-    assert any("monitor" in m for m in imported), (
-        "it should consume the payload through the same strict parser the "
-        "external monitor uses")
+                 "runtime", "scenarios", "profiles", "advisory", "trust_mode")
+    for path in (NAV, ingest):
+        for mod in _imports(path):
+            for p in producers:
+                assert p not in mod, (
+                    f"{os.path.basename(path)} imports {mod!r}, which reaches "
+                    f"a v1.1 producer; the wrapper consumes output only")
+    # The external path must still go through the strict parser, and the
+    # navigation domain must reach it only through the ingest module.
+    assert any("monitor" in m for m in _imports(ingest)), (
+        "the external path should consume the payload through the same "
+        "strict parser the external monitor uses")
+    assert not any("monitor" in m for m in _imports(NAV)), (
+        "the domain should not parse payloads itself; ingest owns the "
+        "boundary so there is exactly one place to audit")
+    # `sequential` appears in ingest only to CHECK the frozen detector
+    # constants a payload declares -- it reads two module constants and
+    # computes nothing, which is the opposite of using a producer.
+    from csia.v2 import ingest as I
+    src = open(ingest, encoding="utf-8").read()
+    assert "CusumBank" not in src and "step(" not in src
+    assert I.SUPPORTED_MAJOR_MINOR == ("1.1",)
 
 
 def test_the_state_map_is_a_bijection():

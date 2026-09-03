@@ -55,7 +55,14 @@ class Snapshot:
     signals: dict = field(default_factory=dict)
     #: The v1.1 output payload, when a navigation domain is present. v2
     #: INGESTS v1.1 output (§24); it never reaches inside the frozen runtime.
+    #:
+    #: EXTERNAL form: a JSON-shaped dict, schema-validated on ingest.
     v1_1_payload: dict | None = None
+    #: INTERNAL form: `csia.v2.ingest.NavigationDomainInput`, typed and valid
+    #: by construction (Phase C §§16-17). When both are present the typed one
+    #: is used and the dict is ignored -- a host that has the typed object has
+    #: already crossed whatever boundary there was.
+    v1_1_input: object = None
 
     def get(self, domain: str, component: str, signal: str, default=None):
         return (self.signals.get(domain, {})

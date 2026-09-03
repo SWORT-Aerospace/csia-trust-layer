@@ -34,9 +34,9 @@ about the domain rather than about a v1.1 function.
 
 from __future__ import annotations
 
-from ...v1_1.monitor import PayloadRejected, parse
 from ..domain import AssuranceDomain, DomainResult, Snapshot
 from ..evidence import Applicability, ObservationState
+from ..ingest import IngestRejected, NavigationDomainInput
 
 #: v1.1 eligibility state -> the categorical verdict. A bijection, and a test
 #: asserts it round-trips through the function roll-up.
@@ -80,35 +80,51 @@ class NavigationAssuranceDomain(AssuranceDomain):
         self.source_dependencies = dict(source_dependencies or {})
 
     # ------------------------------------------------------------------
+    def _missing(self, snapshot, code, detail=None, why=""):
+        return DomainResult(
+            domain=self.domain_id,
+            records=(self._record(
+                component="v1_1", relation="v1_1.function_eligibility",
+                observation_state=ObservationState.UNAVAILABLE,
+                applicability=Applicability.INPUTS_MISSING,
+                affected_functions=self.affected_functions,
+                reason_codes=(code,), timestamp_processed=snapshot.t,
+                detail=detail or {}),),
+            unevaluated={"v1_1": why})
+
     def evaluate(self, snapshot: Snapshot) -> DomainResult:
-        payload = snapshot.v1_1_payload
-        if payload is None:
-            return DomainResult(
-                domain=self.domain_id,
-                records=(self._record(
-                    component="v1_1", relation="v1_1.function_eligibility",
-                    observation_state=ObservationState.UNAVAILABLE,
-                    applicability=Applicability.INPUTS_MISSING,
-                    affected_functions=self.affected_functions,
-                    reason_codes=("V1_1_PAYLOAD_MISSING",),
-                    timestamp_processed=snapshot.t),),
-                unevaluated={"v1_1": "no payload in snapshot"})
+        """Both interfaces converge on ONE typed input before any evidence
+        is built (Phase C §§16-18).
 
-        try:
-            view = parse(payload)
-        except PayloadRejected as exc:
-            return DomainResult(
-                domain=self.domain_id,
-                records=(self._record(
-                    component="v1_1", relation="v1_1.function_eligibility",
-                    observation_state=ObservationState.UNAVAILABLE,
-                    applicability=Applicability.INPUTS_MISSING,
-                    affected_functions=self.affected_functions,
-                    reason_codes=("V1_1_PAYLOAD_REJECTED",),
-                    timestamp_processed=snapshot.t,
-                    detail={"error": str(exc)[:200]}),),
-                unevaluated={"v1_1": f"payload rejected: {str(exc)[:120]}"})
+        That convergence is what makes the equivalence guarantee structural
+        rather than a promise to keep two record builders in step: there is
+        only one record builder, and the external path differs from the
+        internal one solely in how the typed input was obtained.
+        """
+        inp = snapshot.v1_1_input
+        if inp is None:
+            payload = snapshot.v1_1_payload
+            if payload is None:
+                return self._missing(snapshot, "V1_1_PAYLOAD_MISSING",
+                                     why="no payload in snapshot")
+            try:
+                # EXTERNAL path: full strict parse, schema validation included.
+                inp = NavigationDomainInput.from_external_payload(payload)
+            except IngestRejected as exc:
+                return self._missing(
+                    snapshot, "V1_1_PAYLOAD_REJECTED",
+                    detail={"error": str(exc)[:200]},
+                    why=f"payload rejected: {str(exc)[:120]}")
+        elif not isinstance(inp, NavigationDomainInput):
+            return self._missing(
+                snapshot, "V1_1_PAYLOAD_REJECTED",
+                detail={"error": f"v1_1_input is {type(inp).__name__}"},
+                why="v1_1_input is not a NavigationDomainInput")
 
+        return self._evaluate_input(inp, snapshot.t)
+
+    # ------------------------------------------------------------------
+    def _evaluate_input(self, view, tick_t: float) -> DomainResult:
         records = []
         t_valid = float(view.timestamp)
 
@@ -121,20 +137,20 @@ class NavigationAssuranceDomain(AssuranceDomain):
                 applicability=Applicability.APPLICABLE,
                 affected_functions=(name,),
                 reason_codes=tuple(view.function_reasons.get(name, ())),
-                timestamp_validity=t_valid, timestamp_processed=snapshot.t,
+                timestamp_validity=t_valid, timestamp_processed=tick_t,
                 expected_relation="v1.1 eligibility, unmodified",
                 # A function verdict is a conclusion, not a component that
                 # can fail. It is evidence; it is not an answer to "what
                 # broke", and the sources it was computed from are already
                 # candidates in their own right.
                 attributable=False,
-                provenance={"schema_version": payload["schema_version"],
-                            "trust_mode": payload["trust"]["mode"]},
+                provenance={"schema_version": view.schema_version,
+                            "trust_mode": view.trust_mode},
                 detail={"v1_1_state": state}))
 
         # -- 2. per-node source health. NOT attached to a v1.1 function --
-        fresh = payload["evidence"]["fresh"]
-        alarming = set(payload["sequential"].get("alarming", ()))
+        fresh = view.fresh
+        alarming = set(view.sequential_alarming)
         for node in sorted(view.trust):
             trust = float(view.trust[node])
             is_fresh = bool(fresh.get(node, False))
@@ -156,16 +172,14 @@ class NavigationAssuranceDomain(AssuranceDomain):
                 reason_codes=tuple(codes),
                 dependencies=tuple(self.source_dependencies.get(node, ())),
                 measured_value=trust,
-                timestamp_validity=t_valid, timestamp_processed=snapshot.t,
+                timestamp_validity=t_valid, timestamp_processed=tick_t,
                 expected_relation="v1.1 trust and freshness for this source",
                 detail={"fresh": is_fresh,
-                        "missing_reason":
-                            payload["evidence"].get("missing_reason", {})
-                            .get(node)}))
+                        "missing_reason": view.missing_reason.get(node)}))
 
         # -- 3. support / diagnosis, transcribed -------------------------
-        diag = payload["diagnosis"]
-        supported = bool(diag["identifiable"])
+        diag = view.diagnosis
+        supported = bool(diag.identifiable)
         records.append(self._record(
             component="v1_1.diagnosis", relation="v1_1.support",
             observation_state=(ObservationState.NOMINAL if supported
@@ -173,17 +187,17 @@ class NavigationAssuranceDomain(AssuranceDomain):
             applicability=Applicability.APPLICABLE,
             affected_functions=(),
             reason_codes=() if supported else ("SUPPORT_NOT_IDENTIFIABLE",),
-            measured_value=float(diag["posterior"]),
-            timestamp_validity=t_valid, timestamp_processed=snapshot.t,
+            measured_value=float(diag.posterior),
+            timestamp_validity=t_valid, timestamp_processed=tick_t,
             expected_relation="v1.1 leader identifiable against every "
                               "modeled competitor",
             attributable=False,
-            detail={"leader": diag["leader"],
-                    "support_state": diag["support_state"],
-                    "ambiguity": diag["ambiguity"],
+            detail={"leader": diag.leader,
+                    "support_state": diag.support_state,
+                    "ambiguity": diag.ambiguity,
                     "discriminating_evidence_count":
-                        diag["discriminating_evidence_count"],
-                    "unknown_fault_model": diag.get("unknown_fault_model")}))
+                        diag.discriminating_evidence_count,
+                    "unknown_fault_model": diag.unknown_fault_model}))
 
         # -- 4. the aggregate, which IS allowed to reach v2 functions ----
         health = [r for r in records if r.relation == "v1_1.source_health"]
@@ -201,7 +215,7 @@ class NavigationAssuranceDomain(AssuranceDomain):
             affected_functions=self.affected_functions,
             reason_codes=tuple(dict.fromkeys(
                 c for r in health for c in r.reason_codes)),
-            timestamp_validity=t_valid, timestamp_processed=snapshot.t,
+            timestamp_validity=t_valid, timestamp_processed=tick_t,
             expected_relation="worst source health across the v1.1 nodes",
             attributable=False,
             detail={"nodes": len(health)}))

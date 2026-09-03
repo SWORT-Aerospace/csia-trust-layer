@@ -176,10 +176,20 @@ def test_the_only_thing_v2_imports_from_v1_1_is_the_payload_parser():
                 if "v1_1" in mod:
                     seen.append((os.path.relpath(path, ROOT), mod))
     assert seen, "the wrapper must import the parser from somewhere"
+    allowed_v1_1 = {
+        # the strict parser, which IS the external trust boundary
+        "v1_1.monitor",
+        # Phase C: the internal path reads two frozen detector CONSTANTS to
+        # reject a payload produced by a differently configured detector. It
+        # reads `CUSUM_K` and `CUSUM_H` and computes nothing -- a test above
+        # asserts no detector is stepped in `ingest.py`.
+        "v1_1.sequential",
+    }
     for path, mod in seen:
-        assert mod.endswith("v1_1.monitor"), (
+        tail = mod.lstrip(".")
+        assert tail in allowed_v1_1 or mod.endswith("v1_1.monitor"), (
             f"{path} imports {mod!r}; v2 may consume the published payload "
-            f"and nothing else from v1.1")
+            f"and the frozen detector constants, and nothing else from v1.1")
 
 
 def test_an_unknown_major_version_is_refused_not_coerced():
@@ -289,7 +299,7 @@ def test_the_decision_path_imports_nothing_beyond_the_standard_library():
     in the decision path would make the answer depend on its version."""
     allowed = {"csia", "dataclasses", "enum", "abc", "json", "hashlib",
                "typing", "__future__", "os", "collections", "math",
-               "importlib"}
+               "importlib", "types"}
     offenders = []
     for base, _dirs, files in os.walk(V2):
         for name in sorted(files):
