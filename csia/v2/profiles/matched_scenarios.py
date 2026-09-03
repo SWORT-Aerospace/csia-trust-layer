@@ -326,12 +326,14 @@ MATCHED_SCENARIOS = (
          _b3_drive_no_current, tags=("set_b", "actuator")),
     _air("MS_B4_MECHANICAL", "8",
          "current present, shaft not turning",
-         "AMBIGUOUS between ACTUATION/mechanical and SENSOR/response_sensor: "
-         "the multirotor has no independent physical channel",
+         "AMBIGUOUS with BOTH ACTUATION/mechanical and SENSOR/response_sensor "
+         "supported: the stall signature confirms each of them equally and "
+         "the multirotor has no independent physical channel to separate them",
          _b4_mechanical, tags=("set_b", "actuator", "irreducible")),
     _air("MS_B5_RESPONSE_SENSOR", "8",
          "byte-identical evidence to B4 on this platform",
-         "the SAME ambiguous result as B4, which is the honest answer",
+         "the SAME ambiguous result as B4, down to which hypotheses are "
+         "supported, which is the honest answer",
          _b5_response_sensor, tags=("set_b", "actuator", "irreducible")),
     _bench("MS_TS_B4_MECHANICAL", "8",
            "bench: current present, shaft not turning, torque absent",
@@ -345,38 +347,53 @@ MATCHED_SCENARIOS = (
            _ts_b5_response_sensor, tags=("set_b", "actuator")),
 
     # -- SET C: multiple sensors degraded ------------------------------
+    # SET C IS THE SET THAT DOES NOT PASS ITS OWN GATE, and it is kept
+    # because of that. The only real v1.1 payload carrying two adverse
+    # sources has `battery` and `motor_esc`. They share a POWER node; the
+    # battery declares no link and neither declares a compute node. So the
+    # dependency model can MEASURE a shared power cause and is BLIND to a
+    # shared link or shared process for this pair.
+    #
+    # The first version of these four scenarios reported SUPPORTED
+    # SENSOR/independent_faults for C1, C3 and C4 -- reading "I have no
+    # dependency recorded in this domain" as "they do not share one here".
+    # That is a confident answer produced from an absence, which is the
+    # failure §2 exists to forbid, and it made C3 and C4 look like passes
+    # when the framework had simply not looked. The predicates now return
+    # NOT MEASURABLE for an uncovered domain, so all four come back
+    # AMBIGUOUS and `dependency_model_blind_to` names the gap.
     _air("MS_C1_INDEPENDENT", "9",
-         "two sources adverse; nothing they depend on is adverse",
-         "SENSOR/independent_faults supported; no common cause claimed",
+         "two sources adverse; nothing they demonstrably share is adverse",
+         "AMBIGUOUS. The shared POWER node is measured and clean, which "
+         "refutes POWER/shared_node; SENSOR/independent_faults cannot be "
+         "confirmed because COMMUNICATION and COMPUTE sharing is unobserved "
+         "for this pair, and an unobserved domain eliminates nothing (§5)",
          _c1_independent, variant="shared_source",
          tags=("set_c", "multi_sensor")),
     _air("MS_C2_SHARED_POWER", "9",
          "the same two sources, and the power node they share is adverse",
-         "POWER/shared_node supported; the independent explanation is "
-         "refuted by the shared dependency",
+         "POWER/shared_node is the only supported hypothesis and the "
+         "independent explanation is refuted by the shared dependency. Still "
+         "AMBIGUOUS overall, because a shared link or process could also be "
+         "present and would not be seen",
          _c2_shared_power, variant="shared_source",
          tags=("set_c", "multi_sensor")),
-    # C3 and C4 are NEGATIVE controls, and their expectations say so. The
-    # only real v1.1 payload with two adverse sources has `battery` and
-    # `motor_esc`, which share a POWER node and nothing else. A shared-link
-    # or shared-compute common cause is therefore NOT CONSTRUCTIBLE from the
-    # available real data, and the honest thing is to check that the model
-    # declines to claim one rather than to fabricate a payload that would.
-    _air("MS_C3_SHARED_COMM", "9",
+    _air("MS_C3_LINKS_DOWN_NOT_SHARED", "9",
          "both links are down, but the two adverse sources do not share a "
          "link: only motor_esc rides one",
-         "SENSOR/independent_faults stays supported and NO shared-link "
-         "common cause is claimed -- a negative control on §13",
+         "AMBIGUOUS, and COMMUNICATION/shared_link is NOT refuted: the "
+         "battery declares no link, so 'they do not share one' is a "
+         "statement about the model rather than about the vehicle",
          _c3_shared_comm, variant="shared_source",
-         tags=("set_c", "multi_sensor", "negative_control")),
-    _air("MS_C4_SHARED_COMPUTE", "9",
+         tags=("set_c", "multi_sensor", "model_gap")),
+    _air("MS_C4_CPU_SATURATED_NOT_SHARED", "9",
          "the CPU is saturated, and neither adverse source declares a "
          "compute dependency",
-         "SENSOR/independent_faults stays supported. This is what the "
-         "dependency model OMITS: v1.1 sources are raw and declare no "
-         "compute node, so a shared-compute cause cannot be reached",
+         "AMBIGUOUS. This is what the dependency model OMITS: v1.1 sources "
+         "are raw and declare no compute node, so a shared-compute cause can "
+         "be neither reached nor ruled out. Reporting that is the result",
          _c4_shared_compute, variant="shared_source",
-         tags=("set_c", "multi_sensor", "negative_control", "model_gap")),
+         tags=("set_c", "multi_sensor", "model_gap")),
 
     # -- SET D: position function failure ------------------------------
     _air("MS_D1_NAV_SOURCE", "10",
@@ -393,10 +410,22 @@ MATCHED_SCENARIOS = (
          "sources fresh; the GNSS link is down",
          "POSITION_UNAVAILABLE implicates COMMUNICATION/starvation",
          _d3_communication_starvation, tags=("set_d", "position")),
+    # §27 in its literal form. The channel misses its END-TO-END deadline
+    # AND the estimator segment is over ITS OWN budget. Those are one event.
+    # TIMING/deadline_violation is reserved for a deadline missed with every
+    # segment inside budget -- a composition fault -- so here it must be
+    # refuted, not co-reported, or one overrun becomes two faults.
+    #
+    # The consequence is that D4 lands on the SAME hypothesis as D2 and set D
+    # therefore fails the strict gate. That is a real property of the
+    # evidence: a compute segment that blows its budget IS a stale estimator,
+    # and the two scenarios are not distinguishable at this granularity.
     _air("MS_D4_COMPUTE_DEADLINE", "10",
-         "sources fresh; the nav channel misses its end-to-end deadline",
-         "POSITION_UNAVAILABLE implicates TIMING/deadline_violation and "
-         "COMPUTE, which are one event seen twice (§27)",
+         "sources fresh; the nav channel misses its end-to-end deadline "
+         "because the estimator segment is over its own budget",
+         "POSITION_UNAVAILABLE localizes to COMPUTE/estimator_stale, and "
+         "TIMING/deadline_violation is REFUTED rather than co-reported: one "
+         "overrun must not be counted as two independent faults (§27)",
          _d4_compute_deadline, tags=("set_d", "position")),
 )
 
@@ -412,7 +441,8 @@ MATCHED_SETS = {
     "B_ACTUATOR_RESPONSE_BENCH": ("MS_TS_B4_MECHANICAL",
                                   "MS_TS_B5_RESPONSE_SENSOR"),
     "C_MULTI_SENSOR": ("MS_C1_INDEPENDENT", "MS_C2_SHARED_POWER",
-                       "MS_C3_SHARED_COMM", "MS_C4_SHARED_COMPUTE"),
+                       "MS_C3_LINKS_DOWN_NOT_SHARED",
+                       "MS_C4_CPU_SATURATED_NOT_SHARED"),
     "D_POSITION_FUNCTION": ("MS_D1_NAV_SOURCE", "MS_D2_ESTIMATOR_STALE",
                             "MS_D3_COMM_STARVATION",
                             "MS_D4_COMPUTE_DEADLINE"),

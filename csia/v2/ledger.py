@@ -61,6 +61,8 @@ EVENT_TYPES = (
     "DOMAIN_STATE_CHANGED",
     "LIMITING_DOMAIN_CHANGED",
     "ATTRIBUTION_CHANGED",
+    #: Phase C §31. One event per localization decision that CHANGED.
+    "LOCALIZATION_CHANGED",
 )
 
 
@@ -106,6 +108,8 @@ class V2Event:
     dependencies: tuple
     reason_codes: tuple
     attribution: dict
+    #: §31's structured localization record, on LOCALIZATION_CHANGED events.
+    localization: dict | None
     context: dict
     snapshot: dict
     event_id: str = ""
@@ -124,6 +128,7 @@ class V2Event:
             "dependencies": list(self.dependencies),
             "reason_codes": list(self.reason_codes),
             "attribution": self.attribution,
+            "localization": self.localization,
             "context": self.context, "snapshot": self.snapshot,
             "previous_event_hash": self.previous_event_hash,
         }
@@ -168,7 +173,8 @@ class V2AssuranceLedger:
     # ------------------------------------------------------------------
     def _emit(self, *, event_type, subject, previous, new, assurance,
               domain=None, component=None, limiting_domain=None,
-              affected_functions=(), dependencies=(), reason_codes=()):
+              affected_functions=(), dependencies=(), reason_codes=(),
+              localization=None):
         ev = V2Event(
             sequence=len(self.events), event_type=event_type,
             subject=subject, previous_state=str(previous),
@@ -178,6 +184,7 @@ class V2AssuranceLedger:
             dependencies=tuple(dependencies),
             reason_codes=tuple(reason_codes),
             attribution=_attribution_digest(assurance.attribution),
+            localization=localization,
             context=self.context.to_dict(),
             snapshot=_snapshot_digest(assurance),
             previous_event_hash=self._last_hash).seal()
@@ -240,6 +247,35 @@ class V2AssuranceLedger:
                     limiting_domain=verdict.limiting_domain,
                     affected_functions=(name,),
                     reason_codes=verdict.reason_codes))
+
+        # -- §31 localization: symptom, candidates before, evidence
+        #    applied, candidates after, unresolved, affected functions.
+        #    Deterministic and hashable: the key is the whole decision, so a
+        #    localization that reaches the same verdict by different evidence
+        #    opens a new event rather than looking unchanged.
+        for loc in getattr(assurance, "localizations", ()):
+            key = (loc.verdict, loc.supported, loc.unresolved, loc.evidence)
+            slot = f"loc:{loc.symptom}:{loc.subject}"
+            # A symptom APPEARING is itself the event, unlike a function
+            # state where the first observation is only the baseline. So
+            # `prior is None` opens an event here and does not elsewhere.
+            prior = self._prev.get(slot)
+            self._prev[slot] = key
+            if prior == key:
+                continue
+            functions = tuple(sorted(
+                {f for r in assurance.records
+                 if r.domain in loc.domains for f in r.affected_functions}))
+            out.append(self._emit(
+                event_type="LOCALIZATION_CHANGED",
+                subject=f"{loc.symptom}:{loc.subject}",
+                previous=prior[0] if prior else "",
+                new=loc.verdict, assurance=assurance,
+                domain=(loc.supported[0].split("/")[0]
+                        if loc.supported else None),
+                affected_functions=functions,
+                reason_codes=loc.evidence,
+                localization=loc.to_dict()))
 
         # -- attribution ------------------------------------------------
         a = assurance.attribution

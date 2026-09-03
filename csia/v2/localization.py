@@ -362,7 +362,7 @@ def localize_all(specs, records, predicates) -> tuple:
 # --------------------------------------------- §6 minimum resolving evidence
 def minimum_resolving_subsets(spec: SymptomSpec, index: EvidenceIndex,
                               subject: str, predicates: dict,
-                              max_size: int = 4) -> dict:
+                              max_size: int = 6) -> dict:
     """The smallest evidence subset that separates the candidates.
 
     Exhaustive over subsets up to `max_size`, which §6 permits because the

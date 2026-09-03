@@ -239,29 +239,80 @@ def _shared_adverse_dependency(index, domain):
     return (bool(adverse), adverse[0] if adverse else None)
 
 
-def _shared_power(index, _subject):
+#: The domains a common cause could hide in. §13's candidate set.
+_COMMON_CAUSE_DOMAINS = ("POWER", "COMMUNICATION", "COMPUTE", "TIMING")
+
+
+def _covered(index, domain):
+    """Does the dependency model say anything at all about `domain` for
+    EVERY adverse source?
+
+    THIS IS THE PREDICATE THAT KEEPS §2 HONEST HERE. "I found no shared node"
+    has two completely different causes:
+
+        the sources each declare nodes in this domain and the nodes differ
+            -> a measurement. They really do not share one.
+        a source declares no node in this domain at all
+            -> the model is silent. It is not evidence of anything.
+
+    Collapsing the second into `False` turns "I cannot see" into "it is not
+    so", which is how a diagnostic system produces a confident wrong answer.
+    Every caller below returns None when this is False.
+    """
+    for rec in _adverse_sources(index):
+        direct = [d for d in set(rec.dependencies)
+                  if d.startswith(f"{domain}/")]
+        if direct:
+            continue
+        indirect = [up for d in set(rec.dependencies)
+                    for up in index.dependencies_of(d.split("/", 1)[1])
+                    if up.startswith(f"{domain}/")]
+        if not indirect:
+            return False
+    return True
+
+
+def _shared_in(index, domain):
     if len(_adverse_sources(index)) < 2:
         return None
-    return _shared_adverse_dependency(index, "POWER")[0]
+    found = _shared_adverse_dependency(index, domain)[0]
+    if found:
+        return True
+    return False if _covered(index, domain) else None
+
+
+def _shared_power(index, _subject):
+    return _shared_in(index, "POWER")
 
 
 def _shared_comm(index, _subject):
-    if len(_adverse_sources(index)) < 2:
-        return None
-    return _shared_adverse_dependency(index, "COMMUNICATION")[0]
+    return _shared_in(index, "COMMUNICATION")
 
 
 def _shared_compute(index, _subject):
-    if len(_adverse_sources(index)) < 2:
-        return None
-    return _shared_adverse_dependency(index, "COMPUTE")[0]
+    return _shared_in(index, "COMPUTE")
 
 
 def _no_shared_adverse_dependency(index, _subject):
     if len(_adverse_sources(index)) < 2:
         return None
-    return not any(_shared_adverse_dependency(index, d)[0]
-                   for d in ("POWER", "COMMUNICATION", "COMPUTE", "TIMING"))
+    if any(_shared_adverse_dependency(index, d)[0]
+           for d in _COMMON_CAUSE_DOMAINS):
+        return False
+    # No common cause was FOUND. That is only a statement about independence
+    # in the domains the dependency model actually covers; anywhere else the
+    # honest answer is "not measurable", which eliminates nothing (§5).
+    if any(not _covered(index, d) for d in _COMMON_CAUSE_DOMAINS):
+        return None
+    return True
+
+
+def uncovered_common_cause_domains(index) -> tuple:
+    """Reported beside the localization so the gap is visible rather than
+    silently absorbed into a verdict."""
+    if len(_adverse_sources(index)) < 2:
+        return ()
+    return tuple(d for d in _COMMON_CAUSE_DOMAINS if not _covered(index, d))
 
 
 # -- function-level --------------------------------------------------------
@@ -562,7 +613,18 @@ SYMPTOMS = (
             Hypothesis("SENSOR/response_sensor", "SENSOR",
                        "the actuator is fine and the channel measuring its "
                        "response is not",
-                       confirmed_by=("PHYSICAL_RESPONSE_NOMINAL",),
+                       # STALL_SIGNATURE is "current present AND no measured
+                       # motion". A jammed shaft and a dead speed channel
+                       # produce THAT SAME OBSERVATION, so it confirms both
+                       # hypotheses or neither. Giving it only to
+                       # ACTUATION/mechanical would have manufactured an
+                       # asymmetry out of nothing: the mechanical answer
+                       # would read "supported" and this one "unresolved"
+                       # off identical evidence. The independent physical
+                       # channel is what actually separates them, and where
+                       # it does not exist BOTH stay supported (§39).
+                       confirmed_by=("STALL_SIGNATURE",
+                                     "PHYSICAL_RESPONSE_NOMINAL"),
                        refuted_by=("PHYSICAL_RESPONSE_NOMINAL_FALSE",),
                        note="resolvable ONLY where an independent physical "
                             "channel exists. On a platform without one this "

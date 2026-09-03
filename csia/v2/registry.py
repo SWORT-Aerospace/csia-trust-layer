@@ -53,6 +53,29 @@ class DomainRegistry:
         self._by_id[did] = domain
         return domain
 
+    def replace(self, domain: AssuranceDomain) -> AssuranceDomain:
+        """Swap an already-registered domain for a wrapper of it.
+
+        The only supported use is fault injection: `FailingDomain` wrapping a
+        real plugin so §22's watchdog can be exercised. It exists so tests do
+        not reach into `_by_id`, which would let a future change to the
+        registry's internals silently stop injecting anything and leave the
+        watchdog tests passing against nothing.
+
+        `register`'s checks still apply, minus the duplicate rule, and the id
+        must already be present -- this replaces, it does not add.
+        """
+        did = getattr(domain, "domain_id", "")
+        if did not in self._by_id:
+            raise PluginRejected(f"{did!r} is not registered; nothing to "
+                                 f"replace")
+        existing = self._by_id.pop(did)
+        try:
+            return self.register(domain)
+        except PluginRejected:
+            self._by_id[did] = existing
+            raise
+
     def domains(self) -> tuple:
         """Sorted by id, so registration order cannot change the answer."""
         return tuple(self._by_id[k] for k in sorted(self._by_id))

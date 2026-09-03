@@ -97,16 +97,25 @@ class FunctionExplanation:
         return head
 
 
-def explain(verdict, localizations, function_spec=None) -> FunctionExplanation:
+def explain(verdict, localizations, function_spec=None,
+            function_names=()) -> FunctionExplanation:
     """Join one function verdict to the localizations that bear on it."""
     watched = set(verdict.domain_states)
     if function_spec is not None:
         watched |= set(function_spec.required_domains)
         watched |= set(function_spec.supporting_domains)
         watched |= {d for g in function_spec.redundant_groups for d in g}
+    others = set(function_names) - {verdict.function}
 
     limiting, possible, cleared, rows, evidence = set(), set(), set(), [], []
     for loc in localizations:
+        # A symptom whose SUBJECT is another function is about that function.
+        # Attaching it here by domain overlap alone reported PRECISION_
+        # NAVIGATION's loss on the explanation of an unrelated function that
+        # merely shares the SENSOR domain -- and did it while that function
+        # was ELIGIBLE, which is a contradiction in the same object.
+        if loc.subject in others:
+            continue
         touches = ({h.split("/")[0] for h in loc.supported}
                    | {h.split("/")[0] for h in loc.unresolved}
                    | {h.split("/")[0] for h, _p in loc.rejected})
@@ -136,6 +145,15 @@ def explain(verdict, localizations, function_spec=None) -> FunctionExplanation:
     if verdict.limiting_domain and not limiting:
         limiting = {verdict.limiting_domain}
 
+    # §1 defines limiting_domains as the domains that PREVENT FULL
+    # ELIGIBILITY. An eligible function has none by definition, so a symptom
+    # that touches one of its domains without costing it anything is context,
+    # not a limit -- it stays in `symptoms` and out of `limiting`.
+    if verdict.state == "ELIGIBLE":
+        possible |= limiting
+        limiting = set()
+        possible -= cleared
+
     return FunctionExplanation(
         function=verdict.function, state=verdict.state,
         limiting_domains=tuple(sorted(limiting)),
@@ -156,6 +174,7 @@ def explain(verdict, localizations, function_spec=None) -> FunctionExplanation:
 def explain_all(assurance, function_graph=None) -> tuple:
     """One explanation per function, in a deterministic order."""
     specs = getattr(function_graph, "functions", {}) or {}
+    names = tuple(assurance.functions)
     return tuple(
-        explain(v, assurance.localizations, specs.get(name))
+        explain(v, assurance.localizations, specs.get(name), names)
         for name, v in sorted(assurance.functions.items()))
