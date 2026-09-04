@@ -198,3 +198,33 @@ def test_the_mass_term_inputs_are_the_measured_ones():
     assert float(round(exact, 2)) == mass, (
         f"S_0 * (T_0 - T*) = {exact}, which rounds to {round(exact, 2)}, but "
         f"the artifact reports {mass}")
+
+
+def test_the_conclusion_compares_the_two_TERMS_not_a_mass_against_a_term():
+    """The last surviving member of the 125 family.
+
+    The Conclusion's practical advice read "the belief mass banked during calm
+    flight, 500 units against an evidence margin worth 1". Two things were
+    wrong with it. 500 is the THEORETICAL CAP 1/(1-rho_max); the mass actually
+    banked is 475.6775. And it compared a raw mass against a PRODUCT: the
+    margin figure 1.0 is M(T* - e_f), so the like-for-like partner is the mass
+    TERM S_0(T_0 - T*) = 118.82, not S_0 itself.
+
+    Same defect as the 125 in Section 7, in a different disguise -- the
+    idealised cap standing in for the measured quantity -- which is why it
+    survived that correction. The Conclusion now quotes both terms of N*.
+    """
+    d = _artifact("research", "wp_c8", "results", "escalation_algebra.json")
+    ver = d["verification_against_shipping_trustcore"]
+    mass = d["what_dominates_N_star"]["mass_term_S0_times_T0_minus_Tstar"]
+    margin = d["what_dominates_N_star"]["margin_term_M_times_Tstar_minus_ef"]
+    tex = _tex()
+
+    assert "500 units" not in tex, (
+        "the Conclusion is quoting the concentration cap as the banked mass "
+        f"again. The cap is {ver['concentration_cap_1_over_1_minus_rho_max']}; "
+        f"the mass banked is {ver['settled_mass_S0']}; and the figure that "
+        f"belongs beside the margin term is the mass TERM {mass}.")
+    assert f"${mass}$ against ${margin}$" in tex, (
+        f"the Conclusion no longer compares the two terms of N* as "
+        f"{mass} against {margin}")
