@@ -363,6 +363,23 @@ scalars:
     script: csia/trust_engine/engine.py
     note: a source constant, not a measurement
 
+  - id: S13
+    value: "118.82"
+    statement: >-
+      the banked-agreement term S_0(T_0 - T*) in the escalation-delay
+      decomposition, against a margin term M(T* - e_f) of 1.0. The comparison
+      is the section's point: the delay is set by accumulated agreement, not
+      by fault severity.
+    artifact: research/wp_c8/results/escalation_algebra.json
+    json_pointer: .what_dominates_N_star.mass_term_S0_times_T0_minus_Tstar
+    script: research/wp_c8/escalation_algebra.py
+    note: >-
+      The manuscript printed 125 here, which is the value at an idealised
+      T_0 = 1.0; the artifact computes 118.82 from the measured T_0 = 0.98764
+      and 125 appears in no artifact. The qualitative conclusion is unchanged
+      -- both are two orders of magnitude above the margin term -- but the
+      printed figure now matches the artifact it is derived from.
+
 # ---------------------------------------------------------------------------
 # NON-EMPIRICAL NUMERIC LITERALS
 # Regexes for numbers in the manuscript that are NOT quantitative claims:
