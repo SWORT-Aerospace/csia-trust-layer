@@ -1402,10 +1402,10 @@ evidence of prevalence.
 
 \paragraph{The reported scalars are model states, not calibrated
 probabilities.} The trust coefficient is a Beta-recursion state under adaptive
-forgetting. The diagnosis posterior is a tempered softmax over exponentially
-smoothed pseudo-log-likelihoods. Neither is calibrated, we do not calibrate
+forgetting. The diagnosis output is a normalized hypothesis weight: a tempered
+softmax over exponentially smoothed feature log-scores. Neither is calibrated, we do not calibrate
 them, and no claim of calibration is made anywhere in this paper. We
-deliberately do not call the posterior a \emph{confidence}: a leader at
+deliberately call it neither a posterior nor a \emph{confidence}: a leader at
 $0.9998$ with no evidence distinguishing it from its nearest rival carries no
 information about that pair, and the word invites a reader to do arithmetic
 that is not licensed.

@@ -645,7 +645,7 @@ What it found:
       during a smoother warm-up. A structural property, not a fault.
 \item Under injected fix loss it collapses for a further $200$ consecutive
       ticks --- exactly the injected window --- during which
-      Corollary~\ref{c:pinned} says the posterior ratio equals the prior
+      Corollary~\ref{c:pinned} says the weight ratio equals the prior
       ratio. (Corollary~\ref{c:pinned} rather than Proposition~\ref{p:pin}:
       the layer's gate is a skip, so it withholds a term that contributes
       differently to the two hypotheses, and the pinning arises from the
@@ -662,17 +662,18 @@ replication of the fix-loss behaviour, and we do not present it as one: no
 fix-loss arm exists on that platform in our data.
 
 \paragraph{The implemented consequence.} The layer now reports a support state
-separately from the posterior. When $D(a,b)=\emptyset$ against a required
+separately from the normalized hypothesis weight it emits. When
+$D(a,b)=\emptyset$ against a required
 competitor, the tick is emitted as \emph{support lost for required
-information} rather than as eligibility --- \textbf{at any posterior value,
-because no posterior threshold enters the rule at all}. That is deliberate:
-conditioning identifiability on the posterior would make it a function of the
-very score whose support is in question. The rule is likewise independent of
+information} rather than as eligibility --- \textbf{at any weight, because no
+weight threshold enters the rule at all}. That is deliberate: conditioning
+identifiability on the weight would make it a function of the very score whose
+support is in question. The rule is likewise independent of
 freshness, so removing the freshness rule would not rescue it.
 
 The absence of a threshold is visible in the data rather than only in the
-code. Across the ticks where the condition fires, the leader's posterior
-ranges from $0.9691$ to $0.9998$; a rule gated at, say, $0.999$ would have
+code. Across the ticks where the condition fires, the leader's weight ranges
+from $0.9691$ to $0.9998$; a rule gated at, say, $0.999$ would have
 passed most of them.
 
 %======================================================================

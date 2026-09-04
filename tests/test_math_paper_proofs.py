@@ -462,7 +462,12 @@ def test_an_unsuccessful_search_is_not_recorded_as_a_gap():
     exists'. Any row whose status says the search came up short must say so
     in its own claim_consequence rather than asserting a gap."""
     weak = {"NOT_FOUND_NEEDS_HUMAN", "TOPIC_SEARCHED_NO_CLOSE_MATCH",
-            "NOT_READ_HIGH_PRIORITY"}
+            "NOT_READ_HIGH_PRIORITY",
+            # Added 2026-09-04. A reference that was LOCATED and corroborated
+            # but NOT READ is still weak evidence: knowing a theorem exists is
+            # not knowing its hypotheses. The row must say what may not be
+            # concluded, exactly as the other weak states must.
+            "LOCATED_CORROBORATED_NOT_READ"}
     for r in _prior_art_rows():
         if r["status"] not in weak:
             continue

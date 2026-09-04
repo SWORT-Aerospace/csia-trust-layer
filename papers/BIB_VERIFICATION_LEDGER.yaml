@@ -57,6 +57,36 @@ rejected_routes:
   - BRIEF                 # supplied to this project by an upstream document
   - MEMORY                # recalled rather than looked up
 
+# ---------------------------------------------------------------------------
+# A THIRD STATE, ADDED 2026-09-04, BECAUSE THE EVIDENCE MOVED AND THE ROUTE
+# DID NOT.
+#
+# Web SEARCH became available to this environment; web FETCH of any publisher
+# host did not. Every accepted route is still refused:
+#
+#   api.crossref.org, doi.org, dblp.org        CONNECT -> 403
+#   www.impan.pl, projecteuclid.org            EGRESS_BLOCKED
+#   ieeexplore.ieee.org, arxiv.org             EGRESS_BLOCKED
+#
+# So four entries can now be corroborated in detail from multiple independent
+# search indices agreeing on every field -- which is real evidence, and is
+# NOT a publisher record. Marking them VERIFIED would retire a marker on a
+# route this file already lists as rejected, which is the exact failure the
+# ledger exists to prevent.
+#
+#   CORROBORATED_NO_PUBLISHER_RECORD
+#       every bibliographic field independently reproduced by two or more
+#       search indices, no field in dispute, and NO accepted route reachable.
+#       The marker STAYS. bib-guard STAYS RED. This is a strictly better
+#       state than UNVERIFIED and a strictly worse one than VERIFIED, and it
+#       exists so the difference is visible rather than argued.
+#
+# A human with publisher access converts these to VERIFIED in one sitting;
+# the DOIs to check are recorded on each row.
+# ---------------------------------------------------------------------------
+corroboration_only_routes:
+  - SEARCH_INDEX_CONSENSUS
+
 # Why everything below is UNVERIFIED, re-measured 2026-09-04. SIX routes were
 # tried, not three: the first three are the accepted ones, and the last three
 # were tried only to establish that no fallback exists either. All six fail at
@@ -219,18 +249,14 @@ entries:
   # ============================================== papers/gate_conditioning
   - paper: gate_conditioning
     key: heitjan1991car
-    status: UNVERIFIED
-    route: null
-    checked_by: null
-    checked_on: null
-    record: null
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Heitjan, D. F. and Rubin, D. B., "Ignorability and Coarse Data", The Annals of Statistics 19(4), 2244-2253, 1991. DOI 10.1214/aos/1176348396.
     note: >-
-      THE CRITICAL ENTRY OF THE MATHEMATICAL PAPER. It is what makes
-      Proposition 5 KNOWN rather than a contribution, so the paper's central
-      concession is attached to it. Reconstructed from search results alone:
-      volume, number, pages and year all require a publisher record. If these
-      details are wrong the concession points at the wrong work, which is
-      worse than making no citation at all.
+      Project Euclid landing URL and two further indices agree on volume, issue, page range, year and DOI, and reproduce the abstract's CAR-plus-distinctness condition. THE CRITICAL ENTRY: it is what makes the ignorability proposition KNOWN rather than a contribution. The specialization to a BINARY per-feature gate must still be stated as ours, not attributed to them.
 
   - paper: gate_conditioning
     key: dong2024statedependent

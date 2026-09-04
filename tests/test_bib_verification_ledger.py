@@ -147,12 +147,15 @@ def test_every_row_is_well_formed(row):
     for field in ("paper", "key", "status", "route", "checked_by",
                   "checked_on", "record", "note"):
         assert field in row, f"{row.get('key')}: missing field {field}"
-    assert row["status"] in ("VERIFIED", "UNVERIFIED"), row["status"]
+    assert row["status"] in (
+        "VERIFIED", "UNVERIFIED", "CORROBORATED_NO_PUBLISHER_RECORD"), \
+        row["status"]
     assert (row["note"] or "").strip(), \
         f"{row['key']}: a row with no note explains nothing"
 
     accepted = set(LEDGER_DOC["accepted_routes"])
     rejected = set(LEDGER_DOC["rejected_routes"])
+    corroborating = set(LEDGER_DOC.get("corroboration_only_routes", ()))
     if row["status"] == "VERIFIED":
         assert row["route"] in accepted, (
             f"{row['key']}: VERIFIED via {row['route']!r}, which is not an "
@@ -161,12 +164,44 @@ def test_every_row_is_well_formed(row):
             assert row[field], (
                 f"{row['key']}: VERIFIED but {field} is empty. A verification "
                 f"nobody signed and dated is not a verification.")
+    elif row["status"] == "CORROBORATED_NO_PUBLISHER_RECORD":
+        # A strictly intermediate state: better evidence than UNVERIFIED,
+        # weaker than VERIFIED, and it retires NOTHING. The marker stays and
+        # bib-guard stays red, which `test_a_corroborated_row_still_carries_
+        # its_marker` below enforces.
+        assert row["route"] in corroborating, (
+            f"{row['key']}: corroborated via {row['route']!r}, which is not a "
+            f"declared corroboration route. Declared: {sorted(corroborating)}")
+        for field in ("checked_by", "checked_on", "record"):
+            assert row[field], (
+                f"{row['key']}: corroborated but {field} is empty. The point "
+                f"of the state is that it says exactly what was consulted.")
     else:
         assert row["route"] is None, (
             f"{row['key']}: UNVERIFIED rows must not name a route")
     assert row["route"] not in rejected, (
         f"{row['key']}: {row['route']!r} is a rejected route. A web search "
         f"result is a second unverified source, not a publisher record.")
+
+
+def test_a_corroborated_row_still_carries_its_marker():
+    """CORROBORATED_NO_PUBLISHER_RECORD must not become a soft VERIFIED.
+
+    It exists so that real but insufficient evidence is visible. If it ever
+    let a marker be retired, it would be a rename of the failure the ledger
+    was built to prevent.
+    """
+    offenders = []
+    for paper, path in PAPERS.items():
+        for key, markers in bib_entries(path).items():
+            row = BY_KEY.get((paper, key))
+            if row and row["status"] == "CORROBORATED_NO_PUBLISHER_RECORD" \
+                    and not markers:
+                offenders.append(f"{paper}/{key}")
+    assert not offenders, (
+        f"{offenders} are corroborated only, yet their markers are gone. "
+        f"Corroboration is not verification: no accepted route was reachable, "
+        f"so nothing may be retired.")
 
 
 def test_the_accepted_and_rejected_route_lists_do_not_overlap():

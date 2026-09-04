@@ -4,8 +4,9 @@ Binding for both manuscripts. Where the two papers use the same word, this file
 gives one definition. Where they quote the same number, it gives one artifact.
 Where they conflict, it resolves the conflict or marks it BLOCKED.
 
-Audited at HEAD `228bebeb14395aebda60d76dbf6a54b292d0e344`,
-evidence freeze `csia-dual-paper-evidence-freeze` = `eb2577d6…`.
+Audited at HEAD `228bebeb…`; **the eight substitutions below were APPLIED**
+in the final integration pass. Evidence freeze
+`csia-dual-paper-evidence-freeze` = `eb2577d6…`.
 
 ---
 
@@ -70,7 +71,7 @@ mathematical paper says "validity factor $w_h$" on first use in each section;
 the systems paper says "normalized hypothesis weight" in full on first use per
 section and "the weights" thereafter.
 
-### Required replacements — SYSTEMS PAPER (2)
+### Required replacements — SYSTEMS PAPER (2) — **APPLIED**
 
 The manuscript **already states the policy correctly** at line 251:
 *"We call the output a normalized hypothesis weight, not a posterior"*, with
@@ -78,8 +79,8 @@ the three reasons. Two later lines contradict it.
 
 | file | line | current wording | correct wording | action |
 |---|---|---|---|---|
-| `papers/csia_systems/main.tex` | 1405 | "The diagnosis posterior is a tempered softmax over exponentially smoothed pseudo-log-likelihoods." | "The diagnosis output is a normalized hypothesis weight: a tempered softmax over exponentially smoothed feature log-scores." | writing agent |
-| `papers/csia_systems/main.tex` | 1408 | "We deliberately do not call the posterior a \emph{confidence}" | "We deliberately call it neither a posterior nor a \emph{confidence}" | writing agent |
+| ~~`main.tex` 1405~~ **done** |  | "The diagnosis posterior is a tempered softmax over exponentially smoothed pseudo-log-likelihoods." | "The diagnosis output is a normalized hypothesis weight: a tempered softmax over exponentially smoothed feature log-scores." | writing agent |
+| ~~`main.tex` 1408~~ **done** |  | "We deliberately do not call the posterior a \emph{confidence}" | "We deliberately call it neither a posterior nor a \emph{confidence}" | writing agent |
 
 Also, non-manuscript: `research/systems-paper/CLAIMS.csv` row **SC-20** reads
 *"The posterior is not confidence: a leader at high posterior…"*. Same
@@ -87,7 +88,7 @@ substitution. It is a ledger row, not prose, so it may be updated in the same
 commit as the manuscript or left with a note; it must not be left silently
 inconsistent.
 
-### Required replacements — MATHEMATICAL PAPER (6)
+### Required replacements — MATHEMATICAL PAPER (6) — **APPLIED**
 
 Lines 56–532 use "posterior" for the **formal** `q_h`/`p_h`. **All correct; do
 not change them.** Six uses in §9–§10 describe the **deployed layer**:
@@ -214,4 +215,5 @@ paper and the measurements still stand, minus their closed-form explanation.
 | 2 | the estimator literature behind P1/P5a is named as a phrase, not engaged | **BLOCKED** — cannot cite without verification |
 | 3 | non-subsumption by DES / structural FDI | **OPEN** — asserted as a difference of setting, never proved |
 | 4 | 49 unmapped prose literals in the systems manuscript | **OPEN** — listed in the systems handoff; the writing agent decides which need binding |
-| 5 | the eight terminology substitutions in §A | **RESOLVED HERE, NOT YET APPLIED** — policy is explicit; the writing agents apply it |
+| 5 | ~~the eight terminology substitutions~~ | **CLOSED** — all eight applied; both manuscripts rebuild clean; the pinning test was updated in the same commit |
+| 6 | the writing agents' 27-page systems revision | **NOT DELIVERED.** It never reached this repository. Its section numbers (§15.2, §17.4), claim IDs (R01, R02, I02) and reported defects exist in no file here. See `docs/WRITING_AGENT_INPUT_RECONCILIATION.md` |

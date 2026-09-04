@@ -103,12 +103,17 @@ def test_the_manuscript_states_no_threshold_rather_than_a_number():
     same mistake is caught too.
     """
     tex = open(TEX, encoding="utf-8").read()
-    assert "no posterior threshold enters the rule" in tex, (
+    assert "no\nweight threshold enters the rule" in tex or \
+           "no weight threshold enters the rule" in tex, (
         "the manuscript no longer states that the support rule is free of a "
-        "posterior threshold. That is its distinguishing property; without "
-        "the sentence a reader will assume the 0.9998 example IS the rule.")
+        "threshold on the reported quantity. That is its distinguishing "
+        "property; without the sentence a reader will assume the 0.9998 "
+        "example IS the rule. NOTE the wording moved from 'posterior' to "
+        "'weight' when the cross-paper terminology policy was applied: the "
+        "deployed layer emits a normalized hypothesis weight, not a "
+        "posterior. See research/PAPER_CROSS_CONSISTENCY.md.")
     for banned in ("leader above $0.999$", "leader above 0.999",
-                   "posterior above $0.999$"):
+                   "posterior above $0.999$", "weight above $0.999$"):
         assert banned not in tex, (
             f"{banned!r} is back in the manuscript. The implementation has no "
             f"such threshold -- see engineering/v1_1/support/support.py, "
