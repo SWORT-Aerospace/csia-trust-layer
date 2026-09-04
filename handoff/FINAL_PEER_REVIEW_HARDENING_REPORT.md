@@ -18,7 +18,7 @@ disclosed rather than worked around.**
 | frozen v1 code | **PASS** — zero diff against `csia-v1.0-research-final` on every `FROZEN_PATHS` entry |
 | blocking publication guards | **PASS** |
 | bibliography guard | **FAIL, by design.** Zero entries verified |
-| full test suite | **1701 tests, all passing** (V1 reported 1684) |
+| full test suite | **1704 tests, all passing** (V1 reported 1684) |
 
 ---
 

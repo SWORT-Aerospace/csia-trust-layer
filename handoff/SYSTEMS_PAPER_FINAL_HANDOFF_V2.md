@@ -16,7 +16,7 @@
 | evidence freeze | `csia-dual-paper-evidence-freeze` = `eb2577d6830208b26d33facb283aa5be0ddf7c86` |
 | build | `make paper-systems` → **27 pages**, all citations resolved (V1 said 26) |
 | frozen v1 code | **PASS** — zero diff against `csia-v1.0-research-final` on every `FROZEN_PATHS` entry |
-| tests | **1701 collected, all passing** (V1 said 1684) |
+| tests | **1704 collected, all passing** (V1 said 1684) |
 | blocking publication guards | **PASS** |
 | bibliography guard | **FAIL, expected and correct** — zero entries verified |
 

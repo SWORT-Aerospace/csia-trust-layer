@@ -87,9 +87,12 @@ CHECKS = {
 NOT_VERIFIABLE = {
     "systems": [
         ("no bibliography entry is verified",
-         "every publisher host is blocked from the authoring environment; "
-         "2 entries are corroborated by search-index consensus and 16 remain "
-         "unverified. papers/BIB_VERIFICATION_LEDGER.yaml"),
+         "every publisher host is blocked from the authoring environment. "
+         "Corroborating DOIs by search also found three entries carrying "
+         "WRONG metadata and one probable duplicate; all four are disclosed "
+         "in papers/BIB_EXTERNAL_VERIFICATION_PACKET.md. Counts are in "
+         "papers/BIB_VERIFICATION_LEDGER.yaml and are checked against it by "
+         "tests/test_evidence_capsule_counts.py"),
         ("the public-log exposure study was NOT RUN",
          "SC-22's artifact field is literally 'NONE - NOT RUN'. "
          "research/systems-paper/PUBLIC_LOG_EXTERNAL_FETCH_MANIFEST.json "
