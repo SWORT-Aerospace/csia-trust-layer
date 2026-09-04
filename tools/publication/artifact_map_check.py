@@ -33,6 +33,14 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PAPERS = os.path.join(ROOT, "papers")
 
+#: How a numeric literal is recognised in prose, and how a table is excised
+#: from it. Hoisted to module level so that
+#: `tests/test_numeric_literal_audit_is_closed.py` can assert its own copy
+#: still agrees -- that test audits the set this guard reports, and the two
+#: drifting apart silently is worse than either being wrong.
+LITERAL_RE = re.compile(r"(?<![\w\\.])\d+(?:\.\d+)?(?![\w])")
+TABULAR_RE = re.compile(r"\\begin\{tabular\}.*?\\end\{tabular\}", re.S)
+
 
 def strip_comments(tex):
     return re.sub(r"(?<!\\)%.*", "", tex)
@@ -167,14 +175,12 @@ def check_paper(name, pdir, map_path, doc, strict_numbers):
     mapped_vals = {str(s.get("value")) for s in scalars}
     for t in tables:
         mapped_vals.update(str(v) for v in (t.get("values") or []))
-    prose = re.sub(r"\\begin\{tabular\}.*?\\end\{tabular\}", " ", tex,
-                   flags=re.S)
-    lits = set(re.findall(r"(?<![\w\\.])\d+(?:\.\d+)?(?![\w])", prose))
+    prose = TABULAR_RE.sub(" ", tex)
+    lits = set(LITERAL_RE.findall(prose))
     review = sorted(x for x in lits
                     if x not in mapped_vals
                     and not any(a.fullmatch(x) for a in allow))
-    in_tables = len(set(re.findall(r"(?<![\w\\.])\d+(?:\.\d+)?(?![\w])", tex))
-                    - lits)
+    in_tables = len(set(LITERAL_RE.findall(tex)) - lits)
     print(f"  ----  unmapped prose numerics {len(review)} of {len(lits)} "
           f"distinct prose literals ({in_tables} more live inside mapped "
           f"tables)")

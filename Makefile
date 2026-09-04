@@ -29,6 +29,10 @@ help:
 	@echo "  make secrets-scan    credential and local-path scan"
 	@echo "  make release-check   scratch-build + sanitize the public archives"
 	@echo "  make check           every guard above"
+	@echo "Referee-facing verification (no network, no simulator):"
+	@echo "  make verify-systems-paper-public  evidence capsule, systems paper"
+	@echo "  make verify-math-paper-public     evidence capsule, math paper"
+	@echo "  make verify-papers-public         both capsules"
 	@echo "Release:"
 	@echo "  make evidence-export rebuild the 16-file Paper I evidence export"
 	@echo "  make public-release  pack + sanitize the public archives"
@@ -116,6 +120,32 @@ proof-audit-check:
 .PHONY: figure-sync
 figure-sync:
 	$(PY) tools/publication/sync_paper_figures.py --check
+
+# ---------------------------------------------------------------------------
+# Referee-facing verification.
+#
+# `make check` is addressed to maintainers: most of its thirty lines are
+# packaging and hygiene, and a referee cannot tell from the output which lines
+# are evidence. These targets run ONLY the checks that re-derive a number the
+# paper states or a structural property it claims, and then print what CANNOT
+# be verified and why -- the unverified bibliography, the public-log study
+# that was never run, the n=1 current-stack trials, the SITL binary this
+# repository does not vendor. That second list never affects the exit code; it
+# is a disclosure, and a capsule that printed only successes would be an
+# advertisement.
+#
+# No network. No simulator. No artifact is written.
+# ---------------------------------------------------------------------------
+.PHONY: verify-systems-paper-public verify-math-paper-public \
+        verify-papers-public
+verify-systems-paper-public:
+	$(PY) tools/publication/verify_paper_public.py --paper systems
+
+verify-math-paper-public:
+	$(PY) tools/publication/verify_paper_public.py --paper math
+
+verify-papers-public:
+	$(PY) tools/publication/verify_paper_public.py --paper both
 
 .PHONY: phase-guard
 phase-guard:
