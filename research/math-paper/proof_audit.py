@@ -111,7 +111,8 @@ def numeric() -> dict:
               "P3_pinned_to_prior",
               "P7_gated_score_is_a_reweighting",
               "P7b_shift_is_the_withheld_contribution",
-              "P7c_pinned_when_all_distinguishing_gated")}
+              "P7c_pinned_when_all_distinguishing_gated",
+              "P6c_TV_bound_is_attained_at_the_uniform_two_point_witness")}
     slack = {k: -np.inf for k in
              ("P6a_log_ratio_bounded_by_R", "P6b_TV_bound",
               "P8_pinned_pair_margin_never_exceeds_R")}
@@ -268,6 +269,25 @@ def numeric() -> dict:
             p4_held += int(np.argmax(p) == np.argmax(q))
         elif np.argmax(p) != np.argmax(q):
             p4_counterexample_when_violated += 1
+
+    # -- P6c: THE TV BOUND IS ATTAINED. Deterministic, no RNG, so adding it
+    # shifts no other block's stream. Witness: q = (1/2, 1/2) with a two-point
+    # w = (a, b). Then E_q[w] = (a+b)/2, p = (a, b)/(a+b), and
+    #     TV = |a-b| / (2(a+b))  and  bound = (a-b) / (4 * (a+b)/2)
+    # are the SAME expression, verified symbolically on both ordering
+    # branches. The manuscript previously declined to claim sharpness for
+    # P6b; the bound is in fact attained, and cannot be improved as a
+    # function of (w_max, w_min, E_q[w]).
+    p6c = []
+    for ratio in (1.05, 1.5, 2.0, np.e, 10.0, 100.0):
+        wv = np.array([ratio, 1.0])
+        qv = np.array([0.5, 0.5])
+        pv = qv * wv / (qv @ wv)
+        tv = 0.5 * float(np.abs(pv - qv).sum())
+        bd = float((wv.max() - wv.min()) / (4.0 * (qv @ wv)))
+        p6c.append(abs(tv - bd))
+    worst["P6c_TV_bound_is_attained_at_the_uniform_two_point_witness"] = float(
+        max(p6c))
 
     return {"worst_deviation": {k: float(v) for k, v in worst.items()},
             "bound_max_slack": {k: float(v) for k, v in slack.items()},

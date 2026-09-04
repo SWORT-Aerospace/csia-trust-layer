@@ -42,6 +42,12 @@ MARKERS = (
     r"FROM[_\- ]?BRIEF[_\- ]?UNVERIFIED",
     r"CITATION[_\- ]?NEEDED",
     r"RECONSTRUCTED",
+    # Added 2026-09-04. A reference whose metadata several independent search
+    # indices agree on, but whose publisher record was unreachable and whose
+    # text was not read. FROM-BRIEF-UNVERIFIED was being stretched to cover
+    # this and it is the wrong word: nothing came from a brief. The entry is
+    # still unverified and still blocks, which is why it is a marker.
+    r"CORROBORATED[_\- ]?NOT[_\- ]?VERIFIED",
     r"\bTODO\b",
     r"\bFIXME\b",
     r"\bXXX\b",

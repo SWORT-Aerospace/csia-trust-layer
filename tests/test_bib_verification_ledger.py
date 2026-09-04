@@ -39,7 +39,11 @@ LEDGER = os.path.join(ROOT, "papers", "BIB_VERIFICATION_LEDGER.yaml")
 #: than imported so that weakening one file cannot silently weaken both.
 MARKERS = ("VERIFY", "TODO", "FIXME", "XXX", "???", "RECONSTRUCTED",
            "FROM-BRIEF-UNVERIFIED", "FROM_BRIEF_UNVERIFIED",
-           "CITATION-NEEDED", "CITATION_NEEDED")
+           "CITATION-NEEDED", "CITATION_NEEDED",
+           # Added 2026-09-04 alongside the same addition in
+           # tools/publication/bib_guard.py. Both lists must agree, or a
+           # marker the guard blocks on would look retired to this test.
+           "CORROBORATED-NOT-VERIFIED", "CORROBORATED_NOT_VERIFIED")
 
 PAPERS = {
     "csia_systems": os.path.join(ROOT, "papers", "csia_systems", "refs.bib"),
@@ -202,6 +206,28 @@ def test_a_corroborated_row_still_carries_its_marker():
         f"{offenders} are corroborated only, yet their markers are gone. "
         f"Corroboration is not verification: no accepted route was reachable, "
         f"so nothing may be retired.")
+
+
+def test_this_files_marker_list_agrees_with_the_guards():
+    """Two marker lists exist: this one, and the regex list in
+    `tools/publication/bib_guard.py`. They must agree.
+
+    If a marker appears here but not there, an entry can look marked to this
+    test while sailing past the guard that actually blocks submission -- which
+    is precisely the failure mode the whole file exists to prevent, moved one
+    level up. Checked mechanically rather than by comment.
+    """
+    import importlib.util
+    guard_path = os.path.join(ROOT, "tools", "publication", "bib_guard.py")
+    spec = importlib.util.spec_from_file_location("_bib_guard", guard_path)
+    guard = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(guard)
+    unmatched = [m for m in MARKERS if not guard.MARKER_RE.search(m)]
+    assert not unmatched, (
+        f"markers {unmatched} are accepted by this test but do not match "
+        f"bib_guard.MARKER_RE. An entry carrying one would look marked here "
+        f"and unmarked to the guard that blocks submission. Add the pattern "
+        f"to tools/publication/bib_guard.py.")
 
 
 def test_the_accepted_and_rejected_route_lists_do_not_overlap():

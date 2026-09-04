@@ -20,12 +20,23 @@ prior art checked**. A test greps for them.
 | "novel KL bound" | P5a/P5b are exact identities, and the Jensen-gap reading is standard |
 | "new Bayesian identity" | as above |
 | "we prove for the first time" | no proposition here survives that claim |
-| "sharp bound" / "tight bound" applied to P6b | P6b is not shown sharp, only shown to hold with margin |
+| "sharp bound" / "tight bound" applied to P6b **as a claim over all bound families** | P6b is now shown ATTAINED at an explicit witness (P6c), which licenses "attained" and "cannot be improved as a function of `(w_max, w_min, E_q[w])`". It does NOT license "sharp" as a claim about bounds using more information about `w`, and it is not a priority claim |
 
 **P6a may be described as attained**, because the audit measures its worst
 slack at `+1.78e−15` — equality to floating-point precision. "Attained on this
 instance family" is a measurement; "sharp" would be a claim about all
 families.
+
+**P6b may NOW also be described as attained**, which reverses an earlier
+refusal. The witness is explicit and elementary: at `q = (1/2, 1/2)` with a
+two-point `w = (a, b)`, `TV(p,q) = |a−b| / (2(a+b))` and the bound
+`(w_max − w_min) / (4 E_q[w])` are the **same expression**, verified
+symbolically on both ordering branches and numerically at `5.551e−17` (P6c).
+The earlier draft declined to claim it; the construction was simply not looked
+for. The licensed statement is "the bound is attained and cannot be improved
+as a function of `(w_max, w_min, E_q[w])`" — not "sharp" without that
+qualifier, and not a priority claim over the bounded-likelihood-ratio
+literature.
 
 ## 2. Allowed contribution language
 
@@ -44,13 +55,14 @@ families.
 | P1 | `p_h = q_h w_h / E_q[w]` | **KNOWN** | self-normalised importance weighting | `PRIOR_ART_MATRIX.csv` row 4 |
 | P2 | `log(p_a/p_b) = log(q_a/q_b) + log(w_a/w_b)` | **KNOWN** (corollary of P1) | as above | as above |
 | P3 | no distinguishing evidence ⇒ pinned to the prior | **KNOWN as algebra.** The *runtime reading* — that this is a statically checkable software property — is the candidate contribution | — | — |
-| C2 | constant `w` ⇒ `p = q` | **KNOWN** | coarsening at random, Heitjan & Rubin 1991 | `PRIOR_ART_MATRIX.csv` row 1 |
+| C2 | constant `w` ⇒ `p = q` | **KNOWN as algebra** — the zero-loss corner of P1. **It is NOT the coarsening-at-random condition**; that claim was withdrawn 2026-09-04, see `COARSENING_REDUCTION.md` §4 | the coarse-data *setting* is Heitjan & Rubin 1991; the state-dependent case is Speekenbrink & Visser 2025 | `PRIOR_ART_MATRIX.csv`; `COARSENING_REDUCTION.md` |
 | C3 | concentration ≠ discriminating support | **KNOWN as algebra**; the diagnostic distinction and its implementation are the candidate contribution | — | — |
 | P4 | `Δ > R ⇒ argmax p = argmax q` | **KNOWN** | argmax stability under bounded perturbation | `PRIOR_ART_MATRIX.csv` row 6 |
 | P5a | `KL(q‖p)` = Jensen gap of `log w` | **KNOWN** | self-normalised IS identities | row 4 |
 | P5b | `KL(p‖q) = E_p[log w] − log E_q[w]` | **KNOWN** | as above | row 4 |
 | P6a | `\|Δ log-ratio\| ≤ R`, attained | **KNOWN** (immediate from P2) | — | — |
 | P6b | `TV ≤ (w_max − w_min)/(4 E_q[w])` | **KNOWN** (MAD ≤ range/2) | — | — |
+| P6c | that bound is **ATTAINED** at `q = (1/2,1/2)` with two-point `w` | **KNOWN as algebra** — an elementary witness, not a theorem. It changes what may be SAID about P6b, not what P6b is | — | `proof_audit.json` `/numeric/worst_deviation/P6c_...` |
 | P7 | gated additive score ⇒ `w_h = exp(−Σ_j (1−g_j) ℓ_j(h))` | **KNOWN.** Reparameterisation of a log-linear score; one line | — | — |
 | P7b | the pairwise shift is exactly the withheld distinguishing contribution | **KNOWN** (immediate from P7 and P2) | — | — |
 | P7c | every distinguishing feature gated ⇒ pinned to the prior | **KNOWN** (corner of P2); it *supersedes* P3 as the statement the implemented case satisfies | — | — |
@@ -84,7 +96,7 @@ simply stand.
 | hole | consequence |
 |---|---|
 | every prior-art row is `WEB_SEARCH_ONLY` / `CANDIDATE_UNVERIFIED` — egress denies `doi.org`, `dblp.org`, `api.crossref.org` | even the concessions are unverified. A human must confirm Heitjan & Rubin before C2's KNOWN label is safe to print |
-| the brief's named "Rukhin bounded-likelihood-ratio" prior art was **not located** | `PRIOR_ART_MATRIX.csv` row 8 is `NOT_FOUND_NEEDS_HUMAN`. No sharpness may be claimed for P6 until it is closed |
+| the Rukhin bounded-likelihood-ratio reference is **located and corroborated but NOT READ** | `PRIOR_ART_MATRIX.csv` status `LOCATED_CORROBORATED_NOT_READ`: Applicationes Mathematicae 24(4) 415-423, 1997, DOI 10.4064/am-24-4-415-423. The earlier `NOT_FOUND_NEEDS_HUMAN` was a factual error about the world. **Attainment of P6b no longer depends on it** — P6c's witness is our own construction — but the theorem's exact hypotheses are still unread, so no statement about how our bound relates to Rukhin's may be made beyond citing the subject as established |
 | the baseline `q` is a **counterfactual** and, in the measured case, is not evaluable at all | `FORMAL_CORE.md` §1.1. P5 and P6 quantify a distance to a reference point the system never computes. The pinning claim survives because it names only `p` and the prior; the divergence apparatus does not |
 | no MAP-stability result exists for the regime the project measures | P8 (`FORMAL_CORE.md` §9a) proves P4 **cannot** apply to a pinned pair with equal prior mass. This is an absence, not a result, and no substitute is claimed |
 | the **estimator** literature behind P1 and P5a is named as a phrase, not engaged | `KL(q‖p) = log E_q[w] − E_q[log w]` is the standard self-normalised-IS weight-degeneracy diagnostic, and `R` is a bounded-weight condition of the kind that literature uses to control the estimator. The related-work section should engage it and does not. **It cannot be closed from here**: adding a citation would mean adding an unverified string, which `papers/BIB_VERIFICATION_LEDGER.yaml` exists to prevent. Red team objection 1.3 |
@@ -99,3 +111,25 @@ construction". Both are recorded in place rather than silently repaired.
 **Nothing in §3's novelty column changed.** Every row said KNOWN before the
 pass and says KNOWN after it. Finding a hole in a paper that claims no
 theorems does not create one.
+
+## 7. Reduction attempts (peer-review hardening campaign, §21–§22)
+
+Two reductions were run *against* the paper. Both are recorded in full; both
+returned a verdict less favourable than the paper's previous text implied.
+
+| target | document | verdict |
+|---|---|---|
+| ML diagnosis under unreliable observations (Athanasopoulou et al. 2010) | `UNRELIABLE_OBSERVATION_REDUCTION.md` | `PARTIALLY_SUBSUMES` — the decision rule `argmax p` **is** an instance, under a degenerate deletion channel; the distortion identities are not formed there, which is a difference in question asked, not in capability |
+| coarsening at random (Heitjan & Rubin 1991) | `COARSENING_REDUCTION.md` | `SUBSUMES_FORMALISM` — the setting is entirely theirs, and C2's description as "the ignorability condition" is **withdrawn as imprecise** |
+
+Neither changes a KNOWN label, because there was none left to change. What
+they change is the prose: two reductions a reviewer could have found unaided
+are now stated in the manuscript rather than discovered there, and the one
+sentence that was wrong about the missing-data literature has been corrected
+rather than softened.
+
+**Nothing was killed, because nothing survived to be killed.** The rule *if
+prior art subsumes a claim, kill the claim* has no work to do in a paper whose
+every proposition is already conceded. The rule that did apply is the weaker
+and more common one: *if prior art subsumes a claim, say so before the
+reviewer does.*

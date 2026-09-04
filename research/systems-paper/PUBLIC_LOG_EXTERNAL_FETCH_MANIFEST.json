@@ -1,0 +1,76 @@
+{
+  "a_near_zero_result_is_valid": true,
+  "artifact": "PUBLIC_LOG_EXTERNAL_FETCH_MANIFEST",
+  "destination_path": "datasets/raw/px4_support_exposure/",
+  "endpoints": {
+    "note": "log_id is the UUID shown in the Flight Review browse table. Use the official browse/download path only.",
+    "official_download_pattern": "https://review.px4.io/download?log={log_id}",
+    "official_ui": "https://review.px4.io/browse"
+  },
+  "expected_file_type": ".ulg (PX4 ULog)",
+  "forbidden_outputs": [
+    "fault accuracy",
+    "false-negative rate",
+    "fault prevalence",
+    "recall",
+    "any quantity requiring ground truth -- the corpus is UNANNOTATED"
+  ],
+  "minimum_required_count": {
+    "note": "not restated here, so the two cannot drift apart",
+    "value": "as stated in PUBLIC_LOG_STUDY_PLAN.md"
+  },
+  "post_download_hash_procedure": [
+    "sha256sum each .ulg immediately on download, before any parsing",
+    "record it in a manifest alongside the source_log_id",
+    "re-verify the hash before every analysis run",
+    "any hash mismatch invalidates that log; do not re-download silently"
+  ],
+  "purpose": "Everything another machine needs to obtain the corpus for the PREREGISTERED SUPPORT-EXPOSURE STUDY and resume it unchanged. This is NOT the historical 26-log replay.",
+  "reporting_order": [
+    "per-flight distribution FIRST",
+    "pooled exposure SECOND"
+  ],
+  "required_outputs": [
+    "T_IDENTIFIABLE",
+    "T_AMBIGUOUS",
+    "T_NON_IDENTIFIABLE",
+    "T_HIGH_CONCENTRATION_WITHOUT_DISCRIMINATING_SUPPORT",
+    "T_UNAVAILABLE",
+    "T_INAPPLICABLE"
+  ],
+  "required_provenance_per_log": [
+    "source_url",
+    "source_log_id",
+    "license",
+    "sha256_on_download",
+    "retrieval_timestamp_utc",
+    "px4_firmware_version",
+    "vehicle_type",
+    "normalization_version"
+  ],
+  "resume_command": "python -m csia.cli analyze-logs 'datasets/raw/px4_support_exposure/*.ulg' --out research/systems-paper/results/support_exposure.json",
+  "selection_rule": {
+    "must_be_applied_before_scoring": true,
+    "source": "research/systems-paper/PUBLIC_LOG_STUDY_PLAN.md",
+    "warning": "The plan is frozen. Do not re-derive the selection rule from this manifest -- read it from the plan, which is the preregistered document."
+  },
+  "study": {
+    "claim_id": "SC-22",
+    "claim_status": "PROVISIONAL",
+    "do_not_alter_after_seeing_logs": true,
+    "plan": "research/systems-paper/PUBLIC_LOG_STUDY_PLAN.md",
+    "scoring_rule_frozen": true,
+    "submission_gate": "docs/CURRENT_PROGRAM_STATE.md section 3, gate 5"
+  },
+  "why_not_run_here": {
+    "blocked_hosts": [
+      "review.px4.io",
+      "logs.px4.io"
+    ],
+    "local_corpus_present": false,
+    "local_search": "424 .ulg files exist on this host; ALL are SITL boot logs, pytest fixtures, or one PX4 docs sample. NONE is a public Flight Review log. The 26-log manifest exists (datasets/manifests/px4_public_v1.json) but the log FILES are not cached.",
+    "retested_on": "2026-09-04",
+    "substitution_forbidden": "No synthetic data. No unofficial mirror while an official export exists.",
+    "symptom": "HTTP 403 at CONNECT via the agent egress proxy"
+  }
+}

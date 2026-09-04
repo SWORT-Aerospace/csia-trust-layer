@@ -1360,26 +1360,43 @@ repeated on a current ArduPilot and on PX4 before it is relied on, and the
 satellite-ladder result in particular is a statement about one simulator's
 GNSS model rather than about receivers.
 
-\paragraph{One mechanism has been repeated on a current stack, and this paper
-deliberately does not report it.} The history-dominated threshold-crossing
+\paragraph{Both mechanisms have been repeated on current stacks, and this paper
+deliberately reports neither.} The history-dominated threshold-crossing
 mechanism of Section~\ref{sec:algebra} was re-run under a preregistration
 frozen before its first trial, on \textbf{ArduPilot 4.8} SITL: twenty valid
 trials, the source recursion reproducing the runtime trust trajectory from the
 platform's own measured banked state, and the observed threshold crossing
-predicted with zero tick error on every ramp. On \textbf{PX4 SIH} the
+predicted with zero tick error on every ramp. On \textbf{PX4 SIH} that
 intervention is \emph{inapplicable} --- no fix-preserving GNSS position offset
 exists there, four candidate routes were read out of source and all four fail,
 and the preregistration forbids substituting another intervention, so no trials
 were run.
+
+The self-occlusion mechanism itself --- the subject of
+Section~\ref{sec:measurement} --- has also been repeated, on \textbf{both}
+current stacks, and \textbf{at $n=1$ fault trial plus one matched
+fix-preserving control per platform}. The gate weight supporting
+\code{gps\_fault} collapses to exactly zero when the fix is lost (ArduPilot
+$3.0\to0.0$, PX4 $1.0\to0.0$), the diagnosis keeps \code{nominal} on top and
+never promotes \code{gps\_fault}, and neither matched control shows any of it.
+The intervention was validated by its downstream effect --- the observed loss
+of the GNSS position channel with \code{NO\_3D\_FIX}, not the parameter write
+--- before any scoring. \textbf{One trial per platform is a demonstration, not
+a replication base}, and no rate, frequency or exposure figure may be taken
+from it; what it establishes is that the mechanism is not an artifact of a
+2015 build.
 
 None of that appears in this paper's tables, and the omission is enforced
 rather than promised: this manuscript's baseline is 3.3, mixing two autopilot
 builds into one table is the error the project's phase guard exists to prevent,
 and it fails the build if a Phase-I artifact references a later phase. The
 record is \code{research/v1\_1/CURRENT\_STACK\_REPLICATION.md} with results in
-\code{research/v1\_1/results/current\_stack\_replication.json}. A referee who
-wants the current-stack evidence should read it there rather than infer its
-absence.
+\code{research/v1\_1/results/current\_stack\_replication.json},
+\code{mechanism\_a\_ardupilot.json} and \code{mechanism\_a\_px4.json} in the
+same directory, and an admissibility audit of the self-occlusion trials in
+\code{research/systems-paper/CURRENT\_STACK\_MECH\_A\_EVIDENCE\_AUDIT.md}. A
+referee who wants the current-stack evidence should read it there rather than
+infer its absence.
 
 \paragraph{No operational harm is demonstrated, and none is claimed.} The
 vehicle completes every scenario in this paper. The failsafe escalates, the

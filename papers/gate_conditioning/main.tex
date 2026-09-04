@@ -65,15 +65,17 @@ hypotheses their ratio is pinned to the prior ratio exactly, for as long as the
 gate stays shut, however concentrated the posterior becomes --- a statement
 about the produced posterior alone, which does not depend on the choice of
 baseline.
-We give the ignorability condition, its multivalued caveat, a sufficient
-condition for the MAP to be unchanged, and exact divergence identities:
+We give the condition under which the distortion vanishes, its multivalued
+caveat, a sufficient condition for the MAP to be unchanged, and exact
+divergence identities:
 $\mathrm{KL}(q\Vert p)$ is precisely the Jensen gap of $\log w$ under $q$, so
 the distortion is zero exactly when the validity factors do not vary across
 hypotheses.
 
 \textbf{We claim no new mathematics.} Each result is an instance of something
-known --- self-normalised reweighting, coarsening at random, argmax stability
-under bounded perturbation --- and the paper says so for each one. What we
+known --- self-normalised reweighting, argmax stability under bounded
+perturbation, Jensen's inequality --- and the setting is the coarse-data one,
+so the paper concedes rather than claims at every step. What we
 offer is the runtime-diagnostic formulation, the observation that the
 condition is decidable \emph{statically, from a signature table, before the
 system runs}, and a deployed layer that fails it: an independently written
@@ -375,12 +377,72 @@ If $w_h=c$ for all $h$ and some $c>0$, then $p=q$ identically.
 $\mathbb{E}_q[w]=c$, so $p_h=q_h c/c=q_h$ by \eqref{eq:p1}.
 \end{proof}
 
-\begin{remark}[this is coarsening at random]
-Proposition~\ref{p:c2} is recognisably the ignorability condition for a
-coarsening mechanism~\cite{heitjan1991car}. We claim it as \textbf{known} and
-cite it as such. What we add is the reading: here the coarsening mechanism is
-a component of the diagnostic software, so its ignorability is a property
-somebody wrote, can inspect, and can test.
+\begin{remark}[what $p$ is, and what ``distortion'' does not
+mean]\label{r:marginal}
+For binary gates and a score additive over features that the model treats as
+conditionally independent given $h$ --- the naive-Bayes form runtime layers
+use, and the form assumed by \eqref{eq:wgate} --- the surviving terms multiply
+to the marginal likelihood of the surviving features:
+\begin{equation}
+\prod_{j\in\mathrm{ACTIVE}}\exp\ell_j(h)
+\;=\; \mathbb{P}\big(x_{\mathrm{ACTIVE}} \mid h\big),
+\qquad\text{so}\qquad
+p_h \;\propto\; \pi_h\,\mathbb{P}\big(x_{\mathrm{ACTIVE}} \mid h\big).
+\label{eq:marginal}
+\end{equation}
+\textbf{So $p$ is the posterior given the evidence that survived.} If the gate
+were ignorable, $p$ would be the right answer to a smaller question rather
+than a wrong answer to the original one, and the gap between $p$ and $q$ would
+be information loss rather than error. We state this at the outset because it
+is the first objection a missing-data reader will raise and because, under
+ignorability, the objection is correct.
+
+It is not the situation of Section~\ref{sec:instance}, for the reason in
+Remark~\ref{r:car}. Throughout this paper ``distortion'' names the
+multiplicative reweighting of \eqref{eq:p1} and nothing more. The
+propositions are identities; whether a particular reweighting is a defect is a
+question about the mechanism, and it is answered in the next remark rather
+than by the algebra.
+\end{remark}
+
+\begin{remark}[the relation to coarsening at random, stated
+exactly]\label{r:car}
+The gate is a coarsening mechanism, and the framework that owns it is
+coarse-data ignorability~\cite{heitjan1991car}; the same setting is examined,
+in a stochastic and estimated form, as state-dependent missingness in
+latent-state models~\cite{speekenbrink2025statedep}. We claim neither and cite
+both.
+
+The relation has to be stated carefully, because it is easy --- and an earlier
+draft of this paper did it --- to call Proposition~\ref{p:c2} ``the
+ignorability condition''. It is not. Coarsening at random is a condition on
+the \emph{mechanism}: the probability of the observed coarsening must not
+depend on what was coarsened away. What it licenses is dropping the mechanism
+from the likelihood, leaving exactly the $\mathbb{P}(x_{\mathrm{ACTIVE}}\mid
+h)$ of \eqref{eq:marginal} --- \emph{not} $p=q$. Proposition~\ref{p:c2} is a
+condition on the \emph{withheld evidence}: $w$ constant means nothing
+discriminating was withheld, and that does give $p=q$. The second is strictly
+stronger, and the two are independent in both directions. A hypothesis-blind
+gate that happens to remove a discriminating feature satisfies the first and
+not the second; a gate that withholds only non-discriminating features while
+being triggered by the fault satisfies the second and not the first.
+
+For the layer of Section~\ref{sec:instance} the mechanism condition fails, and
+it fails for the reason the missing-data literature exists to name: the gate
+closes \emph{because} the sensor stopped reporting, so the event
+$\{\mathrm{ACTIVE}=A\}$ itself carries information about the hypothesis. A
+posterior that used that information would carry a factor
+$\mathbb{P}(\mathrm{ACTIVE}=A\mid h)$. The implementation carries no such
+factor --- a gated feature contributes nothing to the score and the prior is
+fixed --- so the produced $p$ is neither $q$ nor the posterior that accounts
+for the gate. Supplying the missing factor would require a per-hypothesis
+model of gate closure that the system does not have and that we have not
+validated; we identify the omission and do not repair it here.
+
+What the paper adds is the reading rather than either condition: because the
+coarsening mechanism is a component of the diagnostic software, both questions
+above are settled by inspecting a configuration file, before the system runs
+and without data.
 \end{remark}
 
 \paragraph{The caveat.} The condition is that $w$ be \emph{constant across
@@ -547,9 +609,26 @@ $(w_{\max}-w_{\min})/2$.
 \end{proof}
 
 The first bound is attained; the audit's worst slack over $20{,}000$ instances
-is $+1.78\times10^{-15}$, equality to floating-point precision. \textbf{We make
-no sharpness claim for the second}, and no claim that either is the sharpest
-available: both steps are elementary.
+is $+1.78\times10^{-15}$, equality to floating-point precision.
+
+\textbf{The second is attained too, and we can exhibit the witness.} Take
+$q=(\tfrac12,\tfrac12)$ and a two-point $w=(a,b)$. Then
+$\mathbb{E}_q[w]=(a+b)/2$, $p=(a,b)/(a+b)$, and
+\begin{equation}
+\mathrm{TV}(p,q)=\frac{|a-b|}{2(a+b)}
+=\frac{w_{\max}-w_{\min}}{4\,\mathbb{E}_q[w]},
+\label{eq:tvattained}
+\end{equation}
+an identity rather than an inequality, on both ordering branches. So the bound
+\textbf{cannot be improved as a function of $(w_{\max},w_{\min},
+\mathbb{E}_q[w]$)}. An earlier draft declined to claim this; the construction
+is elementary and we should have looked for it.
+
+We still claim no more than that. Attainment on this witness says the constant
+$4$ and the functional form are best possible \emph{given those three
+arguments}; it says nothing about bounds using more information about $w$, and
+it is not a claim of priority --- bounded-likelihood-ratio divergence bounds
+are an established subject~\cite{rukhin1997bounded}.
 
 %======================================================================
 \section{Verification}
@@ -694,7 +773,10 @@ weighting \\
 Prop.~\ref{p:pin}, Cor.~\ref{c:support} & KNOWN as algebra & --- \\
 Prop.~\ref{p:gated}, Cor.~\ref{c:pinned} & KNOWN & reparameterisation of a
 log-linear score; one line of algebra \\
-Prop.~\ref{p:c2} & KNOWN & coarsening at random~\cite{heitjan1991car} \\
+Prop.~\ref{p:c2} & KNOWN as algebra & the zero-loss corner of
+Prop.~\ref{p:reweight}. It is \emph{not} the coarsening-at-random
+condition~\cite{heitjan1991car}; the two are compared in
+Remark~\ref{r:car} \\
 Prop.~\ref{p:map} & KNOWN & argmax stability under bounded perturbation \\
 Prop.~\ref{p:kl}, \ref{p:bounds} & KNOWN & Jensen; bounded-support mean
 absolute deviation \\
@@ -728,7 +810,14 @@ itself, so the condition is a property of its configuration rather than of an
 automaton.
 
 The ignorability question is the coarsening-at-random
-condition~\cite{heitjan1991car}. Which faults a given instrumentation can
+condition~\cite{heitjan1991car}, and the same question for a mechanism that
+depends on the latent state --- ours does --- is treated in latent-state
+missingness models, where the mechanism is a stochastic submodel estimated
+from data~\cite{speekenbrink2025statedep}. The difference we can state is that
+ours is deterministic and readable from the diagnostic system's own
+configuration, so it is decided rather than estimated; we assert no more than
+that, and in particular no claim that an estimated mechanism could not
+represent it. Which faults a given instrumentation can
 separate is the subject of structural isolability and sensor
 placement~\cite{krysander2008sensorplacement}; that literature answers the
 question our Section~\ref{sec:support} raises but does not answer, namely what

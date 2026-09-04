@@ -435,6 +435,40 @@ def _prior_art_rows():
     return list(_csv.DictReader(open(path, encoding="utf-8")))
 
 
+def test_the_prior_art_matrix_is_not_ragged():
+    """A field that grows a comma without gaining its quotes silently shifts
+    every field after it, and the shifted row still LOOKS complete to a
+    DictReader -- `status` simply becomes a fragment of prose, which then
+    fails no membership test because it matches no weak status either.
+
+    That is exactly what happened on 2026-09-04 while widening three rows.
+    The corruption survived a full green test run. This guard is the reason it
+    cannot survive a second one: it reads the file positionally, so a row that
+    has gained or lost a field fails here regardless of how plausible its
+    contents look.
+    """
+    import csv as _csv
+    path = os.path.join(MP, "PRIOR_ART_MATRIX.csv")
+    with open(path, encoding="utf-8", newline="") as fh:
+        rows = [r for r in _csv.reader(fh) if r]
+    header, data = rows[0], rows[1:]
+    ragged = [(n, len(r)) for n, r in enumerate(data, start=2)
+              if len(r) != len(header)]
+    assert not ragged, (
+        f"PRIOR_ART_MATRIX.csv has {len(header)} columns but these rows "
+        f"(line, width) disagree: {ragged}. A prose field containing a comma "
+        f"must be quoted.")
+    # And the status column must hold statuses, not prose fragments.
+    known = {"KNOWN", "CANDIDATE_UNVERIFIED", "NOT_FOUND_NEEDS_HUMAN",
+             "NOT_READ_HIGH_PRIORITY", "TOPIC_SEARCHED_NO_CLOSE_MATCH",
+             "LOCATED_CORROBORATED_NOT_READ"}
+    idx = header.index("status")
+    unknown = sorted({r[idx] for r in data} - known)
+    assert not unknown, (
+        f"unrecognised prior-art status values {unknown}. Add the status to "
+        f"this guard deliberately, or fix the row that drifted into it.")
+
+
 def test_every_required_search_topic_has_at_least_one_row():
     """C6 asks for a search covering these at minimum. A topic with no row is
     a topic nobody looked at, and 'I did not find it' is not the same as

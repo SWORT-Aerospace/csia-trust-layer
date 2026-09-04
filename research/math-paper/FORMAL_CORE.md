@@ -219,15 +219,48 @@ statement. **Conditional independence of the gate from the fault does not by
 itself deliver `p = q` in the multivalued case, and the paper must not say it
 does.**
 
-**Prior art, and it is close.** This is recognisably the ignorability
-condition of **coarsening at random** (Heitjan & Rubin, *Ignorability and
-Coarse Data*, Annals of Statistics 19(4), 1991 — see `PRIOR_ART_MATRIX.csv`,
-status `CANDIDATE_UNVERIFIED`). The paper must cite it and label C2 **KNOWN**.
-What is not obviously in that literature is the *runtime* reading: that the
-coarsening mechanism here is a designed component of the diagnostic system
-itself, whose non-ignorability is a **software property that can be checked
-statically from the signature table**. That reading, not the condition, is the
-candidate contribution.
+**Prior art — and a correction to what this section used to say.** Earlier
+versions of this document called C2 "recognisably the ignorability condition of
+coarsening at random". **That was imprecise and is withdrawn.** The full
+argument is in `COARSENING_REDUCTION.md` §4; the short form:
+
+| | condition on | conclusion |
+|---|---|---|
+| CAR (Heitjan & Rubin 1991) | the **mechanism** — the coarsening probability must not depend on what was coarsened away | the mechanism may be dropped from the likelihood, leaving `P(x_ACTIVE \| h)`. **Not** `p = q` |
+| C2 | the **withheld evidence** — `w_h = c` | `p = q` exactly: nothing discriminating was withheld |
+
+C2 is strictly stronger and the two are independent in both directions. A
+hypothesis-blind gate that removes a discriminating feature satisfies CAR and
+fails C2; a gate that withholds only non-discriminating features while itself
+being triggered by the fault satisfies C2 and fails CAR.
+
+C2 stays **KNOWN** — it is one line from P1 and always was; the correction is
+to the sentence, not to the status. The paper still cites Heitjan & Rubin
+(`PRIOR_ART_MATRIX.csv`, `CANDIDATE_UNVERIFIED`) because the *setting* is the
+coarse-data one, and now also cites Speekenbrink & Visser 2025 for the
+state-dependent case, which is closer to the framing than any discrete-event
+row (`CORROBORATED_NO_PUBLISHER_RECORD`, not read).
+
+**Two further consequences, both recorded in `COARSENING_REDUCTION.md`:**
+
+1. Under the naive-Bayes structure the implementation asserts, `p` is exactly
+   the **marginal-likelihood posterior** `∝ π_h P(x_ACTIVE | h)`. So `p` is not
+   a corrupted `q`; under an ignorable mechanism it is the correct answer to a
+   smaller question, and the gap to `q` is information loss rather than error.
+   The paper must say this itself — see the manuscript remark `r:marginal`.
+2. The mechanism the systems paper measures is **not** ignorable: the gate
+   closes *because* the receiver stopped reporting, so `{ACTIVE = A}` carries
+   information about `h`. The posterior that used it would carry a factor
+   `P(ACTIVE = A | h)`, and `csia/diagnosis/bayes.py` has no such factor —
+   a gated feature contributes nothing and the prior is fixed. So the produced
+   `p` is neither `q` nor the gate-aware posterior. **This is a diagnosis, not
+   a proposal**: supplying the factor would need a per-hypothesis model of gate
+   closure the system does not have, and it is out of scope.
+
+What remains the candidate contribution is the *runtime* reading: the
+coarsening mechanism here is a designed component of the diagnostic system, so
+both questions above are settled by inspecting a configuration file, before the
+system runs and without data.
 
 ---
 
