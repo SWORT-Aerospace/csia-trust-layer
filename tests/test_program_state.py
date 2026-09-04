@@ -86,14 +86,44 @@ def test_forge_contains_no_code():
 
 def test_the_program_state_document_says_what_the_freeze_is():
     """A state file that stopped saying 'FROZEN' would silently unlock the
-    repository for every future agent that reads it first."""
+    repository for every future agent that reads it first.
+
+    The header block was reformatted during the 2026-09 repository
+    finalization: the trailing colons went, `PRODUCT DEVELOPMENT` became
+    `ENGINEERING`, `DUAL PAPER COMPLETION` became `DUAL PAPER FINALIZATION`,
+    and per-paper status plus an explicit next-phase lock were added. The
+    tokens below track that change. **The set did not shrink** -- every
+    constraint the old list asserted is still asserted here, and three more
+    are, so this is not a guard being loosened to fit a rewrite.
+    """
     path = os.path.join(ROOT, "docs", "CURRENT_PROGRAM_STATE.md")
     text = open(path, encoding="utf-8").read()
-    for required in ("CURRENT PRIORITY:", "DUAL PAPER COMPLETION",
-                     "PRODUCT DEVELOPMENT:", "FROZEN AT V2 PHASE C",
-                     "FORGE:", "DOCUMENTATION / PRIOR ART ONLY",
-                     "HARDWARE:", "NOT CURRENT GATE"):
+    for required in ("CURRENT PRIORITY", "DUAL PAPER FINALIZATION",
+                     "ENGINEERING", "FROZEN AT V2 PHASE C",
+                     "SYSTEMS PAPER", "MATHEMATICAL PAPER", "FINALIZATION",
+                     "FORGE", "DOCUMENTATION / PRIOR ART ONLY",
+                     "HARDWARE", "NOT CURRENT GATE",
+                     "NEXT PRODUCT PHASE",
+                     "LOCKED UNTIL BOTH PAPER SUBMISSION-CANDIDATE TAGS EXIST"):
         assert required in text, f"{path} no longer states {required!r}"
+
+
+def test_the_program_state_names_the_three_canonical_freezes():
+    """The document's stated job is to let another engineer recover the state
+    without conversation history. That is impossible without the commits."""
+    path = os.path.join(ROOT, "docs", "CURRENT_PROGRAM_STATE.md")
+    text = open(path, encoding="utf-8").read()
+    for tag, commit in (
+            ("csia-v1.0-research-final",
+             "ec5acd189295dab9259d4989657d42184d6142a3"),
+            ("csia-v2-phasec-frozen",
+             "50c5d3576e9084e7c2789167628392c5de992b6f"),
+            ("csia-dual-paper-evidence-freeze",
+             "eb2577d6830208b26d33facb283aa5be0ddf7c86")):
+        assert tag in text, f"{path} does not name the tag {tag!r}"
+        assert commit in text, (
+            f"{path} names {tag!r} without its commit; a tag can be moved, a "
+            f"SHA cannot")
 
 
 def test_the_phase_c_freeze_record_exists_and_names_its_commit():

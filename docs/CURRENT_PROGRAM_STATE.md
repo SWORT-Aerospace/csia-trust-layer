@@ -1,18 +1,82 @@
 # CURRENT PROGRAM STATE
 
 ```
-CURRENT PRIORITY:
-DUAL PAPER COMPLETION
+CURRENT PRIORITY
+----------------
+DUAL PAPER FINALIZATION
 
-PRODUCT DEVELOPMENT:
+ENGINEERING
+-----------
 FROZEN AT V2 PHASE C
 
-FORGE:
+SYSTEMS PAPER
+-------------
+FINALIZATION
+
+MATHEMATICAL PAPER
+------------------
+FINALIZATION
+
+FORGE
+-----
 DOCUMENTATION / PRIOR ART ONLY
 
-HARDWARE:
+HARDWARE
+--------
 NOT CURRENT GATE
+
+NEXT PRODUCT PHASE
+------------------
+LOCKED UNTIL BOTH PAPER SUBMISSION-CANDIDATE TAGS EXIST
 ```
+
+## Canonical tags and commits
+
+| tag | commit | what it fixes |
+|---|---|---|
+| `csia-v1.0-research-final` | `ec5acd189295dab9259d4989657d42184d6142a3` | the v1 diagnostic core. **Zero diff**, enforced twice (git diff against the tag, and SHA-256 of every file) |
+| `csia-v2-phasec-frozen` | `50c5d3576e9084e7c2789167628392c5de992b6f` | the v2 Phase C engineering state; artifact hashes recorded in `engineering/v2/V2_PHASEC_FREEZE.md` |
+| `csia-dual-paper-evidence-freeze` | `eb2577d6830208b26d33facb283aa5be0ddf7c86` | the **scientific** state at paper finalization: algorithms, thresholds, scenarios, generated artifacts, headline results, proof outputs and claim state, immediately before the repository presentation cleanup |
+| `v0.7.0`, `archive/handoff-source-of-record` | — | historical |
+
+The two freezes answer different questions. `csia-v2-phasec-frozen` fixes what
+the *software* does. `csia-dual-paper-evidence-freeze` fixes what the *papers
+say*, and is the tag to cite. Anything after it that changes a number is a
+defect, not a result.
+
+## Test status
+
+1683 tests collected, all passing. Guards that hold the freezes:
+
+| guard | command |
+|---|---|
+| v1 core zero diff | `pytest tests/test_v1_frozen.py` |
+| Phase C artifact hashes | `pytest tests/test_phase_c_freeze.py` |
+| proof artifact reproduces from its script | `make proof-audit-check` |
+| every blocking publication guard | `make check-blocking` |
+
+## Known publication blockers
+
+| # | blocker | affects | who can clear it |
+|---|---|---|---|
+| 1 | **bibliography verification.** 52 unresolved provenance markers; no entry verified. Six routes tested, all denied at the proxy: `api.crossref.org`, `doi.org`, `dblp.org`, `api.openalex.org`, `api.semanticscholar.org`, `export.arxiv.org` | both papers | a human with publisher access |
+| 2 | **public-log study not run.** `review.px4.io` and `logs.px4.io` denied by egress policy. Plan committed; claim `SC-22` is `PROVISIONAL` | systems paper | a host with egress |
+| 3 | **one prior-art reference not located** (`NOT_FOUND_NEEDS_HUMAN`); no sharpness may be claimed for the TV bound until closed | math paper | a human with library access |
+| 4 | **one high-priority reference unread** (arXiv:2405.15141) | math paper | a human with access |
+
+None is a research problem. All four need an outside source.
+
+## Known technical limitations
+
+| limitation | where it is stated |
+|---|---|
+| the mathematical paper's baseline `q` is a counterfactual and, in the measured case, not evaluable at all | manuscript Remark, `FORMAL_CORE.md` §1.1 |
+| no MAP-stability result exists for the pinned regime, and P8 proves there cannot be one of P4's form | `FORMAL_CORE.md` §9a |
+| the implemented instance is **n = 1**: one deployed layer, prevalence not established | systems paper §Limitations |
+| Mechanism A has no current-stack replication (`SC-23`, `PROVISIONAL`); the 4.8 result is a negative control, not a replication | `docs/CURRENT_PROGRAM_STATE.md` §3, gate 2b/6b |
+| the checker's 378,000 agreements validate the *reading*, not the signature table | math paper §9 |
+| reported scalars are model states, not calibrated probabilities | both papers §Limitations |
+| the private username remains reachable in git history at `ac8d21d` / `bc3ed97`; purged at HEAD. Removing it needs a history rewrite that would invalidate every tag above | `docs/REPOSITORY_FINALIZATION_PRECHECK.md` |
 
 **Any agent starting work in this repository reads this file first.** It is
 discoverable from the repository alone and does not depend on chat history. If
@@ -81,7 +145,7 @@ to `review.px4.io`). Neither is a research problem.
 
 | # | gate | status |
 |---|---|---|
-| 1 | all propositions proven | **PASS** — P1–P8, C2, C3 in `research/math-paper/FORMAL_CORE.md`; symbolic (sympy, n=4) and numeric (20 000 instances) in `results/proof_audit.json`. P7/P7b/P7c and P8 were added by the red team pass and are numeric-only |
+| 1 | all propositions proven | **PASS** — P1–P8, C2, C3 in `research/math-paper/FORMAL_CORE.md`; symbolic (sympy, n=4) and numeric (20 000 instances) in `research/math-paper/results/proof_audit.json`. P7/P7b/P7c and P8 were added by the red team pass and are numeric-only |
 | 2 | all counterexamples checked | **PASS** — `FORMAL_CORE.md` §11; P4's 6,877 audited instances where the argmax moved with the condition violated |
 | 3 | prior-art matrix complete | **COVERAGE COMPLETE, VERIFICATION BLOCKED** — 18 rows over all **10** topics the brief requires at minimum, asserted by `tests/test_math_paper_proofs.py`. Every row is still `WEB_SEARCH_ONLY`; one is `NOT_FOUND_NEEDS_HUMAN` and one is `NOT_READ_HIGH_PRIORITY` (arXiv:2405.15141, *Likelihood distortion and Bayesian local robustness* — the title alone makes it the most important unread reference in the matrix) |
 | 4 | novelty language audited | **PASS** — `research/math-paper/NOVELTY_AUDIT.md`; every proposition labelled **KNOWN**; forbidden phrases enforced by test |

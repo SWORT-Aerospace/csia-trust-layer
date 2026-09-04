@@ -1,6 +1,6 @@
 # Claim registry index
 
-**There is no single claim registry, and there should not be.** Four registers
+**There is no single claim registry, and there should not be.** Ten registers
 exist because they answer different questions, are maintained by different
 work, and have different lifecycles. What was missing was an index saying
 which governs what. This is it.
@@ -12,17 +12,18 @@ registries are the failure mode this file exists to prevent.
 
 ---
 
-## The four registers
+## The registers
 
 | register | governs | format | status |
 |---|---|---|---|
 | `docs/math/PROOF_STATUS.md` | **mathematical-paper claims about ANYTIME-VALID EVIDENCE**: T-1 … T-5, e-processes, Ville's inequality, and their counterexamples | markdown table | authoritative |
-| `research/math-paper/FORMAL_CORE.md` §10 | **mathematical-paper claims about POSTERIOR DISTORTION**: P1–P6, C2, C3. A DIFFERENT body of work from the row above, under the same paper | markdown table + `results/proof_audit.json` | authoritative |
+| `research/math-paper/FORMAL_CORE.md` §10 | **mathematical-paper claims about POSTERIOR DISTORTION**: P1–P8, C2, C3. A DIFFERENT body of work from the row above, under the same paper. P7 (gated-score form) and P8 (a negative result about P4) were added by the red-team pass recorded in `REVIEWER_RED_TEAM_MATH.md` | markdown table + `research/math-paper/results/proof_audit.json` | authoritative |
 | `research/math-paper/PRIOR_ART_MATRIX.csv` | **novelty status** of every proposition in either row above | CSV, machine-checked | authoritative |
 | `research/systems-paper/CLAIMS.csv` | **systems-paper claims at CLAIM granularity**, each with counter-evidence and an alternative explanation | CSV, machine-checked | authoritative |
 | `research/PROSE_NUMERIC_BINDINGS.yaml` | **every headline number quoted in research prose**, bound to the artifact and JSON pointer it came from | YAML, machine-checked | authoritative |
 | `papers/BIB_VERIFICATION_LEDGER.yaml` | **the verification status of every bibliography entry**, and what route was used | YAML, machine-checked | authoritative |
 | `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` | **systems-paper claims**: every figure, table and headline scalar, bound to a committed artifact | YAML, machine-checked | authoritative |
+| `papers/gate_conditioning/GATE_PAPER_ARTIFACT_MAP.yaml` | **mathematical-paper artifact bindings**: formal sources, verification scripts, counterexamples, tables and scalars | YAML, machine-checked | authoritative |
 | `research/phase2/claims.yaml` | **Phase-II research candidates**: C1–C25, including withdrawn ones | YAML, machine-readable | authoritative, ongoing |
 | `docs/audit/WP_A2_CLAIM_PROVENANCE_MATRIX.csv` | **outward-facing prose claims** audited for scope inflation and prohibited framing | CSV | authoritative, historical |
 
@@ -53,8 +54,8 @@ Every claim in every register carries, or is amended to carry:
 `ID` · `statement` · `status` · `paper eligibility` · `artifact` · `commit` ·
 `scope` · `superseded_by` where applicable.
 
-`research/phase2/claims.yaml` already carries all of these. The other three
-predate the convention; each entry below states where its fields live.
+`research/phase2/claims.yaml` already carries all of these. The others predate
+the convention; each entry below states where its fields live.
 
 ---
 
@@ -90,13 +91,13 @@ proposal.
 reference.
 **Commit scope:** frozen baseline `848f556`. Reproduce at that commit, not HEAD.
 
-`F01`–`F12` figures · `T01`–`T12` tables · `S01`–`S12` headline scalars, each
+`F01`–`F12` figures · `T01`–`T12` tables · `S01`–`S13` headline scalars, each
 bound to a committed result file, a generating script, a JSON pointer where one
 exists, and a regeneration command. `make artifact-map` fails if a figure is
 unmapped, a mapped path is missing, a mapped scalar is absent from the
 manuscript, or the table count disagrees.
 
-**Open:** 46 prose numeric literals are not individually mapped. They are
+**Open:** 49 prose numeric literals are not individually mapped. They are
 listed on every run for human review. That list, not a green check, is the
 enforcement of "no undocumented quantitative claim survives".
 
