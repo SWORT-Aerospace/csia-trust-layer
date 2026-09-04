@@ -186,8 +186,8 @@ def _analyze_logs(args) -> int:
         n_alarm = len(episodes)
         all_episodes += n_alarm
         total_transitions += len(summary.transitions)   # legacy, for compare
-        present = ",".join(n[:3] for n in src.sensors_present)
-        worst = min(summary.min_trust.items(), key=lambda kv: kv[1])             if summary.min_trust else ("-", 1.0)
+        worst = (min(summary.min_trust.items(), key=lambda kv: kv[1])
+                 if summary.min_trust else ("-", 1.0))
         results.append({
             "log": os.path.basename(path), "duration_s": round(src.duration, 1),
             "sensors": src.sensors_present,

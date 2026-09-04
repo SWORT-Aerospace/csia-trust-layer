@@ -237,3 +237,26 @@ def test_the_determinism_selection_actually_selects_something():
     assert len(found) >= 10, (
         f"only {len(found)} determinism tests found: {found}. The CI step "
         f"selects by name, so a rename silently shrinks what it covers")
+
+
+# ============================================================ version drift
+def test_the_package_version_and_the_build_version_agree():
+    """`csia.__version__` and `pyproject.toml [project].version` are two
+    hand-maintained copies of one fact, and nothing checked they matched.
+
+    Both are customer-visible: the first is what `csia info` prints and what a
+    running deployment reports about itself; the second is what `pip` records
+    and what a wheel is named after. A release where they disagree ships a
+    binary that misidentifies itself, and the mismatch survives every existing
+    test because neither value is ever compared to the other.
+
+    Single-sourcing this through the build backend would work too, and would
+    be a packaging change. A guard is enough and cannot break an install.
+    """
+    import csia
+
+    with open(os.path.join(ROOT, "pyproject.toml"), "rb") as fh:
+        build_version = tomllib.load(fh)["project"]["version"]
+    assert csia.__version__ == build_version, (
+        f"version drift: csia/__init__.py says {csia.__version__!r}, "
+        f"pyproject.toml says {build_version!r}. Bump both, in one commit.")

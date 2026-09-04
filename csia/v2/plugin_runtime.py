@@ -192,7 +192,6 @@ class PluginSupervisor:
             result = domain.evaluate(snapshot)
             records = tuple(result.records)
             unevaluated = dict(result.unevaluated)
-            failed = False
         except BaseException as exc:       # noqa: BLE001 -- see docstring
             elapsed = self._clock() - started
             st.consecutive_errors += 1

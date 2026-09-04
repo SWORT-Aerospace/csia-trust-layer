@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import asdict, dataclass, field
 
-from .failsafe import Action, FailsafeLevel, FailsafePolicy
+from .failsafe import Action, FailsafePolicy
 from .online import OnlineTrustLayer, TrustState
 from .plugins import SourcePlugin
 

@@ -57,11 +57,23 @@ rejected_routes:
   - BRIEF                 # supplied to this project by an upstream document
   - MEMORY                # recalled rather than looked up
 
-# Why everything below is UNVERIFIED, measured this session:
+# Why everything below is UNVERIFIED, re-measured 2026-09-04. SIX routes were
+# tried, not three: the first three are the accepted ones, and the last three
+# were tried only to establish that no fallback exists either. All six fail at
+# the proxy's CONNECT, so the failure is the egress policy rather than any
+# one service being down.
 #
-#   api.crossref.org:443   CONNECT -> 403   (organisation egress policy)
-#   doi.org:443            CONNECT -> 403
-#   dblp.org:443           CONNECT -> 403
+#   api.crossref.org:443       CONNECT -> 403   (organisation egress policy)
+#   doi.org:443                CONNECT -> 403
+#   dblp.org:443               CONNECT -> 403
+#   api.openalex.org:443       CONNECT -> 403   (would be SECONDARY_INDEX)
+#   api.semanticscholar.org:443 CONNECT -> 403  (would be SECONDARY_INDEX)
+#   export.arxiv.org:443       CONNECT -> 403   (would be SECONDARY_INDEX)
+#
+# The last three are listed for completeness ONLY. Each is a `rejected_route`,
+# so even a successful lookup there could not have retired a marker: an index
+# entry is a second unverified source, not a publisher record. They were
+# checked so that "no route exists" is a measurement rather than an assumption.
 #
 # Every publisher route is denied from the authoring environment, so
 # `make bib-verify` exits 2 and clears nothing. That is the correct outcome

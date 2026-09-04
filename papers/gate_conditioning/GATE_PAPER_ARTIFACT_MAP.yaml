@@ -183,9 +183,43 @@ tables:
       is stale.
     values: []
 
-scalars: []
+scalars:
+  # Section 10 states that NO posterior threshold enters the support rule.
+  # An earlier draft said "a leader above 0.999", which was wrong twice: the
+  # implementation has no such threshold (csia/v1_1/eligibility.py fires on
+  # the structural condition alone, and engineering/v1_1/support/support.py
+  # says why -- "No filtering by posterior mass -- that would make
+  # identifiability depend on the score whose support is in question"), and
+  # the observed firing ticks go down to 0.9691, which a 0.999 gate would
+  # have excluded. Both endpoints are bound here so the corrected sentence
+  # cannot drift back.
+  - id: GS01
+    value: "0.9691"
+    statement: >-
+      lowest leader posterior at a tick where the support rule fires; a
+      posterior-gated rule would not have fired here
+    artifact: engineering/v1_1/SUPPORT_STATE_RESULTS.csv
+    json_pointer: >-
+      not JSON: min of the `posterior` column over rows with a non-empty
+      `non_identifiable_against` (0.969087, 4 dp)
+    script: engineering/v1_1/support/run_phase2.py
+  - id: GS02
+    value: "0.9998"
+    statement: >-
+      highest leader posterior at a tick where the support rule fires; the
+      value the terminology remark uses to show concentration is not support
+    artifact: engineering/v1_1/SUPPORT_STATE_RESULTS.csv
+    json_pointer: >-
+      not JSON: max of the `posterior` column over rows with a non-empty
+      `non_identifiable_against` (0.999822, 4 dp)
+    script: engineering/v1_1/support/run_phase2.py
 
 non_empirical:
+  # A COUNTERFACTUAL threshold, not a measurement: section 10 names 0.999 to
+  # say that a rule gated there would have missed most of the firing ticks.
+  # It is the number an earlier draft wrongly claimed the implementation used,
+  # and naming it is what makes the correction legible.
+  - "0\\.999"
   - "0\\.[0-9]{2}"
   - "0\\.[0-9]"
   - "[0-9]"

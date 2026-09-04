@@ -18,12 +18,23 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install pyyaml
+      # numpy for the proof audit's numeric pass; sympy so its symbolic pass
+      # is re-checked too rather than skipped. Both are research-script
+      # dependencies, deliberately NOT project dependencies -- the guard
+      # degrades to a numeric-only comparison and says so if sympy is absent.
+      - run: pip install pyyaml numpy sympy
       # Every guard runs and reports before the job fails, so one red guard
       # does not mask the state of the others.
       - name: artifact maps
         if: always()
         run: python tools/publication/artifact_map_check.py
+      # The mathematical paper's verification artifact must be what the
+      # committed script produces. Nothing checked this before: every other
+      # load-bearing artifact here has a staleness gate and proof_audit.json
+      # did not.
+      - name: math paper proof audit reproduces
+        if: always()
+        run: python tools/publication/proof_audit_check.py
       - name: figure bundles match figures/
         if: always()
         run: python tools/publication/sync_paper_figures.py --check
@@ -67,7 +78,7 @@ jobs:
             texlive-latex-extra texlive-fonts-recommended poppler-utils
       - name: build CSIA Systems Paper I
         run: make paper-systems
-      - name: build the gate-conditioning paper (scaffold)
+      - name: build the gate-conditioning (mathematical) paper
         run: make paper-math
       # Generated PDFs are never committed; they are build outputs, retained
       # here only so a reviewer can read what the branch actually produces.

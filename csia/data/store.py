@@ -13,7 +13,6 @@ import hashlib
 import json
 import os
 import shutil
-from dataclasses import dataclass, field
 
 from .adapters import UNIFIED_SCHEMA_VERSION
 

@@ -63,7 +63,6 @@ class UlogSource(SourcePlugin):
 
     def _build_events(self):
         ev = []
-        u = self.ulog
         t0_us = None
 
         def ts(data):

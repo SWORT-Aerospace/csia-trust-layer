@@ -19,8 +19,6 @@ without its composition.
 import math
 from dataclasses import dataclass, field
 
-from ..datasets.manifest import HealthClassification as HC
-
 
 # --- confidence intervals -----------------------------------------------------
 

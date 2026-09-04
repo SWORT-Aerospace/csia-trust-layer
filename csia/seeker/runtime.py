@@ -94,7 +94,6 @@ class SeekerPolicy:
     def _conditions(self, t, trust):
         cfg = self.cfg
         out = {}
-        worst = min(trust, key=trust.get)
         for ch in ("ir_seeker", "rf_seeker"):
             if trust[ch] < cfg.critical:
                 out[f"crit_{ch}"] = (FailsafeLevel.CRITICAL,

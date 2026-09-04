@@ -16,12 +16,13 @@ TEXOPTS := -interaction=nonstopmode -halt-on-error
 help:
 	@echo "Publication:"
 	@echo "  make paper-systems   build CSIA Systems Paper I"
-	@echo "  make paper-math      build the gate-conditioning paper (scaffold)"
+	@echo "  make paper-math      build the gate-conditioning (mathematical) paper"
 	@echo "  make papers          build both"
 	@echo "  make tex-deps        install the pinned TeX Live package set"
 	@echo "Guards:"
 	@echo "  make bib-guard       fail on unresolved citation markers"
 	@echo "  make artifact-map    validate every paper's artifact map"
+	@echo "  make proof-audit-check  math paper's proof audit still reproduces"
 	@echo "  make figure-sync     check paper figure bundles match figures/"
 	@echo "  make phase-guard     Phase-I papers must not cite Phase-II results"
 	@echo "  make manuscript-rules  csia_systems hard style rules"
@@ -100,6 +101,18 @@ bib-guard:
 artifact-map:
 	$(PY) tools/publication/artifact_map_check.py
 
+# The mathematical paper's verification artifact, regenerated and compared
+# against what is committed. Every OTHER load-bearing artifact here already has
+# a staleness gate (dataset manifest determinism in ci.yml, the Phase C hash
+# freeze, the artifact maps, the prose bindings); this one did not, so nothing
+# checked that the committed proof_audit.json was produced by the committed
+# proof_audit.py. The `commit` field is exempt BY NAME, because the artifact
+# records where it was generated and is deliberately not bit-reproducible
+# across commits; everything else must match exactly.
+.PHONY: proof-audit-check
+proof-audit-check:
+	$(PY) tools/publication/proof_audit_check.py
+
 .PHONY: figure-sync
 figure-sync:
 	$(PY) tools/publication/sync_paper_figures.py --check
@@ -140,8 +153,8 @@ release-check:
 #
 # `check` still fails if EITHER bucket fails, so nothing is hidden; it just
 # says which kind of failure it is.
-BLOCKING_GUARDS  = artifact-map figure-sync phase-guard manuscript-rules \
-                   secrets-scan release-check
+BLOCKING_GUARDS  = artifact-map proof-audit-check figure-sync phase-guard \
+                   manuscript-rules secrets-scan release-check
 ADVISORY_GUARDS  = bib-guard
 
 .PHONY: check-blocking

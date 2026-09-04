@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import signal
 import sys
 
@@ -106,7 +105,19 @@ def self_test(runner, seconds: float) -> int:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="csia-shadow")
+    ap = argparse.ArgumentParser(
+        prog="csia-shadow",
+        description="Run the CSIA trust layer alongside a vehicle as a "
+                    "companion-computer observer. It reads telemetry and "
+                    "writes a flight log; it has NO command path to the "
+                    "autopilot in any mode.",
+        epilog="Run --self-test before a shadow flight: it connects, listens "
+               "briefly and reports which channels actually arrive. Zero "
+               "usable channels means the vehicle is not configured to "
+               "stream, and the run would produce an empty log. Mode comes "
+               "from CSIA_MODE (default SHADOW) unless --mode overrides it; "
+               "an unrecognised value is a hard error rather than a silent "
+               "downgrade.")
     ap.add_argument("--config", default="configs/vehicle/example_quad.yaml")
     ap.add_argument("--mode", default=None,
                     help="SHADOW or ADVISORY; overrides CSIA_MODE")

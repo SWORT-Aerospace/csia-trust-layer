@@ -5,6 +5,59 @@ this project versions the **software and its evidence**, not just code.
 Validated scientific results (trust model, diagnosis, campaigns) are
 preserved across releases — campaign artifacts regenerate byte-identical.
 
+## [Unreleased] — 2026-09 — Product hardening pass
+
+No behaviour changed. `campaigns/monte_carlo.json`, `campaigns/bench.json` and
+every scenario artifact still regenerate bit-identically; the frozen v1 core
+was not touched.
+
+### Fixed (claims and code hygiene, not behaviour)
+- **The Monte Carlo campaign never varied the flight, and said it did.**
+  `csia/validation.py` drew a fresh seed per trial and passed it to
+  `generate_flight`, whose scripted truth ignores seeds entirely — every one
+  of the 150 runs flew the same trajectory. The numbers are unaffected and
+  reproduce exactly; what was wrong was the appearance of per-trial flight
+  randomization. The call is now explicit, the consequence is stated where
+  the confidence intervals are produced, and the stream draw is deliberately
+  RETAINED because removing it would shift every subsequent draw and change a
+  committed regression artifact. `tests/test_flight_truth_determinism.py`
+  pins all of it.
+- **The mathematical paper described a posterior threshold that does not
+  exist.** It said support is withheld for "a leader above 0.999"; the
+  implementation applies the structural condition alone, at any posterior,
+  and `engineering/v1_1/support/support.py` refuses to filter by posterior
+  mass on purpose — doing so would make identifiability depend on the score
+  whose support is in question. The firing ticks run down to 0.9691, which a
+  0.999 gate would have excluded. Corrected, bound to the artifact, and
+  guarded by `tests/test_support_state_posterior_range.py`.
+- Dead code removed from nine shipped modules (unused imports, unused locals,
+  a spurious f-string). Each was a statement that claimed to do something and
+  did not; one of them was the only visible symptom of the defect above.
+
+### Added
+- `tools/publication/proof_audit_check.py` and `make proof-audit-check` — the
+  mathematical paper's verification artifact is regenerated and compared
+  against what is committed, with the `commit` field exempt by name. Every
+  other load-bearing artifact already had a staleness gate; this one did not.
+  Wired into `BLOCKING_GUARDS` and the publication CI lane.
+- `tests/test_package_lint.py` — the shipped package is pyflakes-clean. The
+  single exemption is `csia/diagnosis/`, which is FROZEN and therefore
+  un-fixable; the exemption is checked against the freeze test's own path list
+  and fails if it ever stops being needed. `pyflakes` added to the `dev`
+  extra.
+- A version-drift guard: `csia.__version__` and `pyproject.toml` are two
+  hand-maintained copies of one fact and nothing compared them.
+- `csia-shadow --help` now describes what the tool does, states that it has no
+  command path in any mode, and points at `--self-test`.
+
+### Documented
+- `papers/BIB_VERIFICATION_LEDGER.yaml` records six blocked verification
+  routes rather than three: OpenAlex, Semantic Scholar and arXiv were checked
+  this session and also fail at the proxy. All three are `rejected_routes`
+  anyway, so none could have retired a marker — they were tried so that "no
+  route exists" is a measurement. **No marker was retired. The bibliography
+  blocker stands.**
+
 ## [Unreleased] — 2026-08 — Evidence foundation (slice 3A)
 
 ### Added

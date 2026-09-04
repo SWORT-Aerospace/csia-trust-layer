@@ -62,8 +62,6 @@ resolved by assertion — see `EVIDENCE_SUBSET_RESULTS.csv`.
 
 from __future__ import annotations
 
-from dataclasses import replace
-
 from ..scenarios import Scenario
 from .aircraft_scenarios import AIRCRAFT_NOMINAL
 from .test_stand_scenarios import TEST_STAND_NOMINAL

@@ -80,7 +80,7 @@ class SystemAssurance:
         bad = [k for k, v in sorted(self.plugins.items())
                if v.get("state") not in (None, "AVAILABLE")]
         if bad:
-            lines.append(f"  PLUGINS NOT AVAILABLE: "
+            lines.append("  PLUGINS NOT AVAILABLE: "
                          + ", ".join(f"{k}={self.plugins[k]['state']}"
                                      for k in bad))
         a = self.attribution
