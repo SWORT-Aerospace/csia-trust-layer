@@ -374,11 +374,27 @@ scalars:
     json_pointer: .what_dominates_N_star.mass_term_S0_times_T0_minus_Tstar
     script: research/wp_c8/escalation_algebra.py
     note: >-
-      The manuscript printed 125 here, which is the value at an idealised
-      T_0 = 1.0; the artifact computes 118.82 from the measured T_0 = 0.98764
-      and 125 appears in no artifact. The qualitative conclusion is unchanged
-      -- both are two orders of magnitude above the margin term -- but the
-      printed figure now matches the artifact it is derived from.
+      CANONICAL CHAIN, recomputed independently 2026-09-04.
+      S_0 = 475.6775 is the MEASURED settled Beta mass, not the theoretical
+      concentration cap 1/(1 - rho_max) = 500. T_0 = 0.999791 is the MEASURED
+      settled trust, not 1.0. T* = 0.75 is FailsafeConfig.nav_caution. Then
+      475.6775 * (0.999791 - 0.75) = 118.8199584..., which rounds to 118.82.
+      Both inputs come from
+      /verification_against_shipping_trustcore/{settled_mass_S0,
+      settled_trust_T0} in the same artifact.
+      WHERE 125 CAME FROM: the generating script's own docstring
+      (research/wp_c8/escalation_algebra.py, "S_0(T_0 - T*) = 500 * 0.25 =
+      125") states an IDEALISED version of the same term, using the
+      theoretical cap and T_0 = 1.0. It is a pedagogical illustration in a
+      docstring, not a result; it appears in no result artifact, and the
+      manuscript had transcribed it as if it were one.
+      A CORRECTION TO AN EARLIER NOTE HERE: that note claimed 118.82 followed
+      from "the measured T_0 = 0.98764". No such value exists anywhere in this
+      repository. It was obtained by back-solving 118.82 / 500 + 0.75, which
+      reproduces 118.82 by construction because 500 * 0.23764 = 118.82
+      exactly -- an arithmetic coincidence, not a measurement. The VALUE
+      118.82 was correct then and is correct now; only the explanation was
+      wrong. See docs/REPOSITORY_FINALIZATION_REPORT.md.
 
 # ---------------------------------------------------------------------------
 # NON-EMPIRICAL NUMERIC LITERALS

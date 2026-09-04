@@ -9,11 +9,27 @@ those by hand found one wrong:
 
     "Note which term dominates: S_0(T_0 - T*) = 125 against M(T* - e_f) = 1.0"
 
-125 is the value at an idealised T_0 = 1.0. The committed artifact computes
-118.82 from the measured T_0 = 0.98764, and 125 appears in no artifact in the
-repository. The section's conclusion is unaffected -- both are two orders of
-magnitude above the margin term of 1.0 -- but a printed figure that disagrees
-with its own artifact is what a referee checking the arithmetic finds first.
+125 is an IDEALISED version of the same term. It comes from the generating
+script's own docstring (`research/wp_c8/escalation_algebra.py`:
+"S_0(T_0 - T*) = 500 * 0.25 = 125"), which uses the theoretical concentration
+cap 1/(1 - rho_max) = 500 and T_0 = 1.0. The manuscript had transcribed a
+docstring illustration as if it were a result.
+
+The canonical chain, recomputed independently:
+
+    S_0 = 475.6775   MEASURED settled Beta mass, not the cap 500
+    T_0 = 0.999791   MEASURED settled trust, not 1.0
+    T*  = 0.75       FailsafeConfig.nav_caution
+    475.6775 * (0.999791 - 0.75) = 118.8199584...  ->  118.82
+
+A CORRECTION TO AN EARLIER VERSION OF THIS DOCSTRING, left visible rather than
+overwritten. It said 118.82 followed from "the measured T_0 = 0.98764". No such
+value exists anywhere in this repository. It was back-solved from
+118.82 / 500 + 0.75, and it reproduces 118.82 only because 500 * 0.23764 =
+118.82 exactly -- an arithmetic coincidence that looked like a derivation. The
+VALUE was right both times; the account of where it came from was not.
+`test_the_mass_term_inputs_are_the_measured_ones` below pins S_0 and T_0
+themselves, so the explanation cannot drift again the way the value could not.
 
 The rest of the audit came back clean, and the checks are kept rather than
 discarded: a number that was verified once and then left unguarded is a number
@@ -54,8 +70,9 @@ def test_the_escalation_delay_decomposition_matches_its_artifact():
         f"together.")
     assert f"M(T^* - e_f) = {margin}" in tex, margin
     assert "= 125$" not in tex, (
-        "125 is back. It is the banked-agreement term at an idealised "
-        "T_0 = 1.0, not the measured value, and it appears in no artifact.")
+        "125 is back. It is escalation_algebra.py's DOCSTRING illustration -- "
+        "the cap 500 times an idealised (1.0 - 0.75) -- not the measured "
+        "term, and it appears in no result artifact.")
     # The claim the sentence actually makes, checked rather than assumed.
     assert mass / margin > 100, (
         f"the mass term no longer dominates the margin term by two orders of "
@@ -147,3 +164,37 @@ def test_the_design_rule_enforcement_is_not_silently_skipped():
     assert found == {("gps_fault", "phys_gps", "gvalid")}, (
         f"the audited violation set is {sorted(found)}; the manuscript states "
         f"exactly one violation, gps_fault / phys_gps / gvalid")
+
+
+def test_the_mass_term_inputs_are_the_measured_ones():
+    """S_0 and T_0, pinned as VALUES rather than as a story about them.
+
+    The mass term 118.82 was correct while the published explanation of where
+    it came from was wrong twice: once as "500 * 0.25" (the script's idealised
+    docstring illustration, transcribed into the manuscript as a result) and
+    once as "the measured T_0 = 0.98764" (a back-solve that reproduces 118.82
+    by coincidence). Pinning the product alone could not catch either. Pinning
+    the FACTORS can.
+    """
+    from decimal import Decimal
+
+    d = _artifact("research", "wp_c8", "results", "escalation_algebra.json")
+    ver = d["verification_against_shipping_trustcore"]
+    s0, t0 = ver["settled_mass_S0"], ver["settled_trust_T0"]
+    mass = d["what_dominates_N_star"]["mass_term_S0_times_T0_minus_Tstar"]
+
+    assert s0 == 475.6775, (
+        f"settled mass S_0 is {s0}; it was 475.6775 when the manuscript's "
+        f"118.82 was derived. NOTE it is NOT the theoretical cap 500 -- "
+        f"conflating the two is how 125 got into the paper")
+    assert t0 == 0.999791, (
+        f"settled trust T_0 is {t0}; it was 0.999791. It is NOT 1.0, and it "
+        f"is NOT 0.98764, which appears nowhere in this repository")
+    assert ver["concentration_cap_1_over_1_minus_rho_max"] == 500.0, (
+        "the theoretical cap is no longer 500, so the 125 illustration in "
+        "escalation_algebra.py's docstring needs revisiting too")
+
+    exact = Decimal(str(s0)) * (Decimal(str(t0)) - Decimal("0.75"))
+    assert float(round(exact, 2)) == mass, (
+        f"S_0 * (T_0 - T*) = {exact}, which rounds to {round(exact, 2)}, but "
+        f"the artifact reports {mass}")
