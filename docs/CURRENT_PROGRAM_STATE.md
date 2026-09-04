@@ -44,6 +44,21 @@ the *software* does. `csia-dual-paper-evidence-freeze` fixes what the *papers
 say*, and is the tag to cite. Anything after it that changes a number is a
 defect, not a result.
 
+**All three freeze tags are LOCAL ONLY.** Pushing them is refused by GitHub with
+HTTP 403 — this session's credential may push the working branch but may not
+create refs. The commits are all present on the remote branch, so nothing is
+lost; only the tag refs are missing. Someone with tag-creation rights runs:
+
+```sh
+git push origin refs/tags/csia-v1.0-research-final
+git push origin refs/tags/csia-v2-phasec-frozen
+git push origin refs/tags/csia-dual-paper-evidence-freeze
+```
+
+Until then the commit SHAs above are the durable record. A tag can be moved; a
+SHA cannot, which is why both are written here and why
+`tests/test_program_state.py` asserts both.
+
 ## Test status
 
 1683 tests collected, all passing. Guards that hold the freezes:
@@ -117,7 +132,7 @@ and `math-paper-submission-candidate`. Not one. Both.
 |---|---|---|
 | CSIA v1 | `csia-v1.0-research-final` @ `ec5acd189295dab9259d4989657d42184d6142a3` — **zero diff** | `tests/test_v1_frozen.py` (git diff + SHA-256) |
 | CSIA v1.1 | output schema `1.1.0`, unchanged | schema + golden corpus |
-| CSIA v2 Phase C | `50c5d3576e9084e7c2789167628392c5de992b6f`, local tag proposal `csia-v2-phasec-frozen` (**not pushed**) | `engineering/v2/V2_PHASEC_FREEZE.md`, now **enforced** by `tests/test_phase_c_freeze.py`: the 8 reproducible artifact hashes, the recorded commit, and the record's headline verdict against the gate artifact |
+| CSIA v2 Phase C | `50c5d3576e9084e7c2789167628392c5de992b6f`, annotated tag `csia-v2-phasec-frozen` (**local only; remote tag push refused, see above**) | `engineering/v2/V2_PHASEC_FREEZE.md`, now **enforced** by `tests/test_phase_c_freeze.py`: the 8 reproducible artifact hashes, the recorded commit, and the record's headline verdict against the gate artifact |
 | Systems Paper I baseline | `main @ 848f556` | `tools/publication/phase_guard.py` |
 
 ## 3. Submission gate — SYSTEMS PAPER

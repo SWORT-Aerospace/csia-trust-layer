@@ -18,14 +18,47 @@ Completed 2026-09-04.
 
 ## Tags
 
-| tag | commit | pushed |
-|---|---|---|
-| `csia-v1.0-research-final` | `ec5acd18…` | pre-existing |
-| `csia-v2-phasec-frozen` | `50c5d357…` | this session |
-| `csia-dual-paper-evidence-freeze` | `eb2577d6…` | this session, created at the pre-cleanup evidence HEAD |
+| tag | commit | local | remote |
+|---|---|---|---|
+| `csia-v1.0-research-final` | `ec5acd18…` | yes | **no** |
+| `csia-v2-phasec-frozen` | `50c5d357…` | yes, annotated | **no — push refused** |
+| `csia-dual-paper-evidence-freeze` | `eb2577d6…` | yes, annotated, created at the pre-cleanup evidence HEAD | **no — push refused** |
+| `v0.7.0` | `758f4ae5…` | yes | yes, pre-existing |
 
 No tag was moved. `csia-dual-paper-evidence-freeze` did not previously exist;
-`csia-v2-phasec-frozen` already pointed at `50c5d35` and was pushed unchanged.
+`csia-v2-phasec-frozen` already pointed at `50c5d35` and was not altered.
+
+### Tag push is BLOCKED, and it is an authorization limit
+
+The branch pushed cleanly — `origin/claude/code-reviewer-repo-export-zicovg`
+matches local HEAD. Both tag pushes fail with:
+
+```
+error: RPC failed; HTTP 403 curl 22 The requested URL returned error: 403
+```
+
+Four attempts with exponential backoff (2 s, 4 s, 8 s, 16 s) produced the same
+403 every time, so this is not a transient network fault. The agent proxy
+reports **zero** relay failures for any GitHub host, so it is not an egress
+denial either: GitHub is refusing the ref creation. This session's credential
+is scoped to push the designated branch and not to create tags.
+
+**No workaround was attempted, and none should be.** The tags exist locally
+with their full annotated messages, and both point at commits already present
+on the remote branch, so nothing is lost — only the refs are missing.
+
+**Remedy, for someone with tag-creation rights on the repository:**
+
+```sh
+git push origin refs/tags/csia-v2-phasec-frozen
+git push origin refs/tags/csia-dual-paper-evidence-freeze
+git push origin refs/tags/csia-v1.0-research-final   # also local-only
+```
+
+Alternatively, grant ref-creation to the session's GitHub App installation and
+the same commands succeed unattended. Until then `docs/CURRENT_PROGRAM_STATE.md`
+records the tag-to-commit mapping, and the commit SHAs are the durable record:
+a tag can be moved, a SHA cannot.
 
 ## Freeze status
 
