@@ -74,11 +74,31 @@ def test_a_reordered_author_list_is_caught():
 
 
 def test_a_VERIFY_placeholder_reads_as_missing_not_as_a_match():
-    e = parse_bib(BIB)["takai2021diagnosability"]
+    """A placeholder title must never compare equal to a real one.
+
+    The entry is chosen DYNAMICALLY rather than named. This test used to pin
+    `takai2021diagnosability`, and on 2026-09-04 that entry's title was
+    corroborated and filled in -- a legitimate improvement to the bibliography
+    that broke a test about comparison logic. Pinning a key here couples the
+    logic under test to which entries happen to be unresolved today, and the
+    coupling will bite again every time one is resolved.
+    """
+    entries = parse_bib(BIB)
+    placeholders = sorted(
+        k for k, v in entries.items()
+        if (v["fields"].get("title") or "").strip().startswith("VERIFY"))
+    assert placeholders, (
+        "no entry in papers/csia_systems/refs.bib carries a VERIFY placeholder "
+        "title any more. That is good news, and it means this test has no "
+        "subject: either every title is now filled in (check the ledger), or "
+        "the placeholder convention changed and this guard needs rewriting.")
+    e = entries[placeholders[0]]
     rec = {"title": ["Some real title"], "container-title": ["Automatica"],
            "volume": "1", "issue": "1", "page": "1-2",
            "issued": {"date-parts": [[2021]]}, "author": [{"family": "Takai"}]}
-    assert compare(e, rec)["title"][0] == "MISSING_IN_BIB"
+    assert compare(e, rec)["title"][0] == "MISSING_IN_BIB", (
+        f"{placeholders[0]}: a VERIFY placeholder title compared as something "
+        f"other than MISSING_IN_BIB")
 
 
 def test_unreachable_publisher_exits_nonzero_and_clears_nothing():
