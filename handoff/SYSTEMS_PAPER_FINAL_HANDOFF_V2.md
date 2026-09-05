@@ -11,7 +11,7 @@
 
 | | |
 |---|---|
-| repository HEAD | `b676a79cecd174c3ae634032bd15688abd01fdaf` |
+| repository HEAD | `10ccf678876c18981b38e98ea8b6ff8ec3a1b2b1` |
 | branch | `claude/code-reviewer-repo-export-zicovg` (remote matches) |
 | evidence freeze | `csia-dual-paper-evidence-freeze` = `eb2577d6830208b26d33facb283aa5be0ddf7c86` |
 | build | `make paper-systems` → **27 pages**, all citations resolved (V1 said 26) |
