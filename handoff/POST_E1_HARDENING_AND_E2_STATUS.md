@@ -3,7 +3,7 @@
 CSIA POST-E1 HARDENING + E2 STATUS
 ===============================================================
 
-HEAD:    8bb3520  (+ this report)
+HEAD:    d9aa672
 BRANCH:  claude/code-reviewer-repo-export-zicovg
 
 TESTS:     2179
@@ -337,9 +337,10 @@ estimates that say on their face to verify at purchase.
 ```
 db54f91  Post-E1 hardening round 2: A16-A19, E2 preregistration template
 8bb3520  Guard the first hardening round's artifacts, which had none
+d9aa672  Post-E1 hardening and E2 status report; nightly node covers the new tools
 ```
 
-Both pushed to `claude/code-reviewer-repo-export-zicovg`.
+All three pushed to `claude/code-reviewer-repo-export-zicovg`.
 
 ```
 TESTS:                     2179 passed, 0 failed
