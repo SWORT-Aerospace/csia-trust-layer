@@ -7,7 +7,16 @@
 # .github/workflows/publication.yml and reproduced locally by `make tex-deps`.
 # Builds go to build/papers/<name>/ and are never committed.
 
-PY      ?= python
+# README.md tells a developer to build a .venv and run `.venv/bin/python`, and
+# this defaulted to bare `python`. On a machine where those are different
+# interpreters, `make check-blocking` failed on proof-audit-check with
+# ModuleNotFoundError: numpy -- an environment mismatch that reads exactly like
+# a broken guard. Prefer the documented interpreter when it exists.
+#
+# CI is unaffected: .github/workflows/publication.yml has no .venv (it uses
+# setup-python and installs numpy globally), so the fallback is what runs there.
+# PY= on the command line still overrides both.
+PY      ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python)
 PAPERS  := csia_systems gate_conditioning
 BUILD   := build/papers
 TEXOPTS := -interaction=nonstopmode -halt-on-error
