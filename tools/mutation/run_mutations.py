@@ -563,6 +563,7 @@ DEFAULT_SELECTION = [
     # reported in MUTATION_ADJUDICATION.md so the correction is visible rather
     # than quietly folded in.
     "tests/test_shared_power_baselines.py",
+    "tests/test_baseline_rederivation.py",
 ]
 
 if __name__ == "__main__":
