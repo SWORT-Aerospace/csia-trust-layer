@@ -1,0 +1,98 @@
+%YAML 1.2
+---
+# FAILURE LEDGER — PHYSICAL VALIDATION PROGRAM
+#
+# APPEND-ONLY. Entries are never edited and never deleted after a rerun.
+#
+# WHY THIS FILE IS NOT OPTIONAL
+# -----------------------------
+# A validation campaign that reports only its successful trials is not a
+# validation campaign; it is a demonstration with an unrecorded denominator.
+# Every invalid trial, hardware problem, timing failure and negative result
+# lands here, and the trial-count arithmetic in any report must reconcile
+# against it: valid + invalid = attempted.
+#
+# The one rule that makes it work: when a trial is rerun, the rerun gets a NEW
+# entry. The original stays. "We reran it and it worked" is a different fact
+# from "it worked", and the difference is exactly what a referee is trying to
+# establish.
+#
+# WHAT COUNTS AS A FAILURE WORTH RECORDING
+#   - a trial marked invalid for any reason, including our own mistakes
+#   - an intervention that could not be confirmed downstream
+#   - a hardware fault, a wiring error, a damaged part
+#   - a timing budget that could not support a claimed metric
+#   - a preregistration that turned out to be unrunnable as written
+#   - a negative result: the mechanism did not appear where it was expected
+#   - a guard that fired correctly and stopped work
+#
+# A phase marked BLOCKED, INAPPLICABLE or INVALID is recorded here rather than
+# improvised around. Program rule 40.
+
+schema: csia.research.failure_ledger/1
+program: CSIA PAPER EVIDENCE EXTENSION -- PHYSICAL VALIDATION V1
+append_only: true
+
+# Every entry carries at minimum:
+#   id, date, phase, kind, what_happened, verdict, consequence, artifact
+#
+# kind is one of:
+#   INVALID_TRIAL | UNCONFIRMED_INTERVENTION | HARDWARE_FAULT |
+#   TIMING_INSUFFICIENT | PREREG_UNRUNNABLE | NEGATIVE_RESULT |
+#   GUARD_STOPPED_WORK | OUR_OWN_ERROR
+#
+# verdict is one of:
+#   RECORDED | BLOCKED | INAPPLICABLE | INVALID | WITHDRAWN
+
+entries:
+  - id: FL-001
+    date: 2026-09-06
+    phase: P1 (vehicle adapter abstraction)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The first version of csia/aircraft/profile.py's FORBIDDEN_KEYS list did
+      not cover GATE_SPEED_LO, the horizontal-speed gate threshold defined in
+      csia/prediction/comparator.py. The list carried "speed_gate", "gate_lo"
+      and "gate_hi", none of which matches any token of the constant the code
+      actually defines. A vehicle profile could therefore have set the
+      speed-gate threshold -- a frozen-core diagnostic parameter -- and
+      nothing would have objected.
+    found_by: >-
+      tests/test_vehicle_profile.py::
+      test_the_forbidden_list_covers_the_frozen_cores_real_constants, on its
+      first run. The test reads constants out of the frozen source rather than
+      trusting the list, which is why it caught a gap the list's author could
+      not see.
+    verdict: RECORDED
+    consequence: >-
+      FORBIDDEN_KEYS extended with "gate", "gate_speed_lo" and
+      "gate_speed_hi". No profile had exploited it -- the three shipped
+      profiles were checked and none sets any diagnostic key -- so no evidence
+      is affected. Recorded because the near-miss is the point: a blacklist
+      maintained by hand decays silently, and the only thing that caught this
+      was a test that refuses to trust the blacklist.
+    artifact: csia/aircraft/profile.py; tests/test_vehicle_profile.py
+
+  - id: FL-002
+    date: 2026-09-06
+    phase: P0 (repository audit)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The direct systems-writer handoff, PART 2/3, reported "54 markers across
+      both bibliographies" as the current bib-guard count. The correct count
+      at that same HEAD is 53. The 54 reading was taken before the
+      reeves/takai/krysander/kang bibliography corrections landed and was
+      quoted as current afterwards.
+    found_by: >-
+      The P0 audit of this program, which re-ran `make bib-guard` rather than
+      reusing the earlier number.
+    verdict: RECORDED
+    consequence: >-
+      One stale integer in a document already delivered to the writing agent.
+      Nothing scientific depends on it: the blocker is "zero entries
+      verified", which is unchanged, and the ledger row counts (9
+      corroborated, 10 unverified, 0 verified) were correct. Corrected here so
+      the record is not silently wrong. The general lesson is the one this
+      program already applies elsewhere -- a count in prose is a claim, and
+      claims get re-measured, not remembered.
+    artifact: papers/BIB_VERIFICATION_LEDGER.yaml; make bib-guard

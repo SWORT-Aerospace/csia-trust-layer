@@ -1,0 +1,72 @@
+%YAML 1.2
+---
+# Reference vehicle profile — PX4 quadrotor.
+#
+# Same structure as the ArduPilot reference, and DELIBERATELY NOT the same
+# rates. Every value is transcribed from the frozen channel contract
+# (docs/simulation/CHANNEL_SEMANTICS.yaml, contract_version 2,
+# producer_px4.rate_hz).
+#
+# THE RATE DIFFERENCE THAT MATTERS, AND WHY IT IS IN THE PROFILE AND NOT THE
+# CORE. PX4's ESC telemetry publishes at ~1 Hz where ArduPilot's is 10 Hz. A
+# shared max-age constant had PX4 reporting its ESC channels STALE for about
+# half of every publish period -- a platform difference showing up as a fault.
+# The adapter derives staleness from the declared rate; the profile supplies
+# the rate. That is exactly the boundary this architecture exists to draw.
+#
+# Also note mag at 14 Hz and imu0 at 50 Hz, both different from ArduPilot.
+# None of these differences touches a threshold, a weight or a signature.
+
+vehicle_profile:
+  id: reference_quad_px4
+  airframe: quad_x
+  description: >-
+    Reference PX4 multirotor. Channel set matches what the PX4 adapter's
+    semantic contract qualifies. The low ESC rate is a real platform property,
+    not a degraded configuration.
+
+autopilot:
+  family: px4
+  version_observed_at_runtime: true
+
+transport:
+  mavlink:
+    port: "udp:0.0.0.0:14550"
+    baud: 921600
+    sysid: 1
+    transmit: false
+
+streams:
+  imu0.accel:            {nominal_rate_hz: 50}
+  imu0.gyro:             {nominal_rate_hz: 50}
+  imu1.accel:            {nominal_rate_hz: 25}
+  imu1.gyro:             {nominal_rate_hz: 25}
+  mag.field_ut:          {nominal_rate_hz: 14}
+  baro.altitude:         {nominal_rate_hz: 10}
+  baro.temp_c:           {nominal_rate_hz: 10}
+  gnss.position:         {nominal_rate_hz: 5}
+  gnss.velocity:         {nominal_rate_hz: 5}
+  gnss.velocity_z:       {nominal_rate_hz: 5}
+  battery.voltage:       {nominal_rate_hz: 10}
+  battery.current:       {nominal_rate_hz: 10}
+  esc.rpm:               {nominal_rate_hz: 1}
+  esc.current:           {nominal_rate_hz: 1}
+  vibration.rms:         {nominal_rate_hz: 10}
+  vehicle_status.armed:  {nominal_rate_hz: 1}
+  estimator.variances:   {nominal_rate_hz: 5}
+  estimator.flight_mode: {nominal_rate_hz: 1}
+
+functions:
+  position_hold: expected
+  precision_navigation: expected
+  inertial_continuation: expected
+
+experiment:
+  fault_injector:
+    enabled: false
+    channels: {}
+
+safety:
+  shadow_only: true
+  props_removed_for_bench: true
+  independent_pilot_authority_required: true

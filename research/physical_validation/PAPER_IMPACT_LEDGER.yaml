@@ -1,0 +1,106 @@
+%YAML 1.2
+---
+# PAPER IMPACT LEDGER — what new evidence would let the manuscripts say.
+#
+# APPEND-ONLY, and deliberately SEPARATE from the manuscripts.
+#
+# THE RULE THIS FILE ENFORCES
+# ---------------------------
+# A claim is NOT upgraded when a result arrives. It is upgraded when an
+# evidence TIER completes and a row here says `ready_to_integrate: true`. In
+# between, the result exists, is cited, and changes nothing the paper says.
+#
+# That separation is the whole reason the file exists. The alternative -- edit
+# the manuscript each time a trial comes back -- is how a paper ends up
+# claiming the union of every encouraging intermediate result, none of which
+# was ever complete.
+#
+# EVERY ROW MUST STATE ALL FOUR
+#   current_claim        what the paper says today, verbatim where possible
+#   new_evidence         what arrived, with its artifact
+#   supported_upgrade    what the evidence licenses
+#   unsupported_upgrade  what it does NOT license, named explicitly
+#
+# `unsupported_upgrade` is the load-bearing field. It is where "20/20 valid
+# trials" is stopped from becoming "the mechanism occurs in 20 of 20 flights
+# in the field".
+
+schema: csia.research.paper_impact_ledger/1
+program: CSIA PAPER EVIDENCE EXTENSION -- PHYSICAL VALIDATION V1
+append_only: true
+
+evidence_tiers:
+  E0: desktop simulation
+  E1: current-stack SITL/SIH
+  E2: real flight-controller hardware
+  E3: real sensor plus physical fault
+  E4: physical actuator/output path
+  E5: controlled physical flight
+
+# ---------------------------------------------------------------------------
+# BASELINE — where the paper stands before this program produced anything.
+# Recorded so every later row has something to be a delta against.
+# ---------------------------------------------------------------------------
+baseline:
+  measured_at_commit: caa2aa199761e6443583db07fceabce67d525b29
+  systems_paper_pages: 27
+  highest_tier_supporting_the_headline_claim: E1
+  headline_claim: >-
+    A deployed diagnostic layer emits health while holding no evidence it is
+    entitled to assert health from, because its gate skips an inapplicable
+    feature rather than marking it unassessable.
+  tier_evidence:
+    E0: >-
+      The bench-simulator campaigns behind Paper I. 200 consecutive
+      indistinguishable ticks under injected fix loss; 378,000/378,000
+      independent-checker agreement; all ArduCopter 3.3 SITL, a 2015 build.
+    E1: >-
+      mechanism_a_ardupilot.json and mechanism_a_px4.json. n=1 fault trial
+      plus one matched fix-preserving control per platform, RULE-B validated.
+      Plus the 20-trial fix-preserving negative control (15,595 ticks, zero
+      collapses) and the 20-trial Mechanism-B preregistered campaign.
+    E2: NOT_STARTED
+    E3: NOT_STARTED
+    E4: NOT_STARTED
+    E5: NOT_STARTED
+
+entries:
+  - id: PI-001
+    date: 2026-09-06
+    result: >-
+      A vehicle-adapter boundary with capability negotiation, a validated
+      vehicle-profile format, and a test that performs the whole
+      new-vehicle integration workflow and then proves the frozen core is
+      byte-identical to csia-v1.0-research-final.
+    evidence_tier: E0
+    artifact: >-
+      csia/aircraft/capability.py; csia/aircraft/profile.py;
+      profiles/*.yaml; tests/test_vehicle_profile_no_core_change.py;
+      tests/test_capability_negotiation.py; tests/test_vehicle_profile.py
+    old_limitation: >-
+      "unclear vehicle integration boundary" -- the paper could not say what
+      it would take to run the same core on a different airframe.
+    new_limitation: >-
+      The workflow is proven for PROFILE-COMPATIBLE vehicles: those whose
+      telemetry the existing ArduPilot or PX4 adapter already decodes. A
+      vehicle needing a NEW TRANSPORT (DroneCAN, ROS 2, a bespoke serial
+      frame) still needs a new adapter class. That is a smaller claim than
+      "any vehicle" and it is the claim the test supports.
+    claim_impact: >-
+      Licenses a Discussion sentence about the integration boundary. Licenses
+      NOTHING about the diagnostic results -- this is architecture, not
+      evidence, and no measurement changed.
+    supported_upgrade: >-
+      "A new airframe on a supported autopilot is integrated by writing a
+      profile; the frozen diagnostic core is unchanged, and a test performs
+      the integration and verifies the core byte-identical afterwards."
+    unsupported_upgrade: >-
+      "CSIA plugs into any vehicle." False: a new transport needs a new
+      adapter. Also unsupported: any implication that the architecture work
+      strengthens the EMPIRICAL claims. It does not touch them.
+    paper_section: Discussion; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      E0 architecture work alone does not complete an evidence tier. Hold
+      until the repeated current-stack campaign (P8) gives the section
+      something measured to sit beside.
