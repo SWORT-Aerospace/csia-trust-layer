@@ -90,6 +90,34 @@ NODE_CHANNELS = {
 }
 
 
+#: (display name, endpoints) -> the identifier the RUNTIME actually uses.
+#:
+#: THIS IS NOT A NEW IDENTIFIER SCHEME. The stable IDs already existed:
+#: csia/prediction/comparator.py computes `velocity_gps_doppler_0` for the
+#: imu0-gps edge and `velocity_gps_doppler_1` for imu1-gps, and those are the
+#: strings that appear in `gps_gates` in every Mechanism-A trial artifact.
+#: csia/trust_graph/graph.py's EDGES list -- which drives the diagram -- gives
+#: BOTH edges the same human-friendly display name, and the capability layer
+#: inherited that ambiguity from it.
+#:
+#: So a name may legitimately repeat; an edge ID may not. Reporting the
+#: runtime ID means a capability report and a trial artifact now use the same
+#: string for the same edge, which they did not before.
+EDGE_ID = {
+    ("velocity_gps_doppler", ("imu0", "gps")): "velocity_gps_doppler_0",
+    ("velocity_gps_doppler", ("imu1", "gps")): "velocity_gps_doppler_1",
+}
+
+
+def edge_id(relation: str, endpoints: tuple) -> str:
+    """The runtime identifier for an edge. Falls back to the relation name.
+
+    Every relation except the doppler pair has exactly one edge, so its name
+    IS its identifier and no mapping entry is needed.
+    """
+    return EDGE_ID.get((relation, tuple(endpoints)), relation)
+
+
 @dataclass
 class RelationCapability:
     """One relation, and why it can or cannot be fed."""
@@ -100,6 +128,11 @@ class RelationCapability:
     blocking_nodes: tuple = ()
     blocking_channels: tuple = ()
     note: str = ""
+
+    @property
+    def edge_id(self) -> str:
+        """Stable identifier. Distinct even when `relation` repeats."""
+        return edge_id(self.relation, self.endpoints)
 
 
 @dataclass
@@ -112,23 +145,17 @@ class CapabilityReport:
     nodes: dict = field(default_factory=dict)
     relations: list = field(default_factory=list)
 
-    @staticmethod
-    def _label(r: "RelationCapability") -> str:
-        """`velocity_gps_doppler` names TWO edges -- imu0-gps and imu1-gps.
-
-        On a single-IMU airframe one instance is INAPPLICABLE and the other is
-        merely UNKNOWN, and a summary keyed on the bare name puts the same
-        string in two buckets, which reads as a contradiction. So every label
-        carries its endpoints when the name is ambiguous.
-        """
-        return f"{r.relation}({r.endpoints[0]},{r.endpoints[1]})"
-
     def _labels(self, *caps) -> list:
-        ambiguous = {r.relation for r in self.relations
-                     if sum(1 for x in self.relations
-                            if x.relation == r.relation) > 1}
-        return [self._label(r) if r.relation in ambiguous else r.relation
-                for r in self.relations if r.capability in caps]
+        """Summaries are keyed on the EDGE ID, never on the display name.
+
+        `velocity_gps_doppler` names two edges. On a single-IMU airframe one is
+        INAPPLICABLE and the other merely UNKNOWN, and a summary keyed on the
+        display name put the same string in two mutually exclusive buckets --
+        which reads as a contradiction even though the underlying data was
+        right. The runtime already distinguishes them; this now uses those
+        identifiers.
+        """
+        return [r.edge_id for r in self.relations if r.capability in caps]
 
     @property
     def active_relations(self) -> list:
@@ -167,6 +194,7 @@ class CapabilityReport:
             "nodes": {k: v.value for k, v in self.nodes.items()},
             "relations": [
                 {
+                    "edge_id": r.edge_id,
                     "relation": r.relation,
                     "endpoints": list(r.endpoints),
                     "capability": r.capability.value,

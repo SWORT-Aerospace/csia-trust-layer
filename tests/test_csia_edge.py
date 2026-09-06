@@ -163,12 +163,131 @@ def test_an_ambiguous_relation_name_is_disambiguated_in_the_summary():
     """`velocity_gps_doppler` names two edges. On a single-IMU airframe one
     instance is INAPPLICABLE and the other UNKNOWN, and a summary keyed on
     the bare name puts the same string in two buckets -- which reads as a
-    contradiction and was doing exactly that before this was fixed."""
+    contradiction and was doing exactly that before this was fixed.
+
+    The labels asserted here are the RUNTIME's identifiers, not invented ones:
+    csia/prediction/comparator.py has computed `velocity_gps_doppler_0` and
+    `_1` all along, and they are the strings in `gps_gates` in every
+    Mechanism-A trial artifact. A capability report and a trial artifact now
+    name the same edge the same way.
+    """
     report = negotiate(ArduPilotAdapter(), load(MINIMAL))
     absent = set(report.structurally_absent_relations)
     unknown = set(report.unknown_relations)
     assert not (absent & unknown), (
         f"the same label appears in two capability buckets: "
         f"{sorted(absent & unknown)}")
-    assert "velocity_gps_doppler(imu1,gps)" in absent
-    assert "velocity_gps_doppler(imu0,gps)" in unknown
+    assert "velocity_gps_doppler_1" in absent
+    assert "velocity_gps_doppler_0" in unknown
+
+
+# --------------------------------------------------------------------- §11
+# THE THREE GUARDS THE DEFECT ASKED FOR
+#
+# FL-004 was found by reading output, not by a test. These are the tests that
+# would have found it, generalised past the one relation that exhibited it.
+
+def _all_reports():
+    """Every shipped profile against its own platform's adapter."""
+    import glob
+
+    from csia.aircraft.adapters.px4 import PX4Adapter
+    adapters = {"ardupilot": ArduPilotAdapter, "px4": PX4Adapter}
+    for path in sorted(glob.glob(os.path.join(PROFILES, "*.yaml"))):
+        profile = load(path)
+        yield path, negotiate(adapters[profile.autopilot](), profile)
+
+
+def test_no_edge_id_lands_in_two_mutually_exclusive_buckets():
+    """The four summary buckets partition the edges; they do not overlap.
+
+    active / inactive / structurally_absent / unknown are mutually exclusive
+    CLAIMS: "feeding evidence", "declared and dark", "never going to exist",
+    "too early to say". An identifier in two of them at once is not a
+    conservative report, it is an unreadable one -- and a reader resolving the
+    contradiction guesses, which is the failure this whole module exists to
+    prevent.
+
+    Checked across every shipped profile rather than the one that happened to
+    exhibit it, because the next duplicate name will be on some other airframe.
+    """
+    for path, report in _all_reports():
+        buckets = {
+            "active": set(report.active_relations),
+            "inactive": set(report.inactive_relations),
+            "structurally_absent": set(report.structurally_absent_relations),
+            "unknown": set(report.unknown_relations),
+        }
+        names = sorted(buckets)
+        for i, a in enumerate(names):
+            for b in names[i + 1:]:
+                overlap = buckets[a] & buckets[b]
+                assert not overlap, (
+                    f"{os.path.basename(path)}: {sorted(overlap)} appears in "
+                    f"both '{a}' and '{b}'. Two mutually exclusive claims "
+                    f"about one edge.")
+
+
+def test_every_edge_id_the_summary_emits_exists_in_the_runtime():
+    """A disambiguating label must be the runtime's, not a display string.
+
+    The first fix for FL-004 synthesised `velocity_gps_doppler(imu0,gps)`.
+    It read fine and was disjoint and was still wrong: no artifact, log or
+    module anywhere in the repository contains that string, so a capability
+    report could not be joined to a trial artifact. This asserts the labels
+    are the ones the frozen core actually computes.
+    """
+    from csia.aircraft import capability as cap_mod
+
+    core = ""
+    for rel in ("csia/prediction/comparator.py", "csia/runtime/online.py",
+                "csia/trust_graph/graph.py"):
+        with open(os.path.join(ROOT, rel), encoding="utf-8") as fh:
+            core += fh.read()
+
+    emitted = set()
+    for _path, report in _all_reports():
+        for key in ("active_relations", "inactive_relations",
+                    "structurally_absent_relations", "unknown_relations"):
+            emitted.update(getattr(report, key))
+
+    missing = sorted(e for e in emitted if f'"{e}"' not in core)
+    assert not missing, (
+        f"capability summary emits identifiers absent from the frozen core: "
+        f"{missing}. A label the runtime never writes cannot be joined to a "
+        f"trial artifact, which is the only reason to disambiguate at all.")
+
+    # And the mapping itself must not have drifted from the runtime.
+    for value in cap_mod.EDGE_ID.values():
+        assert f'"{value}"' in core, \
+            f"EDGE_ID maps to {value!r}, which the frozen core does not define"
+
+
+def test_a_new_duplicate_relation_name_cannot_slip_through_unmapped():
+    """Fails CLOSED when the frozen graph gains another ambiguous name.
+
+    EDGE_ID is a hand-maintained mapping, and FL-001 is this program's
+    standing evidence that hand-maintained lists decay silently. Derive the
+    set of names needing an entry from EDGES rather than trusting the mapping
+    to be complete.
+    """
+    from collections import Counter
+
+    from csia.aircraft.capability import EDGE_ID
+    from csia.trust_graph.graph import EDGES
+
+    edges = {(rel, (a, b)) for a, b, rel, _d in EDGES}
+    repeated = {rel for rel, n in Counter(r for r, _e in edges).items() if n > 1}
+
+    unmapped = sorted(
+        f"{rel}{endpoints}" for rel, endpoints in edges
+        if rel in repeated and (rel, endpoints) not in EDGE_ID)
+    assert not unmapped, (
+        f"the trust graph gives these edges a name it also gives another "
+        f"edge, and no EDGE_ID entry disambiguates them: {unmapped}. Add the "
+        f"identifier the runtime uses -- do not invent one.")
+
+    stale = sorted(k for k in EDGE_ID if k[0] not in repeated)
+    assert not stale, (
+        f"EDGE_ID carries entries for names that are no longer ambiguous: "
+        f"{stale}. Harmless today, misleading later.")

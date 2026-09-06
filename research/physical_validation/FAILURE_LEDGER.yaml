@@ -219,3 +219,49 @@ entries:
       them -- see PAPER_IMPACT_LEDGER PI-002 for why, and for what may
       therefore not be claimed.
     artifact: research/physical_validation/results/structural_property_campaign.json
+
+  - id: FL-008
+    date: 2026-09-06
+    phase: P11 (edge-identifier correction)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      THE FIX FOR FL-004 WAS ITSELF WRONG, and this entry supersedes its
+      consequence field. To disambiguate the two velocity_gps_doppler edges I
+      SYNTHESISED a label -- "velocity_gps_doppler(imu0,gps)" -- by
+      concatenating the relation name with its endpoints. It read well, the
+      buckets were disjoint, the test passed, and the string exists nowhere
+      else in the repository or in any artifact. Meanwhile the runtime has had
+      stable identifiers for these two edges since before this program began:
+      csia/prediction/comparator.py:149-150 computes them as
+      `velocity_gps_doppler_0` (imu0-gps) and `velocity_gps_doppler_1`
+      (imu1-gps), csia/runtime/online.py:207-208 registers the same two in
+      _edge_meta, csia/deploy/shadow.py:191 traces them by those names, and
+      they are the keys under `gps_gates` in every Mechanism-A trial artifact.
+    found_by: >-
+      Re-reading csia/prediction/comparator.py while checking whether the
+      capability report could be joined to a trial artifact. No test caught
+      it: the FL-004 test asserted the two buckets were DISJOINT, which a
+      wholly invented label satisfies perfectly.
+    verdict: RECORDED
+    consequence: >-
+      The invented labels were replaced by the runtime's own identifiers
+      (csia/aircraft/capability.py EDGE_ID, edge_id(),
+      RelationCapability.edge_id), and to_dict() now emits "edge_id" beside
+      "relation" rather than replacing it -- the display name is still true and
+      still useful, it is simply not an identifier.
+      THE LESSON IS NOT "a name collision needs a suffix". It is that a
+      disambiguating label is only worth anything if it JOINS: an identifier
+      the rest of the system never writes is a private convention wearing an
+      identifier's clothes, and it makes the report look more precise while
+      making it strictly less useful.
+      Three guards added, none of which the invented scheme would have passed:
+      no edge ID may appear in two mutually exclusive availability buckets
+      (checked across every shipped profile, not just the one that exhibited
+      the defect); every identifier the summary emits must appear as a literal
+      in the frozen core; and any relation name the trust graph gives to more
+      than one edge must have an EDGE_ID entry, so the next duplicate fails
+      closed instead of silently reappearing in two buckets.
+      No frozen-core file was modified. No evidence is affected: the capability
+      layer is pre-flight reporting and feeds no diagnostic decision.
+    artifact: csia/aircraft/capability.py; tests/test_csia_edge.py
+    supersedes: FL-004 (consequence only; the defect description stands)
