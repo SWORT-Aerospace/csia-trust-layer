@@ -35,6 +35,8 @@ from typing import Optional
 
 import yaml
 
+from . import firewall
+
 #: Keys that would move diagnostic mathematics. Rejected by name, at any depth.
 #: Every entry corresponds to a real constant in the frozen core; the list is
 #: not speculative and `tests/test_vehicle_profile.py` pins it against source.
@@ -144,6 +146,18 @@ def _walk_keys(node, path=""):
             yield from _walk_keys(v, f"{path}[{i}]")
 
 
+def _walk_values(node, path=""):
+    """Leaf values, with their paths. Keys alone do not close the env route."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk_values(v, f"{path}.{k}".lstrip("."))
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            yield from _walk_values(v, f"{path}[{i}]")
+    else:
+        yield path, node
+
+
 def validate(doc: dict, source_path: Optional[str] = None) -> VehicleProfile:
     """Parse and check a profile. Raises ProfileError with a reason.
 
@@ -155,18 +169,55 @@ def validate(doc: dict, source_path: Optional[str] = None) -> VehicleProfile:
         raise ProfileError(f"{where}: profile is not a mapping")
 
     # -- the load-bearing check --------------------------------------------
-    offenders = sorted({
-        f"{p} (key {k!r})" for p, k in _walk_keys(doc)
-        if k.lower() in FORBIDDEN_KEYS})
+    # TWO LISTS, ON PURPOSE, AND THEY OVERLAP.
+    #
+    #   FORBIDDEN_KEYS is hand-written. It covers concepts the core has no
+    #   single constant for -- "signature", "priors", "cusum_h" -- and it
+    #   produces the message a reader understands.
+    #
+    #   firewall.collision() is GENERATED from the frozen source and matches
+    #   through case, separators, camelCase, framing prefixes and plurals. It
+    #   covers the constants nobody remembered, which is the failure mode
+    #   FL-001 already demonstrated on this very list.
+    #
+    # Neither subsumes the other, so both run and the offender list says which
+    # one fired and, where it can, names the constant in the core.
+    offenders = {}
+    for p, k in _walk_keys(doc):
+        if str(k).lower() in FORBIDDEN_KEYS:
+            offenders[p] = f"{p} (key {k!r} is a reserved diagnostic name)"
+            continue
+        hit = firewall.collision(k)
+        if hit:
+            offenders[p] = (f"{p} (key {k!r} shadows the frozen core's "
+                            f"{hit})")
+    for p, v in _walk_values(doc):
+        env = firewall.env_collision(v)
+        if env:
+            offenders[p] = (f"{p} (value refers to ${env[0]}, which shadows "
+                            f"the frozen core's {env[1]})")
     if offenders:
         raise ProfileError(
             f"{where}: a vehicle profile may not set diagnostic parameters. "
-            f"Offending keys:\n  " + "\n  ".join(offenders) +
+            f"Offending keys:\n  " + "\n  ".join(sorted(offenders.values())) +
             "\n\nA profile declares PLUMBING -- transport, streams, rates, "
             "which channels exist. Thresholds, weights, priors, signatures, "
             "gates and smoothing belong to the frozen core, and a profile "
             "that could move them would make 'the same core ran on both "
             "vehicles' false.")
+
+    # -- fail closed, in the two places where silence would be worse -------
+    # Everywhere else in this function rejects something RECOGNISED as wrong.
+    # These two reject anything NOT RECOGNISED, which is the only way to stop
+    # a parameter nobody has thought of yet.
+    unknown_sections = sorted(set(doc) - firewall.ALLOWED_TOP_LEVEL)
+    if unknown_sections:
+        raise ProfileError(
+            f"{where}: unknown top-level section(s) {unknown_sections}. A "
+            f"profile's sections are a closed set "
+            f"({sorted(firewall.ALLOWED_TOP_LEVEL)}); an unrecognised one is "
+            f"silently ignored today, which is indistinguishable from being "
+            f"honoured and is how a 'tuning:' block would arrive unnoticed.")
 
     vp = doc.get("vehicle_profile") or {}
     profile_id = vp.get("id") or doc.get("profile_id")
@@ -191,6 +242,14 @@ def validate(doc: dict, source_path: Optional[str] = None) -> VehicleProfile:
 
     for ch, spec in streams.items():
         spec = spec or {}
+        extra = sorted(set(spec) - firewall.ALLOWED_STREAM_SPEC_KEYS)
+        if extra:
+            raise ProfileError(
+                f"{where}: channel {ch} carries unrecognised key(s) {extra}. "
+                f"A stream spec is {sorted(firewall.ALLOWED_STREAM_SPEC_KEYS)} "
+                f"and nothing else -- this is the one place where an invented "
+                f"key like 'sigma' or 'scale' would read as plumbing and be a "
+                f"diagnostic parameter.")
         status = spec.get("status", "declared")
         if status not in ("declared", "inapplicable"):
             raise ProfileError(
