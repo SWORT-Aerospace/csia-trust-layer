@@ -22,11 +22,14 @@ Out:  research/phase2/results/modern_replication.json
 import json
 import os
 import shutil
+import argparse
 import subprocess
 import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+from tools.evidence_guard import protected_write  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RESULTS = os.path.join(HERE, "results")
@@ -131,9 +134,23 @@ def probe(binary, speedup=10, seconds=12):
             proc.kill()
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    # FL-013: this script used to write its committed artifact unconditionally.
+    # Running it to check whether a freshly built simulator worked therefore
+    # overwrote research/phase2/results/modern_replication.json -- silently,
+    # with exit code 0 and a cheerful "wrote ..." line. The diff was small
+    # (a build path, a git hash, message counts that vary run to run), which
+    # is what made it dangerous: a large diff gets noticed.
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--out", default=None,
+                    help="write somewhere else; the safe way to re-probe")
+    ap.add_argument("--regenerate", action="store_true",
+                    help="overwrite the committed artifact deliberately, and "
+                         "expect to explain the diff")
+    args = ap.parse_args(argv)
+
     os.makedirs(RESULTS, exist_ok=True)
-    out_path = os.path.join(RESULTS, "modern_replication.json")
+    out_path = args.out or os.path.join(RESULTS, "modern_replication.json")
 
     if not (os.path.isfile(AP_BIN) and os.access(AP_BIN, os.X_OK)):
         report = {
@@ -245,7 +262,7 @@ def main() -> int:
                 "replicate the result."),
         }
 
-    with open(out_path, "w") as fh:
+    with protected_write(out_path, regenerate=args.regenerate) as fh:
         json.dump(report, fh, indent=1, sort_keys=True)
     print(f"status: {report['status']}")
     if report["status"].startswith("MODERN_TARGET_AVAILABLE"):

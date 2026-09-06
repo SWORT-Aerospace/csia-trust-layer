@@ -338,3 +338,133 @@ entries:
       NOT a scientific defect and no claim depends on it.
     artifact: docs/DOCUMENT_INDEX.md; tests/test_doc_counts.py
 
+  - id: FL-011
+    date: 2026-09-06
+    phase: P7 (repeated current-stack preregistration)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      THE ORIGINAL E1 BUILD CANNOT BE IDENTIFIED. Preparing the repeated
+      Mechanism A preregistration required pinning the autopilot build the
+      original n=1 trials ran on. It is not recorded anywhere:
+      research/v1_1/results/mechanism_a_ardupilot.json carries
+      `platform: "ardupilot"` and nothing more; the underlying
+      results/mechanism_a/ap_FAULT.json carries no firmware field at all;
+      research/v1_1/CURRENT_STACK_REPLICATION.md names "ArduPilot 4.8"
+      throughout and never a commit. configs/vehicle/example_quad.yaml has
+      `firmware_git_hash: UNSET` with the comment "Fill this in from the
+      vehicle, do not copy it from here" -- the field exists, the discipline
+      was designed, and the campaign predates its use.
+      "ArduPilot 4.8" is a DEVELOPMENT BRANCH, not a release: the newest
+      released tag is Copter-4.7.1. Every 4.8-dev build is a different
+      program.
+    found_by: >-
+      Writing the P7 preregistration and trying to pin the build, rather than
+      writing "the same stack" and moving on.
+    verdict: RECORDED
+    consequence: >-
+      A repeated campaign therefore CANNOT be described as a repeat of the
+      original run, and the preregistration says so in section 2 before any
+      data exists. What it can establish is the within-build repeatability of
+      a NEWLY PINNED build (e21b732a07ce2b632ea99b098ee6ab7ece0971ea, authored
+      2026-09-05, verified to contain the same
+      AP_GROUPINFO("GLTCH", 6, GPSParms, glitch, 0) injection parameter the
+      replication document cites).
+      THE CONSEQUENCE THAT MATTERS: if the repeat's numbers differ from the
+      original's, there are two candidate explanations -- run-to-run variation
+      and a different autopilot build -- and the design cannot separate them,
+      because one of the two is unrecoverable. Reporting a difference as
+      run-to-run variation would assert something no design here can
+      establish.
+      Going forward, tools/csia_experiment/manifest.py:provenance() records
+      the pinned commit in every trial manifest, and a trial whose manifest
+      lacks it is INVALID_SCENARIO rather than a result. That closes the gap
+      for future campaigns; it cannot close it retroactively.
+      NOT A DEFECT IN THE ORIGINAL RESULT. The n=1 Mechanism A finding stands
+      on what it measured. What is lost is the ability to re-run exactly it.
+    artifact: >-
+      research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md;
+      research/v1_1/results/mechanism_a_ardupilot.json
+
+  - id: FL-012
+    date: 2026-09-06
+    phase: P8 (execution environment)
+    kind: GUARD_STOPPED_WORK
+    what_happened: >-
+      Neither current-stack simulator was installed in this environment.
+      `which sim_vehicle.py arducopter px4` returns nothing, no ArduPilot or
+      PX4 source tree exists on disk, and firmware.ardupilot.org answers 000
+      through the agent proxy. The E1 evidence tier depends on both.
+    found_by: >-
+      Checking whether P8 could actually run before writing anything that
+      assumed it could. USER_ACTION_REQUIRED.md initially said the repeated
+      campaign "runs on the same ArduPilot 4.8 SITL and PX4 SIH"; that
+      sentence was true about HARDWARE and false about this environment, and
+      it was corrected rather than left.
+    verdict: RECORDED
+    consequence: >-
+      ArduPilot is buildable here and was measured to be: the source clones
+      from github.com (821 MB, under 60 s), gcc/g++/make/cmake/ninja are all
+      present, 22 GB of disk is free, and `./waf configure --board sitl`
+      returns 0. So the blocker is not access -- it is build time and the
+      section-2 identifiability problem above.
+      Recorded rather than assumed either way. A campaign reported as "not run
+      because it could not be run" when it could have been is as much a
+      misstatement as the reverse.
+    artifact: research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md
+
+  - id: FL-013
+    date: 2026-09-06
+    phase: P7/P8 (build identification)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      FL-011 IS WRONG AND THIS ENTRY CORRECTS IT. FL-011 concluded that the
+      autopilot build behind the E1 Mechanism A evidence "cannot be
+      identified", on the strength of having searched the Mechanism A
+      artifacts and CURRENT_STACK_REPLICATION.md and found no firmware field.
+      That search was too narrow. The build is recorded, unambiguously and in
+      four places, by artifacts from the same campaign era:
+      research/phase2/results/modern_replication.json carries
+      `git_head: 01a504b` with `firmware_string: ArduCopter V4.8.0-dev`;
+      research/dual_admissibility_confirmatory/results/STAGE2_1_KILL_TEST.json
+      carries "simulator": "ArduPilot SITL @ 01a504b"; every row of
+      .../heldout_raw/CAPTURE_INDEX.json carries
+      "ArduCopter V4.8.0-dev@01a504b"; and HIL_CRITERION_0_PLAN.md names it as
+      "the same commit the repository is verified against".
+      The commit resolves: 01a504b472259602e13df4cf07df7c0cdbb35993, authored
+      2026-08-23, two days before the Mechanism A flight ids
+      (20260825T005244Z, 20260825T005343Z).
+    found_by: >-
+      Running research/phase2/modern_replication.py against a freshly built
+      master and reading the resulting git DIFF, which showed the committed
+      artifact's `git_head` changing from 01a504b to the new build's hash. The
+      recorded value was visible only because the file was overwritten -- see
+      the consequence below, which is a second, separate error.
+    verdict: RECORDED
+    consequence: >-
+      TWO ERRORS, AND THE SECOND IS WORSE THAN THE FIRST.
+      (1) FL-011's conclusion is withdrawn. The repeated campaign IS a repeat
+      of the original build, not of a newly pinned one, and the
+      preregistration was corrected BEFORE being frozen -- section 2 now
+      records the identification, the correction and why it matters. What
+      survives from FL-011 is the narrower true statement: the Mechanism A
+      artifacts THEMSELVES carry no firmware field, and a reader holding only
+      those files cannot identify the build. That is worth fixing going
+      forward, and tools/csia_experiment/manifest.py:provenance() now records
+      the build in every trial manifest.
+      (2) RUNNING THE PROBE OVERWROTE COMMITTED EVIDENCE.
+      modern_replication.py writes research/phase2/results/
+      modern_replication.json unconditionally, and running it modified a
+      committed artifact -- the exact thing this program is instructed never
+      to do. It was reverted immediately with `git checkout --` and the file
+      is byte-identical to its committed state; no commit contains the
+      modification. The near-miss is recorded because the guard that should
+      have caught it does not exist: nothing in this repository stops a
+      research script from overwriting frozen evidence, and the only reason it
+      was noticed is that `git status` was checked straight afterwards.
+      NO EVIDENCE IS AFFECTED. The overwrite lasted under a minute and was
+      never committed.
+    artifact: >-
+      research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md;
+      research/phase2/results/modern_replication.json
+    supersedes: FL-011 (conclusion withdrawn; the narrow finding stands)
+

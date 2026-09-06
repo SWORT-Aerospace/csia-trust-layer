@@ -1,0 +1,1256 @@
+{
+  "counts": {
+    "INVALID_MUTANT": 1,
+    "KILLED": 18,
+    "KILLED_BY_INTEGRITY_ONLY": 5
+  },
+  "head": "33d3d61552dfad479e0fc7031726cf7e65ae6940",
+  "integrity_guards": {
+    "tests/test_phase_c_freeze.py::test_every_recorded_hash_still_matches": [
+      "sha256",
+      "hexdigest",
+      "_sha("
+    ],
+    "tests/test_v1_1_golden.py::test_every_case_names_its_source_config_input_and_output_hashes": [
+      "sha256"
+    ],
+    "tests/test_v1_1_golden.py::test_every_stored_file_matches_its_recorded_file_hash": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_corpus_hash_covers_every_case": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_tier_a_encoding_is_lossless": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_tier_c_fields_are_not_in_the_frozen_ledger": [
+      "sha256"
+    ],
+    "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched": [
+      "\"diff\""
+    ],
+    "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched": [
+      "\"diff\""
+    ],
+    "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze": [
+      "FROZEN_TAG",
+      "_git(",
+      "\"diff\""
+    ],
+    "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes": [
+      "sha256",
+      "hexdigest"
+    ]
+  },
+  "integrity_guards_note": "DERIVED from the selection's own sources by integrity_guards(), not hand-listed -- the hand list was wrong on its first run. Nothing is deselected; these are the node ids a failure is classified AGAINST.",
+  "mutants": [
+    {
+      "behavioural_killers": [
+        "tests/test_comparator.py::test_speed_gate_semantics"
+      ],
+      "breaks": "Opens the horizontal-speed gate at every speed. The gate exists because the heading/course relation contributes nothing below a speed threshold; removing it feeds noise into a relation as though it were evidence.",
+      "expect": "KILLED",
+      "family": "GATING",
+      "full_run": {
+        "failures": [
+          "tests/test_comparator.py::test_speed_gate_semantics"
+        ],
+        "first_failure": "tests/test_comparator.py::test_speed_gate_semantics",
+        "returncode": 1,
+        "seconds": 40.4,
+        "tail": [
+          "=========================== short test summary info ============================",
+          "FAILED tests/test_comparator.py::test_speed_gate_semantics - AssertionError: ..."
+        ]
+      },
+      "id": "GATING-01",
+      "integrity_killers": [],
+      "new": "GATE_SPEED_LO = 0.0",
+      "note": "",
+      "old": "GATE_SPEED_LO = 2.0",
+      "path": "csia/prediction/comparator.py",
+      "result": {
+        "failures": [
+          "tests/test_comparator.py::test_speed_gate_semantics"
+        ],
+        "first_failure": "tests/test_comparator.py::test_speed_gate_semantics",
+        "returncode": 1,
+        "seconds": 38.5,
+        "tail": [
+          "FAILED tests/test_comparator.py::test_speed_gate_semantics - AssertionError: ...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+        "tests/test_engine.py::test_prior_and_convergence",
+        "tests/test_comparator.py::test_speed_gate_semantics",
+        "tests/test_comparator.py::test_clean_flight_residuals_nominal"
+      ],
+      "breaks": "Closes the same gate permanently. The mirror of GATING-01: a gate stuck shut removes a relation entirely, which the layer must report as unassessable rather than as healthy.",
+      "expect": "KILLED",
+      "family": "GATING",
+      "full_run": {
+        "failures": [
+          "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+          "tests/test_engine.py::test_prior_and_convergence",
+          "tests/test_comparator.py::test_speed_gate_semantics",
+          "tests/test_comparator.py::test_clean_flight_residuals_nominal"
+        ],
+        "first_failure": "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+        "returncode": 1,
+        "seconds": 40.1,
+        "tail": [
+          "FAILED tests/test_comparator.py::test_speed_gate_semantics - AssertionError: ...",
+          "FAILED tests/test_comparator.py::test_clean_flight_residuals_nominal - Assert..."
+        ]
+      },
+      "id": "GATING-02",
+      "integrity_killers": [],
+      "new": "GATE_SPEED_LO = 200.0",
+      "note": "",
+      "old": "GATE_SPEED_LO = 2.0",
+      "path": "csia/prediction/comparator.py",
+      "result": {
+        "failures": [
+          "tests/test_engine.py::test_trust_bounded_and_clean_floor"
+        ],
+        "first_failure": "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+        "returncode": 1,
+        "seconds": 25.1,
+        "tail": [
+          "FAILED tests/test_engine.py::test_trust_bounded_and_clean_floor - AssertionEr...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py::test_online_matches_batch"
+      ],
+      "breaks": "Arms every propulsion relation from tick zero, before the vehicle is armed. Pre-arm ESC and current readings are not evidence about flight.",
+      "expect": "KILLED",
+      "family": "GATING",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py::test_online_matches_batch"
+        ],
+        "first_failure": "tests/test_runtime.py::test_online_matches_batch",
+        "returncode": 1,
+        "seconds": 40.2,
+        "tail": [
+          "=========================== short test summary info ============================",
+          "FAILED tests/test_runtime.py::test_online_matches_batch - AssertionError: imu..."
+        ]
+      },
+      "id": "GATING-03",
+      "integrity_killers": [],
+      "new": "armed_gate = np.clip((ticks - 5.0) / 1.0, 1.0, 1.0)",
+      "note": "",
+      "old": "armed_gate = np.clip((ticks - 5.0) / 1.0, 0.0, 1.0)",
+      "path": "csia/prediction/comparator.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py::test_online_matches_batch"
+        ],
+        "first_failure": "tests/test_runtime.py::test_online_matches_batch",
+        "returncode": 1,
+        "seconds": 26.2,
+        "tail": [
+          "FAILED tests/test_runtime.py::test_online_matches_batch - AssertionError: imu...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+        "tests/test_v1_1_support.py::test_ambiguity_does_not_track_the_score_margin"
+      ],
+      "breaks": "Declares GPS valid at every tick, including during injected fix loss. This is the closest single-line analogue of the systems paper's headline mechanism, and it must not survive.",
+      "expect": "KILLED",
+      "family": "GATING",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+          "tests/test_v1_1_support.py::test_ambiguity_does_not_track_the_score_margin"
+        ],
+        "first_failure": "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+        "returncode": 1,
+        "seconds": 39.9,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+          "FAILED tests/test_v1_1_support.py::test_ambiguity_does_not_track_the_score_margin"
+        ]
+      },
+      "id": "GATING-04",
+      "integrity_killers": [],
+      "new": "gvalid = a[\"gps_valid\"] * 0 + 1",
+      "note": "",
+      "old": "gvalid = a[\"gps_valid\"]",
+      "path": "csia/prediction/comparator.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported"
+        ],
+        "first_failure": "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+        "returncode": 1,
+        "seconds": 38.7,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code"
+      ],
+      "breaks": "Raises the likelihood floor tenfold. EPS is departure 1 of 4 from a Bayes posterior and is why the output is a normalized hypothesis weight.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 40.3,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "EVIDENCE-01",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "EPS = 10 * ",
+      "note": "",
+      "old": "EPS = ",
+      "path": "csia/diagnosis/bayes.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.6,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_diagnosis.py::test_clean_flight_reads_nominal",
+        "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+        "tests/test_v1_1_support.py::test_ambiguity_does_not_track_the_score_margin",
+        "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code"
+      ],
+      "breaks": "Removes evidence tempering entirely. Departure 3 of 4.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_diagnosis.py::test_clean_flight_reads_nominal",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_support.py::test_the_fix_loss_case_is_reported_as_unsupported",
+          "tests/test_v1_1_support.py::test_ambiguity_does_not_track_the_score_margin",
+          "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_diagnosis.py::test_clean_flight_reads_nominal",
+        "returncode": 1,
+        "seconds": 39.7,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "EVIDENCE-02",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "EVIDENCE_MULT = 0 * ",
+      "note": "",
+      "old": "EVIDENCE_MULT = ",
+      "path": "csia/diagnosis/bayes.py",
+      "result": {
+        "failures": [
+          "tests/test_diagnosis.py::test_clean_flight_reads_nominal"
+        ],
+        "first_failure": "tests/test_diagnosis.py::test_clean_flight_reads_nominal",
+        "returncode": 1,
+        "seconds": 1.1,
+        "tail": [
+          "FAILED tests/test_diagnosis.py::test_clean_flight_reads_nominal - assert np.f...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code"
+      ],
+      "breaks": "Inverts the EWMA constant, turning ~15 ticks of smoothing into almost none. Departure 2 of 4, and the systems paper's latency figures rest on the resulting time constant.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 40.2,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_phase2_artifacts_exist_and_agree_with_the_code",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "EVIDENCE-03",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "SMOOTH_ALPHA = 1.0 - ",
+      "note": "",
+      "old": "SMOOTH_ALPHA = ",
+      "path": "csia/diagnosis/bayes.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.3,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+        "tests/test_runtime.py::test_gps_vz_invalid_does_not_false_alarm_on_climb"
+      ],
+      "breaks": "Zeroes the physical-consistency weight, so cross-sensor relations stop contributing to any trust coefficient.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+          "tests/test_runtime.py::test_gps_vz_invalid_does_not_false_alarm_on_climb",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+        "returncode": 1,
+        "seconds": 40.2,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "EVIDENCE-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "w_phys: float = 0.0",
+      "note": "",
+      "old": "w_phys: float = 0.30",
+      "path": "csia/trust_engine/engine.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery"
+        ],
+        "first_failure": "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+        "returncode": 1,
+        "seconds": 28.9,
+        "tail": [
+          "FAILED tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery - ...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Multiplies the Beta prior mass by 100. S_0 = 475.6775 -- the measured settled mass in the 118.82 chain -- is a consequence of this prior.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 40.3,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "EVIDENCE-05",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "alpha0: float = 800.0",
+      "note": "",
+      "old": "alpha0: float = 8.0",
+      "path": "csia/trust_engine/engine.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.1,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py",
+        "tests/test_determinism.py",
+        "tests/test_v1_1_staleness.py"
+      ],
+      "breaks": "Makes nothing ever go stale, so a dead sensor's last value is treated as current evidence indefinitely.",
+      "expect": "KILLED",
+      "family": "TIMING",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py",
+          "tests/test_determinism.py",
+          "tests/test_v1_1_staleness.py"
+        ],
+        "first_failure": "tests/test_runtime.py",
+        "returncode": 2,
+        "seconds": 0.9,
+        "tail": [
+          "ERROR tests/test_v1_1_staleness.py - TypeError: unsupported operand type(s) f...",
+          "!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "id": "TIMING-01",
+      "integrity_killers": [],
+      "new": "STALE_TIMEOUT_S = 1000.0 * ",
+      "note": "",
+      "old": "STALE_TIMEOUT_S = ",
+      "path": "csia/runtime/online.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py"
+        ],
+        "first_failure": "tests/test_runtime.py",
+        "returncode": 1,
+        "seconds": 0.8,
+        "tail": [
+          "ERROR tests/test_runtime.py - TypeError: unsupported operand type(s) for *: '...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py",
+        "tests/test_determinism.py",
+        "tests/test_v1_1_staleness.py"
+      ],
+      "breaks": "The mirror: everything is stale immediately, so no evidence is ever admissible. A layer that reports health under this mutant is reporting it from nothing.",
+      "expect": "KILLED",
+      "family": "TIMING",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py",
+          "tests/test_determinism.py",
+          "tests/test_v1_1_staleness.py"
+        ],
+        "first_failure": "tests/test_runtime.py",
+        "returncode": 2,
+        "seconds": 0.9,
+        "tail": [
+          "ERROR tests/test_v1_1_staleness.py - TypeError: unsupported operand type(s) f...",
+          "!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "id": "TIMING-02",
+      "integrity_killers": [],
+      "new": "STALE_TIMEOUT_S = 0.0 * ",
+      "note": "",
+      "old": "STALE_TIMEOUT_S = ",
+      "path": "csia/runtime/online.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py"
+        ],
+        "first_failure": "tests/test_runtime.py",
+        "returncode": 1,
+        "seconds": 0.8,
+        "tail": [
+          "ERROR tests/test_runtime.py - TypeError: unsupported operand type(s) for *: '...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py::test_profiles_registry_and_validation"
+      ],
+      "breaks": "Removes the escalation dwell, so a single tick flaps the failsafe level. The 1.0 s dwell is the term CUSUM_FAIRNESS.yaml removes before any latency comparison -- red team 2.3.",
+      "expect": "KILLED",
+      "family": "TIMING",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py::test_profiles_registry_and_validation",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_runtime.py::test_profiles_registry_and_validation",
+        "returncode": 1,
+        "seconds": 40.1,
+        "tail": [
+          "FAILED tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "TIMING-03",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "dwell_up: float = 0.0",
+      "note": "",
+      "old": "dwell_up: float = 1.0",
+      "path": "csia/runtime/failsafe.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py::test_profiles_registry_and_validation"
+        ],
+        "first_failure": "tests/test_runtime.py::test_profiles_registry_and_validation",
+        "returncode": 1,
+        "seconds": 36.5,
+        "tail": [
+          "FAILED tests/test_runtime.py::test_profiles_registry_and_validation - Asserti...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Removes the baseline detectors' dwell. The Mechanism-B comparison is against these baselines; a baseline that fires instantly is not the baseline the paper describes.",
+      "expect": "KILLED",
+      "family": "TIMING",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 40.0,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "TIMING-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "DWELL_TICKS = 0 * ",
+      "note": "",
+      "old": "DWELL_TICKS = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.5,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Caps every hypothesis at one source, so no multi-source hypothesis can form and shared-cause attribution becomes impossible.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": null,
+      "id": "SUPPORT-01",
+      "integrity_killers": [],
+      "new": "MAX_SOURCES_PER_HYPOTHESIS = 1 + 0 * ",
+      "note": "",
+      "old": "MAX_SOURCES_PER_HYPOTHESIS = ",
+      "path": "csia/diagnosis/hypothesis.py",
+      "result": {
+        "failures": [],
+        "first_failure": null,
+        "returncode": 4,
+        "seconds": 0.4,
+        "tail": []
+      },
+      "verdict": "INVALID_MUTANT"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause",
+        "tests/test_hypothesis.py::test_unknown_activates_when_known_causes_are_disabled"
+      ],
+      "breaks": "Makes the UNKNOWN hypothesis unreachable, so unexplained evidence is always attributed to a modeled cause. This is precisely the failure the DEA profile forbids: attribution without separating evidence.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": {
+        "failures": [
+          "tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause",
+          "tests/test_hypothesis.py::test_unknown_activates_when_known_causes_are_disabled",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause",
+        "returncode": 1,
+        "seconds": 40.2,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "SUPPORT-02",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "UNKNOWN_MIN_UNEXPLAINED = 1000 + 0 * ",
+      "note": "",
+      "old": "UNKNOWN_MIN_UNEXPLAINED = ",
+      "path": "csia/diagnosis/hypothesis.py",
+      "result": {
+        "failures": [
+          "tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause",
+        "returncode": 1,
+        "seconds": 6.3,
+        "tail": [
+          "FAILED tests/test_hypothesis.py::test_delayed_second_source_is_not_forced_into_common_cause",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause",
+        "tests/test_hypothesis.py::test_clean_flight_activates_nothing",
+        "tests/test_hypothesis.py::test_low_evidence_stays_low_confidence_not_unknown"
+      ],
+      "breaks": "Promotes every hypothesis to ACTIVE regardless of accumulated evidence.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": {
+        "failures": [
+          "tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause",
+          "tests/test_hypothesis.py::test_clean_flight_activates_nothing",
+          "tests/test_hypothesis.py::test_low_evidence_stays_low_confidence_not_unknown",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause",
+        "returncode": 1,
+        "seconds": 39.8,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "SUPPORT-03",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "ACTIVE_CONF = 0.0 * ",
+      "note": "",
+      "old": "ACTIVE_CONF = ",
+      "path": "csia/diagnosis/hypothesis.py",
+      "result": {
+        "failures": [
+          "tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause",
+        "returncode": 1,
+        "seconds": 4.8,
+        "tail": [
+          "FAILED tests/test_hypothesis.py::test_near_simultaneous_independent_faults_still_not_common_cause",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Lets a single degraded source establish a shared-resource verdict, removing the multi-source requirement the baselines are built on.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 39.8,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "SUPPORT-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "D_MIN_SOURCES = 1 + 0 * ",
+      "note": "",
+      "old": "D_MIN_SOURCES = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.1,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery"
+      ],
+      "breaks": "Drops the navigation caution threshold to zero, so no trust value ever crosses it. T* = 0.75 is in the 118.82 chain and in every latency figure compared against CUSUM.",
+      "expect": "KILLED",
+      "family": "CONFIGURATION",
+      "full_run": {
+        "failures": [
+          "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+        "returncode": 1,
+        "seconds": 39.7,
+        "tail": [
+          "FAILED tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "CONFIGURATION-01",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "nav_caution: float = 0.0 * ",
+      "note": "",
+      "old": "nav_caution: float = ",
+      "path": "csia/runtime/failsafe.py",
+      "result": {
+        "failures": [
+          "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery"
+        ],
+        "first_failure": "tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery",
+        "returncode": 1,
+        "seconds": 28.5,
+        "tail": [
+          "FAILED tests/test_runtime.py::test_failsafe_gps_spoof_caution_and_recovery - ...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Makes IMU isolation unreachable, so a divergent dual-IMU pair is never resolved to one unit.",
+      "expect": "KILLED",
+      "family": "CONFIGURATION",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 39.8,
+        "tail": [
+          "FAILED tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "CONFIGURATION-02",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "imu_isolation_gap: float = 0.99",
+      "note": "",
+      "old": "imu_isolation_gap: float = 0.12",
+      "path": "csia/runtime/failsafe.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.2,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_engine.py::test_trust_bounded_and_clean_floor"
+      ],
+      "breaks": "Collapses the forgetting factor's lower bound, so the engine discards history almost immediately under disagreement.",
+      "expect": "KILLED",
+      "family": "CONFIGURATION",
+      "full_run": {
+        "failures": [
+          "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+        "returncode": 1,
+        "seconds": 39.6,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "CONFIGURATION-03",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "rho_min: float = 0.10",
+      "note": "",
+      "old": "rho_min: float = 0.95",
+      "path": "csia/trust_engine/engine.py",
+      "result": {
+        "failures": [
+          "tests/test_engine.py::test_trust_bounded_and_clean_floor"
+        ],
+        "first_failure": "tests/test_engine.py::test_trust_bounded_and_clean_floor",
+        "returncode": 1,
+        "seconds": 25.3,
+        "tail": [
+          "FAILED tests/test_engine.py::test_trust_bounded_and_clean_floor - AssertionEr...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step"
+      ],
+      "breaks": "Collapses the temporal-coherence window, so simultaneity carries no weight in shared-cause assessment.",
+      "expect": "KILLED",
+      "family": "DIAGNOSIS",
+      "full_run": {
+        "failures": [
+          "tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step",
+        "returncode": 1,
+        "seconds": 39.8,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "DIAGNOSIS-01",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "TEMPORAL_FULL_S = 0.0 * ",
+      "note": "",
+      "old": "TEMPORAL_FULL_S = ",
+      "path": "csia/diagnosis/causal.py",
+      "result": {
+        "failures": [
+          "tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step"
+        ],
+        "first_failure": "tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step",
+        "returncode": 1,
+        "seconds": 19.0,
+        "tail": [
+          "FAILED tests/test_causal.py::test_temporal_coherence_is_monotonic_not_a_step",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "tests/test_hypothesis.py::test_shared_power_isolation_latency_is_bounded",
+        "tests/test_hypothesis.py::test_shared_and_independent_are_separated_by_margin",
+        "tests/test_hypothesis.py::test_active_hypothesis_carries_reason_codes",
+        "tests/test_hypothesis.py::test_temporal_evidence_is_load_bearing",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[0.9]",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[1.2]",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[1.8]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[20.0]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[25.0]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[40.0]",
+        "tests/test_hypothesis.py::test_held_out_generalization_is_pinned_at_its_measured_value",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.2-350.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.75-200.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.5-500.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.5-620.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[2.1-260.0]",
+        "tests/test_causal.py::test_clean_flight_never_activates_shared_cause",
+        "tests/test_causal.py::test_healthy_strongly_coupled_member_contradicts"
+      ],
+      "breaks": "Flattens the causal scoring curve, so every candidate cause scores alike and ranking becomes arbitrary.",
+      "expect": "KILLED",
+      "family": "DIAGNOSIS",
+      "full_run": {
+        "failures": [
+          "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+          "tests/test_hypothesis.py::test_shared_power_isolation_latency_is_bounded",
+          "tests/test_hypothesis.py::test_shared_and_independent_are_separated_by_margin",
+          "tests/test_hypothesis.py::test_active_hypothesis_carries_reason_codes",
+          "tests/test_hypothesis.py::test_temporal_evidence_is_load_bearing",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[0.9]",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[1.2]",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[1.8]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[20.0]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[25.0]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[40.0]",
+          "tests/test_hypothesis.py::test_held_out_generalization_is_pinned_at_its_measured_value",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.2-350.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.75-200.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.5-500.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.5-620.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[2.1-260.0]",
+          "tests/test_causal.py::test_clean_flight_never_activates_shared_cause",
+          "tests/test_causal.py::test_healthy_strongly_coupled_member_contradicts",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "returncode": 1,
+        "seconds": 41.2,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "DIAGNOSIS-02",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "SHARPNESS = 0.0 * ",
+      "note": "",
+      "old": "SHARPNESS = ",
+      "path": "csia/diagnosis/causal.py",
+      "result": {
+        "failures": [
+          "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "returncode": 1,
+        "seconds": 2.5,
+        "tail": [
+          "FAILED tests/test_hypothesis.py::test_shared_power_is_correctly_isolated - As...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "tests/test_hypothesis.py::test_shared_power_isolation_latency_is_bounded",
+        "tests/test_hypothesis.py::test_shared_and_independent_are_separated_by_margin",
+        "tests/test_hypothesis.py::test_active_hypothesis_carries_reason_codes",
+        "tests/test_hypothesis.py::test_temporal_evidence_is_load_bearing",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[0.9]",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[1.2]",
+        "tests/test_hypothesis.py::test_sweep_severity_holds[1.8]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[20.0]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[25.0]",
+        "tests/test_hypothesis.py::test_sweep_onset_holds[40.0]",
+        "tests/test_hypothesis.py::test_held_out_generalization_is_pinned_at_its_measured_value",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.2-350.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.75-200.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.5-500.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.5-620.0]",
+        "tests/test_causal.py::test_shared_power_is_ratio_invariant[2.1-260.0]",
+        "tests/test_causal.py::test_clean_flight_never_activates_shared_cause",
+        "tests/test_causal.py::test_healthy_strongly_coupled_member_contradicts"
+      ],
+      "breaks": "Declares every source degraded, so shared-cause assessment always has a full membership set to reason over.",
+      "expect": "KILLED",
+      "family": "DIAGNOSIS",
+      "full_run": {
+        "failures": [
+          "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+          "tests/test_hypothesis.py::test_shared_power_isolation_latency_is_bounded",
+          "tests/test_hypothesis.py::test_shared_and_independent_are_separated_by_margin",
+          "tests/test_hypothesis.py::test_active_hypothesis_carries_reason_codes",
+          "tests/test_hypothesis.py::test_temporal_evidence_is_load_bearing",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[0.9]",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[1.2]",
+          "tests/test_hypothesis.py::test_sweep_severity_holds[1.8]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[20.0]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[25.0]",
+          "tests/test_hypothesis.py::test_sweep_onset_holds[40.0]",
+          "tests/test_hypothesis.py::test_held_out_generalization_is_pinned_at_its_measured_value",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.2-350.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.75-200.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[1.5-500.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[0.5-620.0]",
+          "tests/test_causal.py::test_shared_power_is_ratio_invariant[2.1-260.0]",
+          "tests/test_causal.py::test_clean_flight_never_activates_shared_cause",
+          "tests/test_causal.py::test_healthy_strongly_coupled_member_contradicts",
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "returncode": 1,
+        "seconds": 41.5,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "DIAGNOSIS-03",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "SOURCE_DEGRADED = 0.0 * ",
+      "note": "",
+      "old": "SOURCE_DEGRADED = ",
+      "path": "csia/diagnosis/causal.py",
+      "result": {
+        "failures": [
+          "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated"
+        ],
+        "first_failure": "tests/test_hypothesis.py::test_shared_power_is_correctly_isolated",
+        "returncode": 1,
+        "seconds": 2.5,
+        "tail": [
+          "FAILED tests/test_hypothesis.py::test_shared_power_is_correctly_isolated - As...",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Removes the voting baseline's threshold, so it detects at every tick.",
+      "expect": "KILLED",
+      "family": "DIAGNOSIS",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 40.0,
+        "tail": [
+          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "DIAGNOSIS-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "VOTE_C = 0.0 * ",
+      "note": "",
+      "old": "VOTE_C = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 38.6,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    }
+  ],
+  "python": "/home/user/csia-trust-layer/.venv/bin/python",
+  "schema": "csia.research.mutation_results/1",
+  "selection": [
+    "tests/test_diagnosis.py",
+    "tests/test_hypothesis.py",
+    "tests/test_causal.py",
+    "tests/test_engine.py",
+    "tests/test_runtime.py",
+    "tests/test_comparator.py",
+    "tests/test_determinism.py",
+    "tests/test_v1_frozen.py",
+    "tests/test_v1_1_golden.py",
+    "tests/test_v1_1_support.py",
+    "tests/test_v1_1_staleness.py",
+    "tests/test_phase_c_freeze.py",
+    "tests/test_prose_numeric_bindings.py",
+    "tests/test_systems_paper_numeric_claims.py"
+  ],
+  "self_check": {
+    "canary_verdict": "KILLED",
+    "sandbox_csia_file": "/tmp/csia-mutation-byodv6lm/wt/csia/__init__.py",
+    "why": "The canary sets PRIOR_NOMINAL to zero. If it had survived, every result here would be a false survivor caused by the editable install resolving `import csia` to the unmutated repository."
+  },
+  "verdict_vocabulary": {
+    "EQUIVALENT": "author judgement, recorded in MUTATION_PLAN.md and never inferred by this script",
+    "INVALID_MUTANT": "the mutated program does not run -- collection error or a pytest usage exit. Says nothing about the test suite.",
+    "KILLED": "at least one failing test was not a source-integrity guard, so a BEHAVIOUR change was detected",
+    "KILLED_BY_INTEGRITY_ONLY": "every failing test was a source-integrity guard -- a file-hash or tag diff, which would fire identically on a reformatted comment. The change cannot reach a commit, and NO test asserts the behaviour this line produces. Treated as a survivor for the purpose of 'what do the tests establish about the science'.",
+    "OUT_OF_SCOPE": "author judgement, recorded in MUTATION_PLAN.md",
+    "SURVIVED": "no test failed at all"
+  }
+}

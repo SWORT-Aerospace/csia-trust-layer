@@ -159,6 +159,21 @@ manuscript-rules:
 secrets-scan:
 	$(PY) tools/publication/secrets_scan.py
 
+# Mutation testing against the scientific core: break one diagnostic decision
+# on purpose and see whether any test objects. A SURVIVOR IS THE FINDING -- it
+# means no claim in either manuscript is pinned to that line.
+#
+# DELIBERATELY NOT IN `check`. It takes 15-25 minutes, it needs a git worktree,
+# and its output is a research artifact to be read rather than a pass/fail
+# gate. Wiring it into the blocking gate would get it disabled the first time
+# someone was in a hurry.
+#
+# Runs entirely in a `git worktree add --detach` sandbox; the working tree is
+# never written to, so an interrupted run cannot leave the frozen core mutated.
+.PHONY: verify-paper-mutations
+verify-paper-mutations:
+	$(PY) tools/mutation/run_mutations.py
+
 # Verifies a release is buildable and clean without leaving an archive behind:
 # every allowlisted path exists and is tracked, and a scratch build of each
 # archive passes the post-pack scan. Packing is reproducible, so the scratch
