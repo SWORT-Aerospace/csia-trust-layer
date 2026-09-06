@@ -44,10 +44,30 @@ The obvious rule — *"when a gate closes, trust shall decrease"* — is
 **deliberately NOT in this profile**, and the reason is a measurement.
 
 On both current-stack platforms, across a GNSS fix-loss fault, the gate weight
-collapses to zero **and the trust coefficient rises**: ArduPilot 0.9213 →
-0.9300, PX4 0.9856 → 0.9875. That is not a bug. Removing an inconsistent
-comparison removes a source of disagreement, and a layer that scores agreement
-will score higher with less to disagree about.
+collapses to zero **and the trust coefficient rises**. That is not a bug.
+Removing an inconsistent comparison removes a source of disagreement, and a
+layer that scores agreement will score higher with less to disagree about.
+
+**The measurement, restated after it was repeated.** On ArduPilot this is now
+20 fault trials against 20 matched fix-preserving controls (Campaign A2), and
+trust rose in **20 of 20** fault trials — so the rule the profile declines to
+adopt would have failed a correct implementation twenty times out of twenty.
+
+It also rose in **20 of 20 controls, by about three times as much**: Δ median
++0.020594 with the fault absent against +0.007007 with it present, ranges
+disjoint. What the fault does is **freeze** the coefficient — the node stops
+receiving evidence when the gate shuts — so the fault *suppresses* a rise that
+happens anyway rather than causing one. A rule keyed on the direction of the
+trust change would therefore be doubly wrong: the direction is up in both arms,
+and the arm-to-arm difference is not something a single-trial threshold can see.
+
+The single-trial figures this section once quoted (ArduPilot 0.9213 → 0.9300,
+PX4 0.9856 → 0.9875) are **not repeatable values** and are no longer cited
+here. They are faithful records of trials run under a superseded 0.5 s runtime
+stale timeout; the repeats ran 1.0 s. See
+`research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md` §4. **The
+argument above does not depend on the magnitude, only on the sign, and the
+sign is what was repeated.**
 
 A standard containing "gate closure shall lower trust" would fail a correct
 implementation for doing the arithmetic right, and would be met by

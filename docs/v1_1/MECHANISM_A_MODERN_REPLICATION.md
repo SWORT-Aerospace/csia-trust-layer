@@ -11,6 +11,17 @@ here, and section 6 says exactly why rather than gesturing at it.
 This is a small confirmatory replication — two arms per platform, one
 intervention — not a new characterisation programme.
 
+> **HISTORICAL, and deliberately not updated.** This records what the n = 1
+> trials of 2026-08-25 measured, and the tables below are left exactly as they
+> were. Two campaigns have since repeated it — ArduPilot 20+20 twice (A1, A2)
+> and PX4 20+20 — and **the GPS trust rows below do not reproduce**: those
+> trials ran a 0.5 s runtime stale timeout and the repeats ran 1.0 s, so the
+> gate held twice as long and trust froze higher. Every other row here does
+> reproduce. Correcting a frozen measurement to match a later one is the defect
+> this programme exists to prevent, so the numbers stay and the reconciliation
+> lives in
+> `research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md`.
+
 ---
 
 ## 1. The claim under test

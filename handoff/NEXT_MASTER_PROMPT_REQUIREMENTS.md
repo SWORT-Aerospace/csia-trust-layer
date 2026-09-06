@@ -19,12 +19,16 @@ again.
 |---|---|
 | the frozen core is the six `FROZEN_PATHS`, and freeze tags are **local only** | a session that assumes the tags are pushed will trust a test that silently skips |
 | the deployed output is a **normalised hypothesis weight**, not a posterior; "confidence" is forbidden | terminology drift is the failure mode the manuscripts are most exposed to |
-| **trust RISES** across a gate collapse on both platforms (0.9213→0.9300, 0.9856→0.9875) | every session that meets this for the first time assumes it is a bug and tries to "fix" it |
+| **trust RISES** across a gate collapse on both platforms, 20/20 fault trials on ArduPilot | every session that meets this for the first time assumes it is a bug and tries to "fix" it |
+| **it rises ~3x MORE in the matched CONTROL arm** (Δ median +0.020594 against +0.007007, ranges disjoint) | "trust rises across a gate collapse" is true and misleading alone: the fault SUPPRESSES a rise that happens anyway. FL-016 |
+| the single-trial figures 0.9213→0.9300 and 0.9856→0.9875 are **NOT repeatable values** | they were measured under a superseded 0.5 s runtime stale timeout; the repeats ran 1.0 s. FL-017 |
+| the **runtime stale-timeout source** is part of the configuration a result is quoted against | it is not in the A1 or A2 preregistration, and that omission is what FL-017 is |
 | `S_0 = 475.6775` is MEASURED, not the cap 500; `T_0 = 0.999791`, not 1.0; **`0.98764` exists nowhere** | these have each been wrong in a published draft once |
 | support state is **NOT RECORDED** in the Mechanism-A artifacts | a writer will otherwise state one |
 | nothing above **E1** exists | the single most common overclaim available |
 | the deployment config routes exactly **two** values into the core (`tick_hz`, `field_mode`); `csia.profile` is a label | a session will otherwise either miss the two or invent a third |
-| ArduPilot SITL **can be built here**; PX4 SIH has not been | so the next session neither re-discovers this nor assumes PX4 works |
+| **both** ArduPilot SITL and PX4 SIH can be built and run here | superseded: PX4 SIH is built at `547e2ca`, drives the full stack, and its repeat campaign has run |
+| PX4 SIH is **lockstep real time** and ignores `--speedup` | a 40-trial PX4 campaign takes ~35 min of wall clock; ArduPilot's takes ~30 at 5x |
 | the pinned build is `01a504b472259602e13df4cf07df7c0cdbb35993`, reachable only after `git fetch --deepen` | a `--depth 1` clone does not contain it |
 
 ## 2. Constraints the next prompt must restate verbatim
