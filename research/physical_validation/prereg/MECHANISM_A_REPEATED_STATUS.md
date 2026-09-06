@@ -127,9 +127,72 @@ Machine-readable, and the authority for anything quoted:
   reconciliation; `planned = valid + invalid + not_attempted` must balance or
   the report raises rather than printing
 
-**The reconciled outcome is in `_report.json` and is not restated here**, so
-that a number in prose cannot drift from the artifact it came from. That is the
-rule FL-002 exists for.
+### 6.1 Reconciliation
+
+```
+planned 40 | attempted 40 | valid 40 | invalid 0 | not_attempted 0
+```
+
+The arithmetic balances. 20 FAULT and 20 CONTROL, interleaved.
+
+### 6.2 The preregistered quantities
+
+Extracted by `tools/csia_experiment/extract_mechanism_a.py` into
+`research/physical_validation/results/mechanism_a_repeat_ardupilot.json`, which
+is the authority for anything quoted.
+
+**TWO DISTINCT INTERMEDIATE QUANTITIES, and conflating them is the RULE-B
+failure this discipline exists to prevent:**
+
+* `gnss.position MISSING with NO_3D_FIX` — the canonical channel going away.
+  **This is what the original n=1 artifact reports.**
+* `gps_gate_weight_sum == 0` — the diagnostic gate closing. It *follows* the
+  first, about a second later.
+
+| quantity | FAULT (n=20) | CONTROL (n=20) | original n=1 |
+|---|---|---|---|
+| gps_gate_weight_sum, before | 3.0 in 20/20 | 3.0 in 20/20 | 3.0 |
+| gps_gate_weight_sum, after | **0.0 in 20/20** | **3.0 in 20/20** | 0.0 |
+| channel MISSING occurred | 20/20 | **0/20** | yes |
+| `first_t` channel MISSING (s) | 12.0399 – 12.0827, **median 12.0432** | — | **12.043901** |
+| channel-MISSING ticks | 449 – 450 | 0 | **450** |
+| gate-weight-zero `first_t` (s) | 13.0400 – 13.0807, median 13.0425 | — | not reported |
+| gate-zero ticks | 424 – 425 | 0 | not reported |
+| nominal hypothesis rank, after | 1 in 20/20 | 1 in 20/20 | 1 |
+
+**The original n=1 value falls inside the repeat's range**, and the repeat's
+median (12.0432 s) is within 0.0007 s of it. The tick count (449–450) brackets
+the original's 450.
+
+**The preregistered qualitative comparison holds:** the collapse occurs in
+every valid FAULT trial (20/20) and in no valid CONTROL trial (0/20).
+
+### 6.3 A quantity the original did not report
+
+The gate weight reaches zero **about 1.0 s after** the channel goes missing
+(median 13.0425 against 12.0432), consistently, in 20/20 fault trials. That
+interval is the propagation from "the canonical channel went away" to "the
+diagnostic gate closed". It is stated here as observed; **no claim is made
+about what it means**, and nothing in either manuscript depends on it.
+
+### 6.4 What was NOT captured — quantity 2
+
+**The trust coefficient was not recorded and is reported `NOT_CAPTURED`, not
+inferred.**
+
+Preregistration §5 item 2 asks for the trust coefficient of `gps` before and
+after onset. The per-tick trust series is written only when the driver is given
+`--trust-trace`, and this campaign was run without it. The gap was found when
+the quantities were extracted, not assumed away.
+
+This is an **execution shortfall against the preregistration**, recorded as
+FL-014. It does not invalidate the 40 trials — the other preregistered
+quantities were captured and the arithmetic balances — but it means this
+campaign says **nothing** about the "trust rises across the fault" observation,
+which therefore still rests on n=1 per platform.
+
+**The remedy is a second campaign with `--trust-trace`, not a re-read of these
+logs.** The data is not in them.
 
 ## 7. What this campaign does not establish
 

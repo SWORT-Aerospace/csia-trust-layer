@@ -162,3 +162,67 @@ entries:
       E0 tier. Hold until the repeated current-stack campaign (P8) completes,
       so the Verification section gains its structural and its empirical half
       in one edit rather than two.
+
+  - id: PI-003
+    date: 2026-09-06
+    result: >-
+      The Mechanism A intermediate quantity, repeated 20 times against 20
+      matched fix-preserving controls, on the SAME pinned ArduPilot build the
+      original n=1 trials used (ArduCopter V4.8.0-dev @ 01a504b, rebuilt from
+      source and verified by its own MAVLink version string). 40 of 40 trials
+      adjudicated VALID and the campaign arithmetic balances.
+      `gnss.position MISSING with NO_3D_FIX` occurred in 20 of 20 FAULT trials
+      and 0 of 20 CONTROL trials. The original's first_t of 12.043901 s falls
+      INSIDE the repeat's range (12.0399-12.0827, median 12.0432) and its 450
+      observed ticks is bracketed by the repeat's 449-450.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_repeat_ap/;
+      research/physical_validation/results/mechanism_a_repeat_ardupilot.json;
+      research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md
+    old_limitation: >-
+      "n = 1 fault trial plus one matched control per platform." Every latency
+      and tick count in the Mechanism A result was a single observation, and
+      the paper could not say whether the mechanism was reproducible or
+      whether that one trial was unusual.
+    new_limitation: >-
+      ARDUPILOT ONLY. PX4 SIH was NOT RUN -- not "no difference", NOT RUN --
+      because building it needs its own toolchain and that was not attempted.
+      The two platforms are analysed separately and never pooled, so this
+      strengthens the ArduPilot half and leaves the PX4 half at n=1.
+      Still E1. Repeating a simulation 20 times produces 20 simulator runs,
+      not evidence about hardware, and the evidence tier does not move.
+      NO TIMING CLAIM. The trials ran on a container shared with other work;
+      latency is recorded and deliberately NOT adjudicated.
+      TRUST WAS NOT CAPTURED (FL-014). The runner did not pass --trust-trace,
+      so this campaign says nothing about the trust coefficient.
+    claim_impact: >-
+      Licenses replacing "n=1 per platform" with "n=20 fault and n=20 matched
+      control on ArduPilot; n=1 on PX4" in the systems paper's evidence
+      description, and licenses the statement that the original single
+      observation is not an outlier with respect to this build.
+    supported_upgrade: >-
+      "On ArduPilot, the intermediate quantity was observed in 20 of 20 valid
+      fault trials and in 0 of 20 valid matched controls, on the same pinned
+      autopilot build as the original trial, whose value falls within the
+      repeated distribution."
+    unsupported_upgrade: >-
+      "The mechanism occurs in 20 of 20 flights." FALSE -- these are simulator
+      runs, not flights, and nothing about hardware follows from them.
+      "Confirmed on both platforms at n=20." FALSE -- PX4 was not run.
+      "The trust rise is reproducible." NOT SUPPORTED BY THIS CAMPAIGN --
+      trust was not captured at all (FL-014); that observation still rests on
+      n=1 per platform.
+      Any confidence interval or p-value over these 20 runs. They are runs of
+      a deterministic simulator differing in seed and timing jitter, not draws
+      from a population, and the preregistration forbids it in advance.
+    paper_section: Evidence; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      The E1 tier is now materially stronger on ArduPilot and unchanged on
+      PX4, which is an asymmetric state that should not be written into a
+      manuscript one platform at a time. Hold until either the PX4 half runs
+      or a deliberate decision is taken to report the asymmetry. Integrating
+      now would produce a paper describing a 20-trial campaign and a 1-trial
+      campaign in the same sentence without flagging which is which.
+

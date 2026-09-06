@@ -468,3 +468,89 @@ entries:
       research/phase2/results/modern_replication.json
     supersedes: FL-011 (conclusion withdrawn; the narrow finding stands)
 
+  - id: FL-014
+    date: 2026-09-06
+    phase: P8 (repeated current-stack campaign)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      THE CAMPAIGN RAN WITHOUT CAPTURING ONE OF ITS OWN PREREGISTERED
+      QUANTITIES. Section 5 item 2 of the preregistration asks for the trust
+      coefficient of `gps` before and after onset. The per-tick trust series
+      is written by tools/deploy/shadow_sitl_check.py only when it is given
+      `--trust-trace`, and the campaign runner did not pass it. All 40 trials
+      ran, all 40 adjudicated VALID, and the trust data is simply not in the
+      flight logs.
+    found_by: >-
+      Extracting the preregistered quantities from the logs rather than
+      assuming the campaign had captured them. The extractor reports
+      NOT_CAPTURED with the reason; it does not infer a value, and it does not
+      leave the field absent where a reader might miss it.
+    verdict: RECORDED
+    consequence: >-
+      The 40 trials are NOT invalidated. The other preregistered quantities
+      were captured, the arithmetic balances, and the qualitative comparison
+      the preregistration fixed in advance holds: the collapse occurs in 20 of
+      20 valid FAULT trials and 0 of 20 valid CONTROL trials.
+      WHAT IS LOST IS SPECIFIC. This campaign says NOTHING about the "trust
+      rises across the fault" observation (ArduPilot 0.9213 -> 0.9300, PX4
+      0.9856 -> 0.9875), which therefore still rests on n=1 per platform. That
+      observation is quoted in the master system input packet section G and in
+      the DEA profile's justification for NOT standardising "gate closure
+      shall lower trust", so it is not a minor gap -- it is the one number a
+      repeat would most have strengthened.
+      The remedy is a SECOND campaign with --trust-trace, not a re-read of
+      these logs: the data is not in them. Recorded as a follow-on rather than
+      run here, because a second 40-flight campaign was not started at the
+      point this was discovered and starting one to avoid recording a
+      shortfall would be the wrong order of operations.
+      THE GENERAL LESSON: a preregistration that names quantities does not
+      make a runner capture them. The runner should have been checked against
+      section 5 field by field before 40 flights, the same way it was checked
+      against the adjudication vocabulary on a 1+1 pair.
+    artifact: >-
+      research/physical_validation/prereg/MECHANISM_A_REPEATED_STATUS.md;
+      research/physical_validation/results/mechanism_a_repeat_ardupilot.json
+
+  - id: FL-015
+    date: 2026-09-06
+    phase: P8 (quantity extraction)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      Three defects in the extractor, each found by looking at the data rather
+      than at the summary it produced.
+      (1) A flight log's last line carries no `t_mono`. The extractor
+      defaulted it to 0.0, which gave that row a large negative relative time,
+      swept it into the "before" bucket and made it `before[-1]`. Every
+      "before" reading was therefore taken from a row with no gates and came
+      back 0.0 on BOTH arms -- which read as the mechanism being present
+      before the injection.
+      (2) A single tick either side of onset is a fragile estimator of a
+      quantity being claimed to have changed. Replaced with the median over a
+      2 s window.
+      (3) first_t and the RULE-B tick count were then measured over the
+      settled window, which starts at onset+2, so the collapse was reported at
+      14.00 s when the series shows it at 13.04 s. The extractor was reporting
+      its own window boundary as if it were a measurement.
+    found_by: >-
+      Printing the gate-weight time series for one FAULT and one CONTROL trial
+      instead of trusting the aggregate. The transitions -- 0.0 at t=0, 3.0 at
+      t=0.08, 0.0 at t=13.04 on the fault arm and no collapse at all on the
+      control -- made all three defects visible at once.
+    verdict: RECORDED
+    consequence: >-
+      All three fixed and the reason recorded in the source. The corrected
+      numbers replicate the original n=1 result: the original's first_t of
+      12.043901 for `gnss.position MISSING` falls inside the repeat's range
+      (12.0399-12.0827, median 12.0432) and its 450 ticks is bracketed by the
+      repeat's 449-450.
+      A FOURTH THING THE SAME INSPECTION CAUGHT, and it is the important one:
+      the original artifact's first_t is for a DIFFERENT INTERMEDIATE QUANTITY
+      than the gate weight. It reports "gnss.position MISSING with NO_3D_FIX"
+      -- the canonical channel going away -- while the extractor was measuring
+      the diagnostic gate closing, which follows it about a second later.
+      Reporting one against the other as a replication would have been exactly
+      the RULE-B failure the trial contract exists to prevent. Both are now
+      extracted, both are named, and the ~1.0 s interval between them is
+      reported as an observation with no claim attached.
+    artifact: tools/csia_experiment/extract_mechanism_a.py
+

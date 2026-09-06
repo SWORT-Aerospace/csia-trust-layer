@@ -90,7 +90,7 @@ authority; CSIA will never provide it.
 | tier | meaning | status |
 |---|---|---|
 | **E0** | desktop simulation | complete |
-| **E1** | current-stack SITL/SIH | complete, and extended by this program |
+| **E1** | current-stack SITL/SIH | complete; **repeated 20+20 on ArduPilot** this program, PX4 still n=1 |
 | **E2** | real flight-controller hardware | **NOT STARTED** — needs purchase (**O-4**) |
 | **E3** | real sensor + physical fault | NOT STARTED |
 | **E4** | physical actuator/output path | NOT STARTED |
@@ -122,6 +122,17 @@ sensor. **The signal is the gate weight, not the trust.**
 
 Confound, recorded and not resolved: ArduPilot is UNAFFECTED and PX4 is
 PARTIALLY_AFFECTED (1 of 4 relations live pre-fault).
+
+**Repeated this program, ArduPilot only, on the same pinned build** (ArduCopter
+V4.8.0-dev @ `01a504b`, rebuilt from source): 40 of 40 trials valid, the
+intermediate quantity present in **20 of 20 fault trials and 0 of 20 matched
+controls**, and the original single observation (`first_t` 12.043901 s, 450
+ticks) falls inside the repeat's range (12.0399–12.0827, median 12.0432;
+449–450 ticks).
+
+**The trust figures above were NOT repeated.** The campaign ran without
+`--trust-trace` and captured no trust series (FL-014), so the trust rise still
+rests on **n = 1 per platform**. PX4 is `NOT_RUN`, not "no difference".
 
 Support state is **NOT RECORDED** in the original Mechanism-A artifacts —
 grepping them for `support` and `eligib` returns nothing. Do not state one.
