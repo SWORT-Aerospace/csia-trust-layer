@@ -363,6 +363,52 @@ scalars:
     script: csia/trust_engine/engine.py
     note: a source constant, not a measurement
 
+  # ---------------------------------------------------------------------
+  # S14-S17: the repeated current-stack trust deltas.
+  #
+  # These four appear ONLY in the limitations paragraph that reports what this
+  # manuscript deliberately keeps out of its tables, and they are bound here
+  # for the same reason every other prose scalar is: a number stated in the
+  # author's voice needs a file behind it. They cite
+  # research/physical_validation/, which is NOT research/phase2/, so the phase
+  # guard's Phase-I/Phase-II separation is untouched.
+  #
+  # The manuscript rounds to four decimals; the artifact holds full precision.
+  # tests/test_artifact_map_pointers.py dereferences each pointer and checks
+  # the rounding, so the two cannot drift apart.
+  - id: S14
+    value: "0.0070"
+    statement: >-
+      median gps trust delta across confirmed fix loss, ArduPilot Campaign A2,
+      20 valid fault trials, PRE [10,12) to POST [14,20) window medians
+    artifact: research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json
+    json_pointer: .question_B_fault_delta_distribution.median
+    script: tools/csia_experiment/extract_trust_a2.py
+  - id: S15
+    value: "0.0206"
+    statement: >-
+      the same quantity on the MATCHED CONTROL arm, ArduPilot Campaign A2,
+      20 valid trials. Larger than the fault arm's, which is the measurement
+      that refuted the earlier causal reading (FL-016)
+    artifact: research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json
+    json_pointer: .question_C_control_delta_distribution.median
+    script: tools/csia_experiment/extract_trust_a2.py
+  - id: S16
+    value: "0.0035"
+    statement: >-
+      median gps trust delta across confirmed fix loss, PX4 Campaign P1,
+      20 valid fault trials, same four preregistered windows
+    artifact: research/physical_validation/results/mechanism_a_p1_trust_px4.json
+    json_pointer: .question_B_fault_delta_distribution.median
+    script: tools/csia_experiment/extract_trust_a2.py
+  - id: S17
+    value: "0.0095"
+    statement: >-
+      the same quantity on the MATCHED CONTROL arm, PX4 Campaign P1, 20 valid
+      trials. The ArduPilot refutation replicated on a second platform
+    artifact: research/physical_validation/results/mechanism_a_p1_trust_px4.json
+    json_pointer: .question_C_control_delta_distribution.median
+    script: tools/csia_experiment/extract_trust_a2.py
   - id: S13
     value: "118.82"
     statement: >-

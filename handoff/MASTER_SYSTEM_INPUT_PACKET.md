@@ -128,12 +128,20 @@ Measured across a GNSS fix-loss fault on both current-stack platforms:
 | nominal hypothesis rank | 1 | 1 |
 
 **Trust RISES as the gate collapses, on both platforms.** That is not a bug:
-removing an inconsistent comparison removes a source of disagreement, and a
-layer scoring agreement scores higher with less to disagree about. A master
-system must not assume that a falling trust value is the signal of a lost
-sensor. **The signal is the gate weight, not the trust.**
+the node stops receiving evidence, so its belief update is **frozen** rather
+than driven down, and absence of evidence is not treated as evidence of fault.
+A master system must not assume that a falling trust value is the signal of a
+lost sensor. **The signal is the gate weight, not the trust.**
 
-**AND THE SENTENCE ABOVE IS MISLEADING WITHOUT THE CONTROL ARM (FL-016).**
+**SUPERSEDED EXPLANATION, KEPT VISIBLE.** This section previously read
+"removing an inconsistent comparison removes a source of disagreement, and a
+layer scoring agreement scores higher with less to disagree about". **That
+causal reading is REFUTED by the matched control arms** — see below and
+`E1_FINAL_CLAIM_TABLE.csv` row `E1-TRUSTCAUSE`. It is recorded here rather than
+deleted, because a designer who read the old wording needs to find out that it
+was withdrawn.
+
+**AND "TRUST RISES" IS MISLEADING STATED WITHOUT THE CONTROL ARM (FL-016).**
 Campaign A2 measured both arms, n = 20 each, and the **control arm rises about
 three times more** than the fault arm — Δ median **+0.020594** against
 **+0.007007**, ranges completely disjoint. Trust rises in **both** arms as

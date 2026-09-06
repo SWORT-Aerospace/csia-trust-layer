@@ -44,9 +44,19 @@ The obvious rule — *"when a gate closes, trust shall decrease"* — is
 **deliberately NOT in this profile**, and the reason is a measurement.
 
 On both current-stack platforms, across a GNSS fix-loss fault, the gate weight
-collapses to zero **and the trust coefficient rises**. That is not a bug.
-Removing an inconsistent comparison removes a source of disagreement, and a
-layer that scores agreement will score higher with less to disagree about.
+collapses to zero **and the trust coefficient rises**. That is not a bug: the
+node stops receiving evidence, so its belief update is **frozen** rather than
+driven down, and absence of evidence is not treated as evidence of fault.
+
+> **A superseded explanation, kept visible because this profile once rested on
+> it.** Earlier drafts of this section explained the rise causally — *gating out
+> an inconsistent comparison removes a source of disagreement, so a layer
+> scoring agreement scores higher*. **The matched control arms refute that**
+> (FL-016): trust rises in both arms and rises *more* where no fault was
+> injected, so an explanation requiring the gate to close cannot account for the
+> larger rise where it did not. The freezing account above is what the repeated
+> data support. The profile's conclusion is unchanged, because it never depended
+> on *why* trust rose — only on the fact that it does not fall.
 
 **The measurement, restated after it was repeated.** On ArduPilot this is now
 20 fault trials against 20 matched fix-preserving controls (Campaign A2), and
