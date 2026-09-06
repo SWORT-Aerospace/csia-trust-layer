@@ -1,9 +1,22 @@
-"""Extract Campaign A2's preregistered trust quantities from the raw traces.
+"""Extract a repeated campaign's preregistered trust quantities from the traces.
 
 PREREGISTERED IN section 4-6 of
     research/physical_validation/prereg/
     MECHANISM_A_ARDUPILOT_TRUST_COMPLETION_PREREG.md
 frozen at commit ceeaf4a before the first A2 trial.
+
+IT SERVES TWO CAMPAIGNS, WHICH IS DELIBERATE AND NOT A GENERALISATION.
+`--campaign-key a2` is the ArduPilot trust completion this file was frozen for
+and remains the default. `--campaign-key p1` is the PX4 repeat, whose own
+preregistration (section 6) requires "the same committed deterministic
+extractor and the same four windows the ArduPilot A2 campaign uses". Forking
+this file would have satisfied the words and not the requirement: two copies
+drift, and the second one drifts in whichever direction its result needs.
+The WINDOWS below are shared by both and are not per-campaign.
+
+The filename still says a2 because the A2 preregistration, the reconciliation
+and the scalar graph all cite it by that path. Renaming it to look tidier
+would break three citations to gain nothing.
 
 RAW FIRST, DERIVED SECOND. The full per-engine-step trace is archived by the
 runner; this reduces it to the four preregistered windows and NOTHING ELSE.
@@ -58,6 +71,48 @@ WINDOWS = {
 #: The original n=1 ArduPilot observation this campaign asks about.
 ORIGINAL_N1 = {"trust_pre": 0.9213, "trust_post": 0.9300,
                "delta": 0.0087}
+
+#: Per campaign: everything about it that is not the reduction itself.
+#:
+#: The PX4 preregistration section 6 requires "the same committed deterministic
+#: extractor and the same four windows the ArduPilot A2 campaign uses". This
+#: table is how that is honoured LITERALLY -- one extractor, one set of
+#: windows, a different corpus -- rather than by forking the file and letting
+#: the two reductions drift.
+#:
+#: The A2 entry is unchanged and remains the default, so nothing about the
+#: committed A2 result depends on this table having been added.
+CAMPAIGNS = {
+    "a2": {
+        "campaign_id": "CAMPAIGN_A2",
+        "platform": "ardupilot",
+        "prereg": PREREG,
+        "trial_glob": "MECHA2-*.json",
+        "campaign_dir": ("campaigns", "physical_validation",
+                         "mechanism_a_trust_completion_a2"),
+        "logs_dir": ("logs", "shadow-sitl-ardupilot"),
+        "traces_dir": ("research", "physical_validation", "results",
+                       "a2_traces_raw"),
+        "original_n1": ORIGINAL_N1,
+    },
+    "p1": {
+        "campaign_id": "CAMPAIGN_P1",
+        "platform": "px4",
+        "prereg": ("research/physical_validation/prereg/"
+                   "MECHANISM_A_PX4_REPEATED_PREREG.md"),
+        "trial_glob": "MECHP1-*.json",
+        "campaign_dir": ("campaigns", "physical_validation",
+                         "mechanism_a_px4_repeat_p1"),
+        "logs_dir": ("logs", "shadow-sitl-px4"),
+        "traces_dir": ("research", "physical_validation", "results",
+                       "p1_traces_raw"),
+        # PX4's own original n=1, from research/v1_1/results/mechanism_a_px4.json
+        # snapshots. NOT ArduPilot's -- the two are never pooled and never
+        # compared to each other's baselines.
+        "original_n1": {"trust_pre": 0.9856, "trust_post": 0.9875,
+                        "delta": 0.0019},
+    },
+}
 
 GPS_TRACE_EDGES = ("altitude_baro", "velocity_gps_doppler_0",
                    "velocity_gps_doppler_1", "heading_course")
@@ -226,19 +281,26 @@ def extract(trace_path: str, onset_s: float = 12.0) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--campaign-key", default="a2", choices=sorted(CAMPAIGNS),
+                    help="a2 = ArduPilot trust completion; p1 = PX4 repeat")
     # The archived raw traces, in the repository. The runner writes them to
     # scratch; they are gzipped into the tree BEFORE any reduction, so this
     # extractor is runnable on a fresh clone with no scratch directory.
-    ap.add_argument("--traces", default=os.path.join(
-        ROOT, "research", "physical_validation", "results", "a2_traces_raw"))
-    ap.add_argument("--logs", default=os.path.join(
-        ROOT, "logs", "shadow-sitl-ardupilot"))
-    ap.add_argument("--campaign", default=os.path.join(
-        ROOT, "campaigns", "physical_validation",
-        "mechanism_a_trust_completion_a2"))
+    ap.add_argument("--traces", default=None)
+    ap.add_argument("--logs", default=None)
+    ap.add_argument("--campaign", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--csv", default=None)
+    ap.add_argument("--regenerate", action="store_true",
+                    help="overwrite a COMMITTED --out. The resulting diff has "
+                         "to be explained; see tools/evidence_guard.py")
     args = ap.parse_args(argv)
+
+    spec = CAMPAIGNS[args.campaign_key]
+    args.traces = args.traces or os.path.join(ROOT, *spec["traces_dir"])
+    args.logs = args.logs or os.path.join(ROOT, *spec["logs_dir"])
+    args.campaign = args.campaign or os.path.join(ROOT, *spec["campaign_dir"])
+    original_n1 = spec["original_n1"]
 
     # Index the flight logs by flight_id. Matching by filename order would
     # silently pair a FAULT trial with a CONTROL log.
@@ -253,7 +315,7 @@ def main(argv=None) -> int:
 
     trials = []
     for manifest_path in sorted(glob.glob(os.path.join(args.campaign,
-                                                       "MECHA2-*.json"))):
+                                                       spec["trial_glob"]))):
         with open(manifest_path, encoding="utf-8") as fh:
             man = json.load(fh)
         record, trial_id = man["record"], man["trial_id"]
@@ -301,12 +363,13 @@ def main(argv=None) -> int:
 
     fault_d, control_d = deltas("FAULT"), deltas("CONTROL")
     inside = (bool(fault_d)
-              and fault_d[0] <= ORIGINAL_N1["delta"] <= fault_d[-1])
+              and fault_d[0] <= original_n1["delta"] <= fault_d[-1])
 
     summary = {
-        "schema": "csia.research.mechanism_a_a2_trust/1",
-        "campaign_id": "CAMPAIGN_A2",
-        "prereg": PREREG,
+        "schema": "csia.research.mechanism_a_repeat_trust/1",
+        "campaign_id": spec["campaign_id"],
+        "platform": spec["platform"],
+        "prereg": spec["prereg"],
         "raw_traces": {
             "archive": os.path.relpath(args.traces, ROOT),
             "note": ("RAW FIRST. The full per-step traces are archived "
@@ -329,7 +392,7 @@ def main(argv=None) -> int:
         "question_B_fault_delta_distribution": stats(fault_d),
         "question_C_control_delta_distribution": stats(control_d),
         "question_D_original_n1": {
-            **ORIGINAL_N1,
+            **original_n1,
             "inside_repeated_fault_range": inside,
             "fault_range": [fault_d[0], fault_d[-1]] if fault_d else None,
         },
@@ -339,7 +402,7 @@ def main(argv=None) -> int:
     text = json.dumps(summary, indent=2, sort_keys=True, default=str) + "\n"
     if args.out:
         from tools.evidence_guard import protected_write
-        with protected_write(args.out) as fh:
+        with protected_write(args.out, regenerate=args.regenerate) as fh:
             fh.write(text)
         print(f"wrote {args.out}")
     else:
