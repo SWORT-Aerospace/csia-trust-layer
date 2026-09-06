@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import glob
+import gzip
 import json
 import os
 import statistics
@@ -62,9 +63,16 @@ GPS_TRACE_EDGES = ("altitude_baro", "velocity_gps_doppler_0",
                    "velocity_gps_doppler_1", "heading_course")
 
 
+def _open_text(path: str):
+    """Raw traces are archived gzipped; a scratch run leaves them plain."""
+    if path.endswith(".gz"):
+        return gzip.open(path, "rt", encoding="utf-8")
+    return open(path, encoding="utf-8")
+
+
 def load_trace(path: str):
     header, steps = None, []
-    with open(path, encoding="utf-8") as fh:
+    with _open_text(path) as fh:
         for line in fh:
             line = line.strip()
             if not line:
@@ -120,6 +128,77 @@ def failsafe_levels(steps):
     return seen
 
 
+def load_flight_log(path: str):
+    """The FLIGHT LOG, which carries what the trust trace does not.
+
+    The trace holds per-engine-step trust, S and the four traced edges. The
+    hypothesis posterior, the full gate set and the canonical channel states
+    are in the flight log. The preregistered table needs both, so both are
+    read -- rather than leaving ten columns NOT_CAPTURED and calling the table
+    complete.
+    """
+    header, rows = None, []
+    with open(path, encoding="utf-8") as fh:
+        for i, line in enumerate(fh):
+            line = line.strip()
+            if not line:
+                continue
+            obj = json.loads(line)
+            if i == 0:
+                header = obj
+            elif "t_mono" in obj:
+                rows.append(obj)
+    return header, rows
+
+
+def _ranks_and_weights(row):
+    post = (row.get("diagnosis") or {}).get("posterior") or {}
+    if not post:
+        return {}
+    order = sorted(post, key=lambda h: (-post[h], h))
+    rank = {h: i + 1 for i, h in enumerate(order)}
+    return {
+        "nominal_rank": rank.get("nominal"),
+        "gps_fault_rank": rank.get("gps_fault"),
+        "nominal_weight": post.get("nominal"),
+        "gps_fault_weight": post.get("gps_fault"),
+    }
+
+
+def _live_relations(row):
+    """Relations carrying non-zero gate weight -- 'live discriminating'."""
+    gates = row.get("gates") or {}
+    return sum(1 for v in gates.values()
+               if isinstance(v, (list, tuple)) and len(v) >= 2 and v[1] > 0.0)
+
+
+def from_flight_log(path: str, onset_s: float = 12.0) -> dict:
+    header, rows = load_flight_log(path)
+    if not rows:
+        return {}
+    t0 = rows[0]["t_mono"]
+
+    def window(lo, hi):
+        return [r for r in rows if lo <= (r["t_mono"] - t0) < hi]
+
+    out = {}
+    for name, (lo, hi) in (("pre", WINDOWS["PRE"]), ("post", WINDOWS["POST"])):
+        sel = window(lo, hi)
+        if not sel:
+            continue
+        # The LAST row of the window: ranks are a state, not a rate, and a
+        # median over a categorical rank is meaningless.
+        rw = _ranks_and_weights(sel[-1])
+        out[f"nominal_rank_{name}"] = rw.get("nominal_rank")
+        out[f"gps_fault_rank_{name}"] = rw.get("gps_fault_rank")
+        out[f"nominal_weight_{name}"] = rw.get("nominal_weight")
+        out[f"gps_fault_weight_{name}"] = rw.get("gps_fault_weight")
+        out[f"{name}_live_relations"] = _median(
+            float(_live_relations(r)) for r in sel)
+    out["flight_log"] = os.path.basename(path)
+    return out
+
+
 def extract(trace_path: str, onset_s: float = 12.0) -> dict:
     header, steps = load_trace(trace_path)
     if not steps:
@@ -147,13 +226,30 @@ def extract(trace_path: str, onset_s: float = 12.0) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--traces", default="/tmp/a2/trace")
+    # The archived raw traces, in the repository. The runner writes them to
+    # scratch; they are gzipped into the tree BEFORE any reduction, so this
+    # extractor is runnable on a fresh clone with no scratch directory.
+    ap.add_argument("--traces", default=os.path.join(
+        ROOT, "research", "physical_validation", "results", "a2_traces_raw"))
+    ap.add_argument("--logs", default=os.path.join(
+        ROOT, "logs", "shadow-sitl-ardupilot"))
     ap.add_argument("--campaign", default=os.path.join(
         ROOT, "campaigns", "physical_validation",
         "mechanism_a_trust_completion_a2"))
     ap.add_argument("--out", default=None)
     ap.add_argument("--csv", default=None)
     args = ap.parse_args(argv)
+
+    # Index the flight logs by flight_id. Matching by filename order would
+    # silently pair a FAULT trial with a CONTROL log.
+    flight_logs = {}
+    for path in sorted(glob.glob(os.path.join(args.logs, "*.jsonl"))):
+        try:
+            header, _ = load_flight_log(path)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if header and header.get("flight_id"):
+            flight_logs[header["flight_id"]] = path
 
     trials = []
     for manifest_path in sorted(glob.glob(os.path.join(args.campaign,
@@ -163,6 +259,8 @@ def main(argv=None) -> int:
         record, trial_id = man["record"], man["trial_id"]
         arm = record.get("arm")
         trace = os.path.join(args.traces, f"{trial_id}_{arm}.trace.jsonl")
+        if not os.path.exists(trace) and os.path.exists(trace + ".gz"):
+            trace += ".gz"
         row = {"trial_id": trial_id, "arm": arm,
                "validity": man["adjudication"]["state"],
                "fix_loss_confirmed": (record.get("measured_injection") or {})
@@ -179,6 +277,12 @@ def main(argv=None) -> int:
             row["trust_trajectory"] = ("CAPTURED"
                                        if row.get("trust_pre") is not None
                                        else "NOT_CAPTURED")
+            flight_id = record.get("measured_flight_id")
+            log = flight_logs.get(flight_id)
+            if log:
+                row.update(from_flight_log(log))
+            else:
+                row["flight_log"] = "NOT_FOUND"
         trials.append(row)
 
     def deltas(arm):
@@ -203,6 +307,13 @@ def main(argv=None) -> int:
         "schema": "csia.research.mechanism_a_a2_trust/1",
         "campaign_id": "CAMPAIGN_A2",
         "prereg": PREREG,
+        "raw_traces": {
+            "archive": os.path.relpath(args.traces, ROOT),
+            "note": ("RAW FIRST. The full per-step traces are archived "
+                     "gzipped, with SHA256SUMS.uncompressed.txt, BEFORE this "
+                     "reduction. This file is derived and can be deleted and "
+                     "regenerated; the archive cannot."),
+        },
         "windows": {k: list(v) for k, v in WINDOWS.items()},
         "statistics_policy": (
             "N, median, min, max and IQR at the TRIAL level. No p-values and "
@@ -280,6 +391,13 @@ def write_table(trials, path):
                 "trust_post": t.get("trust_post"),
                 "trust_delta": t.get("trust_delta"),
             })
+            for col in ("pre_live_relations", "post_live_relations",
+                        "nominal_rank_pre", "nominal_rank_post",
+                        "gps_fault_rank_pre", "gps_fault_rank_post",
+                        "nominal_weight_pre", "nominal_weight_post",
+                        "gps_fault_weight_pre", "gps_fault_weight_post"):
+                if t.get(col) is not None:
+                    row[col] = t[col]
             transitions = t.get("failsafe_transitions") or []
             if transitions:
                 row["failsafe_pre"] = transitions[0][1]
