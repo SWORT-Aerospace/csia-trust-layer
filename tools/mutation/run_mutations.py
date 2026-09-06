@@ -550,6 +550,19 @@ DEFAULT_SELECTION = [
     # Added to the selection so the re-adjudication measures the same suite the
     # paper's numbers now actually depend on.
     "tests/test_scalar_rederivation.py",
+    # A SELECTION ERROR, CORRECTED. The first campaign reported three
+    # integrity-only survivors in csia/diagnosis/baselines.py and concluded
+    # that "the baselines the paper compares against are not behaviourally
+    # pinned". They are: tests/test_shared_power_baselines.py asserts VOTE_C,
+    # DWELL_TICKS, D_WINDOW_S and D_MIN_SOURCES against the pre-registered
+    # protocol, and evaluates all five systems over the frozen 110-scenario
+    # campaign. It was simply absent from this hand-picked list.
+    #
+    # Adding it is correcting a MEASUREMENT ERROR, not chasing a score: the
+    # file is named after the module the mutants are in. Both readings are
+    # reported in MUTATION_ADJUDICATION.md so the correction is visible rather
+    # than quietly folded in.
+    "tests/test_shared_power_baselines.py",
 ]
 
 if __name__ == "__main__":
