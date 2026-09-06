@@ -1,57 +1,86 @@
 # User action required
 
-**Written:** 2026-09-06 · physical-validation + standards-candidate program.
-**Audience:** the repository owner. Every item below is blocked on a decision
-or a permission that this agent does not have and must not assume.
+**Written:** 2026-09-06, after the software-evidence completion pass.
+**Audience:** the repository owner.
 
-Each item states **what is blocked**, **what was measured**, **what the agent
-did instead**, and **what specifically is needed**. Nothing here is a
-suggestion for improvement; these are things that cannot proceed.
+Everything below is blocked on something **outside this environment**:
+hardware that must be bought and wired, access this environment is denied, or
+a judgement that is not an agent's to make.
 
----
+**Nothing here is a software task.** Anything that could be done in software
+has been done or is recorded in
+`handoff/NEXT_MASTER_PROMPT_REQUIREMENTS.md`.
 
-## A. BLOCKING — the three freeze tags exist only on this machine
-
-**Measured, 2026-09-06:**
-
-```
-$ git tag -l
-archive/handoff-source-of-record
-csia-dual-paper-evidence-freeze
-csia-v1.0-research-final
-csia-v2-phasec-frozen
-v0.7.0
-
-$ git ls-remote --tags origin
-758f4ae...  refs/tags/v0.7.0        <- the only tag on the remote
-```
-
-**Why it matters more than it looks.** Four load-bearing tags are local-only,
-and one of them —`csia-v1.0-research-final`— is what
-`tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze`
-diffs against. On a fresh clone that tag does not exist, so the freeze test
-**skips**, and a skipped freeze test reads as green. The repository already hit
-this: the tag push was refused with HTTP 403 while the commits went through,
-and `test_diagnostic_core_matches_its_recorded_hashes` exists precisely because
-of it — a hash-file check that works without git history.
-
-Beyond CI, every claim of the form "the frozen core is unchanged since the
-freeze" is checkable by a reviewer **only if the reviewer can fetch the tag.**
-Today they cannot.
-
-**What is needed:** push the four tags, or grant this agent tag-push
-permission. `git push origin --tags` from a session that has it.
-
-**What was done instead:** the hash-file fallback is in place and passing, and
-`docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md` and the failure ledger both record the
-tags as local-only rather than implying they are published.
+The three sections are deliberately kept apart. Mixing a purchase decision with
+a library-access problem produces a list where nothing looks actionable.
 
 ---
 
-## B. BLOCKING — zero bibliography entries are verified, and this environment
-cannot verify them
+# A. PHYSICAL HARDWARE
 
-**Measured, 2026-09-06** (`papers/BIB_VERIFICATION_LEDGER.yaml`):
+Everything above evidence tier **E1** is behind this section, and no amount of
+further software work substitutes for any of it.
+
+## A-1. Purchase decision for evidence tier E2
+
+| tier | needs | status |
+|---|---|---|
+| E0 desktop simulation | — | complete |
+| E1 current-stack SITL/SIH | — | complete: ArduPilot 20+20 ×2 campaigns, PX4 built and preregistered |
+| **E2 real flight-controller hardware** | flight controller, companion computer, bench harness | **NOT STARTED** |
+| E3 real sensor + physical fault | E2 + fault-injection rig | NOT STARTED |
+| E4 physical actuator path | E3 + thrust stand | NOT STARTED |
+| E5 controlled flight | E4 + airframe, site, pilot | NOT STARTED |
+
+**What is needed:** a decision on which tier to fund.
+**Itemised:** `hardware/validation_rig/PURCHASE_JUSTIFICATION.csv` — 12 rows,
+each with what it buys, what claim it licenses, and **what it does not**.
+
+**Deliberately unpriced.** Vendor sites are unreachable from this environment,
+so every price would have been invented. `docs/HARDWARE_BOM.md` carries 2026
+planning estimates that say on their face to verify at purchase.
+
+**E2 is the smallest step that changes what either manuscript may say.**
+
+## A-2. What is already built and waiting for hardware
+
+So the purchase is not blocked on further software:
+
+* the campaign orchestrator, the eight-state validity vocabulary and the
+  twelve-cause invalid-trial matrix (12/12 classified, no manual adjudication);
+* the fault-injector **wire protocol** and a simulated backend;
+* immutable, content-hashed trial manifests.
+
+Both the hardware backend and the serial injector **refuse to construct** rather
+than returning plausible values. That is deliberate: a stub would produce E2
+and E3 numbers from nothing, indistinguishable from measurements downstream.
+
+**No firmware has been written.** There is no board to test it on, and untested
+firmware sitting in `hardware/validation_rig/` would read as a validated
+component.
+
+## A-3. Authorisation, before any physical trial
+
+Not needed today; listed so it is not discovered late.
+
+* **props removed** for every bench phase — declared in every shipped profile;
+* **independent pilot authority** — a human with a kill path who is not the
+  experimenter;
+* **flight site and airspace clearance** for E5. Money does not solve this one.
+
+Out of scope by instruction and implemented nowhere: RF jamming, GPS spoofing
+transmitters, counter-UAS behaviour, autonomous targeting. The GNSS fault in
+the rig is produced by **physically disconnecting a receive antenna or data
+line**; nothing on the purchase list can transmit.
+
+---
+
+# B. BIBLIOGRAPHY AND EXTERNAL ACCESS
+
+Administrative and access blockers. **None of these is a hardware problem and
+none is a software problem.**
+
+## B-1. Zero bibliography entries are publisher-verified
 
 | status | count |
 |---|---|
@@ -59,143 +88,101 @@ cannot verify them
 | `CORROBORATED_NO_PUBLISHER_RECORD` | 9 |
 | **`VERIFIED`** | **0** |
 
-**Why this environment cannot close it.** Re-measured this session:
+**This environment cannot clear it.** The agent proxy answers **403 at
+CONNECT** for `doi.org`, `dl.acm.org`, `ieeexplore.ieee.org`,
+`link.springer.com`, `www.sciencedirect.com`, `arxiv.org` and
+`api.crossref.org`. That is a policy denial at the gateway — not TLS, not rate
+limiting, and not something a retry or another client fixes. **No further
+engineering time will be spent on those hosts.**
+
+**The work order is prepared:**
+`papers/BIBLIOGRAPHY_HUMAN_VERIFICATION_WORKORDER.md` — all 19 entries with
+title, authors, venue, year, DOI where one exists, and the authoritative target.
+
+**Consequence:** while `publisher_verified = 0`, neither manuscript is
+submission-ready if the publication gate requires authoritative verification.
+
+## B-2. Four freeze tags exist only on one machine
 
 ```
-$ curl -o /dev/null -w '%{http_code}' https://doi.org/            -> 000
-  (dl.acm.org, ieeexplore.ieee.org, link.springer.com,
-   www.sciencedirect.com, arxiv.org: all 000)
-
-$ curl "$HTTPS_PROXY/__agentproxy/status"
-  "recentRelayFailures": [
-    {"kind": "connect_rejected",
-     "detail": "gateway answered 403 to CONNECT (policy denial or upstream
-                failure)",
-     "host": "api.crossref.org:443"}, ...
+$ git ls-remote --tags origin
+758f4ae...  refs/tags/v0.7.0          <- the only tag on the remote
 ```
 
-The agent proxy negotiates the CONNECT tunnel and the gateway then answers 403.
-This is a policy denial at the gateway, not a TLS problem and not something a
-retry or a different client fixes. WebSearch works; fetching a publisher record
-does not.
+`csia-v1.0-research-final`, `csia-v2-phasec-frozen`,
+`csia-dual-paper-evidence-freeze` and `archive/handoff-source-of-record` are
+local-only; the push was refused **HTTP 403**.
 
-**What is needed:** a human with journal access confirms each entry against the
-publisher's record — title, authors, venue, year, DOI — and marks it
-`VERIFIED`. Nine entries are already corroborated from search results and need
-only the publisher check; ten have not been read at all.
+**Why it matters:** `test_diagnostic_core_is_unchanged_since_the_freeze` diffs
+against `csia-v1.0-research-final`. On a fresh clone the tag does not exist, so
+the test **skips**, and a skipped freeze test reads as green. A hash-file
+fallback exists and runs everywhere, which is why this is a real problem and
+not an emergency.
 
-**What was NOT done, deliberately:** no entry was marked verified on the
-strength of a search snippet, and no citation was invented to make a guard
-pass. `tools/publication/bib_guard.py` enforces the marker vocabulary and
-`tests/test_bib_verification_ledger.py` asserts the two lists agree.
+**Needed:** push the tags, or grant tag-push permission.
 
-**Consequence if unresolved:** neither manuscript can be submitted. This is the
-single hardest blocker in the repository.
+## B-3. Configuration-unification decision
 
----
+`profiles/*.yaml` and `configs/vehicle/*.yaml` overlap. **Not an agent's call:**
+unifying them changes the flight-log header hash and **orphans every committed
+trial manifest that cites one**.
 
-## C. DECISION REQUIRED — unify `configs/vehicle/*.yaml` and `profiles/*.yaml`,
-or keep them separate
-
-**The seam** is documented in full at `docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md`
-and was first recorded as FL-005.
-
-**Why the agent did not decide it.** `csia/deploy/flight_log.py` writes
-`sha256(json.dumps(vehicle_config, sort_keys=True))[:16]` into every flight-log
-header. Merging the two files changes that hash for every existing deployment
-config, which **orphans every committed trial manifest that cites one**. That
-is an evidence consequence, not a refactor, and it is the owner's call.
-
-**What was done instead:** the two files are now checkable against each other
-(`csia-edge validate --deployment` exits 3 on conflict, never prefers one), and
-`csia.deployment/2` adds an opt-in profile reference in **new files only**.
-`configs/vehicle/example_quad.yaml` still hashes to `da6321053178df5b`, pinned
-by a test.
-
-**The three options, with what each costs:**
-
-| option | cost |
-|---|---|
-| keep both, cross-checked (**status quo, implemented**) | two files to keep in sync; the cross-check catches disagreement but not omission |
-| migrate new vehicles to schema 2, leave schema 1 files frozen | none to existing evidence; two schemas coexist indefinitely |
-| unify into one file | every existing flight-log header hash becomes unresolvable, and every trial manifest citing one must be re-derived or annotated |
+Documented at `docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md` with three options and
+what each costs. The status quo — two files, cross-checked, conflicts reported
+and never silently resolved — is implemented and safe to leave.
 
 ---
 
-## D. DECISION REQUIRED — hardware purchase for evidence tiers E2 and above
+# C. EXTERNAL INDEPENDENT VALIDATION
 
-The evidence tiers are defined in
-`research/physical_validation/PAPER_IMPACT_LEDGER.yaml`. Current state:
+Judgements that need someone who did not build this.
 
-| tier | what it needs | status |
-|---|---|---|
-| E0 desktop simulation | — | complete |
-| E1 current-stack SITL/SIH | — | complete (ArduPilot 4.8, PX4 SIH) |
-| **E2 real flight-controller hardware** | a flight controller, a companion computer, a bench harness | **NOT STARTED — needs purchase** |
-| E3 real sensor + physical fault | E2 plus a fault-injection rig | NOT STARTED |
-| E4 physical actuator/output path | E3 plus a thrust stand | NOT STARTED |
-| E5 controlled physical flight | E4 plus an airframe, a site and an authorised pilot | NOT STARTED |
+## C-1. Adversarial review of the DEA candidate profile
 
-`hardware/validation_rig/PURCHASE_JUSTIFICATION.csv` itemises what each tier
-requires and what claim it would license. **No purchase is assumed and no
-result above E1 is written anywhere.**
+`standards/dea/DEA_PROFILE.md` is a **candidate**, not a standard: not
+submitted to any body, not endorsed by one.
 
-**What is needed:** a decision on which tier to fund. E2 is the smallest step
-that changes what either manuscript may say.
+It has been tested against itself as hard as its author can — a conforming
+non-CSIA reference in a different domain, eight deliberately bad references
+each rejected for the requirement it violates, and a test that every
+requirement is violated by at least one of them.
 
----
+**What it has not had is an attacker.** Its four open questions (§10 of the
+profile) need answers from someone with no stake in it — particularly the
+open-world hypothesis set, which DEA-6 currently cannot express.
 
-## E. AUTHORISATION REQUIRED — before any physical trial
+## C-2. Independent replication of the E1 campaigns
 
-Not needed today (nothing physical has run), listed so it is not discovered
-late. Every shipped profile already declares these under `safety:`:
+Everything measured here ran on one host, in one container, driven by one
+agent. The builds are pinned and the campaigns are preregistered so that
+someone else **can** re-run them:
 
-* `props_removed_for_bench: true` — props stay off for every bench phase. A
-  flight phase that needs them must say so explicitly and separately.
-* `independent_pilot_authority_required: true` — a human with an independent
-  kill path, not the person running the experiment.
-* `shadow_only: true` — CSIA has no command path in any mode, enforced
-  structurally in `csia/deploy/shadow.py`, not by configuration.
+* ArduPilot `01a504b472259602e13df4cf07df7c0cdbb35993`
+* PX4 `547e2caa9883bc1609325f02b4914b4e2482fe62`
 
-**Out of scope by instruction and not implemented anywhere:** RF jamming, GPS
-spoofing transmitters, counter-UAS behaviour, autonomous targeting.
+**Nobody has.** Reproducibility that has never been exercised is a property of
+the documentation, not yet of the result.
 
----
+## C-3. Review of what the mutation campaign did not pin
 
-## F. FOR INFORMATION — what is NOT blocked
+The mutation results are a self-assessment: the agent chose the mutants and
+chose the test selection, and **that selection was wrong once** — three
+"survivors" in `csia/diagnosis/baselines.py` turned out to be an omission from
+a hand-picked list rather than a gap in the suite.
 
-So the list above is read as short rather than as everything:
-
-* The repeated current-stack campaign (P8) needs **no new hardware**, and its
-  preregistration is frozen before any trial
-  (`research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md`).
-  It does need a simulator, and two measured facts shape what it can claim —
-  both are recorded in §2 of that preregistration:
-  - neither ArduPilot SITL nor PX4 SIH was installed in this environment
-    (`sim_vehicle.py`, `arducopter` and `px4` are all absent, and
-    `firmware.ardupilot.org` answers 000 through the proxy). ArduPilot builds
-    from source here: the clone succeeds, `waf configure --board sitl` succeeds,
-    and the toolchain is present;
-  - **the original E1 build cannot be identified.** No autopilot commit,
-    firmware hash or build date appears in any Mechanism A artifact, and
-    "ArduPilot 4.8" is a development branch — the newest release tag is
-    `Copter-4.7.1`. So a repeat pins a NEW commit
-    (`e21b732a07ce2b632ea99b098ee6ab7ece0971ea`) and establishes within-build
-    repeatability of that build. It cannot be described as a repeat of the
-    original run, and the design cannot separate a build difference from
-    run-to-run variation.
-* The DEA standards-candidate work is implementation-neutral and software-only.
-* Mutation testing, the profile/science firewall and the clean-room structural
-  reference all ran to completion in this environment.
+A reviewer choosing their own mutants would be worth more than another campaign
+run by the same author.
 
 ---
 
-## G. Where the record lives
+## Where the record lives
 
-| file | what it holds |
+| file | holds |
 |---|---|
 | `research/physical_validation/FAILURE_LEDGER.yaml` | every failure, negative result and self-correction, append-only |
-| `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | what new evidence would license each manuscript to say — and what it would not |
-| `research/physical_validation/mutation/MUTATION_SURVIVORS.md` | which parts of the science no test pins |
-| `docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md` | the configuration seam, §C above |
-| `papers/BIB_VERIFICATION_LEDGER.yaml` | the bibliography, §B above |
+| `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | what each result licenses — and what it does not |
+| `research/physical_validation/SCALAR_DERIVATION_GRAPH.yaml` | where each headline number comes from |
+| `research/physical_validation/mutation/` | what no behavioural test pins |
+| `handoff/MASTER_SYSTEM_INPUT_PACKET.md` | for whoever designs the system around CSIA |
+| `handoff/NEXT_MASTER_PROMPT_REQUIREMENTS.md` | for the next agent session |
+| `papers/BIBLIOGRAPHY_HUMAN_VERIFICATION_WORKORDER.md` | §B-1, per entry |

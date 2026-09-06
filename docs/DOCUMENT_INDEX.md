@@ -1,8 +1,8 @@
 # Document index
 
-358 markdown files exist in this repository. Most are the frozen research
+361 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 358 individually would
+once, cite a commit, and are never revised. Indexing all 361 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -76,6 +76,13 @@ updating what points at it.
 | `research/PAPER_RELATIONSHIP.md` | CANONICAL | which paper owns which result, and what neither may do | yes | — | no |
 | `research/FUTURE_RESEARCH_FRONTIER.md` | CANONICAL | questions deliberately not pursued yet | yes | — | no |
 | `research/v1_1/CURRENT_STACK_REPLICATION.md` | **CANONICAL** | the preregistered replication campaign. ArduPilot 4.8 REPLICATED, PX4 SIH INAPPLICABLE | yes | — | **yes** |
+| `research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md` | **CANONICAL** | twelve headline quantities across the original n=1, Campaign A1 and Campaign A2. Nine reproduce; three do not, root-caused to a 0.5 s vs 1.0 s runtime watchdog | yes, for what the Mechanism-A numbers mean | — | **yes** — `tests/test_ardupilot_repeat_reconciliation.py` |
+| `research/physical_validation/SCALAR_DERIVATION_GRAPH.yaml` | CANONICAL | where each headline scalar comes from, and which have an oracle that closes the loop | yes | — | no — hand-compiled, and says so |
+| `research/physical_validation/mutation/MUTATION_ADJUDICATION.md` | CANONICAL | per-mutant adjudication of the six unresolved mutants, in five classes | yes | — | no |
+| `research/physical_validation/mutation/MUTATION_SURVIVORS.md` | HISTORICAL | the original campaign at `33d3d61`. **Its §2–4 is contradicted** by the adjudication and kept | — | partly, by `MUTATION_ADJUDICATION.md` | no |
+| `research/physical_validation/P4_P7_STATUS_AUDIT.md` | CANONICAL | P4–P7 audited by running their tests. P4/P6/P7 PASS, P5 PARTIAL at the hardware boundary | yes | — | no |
+| `research/physical_validation/FAILURE_LEDGER.yaml` | **CANONICAL** | every failure, negative result and self-correction, append-only | yes | — | yes |
+| `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | **CANONICAL** | what each result licenses — and what it does not | yes | — | yes |
 | `docs/math/PROOF_STATUS.md` | CANONICAL | claim register for the **anytime-valid e-process** work (T-1…T-5). A different body of work; it does **not** govern P1–P8 | yes, for e-processes | — | yes |
 
 ## Architecture, product and status
