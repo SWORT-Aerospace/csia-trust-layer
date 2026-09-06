@@ -1,8 +1,8 @@
 # Document index
 
-370 markdown files exist in this repository. Most are the frozen research
+371 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 370 individually would
+once, cite a commit, and are never revised. Indexing all 371 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -85,6 +85,7 @@ updating what points at it.
 | `research/physical_validation/E1_FINAL_CLAIM_TABLE.csv` | **CANONICAL** | per current-stack claim: what repeated, what did not, what is configuration dependent, and the wording each licenses | yes, for what may be written about E1 | — | **yes** — `tests/test_e1_claim_table.py` |
 | `research/physical_validation/E1_FREEZE_MANIFEST.yaml` | **CANONICAL** | the state E1 was frozen at: core, campaign, prereg, trace, extractor, claim-table and paper digests | yes | — | **yes** — `tests/test_e1_freeze_manifest.py` |
 | `hardware/validation_rig/E2_BUILD_PACKET.md` | CANONICAL | what to buy and wire for E2, and what E2 does and does not license | yes, for the next tier | — | **yes** — path checked by `tests/test_e1_freeze_manifest.py` |
+| `research/physical_validation/prereg/E2_HARDWARE_BOUNDARY_PREREG.md` | **TEMPLATE, NOT A PREREGISTRATION** | E2's design fixed before purchase; every environment field left `[FILL:]` until a board exists. `E2_STATUS: NOT_RUN` is the only line citable today | **no** — nothing in it is evidence | — | **yes** — `tests/test_post_e1_hardening_round2.py` fails if the FILL markers vanish |
 | `research/physical_validation/FAILURE_LEDGER.yaml` | **CANONICAL** | every failure, negative result and self-correction, append-only | yes | — | yes |
 | `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | **CANONICAL** | what each result licenses — and what it does not | yes | — | yes |
 | `docs/math/PROOF_STATUS.md` | CANONICAL | claim register for the **anytime-valid e-process** work (T-1…T-5). A different body of work; it does **not** govern P1–P8 | yes, for e-processes | — | yes |
