@@ -112,10 +112,11 @@ def test_no_hostile_input_produces_a_silent_healthy_verdict():
 
 def test_the_hostile_campaign_still_covers_its_declared_classes():
     doc = _load("HOSTILE_INPUT_RESULTS.json")
-    assert len(doc["classes"]) >= 26, (
+    assert len(doc["classes"]) >= 27, (
         f"the hostile-input campaign now declares {len(doc['classes'])} "
-        f"classes; it was written with 26 and shrinking it silently narrows "
-        f"the claim")
+        f"classes; it was built with 27 -- the 26 the programme named plus "
+        f"`unknown_schema_field` -- and shrinking it silently narrows the "
+        f"claim")
     # NOT_APPLICABLE rows are reported rather than dropped, and that is the
     # property that keeps an uncovered class visible.
     assert "NOT_APPLICABLE" in doc["counts"]

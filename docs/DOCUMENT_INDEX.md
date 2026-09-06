@@ -1,8 +1,8 @@
 # Document index
 
-371 markdown files exist in this repository. Most are the frozen research
+372 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 371 individually would
+once, cite a commit, and are never revised. Indexing all 372 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -163,6 +163,7 @@ is usually two arms of one experiment, not duplication.
 | `research/maer/` | 9 | MAER jamming and raw-GNSS qualification |
 | `docs/validation/` | 9 | metric definitions, split policy, deduplication, exposure plan |
 | `research/dual_admissibility/` | 8 | the original dual-admissibility work |
+| `handoff/` | 12 | status and handoff reports written at a stated commit, for the writing agents and for the next session. Each is a snapshot, **never** a claim register — `POST_E1_HARDENING_AND_E2_STATUS.md` is the current one |
 | `research/wp_c*/`, `research/v1_1/`, `research/invalidity_masking/`, `research/formalization/` | ~30 | work packages C2–C9, v1.1 campaigns, invalidity masking, formalization |
 
 ## How to keep this index true

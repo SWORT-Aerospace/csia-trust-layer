@@ -58,6 +58,16 @@ the rest. `scripts/optiplex_nightly.sh` is the script; the order is:
 | 8 | decision replay | `tools/assurance/decision_replay.py` |
 | 9 | portability comparison | `portability_probe.py --compare` against the stored baseline |
 | 10 | resource envelope | `tools/assurance/resource_envelope.py` |
+| 11 | differential, five implementations | `tools/assurance/differential.py` |
+| 12 | process failure and recovery | `tools/assurance/process_recovery.py` |
+| 13 | configuration proof | `tools/assurance/config_proof.py` |
+| 14 | build and dependency provenance | `tools/assurance/build_provenance.py` |
+
+**Stage 8 is expected to FAIL, and that is not a broken node.** Decision replay
+is DIVERGENT on both platforms (HF-004) and the software-hardening gate does
+not count it as PASS. It runs nightly anyway so that the day it *changes* is
+visible — in either direction. A nightly report reading `decision_replay FAIL`
+is the current, correct state.
 
 ## 4. The three outcomes
 

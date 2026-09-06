@@ -45,6 +45,10 @@ stage bounded_formal "$PY" tools/assurance/bounded_verify.py --out "$OUT/bounded
 stage hostile_input  "$PY" tools/assurance/hostile_input.py --out "$OUT/hostile.json"
 stage decision_replay "$PY" tools/assurance/decision_replay.py --out "$OUT/replay.json"
 stage resource_env   "$PY" tools/assurance/resource_envelope.py --out "$OUT/envelope.json" --quick
+stage differential   "$PY" tools/assurance/differential.py --out "$OUT/differential.json"
+stage recovery       "$PY" tools/assurance/process_recovery.py --out "$OUT/recovery.json"
+stage config_proof   "$PY" tools/assurance/config_proof.py --out "$OUT/config_proof.json"
+stage provenance     "$PY" tools/assurance/build_provenance.py --out "$OUT/provenance.json"
 
 if [ -f "$ROOT/research/physical_validation/results/PORTABILITY_HOST_current.json" ] \
    && [ -f "$OUT/host.json" ]; then
