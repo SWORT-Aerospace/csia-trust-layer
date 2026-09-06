@@ -119,19 +119,6 @@ def test_the_original_tick_count_and_gate_collapse_rederive(original,
     assert original["ranks_after"]["gps_fault"] == 2
 
 
-def test_the_original_log_does_not_record_which_ardupilot_build_it_ran(
-        original):
-    """Section 4.5. An UNRECOVERABLE field, pinned so it is not rediscovered.
-
-    If this ever starts failing because the log gained a real build string,
-    the log was rewritten -- which is the thing that must not happen to frozen
-    evidence.
-    """
-    assert original["autopilot_version"] == "ardupilot", (
-        "the original trial's log records a platform name, not a build; "
-        "section 4.5 of the reconciliation depends on that")
-
-
 def test_the_original_trust_was_in_the_log_all_along(original):
     """The artifact carries four snapshots; the LOG carries every tick.
 
@@ -232,6 +219,86 @@ def test_the_a2_dwells_match_the_derived_watchdog():
     assert len(dwells) == 20, f"expected 20 FAULT logs, found {len(dwells)}"
     for d in dwells:
         assert d == pytest.approx(derived, abs=TICK_S)
+
+
+def _dwell_and_age(path):
+    """Dwell, plus the channel's age at the last tick before it was flagged.
+
+    The watchdog counts from the last time the `gps` node was EMITTED, not
+    from the tick that first reports MISSING. Those differ by exactly this
+    age, which is why section 4.5's relation has an age term at all.
+    """
+    with open(path, encoding="utf-8") as fh:
+        ticks = [json.loads(line) for line in fh
+                 if json.loads(line).get("record") == "tick"]
+    t0 = ticks[0]["t_mono"]
+    prev = missing = age = gate_zero = None
+    for x in ticks:
+        t = x["t_mono"] - t0
+        ch = (x["canonical"]["channels"].get("gnss.position") or {})
+        if missing is None and ch.get("missing") == "NO_3D_FIX":
+            missing = t
+            age = ((prev["canonical"]["channels"].get("gnss.position") or {})
+                   .get("age_s") if prev else None)
+        gates = x.get("gates") or {}
+        gsum = sum(float(gates[k][1]) for k in GPS_EDGES if k in gates)
+        if missing is not None and gate_zero is None and gsum == 0.0:
+            gate_zero = t
+        prev = x
+    if missing is None or gate_zero is None:
+        return None, age
+    return gate_zero - missing, age
+
+
+#: Section 4.5. Four runs across TWO platforms and BOTH watchdog values, so
+#: the relation is not fitted to the case it explains.
+DWELL_CASES = [
+    ("ardupilot ORIGINAL", "shadow-sitl-ardupilot",
+     "20260825T005244Z-8c32ffe5", 0.5),
+    ("px4 ORIGINAL", "shadow-sitl-px4",
+     "20260825T005931Z-1b4add14", 0.5),
+]
+
+
+@pytest.mark.parametrize("label,subdir,flight_id,watchdog", DWELL_CASES)
+def test_the_dwell_is_the_watchdog_minus_the_channel_age(label, subdir,
+                                                        flight_id, watchdog):
+    """Section 4.5: dwell ~= watchdog - age at the last usable tick.
+
+    Tolerance is ONE TICK PERIOD, because the dwell is observed on tick
+    boundaries and cannot be resolved finer. It is not a tolerance chosen to
+    make the check pass -- every measured residual is under 0.013 s against a
+    0.04 s budget.
+    """
+    log = os.path.join(ROOT, "logs", subdir, f"{flight_id}.part000.jsonl")
+    _skip_without(log)
+    dwell, age = _dwell_and_age(log)
+    assert dwell is not None and age is not None, f"{label}: no dwell to check"
+    assert dwell == pytest.approx(watchdog - age, abs=TICK_S), (
+        f"{label}: dwell {dwell} against watchdog {watchdog} minus age {age}; "
+        f"section 4.5's relation no longer holds")
+
+
+def test_the_px4_gps_watchdog_moved_the_same_way_ardupilot_s_did():
+    """Section 4.6: the reconciliation is not an ArduPilot-only story."""
+    assert STALE_TIMEOUT_S["gps"] == 0.5
+    assert build_runtime_stale_timeouts("px4")["gps"] == 1.0
+
+
+def test_both_original_logs_record_a_platform_name_not_a_build():
+    """Section 4.6, both platforms. An UNRECOVERABLE field, pinned.
+
+    If this ever starts failing because a log gained a real build string, the
+    log was rewritten -- which is the thing that must not happen to frozen
+    evidence.
+    """
+    for subdir, flight_id, expected in (
+            ("shadow-sitl-ardupilot", "20260825T005244Z-8c32ffe5",
+             "ardupilot"),
+            ("shadow-sitl-px4", "20260825T005931Z-1b4add14", "px4")):
+        log = os.path.join(ROOT, "logs", subdir, f"{flight_id}.part000.jsonl")
+        _skip_without(log)
+        assert extract(log, onset_s=12.0)["autopilot_version"] == expected
 
 
 def _table_rows():

@@ -170,8 +170,17 @@ chose the test selection, and **that selection was wrong once** — three
 "survivors" in `csia/diagnosis/baselines.py` turned out to be an omission from
 a hand-picked list rather than a gap in the suite.
 
+All six unresolved mutants are now adjudicated, in
+`research/physical_validation/mutation/MUTATION_ADJUDICATION.md`. **The count
+moved from 0 of 5 killed to 4 of 5, and the raw count is the least useful thing
+in that file**: three were the selection error above, one was killed by an
+oracle written *after* the mutant was known, and **one is still pinned by
+nothing but a file hash and was deliberately left that way** — writing a test
+for it now would make the count 5 of 5 and measure nothing.
+
 A reviewer choosing their own mutants would be worth more than another campaign
-run by the same author.
+run by the same author. The specific thing to attack is
+`CONFIGURATION-02` (`imu_isolation_gap`), which no behavioural test reaches.
 
 ---
 
@@ -182,7 +191,9 @@ run by the same author.
 | `research/physical_validation/FAILURE_LEDGER.yaml` | every failure, negative result and self-correction, append-only |
 | `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | what each result licenses — and what it does not |
 | `research/physical_validation/SCALAR_DERIVATION_GRAPH.yaml` | where each headline number comes from |
-| `research/physical_validation/mutation/` | what no behavioural test pins |
+| `research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md` | twelve headline quantities across n=1, A1 and A2. **Nine reproduce, three do not**, and why |
+| `research/physical_validation/P4_P7_STATUS_AUDIT.md` | P4–P7 audited by running their tests, not by observing files exist |
+| `research/physical_validation/mutation/` | what no behavioural test pins — `MUTATION_ADJUDICATION.md` is the current state |
 | `handoff/MASTER_SYSTEM_INPUT_PACKET.md` | for whoever designs the system around CSIA |
 | `handoff/NEXT_MASTER_PROMPT_REQUIREMENTS.md` | for the next agent session |
 | `papers/BIBLIOGRAPHY_HUMAN_VERIFICATION_WORKORDER.md` | §B-1, per entry |

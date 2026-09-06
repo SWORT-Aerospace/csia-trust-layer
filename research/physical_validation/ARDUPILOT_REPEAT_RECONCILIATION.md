@@ -168,15 +168,49 @@ is that **the "repeat" repeated a different deployment configuration from the
 original**, and neither the A1 nor the A2 preregistration named the watchdog as
 a pinned environment field. That omission is the finding (FL-017).
 
-### 4.5 One further gap in the original's record
+### 4.5 The dwell is a deterministic function of the watchdog, checked four ways
+
+§4.3 says the dwells "match their respective constants to within one tick".
+They match something sharper than that, and it is worth stating because it
+turns §4 from *the watchdog differs* into *the dwell is predictable from the
+watchdog*.
+
+The watchdog measures from the last time the `gps` node was **emitted**, not
+from the tick that first reports the channel MISSING. Those differ by whatever
+age the channel had already accumulated. So:
+
+> **dwell ≈ watchdog − (channel age at the last usable tick)**
+
+| run | watchdog | age at last usable tick | predicted | **measured** | residual |
+|---|---|---|---|---|---|
+| ArduPilot ORIGINAL | 0.5 | 0.012817 | 0.487183 | **0.478777** | −0.008406 |
+| PX4 ORIGINAL | 0.5 | 0.112200 | 0.387800 | **0.400208** | +0.012408 |
+| ArduPilot A2, n=20 medians | 1.0 | 0.006286 | 0.993714 | **0.999657** | +0.005943 |
+| PX4 validation pair | 1.0 | 0.092852 | 0.907148 | **0.919577** | +0.012429 |
+
+Every residual is inside one tick period (0.04 s at 25 Hz), which is the
+resolution the dwell can be observed at. The relation holds across **two
+platforms and both watchdog values**, so it is not fitted to the case it
+explains.
+
+**It also explains why the two ORIGINAL trials have different dwells** (0.4788
+against 0.4002) under the *same* 0.5 s watchdog: PX4's `gnss.position` arrives
+more slowly on the passive link, so the channel is older when it is flagged.
+That is the same passive-link starvation §4 of the PX4 preregistration retains,
+showing up in a second quantity.
+
+### 4.6 One further gap in the original's record
 
 The original trial's flight-log header records `autopilot_version:
 "ardupilot"` — a platform name, not a build. **The original n=1 trial cannot be
 shown from its own record to have run the pinned ArduPilot build**
 `01a504b472259602e13df4cf07df7c0cdbb35993`; A1 and A2 record
 `ArduCopter V4.8.0-dev@01a504b`. This is not offered as the cause of anything —
-§4.3 already accounts for the discrepancy quantitatively — but it is an
+§4.3 and §4.5 account for the discrepancy quantitatively — but it is an
 unrecoverable field and is recorded rather than left to be rediscovered.
+**The original PX4 trial has the identical gap**: its log records
+`autopilot_version: "px4"`, while the repeat resolves
+`PX4-Autopilot v1.18.0-beta1-395-g547e2caa98@547e2ca`.
 
 ## 5. Claim impact, per row
 
