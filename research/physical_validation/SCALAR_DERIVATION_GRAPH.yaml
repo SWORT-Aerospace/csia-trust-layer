@@ -1,0 +1,243 @@
+%YAML 1.2
+---
+# SCALAR DERIVATION GRAPH -- where every headline number actually comes from.
+#
+# THE PRINCIPLE
+# -------------
+# For every scientific scalar, ask: can this be regenerated from a more
+# primitive frozen artifact?
+#
+#   PREFERRED:   RAW -> DETERMINISTIC EXTRACTION -> DERIVED SCALAR -> PAPER
+#   AVOIDED:     PAPER SCALAR -> TEST EXPECTS THE SAME PAPER SCALAR
+#
+# The second shape is not a check. It is a copy of the number in a second
+# place, and mutation testing found exactly that: alpha0 could be changed 100x
+# and every test stayed green, BECAUSE the stored artifact still held the old
+# value (EVIDENCE-05).
+#
+# HOW TO READ `provenance`
+#   RAW_REDERIVABLE      a raw trace or campaign, plus a committed
+#                        deterministic extractor, reproduces it
+#   SOURCE_REDERIVABLE   the frozen source alone reproduces it. Weaker than
+#                        RAW (no measurement is involved) and much stronger
+#                        than an artifact lookup
+#   ARTIFACT_SUMMARY_ONLY  the number exists only as a stored summary; nothing
+#                        re-derives it. THIS IS THE CATEGORY TO SHRINK
+#   MEASURED_NOT_DERIVED a direct observation with no derivation chain -- a
+#                        count, a version string. Re-derivation is meaningless
+#
+# `oracle_test` names the test that CLOSES the loop. A scalar with a
+# provenance of RAW_REDERIVABLE or SOURCE_REDERIVABLE and NO oracle_test is
+# re-derivABLE and not re-derivED, which is a plan rather than a check.
+
+schema: csia.research.scalar_derivation_graph/1
+generated_by_hand: true
+generated_note: >-
+  Compiled by inspection, not by a script. A generated graph would be better
+  and does not exist; this is the honest state, and building the generator is
+  named as an open item rather than implied.
+
+scalars:
+
+  # =========================================================================
+  - id: S_0
+    value: 475.6775
+    what: >-
+      Beta mass alpha+beta of the gps node after 1500 healthy steps of the
+      frozen recursion under a synthetic evidence sequence.
+    used_by: >-
+      systems paper mass term S_0 * (T_0 - T*) = 118.82
+    provenance: SOURCE_REDERIVABLE
+    chain:
+      - frozen EngineConfig (alpha0=8.0, beta0=2.0, rho_max=0.998)
+      - frozen TrustCore recursion
+      - settling procedure, 1500 steps, one neighbour edge
+      - S_0
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::test_s0_rederives_from_the_frozen_engine
+    extractor: research/physical_validation/derivation/rederive_s0.py
+    was_previously: ARTIFACT_SUMMARY_ONLY
+    closed_by: >-
+      This session. Before it, the only check read
+      research/wp_c8/results/escalation_algebra.json and could not see a 100x
+      change in alpha0.
+    caveat: >-
+      NOT a flight observable -- no trial measures it. And the field is named
+      settled_mass_S0 while the mass is still climbing at n=1500 (475.68 ->
+      498.79 by n=3000, cap 500). S_0 is a function of the horizon and must be
+      quoted with n_steps. The TRUST is settled by then; the mass is not.
+
+  # =========================================================================
+  - id: T_0
+    value: 0.999791
+    what: settled trust of the gps node at the same horizon
+    used_by: the same mass term
+    provenance: SOURCE_REDERIVABLE
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::test_t0_rederives_from_the_frozen_engine
+    extractor: research/physical_validation/derivation/rederive_s0.py
+    caveat: >-
+      It is NOT 1.0 and it is NOT 0.98764. The latter appears nowhere in this
+      repository and was a back-solve that reproduces 118.82 by coincidence.
+
+  # =========================================================================
+  - id: mass_term_118_82
+    value: 118.82
+    what: S_0 * (T_0 - T*) with T* = 0.75
+    used_by: systems paper, the dominant term in N*
+    provenance: SOURCE_REDERIVABLE
+    chain: [S_0, T_0, "T* = 0.75 from FailsafeConfig.nav_caution", product]
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::
+      test_the_mass_term_rederives_to_the_published_118_82
+    caveat: >-
+      125 is a DOCSTRING ILLUSTRATION using the theoretical cap 500, not a
+      result. It was transcribed into the manuscript once as if it were one.
+
+  # =========================================================================
+  - id: shared_power_baseline_verdicts
+    what: >-
+      fault_detected, affected_sources, shared_vs_independent and
+      root_cause_supported for all five systems over 110 scenarios
+    used_by: the systems paper's baseline comparison
+    provenance: RAW_REDERIVABLE
+    chain:
+      - campaigns/shared_power_generalization_v1.json (frozen, hash-pinned)
+      - frozen csia/diagnosis/baselines.py + run_shadow
+      - tools/run_shared_power_baseline.py
+      - campaigns/results/shared_power_baseline_v1.json
+    oracle_test: >-
+      tests/test_baseline_rederivation.py::
+      test_the_baseline_verdicts_rederive_from_the_frozen_campaign
+    measured: >-
+      Full 110-scenario re-derivation (64 s) matched the committed artifact on
+      EVERY verdict field. 723 differences were tick_cost_us; 6 were
+      A_LEGACY_SINGLE_SOURCE.t_first_detection in the NEGATIVE_INDEPENDENT
+      dual-IMU family, where the verdicts are identical.
+    was_previously: ARTIFACT_SUMMARY_ONLY
+    caveat: >-
+      Neither excluded field class is load-bearing: no test and no manuscript
+      binding references t_first_detection, or this artifact at all.
+
+  # =========================================================================
+  - id: mechanism_a_first_t_ardupilot
+    value: 12.043901
+    what: >-
+      first tick at which gnss.position goes MISSING with NO_3D_FIX, original
+      n=1 ArduPilot trial
+    used_by: systems paper, Mechanism A
+    provenance: RAW_REDERIVABLE
+    chain:
+      - the trial's flight log (per-tick canonical channels)
+      - tools/csia_experiment/extract_mechanism_a.py
+      - first_t
+    oracle_test: >-
+      NONE for the ORIGINAL trial's own log. The extractor was applied to
+      Campaign A1's 40 new logs, where the original value falls inside the
+      repeated range (12.0399-12.0827, median 12.0432).
+    caveat: >-
+      A repeat agreeing with a number is not the same as re-deriving that
+      number from its own raw log. The original log is committed and the
+      extractor would run on it; that check is NOT written.
+
+  # =========================================================================
+  - id: gps_gate_weight_sum_ardupilot
+    value: "3.0 -> 0.0"
+    what: sum of gate weights over the four GNSS-incident edges
+    provenance: RAW_REDERIVABLE
+    oracle_test: >-
+      research/physical_validation/results/mechanism_a_repeat_ardupilot.json,
+      20/20 FAULT and 0/20 CONTROL, via extract_mechanism_a.py
+    caveat: >-
+      The edge set is DERIVED from the frozen trust graph, not listed -- every
+      edge with gps as an endpoint, under the runtime's own identifiers.
+
+  # =========================================================================
+  - id: trust_rise_ardupilot
+    value: "0.9213 -> 0.9300"
+    what: gps trust coefficient across the fault, original n=1
+    used_by: >-
+      master packet section G; the DEA profile's justification for NOT
+      standardising "gate closure shall lower trust"
+    provenance: ARTIFACT_SUMMARY_ONLY
+    status_this_session: >-
+      Campaign A2 captures the trust trace and produces the repeated
+      distribution. Until A2's extraction is committed, this scalar remains
+      artifact-summary-only and rests on n=1.
+    oracle_test: pending A2
+    caveat: >-
+      Campaign A1 did NOT capture trust (FL-014). NOT_CAPTURED is not FAIL,
+      ZERO or UNCHANGED.
+
+  # =========================================================================
+  - id: trust_rise_px4
+    value: "0.9856 -> 0.9875"
+    provenance: ARTIFACT_SUMMARY_ONLY
+    oracle_test: none
+    caveat: >-
+      n=1. The PX4 repeated campaign is preregistered and its environment is
+      reconstructed and built; until it runs this stays n=1.
+
+  # =========================================================================
+  - id: independent_checker_agreement
+    value: "378000/378000"
+    what: production vs independent checker agreement on real ticks
+    provenance: ARTIFACT_SUMMARY_ONLY
+    oracle_test: none
+    caveat: >-
+      Re-deriving it means re-running the campaign that produced the ticks.
+      Feasibility not assessed this session.
+
+  # =========================================================================
+  - id: cusum_latencies
+    value: "2.96 / 1.16 / 0.72 s"
+    what: CUSUM detection latency per arm, detector-alone
+    provenance: RAW_REDERIVABLE
+    chain:
+      - research/systems-paper/results/mechanism_b.json (frozen traces)
+      - the CUSUM parameters frozen at commit b9fc5d6
+      - CUSUM_FAIRNESS_TABLE.csv
+    oracle_test: none
+    caveat: >-
+      n=1 per arm, four arms, one flight profile, one node. The forbidden
+      comparison -- detector+dwell against detector-alone -- is recorded in
+      CUSUM_FAIRNESS.yaml so it cannot recur silently.
+
+  # =========================================================================
+  - id: frozen_core_hashes
+    what: per-file SHA-256 of the six FROZEN_PATHS
+    provenance: MEASURED_NOT_DERIVED
+    oracle_test: >-
+      tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes
+    caveat: >-
+      A hash is not a behavioural check. It fires identically on a reformatted
+      comment, which is exactly why the mutation campaign separates
+      KILLED from KILLED_BY_INTEGRITY_ONLY.
+
+# ---------------------------------------------------------------------------
+summary:
+  total_scalars: 11
+  raw_rederivable: 4
+  source_rederivable: 3
+  artifact_summary_only: 3
+  measured_not_derived: 1
+  with_oracle_test: 6
+  without_oracle_test: 5
+  closed_this_session:
+    - S_0
+    - T_0
+    - mass_term_118_82
+    - shared_power_baseline_verdicts
+
+open_items:
+  - >-
+    THIS FILE IS HAND-COMPILED. A generator that walks the artifact maps and
+    prose bindings and emits this graph would be better and does not exist.
+  - >-
+    mechanism_a_first_t_ardupilot has no oracle against the ORIGINAL trial's
+    own log. The log is committed and the extractor would run on it.
+  - >-
+    trust_rise_ardupilot depends on Campaign A2 completing.
+  - >-
+    trust_rise_px4 and independent_checker_agreement remain
+    ARTIFACT_SUMMARY_ONLY with no assessed path to re-derivation.
