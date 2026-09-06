@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "class": "subnormal",
+      "detail": "SUPPORTED_UNIQUE from hostile input 'subnormal'",
+      "minimization": {
+        "caveat": "A LOCAL minimum from delta debugging, not a global one. It is the smallest case this reduction order reached.",
+        "minimized_prior": null,
+        "minimized_record": {
+          "canonical_sample_present": true,
+          "config_hash": "cfg-1",
+          "evidence_hash": "ev-1",
+          "evidence_states": {
+            "rel_a": "ACTIVE"
+          },
+          "gates": {
+            "rel_a": 5e-324
+          },
+          "leader": "nominal",
+          "schema": "csia.assurance.input/1",
+          "signatures": {
+            "gps_fault": [
+              "rel_a"
+            ],
+            "nominal": []
+          },
+          "software_hash": "sw-1",
+          "timestamp": 100.0
+        },
+        "minimized_size": {
+          "evidence_terms": 1,
+          "extra_fields": 0,
+          "hypotheses": 2
+        },
+        "original_size": {
+          "evidence_terms": 2,
+          "extra_fields": 1,
+          "hypotheses": 3
+        },
+        "reduction_steps": [
+          {
+            "drop_hypothesis": "imu_bias"
+          },
+          {
+            "drop_evidence_term": "rel_b"
+          },
+          {
+            "drop_field": "evidence_sources"
+          }
+        ],
+        "reverified": true
+      },
+      "outcome": "SILENT_HEALTHY",
+      "state": "SUPPORTED_UNIQUE",
+      "target": "assurance_firewall"
+    }
+  ],
+  "note": "Every non-PASS case from the hostile-input campaign, shrunk. A case with no minimization entry was not reducible by this reducer, and says so.",
+  "schema": "csia.assurance.minimized_reproducers/1",
+  "source_results": "research/physical_validation/results/HOSTILE_INPUT_RESULTS.json"
+}

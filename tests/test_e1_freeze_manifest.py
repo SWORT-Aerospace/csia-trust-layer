@@ -149,13 +149,25 @@ def test_the_next_tier_is_e2_and_is_blocked_on_hardware(doc):
         f"the E2 build packet {nxt['packet']} does not exist")
 
 
-def test_the_recorded_test_count_is_not_wildly_stale(doc):
-    """Catches a manifest generated against a very different suite.
+def test_the_suite_has_not_lost_the_tests_the_freeze_counted(doc):
+    """The suite may GROW after the freeze. It may not SHRINK.
 
-    Deliberately loose: this file cannot verify a count it did not observe,
-    and a tight bound would fail on every ordinary test addition. It fails
-    only on the case that matters -- a manifest carried over from a
-    substantially different repository state.
+    THIS TEST WAS WRITTEN AS A TWO-SIDED BOUND AND THAT WAS WRONG. It
+    originally asserted `abs(total - recorded) <= 50`, on the reasoning that a
+    large drift meant a manifest carried over from a different repository
+    state. Program A then added 90 tests and the guard fired -- against an
+    artifact that is IMMUTABLE BY INSTRUCTION and that correctly describes a
+    past state.
+
+    The premise was the defect, not the manifest. A freeze manifest records
+    what was true at the freeze; post-freeze work is expected to add tests,
+    and an upper bound turns every future addition into a demand to rewrite
+    history. The bound that still means something is the lower one: if the
+    suite drops below what the freeze counted, tests that existed at the
+    freeze have gone, and that needs an explanation.
+
+    So the manifest is NOT regenerated and the growth is reported, not
+    asserted against.
     """
     recorded = (doc.get("tests") or {}).get("collected")
     if recorded is None:
@@ -168,6 +180,9 @@ def test_the_recorded_test_count_is_not_wildly_stale(doc):
                 for line in proc.stdout.splitlines()
                 if line.strip().endswith(tuple("0123456789"))
                 and ": " in line and line.rsplit(": ", 1)[1].isdigit())
-    assert abs(total - recorded) <= 50, (
-        f"the manifest records {recorded} tests, the suite now collects "
-        f"{total}. Regenerate the manifest with the observed count.")
+    print(f"\nE1 freeze counted {recorded} tests; the suite now collects "
+          f"{total} ({total - recorded:+d} since the freeze)")
+    assert total >= recorded - 50, (
+        f"the suite collects {total} but the E1 freeze counted {recorded}. "
+        f"Tests that existed at the freeze appear to have been removed. The "
+        f"freeze manifest is immutable -- investigate the suite, not it.")

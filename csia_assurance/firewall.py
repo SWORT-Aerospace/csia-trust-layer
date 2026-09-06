@@ -152,6 +152,29 @@ def _check_contract(rec: Mapping[str, Any], prior: Mapping | None):
         # it. Written this way on purpose.
         if not (_GATE_MIN <= float(value) <= _GATE_MAX):
             return "INVALID_GATE_STATE"
+        # SUBNORMAL GATE WEIGHTS ARE REFUSED, and this is a VALIDITY rule,
+        # not a threshold.
+        #
+        # Found by the hostile-input campaign: a gate of 5e-324 -- the
+        # smallest positive double -- is strictly greater than zero, so it
+        # counted as ACTIVE and licensed SUPPORTED_UNIQUE off a quantity
+        # numerically indistinguishable from nothing. The minimized
+        # reproducer is two hypotheses, one relation, that weight.
+        #
+        # The tempting fix is a tolerance in the activity test. That is
+        # exactly what the clean-room reference refuses to have -- "a
+        # tolerance here would be a threshold, and a threshold is the thing
+        # this reference exists not to have" -- and adding one would put a
+        # tunable number inside the layer whose value is that it has none.
+        #
+        # So the rejection goes HERE instead, with the other malformed-value
+        # rejections. A subnormal weight cannot arise from any computation
+        # this pipeline performs; it is a symptom of numerical corruption,
+        # and "I cannot interpret this input" is the honest answer. The
+        # activity test stays `v > 0`, unchanged.
+        f = float(value)
+        if f != 0.0 and abs(f) < sys.float_info.min:
+            return "INVALID_GATE_STATE"
 
     states = rec.get("evidence_states") or {}
     if not isinstance(states, Mapping):

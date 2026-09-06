@@ -290,3 +290,50 @@ def test_the_verdict_serialises_to_json_safe_types():
     json.dumps(qualify(clean()).to_dict())
     json.dumps(build_certificate(qualify(clean()), clean(),
                                  SEMANTICS_VERSION).to_dict())
+
+
+# --- regression: findings from the hostile-input campaign ------------------
+
+def test_a_subnormal_gate_weight_cannot_license_support():
+    """HARDENING FINDING HF-001, kept as its own test after the fix.
+
+    The minimized reproducer, verbatim: two hypotheses, one relation, gate
+    5e-324. Before the fix this returned SUPPORTED_UNIQUE -- a unique
+    attribution licensed by a quantity numerically indistinguishable from
+    zero.
+
+    The fix rejects subnormal weights as INVALID_GATE_STATE rather than
+    adding a tolerance to the activity test, because a tolerance would put a
+    threshold inside the layer whose value is that it has none. This test
+    pins the outcome AND the reason, so a later "fix" that instead made the
+    weight inactive would fail here and have to be argued for.
+    """
+    rec = {
+        "schema": SCHEMA, "timestamp": 100.0, "config_hash": "cfg-1",
+        "software_hash": "sw-1", "evidence_hash": "ev-1",
+        "canonical_sample_present": True, "leader": "nominal",
+        "signatures": {"nominal": [], "gps_fault": ["rel_a"]},
+        "gates": {"rel_a": 5e-324},
+        "evidence_states": {"rel_a": "ACTIVE"},
+    }
+    v = qualify(rec)
+    assert v.state == NOT_EVALUABLE
+    assert v.reason == "INVALID_GATE_STATE"
+
+
+def test_the_smallest_normal_double_is_still_a_valid_gate():
+    """The boundary, from the other side.
+
+    Rejecting subnormals must not creep into rejecting small-but-normal
+    values. sys.float_info.min is valid, active, and licenses support.
+    """
+    import sys as _sys
+    rec = {
+        "schema": SCHEMA, "timestamp": 100.0, "config_hash": "cfg-1",
+        "software_hash": "sw-1", "evidence_hash": "ev-1",
+        "canonical_sample_present": True, "leader": "nominal",
+        "signatures": {"nominal": [], "gps_fault": ["rel_a"]},
+        "gates": {"rel_a": _sys.float_info.min},
+        "evidence_states": {"rel_a": "ACTIVE"},
+    }
+    assert qualify(rec).state == SUPPORTED_UNIQUE

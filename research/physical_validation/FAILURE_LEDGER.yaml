@@ -708,3 +708,80 @@ entries:
     artifact: >-
       research/physical_validation/PX4_REPEAT_RECONCILIATION.md section 3.3;
       tools/csia_experiment/watchdog_replay.py module docstring
+
+  - id: HF-001
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening)
+    kind: INPUT_VALIDATION
+    what_happened: >-
+      A SUBNORMAL GATE WEIGHT LICENSED A UNIQUE ATTRIBUTION. The assurance
+      firewall's activity test is `w > 0` with no tolerance, so a gate weight
+      of 5e-324 -- the smallest positive double, numerically indistinguishable
+      from zero for any purpose this pipeline has -- counted as ACTIVE and
+      produced SUPPORTED_UNIQUE.
+      Minimized reproducer: two hypotheses, ONE relation, that weight, state
+      ACTIVE. Nothing else is required.
+    found_by: >-
+      The 26-class hostile-input campaign, tools/assurance/hostile_input.py.
+      The `subnormal` class returned SILENT_HEALTHY, which is the one outcome
+      the campaign exists to find -- a positive verdict from an input that
+      does not support one.
+    verdict: FIXED_AND_PINNED
+    consequence: >-
+      REJECTED AS A VALIDITY QUESTION, NOT SOLVED WITH A THRESHOLD. The
+      tempting fix is a tolerance in the activity test, and that is exactly
+      what the clean-room reference refuses to have -- "a tolerance here would
+      be a threshold, and a threshold is the thing this reference exists not
+      to have". A tolerance would have put a tunable number inside the layer
+      whose whole value is that it has none.
+      So a subnormal weight is refused as INVALID_GATE_STATE alongside the
+      other malformed values: it cannot arise from any computation this
+      pipeline performs, and "I cannot interpret this input" is the honest
+      answer. The activity test stays `w > 0`, unchanged.
+      Two regression tests pin it from both sides: the minimized reproducer
+      must be NOT_EVALUABLE with reason INVALID_GATE_STATE, and
+      sys.float_info.min -- the smallest NORMAL double -- must still be valid
+      and still license support, so the rejection cannot creep upward.
+      NOTHING IN THE FROZEN CORE WAS TOUCHED. The firewall is outside it.
+    artifact: >-
+      research/physical_validation/results/HOSTILE_INPUT_RESULTS.json;
+      ASSURANCE_MINIMIZED_REPRODUCERS.json;
+      tests/test_assurance_firewall.py::
+      test_a_subnormal_gate_weight_cannot_license_support
+
+  - id: HF-002
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      THE COUNTEREXAMPLE MINIMIZER PRODUCED A CONFIDENT WRONG ANSWER, TWICE,
+      and each time the answer looked like a valid reduction.
+      FIRST: reducing HF-001 with only the outcome predicate ("still
+      SILENT_HEALTHY"), the reducer DELETED THE SUBNORMAL GATE and returned a
+      case with one relation at weight 1.0. That case is perfectly supported
+      and merely carries the same outcome LABEL. The reduction was valid; the
+      answer had shrunk away the property under investigation.
+      SECOND: after adding an invariant requiring a subnormal value to be
+      PRESENT, the reducer returned a case where the subnormal gate was
+      present but did no work -- the separation came from a different relation
+      at weight 1.0, and the subnormal value was along for the ride. A reader
+      would have concluded the defect needed two relations.
+    found_by: >-
+      Reading the minimized output instead of accepting it. Both times the
+      reduction was internally consistent and both times the case did not
+      demonstrate the defect.
+    verdict: FIXED
+    consequence: >-
+      The invariant must require the characteristic property to be
+      LOAD-BEARING, not merely present: the reducer neutralises the property
+      and requires the verdict to MOVE. Only then is the minimized case a
+      demonstration of the property rather than a case containing it.
+      With that, HF-001 reduces to its true minimum: 2 hypotheses, 1 relation,
+      gate 5e-324.
+      GENERAL LESSON, RECORDED BECAUSE IT APPLIES TO EVERY REDUCER: a
+      minimizer driven by an outcome label will shrink away the cause and
+      report a smaller case that demonstrates something else. The predicate
+      must preserve the mechanism, not the symptom.
+    artifact: >-
+      tools/assurance/minimize.py (the `load_bearing` wrapper and the
+      docstring recording both corrections)
