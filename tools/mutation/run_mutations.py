@@ -544,6 +544,12 @@ DEFAULT_SELECTION = [
     # these, no claim in either paper is pinned to the line it changed.
     "tests/test_prose_numeric_bindings.py",
     "tests/test_systems_paper_numeric_claims.py",
+    # THE BEHAVIOURAL ORACLE ADDED AFTER THE FIRST CAMPAIGN. It re-derives
+    # S_0 and T_0 from the frozen engine instead of reading the stored
+    # artifact, which is what the first campaign found EVIDENCE-05 exploiting.
+    # Added to the selection so the re-adjudication measures the same suite the
+    # paper's numbers now actually depend on.
+    "tests/test_scalar_rederivation.py",
 ]
 
 if __name__ == "__main__":

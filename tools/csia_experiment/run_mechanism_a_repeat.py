@@ -61,11 +61,18 @@ PINNED_AP_COMMIT = "01a504b472259602e13df4cf07df7c0cdbb35993"
 
 
 def run_flight(platform, arm, out_path, seconds, speedup, inject_at,
-               ap_root, timeout=900) -> dict:
-    """One SITL flight. FAULT injects; CONTROL is identical and does not."""
+               ap_root, timeout=900, trust_trace_path=None) -> dict:
+    """One SITL flight. FAULT injects; CONTROL is identical and does not.
+
+    `trust_trace_path` is the ONLY difference between Campaign A1 and A2. It
+    changes no diagnostic path: the tracer reads state the frozen engine has
+    already computed and writes it to a separate file.
+    """
     cmd = [sys.executable, DRIVER, "--platform", platform, "--fly",
            "--speedup", str(speedup), "--seconds", str(seconds),
            "--out", out_path]
+    if trust_trace_path:
+        cmd += ["--trust-trace", trust_trace_path]
     if arm == "FAULT":
         cmd += ["--inject", "gps_fix_loss", "--inject-at", str(inject_at)]
 
@@ -82,8 +89,13 @@ def run_flight(platform, arm, out_path, seconds, speedup, inject_at,
                 payload = json.load(fh)
         except json.JSONDecodeError:
             payload = None
+    trace_rows = 0
+    if trust_trace_path and os.path.exists(trust_trace_path):
+        with open(trust_trace_path, encoding="utf-8") as fh:
+            trace_rows = sum(1 for _ in fh)
     return {"returncode": proc.returncode, "seconds": elapsed,
-            "payload": payload,
+            "payload": payload, "trust_trace_path": trust_trace_path,
+            "trust_trace_rows": trace_rows,
             "stderr_tail": (proc.stderr or "").strip().splitlines()[-3:]}
 
 
@@ -192,6 +204,28 @@ def build_record(arm, flight, ap_commit) -> dict:
 
     # Section 5.1: recorded if present, NOT_RECORDED if not. Never inferred.
     record["support_state"] = payload.get("support_state", "NOT_RECORDED")
+
+    # A2: THE TRACE IS THE POINT OF THIS CAMPAIGN. A flight that produced no
+    # trust trace has not captured the quantity the campaign exists for, so it
+    # is INVALID_SCENARIO rather than a valid trial with a missing column --
+    # which is precisely the shape of A1's defect (FL-014), and repeating it
+    # silently would be worse than the original.
+    if flight.get("trust_trace_path"):
+        record["trust_trace_path"] = os.path.relpath(
+            flight["trust_trace_path"], ROOT) \
+            if flight["trust_trace_path"].startswith(ROOT) \
+            else flight["trust_trace_path"]
+        record["trust_trace_rows"] = flight.get("trust_trace_rows", 0)
+        record["trust_trajectory"] = ("CAPTURED"
+                                      if flight.get("trust_trace_rows", 0) > 1
+                                      else "NOT_CAPTURED")
+        if record["trust_trajectory"] != "CAPTURED" and not first_break:
+            record["first_break"] = "CSIA_RECEIVED_CHANGE"
+            record["first_break_reason"] = (
+                "no trust trace was produced; the quantity this campaign "
+                "exists to capture is absent")
+    else:
+        record["trust_trajectory"] = "NOT_CAPTURED"
     return record
 
 
@@ -208,10 +242,17 @@ def main(argv=None) -> int:
     ap.add_argument("--ap-root", default=os.environ.get("CSIA_AP_ROOT",
                                                         "/tmp/ap-probe"))
     ap.add_argument("--raw-dir", default="/tmp/p8/raw")
+    ap.add_argument("--campaign-id", default=None,
+                    help="overrides the derived id; A2 uses MECHA2-ARDUPILOT")
+    ap.add_argument("--trust-trace-dir", default=None,
+                    help="enable trust tracing, one file per flight. Required "
+                         "for CAMPAIGN A2")
     args = ap.parse_args(argv)
 
     os.makedirs(args.raw_dir, exist_ok=True)
-    campaign = f"MECHA-{args.platform.upper()}"
+    campaign = args.campaign_id or f"MECHA-{args.platform.upper()}"
+    if args.trust_trace_dir:
+        os.makedirs(args.trust_trace_dir, exist_ok=True)
     total = args.n * 2
     O.plan_campaign(args.dir, campaign, "gps_fix_loss", total,
                     prereg_path=PREREG)
@@ -231,15 +272,20 @@ def main(argv=None) -> int:
             print(f"{trial_id} already recorded, skipping")
             continue
         raw = os.path.join(args.raw_dir, f"{trial_id}_{arm}.json")
+        trace = (os.path.join(args.trust_trace_dir,
+                              f"{trial_id}_{arm}.trace.jsonl")
+                 if args.trust_trace_dir else None)
         flight = run_flight(args.platform, arm, raw, args.seconds,
-                            args.speedup, args.inject_at, args.ap_root)
+                            args.speedup, args.inject_at, args.ap_root,
+                            trust_trace_path=trace)
         record = build_record(arm, flight, PINNED_AP_COMMIT)
         path = O.run_trial(args.dir, trial_id, "ardupilot_sitl",
                            record_override=record)
         body = M.load(path)
         print(f"{trial_id} {arm:8s} {body['adjudication']['state']:18s} "
               f"{flight['seconds']:6.1f}s "
-              f"ticks={(flight['payload'] or {}).get('stats', {}).get('ticks')}")
+              f"ticks={(flight['payload'] or {}).get('stats', {}).get('ticks')} "
+              f"trace_rows={flight.get('trust_trace_rows', 0)}")
 
     summary = O.report(args.dir)
     out = os.path.join(args.dir, "_report.json")

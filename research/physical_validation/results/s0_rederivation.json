@@ -1,0 +1,81 @@
+{
+  "engine_config": {
+    "alpha0": 8.0,
+    "beta0": 2.0,
+    "rho_max": 0.998,
+    "rho_min": 0.95,
+    "w_nbr": 0.35,
+    "w_phys": 0.3,
+    "w_stat": 0.15,
+    "w_temp": 0.2
+  },
+  "mass_term": {
+    "formula": "S_0 * (T_0 - T*), T* = 0.75",
+    "value": 118.8201
+  },
+  "method": "independent re-derivation: the frozen TrustCore driven directly with the documented settling procedure. Does NOT import research/wp_c8/escalation_algebra.py and does NOT read research/wp_c8/results/escalation_algebra.json.",
+  "not_settled_finding": {
+    "claim_in_artifact": "field is named settled_mass_S0",
+    "conclusion": "the MASS is still climbing at n=1500 (475.68 -> 498.79 by n=3000, cap 500). The TRUST is settled by then. S_0 is a function of the horizon and must be quoted with n_steps.",
+    "measured": [
+      {
+        "S0": 98.90226570267033,
+        "T0": 0.9834469554590531,
+        "n_steps": 100
+      },
+      {
+        "S0": 319.9194851199923,
+        "T0": 0.9977024765795723,
+        "n_steps": 500
+      },
+      {
+        "S0": 433.8183840011249,
+        "T0": 0.9993773222738926,
+        "n_steps": 1000
+      },
+      {
+        "S0": 475.6775112557788,
+        "T0": 0.9997912967043575,
+        "n_steps": 1500
+      },
+      {
+        "S0": 498.7926868189534,
+        "T0": 0.9999901205269596,
+        "n_steps": 3000
+      }
+    ]
+  },
+  "provenance": "SOURCE_REDERIVABLE",
+  "provenance_note": "S_0 is NOT a flight observable -- no trial measures it. It is a property of the frozen recursion under a synthetic evidence sequence, so the primitive it is derived from is the FROZEN SOURCE, not a raw trace. That is a stronger chain than an artifact lookup and a weaker one than a measurement.",
+  "published": {
+    "S0": 475.6775,
+    "T0": 0.999791
+  },
+  "published_horizon_steps": 1500,
+  "rederived": {
+    "S0_exact": 475.6775112557788,
+    "S0_rounded_4": 475.6775,
+    "T0_exact": 0.9997912967043575,
+    "T0_rounded_6": 0.999791
+  },
+  "scalar": "S_0 and T_0 for the systems paper mass term",
+  "schema": "csia.research.scalar_rederivation/1",
+  "sensitivity_alpha0": [
+    {
+      "S0": 475.6775112557788,
+      "T0": 0.9997912967043575,
+      "alpha0": 8.0
+    },
+    {
+      "S0": 479.25142796921523,
+      "T0": 0.999792853065284,
+      "alpha0": 80.0
+    },
+    {
+      "S0": 514.9905951035804,
+      "T0": 0.9998072285878499,
+      "alpha0": 800.0
+    }
+  ],
+  "sensitivity_note": "S_0 moves with alpha0 (475.68 -> 514.99 at 100x), which is what makes this re-derivation an oracle for mutation EVIDENCE-05. The stored-artifact test could not see that change."
+}
