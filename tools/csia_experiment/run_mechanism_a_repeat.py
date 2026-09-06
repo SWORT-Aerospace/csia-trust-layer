@@ -59,9 +59,42 @@ DRIVER = os.path.join(ROOT, "tools", "deploy", "shadow_sitl_check.py")
 #: The build the preregistration pins (section 2.1), reproduced from source.
 PINNED_AP_COMMIT = "01a504b472259602e13df4cf07df7c0cdbb35993"
 
+#: Per platform: the env var that points at the simulator checkout, the
+#: manifest backend label, the field the trial record names the build in, the
+#: commit its preregistration pins, and that preregistration.
+#:
+#: NOT a convenience table. Before it existed, `build_record` wrote
+#: `"backend": "ardupilot_sitl"` and an `ardupilot_commit` unconditionally, so
+#: a PX4 campaign would have produced 40 manifests each asserting it ran an
+#: ArduPilot build it never touched -- and the adjudicator's
+#: WRONG_AUTOPILOT_VERSION check would have compared a PX4 run against an
+#: ArduPilot commit and passed.
+PLATFORMS = {
+    "ardupilot": {
+        "root_env": "CSIA_AP_ROOT",
+        "backend": "ardupilot_sitl",
+        "commit_field": "ardupilot_commit",
+        "pinned_commit": PINNED_AP_COMMIT,
+        "prereg": PREREG,
+        "honours_speedup": True,
+    },
+    "px4": {
+        "root_env": "CSIA_PX4_ROOT",
+        "backend": "px4_sitl",
+        "commit_field": "px4_commit",
+        "pinned_commit": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+        "prereg": ("research/physical_validation/prereg/"
+                   "MECHANISM_A_PX4_REPEATED_PREREG.md"),
+        # PX4 SIH is lockstep and IGNORES a requested speedup (rigs.py
+        # HONOURS_SPEEDUP). The PX4 preregistration section 2 declares this
+        # before the campaign as a schedule fact.
+        "honours_speedup": False,
+    },
+}
+
 
 def run_flight(platform, arm, out_path, seconds, speedup, inject_at,
-               ap_root, timeout=900, trust_trace_path=None) -> dict:
+               sim_root, timeout=900, trust_trace_path=None) -> dict:
     """One SITL flight. FAULT injects; CONTROL is identical and does not.
 
     `trust_trace_path` is the ONLY difference between Campaign A1 and A2. It
@@ -76,7 +109,7 @@ def run_flight(platform, arm, out_path, seconds, speedup, inject_at,
     if arm == "FAULT":
         cmd += ["--inject", "gps_fix_loss", "--inject-at", str(inject_at)]
 
-    env = dict(os.environ, CSIA_AP_ROOT=ap_root)
+    env = dict(os.environ, **{PLATFORMS[platform]["root_env"]: sim_root})
     started = time.time()
     proc = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True,
                           text=True, timeout=timeout)
@@ -99,8 +132,9 @@ def run_flight(platform, arm, out_path, seconds, speedup, inject_at,
             "stderr_tail": (proc.stderr or "").strip().splitlines()[-3:]}
 
 
-def build_record(arm, flight, ap_commit) -> dict:
+def build_record(arm, flight, commit, platform="ardupilot") -> dict:
     """Turn a flight into a trial record the validity predicates can read."""
+    spec = PLATFORMS[platform]
     payload = flight["payload"] or {}
     injection = payload.get("injection") or {}
     confirmed = injection.get("confirmed")
@@ -166,11 +200,12 @@ def build_record(arm, flight, ap_commit) -> dict:
     record = {
         "attempted": True,
         "arm": arm,
-        "backend": "ardupilot_sitl",
+        "backend": spec["backend"],
         "evidence_tier": "E1",
         "admissible_as_evidence": True,
-        "ardupilot_commit": ap_commit,
-        "prereg": PREREG,
+        spec["commit_field"]: commit,
+        "platform": platform,
+        "prereg": spec["prereg"],
         "prereg_deviations": [],
         "operator_abort": False,
         # A RIG FAULT IS THE RIG BREAKING, not a budget being missed. Only a
@@ -239,8 +274,10 @@ def main(argv=None) -> int:
     ap.add_argument("--seconds", type=float, default=30.0)
     ap.add_argument("--speedup", type=int, default=5)
     ap.add_argument("--inject-at", type=float, default=12.0)
-    ap.add_argument("--ap-root", default=os.environ.get("CSIA_AP_ROOT",
-                                                        "/tmp/ap-probe"))
+    ap.add_argument("--sim-root", "--ap-root", dest="sim_root", default=None,
+                    help="the simulator checkout. Defaults to the platform's "
+                         "own env var (CSIA_AP_ROOT / CSIA_PX4_ROOT) and to "
+                         "NOTHING otherwise -- see main()")
     ap.add_argument("--raw-dir", default="/tmp/p8/raw")
     ap.add_argument("--campaign-id", default=None,
                     help="overrides the derived id; A2 uses MECHA2-ARDUPILOT")
@@ -249,13 +286,32 @@ def main(argv=None) -> int:
                          "for CAMPAIGN A2")
     args = ap.parse_args(argv)
 
+    if args.platform not in PLATFORMS:
+        raise SystemExit(f"unknown platform {args.platform!r}; "
+                         f"known: {sorted(PLATFORMS)}")
+    spec = PLATFORMS[args.platform]
+    sim_root = args.sim_root or os.environ.get(spec["root_env"])
+    if not sim_root:
+        raise SystemExit(
+            f"--sim-root or ${spec['root_env']} must point at the "
+            f"{args.platform} checkout. It is NOT defaulted: a wrong default "
+            f"produces a campaign against a build nobody chose.")
+
+    # PX4 SIH ignores a requested speedup. Recording the REQUESTED value as if
+    # it were the one that ran is how a rate-dependent check ends up gated on
+    # a number that was never true (rigs.py, HONOURS_SPEEDUP).
+    speedup = args.speedup if spec["honours_speedup"] else 1
+    if speedup != args.speedup:
+        print(f"NOTE: {args.platform} ignores --speedup {args.speedup}; "
+              f"running at {speedup}x. Both are recorded per trial.")
+
     os.makedirs(args.raw_dir, exist_ok=True)
     campaign = args.campaign_id or f"MECHA-{args.platform.upper()}"
     if args.trust_trace_dir:
         os.makedirs(args.trust_trace_dir, exist_ok=True)
     total = args.n * 2
     O.plan_campaign(args.dir, campaign, "gps_fix_loss", total,
-                    prereg_path=PREREG)
+                    prereg_path=spec["prereg"])
 
     # Arms interleaved, FAULT first. Interleaving matters: running all 20
     # faults then all 20 controls confounds arm with anything that drifts
@@ -276,10 +332,13 @@ def main(argv=None) -> int:
                               f"{trial_id}_{arm}.trace.jsonl")
                  if args.trust_trace_dir else None)
         flight = run_flight(args.platform, arm, raw, args.seconds,
-                            args.speedup, args.inject_at, args.ap_root,
+                            speedup, args.inject_at, sim_root,
                             trust_trace_path=trace)
-        record = build_record(arm, flight, PINNED_AP_COMMIT)
-        path = O.run_trial(args.dir, trial_id, "ardupilot_sitl",
+        record = build_record(arm, flight, spec["pinned_commit"],
+                              platform=args.platform)
+        record["requested_speedup"] = args.speedup
+        record["effective_speedup"] = speedup
+        path = O.run_trial(args.dir, trial_id, spec["backend"],
                            record_override=record)
         body = M.load(path)
         print(f"{trial_id} {arm:8s} {body['adjudication']['state']:18s} "
