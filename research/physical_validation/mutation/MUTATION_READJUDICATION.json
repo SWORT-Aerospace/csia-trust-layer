@@ -1,10 +1,10 @@
 {
   "counts": {
     "INVALID_MUTANT": 1,
-    "KILLED": 1,
-    "KILLED_BY_INTEGRITY_ONLY": 4
+    "KILLED": 4,
+    "KILLED_BY_INTEGRITY_ONLY": 1
   },
-  "head": "ba9a8f476b0ce2d154422050f9a2234ea48b00f6",
+  "head": "63af8c22cae92b28eebc4b98cf7f8db2a7feaee3",
   "integrity_guards": {
     "tests/test_phase_c_freeze.py::test_every_recorded_hash_still_matches": [
       "sha256",
@@ -75,7 +75,7 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 36.5,
+        "seconds": 54.5,
         "tail": [
           "FAILED tests/test_scalar_rederivation.py::test_the_mass_term_rederives_to_the_published_118_82",
           "FAILED tests/test_scalar_rederivation.py::test_s0_is_not_settled_at_the_published_horizon"
@@ -99,7 +99,7 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 35.0,
+        "seconds": 34.3,
         "tail": [
           "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -108,7 +108,10 @@
       "verdict": "KILLED"
     },
     {
-      "behavioural_killers": [],
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+      ],
       "breaks": "Removes the baseline detectors' dwell. The Mechanism-B comparison is against these baselines; a baseline that fires instantly is not the baseline the paper describes.",
       "expect": "KILLED",
       "family": "TIMING",
@@ -117,14 +120,16 @@
           "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
           "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 35.9,
+        "seconds": 55.5,
         "tail": [
-          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "FAILED tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
         ]
       },
       "id": "TIMING-04",
@@ -144,13 +149,13 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 36.4,
+        "seconds": 33.3,
         "tail": [
           "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
         ]
       },
-      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+      "verdict": "KILLED"
     },
     {
       "behavioural_killers": [],
@@ -168,13 +173,16 @@
         "failures": [],
         "first_failure": null,
         "returncode": 4,
-        "seconds": 0.4,
+        "seconds": 0.3,
         "tail": []
       },
       "verdict": "INVALID_MUTANT"
     },
     {
-      "behavioural_killers": [],
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+      ],
       "breaks": "Lets a single degraded source establish a shared-resource verdict, removing the multi-source requirement the baselines are built on.",
       "expect": "KILLED",
       "family": "SUPPORT",
@@ -183,14 +191,16 @@
           "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
           "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 36.5,
+        "seconds": 56.4,
         "tail": [
-          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "FAILED tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
         ]
       },
       "id": "SUPPORT-04",
@@ -210,13 +220,13 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 34.1,
+        "seconds": 34.4,
         "tail": [
           "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
         ]
       },
-      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+      "verdict": "KILLED"
     },
     {
       "behavioural_killers": [],
@@ -232,7 +242,7 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 35.5,
+        "seconds": 55.4,
         "tail": [
           "FAILED tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
           "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
@@ -255,7 +265,7 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 33.7,
+        "seconds": 34.4,
         "tail": [
           "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -264,7 +274,11 @@
       "verdict": "KILLED_BY_INTEGRITY_ONLY"
     },
     {
-      "behavioural_killers": [],
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+        "tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
+      ],
       "breaks": "Removes the voting baseline's threshold, so it detects at every tick.",
       "expect": "KILLED",
       "family": "DIAGNOSIS",
@@ -273,14 +287,17 @@
           "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
           "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+          "tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 35.9,
+        "seconds": 55.9,
         "tail": [
-          "FAILED tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
-          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+          "FAILED tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
         ]
       },
       "id": "DIAGNOSIS-04",
@@ -300,13 +317,13 @@
         ],
         "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
         "returncode": 1,
-        "seconds": 34.0,
+        "seconds": 33.4,
         "tail": [
           "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
           "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
         ]
       },
-      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+      "verdict": "KILLED"
     }
   ],
   "python": "/home/user/csia-trust-layer/.venv/bin/python",
@@ -326,11 +343,13 @@
     "tests/test_phase_c_freeze.py",
     "tests/test_prose_numeric_bindings.py",
     "tests/test_systems_paper_numeric_claims.py",
-    "tests/test_scalar_rederivation.py"
+    "tests/test_scalar_rederivation.py",
+    "tests/test_shared_power_baselines.py",
+    "tests/test_baseline_rederivation.py"
   ],
   "self_check": {
     "canary_verdict": "KILLED",
-    "sandbox_csia_file": "/tmp/csia-mutation-g4_ufom6/wt/csia/__init__.py",
+    "sandbox_csia_file": "/tmp/csia-mutation-xn0d0390/wt/csia/__init__.py",
     "why": "The canary sets PRIOR_NOMINAL to zero. If it had survived, every result here would be a false survivor caused by the editable install resolving `import csia` to the unmutated repository."
   },
   "verdict_vocabulary": {

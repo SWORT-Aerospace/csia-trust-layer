@@ -226,3 +226,83 @@ entries:
       now would produce a paper describing a 20-trial campaign and a 1-trial
       campaign in the same sentence without flagging which is which.
 
+
+  - id: PI-004
+    date: 2026-09-06
+    result: >-
+      Campaign A2 recovered the trust measurement A1 omitted (FL-014). 20 FAULT
+      and 20 matched CONTROL trials, all 40 adjudicated VALID, all 40 with a
+      captured trust trace, on the same pinned ArduPilot build and the same
+      frozen core as A1.
+      FAULT   (n=20): trust 0.924816 -> 0.931823, delta median +0.007007,
+                      range [+0.006996, +0.007145], 20/20 POSITIVE.
+      CONTROL (n=20): trust 0.924813 -> 0.945407, delta median +0.020594,
+                      range [+0.020572, +0.020804].
+      The gate collapses 3.0 -> 0.0 in 20/20 FAULT and 0/20 CONTROL; failsafe
+      NORMAL -> CAUTION in 20/20 FAULT and NORMAL -> NORMAL in 20/20 CONTROL;
+      nominal stays rank 1 and gps_fault rank 2 in every arm, while the
+      gps_fault hypothesis WEIGHT moves 6.4e-05 -> 0.02272 on the fault arm and
+      not at all on the control.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_trust_completion_a2/;
+      research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json;
+      research/physical_validation/results/ARDUPILOT_MECHANISM_A_REPEAT_TABLE.csv;
+      research/physical_validation/results/a2_traces_raw/ (raw, archived before
+      reduction, with SHA256SUMS);
+      research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md
+    old_limitation: >-
+      "The trust rise is NOT SUPPORTED BY THIS CAMPAIGN -- trust was not
+      captured at all (FL-014); that observation still rests on n=1 per
+      platform." (PI-003)
+    new_limitation: >-
+      THE CONTROL ARM RISES ABOUT THREE TIMES MORE THAN THE FAULT ARM, ranges
+      disjoint (FL-016). Trust rises in both arms as evidence accumulates; the
+      fault SUPPRESSES the rise rather than causing it.
+      THE ORIGINAL n=1 DELTA IS OUTSIDE THE REPEATED FAULT RANGE. +0.008656
+      against [+0.006996, +0.007145]. Root-caused (FL-017): the original ran a
+      0.5 s gps watchdog and the repeats a 1.0 s one, so the gate held twice as
+      long and trust accrued twice as long before freezing. Neither run is
+      wrong; they are different deployment configurations, and neither
+      preregistration pinned that field.
+      ARDUPILOT ONLY. The PX4 repeat is preregistered and NOT_RUN.
+      Still E1: 40 simulator runs are not evidence about hardware.
+      No p-values, no confidence intervals, no pooling across ORIGINAL/A1/A2,
+      no prevalence claim, no timing claim (shared host, latency recorded and
+      not adjudicated).
+    claim_impact: >-
+      Licenses replacing the n=1 trust observation with a repeated
+      distribution on ArduPilot, and REQUIRES that the claim be restated with
+      the control arm. Removes "0.9213 -> 0.9300" from use as a repeatable
+      value while leaving the frozen artifact that records it untouched.
+    supported_upgrade: >-
+      "On ArduPilot, across 20 fault trials and 20 matched fix-preserving
+      controls under a fixed preregistered reduction, the gps trust coefficient
+      ROSE in every trial of both arms. It rose by a median of +0.0070 under
+      fault and +0.0206 under control, with disjoint ranges: the gate closure
+      does not lower trust, it FREEZES it, and the resulting trajectory is
+      lower than the control's rather than higher than its own baseline alone."
+      "Every other Mechanism A quantity -- first_t, MISSING tick count, gate
+      collapse, hypothesis ranks, failsafe transition -- reproduces from n=1 to
+      n=20+20."
+    unsupported_upgrade: >-
+      "Trust rises across a gate collapse." TRUE BUT MISLEADING ALONE -- it
+      rises more without the fault. Do not state it without the control arm.
+      "The fault causes trust to increase." FALSE. It suppresses an increase
+      that happens anyway.
+      "0.9213 -> 0.9300 is reproducible." FALSE under the current runtime; it
+      is a faithful record of one trial under a superseded 0.5 s watchdog.
+      "The repeat confirms the original." PARTIALLY -- on 9 of 12 headline
+      quantities. Two disagree and one was never previously compared.
+      Any confidence interval, p-value, or pooled N across the three campaigns.
+    paper_section: Evidence; Limitations; Discussion (Mechanism A)
+    ready_to_integrate: false
+    ready_reason: >-
+      Same asymmetry as PI-003 and one more reason. ArduPilot now has 20+20
+      trust trials and PX4 has n=1; writing both into one sentence without
+      flagging which is which is the failure mode. And the control-arm finding
+      (FL-016) changes how the result must be WORDED in three places that
+      currently carry the old phrasing -- handoff/MASTER_SYSTEM_INPUT_PACKET.md
+      section G, standards/dea/DEA_PROFILE.md, docs/v1_1/
+      MECHANISM_A_MODERN_REPLICATION.md -- and those are edits for the writing
+      agents to make deliberately, not for the repository agent to slip in.

@@ -554,3 +554,84 @@ entries:
       reported as an observation with no claim attached.
     artifact: tools/csia_experiment/extract_mechanism_a.py
 
+
+  - id: FL-016
+    date: 2026-09-06
+    phase: P9 (Campaign A2, trust completion)
+    kind: PREVIOUSLY_UNREPORTED_FINDING
+    what_happened: >-
+      The headline "trust RISES across a gate collapse (0.9213 -> 0.9300)" is
+      true and, stated alone, misleading. Campaign A2 captured both arms and
+      the CONTROL arm rises about THREE TIMES MORE than the FAULT arm:
+      fault delta median +0.007007 over [+0.006996, +0.007145], control delta
+      median +0.020594 over [+0.020572, +0.020804], n=20 each, ranges
+      completely disjoint.
+      Trust rises in BOTH arms as evidence accumulates over the flight. Under
+      the fault it rises LESS, because the gate closes and the node stops
+      receiving evidence, freezing the coefficient. The fault SUPPRESSES an
+      ongoing rise; it does not cause one.
+    found_by: >-
+      Running the control arm's trust through the same extraction as the fault
+      arm's, which the preregistration required and which nothing before A2
+      had done. Not by suspecting anything.
+    verdict: RECORDED
+    consequence: >-
+      THE COMPARISON WAS ALREADY POSSIBLE FROM THE FROZEN n=1 ARTIFACT AND WAS
+      NOT MADE. research/v1_1/results/mechanism_a_ardupilot.json carries the
+      control arm's snapshots: control +0.014020 at post against fault
+      +0.008656, and +0.038232 at late -- 4.4x. The published headline is the
+      fault arm alone.
+      The frozen artifact is NOT edited. It records what that trial measured.
+      What survives: the DEA profile's use of this result to justify NOT
+      standardising "gate closure shall lower trust" is unaffected and in fact
+      strengthened -- trust falls in none of the 20 repeats.
+      What does not: any phrasing implying the fault drove trust up.
+    artifact: >-
+      research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md section
+      3; research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json;
+      tests/test_ardupilot_repeat_reconciliation.py
+
+  - id: FL-017
+    date: 2026-09-06
+    phase: P9 (Campaign A2, reconciliation)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The original n=1 ArduPilot trial and the two repeat campaigns did not run
+      the same runtime watchdog, and NEITHER PREREGISTRATION NAMED THE WATCHDOG
+      AS A PINNED ENVIRONMENT FIELD. The A1 and A2 preregistrations pin the
+      ArduPilot commit, the frozen core tag, the profile, the speedup and the
+      link configuration -- and not this.
+      The gps stale timeout was 0.5 s for the original (the frozen core's
+      STALE_TIMEOUT_S constant) and 1.0 s for A1/A2 (Phase 4.5 Gate B: the
+      driver now passes build_runtime_stale_timeouts, = MAX_AGE_MARGIN 5.0 /
+      declared 5.0 Hz). The frozen core is byte-identical between the two
+      commits; what changed is csia/deploy/shadow.py, deliberately and with its
+      own validation.
+    found_by: >-
+      Asking why the original's trust delta (+0.008656) sits outside the
+      repeated FAULT range and the CONTROL arm reproduces exactly, then
+      measuring per tick: the channel dies at the same instant in both runs
+      (12.0438 vs ~12.048) and the gate then holds 0.4788 s in the original
+      against 0.9997 s in every repeat. Each dwell matches its own watchdog to
+      within one tick period.
+    verdict: RECORDED
+    consequence: >-
+      NEITHER RUN IS WRONG and no artifact is corrected. The "repeat" repeated
+      a different deployment configuration from the original, so 0.9213 ->
+      0.9300 must not be quoted as a repeatable value; the repeated value under
+      the current runtime is 0.924816 -> 0.931823 (n=20).
+      Every OTHER headline quantity -- first_t, tick count, gate collapse,
+      ranks, failsafe, direction of the trust change -- reproduces, because
+      none of them depends on how long the gate holds.
+      THE FIX IS NOT TO RE-RUN THE ORIGINAL under its own watchdog. That would
+      be a third campaign with its own preregistration. The fix is that a
+      future preregistration pins the runtime stale-timeout source, and this
+      entry exists so that is not forgotten.
+      A SECOND, SMALLER GAP found at the same time: the original trial's log
+      records autopilot_version "ardupilot" -- a platform name, not a build --
+      so that trial cannot be shown FROM ITS OWN RECORD to have run the pinned
+      ArduPilot commit. Unrecoverable; recorded, not inferred.
+    artifact: >-
+      research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md section
+      4; tests/test_ardupilot_repeat_reconciliation.py::
+      test_the_two_watchdogs_that_explain_the_discrepancy
