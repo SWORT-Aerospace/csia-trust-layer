@@ -785,3 +785,81 @@ entries:
     artifact: >-
       tools/assurance/minimize.py (the `load_bearing` wrapper and the
       docstring recording both corrections)
+
+  - id: HF-003
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A22)
+    kind: PROVENANCE
+    what_happened: >-
+      A MAPPED PAPER SCALAR POINTS AT AN ARTIFACT THAT DOES NOT CONTAIN IT.
+      Scalar S11 (value 0.44, "onset of a non-healthy status moves from 1.48 s
+      to 0.44 s") is declared in PAPER1_ARTIFACT_MAP.yaml against
+      research/wp_c6/results/q_gvalid_campaign.json. A full numeric scan of
+      that artifact finds NO value within 5e-3 of 0.44.
+    found_by: >-
+      Adjudicating the six pointerless scalars. The exercise was meant to
+      decide whether each COULD gain a JSON pointer; for S11 the answer turned
+      out to be that it could not gain one from the file it names, because the
+      number is not in that file.
+    verdict: RECORDED_FIX_SPECIFIED_NOT_APPLIED
+    consequence: >-
+      THE NUMBER IS RIGHT AND ITS SOURCE EXISTS. 0.44 lives in
+      research/wp_c7/results/false_healthy.json at
+      .per_arm.denial.onset_to_status_change_abstaining_s, which matches the
+      manuscript context exactly -- the sentence is about the abstaining
+      policy, and false_healthy.json is the abstaining-policy artifact. So
+      nothing in the manuscript is wrong; the PROVENANCE RECORD was wrong,
+      which is precisely what this class of audit exists to find.
+      THE FIX IS SPECIFIED AND DELIBERATELY NOT APPLIED. PAPER1_ARTIFACT_MAP.yaml
+      is hashed by E1_FREEZE_MANIFEST.yaml, and that manifest is immutable by
+      instruction; editing the map now would break the freeze it is recorded
+      in. The correction is written down for a later, deliberate re-freeze
+      rather than slipped in.
+      A SECOND OBSERVATION FROM THE SAME PASS: the map's pointer field is
+      JSON-only, so GS01 -- which IS present in its CSV artifact -- cannot be
+      addressed at all. That is a schema limitation, not missing provenance,
+      and is recorded as one.
+    artifact: >-
+      research/physical_validation/results/
+      POST_E1_SCALAR_POINTER_ADJUDICATION.json
+
+  - id: HF-004
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A11)
+    kind: TIMING
+    what_happened: >-
+      DECISION-LEVEL REPLAY FROM A FLIGHT LOG IS NOT FAITHFUL ENOUGH TO SERVE
+      AS A VERIFICATION INSTRUMENT, ON EITHER PLATFORM.
+      Replaying a committed log through the frozen core and comparing
+      decision-by-decision against the recorded run gives DIVERGENT on both:
+      ArduPilot 511 of 750 compared ticks differ CATEGORICALLY (which gates
+      are live), PX4 144 of 750. Bit-identical: 24 and 3.
+    found_by: >-
+      Building the A11 replay and running it, rather than assuming a replay
+      that produces output is a replay that agrees.
+      An earlier version of the same tool reported NOT_COMPARABLE with zero
+      comparisons on both platforms, because the replayed states carry the
+      LAYER's internal tick clock (0.00, 0.04, 0.08 by construction) and the
+      log carries actual arrival times, so an exact timestamp join matched
+      nothing. That silent zero looked like a result and was not one; states
+      are now matched to the nearest recorded tick within half a tick period,
+      and unmatched states are counted rather than dropped.
+    verdict: RECORDED_NOT_FIXED
+    consequence: >-
+      THE REPLAY IS NOT TUNED UNTIL IT AGREES. The divergence is attributable:
+      the reconstruction in tools/deploy/profile_core_from_log.py detects a
+      core hand-off by a CHANGED channel value, so two identical consecutive
+      readings look like no new reading, and the hand-off sequence it rebuilds
+      is not the one the live run performed. FL-019 already recorded that this
+      reproduces PX4's trust to ~0.003 and not ArduPilot's; this measures the
+      same limitation at decision level and on both platforms.
+      SO A11 IS IMPLEMENTED AND ITS RESULT IS NEGATIVE. Decision replay cannot
+      currently be used as a conformance check, and the software-hardening gate
+      may not count it as PASS.
+      THE FIX IS NOT A TOLERANCE. It is to LOG THE ACTUAL HAND-OFFS at run
+      time instead of reconstructing them afterwards -- a change to the driver,
+      which is outside the frozen core, and a future item rather than a
+      silent widening of this tool's comparison.
+    artifact: >-
+      research/physical_validation/results/DECISION_REPLAY_RESULTS.json;
+      tools/assurance/decision_replay.py

@@ -1,0 +1,198 @@
+{
+  "note": "Bit identity is NOT demanded where the platform contract does not guarantee it. The four outcomes are reported separately so a numerical difference is never read as a decision failure, and a decision failure is never excused as rounding.",
+  "outcomes": [
+    "BIT_IDENTICAL",
+    "NUMERICALLY_EQUIVALENT_WITHIN_TOLERANCE",
+    "SEMANTICALLY_EQUIVALENT",
+    "DIVERGENT"
+  ],
+  "runs": [
+    {
+      "bit_identical": 24,
+      "decisions_compared": 750,
+      "divergence_examples": [
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "t": 1.04
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "t": 1.52
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "t": 1.56
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "t": 1.6
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "redundant_imu",
+            "temp_bias_drift",
+            "velocity_gps_doppler_0",
+            "velocity_gps_doppler_1"
+          ],
+          "t": 1.64
+        }
+      ],
+      "divergent": 511,
+      "fidelity_note": "The hand-off reconstruction detects a change in a channel value, so two identical consecutive readings look like no new reading. FL-019 records that this reproduces PX4's measured trust to ~0.003 and does NOT reproduce ArduPilot's. A continuous-value difference on ArduPilot is therefore EXPECTED and attributable, not a new finding; a CATEGORICAL difference would be a finding on either platform.",
+      "log": "logs/shadow-sitl-ardupilot/20260825T005244Z-8c32ffe5.part000.jsonl",
+      "node": "gps",
+      "numerically_equivalent": 0,
+      "platform": "ardupilot",
+      "replayed_states_unmatched": 1,
+      "semantically_equivalent_only": 215,
+      "ticks_in_log": 751,
+      "tolerance": 1e-12,
+      "verdict": "DIVERGENT",
+      "worst_relative_difference": 0.028618959637081127
+    },
+    {
+      "bit_identical": 3,
+      "decisions_compared": 750,
+      "divergence_examples": [
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 0.16
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 0.2
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 0.24
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 0.28
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 0.32
+        }
+      ],
+      "divergent": 144,
+      "fidelity_note": "The hand-off reconstruction detects a change in a channel value, so two identical consecutive readings look like no new reading. FL-019 records that this reproduces PX4's measured trust to ~0.003 and does NOT reproduce ArduPilot's. A continuous-value difference on ArduPilot is therefore EXPECTED and attributable, not a new finding; a CATEGORICAL difference would be a finding on either platform.",
+      "log": "logs/shadow-sitl-px4/20260825T005931Z-1b4add14.part000.jsonl",
+      "node": "gps",
+      "numerically_equivalent": 0,
+      "platform": "px4",
+      "replayed_states_unmatched": 1,
+      "semantically_equivalent_only": 603,
+      "ticks_in_log": 751,
+      "tolerance": 1e-12,
+      "verdict": "DIVERGENT",
+      "worst_relative_difference": 0.10449589663628599
+    }
+  ],
+  "schema": "csia.assurance.decision_replay/1"
+}

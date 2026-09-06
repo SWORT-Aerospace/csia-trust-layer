@@ -18,6 +18,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "jsonschema>=4", "build>=1", "pyflakes>=3"]
+# Post-E1 assurance hardening: the bounded verifier (z3), the
+# property-based tests (hypothesis) and the resource-envelope probe
+# (psutil). NOT imported by the runtime path or by the frozen core --
+# only by tools/assurance/ and its tests.
+assurance = ["z3-solver>=4.12", "hypothesis>=6", "psutil>=5.9"]
 mavlink = ["pymavlink>=2.4"]
 logs = ["pyulog>=1.0"]
 # Research data lake only — the embedded runtime path (csia/runtime,

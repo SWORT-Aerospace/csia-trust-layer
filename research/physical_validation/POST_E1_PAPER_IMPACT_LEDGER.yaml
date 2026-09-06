@@ -1,0 +1,101 @@
+%YAML 1.2
+---
+schema: csia.research.post_e1_paper_impact/1
+program: POST-E1 HARDENING + E2 PREPARATION
+append_only: true
+principle: >-
+  Do not rewrite the systems paper continuously. This ledger records what a
+  future paper change WOULD be licensed by, and nothing is written into the
+  manuscript from here until the evidence exists.
+
+entries:
+
+  - id: PE-001
+    date: 2026-09-06
+    result: >-
+      An independent assurance firewall exists outside the frozen core, with a
+      support-witness certificate, eleven fail-closed conditions, bounded
+      formal verification (z3, |H|<=4, |E|<=6), 26-class hostile-input
+      fuzzing, metamorphic relations and 15 conformance vectors.
+    evidence_tier: NOT_AN_EVIDENCE_TIER
+    tier_note: >-
+      THIS IS SOFTWARE ASSURANCE, NOT EMPIRICAL EVIDENCE. It does not move E1
+      and cannot. The evidence tiers describe what was measured about
+      vehicles; this describes what the software refuses to assert.
+    claim_impact: >-
+      NONE ON THE PUBLISHED MANUSCRIPT TODAY. Nothing here changes any E1
+      measurement or any claim in the paper.
+    supported_upgrade_when_gated: >-
+      Only after the review gate in docs/ASSURANCE_REFERENCE_SEMANTICS.md
+      section 9 -- which requires E2, E3, E4 and INDEPENDENT REVIEW -- would a
+      manuscript be entitled to describe the qualification layer as anything
+      other than experimental.
+    unsupported_upgrade: >-
+      "CSIA now verifies its own attributions." FALSE -- an experimental
+      wrapper exists and has not been reviewed by anyone outside this
+      repository.
+      "Formally verified." FALSE -- bounded verification within |H|<=4 and
+      |E|<=6 licenses exactly one sentence: no counterexample exists within
+      the verified bounded domain.
+      Any claim from the certificate. It is named EXPERIMENTAL_SUPPORT_
+      CERTIFICATE and a test enforces the word.
+    ready_to_integrate: false
+    ready_reason: >-
+      C3 of the programme: the firewall remains an experimental wrapper until
+      property tests, bounded checks, fuzzing, E2, E3/E4 and independent
+      review are all satisfied. Three of those cannot be satisfied by this
+      repository at all.
+
+  - id: PE-002
+    date: 2026-09-06
+    result: >-
+      The E2 board class is selected from both autopilots' own source trees:
+      Pixhawk FMUv6C, ArduPilot hwdef `Pixhawk6C` and PX4 `px4/fmu-v6c`, MCU
+      family agreeing (STM32H743), four IMUs declared, PX4 SIH available on
+      the default target.
+      A NEGATIVE FINDING accompanies it: NO board supports
+      simulation-on-hardware on BOTH stacks. ArduPilot's -SimOnHardWare exists
+      for CubeOrange and CubeOrangePlus only, and neither has PX4 SIH.
+    evidence_tier: E1
+    tier_note: >-
+      Selecting a board is not evidence about a board. Nothing has been
+      bought, powered or measured.
+    claim_impact: >-
+      NONE. A board selection licenses no statement about hardware.
+    supported_upgrade_when_e2_runs: >-
+      "The repeated mechanism was reproduced while the autopilot executed on
+      real flight-controller hardware." AND NOTHING MORE. Not physical GNSS
+      failure, not flight validation, not aircraft validation, not
+      hardware-certified, not field proven -- those are E3 to E5.
+    unsupported_upgrade: >-
+      Any hardware claim before a board exists and a preregistered campaign
+      has run on it.
+    ready_to_integrate: false
+    ready_reason: >-
+      No hardware is present. E2 has not run and its preregistration is a
+      template, deliberately unfrozen until the exact board is in hand.
+
+  - id: PE-003
+    date: 2026-09-06
+    result: >-
+      Publication provenance was audited post-freeze: all 50 unmapped prose
+      literals classified (42 SCIENTIFIC_RESULT, 3 SOURCE_CONSTANT, 3
+      DERIVED_QUANTITY, 2 FORMATTING, 0 unclassified), all 6 pointerless
+      scalars adjudicated, and one WRONG ARTIFACT ATTRIBUTION found (HF-003,
+      scalar S11).
+    evidence_tier: NOT_AN_EVIDENCE_TIER
+    claim_impact: >-
+      NO MANUSCRIPT NUMBER IS WRONG. What was wrong is a provenance record --
+      S11's declared artifact does not contain its value. The number is right
+      and its real source was located.
+    supported_upgrade: >-
+      None yet. The 42 scientific literals are CLASSIFIED, not BOUND, and the
+      three pointer corrections are SPECIFIED, not APPLIED -- deferred
+      because the artifact map is hashed by the immutable E1 freeze.
+    unsupported_upgrade: >-
+      "All paper numbers are bound to artifacts." FALSE. 13 of 19 map scalars
+      dereference; 42 prose literals do not.
+    ready_to_integrate: false
+    ready_reason: >-
+      Applying the corrections needs a deliberate re-freeze, which is a
+      decision rather than a task.
