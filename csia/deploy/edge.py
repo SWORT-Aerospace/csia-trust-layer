@@ -42,10 +42,10 @@ import os
 import sys
 from typing import Optional
 
-import yaml
-
 from ..aircraft.capability import negotiate
 from ..aircraft.profile import ProfileError, load as load_profile
+from .deployment import (DeploymentError, conflicts as deployment_conflicts,
+                         load as load_deployment)
 
 #: Modes this entry point will start. `control` and anything resembling
 #: command authority are absent by construction, not by check.
@@ -86,38 +86,21 @@ def cross_check(profile, deployment_path: Optional[str]) -> list:
 
     Returns a list of conflict strings. An empty list means the two agree on
     everything they both state.
+
+    THE COMPARISON LOGIC LIVES IN csia/deploy/deployment.py, not here. It was
+    written here first, and a second copy appeared the moment schema 2 needed
+    the same rules -- which is the parallel-hierarchy mistake P1 avoided,
+    arriving through the back door. A config that will not parse is reported
+    as a conflict rather than raised: `validate` must be able to say "these two
+    files disagree" without the disagreement becoming a crash.
     """
     if not deployment_path or not os.path.exists(deployment_path):
         return []
-    with open(deployment_path, encoding="utf-8") as fh:
-        dep = yaml.safe_load(fh) or {}
-
-    conflicts = []
-    dep_stack = ((dep.get("autopilot") or {}).get("stack") or "").lower()
-    if dep_stack and dep_stack != profile.autopilot:
-        conflicts.append(
-            f"autopilot: profile says {profile.autopilot!r}, deployment "
-            f"config says {dep_stack!r}. These select different message "
-            f"dialects; running with the wrong one reports channels missing "
-            f"that were arriving.")
-
-    dep_link = dep.get("link") or {}
-    prof_mav = (profile.transport.get("mavlink") or {})
-    dep_conn = dep_link.get("connection") or dep_link.get("device")
-    prof_conn = prof_mav.get("port")
-    if dep_conn and prof_conn and dep_conn != prof_conn:
-        conflicts.append(
-            f"transport: profile says {prof_conn!r}, deployment config says "
-            f"{dep_conn!r}. Not necessarily an error -- the deployment config "
-            f"is authoritative for the link -- but the profile should not "
-            f"state a different one.")
-
-    dep_mode = ((dep.get("csia") or {}).get("mode") or "").upper()
-    if dep_mode and dep_mode not in ("SHADOW", "ADVISORY"):
-        conflicts.append(
-            f"mode: deployment config declares {dep_mode!r}. csia-edge starts "
-            f"no mode with command authority.")
-    return conflicts
+    try:
+        dep = load_deployment(deployment_path)
+    except DeploymentError as exc:
+        return [str(exc)]
+    return deployment_conflicts(dep, profile)
 
 
 def do_validate(args) -> int:

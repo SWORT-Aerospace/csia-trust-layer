@@ -265,3 +265,76 @@ entries:
       layer is pre-flight reporting and feeds no diagnostic decision.
     artifact: csia/aircraft/capability.py; tests/test_csia_edge.py
     supersedes: FL-004 (consequence only; the defect description stands)
+
+  - id: FL-009
+    date: 2026-09-06
+    phase: P1-followup (profile/deployment seam)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The first draft of csia/deploy/deployment.py asserted -- in its module
+      docstring, and enforced it in code -- that the deployment config's
+      `csia.profile: FIELD_DERIVED_NOISE` "selects per-sensor noise
+      parameters, which is diagnostic by definition". Both halves were wrong.
+      It resolved the string through csia/profiles.py:get_profile(), which
+      holds VEHICLE profiles (sow001_quad, interceptor_seeker), and the
+      loader therefore raised on configs/vehicle/example_quad.yaml -- the only
+      committed deployment config in the repository. FIELD_DERIVED_NOISE lives
+      in csia/simulation/profiles.py. Two registries, one word.
+      The second error was the one that mattered. Following the value through
+      the runtime shows csia.profile reaching exactly one place --
+      csia/deploy/shadow.py:285, the flight-log header. It selects nothing. It
+      is a provenance LABEL, and it has to be: a shadow deployment reads real
+      telemetry and has no simulated noise to parameterise.
+    found_by: >-
+      Running the new loader against the committed config instead of trusting
+      the docstring. The KeyError named the registry that did not contain the
+      value, which is what exposed that there were two.
+    verdict: RECORDED
+    consequence: >-
+      THE DOCSTRING WAS THE DEFECT, not the code. It was a plausible claim
+      about the system, written from key names rather than from following the
+      call, and it would have propagated into the standards work and the
+      handoff packet as "the deployment config sets three diagnostic values".
+      The true figure is TWO -- csia.tick_hz and csia.field_mode, both of which
+      are passed to OnlineTrustLayer -- and it is now DERIVED rather than
+      asserted: core_reachable_keys() reads cli.py's ShadowConfig construction
+      and shadow.py's OnlineTrustLayer call and reports the intersection, so
+      the number cannot go stale the way a docstring can.
+      The label is still validated at load, against the correct registry, for
+      a different and smaller reason: it lands in the permanent flight-log
+      header, and a typo there names nothing forever.
+      Worth recording because nothing failed. The suite was green, the design
+      was sound, and the module simply said something untrue about the system
+      it was documenting -- which is the failure mode that a test suite cannot
+      catch and that a paper inherits verbatim.
+    artifact: >-
+      csia/deploy/deployment.py; docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md;
+      tests/test_deployment_schema.py
+
+  - id: FL-010
+    date: 2026-09-06
+    phase: P1-followup (incidental finding)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      docs/DOCUMENT_INDEX.md opens "319 markdown files exist in this
+      repository." The tracked count at commit cb4e797, before this program
+      added any document, is 342. The index's own status vocabulary calls
+      itself CANONICAL, so the first sentence a new reader meets is a
+      measurement that is 23 short.
+    found_by: >-
+      Checking, before adding docs/VEHICLE_PROFILE_VS_DEPLOYMENT.md, whether a
+      guard would object to a new markdown file. None does -- and that absence
+      is why the number drifted.
+    verdict: RECORDED
+    consequence: >-
+      Corrected to the measured count and pinned by a guard, because this
+      repository already decided this question for a different number:
+      tests/test_doc_counts.py exists precisely because "39", "48", "62" and
+      "77" were each the true collected test count at some commit and each was
+      stale when a reader saw it. The same rule now applies to the markdown
+      count. The guard adds friction to every commit that adds a document,
+      which is the intended cost: the alternative is a CANONICAL document
+      whose first sentence is false.
+      NOT a scientific defect and no claim depends on it.
+    artifact: docs/DOCUMENT_INDEX.md; tests/test_doc_counts.py
+

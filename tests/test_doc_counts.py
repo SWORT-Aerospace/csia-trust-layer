@@ -155,3 +155,45 @@ def test_guard_does_not_fire_on_scoped_or_unrelated_counts():
             continue
         assert not any(p.search(line) for p in COUNT_PATTERNS), (
             f"pattern set wrongly flagged an allowed line: {line!r}")
+
+
+# --------------------------------------------------------------------------
+# The same rule, applied to the other hand-maintained count in the repository.
+
+def test_the_document_index_states_the_real_file_count():
+    """docs/DOCUMENT_INDEX.md opens with a count of the markdown files.
+
+    It read 319 for an unknown period against a true count of 342 (FL-010).
+    That is the identical defect this module already exists for -- a number
+    that was true once, published in a document that calls itself CANONICAL,
+    and stale by the time a reader arrives -- so it gets the identical
+    treatment rather than a note asking someone to remember.
+
+    The friction is the point. A commit that adds a document must update the
+    count in the same commit, which is the only moment anyone knows the new
+    number.
+    """
+    import subprocess
+
+    root = Path(__file__).resolve().parents[1]
+    tracked = subprocess.run(["git", "ls-files", "*.md"], cwd=root,
+                             capture_output=True, text=True, check=True)
+    actual = len([ln for ln in tracked.stdout.splitlines() if ln.strip()])
+
+    index = root / "docs" / "DOCUMENT_INDEX.md"
+    text = index.read_text(encoding="utf-8")
+    stated = re.findall(r"\b(\d{2,4})\b(?= markdown files exist)", text)
+    assert stated, ("docs/DOCUMENT_INDEX.md no longer opens with a markdown "
+                    "file count; if the sentence was removed on purpose, "
+                    "remove this guard in the same commit")
+    assert int(stated[0]) == actual, (
+        f"docs/DOCUMENT_INDEX.md says {stated[0]} markdown files; "
+        f"`git ls-files '*.md'` counts {actual}. Update the number -- both "
+        f"occurrences -- in the commit that changed it.")
+
+    # The paragraph repeats the figure ("indexing all N individually"). A
+    # half-updated sentence is worse than a stale one: it looks checked.
+    repeated = re.findall(r"[Ii]ndexing all (\d{2,4})", text)
+    for value in repeated:
+        assert int(value) == actual, (
+            f"the second occurrence of the count says {value}, not {actual}")

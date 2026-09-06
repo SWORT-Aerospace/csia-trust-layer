@@ -1,0 +1,113 @@
+%YAML 1.2
+---
+# Deployment config, schema csia.deployment/2 — ArduPilot reference quad.
+#
+# WHY THIS IS A NEW FILE AND NOT AN EDIT TO example_quad.yaml
+# -----------------------------------------------------------
+# The SHA-256 of a deployment config is in the header of every flight log it
+# produced. Adding a `schema:` key to example_quad.yaml would change its hash
+# and orphan every log and trial manifest that cites it. Schema 1 files are
+# never rewritten in place; see csia/deploy/deployment.py MIGRATION_POLICY.
+#
+# WHAT SCHEMA 2 ADDS, AND WHY EACH PART EARNS ITS PLACE
+# -----------------------------------------------------
+#   vehicle_profile:  a reference to profiles/*.yaml. Without it, the two
+#                     files that describe this vehicle drift apart and nothing
+#                     notices. With it, `csia-edge validate --deployment`
+#                     cross-checks them and exits 3 on disagreement.
+#
+#   science_surface:  every key that is routed into the frozen diagnostic core,
+#                     named, with a reason. The list is NOT decided by whoever
+#                     writes this file: csia/deploy/deployment.py derives it by
+#                     following cli.py -> ShadowConfig -> shadow.py's
+#                     OnlineTrustLayer(...) call, and a key that reaches the
+#                     core without a declaration here is a load error. Wire a
+#                     new value into the core and this file stops loading until
+#                     somebody writes down why.
+
+schema: csia.deployment/2
+
+vehicle_profile: profiles/reference_quad_ardupilot.yaml
+
+vehicle:
+  id: REFERENCE-QUAD-AP-01
+  airframe: quad-x
+  mass_kg: 1.85
+  notes: >-
+    Reference configuration for the ArduPilot bench. Replace the identifiers
+    with the real airframe before any bench or flight work; the mass is a
+    placeholder and is NOT a calibration.
+
+autopilot:
+  stack: ardupilot
+  firmware: "ArduCopter V4.8.0-dev"
+  # Fill this in from the vehicle. UNSET is honest; a copied hash is not.
+  firmware_git_hash: UNSET
+
+link:
+  # Matches profiles/reference_quad_ardupilot.yaml's transport.mavlink.port.
+  # If these disagree, `csia-edge validate --deployment` reports it rather
+  # than preferring one.
+  transport: udp
+  connection: "udp:0.0.0.0:14550"
+  device: null
+  baud: 921600
+  required_streams:
+    SR2_RAW_SENS: 25
+    SR2_EXTRA1: 10
+    SR2_EXTRA2: 10
+    SR2_EXTRA3: 5
+    SR2_POSITION: 10
+    SR2_EXT_STAT: 10
+
+csia:
+  mode: SHADOW                # SHADOW | ADVISORY. No mode can command.
+  tick_hz: 25.0
+  field_mode: true
+  profile: FIELD_DERIVED_NOISE
+  watchdog_timeout_s: 5.0
+  log_dir: /var/log/csia
+  log_max_bytes: 67108864
+  log_keep_parts: 20
+
+# EVERY KEY BELOW IS ROUTED INTO OnlineTrustLayer. Nothing else in this file
+# is, and the loader checks that claim against the source rather than
+# believing this block.
+science_surface:
+  - key: csia.tick_hz
+    reaches: OnlineTrustLayer(tick_hz=)
+    reason: >-
+      The diagnostic smoothing is an EWMA over TICKS (SMOOTH_ALPHA = 0.06,
+      about 15 ticks), so the tick rate sets the smoothing TIME CONSTANT: at
+      25 Hz that is ~0.6 s, at 10 Hz ~1.5 s. 25.0 is used because it matches
+      the rate the frozen channel contract qualifies the ArduPilot adapter at
+      (docs/simulation/CHANNEL_SEMANTICS.yaml, contract_version 2) and the
+      rate every committed campaign ran at. Changing it makes this deployment
+      a different detector from the one the evidence describes.
+
+  - key: csia.field_mode
+    reaches: OnlineTrustLayer(field_mode=)
+    reason: >-
+      Selects the real-world tolerance package rather than the simulator's.
+      TRUE for anything reading a physical vehicle: the simulator tolerances
+      are qualified against SITL noise and would report faults on real
+      telemetry that are properties of the sensor, not of the airframe.
+
+# NOT in science_surface, and each absence is deliberate:
+#
+#   csia.profile          reaches the flight-log header only (shadow.py:285).
+#                         It is a PROVENANCE LABEL and selects nothing at
+#                         runtime -- a shadow deployment reads real telemetry
+#                         and has no simulated noise to parameterise. The
+#                         loader still checks it names a committed profile,
+#                         because a typo would put a name in the permanent
+#                         evidence record that resolves to nothing.
+#   csia.watchdog_timeout_s, log_*   liveness and storage. No diagnostic path.
+#   link.*, autopilot.*   transport and provenance.
+
+channel_overrides: []
+
+calibration:
+  compass_last_calibrated: UNSET
+  accel_last_calibrated: UNSET
+  esc_last_calibrated: UNSET
