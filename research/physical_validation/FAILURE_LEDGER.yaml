@@ -96,3 +96,83 @@ entries:
       program already applies elsewhere -- a count in prose is a claim, and
       claims get re-measured, not remembered.
     artifact: papers/BIB_VERIFICATION_LEDGER.yaml; make bib-guard
+
+  - id: FL-003
+    date: 2026-09-06
+    phase: P2 (synthetic adapter quarantine)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The synthetic-evidence quarantine guard's first marker list contained
+      the bare phrase "SYNTHETIC EVIDENCE", matched case-insensitively. It
+      flagged papers/csia_systems/main.tex, which says "...with a synthetic
+      evidence sequence: maximum absolute error 0.00...". That sentence is
+      correct methodology describing a closed-form check against a
+      constructed input, not constructed data masquerading as a measurement.
+    found_by: >-
+      tests/test_synthetic_evidence_is_quarantined.py on its first run.
+    verdict: RECORDED
+    consequence: >-
+      THE TEMPTING FIX WAS THE WRONG ONE. Adding main.tex to the exemption
+      list would have made the guard pass and would then have exempted that
+      file from every FUTURE violation -- and main.tex is precisely the file
+      where a synthetic number must never appear. The marker was narrowed
+      instead, to the adapter's own distinctive string
+      ("SYNTHETIC EVIDENCE -- constructed for testing"), which cannot occur in
+      ordinary prose. No exemption was added.
+      Also in the same run: figures/ was in the scanned tree list and holds
+      only PNGs, so the coverage check correctly reported that the scan
+      matched nothing there. figures/ was removed from the list rather than
+      the coverage check weakened -- a PNG cannot carry a JSON marker.
+    artifact: tests/test_synthetic_evidence_is_quarantined.py
+
+  - id: FL-004
+    date: 2026-09-06
+    phase: P3 (csia-edge validate)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The first capability summary keyed relations by NAME alone.
+      `velocity_gps_doppler` names two distinct edges (imu0-gps and
+      imu1-gps), so on the single-IMU reference profile it appeared in BOTH
+      the "structurally absent" and the "unknown" bucket at once. The report
+      was internally correct -- one instance is INAPPLICABLE, the other
+      UNKNOWN -- and read as a contradiction.
+    found_by: >-
+      Running `csia-edge validate --profile
+      profiles/minimal_single_imu_ardupilot.yaml` and reading the output,
+      rather than by any test.
+    verdict: RECORDED
+    consequence: >-
+      Summary labels now carry their endpoints when a relation name is
+      ambiguous: velocity_gps_doppler(imu0,gps) against
+      velocity_gps_doppler(imu1,gps). Pinned by
+      test_an_ambiguous_relation_name_is_disambiguated_in_the_summary, which
+      asserts the two buckets are disjoint. Worth recording because the
+      underlying data was right and only the presentation was wrong -- which
+      is the class of defect a test suite does not catch and a reader does.
+    artifact: csia/aircraft/capability.py; tests/test_csia_edge.py
+
+  - id: FL-005
+    date: 2026-09-06
+    phase: P3 (csia-edge)
+    kind: GUARD_STOPPED_WORK
+    what_happened: >-
+      P3 asked for a `csia-edge run` runtime. The repository already has a
+      mature one -- csia/deploy/shadow.py, with structural transmit-surface
+      denial, the flight-log header and the watchdog -- and building a second
+      would repeat the parallel-hierarchy mistake P1 correctly avoided.
+    verdict: RECORDED
+    consequence: >-
+      `csia-edge run` deliberately exits 4 and points at `csia-shadow`. What
+      csia-edge adds is `validate`, which did not exist: the pre-flight
+      answer to "what will this vehicle be blind to", derived from the
+      profile and the frozen relation graph before anything is connected.
+      A SEAM IS ALSO NOW EXPOSED RATHER THAN HIDDEN: this repository has two
+      overlapping configuration concepts -- configs/vehicle/*.yaml (the
+      deployment config, whose SHA is in every flight-log header) and
+      profiles/*.yaml (the canonical vehicle profile). They overlap on
+      autopilot family and transport. `csia-edge validate --deployment`
+      cross-checks them and exits 3 on conflict rather than preferring one.
+      Unifying them would change the flight-log header hash and therefore
+      every committed trial manifest, so that decision is NOT made here and
+      is flagged for the user.
+    artifact: csia/deploy/edge.py; tests/test_csia_edge.py

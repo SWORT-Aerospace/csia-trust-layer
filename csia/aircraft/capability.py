@@ -112,27 +112,40 @@ class CapabilityReport:
     nodes: dict = field(default_factory=dict)
     relations: list = field(default_factory=list)
 
+    @staticmethod
+    def _label(r: "RelationCapability") -> str:
+        """`velocity_gps_doppler` names TWO edges -- imu0-gps and imu1-gps.
+
+        On a single-IMU airframe one instance is INAPPLICABLE and the other is
+        merely UNKNOWN, and a summary keyed on the bare name puts the same
+        string in two buckets, which reads as a contradiction. So every label
+        carries its endpoints when the name is ambiguous.
+        """
+        return f"{r.relation}({r.endpoints[0]},{r.endpoints[1]})"
+
+    def _labels(self, *caps) -> list:
+        ambiguous = {r.relation for r in self.relations
+                     if sum(1 for x in self.relations
+                            if x.relation == r.relation) > 1}
+        return [self._label(r) if r.relation in ambiguous else r.relation
+                for r in self.relations if r.capability in caps]
+
     @property
     def active_relations(self) -> list:
-        return [r.relation for r in self.relations
-                if r.capability is Capability.AVAILABLE]
+        return self._labels(Capability.AVAILABLE)
 
     @property
     def inactive_relations(self) -> list:
-        return [r.relation for r in self.relations
-                if r.capability in (Capability.UNAVAILABLE, Capability.STALE)]
+        return self._labels(Capability.UNAVAILABLE, Capability.STALE)
 
     @property
     def structurally_absent_relations(self) -> list:
         """Relations this airframe was never going to feed. NOT a fault."""
-        return [r.relation for r in self.relations
-                if r.capability in (Capability.NOT_CONFIGURED,
-                                    Capability.INAPPLICABLE)]
+        return self._labels(Capability.NOT_CONFIGURED, Capability.INAPPLICABLE)
 
     @property
     def unknown_relations(self) -> list:
-        return [r.relation for r in self.relations
-                if r.capability is Capability.UNKNOWN]
+        return self._labels(Capability.UNKNOWN)
 
     @property
     def compatible(self) -> bool:
