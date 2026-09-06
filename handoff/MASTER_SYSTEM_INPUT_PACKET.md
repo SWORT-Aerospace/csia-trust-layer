@@ -94,7 +94,7 @@ authority; CSIA will never provide it.
 | tier | meaning | status |
 |---|---|---|
 | **E0** | desktop simulation | complete |
-| **E1** | current-stack SITL/SIH | complete; **repeated 20+20 on ArduPilot** this program, PX4 still n=1 |
+| **E1** | current-stack SITL/SIH | complete; **repeated 20+20 on BOTH platforms** — ArduPilot A1 and A2, PX4 P1 |
 | **E2** | real flight-controller hardware | **NOT STARTED** — needs purchase (**O-4**) |
 | **E3** | real sensor + physical fault | NOT STARTED |
 | **E4** | physical actuator/output path | NOT STARTED |
@@ -105,9 +105,11 @@ is unsupported today. `PAPER_IMPACT_LEDGER.yaml` records, per result, what it
 licenses and — in the load-bearing field — what it does **not**.
 
 **E1 is now closed as far as software can close it, and E2 is the checkpoint.**
-Two ArduPilot campaigns (A1: 40 trials, no trust; A2: 40 trials, trust
-captured) and a preregistered, built, `NOT_RUN` PX4 campaign. Repeating a
-simulation a third time produces more simulator runs, not a tier change.
+Three campaigns, 120 trials, all preregistered before their first trial:
+ArduPilot A1 (40, no trust), ArduPilot A2 (40, trust captured), PX4 P1 (40,
+trust captured). All 120 adjudicated VALID and every campaign's arithmetic
+balances. Repeating a simulation a fourth time produces more simulator runs,
+not a tier change.
 **The next thing that changes what either manuscript may say is a board**, and
 the software waiting for it is listed in `USER_ACTION_REQUIRED.md` §A-2.
 
@@ -122,7 +124,7 @@ Measured across a GNSS fix-loss fault on both current-stack platforms:
 | | ArduPilot 4.8 | PX4 SIH |
 |---|---|---|
 | `gps_gate_weight_sum` | 3.0 → **0.0** | 1.0 → **0.0** |
-| trust coefficient | 0.9213 → **0.9300** | 0.9856 → **0.9875** |
+| trust coefficient, original n=1 (**not repeatable, see below**) | 0.9213 → 0.9300 | 0.9856 → 0.9875 |
 | nominal hypothesis rank | 1 | 1 |
 
 **Trust RISES as the gate collapses, on both platforms.** That is not a bug:
@@ -140,21 +142,28 @@ the gate closes and the node stops receiving evidence, **freezing** the
 coefficient at whatever it had reached. **The fault suppresses an ongoing rise;
 it does not cause one.** This was already visible in the frozen n = 1 artifact —
 control +0.014020 against fault +0.008656 — and the arm-to-arm comparison was
-never made.
+never made. **It replicates on PX4 from an independent campaign** (2.7×,
+ranges disjoint) and was latent and un-compared in **that** platform's frozen
+artifact too — control +0.003332 against fault +0.001884. Two platforms, two
+frozen artifacts, the same un-made comparison.
 
 For a master system the practical rule is unchanged and is now better founded:
 **do not read the trust value at all as a lost-sensor signal.** It neither
 falls nor rises distinctively; it stops moving.
 
 Confound, recorded and not resolved: ArduPilot is UNAFFECTED and PX4 is
-PARTIALLY_AFFECTED (1 of 4 relations live pre-fault).
+PARTIALLY_AFFECTED (1 of 4 relations live pre-fault). **PX4's repeat measured
+that qualification 40/40 rather than arguing it from one trial**, and did not
+adopt a cleaner link to improve the number.
 
-**Repeated this program, ArduPilot only, on the same pinned build** (ArduCopter
-V4.8.0-dev @ `01a504b`, rebuilt from source): 40 of 40 trials valid, the
-intermediate quantity present in **20 of 20 fault trials and 0 of 20 matched
-controls**, and the original single observation (`first_t` 12.043901 s, 450
-ticks) falls inside the repeat's range (12.0399–12.0827, median 12.0432;
-449–450 ticks).
+**Repeated this program on BOTH platforms, each on its own pinned build**
+(ArduCopter V4.8.0-dev @ `01a504b`; PX4 v1.18.0-beta1 @ `547e2ca`, both rebuilt
+from source): 120 of 120 trials valid across three campaigns, the intermediate
+quantity present in **20 of 20 fault trials and 0 of 20 matched controls** on
+each platform, and each platform's original single observation falling inside
+its own repeat's range — ArduPilot `first_t` 12.043901 s / 450 ticks inside
+12.0399–12.0827 / 449–450, PX4 12.121585 s / 448 ticks inside
+12.0005–12.1291 / 444–451.
 
 **The trust figures were repeated on ArduPilot, in a SECOND campaign.** The
 first (A1) ran without `--trust-trace` and captured no trust series at all
@@ -167,8 +176,22 @@ instrument on: 40 of 40 valid, trust captured in 40 of 40.
 | FAULT | 0.924816 | 0.931823 | **+0.007007** | +0.006996 … +0.007145 |
 | CONTROL | 0.924813 | 0.945407 | **+0.020594** | +0.020572 … +0.020804 |
 
-**PX4 is still `NOT_RUN`** — not "no difference". Its repeat is preregistered
-and its binary is built.
+**PX4 was repeated too, and both findings replicate there independently.**
+Campaign P1, 20 + 20 on the rebuilt SIH environment, 40/40 VALID, trust
+captured 40/40:
+
+| PX4, P1, n = 20 per arm | PRE | POST | Δ median | Δ range |
+|---|---|---|---|---|
+| FAULT | 0.952172 | 0.955534 | **+0.003513** | +0.002269 … +0.003999 |
+| CONTROL | 0.952244 | 0.961753 | **+0.009499** | +0.009328 … +0.010729 |
+
+Same shape: control rises **2.7×** more, ranges disjoint, and the original n=1
+delta (+0.001884) falls outside the repeated range. **The PX4 demonstration is
+narrower than the ArduPilot one** — `gps_gate_weight_sum` is 1.0, not 3.0,
+because only 1 of 4 GNSS-gated relations is live pre-fault on the passive link.
+That was preregistered in advance and is now measured 40/40. It is a property
+of the link configuration, not of PX4, and a cleaner link was **not** adopted
+to improve the number.
 
 **DO NOT QUOTE `0.9213 → 0.9300` AS A REPEATABLE VALUE.** Its Δ (+0.008656) is
 outside the repeated FAULT range, and the reason is measured (FL-017): the

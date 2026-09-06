@@ -306,3 +306,87 @@ entries:
       section G, standards/dea/DEA_PROFILE.md, docs/v1_1/
       MECHANISM_A_MODERN_REPLICATION.md -- and those are edits for the writing
       agents to make deliberately, not for the repository agent to slip in.
+
+  - id: PI-005
+    date: 2026-09-06
+    result: >-
+      Campaign P1 repeated Mechanism A on PX4 SIH: 20 FAULT and 20 matched
+      fix-preserving CONTROL trials on the reconstructed and rebuilt
+      environment (PX4 547e2ca, px4_sitl_default, SIH, sihsim_quadx, real-time
+      lockstep). 40 of 40 VALID, trust captured 40/40, arithmetic balanced.
+      Reduced by the SAME committed extractor and the SAME four preregistered
+      windows the ArduPilot A2 campaign uses.
+      FAULT   (n=20): trust 0.952172 -> 0.955534, delta median +0.003513,
+                      range [+0.002269, +0.003999], 20/20 POSITIVE.
+      CONTROL (n=20): trust 0.952244 -> 0.961753, delta median +0.009499,
+                      range [+0.009328, +0.010729].
+      The gate collapses 1.0 -> 0.0 in 20/20 FAULT and stays 1.0 in 20/20
+      CONTROL; nominal stays rank 1 in all 40; failsafe reaches CRITICAL in 19
+      of 20 FAULT trials and CAUTION in 1, and stays NORMAL in 20/20 CONTROL.
+      THE PREREGISTERED QUALIFICATION REPRODUCES: gps_gate_weight_sum is 1.0,
+      not 3.0, because only 1 of 4 GNSS-gated relations is live pre-fault on
+      the passive link. Measured 40/40 rather than argued from one trial.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_px4_repeat_p1/;
+      research/physical_validation/results/mechanism_a_p1_trust_px4.json;
+      research/physical_validation/results/PX4_MECHANISM_A_REPEAT_TABLE.csv;
+      research/physical_validation/results/p1_traces_raw/ (raw, archived before
+      reduction, with SHA256SUMS);
+      research/physical_validation/PX4_REPEAT_RECONCILIATION.md
+    old_limitation: >-
+      "ARDUPILOT ONLY. The PX4 repeat is preregistered and NOT_RUN." (PI-004)
+      "PX4 is NOT_RUN, not 'no difference'." (PI-003)
+    new_limitation: >-
+      THE ASYMMETRY THAT HELD PI-003 AND PI-004 BACK IS GONE. Both platforms now
+      have a repeated campaign, so the two can be written into one section
+      without one of them being n=1.
+      FL-018: the control arm rises ~2.7x more here too, ranges disjoint, and
+      the comparison was already possible from the frozen PX4 artifact and never
+      made.
+      FL-018: the original PX4 delta is OUTSIDE the repeated range, and PX4's
+      PRE-FAULT trust does not reproduce either (0.985624 against 0.952172) --
+      a symptom ArduPilot did not have. Attributed by controlled replay to the
+      0.5 s -> 1.0 s runtime watchdog: the same log under the two tables
+      reproduces both measured values.
+      FL-019 IS AN UNRESOLVED MECHANISM AND IS LABELLED ONE: why ArduPilot's
+      pre-fault trust was stable across the same change is not established, and
+      the replay that settles PX4 is not a valid instrument on ArduPilot.
+      Still E1. PX4's demonstration is NARROWER than ArduPilot's -- 1 of 4
+      relations live rather than 3 of 4 -- and that is a property of the passive
+      link configuration, not of PX4.
+      No pooling across platforms or campaigns, no p-values, no confidence
+      intervals, no prevalence claim, no timing claim (real-time lockstep on a
+      shared host makes PX4's latency figures even less comparable).
+    claim_impact: >-
+      Licenses replacing "n=20+20 on ArduPilot, n=1 on PX4" with a repeated
+      campaign on BOTH platforms, and requires that the trust claim be stated
+      with the control arm on both. Removes 0.9856 -> 0.9875 from use as a
+      repeatable value while leaving the frozen artifact that records it
+      untouched.
+    supported_upgrade: >-
+      "On both current-stack platforms, across 20 fault trials and 20 matched
+      fix-preserving controls each, under preregistrations frozen before the
+      first trial: the GNSS-incident gate weight collapsed to zero in every
+      fault trial and in no control trial, the nominal hypothesis remained
+      rank 1 throughout, and the gps trust coefficient ROSE in every trial of
+      every arm -- by less under fault than under control, on both platforms."
+      "The PX4 demonstration is narrower than the ArduPilot one because only 1
+      of 4 GNSS-gated relations was live pre-fault on the passive link, which is
+      preregistered, measured 40/40, and a property of the link configuration."
+    unsupported_upgrade: >-
+      "Confirmed on both platforms" WITHOUT the narrowness qualification. The
+      PX4 arm removes 1.0 units of gate weight, not 3.0.
+      "The mechanism occurs in 40 of 40 flights." FALSE -- simulator runs.
+      "0.9856 -> 0.9875 is reproducible." FALSE under the current runtime.
+      "The trust rise is caused by the fault." FALSE on both platforms.
+      Any pooled N across ArduPilot and PX4, or across ORIGINAL and P1.
+      Any statement about a driven-link PX4 configuration. Not tested.
+    paper_section: Evidence; Limitations; Discussion (Mechanism A)
+    ready_to_integrate: false
+    ready_reason: >-
+      The E1 asymmetry is resolved, so the reason PI-003 and PI-004 gave is
+      spent. What remains is that FL-016's control-arm finding changes how the
+      result must be WORDED, and those edits belong to the writing agents,
+      deliberately, not to the repository agent. The evidence is ready; the
+      prose decision is not the repository agent's to make.

@@ -635,3 +635,76 @@ entries:
       research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md section
       4; tests/test_ardupilot_repeat_reconciliation.py::
       test_the_two_watchdogs_that_explain_the_discrepancy
+
+  - id: FL-018
+    date: 2026-09-06
+    phase: P9 (Campaign P1, PX4 repeat)
+    kind: PREVIOUSLY_UNREPORTED_FINDING
+    what_happened: >-
+      FL-016 and FL-017 both REPLICATE ON PX4, from an independent campaign on
+      a structurally different platform.
+      FL-016: the CONTROL arm rises ~2.7x more than the FAULT arm (delta median
+      +0.009499 against +0.003513, ranges disjoint), and the comparison was
+      ALREADY POSSIBLE from the frozen PX4 n=1 artifact and never made -- control
+      +0.003332 against fault +0.001884 at post, 3.8x by late. Two platforms,
+      two frozen artifacts, the same un-made comparison.
+      FL-017: the original PX4 delta (+0.001884) is OUTSIDE the repeated FAULT
+      range [+0.002269, +0.003999].
+      AND ONE SYMPTOM ARDUPILOT DID NOT HAVE: PX4's PRE-FAULT trust does not
+      reproduce either -- 0.985624 originally against 0.952172 repeated -- where
+      ArduPilot's did (0.924639 against 0.924816).
+    found_by: >-
+      Running the PX4 campaign through the same extractor and comparing every
+      preregistered column against the frozen artifact, rather than only the
+      quantities the ArduPilot reconciliation had flagged.
+    verdict: RECORDED
+    consequence: >-
+      The pre-fault discrepancy was ATTRIBUTED BY EXPERIMENT, not by analogy.
+      tools/csia_experiment/watchdog_replay.py drives the SAME committed flight
+      log through the SAME frozen core twice, changing only the stale-timeout
+      table. The original log gives 0.986420 under the frozen 0.5 s table and
+      0.952526 under the derived 1.0 s one; a P1 repeat log gives 0.985924 and
+      0.949056. BOTH LOGS REPRODUCE BOTH MEASURED VALUES to ~0.003, so the
+      watchdog accounts for it and nothing else was invoked.
+      The link state itself reproduced -- same channels usable at the same
+      shares, same live relation count, same gates -- which rules out the other
+      obvious explanation.
+      Do not quote 0.9856 -> 0.9875 as a repeatable value.
+    artifact: >-
+      research/physical_validation/PX4_REPEAT_RECONCILIATION.md;
+      research/physical_validation/results/mechanism_a_p1_trust_px4.json;
+      tools/csia_experiment/watchdog_replay.py
+
+  - id: FL-019
+    date: 2026-09-06
+    phase: P9 (Campaign P1, PX4 repeat)
+    kind: UNRESOLVED_MECHANISM
+    what_happened: >-
+      WHY ARDUPILOT'S PRE-FAULT TRUST WAS STABLE across the same 0.5 s -> 1.0 s
+      watchdog change is NOT ESTABLISHED. PX4's moved by -0.033 and ArduPilot's
+      moved by +0.000177, and the replay that settles the PX4 case cannot settle
+      this one.
+    found_by: >-
+      Applying the watchdog replay to the ArduPilot logs as well, and checking
+      it against the measured values instead of trusting it because it had just
+      worked on PX4.
+    verdict: RECORDED
+    consequence: >-
+      THE REPLAY IS NOT A VALID INSTRUMENT ON ARDUPILOT and is not used as one.
+      On the original ArduPilot log it gives 0.979440 under the frozen table and
+      0.941275 under the derived one, against measured 0.924639 and 0.924816 --
+      wrong by 0.055 and 0.017, and wrong in a direction the flights did not
+      show at all. core_samples_for_tick detects a hand-off by a CHANGED channel
+      value, so two identical consecutive readings look like no new reading, and
+      ArduPilot's higher channel rates make that under-count bias much larger.
+      The bias is documented in tools/deploy/profile_core_from_log.py, where the
+      reconstruction lives; it was not discovered here, only its size was.
+      A HYPOTHESIS IS RECORDED AS A HYPOTHESIS: ArduPilot's channels are usable
+      ~100% of the time, so a longer timeout changes nothing, while PX4's baro
+      sits at ~50% and its battery and vibration at ~24%, so a longer timeout
+      keeps starved nodes alive. Consistent with everything measured. NOT
+      ESTABLISHED. Settling it needs an instrument that reproduces ArduPilot's
+      measured values, and that instrument does not exist.
+    artifact: >-
+      research/physical_validation/PX4_REPEAT_RECONCILIATION.md section 3.3;
+      tools/csia_experiment/watchdog_replay.py module docstring

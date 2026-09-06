@@ -1,8 +1,8 @@
 # Document index
 
-361 markdown files exist in this repository. Most are the frozen research
+363 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 361 individually would
+once, cite a commit, and are never revised. Indexing all 363 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -77,6 +77,7 @@ updating what points at it.
 | `research/FUTURE_RESEARCH_FRONTIER.md` | CANONICAL | questions deliberately not pursued yet | yes | — | no |
 | `research/v1_1/CURRENT_STACK_REPLICATION.md` | **CANONICAL** | the preregistered replication campaign. ArduPilot 4.8 REPLICATED, PX4 SIH INAPPLICABLE | yes | — | **yes** |
 | `research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md` | **CANONICAL** | twelve headline quantities across the original n=1, Campaign A1 and Campaign A2. Nine reproduce; three do not, root-caused to a 0.5 s vs 1.0 s runtime watchdog | yes, for what the Mechanism-A numbers mean | — | **yes** — `tests/test_ardupilot_repeat_reconciliation.py` |
+| `research/physical_validation/PX4_REPEAT_RECONCILIATION.md` | **CANONICAL** | the same, second platform: twelve quantities across the PX4 n=1 and Campaign P1. Ten reproduce; two do not, attributed by a controlled watchdog replay | yes | — | **yes** — `tests/test_px4_repeat_reconciliation.py` |
 | `research/physical_validation/SCALAR_DERIVATION_GRAPH.yaml` | CANONICAL | where each headline scalar comes from, and which have an oracle that closes the loop | yes | — | no — hand-compiled, and says so |
 | `research/physical_validation/mutation/MUTATION_ADJUDICATION.md` | CANONICAL | per-mutant adjudication of the six unresolved mutants, in five classes | yes | — | no |
 | `research/physical_validation/mutation/MUTATION_SURVIVORS.md` | HISTORICAL | the original campaign at `33d3d61`. **Its §2–4 is contradicted** by the adjudication and kept | — | partly, by `MUTATION_ADJUDICATION.md` | no |

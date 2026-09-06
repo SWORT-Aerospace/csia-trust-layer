@@ -26,7 +26,7 @@ further software work substitutes for any of it.
 | tier | needs | status |
 |---|---|---|
 | E0 desktop simulation | — | complete |
-| E1 current-stack SITL/SIH | — | complete: ArduPilot 20+20 ×2 campaigns, PX4 built and preregistered |
+| E1 current-stack SITL/SIH | — | complete: **three campaigns, 120 trials, 120 VALID** — ArduPilot A1 and A2, PX4 P1, each 20+20 |
 | **E2 real flight-controller hardware** | flight controller, companion computer, bench harness | **NOT STARTED** |
 | E3 real sensor + physical fault | E2 + fault-injection rig | NOT STARTED |
 | E4 physical actuator path | E3 + thrust stand | NOT STARTED |
@@ -192,6 +192,7 @@ run by the same author. The specific thing to attack is
 | `research/physical_validation/PAPER_IMPACT_LEDGER.yaml` | what each result licenses — and what it does not |
 | `research/physical_validation/SCALAR_DERIVATION_GRAPH.yaml` | where each headline number comes from |
 | `research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md` | twelve headline quantities across n=1, A1 and A2. **Nine reproduce, three do not**, and why |
+| `research/physical_validation/PX4_REPEAT_RECONCILIATION.md` | the same, second platform. **Ten reproduce, two do not**, attributed by a controlled watchdog replay |
 | `research/physical_validation/P4_P7_STATUS_AUDIT.md` | P4–P7 audited by running their tests, not by observing files exist |
 | `research/physical_validation/mutation/` | what no behavioural test pins — `MUTATION_ADJUDICATION.md` is the current state |
 | `handoff/MASTER_SYSTEM_INPUT_PACKET.md` | for whoever designs the system around CSIA |

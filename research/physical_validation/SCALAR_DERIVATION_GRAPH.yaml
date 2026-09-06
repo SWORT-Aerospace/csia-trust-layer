@@ -229,11 +229,63 @@ scalars:
   # =========================================================================
   - id: trust_rise_px4
     value: "0.9856 -> 0.9875"
-    provenance: ARTIFACT_SUMMARY_ONLY
-    oracle_test: none
+    provenance: RAW_REDERIVABLE
+    status_this_session: >-
+      SUPERSEDED AS A QUOTABLE VALUE, and re-derivable as a record. Campaign P1
+      ran 20+20 on the reconstructed environment with the trace on:
+      FAULT 0.952172 -> 0.955534 (delta median +0.003513, 20/20 positive),
+      CONTROL 0.952244 -> 0.961753 (delta median +0.009499).
+    chain:
+      - research/physical_validation/results/p1_traces_raw/ (40 raw traces)
+      - tools/csia_experiment/extract_trust_a2.py --campaign-key p1, the SAME
+        four frozen windows the ArduPilot campaign uses
+      - PX4_MECHANISM_A_REPEAT_TABLE.csv
+    oracle_test: >-
+      tests/test_px4_repeat_reconciliation.py::
+      test_the_control_arm_rises_more_on_px4_too;
+      ::test_the_original_px4_delta_is_outside_the_repeated_fault_range;
+      ::test_the_watchdog_replay_reproduces_both_px4_values_from_one_log
+    was_previously: ARTIFACT_SUMMARY_ONLY
     caveat: >-
-      n=1. The PX4 repeated campaign is preregistered and its environment is
-      reconstructed and built; until it runs this stays n=1.
+      DO NOT QUOTE 0.9856 -> 0.9875 AS REPEATABLE. Its delta (+0.001884) is
+      outside the repeated FAULT range, AND the PRE-fault value does not
+      reproduce either (0.985624 against 0.952172) -- a symptom ArduPilot did
+      not have. Attributed by controlled replay (FL-018): the SAME log under the
+      0.5 s and 1.0 s watchdog tables gives 0.986420 and 0.952526, recovering
+      both measured values.
+      The control arm rises ~2.7x more than the fault arm here too (FL-016),
+      and that comparison was already possible from the frozen PX4 artifact.
+      PX4's demonstration is NARROWER than ArduPilot's -- 1 of 4 relations live
+      pre-fault, not 3 of 4 -- which is preregistered and is a property of the
+      passive link, not of PX4.
+
+  # =========================================================================
+  - id: px4_pre_fault_trust_watchdog_sensitivity
+    value: "0.986420 (0.5 s) / 0.952526 (1.0 s)"
+    what: >-
+      gps trust over the preregistered PRE window from ONE flight log, driven
+      through the frozen core twice under the two runtime stale-timeout tables
+    used_by: >-
+      nothing directly. It is the CONTROLLED EXPERIMENT that attributes the PX4
+      pre-fault discrepancy, and an attribution has to be re-derivable.
+    provenance: RAW_REDERIVABLE
+    chain:
+      - a committed PX4 flight log
+      - "csia/runtime/online.py:STALE_TIMEOUT_S (frozen, gps 0.5)"
+      - "csia/v1_1/staleness.py:build_runtime_stale_timeouts('px4') (gps 1.0)"
+      - tools/csia_experiment/watchdog_replay.py
+    oracle_test: >-
+      tests/test_px4_repeat_reconciliation.py::
+      test_the_watchdog_replay_reproduces_both_px4_values_from_one_log
+    caveat: >-
+      THE INSTRUMENT IS PLATFORM-LIMITED AND THE LIMIT IS PINNED. It reproduces
+      PX4's measured values to ~0.003 and does NOT reproduce ArduPilot's (0.9794
+      and 0.9413 against measured 0.9246 and 0.9248), because the hand-off
+      reconstruction under-counts when consecutive readings repeat, which bites
+      harder at ArduPilot's channel rates. So it says nothing about why
+      ArduPilot's pre-fault trust was stable -- FL-019, an UNRESOLVED mechanism,
+      labelled rather than filled in by analogy. A second test asserts the
+      replay still FAILS on ArduPilot, so the limit cannot lapse silently.
 
   # =========================================================================
   - id: independent_checker_agreement
@@ -273,13 +325,13 @@ scalars:
 
 # ---------------------------------------------------------------------------
 summary:
-  total_scalars: 12
-  raw_rederivable: 6
+  total_scalars: 13
+  raw_rederivable: 8
   source_rederivable: 3
-  artifact_summary_only: 2
+  artifact_summary_only: 1
   measured_not_derived: 1
-  with_oracle_test: 9
-  without_oracle_test: 3
+  with_oracle_test: 11
+  without_oracle_test: 2
   closed_this_session:
     - S_0
     - T_0
@@ -287,26 +339,35 @@ summary:
     - shared_power_baseline_verdicts
     - mechanism_a_first_t_ardupilot
     - trust_rise_ardupilot
+    - trust_rise_px4
   added_this_session:
     - gps_gate_dwell_ardupilot
+    - px4_pre_fault_trust_watchdog_sensitivity
   still_without_an_oracle:
-    - trust_rise_px4
     - independent_checker_agreement
     - cusum_latencies
+  at_session_start:
+    total_scalars: 11
+    artifact_summary_only: 3
+    with_oracle_test: 6
 
 open_items:
   - >-
     THIS FILE IS HAND-COMPILED. A generator that walks the artifact maps and
     prose bindings and emits this graph would be better and does not exist.
+    This is the LARGEST remaining defect in this file and it did not shrink
+    this session.
   - >-
-    trust_rise_px4 stays n=1 until the preregistered PX4 campaign runs. It is
-    built and NOT_RUN.
-  - >-
-    independent_checker_agreement remains ARTIFACT_SUMMARY_ONLY. Re-deriving
-    it means re-running the campaign that produced the 378000 ticks;
-    feasibility still not assessed.
+    independent_checker_agreement is the last ARTIFACT_SUMMARY_ONLY scalar.
+    Re-deriving it means re-running the campaign that produced the 378000
+    ticks; feasibility still not assessed.
   - >-
     cusum_latencies is RAW_REDERIVABLE and has no oracle written. The frozen
     traces and the frozen CUSUM parameters are both committed, so this is a
     plan rather than a check -- which is the exact shape this file exists to
     flag.
+  - >-
+    FL-019 is open and is a mechanism, not a scalar: why ArduPilot's PRE-fault
+    trust was stable across the 0.5 s -> 1.0 s watchdog change while PX4's
+    moved by -0.033. Settling it needs an instrument that reproduces
+    ArduPilot's measured values, and none exists.
