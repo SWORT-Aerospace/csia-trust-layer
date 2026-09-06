@@ -1,0 +1,46 @@
+{
+  "commit": "f00f5b2404c27dd75b771413d2cc13006d0b2dfd",
+  "dea_is_a_specialisation": "DEA separation is DIRECTIONAL. It coincides with the symmetric structural question only at the observation matching the asserted hypothesis, and that is the observation used. A DEA answer under a different observation is a different question, not a defect.",
+  "disagreements": [],
+  "disagreements_truncated": 0,
+  "firewall_not_evaluable_examples": [],
+  "hypotheses": [
+    "gps_fault",
+    "imu0_bias_drift",
+    "imu1_bias_drift",
+    "mag_interference",
+    "nominal",
+    "power_fault",
+    "unexpected_maneuver",
+    "vibration_anomaly"
+  ],
+  "implementations": {
+    "CHECKER": "research/systems-paper/independent_checker.py (STRUCTURAL)",
+    "CLEANROOM": "research/physical_validation/cleanroom/structural_reference.py (STRUCTURAL, stdlib only)",
+    "DEA": "tools/dea/conformance.py separators(), the published profile's own definition",
+    "FIREWALL": "csia_assurance/firewall.py, asked through competitors_without_witness",
+    "PRODUCTION": "engineering/v1_1/support/decompose.py Decomposition.discriminating (NUMERIC, |delta| > 1e-12)"
+  },
+  "known_disagreement_class": "c == 0.5 makes log(1-c+eps) == log(c+eps), so a structurally distinguishing term contributes zero numeric difference. Counted as `degenerate_production_only`, NEVER as agreement.",
+  "scenarios": [
+    "CLEAN",
+    "DUAL_IMU_AMBIGUITY",
+    "GNSS_BIAS_RAMP",
+    "GNSS_FIX_LOSS",
+    "HIGH_SPEED_ENVELOPE",
+    "IMU_BIAS",
+    "MAG_DEGRADED",
+    "POWER",
+    "VIBRATION"
+  ],
+  "schema": "csia.assurance.differential/1",
+  "totals": {
+    "comparisons": 1036,
+    "degenerate_production_only": 0,
+    "firewall_not_evaluable": 0,
+    "real_disagreements": 0,
+    "unanimous": 1036
+  },
+  "verdict": "FIVE_IMPLEMENTATIONS_AGREE",
+  "what_agreement_does_not_prove": "that the shared DEFINITION is right. Five implementations of a wrong definition agree perfectly. This bounds implementation error, not conceptual error."
+}

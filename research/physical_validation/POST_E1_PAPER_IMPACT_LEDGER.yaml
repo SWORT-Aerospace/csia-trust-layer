@@ -99,3 +99,48 @@ entries:
     ready_reason: >-
       Applying the corrections needs a deliberate re-freeze, which is a
       decision rather than a task.
+
+  - id: PE-004
+    date: 2026-09-06
+    result: >-
+      The second post-E1 hardening round completed A16 (process failure and
+      recovery), A17 (configuration proof), A18 (build and dependency
+      provenance) and A19 (differential implementation testing), plus the E2
+      preregistration template. Five independent implementations of the
+      support-separation question agree on 1036 of 1036 comparisons across
+      nine scenarios; no forbidden state transition was observed in six
+      recovery scenarios; none of six configuration-smuggling forms reaches
+      the frozen core.
+    evidence_tier: NOT_AN_EVIDENCE_TIER
+    claim_impact: >-
+      NONE. Not one manuscript number, claim or qualification changes. This
+      round produced five findings (HF-005 through HF-009) and every one of
+      them is about an INSTRUMENT, a LOADER, a CERTIFICATE FIELD or a GUARD --
+      never about a scientific result.
+      Two of the five were MY OWN measurement errors: HF-005 (a harness that
+      read an absent firewall answer as a positive one, and consequently
+      accused the firewall of the defect the harness had committed) and HF-007
+      (a provenance tool that reported frozen-core drift where a directory
+      digest format differed). Both were caught by checking a surprising
+      output by hand instead of filing it.
+    supported_upgrade: >-
+      That implementation error in the support-separation semantics is bounded
+      by five independent implementations rather than two, on the committed
+      distinct active sets. WORDED AS A BOUND ON IMPLEMENTATION ERROR, NOT AS
+      CORRECTNESS: five implementations of a wrong definition would agree
+      perfectly, and the artifact says so in the row a reader reaches first.
+    unsupported_upgrade: >-
+      "The definition is verified." FALSE -- agreement bounds implementation
+      error only.
+      "Configuration is hardened." FALSE -- the strict gate is written and
+      evidenced OUTSIDE the loader and is NOT wired in; the existing loader
+      still accepts all six forms, and only the measurement that none reaches
+      the core makes that a coverage finding rather than a defect.
+      "Recovery is verified." FALSE -- there is no supervisor in this
+      repository, so restart behaviour is UNTESTED and recorded as untested.
+      "The build is attested." FALSE -- nothing is signed.
+    ready_to_integrate: false
+    ready_reason: >-
+      There is nothing to integrate. No paper claim is affected, and a
+      hardening round with no claim impact is the outcome to hope for rather
+      than a shortfall.

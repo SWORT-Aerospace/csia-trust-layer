@@ -863,3 +863,161 @@ entries:
     artifact: >-
       research/physical_validation/results/DECISION_REPLAY_RESULTS.json;
       tools/assurance/decision_replay.py
+
+  - id: HF-005
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A19)
+    kind: METHODOLOGY
+    what_happened: >-
+      THE DIFFERENTIAL HARNESS READ A SILENCE AS A YES, AND ACCUSED THE
+      FIREWALL OF THE DEFECT IT HAD ITSELF COMMITTED.
+      The five-implementation comparison asserted a leader by setting
+      `ranking: [a, b]` in the firewall's input record. The firewall
+      DELIBERATELY DOES NOT READ A RANKING -- conformance vector V11 exists to
+      pin exactly that -- so every call returned UNKNOWN / NO_LEADER_ASSERTED
+      with an EMPTY `competitors_without_witness`. The harness then evaluated
+      `b not in ()`, which is True, and recorded "distinguishable" for every
+      pair. At CLEAN tick 0 the other four implementations agreed the
+      nominal/gps_fault pair has no active distinguishing term; the firewall
+      column said it did, and the run reported a real disagreement with the
+      firewall as the outlier.
+    found_by: >-
+      Running the differential on one scenario before running it on nine, and
+      reproducing the single flagged row by hand instead of accepting the
+      table.
+    verdict: FIXED
+    consequence: >-
+      The harness now checks the VERDICT STATE before reading the field, and
+      returns no answer -- not a default, not a guess -- for any state in
+      which nothing was computed. With that, all five implementations agree
+      on 1036 of 1036 comparisons across nine scenarios.
+      THIS IS THE SECOND TIME IN THIS PROGRAMME THAT AN ABSENT RESULT WAS
+      READ AS A PRESENT ONE: HF-004 records the replay harness reporting
+      NOT_COMPARABLE from zero comparisons. The shape is the same and it is
+      worth naming: a measurement path that cannot distinguish "no answer"
+      from "the answer is yes" will eventually produce a confident wrong one,
+      and in both cases it was MY OWN INSTRUMENT, not the system under test.
+      Two regression tests now pin it from both sides -- the leaderless record
+      and the contract-refused record -- with a control asserting that a
+      well-formed record still answers, so neither test can pass vacuously.
+    artifact: >-
+      research/physical_validation/results/ASSURANCE_DIFFERENTIAL.json;
+      tools/assurance/differential.py;
+      tests/test_post_e1_hardening_round2.py
+
+  - id: HF-006
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A17)
+    kind: COVERAGE
+    what_happened: >-
+      THE DEPLOYMENT LOADER ACCEPTS ALL SIX CONFIGURATION-SMUGGLING FORMS.
+      An unknown key, a camelCase alias, an upper-case variant, a hyphenated
+      variant, an `overrides:` block and a CSIA_-prefixed environment variable
+      are all read without complaint by csia/deploy/deployment.py validate().
+    found_by: >-
+      A17's configuration proof, which applies each form to the committed
+      reference config and measures TWO things separately: whether the gate
+      accepted it, and whether the value REACHED the frozen core.
+    verdict: RECORDED_NOT_FIXED_IN_THE_LOADER
+    consequence: >-
+      NONE OF THE SIX REACHES THE FROZEN CORE. tick_hz stays 25.0 in every
+      case, so this is a COVERAGE finding, not a science defect: an operator
+      can believe a key is in effect when it is inert, and the evidence record
+      would then name a configuration nobody ran.
+      The existing loader is not being failed for its design -- it validates
+      MEANING, and was never written to be exact-key.
+      A strict exact-key gate is written at csia_assurance/config_gate.py,
+      OUTSIDE the frozen core and NOT wired into the loader, and it refuses
+      all six with a distinct reason each while accepting the unmodified
+      reference config. Wiring it in front of validate() is a deliberate later
+      decision by a human, not a side effect of this audit -- the instruction
+      is explicit that source is not modified automatically.
+      A SEPARATE AND WEAKER TRUE STATEMENT IS RECORDED RATHER THAN THE
+      STRONGER FALSE ONE: three environment variables ARE read by csia
+      (CSIA_MODE, CSIA_AP_ROOT, CSIA_PX4_ROOT). None is routed into
+      OnlineTrustLayer, CSIA_MODE raises on an unrecognised value rather than
+      falling back, and no mode carries command authority. The check behind
+      that statement is name-level and read-site, NOT dataflow, and the
+      artifact says so.
+    artifact: >-
+      research/physical_validation/results/CONFIG_PROOF.json;
+      csia_assurance/config_gate.py
+
+  - id: HF-007
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A18)
+    kind: EVIDENCE_INTEGRITY
+    what_happened: >-
+      THE BUILD-PROVENANCE TOOL REPORTED BOTH FROZEN PACKAGES AS CHANGED WHEN
+      NEITHER HAD.
+      Its first version walked csia/diagnosis and csia/trust_engine itself and
+      built a flat {path: digest} map. The E1 freeze manifest records a
+      directory as {files: {...}, sha256_of_file_manifest: ...}. Two identical
+      trees therefore compared unequal, and the tool announced drift in the
+      frozen core.
+    found_by: >-
+      Reading the tool's own first output instead of filing it, and diffing
+      the two structures rather than trusting the boolean.
+    verdict: FIXED
+    consequence: >-
+      The digest functions are now IMPORTED from the freeze manifest's own
+      builder, so the checker and the artifact it checks cannot disagree about
+      what a directory digest is -- the same sharing tests/test_e1_freeze_
+      manifest.py already does.
+      A PROVENANCE TOOL THAT CRIES DRIFT IS WORSE THAN ONE THAT DOES NOT
+      EXIST: the next real drift gets read as another formatting artifact.
+      No frozen file was touched; the freeze manifest is byte-unchanged.
+    artifact: >-
+      research/physical_validation/results/BUILD_PROVENANCE.json;
+      tools/assurance/build_provenance.py
+
+  - id: HF-008
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A2)
+    kind: EVIDENCE_INTEGRITY
+    what_happened: >-
+      THE SUPPORT CERTIFICATE ASSERTED FRESHNESS AND APPLICABILITY IT NEVER
+      READ. csia_assurance/witness.py built every DiagnosticSupportWitness
+      with applicability_state="APPLICABLE" and freshness_state="FRESH"
+      hardcoded, while the record's own `evidence_states` sat in an assigned
+      but unused local three lines above.
+    found_by: >-
+      A lint warning about the unused variable, followed by asking what it had
+      been for rather than deleting it.
+    verdict: FIXED
+    consequence: >-
+      THE ASSERTION WAS TRUE BY CONSTRUCTION -- the firewall masks every
+      non-ACTIVE gate to zero weight, so no non-active discriminator can reach
+      the witness list -- BUT CORRECT BY CONSTRUCTION IS NOT THE SAME AS
+      RECORDED. A certificate that states a property it did not read is the
+      exact shape of claim this layer exists to refuse, and it stays that
+      shape when the statement happens to be right.
+      The states are now read back from the record. A discriminator whose
+      recorded state is not ACTIVE is reported as CONTRADICTED:<names> rather
+      than relabelled, so a contradiction between the firewall and its own
+      input would be visible in the certificate instead of being papered over.
+    artifact: csia_assurance/witness.py
+
+  - id: HF-009
+    date: 2026-09-06
+    phase: PROGRAM A (post-E1 hardening, A17 guard)
+    kind: SELF_INFLICTED_GUARD
+    what_happened: >-
+      A FORBIDDEN-WORD GUARD FIRED ON THE DOCUMENTATION OF THE RULE IT
+      ENFORCES. test_the_strict_gate_never_guesses_a_correction scanned
+      config_gate.py for the string "did you mean". The module docstring says
+      'There is no "did you mean" and no nearest-key suggestion that a caller
+      could act on automatically.' The guard read the denial as the violation.
+    found_by: The test suite, on its first run.
+    verdict: FIXED
+    consequence: >-
+      THIS IS THE SEVENTH GUARD IN THIS REPOSITORY TO TRIP OVER PROSE STATING
+      THE VERY RULE IT ENFORCES, after the E1-GATE allowed_wording case and
+      five before it. The pattern is now unmistakable: a substring scan that
+      cannot distinguish a claim from its denial has exactly one cheap fix --
+      delete the sentence explaining the rule -- and that fix makes the
+      repository worse.
+      The guard now strips comments and docstrings with tokenize and ast and
+      scans the CODE, and it checks for the mechanisms as well as the phrase
+      (difflib, get_close_matches). The docstring stays.
+    artifact: tests/test_post_e1_hardening_round2.py

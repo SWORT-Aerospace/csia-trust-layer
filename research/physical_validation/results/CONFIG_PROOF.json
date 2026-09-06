@@ -1,0 +1,170 @@
+{
+  "baseline_tick_hz": 25.0,
+  "control": {
+    "control_holds": true,
+    "strict_refusals_on_the_control": [],
+    "unmodified_reference_passes_existing": true,
+    "unmodified_reference_passes_strict": true,
+    "why": "A gate that rejects the committed configuration would refuse everything, and six refusals would mean nothing."
+  },
+  "environment_paths": {
+    "check_performed": "NAME-LEVEL AND READ-SITE, NOT DATAFLOW. Two things are checked: that no environment variable name is a core-reachable deployment key, and which files both read the environment and construct the core entry point. A file in neither set cannot route the environment into the core. This is weaker than a dataflow proof and is labelled as such rather than reported as one.",
+    "core_reachable_deployment_keys": [
+      "csia.field_mode",
+      "csia.tick_hz"
+    ],
+    "files_constructing_the_core_entry_point": [
+      "csia/cli.py",
+      "csia/deploy/deployment.py",
+      "csia/deploy/shadow.py",
+      "csia/runtime/online.py",
+      "csia/runtime/service.py",
+      "csia/runtime/ulog_source.py",
+      "csia/v1_1/staleness.py",
+      "csia/validation.py"
+    ],
+    "files_doing_both": [
+      "csia/deploy/shadow.py"
+    ],
+    "files_reading_an_environment_variable": [
+      "csia/deploy/shadow.py",
+      "csia/simulation/rigs.py"
+    ],
+    "note": "CSIA_MODE is read, and it is reported here rather than omitted because the ENV_VAR row only proves that CSIA_TICK_HZ is inert. CSIA_MODE selects a deployment MODE, no mode carries command authority, an unrecognised value RAISES rather than falling back, and the value is not among the keys routed into OnlineTrustLayer. It is therefore an environment path that does not reach the science -- which is a different statement from 'there is no environment path', and the weaker one is the true one.",
+    "variables_read_by_csia": {
+      "CSIA_AP_ROOT": [
+        "csia/simulation/rigs.py:26"
+      ],
+      "CSIA_MODE": [
+        "csia/deploy/shadow.py:512"
+      ],
+      "CSIA_PX4_ROOT": [
+        "csia/simulation/rigs.py:27"
+      ]
+    }
+  },
+  "forms": [
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "UNKNOWN_KEY",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "UNKNOWN_KEY"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "a key from a newer build, a blog post, or a typo nobody noticed"
+    },
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "ALIAS",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "ALIAS_OF_KNOWN_KEY"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "the same setting under the spelling another project uses"
+    },
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "CASE_VARIANT",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "CASE_VARIANT_OF_KNOWN_KEY"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "copied from documentation that shouts its key names"
+    },
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "SEPARATOR_TRICK",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "SEPARATOR_VARIANT_OF_KNOWN_KEY"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "hyphen instead of underscore, which most YAML readers accept"
+    },
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "ENV_VAR",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "ENVIRONMENT_OVERRIDE_PRESENT"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "no file edit at all -- an environment variable in a unit file"
+    },
+    {
+      "assessment": "ACCEPTED_BUT_INERT",
+      "existing_gate": {
+        "accepted": true,
+        "error": null,
+        "tick_hz_the_core_would_receive": 25.0
+      },
+      "form": "NESTED_OVERRIDE",
+      "strict_gate": {
+        "accepted": false,
+        "reasons": [
+          "NESTED_OVERRIDE_BLOCK"
+        ]
+      },
+      "value_reached_the_frozen_core": false,
+      "why_an_operator_would_do_this": "a late-binding overrides block, the shape most config systems grow"
+    }
+  ],
+  "gates": {
+    "EXISTING": "csia/deploy/deployment.py validate() -- SEMANTIC. Not exact-key by design; this table reports its coverage, it does not accuse it of a bug.",
+    "STRICT": "csia_assurance/config_gate.py -- EXACT-KEY. Outside the frozen core and NOT wired into the loader."
+  },
+  "nothing_was_modified_automatically": "The strict gate is written and evidenced here. Wiring it in front of csia/deploy/deployment.py validate() is a deliberate later decision by a human reading this table, not a side effect of running this tool.",
+  "reference_config": "configs/vehicle/reference_quad_ardupilot_v2.yaml",
+  "schema": "csia.assurance.config_proof/1",
+  "strict_gate_verdict": "ALL_SIX_REFUSED",
+  "target": {
+    "path": "csia.tick_hz",
+    "value": 50.0,
+    "why_this_key": "the one deployment key that is both declared in science_surface and routed into OnlineTrustLayer, so a successful smuggle would change the detector"
+  },
+  "totals": {
+    "accepted_by_the_existing_gate": 6,
+    "accepted_by_the_strict_gate": 0,
+    "forms_tried": 6,
+    "reached_the_frozen_core": 0
+  },
+  "verdict": "NOTHING_SMUGGLED_INTO_THE_CORE"
+}

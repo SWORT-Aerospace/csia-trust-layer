@@ -31,9 +31,7 @@ absence from the report is visible.
 from __future__ import annotations
 
 import argparse
-import copy
 import json
-import math
 import os
 import sys
 

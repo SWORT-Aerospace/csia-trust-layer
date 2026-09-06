@@ -122,14 +122,31 @@ def build_certificate(verdict, record: Mapping,
             (verdict.witnesses or {}).items()):
         if not discriminators:
             continue
+        # READ FROM THE RECORD, NOT ASSERTED. The two state fields were
+        # previously hardcoded to APPLICABLE/FRESH while `states` sat unused
+        # a few lines above -- correct by construction, because the firewall
+        # masks every non-ACTIVE gate to zero weight before a discriminator
+        # can reach this list, but correct by construction is not the same as
+        # recorded. A certificate that asserts freshness it never read is the
+        # exact shape of claim this layer exists to refuse, even when the
+        # assertion happens to be true.
+        #
+        # So the states are read back, and a discriminator whose recorded
+        # state is NOT ACTIVE is reported as it stands rather than relabelled.
+        # If that ever appears in a certificate it is a contradiction between
+        # the firewall and its own input, and it should be visible.
+        declared = {d: states.get(d, "ACTIVE") for d in discriminators}
+        non_active = sorted(d for d, s in declared.items() if s != "ACTIVE")
         witnesses.append(DiagnosticSupportWitness(
             target_hypothesis=verdict.leader,
             competitor_hypothesis=competitor,
             active_discriminator_ids=tuple(discriminators),
             evidence_source_ids=tuple(sorted(
                 {sources.get(d, "UNDECLARED") for d in discriminators})),
-            applicability_state="APPLICABLE",
-            freshness_state="FRESH",
+            applicability_state=("APPLICABLE" if not non_active
+                                 else f"CONTRADICTED:{','.join(non_active)}"),
+            freshness_state=("FRESH" if not non_active
+                             else f"CONTRADICTED:{','.join(non_active)}"),
             timestamp=ts,
         ))
 

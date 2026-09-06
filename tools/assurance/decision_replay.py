@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import sys
 
@@ -63,8 +62,6 @@ def replay(log_path: str, platform: str, node: str = "gps") -> dict:
     from csia.v1_1.staleness import build_runtime_stale_timeouts
     from tools.deploy.profile_core_from_log import (core_samples_for_tick,
                                                     load_ticks)
-    from csia_assurance import qualify
-    from csia_assurance.firewall import SCHEMA
 
     ticks = list(load_ticks(log_path))
     if not ticks:
