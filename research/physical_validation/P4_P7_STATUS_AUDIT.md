@@ -129,7 +129,19 @@ is what went wrong — so the counts differ by design, not by an error.
 | `MECHANISM_A_PX4_REPEATED_PREREG.md` (P1) | commit `1968ffd` | the campaign, which is `NOT_RUN` |
 
 Each was committed **before** the trials it governs, which is checkable from
-git rather than from a claim in the document. The A2 preregistration in
+git rather than from a claim in the document.
+
+**And each is byte-identical to its freeze commit**, which is now a test:
+`tests/test_prereg_freeze.py` compares the blob at HEAD against the blob at the
+named commit, so a later edit fails loudly and names the file. That test states
+its own limit rather than implying more: it proves the document has not
+changed, **not** that the freeze commit predates the first trial in wall-clock
+terms. The ordering is established by the campaign directories' own history.
+
+| preregistration | blob |
+|---|---|
+| A2 | `2237b156e38294f68e2350e051e9846c9a3965a9` at `ceeaf4a` and at HEAD |
+| P1 | `ca445079f9f0c68306c26701dff41c7c105c63cf` at `1968ffd` and at HEAD | The A2 preregistration in
 particular fixes its four analysis windows — `PRE` [10,12), `AT` [12,13),
 `POST` [14,20), `LATE` [20,end] — and states in §6 that success is **NOT**
 "trust must rise". Both mattered: the campaign's headline result is that the
