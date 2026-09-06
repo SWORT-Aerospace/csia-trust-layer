@@ -176,3 +176,46 @@ entries:
       every committed trial manifest, so that decision is NOT made here and
       is flagged for the user.
     artifact: csia/deploy/edge.py; tests/test_csia_edge.py
+
+  - id: FL-006
+    date: 2026-09-06
+    phase: P9-P10 (clean-room reference and property campaign)
+    kind: GUARD_STOPPED_WORK
+    what_happened: >-
+      tests/test_ci_env.py::test_every_third_party_import_is_installed_by_ci
+      failed, reporting `independent_checker` and `structural_reference` as
+      "imported but not in any extra CI installs". Both are repository files,
+      imported by the property test after a sys.path insert -- the exact
+      pattern that guard's own docstring exists to permit.
+    found_by: The full suite run after P9/P10.
+    verdict: RECORDED
+    consequence: >-
+      THE TEMPTING FIX WAS AGAIN THE WRONG ONE. Declaring two repository
+      modules as PyPI dependencies in pyproject.toml would have made the
+      guard pass and would have been a lie in the packaging metadata.
+      The guard was conflating two questions that its own docstring already
+      distinguishes: "what do our first-party sources IMPORT" (scan csia/,
+      tests/, tools/) and "what is IMPORTABLE from this repository" (a wider
+      set). research/ answers the second and must not be added to the first,
+      because it also holds analysis scripts importing matplotlib and sympy
+      that CI neither installs nor needs.
+      Split into SCANNED_DIRS and LOCAL_NAME_DIRS. The scan is unchanged; the
+      name lookup now also walks research/ and engineering/.
+    artifact: tests/test_ci_env.py
+
+  - id: FL-007
+    date: 2026-09-06
+    phase: P10 (property campaign)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      NOT A FAILURE -- recorded because a campaign that reports only what it
+      found is missing half its result. The 100,000-structure campaign found
+      ZERO disagreements and ZERO counterexamples. Every property held.
+    verdict: RECORDED
+    consequence: >-
+      A clean campaign is a weaker result than a campaign that found and fixed
+      something, and it is worth saying so. What it establishes is bounded:
+      three STRUCTURAL implementations agree, and production was NOT among
+      them -- see PAPER_IMPACT_LEDGER PI-002 for why, and for what may
+      therefore not be claimed.
+    artifact: research/physical_validation/results/structural_property_campaign.json

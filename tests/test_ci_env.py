@@ -31,7 +31,26 @@ import sys
 import tomllib
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+#: Directories whose sources are SCANNED for third-party imports. These are
+#: the trees CI installs dependencies for.
 SCANNED_DIRS = ("csia", "tests", "tools")
+
+#: Directories that merely CONTRIBUTE IMPORTABLE NAMES. Wider than
+#: SCANNED_DIRS on purpose, and the distinction matters:
+#:
+#:   "what do our first-party sources import?"   -> SCANNED_DIRS
+#:   "what is importable from this repository?"  -> SCANNED_DIRS + these
+#:
+#: research/ holds modules that tests legitimately import after a sys.path
+#: insert -- the independent checker and the clean-room structural reference,
+#: which exist precisely so that a test can drive them. Without this, both
+#: were reported as undeclared PyPI dependencies.
+#:
+#: research/ is deliberately NOT in SCANNED_DIRS: it also holds analysis
+#: scripts importing matplotlib, sympy and friends, which CI does not install
+#: and does not need to. Widening the scan to make the name lookup work would
+#: have imported that problem to solve this one.
+LOCAL_NAME_DIRS = SCANNED_DIRS + ("research", "engineering")
 
 #: import name -> PyPI distribution, where they differ
 IMPORT_TO_DIST = {"yaml": "pyyaml"}
@@ -92,9 +111,11 @@ def _local_module_names() -> set:
     as an undeclared dependency.
     """
     local = {"__future__"}
-    for d in SCANNED_DIRS:
+    for d in LOCAL_NAME_DIRS:
         local.add(d)
         base = os.path.join(ROOT, d)
+        if not os.path.isdir(base):
+            continue
         # WALK, do not listdir. The first version looked only at the top
         # level, so `tools/simulation/qualify_platform.py` was invisible to it
         # and a test importing that module after a sys.path insert -- the

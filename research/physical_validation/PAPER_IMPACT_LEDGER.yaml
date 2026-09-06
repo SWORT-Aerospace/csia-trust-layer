@@ -104,3 +104,61 @@ entries:
       E0 architecture work alone does not complete an evidence tier. Hold
       until the repeated current-stack campaign (P8) gives the section
       something measured to sit beside.
+
+  - id: PI-002
+    date: 2026-09-06
+    result: >-
+      A THIRD structural implementation, written from the definition rather
+      than from either existing one, agrees with the independent checker and
+      with brute-force enumeration across 100,000 randomly generated
+      structures and 500,925 pair comparisons. Seven structural invariants
+      hold with zero counterexamples.
+    evidence_tier: E0
+    artifact: >-
+      research/physical_validation/cleanroom/structural_reference.py;
+      research/physical_validation/results/structural_property_campaign.json;
+      tests/test_structural_property_agreement.py;
+      tests/test_cleanroom_independence.py
+    old_limitation: >-
+      "the independent checker could share conceptual mistakes with
+      production" -- two implementations written by the same people from the
+      same understanding can agree perfectly on the wrong answer, and the
+      paper's 378,000/378,000 figure could not exclude that.
+    new_limitation: >-
+      WHAT WAS AND WAS NOT COMPARED, because the distinction decides what may
+      be said. Three STRUCTURAL implementations were compared on generated
+      structures: the clean-room reference, the independent checker, and
+      brute-force enumeration. PRODUCTION WAS NOT among them -- its
+      discriminating() needs a populated trust-data object, and constructing
+      one for a random structure would mean reimplementing production's input
+      format inside the test, where a mistake produces false disagreement and
+      a shared mistake produces false agreement. Production's agreement is
+      established where its numeric path is genuinely exercised: on real
+      ticks, 378,000 comparisons.
+      So the residual limitation is real and narrower than before: a
+      conceptual mistake shared by production AND the independent checker AND
+      the clean-room reference is not excluded, but it would now have to
+      survive an implementation written from the one-sentence definition, and
+      an explicit enumeration written differently again.
+    claim_impact: >-
+      Licenses a Verification subsection. Changes no measurement and no
+      empirical claim.
+    supported_upgrade: >-
+      "Three structural implementations -- production's checker, a clean-room
+      reference sharing no code with it, and brute-force enumeration -- agree
+      on 100,000 generated structures and 500,925 pair comparisons, with
+      seven structural invariants holding and no counterexample."
+    unsupported_upgrade: >-
+      "The production support engine was verified against two independent
+      implementations on random structures." FALSE -- production was not in
+      the random-structure comparison, for the reason above. Also
+      unsupported: any claim that the signature TABLE is correct. No amount
+      of structural agreement can test whether a relation behaves as its
+      LOW(h) entry says; that needs physical evidence (P17) and the paper
+      already says so.
+    paper_section: Verification; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      E0 tier. Hold until the repeated current-stack campaign (P8) completes,
+      so the Verification section gains its structural and its empirical half
+      in one edit rather than two.
