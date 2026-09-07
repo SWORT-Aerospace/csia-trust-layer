@@ -1591,3 +1591,99 @@ entries:
       it should adopt that sandbox rather than the two diverging.
     artifact: >-
       tools/xr/mutation_probe.py; tools/mutation/run_mutations.py
+
+  - id: SR-001
+    date: 2026-09-07
+    phase: STRESS (multi-sensor degradation campaign)
+    kind: SUPERVISION_GAP
+    what_happened: >-
+      LOSS OF DATA ESCALATES THE FAILSAFE FOR EXACTLY ONE OF EIGHT SENSORS.
+      GPS has an explicit rule -- "GPS data invalid" fires when the node is
+      not fresh and was monitored earlier in the run. Every other rule in
+      FailsafePolicy._conditions is gated on fresh.get(<sensor>), so a
+      sensor that stops delivering valid data is REMOVED FROM SUPERVISION
+      rather than alarmed on.
+      The sharpest instance is attitude. The attitude rules reason over
+      `imus = [n for n in ("imu0","imu1") if fresh.get(n)]` and then take
+      `att = max((T[n] for n in imus), default=1.0)`. When NEITHER IMU is
+      fresh the default applies, attitude confidence reads 1.000, and both
+      att_caution and att_emergency become unreachable.
+      MEASURED: both IMUs dropped out for 40 s of a 90 s flight. Freshness
+      detection worked correctly -- both marked not fresh at t=30 s -- and
+      the failsafe peak over the whole flight was NORMAL. The same holds
+      for battery+baro, mag+baro and battery+motor_esc dropouts. A GPS
+      dropout under identical conditions reaches CAUTION.
+    found_by: >-
+      A randomised multi-sensor stress campaign: 53 of 200 generated
+      variations were NOT_DETECTED, and grouping them by fault composition
+      showed the missed sets were dominated by `dropout`. The minimal
+      reproducer was then constructed by hand.
+    verdict: RECORDED_NOT_FIXED
+    consequence: >-
+      NOT A DEFECT IN FRESHNESS DETECTION, which works. The gap is that
+      only GPS has a rule that ACTS on absence.
+      THE EXCLUSION IS DELIBERATE IN ORIGIN AND DOCUMENTED IN THE FROZEN
+      SOURCE: "A sensor that is not delivering data has NO meaningful trust
+      value (it holds the Bayesian prior). Rules must only reason over
+      sensors actually being monitored -- comparing against a frozen prior
+      produced phantom IMU divergence alarms on real flight logs." That
+      rationale is sound for TRUST-BASED rules. It does not by itself
+      supply a LOSS-OF-DATA rule for the other seven nodes, and GPS shows
+      what one looks like.
+      The existing watchdog regression test (tests/test_runtime.py
+      test_stale_sensor_watchdog) covers GPS only, so this asymmetry was
+      not previously pinned.
+      NOT FIXED HERE. csia/runtime/failsafe.py is FROZEN. Four
+      characterization tests now pin the behaviour from both sides -- the
+      GPS rule firing, the non-GPS dropouts not firing, and a control
+      showing the same sensors DO escalate on BAD data as opposed to NO
+      data -- so the day this changes, it is visible and deliberate.
+      SCOPE OF THE CLAIM: CSIA is an advisory layer with no command
+      authority. This says what the trust layer would and would not raise;
+      it says nothing about mitigations elsewhere in a vehicle.
+    artifact: >-
+      tests/test_stress_layer.py (test_sr001_*);
+      research/stress/results/STRESS_CATALOG.json;
+      csia_stress/observables.py
+
+  - id: SR-002
+    date: 2026-09-07
+    phase: STRESS (instrument validation)
+    kind: TEST_RIG_DELIVERY_GAP
+    what_happened: >-
+      A FAULT THAT PERTURBS THE SENSOR STREAM AND REACHES THE LAYER AS
+      NOTHING. `dropout` on the vibration node marks every sample in its
+      window invalid -- 40000 of 40000 samples measured -- and the online
+      layer never sees it, because SimulatedFlightSource.samples() emits
+      the 10 Hz RMS envelope as {"rms": ..., "valid": True} with the flag
+      HARDCODED, discarding the stream's own validity.
+      So the pair is live in the stream and inert after transport. One of
+      the 19 stream-live (kind, target) pairs is affected; the other 18
+      survive.
+    found_by: >-
+      A characterization test asserting that a battery+vibration dropout
+      leaves both nodes not fresh. It failed: vibration stayed fresh
+      throughout. The applicability matrix had measured perturbation at the
+      SAMPLED STREAM, while every run goes through the EVENT SOURCE.
+    verdict: RECORDED_NOT_FIXED
+    consequence: >-
+      THIS WAS A HOLE IN MY OWN VACUITY GUARD. The whole point of the
+      applicability matrix is that a stress profile cannot inject a fault
+      nothing acts on, and it was checking the wrong boundary -- one layer
+      upstream of where the runs actually consume data. A profile built on
+      dropout@vibration would have injected a fault the layer could not
+      see and reported a clean result, which is precisely the failure mode
+      the matrix exists to prevent.
+      The matrix is now TWO-STAGE: a pair is live only if it perturbs the
+      sampled stream AND survives into the event stream. 18 live, 30 inert,
+      1 lost in transport, and the lost one is REPORTED in every campaign
+      artifact rather than quietly excluded -- "this rig cannot deliver
+      that fault" is something a reader of a stress result must know.
+      NOT FIXED. csia/runtime/plugins.py is not frozen, but changing how
+      the simulator delivers the vibration channel alters an
+      evidence-producing path that existing tests and golden corpora
+      depend on. That is a deliberate decision for a human, not a side
+      effect of adding a stress harness.
+    artifact: >-
+      csia_stress/applicability.py;
+      tests/test_stress_layer.py (test_dropout_on_vibration_is_lost_in_transport)
