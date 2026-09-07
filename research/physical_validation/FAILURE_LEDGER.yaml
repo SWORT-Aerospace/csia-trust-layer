@@ -1464,3 +1464,58 @@ entries:
     artifact: >-
       research/physical_validation/results/PROPOSED_PROSE_BINDINGS.json;
       tools/publication/propose_prose_bindings.py
+
+  - id: MX-014
+    date: 2026-09-07
+    phase: QUALITY AUDIT (frozen core, resolved)
+    kind: TEST_SENSITIVITY_MEASURED
+    what_happened: >-
+      MX-010 RECORDED THE FROZEN CORE AT 0.35 WITH A STATED CAVEAT that the
+      nine-file test subset might be the explanation. It is not. A WIDE
+      eighteen-file subset -- adding over 250 tests including
+      test_v2_scenarios' 114 -- produced the IDENTICAL score, 42 killed of
+      120, with a BYTE-IDENTICAL surviving set. Zero mutants were killed only
+      by the wider subset.
+      The low score is a property of what the tests ASSERT, not of which
+      tests were chosen.
+    found_by: >-
+      Running the probe twice with different subsets rather than reporting
+      the first number with a caveat nobody could resolve.
+    verdict: RESOLVED_AND_DECOMPOSED
+    consequence: >-
+      THE AGGREGATE 0.35 WAS MISLEADING AND IS SUPERSEDED BY THE PER-FILE
+      BREAKDOWN. The distribution is BIMODAL, and reporting the mean of a
+      bimodal distribution is the same mistake as pooling arms:
+        csia/trust_engine/engine.py    cov 96.3%  mutation 1.000  (11/11)
+        csia/runtime/failsafe.py       cov 39.3%  mutation 1.000  (20/20)
+        csia/diagnosis/bayes.py        cov 96.2%  mutation 1.000  (9/9)
+        csia/runtime/online.py         cov 88.8%  mutation 0.154  (2/13)
+        csia/diagnosis/hypothesis.py   cov 38.4%  mutation 0.000  (0/46)
+        csia/diagnosis/causal.py       cov 29.8%  mutation 0.000  (0/19)
+        csia/profiles.py               NOT IMPORTED  (0/2)
+      THE MATHEMATICAL HEART IS FULLY CONSTRAINED. The trust engine, the
+      failsafe policy and the Bayesian likelihood score 1.000 -- every
+      injected defect caught. Those are the files the E1 numbers actually
+      come out of.
+      TWO FILES CARRY 65 OF THE 78 SURVIVORS: hypothesis.py and causal.py,
+      both at 0.000.
+      THE MOST DIAGNOSTIC ROW IS online.py: 88.8% COVERAGE AND 0.154
+      MUTATION. The tests execute nearly the whole online trust layer and
+      catch 2 of 13 injected defects -- the largest coverage-versus-mutation
+      gap measured anywhere in this repository, and a cleaner demonstration
+      of why coverage alone is not a quality measure than any argument.
+      failsafe.py is the OPPOSITE and better pattern: 39.3% coverage, 1.000
+      mutation. Modest coverage, and everything covered is genuinely
+      constrained.
+      csia/profiles.py's 0/2 is a COVERAGE ARTIFACT, not a finding: the
+      subset never imports it, so its mutants could not have been killed by
+      any assertion. Counting it as a test weakness would be wrong.
+      NOTHING WAS CHANGED. No test was added to the frozen core, no core file
+      was touched, the mutation ran against a temporary copy, and the diff
+      against csia-v1.0-research-final is empty. Improving these numbers
+      means adding tests AROUND the core, which is a deliberate decision with
+      its own evidence and is not taken here.
+    artifact: >-
+      research/mission/results/FROZEN_CORE_TEST_SENSITIVITY.json;
+      research/mission/results/MUTATION_PROBE_FROZEN_CORE.json;
+      research/mission/results/MUTATION_PROBE_FROZEN_CORE_WIDE.json
