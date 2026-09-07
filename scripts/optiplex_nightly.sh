@@ -83,6 +83,18 @@ stage mutation_probe "$PY" tools/xr/mutation_probe.py --sample 250 \
 # stop the nightly from making silently.
 INCONCLUSIVE_RC=2 stage quality_ratchet "$PY" tools/xr/quality_ratchet.py --check
 
+# STRESS: multi-sensor degradation, and an EXACT regression gate on what the
+# core did with it -- detection, escalation, recovery time and attribution.
+# The campaign is bit-for-bit deterministic, so the gate needs no tolerance
+# band; any difference is a real difference. exit 2 = the baseline was
+# recorded under a different seed/count/applicability matrix, which is
+# INCONCLUSIVE rather than a failure.
+stage stress_tests   "$PY" -m pytest tests/test_stress_layer.py \
+                        tests/test_stress_regression.py -q
+stage stress_catalog "$PY" csia_stress/campaign.py --mode catalog --quiet \
+                        --out "$OUT/stress_catalog.json"
+INCONCLUSIVE_RC=2 stage stress_regression "$PY" tools/xr/stress_regression.py --check
+
 if [ -f "$ROOT/research/physical_validation/results/PORTABILITY_HOST_current.json" ] \
    && [ -f "$OUT/host.json" ]; then
   stage portability "$PY" tools/assurance/portability_probe.py --compare \

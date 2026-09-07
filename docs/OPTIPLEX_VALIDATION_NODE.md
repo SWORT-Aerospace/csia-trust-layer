@@ -65,6 +65,9 @@ the rest. `scripts/optiplex_nightly.sh` is the script; the order is:
 | 15 | mission-layer tests | `pytest tests/test_mission_*.py` |
 | 16 | mutation probe | `tools/xr/mutation_probe.py` |
 | 17 | **quality ratchet** | `tools/xr/quality_ratchet.py --check` |
+| 18 | stress-layer tests | `pytest tests/test_stress_layer.py tests/test_stress_regression.py` |
+| 19 | stress catalog | `csia_stress/campaign.py --mode catalog` |
+| 20 | **stress regression** | `tools/xr/stress_regression.py --check` |
 
 **The ratchet is the stage that stops quality drifting down.** Coverage and
 mutation score may not fall below `research/mission/results/QUALITY_FLOOR.json`,
@@ -88,6 +91,14 @@ Including it moved `hypothesis.py` from 0.000 to 0.448.
 That also means the floor's `mutation_frozen_core: 0.35` must be read next to
 the nine-file `test_subset` stored beside it. **It is not "the frozen core's
 mutation score."** It is what that probe measured over those tests.
+
+**Stage 20 is exact, not tolerant.** The stress campaign is bit-for-bit
+deterministic, so the regression gate compares detection latency, recovery
+time, escalation and attribution *exactly* — no tolerance band, because a
+tolerance band is where a behavioural change hides. It exits 2 (INCONCLUSIVE)
+when the baseline was recorded under a different seed, count or applicability
+matrix, and 1 when behaviour actually moved. Stages 19 and 20 take roughly a
+minute and six minutes respectively; see `docs/STRESS_TESTING.md`.
 
 **Stage 8 is expected to FAIL, and that is not a broken node.** Decision replay
 is DIVERGENT on both platforms (HF-004) and the software-hardening gate does

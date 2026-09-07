@@ -157,14 +157,57 @@ nearest available signature:
 | control-surface flutter | `vibration_anomaly` | that is a prop/blade damage signature — amplitude growth plus a sub-harmonic. Flutter is a divergent structural mode with a different spectrum and time constant |
 | high-throttle maneuvering | `fast_cruise` | high *speed*, not high *throttle*: no thrust model, no load factor, no control input, and its own catalog entry says aerodynamic drag is not modelled |
 
-## 7. Running it
+## 7. A thousand generated variations
+
+Seeded, always multi-fault, drawn only from live pairs, and always given a
+window long enough to answer their own recovery question. **1000 runs, 1695 s,
+zero crashes.**
+
+| | |
+|---|---|
+| detected | 783 |
+| **not detected** | **217** |
+| recovered (of those detected) | 783 — all of them |
+| peak level | CAUTION 398, CRITICAL 343, EMERGENCY 42, NORMAL 217 |
+| detection latency | min 1.04 s, p50 5.6 s, p95 23.5 s, max 45.7 s |
+| recovery time | min 0.01 s, p50 0.44 s, p95 8.5 s, max 13.4 s |
+| runs where a **nameable** target was never named | 813 |
+| runs with a structurally unnameable target | 578 |
+
+**The 217 undetected runs are not a pass, and they are not noise.** Grouping
+them by fault composition shows they are dominated by `dropout` — the SR-001
+asymmetry, at scale. The low recovery p50 is explained by the
+`recovered_before_faults_cleared` flag: in a staggered profile the failsafe is
+often already back at NORMAL when the last window closes, so that run's
+recovery time is near zero and is *not* a measurement of how long recovery
+took. The flag is recorded per run so those cases can be excluded rather than
+read as instant recoveries.
+
+## 8. The regression gate is exact, not tolerant
+
+The campaign is **bit-for-bit deterministic** — fixed sensor seeds, a seeded
+generator, a frozen core — verified by running it twice and comparing. So
+`tools/xr/stress_regression.py` compares against its baseline **exactly**, with
+no tolerance band, because a tolerance band is precisely where a behavioural
+change hides.
+
+Compared per profile: `escalated`, peak failsafe level, **detection latency**,
+recovery status, **recovery time**, and which targets were named. Any
+difference is listed with its before and after; nothing is aggregated away, so
+two runs cannot swap outcomes behind a stable mean.
+
+A baseline recorded under a different seed, count, or applicability matrix is
+`NOT_COMPARABLE` and exits 2 — MX-015's rule again. Behaviour change exits 1.
 
 ```bash
 python csia_stress/campaign.py --mode catalog --out research/stress/results/STRESS_CATALOG.json
 python csia_stress/campaign.py --mode random --count 1000 --seed 20260907 --quiet
-pytest tests/test_stress_layer.py -q
+python tools/xr/stress_regression.py --check      # 200 runs, ~5m40s
+python tools/xr/stress_regression.py --update     # deliberate re-baseline
+pytest tests/test_stress_layer.py tests/test_stress_regression.py -q
 ```
 
-Random variations are seeded and reproducible, always multi-fault, drawn only
-from live pairs, and always given a window long enough to answer their own
-recovery question.
+It runs as a CI job (`stress`) and as three nightly stages. **A `CHANGED`
+verdict is not automatically bad** — it may be an improvement, a harness
+change, or a regression. Read the listed differences and re-baseline
+deliberately if the new behaviour is the intended one.

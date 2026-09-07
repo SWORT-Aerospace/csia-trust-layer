@@ -76,3 +76,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash csia/native/build.sh --check
+
+  # Multi-sensor degradation stress, and an EXACT regression gate on what the
+  # frozen core did with it. The campaign is bit-for-bit deterministic --
+  # fixed sensor seeds, a seeded profile generator, a frozen core -- so the
+  # gate compares exactly instead of against a tolerance band, and a
+  # tolerance band is precisely where a behavioural change would hide.
+  #
+  # THIS IS NOT SITL AND NOT HITL. No autopilot is executed; ArduPilot is not
+  # installed here. Hardware-in-the-loop is blocked on physical hardware (E2).
+  # Both are recorded as not-run in every artifact rather than approximated.
+  stress:
+    runs-on: ubuntu-latest
+    name: stress — multi-sensor degradation + recovery-time regression
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev,assurance]"
+      - name: stress layer and regression-gate tests
+        run: python -m pytest tests/test_stress_layer.py tests/test_stress_regression.py -q
+      - name: named catalog — every profile detected and recovered
+        run: python csia_stress/campaign.py --mode catalog --quiet
+      # exit 1 = behaviour changed; exit 2 = the baseline is NOT COMPARABLE
+      # (different seed, count or applicability matrix), which is reported as
+      # such rather than absorbed into a pass.
+      - name: exact regression gate (detection, escalation, recovery time)
+        run: |
+          set +e
+          python tools/xr/stress_regression.py --check
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ]; then
+            echo "::error::stress baseline NOT COMPARABLE — nothing was compared"
+          elif [ "$rc" -ne 0 ]; then
+            echo "::error::stress behaviour changed; read the diff above and re-baseline deliberately if intended"
+          fi
+          exit $rc
