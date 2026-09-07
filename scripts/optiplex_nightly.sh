@@ -18,9 +18,15 @@ mkdir -p "$OUT"
 pass=0; fail=0; inconclusive=0
 declare -a RESULTS
 
+# A stage may declare ONE exit code that means "I could not perform this
+# check", by prefixing the call with INCONCLUSIVE_RC=<n>. That is reported as
+# INCONCLUSIVE, never as PASS and never as FAIL: a check that could not run is
+# not a check that failed, and calling it a failure is as misleading as
+# calling it a pass.
 stage() {
   local name="$1"; shift
   local log="$OUT/${name}.log"
+  local ic_rc="${INCONCLUSIVE_RC:-}"
   if ! command -v "${1}" >/dev/null 2>&1 && [ ! -x "${1}" ]; then
     RESULTS+=("$name INCONCLUSIVE (command not available)")
     inconclusive=$((inconclusive+1)); return
@@ -31,6 +37,9 @@ stage() {
     local rc=$?
     if [ "$rc" -eq 124 ]; then
       RESULTS+=("$name INCONCLUSIVE (timeout)"); inconclusive=$((inconclusive+1))
+    elif [ -n "$ic_rc" ] && [ "$rc" -eq "$ic_rc" ]; then
+      RESULTS+=("$name INCONCLUSIVE (could not compare, see $log)")
+      inconclusive=$((inconclusive+1))
     else
       RESULTS+=("$name FAIL (exit $rc, see $log)"); fail=$((fail+1))
     fi
@@ -68,7 +77,11 @@ stage mission_tests  "$PY" -m pytest tests/test_mission_assurance.py \
                         tests/test_paper_i_scope_guard.py -q
 stage mutation_probe "$PY" tools/xr/mutation_probe.py --sample 250 \
                         --out "$OUT/mutation.json"
-stage quality_ratchet "$PY" tools/xr/quality_ratchet.py --check
+# exit 2 = NOT_COMPARABLE: the score was measured over a different target or
+# test subset than the floor was earned under, so nothing was compared. See
+# MX-015 -- comparing across subsets is the error this exit code exists to
+# stop the nightly from making silently.
+INCONCLUSIVE_RC=2 stage quality_ratchet "$PY" tools/xr/quality_ratchet.py --check
 
 if [ -f "$ROOT/research/physical_validation/results/PORTABILITY_HOST_current.json" ] \
    && [ -f "$OUT/host.json" ]; then

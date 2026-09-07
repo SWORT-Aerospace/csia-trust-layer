@@ -74,6 +74,21 @@ it is an edit somebody has to justify in review. Stage 16 is slow — minutes,
 not seconds — and runs against a copy of the tree, so it sits near the end
 where a hang cannot starve the fast stages.
 
+**A ratchet only ratchets within one measurement definition.** Each mutation
+entry in the floor records the *targets* and *test subset* it was measured
+over, and the ratchet compares scores only when both match. If they differ it
+reports `NOT_COMPARABLE` and exits **2**, which the nightly maps to
+INCONCLUSIVE — not PASS, and not FAIL either, because nothing was compared and
+a false regression is as misleading as a false pass. Re-baselining onto a new
+subset is then a deliberate `--update`. This exists because MX-015 records the
+cost of forgetting it: two subsets were compared, a conclusion was drawn about
+the frozen core, and the decisive test file was missing from *both* sides.
+Including it moved `hypothesis.py` from 0.000 to 0.448.
+
+That also means the floor's `mutation_frozen_core: 0.35` must be read next to
+the nine-file `test_subset` stored beside it. **It is not "the frozen core's
+mutation score."** It is what that probe measured over those tests.
+
 **Stage 8 is expected to FAIL, and that is not a broken node.** Decision replay
 is DIVERGENT on both platforms (HF-004) and the software-hardening gate does
 not count it as PASS. It runs nightly anyway so that the day it *changes* is
@@ -86,11 +101,16 @@ is the current, correct state.
 |---|---|
 | **PASS** | every stage met its declared criterion |
 | **REGRESSION** | a stage that previously passed now fails |
-| **INCONCLUSIVE** | a stage could not run — missing dependency, absent artifact, timeout. **Never reported as PASS** |
+| **INCONCLUSIVE** | a stage could not run, or could not compare — missing dependency, absent artifact, timeout, or a measurement the stored baseline is not comparable to. **Never reported as PASS** |
 
 `INCONCLUSIVE` exists because a skipped stage reading as green is the failure
 mode this repository has already hit once: a freeze test that *skips* on a
 fresh clone because the tag is local-only, and a skip looks like a pass.
+
+A stage declares its own "could not compare" exit code by prefixing its call
+with `INCONCLUSIVE_RC=<n>` in `scripts/optiplex_nightly.sh`; stage 17 uses
+`INCONCLUSIVE_RC=2`. Without that prefix every non-zero, non-timeout exit is
+still a FAIL, so a stage cannot quietly downgrade a real failure.
 
 ## 5. The portability matrix, and why it is nearly empty
 

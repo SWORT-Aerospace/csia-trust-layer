@@ -31,6 +31,26 @@ sample covers. A hard equality would fire on every refactor. The tolerance is
 therefore a small band, declared here, and the floor is compared against the
 band's lower edge -- never widened after seeing a result.
 
+WHY THE FLOOR RECORDS A SUBSET FINGERPRINT (MX-015)
+---------------------------------------------------
+A mutation score is only comparable to another mutation score over THE SAME
+CODE AND THE SAME TESTS. MX-015 records what happens when that is forgotten:
+two subsets were compared, a conclusion was drawn about the frozen core, and
+the decisive test file was missing from BOTH sides -- so the comparison
+measured the two omissions rather than the tests. Including it moved
+`hypothesis.py` from 0.000 to 0.448.
+
+That error is easy to wire into a nightly gate: measure with one test subset,
+compare against a floor earned under another, and read the difference as a
+quality change. So the floor stores a fingerprint of the targets and the test
+subset that produced it, and a comparison across differing fingerprints is
+reported as NOT COMPARABLE.
+
+**NOT COMPARABLE IS NOT PASS.** It is the same rule as the nightly's
+INCONCLUSIVE: a check that could not be performed never reads as a check that
+succeeded. It exits non-zero, and the report separates it from a genuine
+regression so the two are not confused.
+
     python tools/xr/quality_ratchet.py --check
     python tools/xr/quality_ratchet.py --update    # raises the floor
 """
@@ -38,6 +58,7 @@ band's lower edge -- never widened after seeing a result.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -93,6 +114,25 @@ def measure_coverage() -> dict:
     }
 
 
+def subset_fingerprint(doc: dict) -> str | None:
+    """Hash the targets and test subset a mutation run was measured over.
+
+    TWO SCORES ARE COMPARABLE ONLY IF THIS MATCHES. Order is normalised so a
+    reordered list is not read as a different subset; anything else -- a file
+    added, a file dropped -- changes the hash, which is the point. Returns
+    None when the artifact does not declare both, so a missing fingerprint is
+    distinguishable from a differing one.
+    """
+    targets = doc.get("targets")
+    tests = doc.get("test_subset")
+    if not targets or not tests:
+        return None
+    payload = json.dumps(
+        {"targets": sorted(targets), "test_subset": sorted(tests)},
+        sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
 def read_mutation(path: str) -> dict:
     full = os.path.join(ROOT, path)
     if not os.path.exists(full):
@@ -102,7 +142,10 @@ def read_mutation(path: str) -> dict:
     return {"score": doc.get("mutation_score"),
             "killed": doc.get("killed"),
             "evaluated": doc.get("evaluated"),
-            "sites": doc.get("total_mutation_sites")}
+            "sites": doc.get("total_mutation_sites"),
+            "subset_fingerprint": subset_fingerprint(doc),
+            "targets": doc.get("targets"),
+            "test_subset": doc.get("test_subset")}
 
 
 def load_floor() -> dict:
@@ -114,6 +157,7 @@ def load_floor() -> dict:
 
 def check(measured: dict, floor: dict) -> dict:
     problems = []
+    not_comparable = []
 
     fc = (floor.get("coverage") or {}).get("total_percent")
     mc = (measured.get("coverage") or {}).get("total_percent")
@@ -130,6 +174,38 @@ def check(measured: dict, floor: dict) -> dict:
         mm = (measured.get(key) or {}).get("score")
         if fm is None or mm is None:
             continue
+
+        # COMPARABILITY IS CHECKED BEFORE THE SCORES ARE. A score measured
+        # over a different target set or a different test subset is not a
+        # worse or better version of the floor -- it is a different
+        # measurement, and comparing the two is MX-015.
+        ff = (floor.get(key) or {}).get("subset_fingerprint")
+        mf = (measured.get(key) or {}).get("subset_fingerprint")
+        if ff is None or mf is None:
+            not_comparable.append({
+                "metric": key, "reason": "UNFINGERPRINTED",
+                "floor_fingerprint": ff, "measured_fingerprint": mf,
+                "why": ("one side does not declare the targets and test "
+                        "subset it was measured over, so comparability "
+                        "cannot be established. Re-measure with a probe that "
+                        "records both, then --update.")})
+            continue
+        if ff != mf:
+            not_comparable.append({
+                "metric": key, "reason": "SUBSET_CHANGED",
+                "floor_fingerprint": ff, "measured_fingerprint": mf,
+                "floor_test_subset": (floor.get(key) or {}).get("test_subset"),
+                "measured_test_subset":
+                    (measured.get(key) or {}).get("test_subset"),
+                "floor_score": fm, "measured_score": mm,
+                "why": ("the targets or the test subset changed, so this "
+                        "score and the floor are not measurements of the "
+                        "same thing. A difference between them says nothing "
+                        "about quality. Decide DELIBERATELY whether the new "
+                        "subset is the one to ratchet on, and --update if "
+                        "so. See MX-015.")})
+            continue
+
         if mm < fm - MUTATION_TOLERANCE:
             problems.append({
                 "metric": key, "floor": fm, "measured": mm,
@@ -138,14 +214,28 @@ def check(measured: dict, floor: dict) -> dict:
                         "the tests now constrain less of the code than they "
                         "did.")})
 
+    if problems:
+        verdict = "REGRESSION"
+    elif not_comparable:
+        verdict = "NOT_COMPARABLE"
+    else:
+        verdict = "HOLDS"
+
     return {
-        "schema": "csia.mission.quality_ratchet/1",
+        "schema": "csia.mission.quality_ratchet/2",
         "floor": floor,
         "measured": measured,
         "tolerances": {"mutation": MUTATION_TOLERANCE,
                        "coverage_percentage_points": COVERAGE_TOLERANCE},
         "problems": problems,
-        "holds": not problems,
+        "not_comparable": not_comparable,
+        "verdict": verdict,
+        "holds": verdict == "HOLDS",
+        "not_comparable_is_not_pass": (
+            "a comparison that could not be performed NEVER reads as a "
+            "comparison that succeeded. NOT_COMPARABLE exits non-zero, like "
+            "the nightly's INCONCLUSIVE, and is reported separately from a "
+            "REGRESSION so the two are not confused."),
         "the_floor_only_moves_up": (
             "raising it is a deliberate edit in the commit that earned it; "
             "lowering it is a deliberate edit that has to be justified in "
@@ -181,6 +271,7 @@ def main(argv=None) -> int:
 
     if args.update:
         new_floor = dict(floor)
+        actions = []
         for key, value in measured.items():
             if "error" in value:
                 continue
@@ -191,28 +282,76 @@ def main(argv=None) -> int:
                         or value["total_percent"] >= old["total_percent"]):
                     new_floor[key] = {
                         "total_percent": value["total_percent"]}
+                    actions.append(f"{key}: raised")
             elif value.get("score") is not None:
-                if old.get("score") is None or value["score"] >= old["score"]:
-                    new_floor[key] = {"score": value["score"],
-                                      "killed": value.get("killed"),
-                                      "evaluated": value.get("evaluated")}
-        new_floor["schema"] = "csia.mission.quality_floor/1"
+                # THE ONE-WAY RULE ONLY MEANS SOMETHING WITHIN ONE
+                # MEASUREMENT DEFINITION. Across a changed subset, "improved"
+                # is not a fact about quality (MX-015), so a re-baseline is
+                # written unconditionally and labelled as one -- `--update`
+                # IS the deliberate act that accepts the new subset.
+                old_fp, new_fp = (old.get("subset_fingerprint"),
+                                  value.get("subset_fingerprint"))
+                rebaseline = old_fp != new_fp
+                if (rebaseline or old.get("score") is None
+                        or value["score"] >= old["score"]):
+                    new_floor[key] = {
+                        "score": value["score"],
+                        "killed": value.get("killed"),
+                        "evaluated": value.get("evaluated"),
+                        "subset_fingerprint": new_fp,
+                        "targets": value.get("targets"),
+                        "test_subset": value.get("test_subset")}
+                    # SAY WHICH OF THE THREE THINGS HAPPENED. A score that
+                    # did not move must not be reported as a re-baseline
+                    # just because the floor previously carried no
+                    # fingerprint to compare against.
+                    if old.get("score") is None:
+                        what = "new"
+                    elif old_fp is None:
+                        what = ("fingerprinted, score unchanged"
+                                if value["score"] == old["score"]
+                                else f"fingerprinted, {old['score']} -> "
+                                     f"{value['score']} (the floor carried "
+                                     "no subset, so this is NOT a verified "
+                                     "quality change)")
+                    elif rebaseline:
+                        what = (f"RE-BASELINED onto a different subset "
+                                f"({old['score']} -> {value['score']}, NOT a "
+                                "quality comparison)")
+                    else:
+                        what = f"raised {old['score']} -> {value['score']}"
+                    actions.append(f"{key}: {what}")
+        new_floor["schema"] = "csia.mission.quality_floor/2"
         new_floor["note"] = (
             "A MEASUREMENT, not an aspiration. Written by "
-            "tools/xr/quality_ratchet.py --update, and only ever upward.")
+            "tools/xr/quality_ratchet.py --update, and only ever upward "
+            "WITHIN ONE SUBSET. Each mutation entry records the targets and "
+            "test subset it was measured over: a score earned under a "
+            "different subset is a different measurement, not a better or "
+            "worse one. See MX-015 in "
+            "research/physical_validation/FAILURE_LEDGER.yaml.")
         os.makedirs(os.path.dirname(FLOOR), exist_ok=True)
         with open(FLOOR, "w", encoding="utf-8") as fh:
             json.dump(new_floor, fh, indent=2, sort_keys=True)
             fh.write("\n")
         print(f"floor updated: {FLOOR}")
+        for line in actions:
+            print(f"  {line}")
         print(json.dumps(new_floor, indent=2, sort_keys=True))
         return 0
 
     print(json.dumps(report, indent=2, sort_keys=True, default=str))
-    if not report["holds"]:
+    if report["verdict"] == "REGRESSION":
         print(f"\nQUALITY RATCHET: {len(report['problems'])} regression(s)",
               file=sys.stderr)
         return 1
+    if report["verdict"] == "NOT_COMPARABLE":
+        # NOT PASS. The same rule as the nightly's INCONCLUSIVE.
+        print("\nQUALITY RATCHET: NOT COMPARABLE -- "
+              f"{len(report['not_comparable'])} metric(s) measured over a "
+              "different subset than the floor. This is NOT a pass and NOT a "
+              "regression; nothing was compared.", file=sys.stderr)
+        return 2
     print("\nQUALITY RATCHET: HOLDS", file=sys.stderr)
     return 0
 
