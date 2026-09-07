@@ -1216,3 +1216,109 @@ entries:
     artifact: >-
       tests/test_mission_registries_and_schemas.py;
       tests/test_bad_product_references.py
+
+  - id: MX-007
+    date: 2026-09-07
+    phase: MISSION EXTENSION (quality audit)
+    kind: UNTESTED_CODE_SHIPPED
+    what_happened: >-
+      THREE MISSION MODULES SHIPPED AT 0.0% COVERAGE: graphs.py, metrics.py
+      and reconfiguration.py. All three had tests that LOOKED like coverage
+      and were reading the GENERATED ARTIFACT rather than calling the code.
+      If the analyser or the metric computation had broken in a way that
+      still produced a plausible JSON file, nothing would have noticed.
+      compute.py was at 30.9%: its Linux collector -- every band boundary,
+      every UNKNOWN default -- was essentially unexercised.
+    found_by: >-
+      Installing coverage and running it, which had not been done for this
+      extension at all. The extension was committed and pushed before anyone
+      measured whether its tests touched it.
+    verdict: FIXED
+    consequence: >-
+      This is the artifact-reading trap in a new place. Reading a generated
+      artifact is a fine test OF THE ARTIFACT. It is not a test of the code
+      that wrote it, and the distinction had been made explicitly for the
+      round-1 assurance artifacts one commit earlier and then not applied
+      here.
+      30 direct tests added. Coverage 76.6% -> 88.7%; the three zero modules
+      to 100%, 100% and 95.5%; compute.py to 78.7%.
+      A REAL DEFECT WAS FOUND WHILE WRITING THEM: graphs.consumers_of()
+      returned only DIRECT dependents. gnss.position.supported is named by
+      one capability and by NO product, so a caller asking "what breaks if I
+      lose GNSS?" would read products: [] and conclude nothing does. That is
+      MX-005's shape a third time -- a query stopping at the first hop over a
+      graph whose point is that dependencies compose. Both answers are now
+      returned and named separately.
+    artifact: >-
+      tests/test_mission_untested_modules.py; csia_mission/graphs.py
+
+  - id: MX-008
+    date: 2026-09-07
+    phase: MISSION EXTENSION (quality audit)
+    kind: TEST_SENSITIVITY_MEASURED
+    what_happened: >-
+      A MUTATION PROBE SCORED THE MISSION LAYER AT 0.4676 -- 115 of 216
+      injected defects went unnoticed by the tests. The same probe scored the
+      csia_assurance firewall from the previous round at 0.6125. Coverage was
+      88.7% at the time, so the gap between "the line ran" and "a test
+      constrains the line" was 36 percentage points.
+    found_by: >-
+      Building the probe and running it. No such measurement had been made
+      for any part of this repository before.
+    verdict: PARTIALLY_ADDRESSED_AND_RECORDED
+    consequence: >-
+      NEARLY EVERY SURVIVOR WAS A BOUNDARY EQUALITY -- `>` against `>=`, `<=`
+      against `<`. They survive because a test checking "well before" and
+      "well after" never visits the instant between, and that instant is
+      where an off-by-one lives.
+      18 boundary tests were added, killing 13 mutants: 0.4676 -> 0.5278.
+      ALL 18 PASSED ON FIRST RUN, so no behavioural defect was found -- the
+      code was already right at those boundaries and nothing had been
+      checking it.
+      THE SCORE IS STILL LOW AND IS REPORTED AS LOW. 102 mutants survive, of
+      which 17 are provably equivalent (module-level constant renames, where
+      every reader uses the same symbol), leaving ~85 real gaps. The weakest
+      files are graphs.py 0.364 and forge_seed.py 0.419.
+      The probe is committed so the number can be tracked rather than
+      re-derived, and it reports its own limits: equivalent mutants are not
+      detected, so the score is a LOWER BOUND; and a high score would bound
+      TEST SENSITIVITY, never correctness -- a well-tested wrong definition
+      scores perfectly.
+    artifact: >-
+      tools/xr/mutation_probe.py;
+      research/mission/results/MUTATION_PROBE.json;
+      research/mission/results/MUTATION_PROBE_ASSURANCE_BASELINE.json;
+      tests/test_mission_boundaries.py
+
+  - id: MX-009
+    date: 2026-09-07
+    phase: XR-1 (physical measurement)
+    kind: CANNOT_BE_DONE_HERE
+    what_happened: >-
+      A REQUEST TO MEASURE THE BATTERY ENVELOPE AND UPDATE THE DRAFT PROFILE.
+      It cannot be done from here and was not done. There is no caliper API;
+      this session is software in a container with no physical access to any
+      article.
+    found_by: The request.
+    verdict: REFUSED_AND_TOOLED_AROUND
+    consequence: >-
+      NO NUMBER WAS WRITTEN INTO THE PROFILE. XR1_DRAFT_PROFILE.yaml is
+      byte-unchanged and the battery envelope remains UNKNOWN.
+      A DATASHEET FIGURE WOULD NOT HAVE SATISFIED IT EITHER, and the attempt
+      is recorded: vendor sites are unreachable (the agent proxy answered 403
+      at CONNECT to www.genstattu.com, logged in the proxy's own relay
+      failures), and even a reachable figure is GIVEN, not MEASURED. The
+      profile requires MEASURED before CAD freeze because a LiPo pack's
+      catalogue envelope is not the article's envelope under a strap.
+      WHAT WAS BUILT INSTEAD is the machinery that accepts the measurement:
+      a validated entry tool that refuses an unattributed value, a MEASURED
+      value with no stated tolerance, and an implausible one; a readiness
+      gate that derives its blocker list FROM THE PROFILE'S STATUS FIELDS so
+      it cannot go stale; and a protocol document naming what to measure, how,
+      and the six quantities for the battery specifically -- including the
+      two most often forgotten, height under strap tension and lead exit
+      position.
+      The gate currently reports 6 quantities blocking CAD freeze.
+    artifact: >-
+      tools/xr/xr1_measurement.py;
+      hardware/xr1/XR1_MEASUREMENT_PROTOCOL.md

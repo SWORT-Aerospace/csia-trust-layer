@@ -144,23 +144,76 @@ def consumers_of(graphs: Mapping, evidence_id: str) -> dict:
     Storing an upward edge would make it possible for a product to reach a
     capability, which is the inversion this architecture prevents. Computing
     it at read time answers the same question and creates no such path.
+
+    BOTH ANSWERS ARE RETURNED, AND THEY ARE DIFFERENT QUESTIONS.
+
+        direct_*      names this evidence id itself
+        transitive_*  reaches it through a chain of capabilities
+
+    The first version returned only the direct answer, and that answer is
+    MISLEADING for the question a reader is usually asking. `gnss.position.
+    supported` is named by exactly one capability -- `absolute_navigation` --
+    and by NO product, because the products depend on the capability rather
+    than on the evidence. A caller asking "what breaks if I lose GNSS?" and
+    reading `products: []` would conclude nothing does.
+
+    This is MX-005's shape a second time: a query that stops at the first
+    hop, over a graph whose whole point is that dependencies compose.
     """
-    caps = [cid for cid, ev in
-            graphs[CAPABILITY_GRAPH]["requires_evidence"].items()
-            if evidence_id in ev]
-    prods = [pid for pid, ev in
-             graphs[MISSION_PRODUCT_GRAPH]["requires_evidence"].items()
-             if evidence_id in ev]
-    props = []
-    for pid, per_prop in graphs[MISSION_PRODUCT_GRAPH][
-            "property_edges"].items():
-        for pname, edges in per_prop.items():
-            if evidence_id in edges["evidence"]:
-                props.append(f"{pid}.{pname}")
-    return {"evidence": evidence_id,
-            "capabilities": sorted(caps),
-            "products": sorted(prods),
-            "product_properties": sorted(props)}
+    cap_ev = graphs[CAPABILITY_GRAPH]["requires_evidence"]
+    cap_cap = graphs[CAPABILITY_GRAPH]["requires_capabilities"]
+    prod_ev = graphs[MISSION_PRODUCT_GRAPH]["requires_evidence"]
+    prod_cap = graphs[MISSION_PRODUCT_GRAPH]["requires_capabilities"]
+    prop_edges = graphs[MISSION_PRODUCT_GRAPH]["property_edges"]
+
+    direct_caps = {cid for cid, ev in cap_ev.items() if evidence_id in ev}
+
+    # Capabilities that reach it through subordinates, to a fixed point.
+    reaching = set(direct_caps)
+    for _ in range(len(cap_cap) + 1):
+        grown = {cid for cid, subs in cap_cap.items()
+                 if set(subs) & reaching}
+        if grown <= reaching:
+            break
+        reaching |= grown
+
+    direct_prods = {pid for pid, ev in prod_ev.items() if evidence_id in ev}
+    direct_props = {f"{pid}.{p}"
+                    for pid, per in prop_edges.items()
+                    for p, e in per.items() if evidence_id in e["evidence"]}
+
+    trans_prods = set(direct_prods) | {
+        pid for pid, caps in prod_cap.items() if set(caps) & reaching}
+    trans_props = set(direct_props)
+    for pid, per in prop_edges.items():
+        base_hit = pid in trans_prods and pid in direct_prods
+        for pname, edges in per.items():
+            if set(edges["capabilities"]) & reaching or base_hit:
+                trans_props.add(f"{pid}.{pname}")
+    # A product whose BASE depends on it takes all of its properties.
+    for pid in trans_prods:
+        if pid in direct_prods or set(prod_cap.get(pid, ())) & reaching:
+            for pname in prop_edges.get(pid, {}):
+                trans_props.add(f"{pid}.{pname}")
+
+    return {
+        "evidence": evidence_id,
+        "direct_capabilities": sorted(direct_caps),
+        "direct_products": sorted(direct_prods),
+        "direct_product_properties": sorted(direct_props),
+        "transitive_capabilities": sorted(reaching),
+        "transitive_products": sorted(trans_prods),
+        "transitive_product_properties": sorted(trans_props),
+        # Kept as aliases of the DIRECT answer so existing readers do not
+        # silently change meaning, with the transitive answer named beside
+        # them rather than substituted for them.
+        "capabilities": sorted(direct_caps),
+        "products": sorted(direct_prods),
+        "product_properties": sorted(direct_props),
+        "note": ("direct_* names this evidence id itself; transitive_* "
+                 "reaches it through a chain of capabilities. For 'what "
+                 "breaks if I lose this?', read the transitive answer."),
+    }
 
 
 def isolated_survivors(graphs: Mapping, removed_evidence: Iterable[str]
