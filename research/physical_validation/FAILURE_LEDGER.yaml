@@ -1802,3 +1802,114 @@ entries:
       research/physical_validation/results/FROZEN_SOURCE_DIGESTS.json;
       tools/csia_experiment/build_e1_freeze_manifest.py;
       tests/test_e1_freeze_manifest.py
+
+  - id: HF-009
+    date: 2026-09-07
+    phase: PROGRAM A (independent verification)
+    kind: REPRODUCTION
+    what_happened: >-
+      A SECOND, INDEPENDENT REDUCTION OF THE E1 RAW TRACES REPRODUCES THE
+      PUBLISHED NUMBERS. Every published E1 figure had passed through
+      exactly one program, so the artifact, the claim table and the paper
+      agreed with each other BY CONSTRUCTION and would have agreed just as
+      loudly if that program were wrong.
+      The second reducer was written from the trace format and the
+      preregistered window definitions, without reading
+      extract_trust_a2.py. The aggregation rule was recovered by testing
+      candidates against one published trial: mean, median and last value,
+      of which the MEDIAN reproduced the published figure to the last digit
+      and the others did not.
+      RESULT over 80 trials (40 ArduPilot + 40 PX4):
+        per-trial trust_pre, trust_post, trust_delta   0 mismatches
+        every window's trust and n_steps               0 mismatches
+        n, median, min, max of the fault distribution  reproduced exactly
+        20 of 20 fault trials with a positive delta    reproduced, both platforms
+    found_by: >-
+      Writing the reducer and running it, rather than assuming that a
+      number nothing had ever recomputed was a number that had been checked.
+    verdict: REPRODUCED_WITH_ONE_AMBIGUITY
+    consequence: >-
+      THE ONE THING THAT DID NOT REPRODUCE FIRST TIME WAS THE IQR, AND THE
+      CAUSE IS A DEFINITION THE ARTIFACT NEVER STATES. Its
+      `statistics_policy` promises "N, median, min, max and IQR at the
+      TRIAL level" and does not say which quartile definition. The
+      published q1/q3/iqr come from Python's DEFAULT method (`exclusive`);
+      my first reducer chose `inclusive` and disagreed. Neither is wrong --
+      they are different statistics:
+        A2  iqr 1.2874e-05 (exclusive, published) vs 1.1898e-05 (inclusive)
+        P1  iqr 5.3640e-04 (exclusive, published) vs 4.3690e-04 (inclusive)
+      That is an 8% difference on A2 and 19% on P1, in the third
+      significant figure of a reported quantity. AN INDEPENDENT REPRODUCER
+      CANNOT LAND ON THE PUBLISHED IQR WITHOUT GUESSING.
+      NOTHING IS CHANGED IN THE PUBLISHED ARTIFACT. The frozen result is
+      correct under the method it used; the gap is that the method is not
+      recorded next to the number. The reducer now reports BOTH definitions
+      side by side and records which one reproduces the published figures,
+      and a test pins that so the ambiguity is documented rather than
+      rediscovered.
+      WHAT THIS DOES NOT ESTABLISH, stated because a reproduction is easy
+      to over-read: that the traces describe reality, that the windows were
+      the right windows, or that the experiment answers its question. A
+      second reduction checks arithmetic and bookkeeping, not physics.
+    artifact: >-
+      tools/csia_experiment/reduce_e1_independently.py;
+      research/physical_validation/results/E1_INDEPENDENT_REDUCTION.json;
+      tests/test_e1_independent_reduction.py
+
+  - id: HF-010
+    date: 2026-09-07
+    phase: PUBLICATION (prose-to-artifact bindings)
+    kind: TRACEABILITY
+    what_happened: >-
+      THE 27 AMBIGUOUS PROSE LITERALS WERE NARROWED BY SECTION CONTEXT, AND
+      MOST OF THEM STAYED AMBIGUOUS. Each literal sits in a section about
+      one experiment whose artifacts live under a path that names it, so
+      filtering candidates to that scope decides some of them.
+      OUTCOME of 27:
+        3  CONFIRMED, hand-verified against prose and artifact
+        1  REVIEW -- the prose and the artifact disagree
+        1  DUPLICATE_POINTER -- one quantity recorded at two pointers
+        2  SPURIOUS_MATCH -- the shared token means something else
+        1  ALREADY_STATED elsewhere
+       19  STILL AMBIGUOUS
+    found_by: >-
+      Filtering by section, then reading every surviving candidate against
+      the sentence by hand rather than accepting the survivor because it
+      was the only one left.
+    verdict: PARTIALLY_RESOLVED_NOTHING_APPLIED
+    consequence: >-
+      THE THREE CONFIRMED BINDINGS have independent corroboration, not just
+      a matching value. 0.717 and 0.723 are the minimum and maximum of
+      `ramp_versus_step`'s three ramps (0.71813, 0.71686, 0.72273), and the
+      SAME three entries carry floor_ticks 104, 168, 139 -- the prose's
+      "104 to 168 ticks" pins the identification without using the trust
+      values at all. 0.678 is observed_range[0] under a key named
+      evidence_floor_confirmation, in the section that derives the floor.
+      THE REVIEW ITEM IS A REAL DISAGREEMENT. The prose says "the measured
+      floor ranges 0.678 to 0.700"; the artifact's observed_range is
+      [0.6785, 0.9422], whose upper end is 0.9422, not 0.700. 0.700 is the
+      SATURATION value -- predicted_e_f algebraically, and the value the 8
+      of 21 saturating cells land on. The sentence therefore pairs a
+      measured minimum with a saturation value and calls the pair a
+      measured range. Not obviously wrong, since 0.7000 IS measured in
+      those cells and the paper states that separately, but the artifact
+      holds no scalar for "measured floor upper end" and there is nothing
+      honest to bind to. FLAGGED FOR A HUMAN, NOT BOUND -- binding the
+      bound of a wider population is precisely the MX-013 error.
+      THE SPURIOUS MATCHES MATTER MORE THAN THE BINDINGS. kappa(S) = 0.000
+      over eight HYPOTHESIS classes matched V2_COMPLEXITY.json '/*/classes'
+      -- the number of PYTHON CLASSES in a module, which is 0 for an
+      __init__.py. Same word, unrelated quantity, coincident value. A
+      resolver that reported 27 of 27 resolved would have bound it.
+      A SIDE EFFECT WORTH RECORDING: adding result artifacts makes value
+      matching MORE ambiguous, not less. The stress campaign artifact
+      committed earlier today now appears as a candidate for the literal
+      0.700, because a 1000-run campaign contains many values. Every new
+      artifact enlarges the space of coincidences.
+      NOTHING IS APPLIED. These bind into PAPER1_ARTIFACT_MAP.yaml, which
+      the E1 freeze manifest hashes; applying them would break the freeze
+      they are recorded in. A test asserts the map is unmodified.
+    artifact: >-
+      tools/publication/resolve_ambiguous_bindings.py;
+      research/publication/AMBIGUOUS_BINDING_RESOLUTION.json;
+      tests/test_ambiguous_binding_resolution.py
