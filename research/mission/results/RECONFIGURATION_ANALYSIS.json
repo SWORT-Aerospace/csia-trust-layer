@@ -1,0 +1,383 @@
+{
+  "configurations": [
+    "CAMERA_STOWED",
+    "FULL_PAYLOAD",
+    "GNSS_DENIED",
+    "MINIMAL_F1",
+    "THERMAL_ONLY"
+  ],
+  "not_in_paper_i": true,
+  "novelty": "NOVELTY_NOT_ESTABLISHED",
+  "rows": [
+    {
+      "capabilities_enabled": [],
+      "capabilities_invalidated": [
+        "RGB_capture",
+        "global_mapping",
+        "local_mapping"
+      ],
+      "capabilities_narrowed": [
+        {
+          "capability": "relative_navigation",
+          "witnesses_lost": [
+            "visual_odometry.supported"
+          ]
+        }
+      ],
+      "capabilities_preserved": [
+        "absolute_navigation",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "relative_navigation",
+        "stable_flight",
+        "telemetry_downlink",
+        "thermal_capture",
+        "timing"
+      ],
+      "detail": "",
+      "evidence_gained": [],
+      "evidence_kept": [
+        "actuator.elevon.command_echo",
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "comms.telemetry_link.supported",
+        "gnss.position.supported",
+        "gnss.velocity.supported",
+        "imu.primary.supported",
+        "imu.reference.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported"
+      ],
+      "evidence_lost": [
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid",
+        "visual_odometry.supported"
+      ],
+      "intended_capability": "relative_navigation",
+      "new_witnesses_possible": [],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [
+        "camera.rgb.available",
+        "visual_odometry.supported"
+      ],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": false,
+      "status": "EXPERIMENTAL",
+      "transition": "FULL_PAYLOAD -> CAMERA_STOWED",
+      "verdict": "EVIDENCE_REDUCING",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    },
+    {
+      "capabilities_enabled": [],
+      "capabilities_invalidated": [
+        "RGB_capture",
+        "global_mapping",
+        "local_mapping"
+      ],
+      "capabilities_narrowed": [
+        {
+          "capability": "relative_navigation",
+          "witnesses_lost": [
+            "visual_odometry.supported"
+          ]
+        }
+      ],
+      "capabilities_preserved": [
+        "absolute_navigation",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "relative_navigation",
+        "stable_flight",
+        "telemetry_downlink",
+        "thermal_capture",
+        "timing"
+      ],
+      "detail": "the transition removes ['camera.rgb.available', 'visual_odometry.supported'], which 'local_mapping' requires (directly or through a subordinate capability). After R there is no evidence path by which the capability R was performed for can be established.",
+      "evidence_gained": [],
+      "evidence_kept": [
+        "actuator.elevon.command_echo",
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "comms.telemetry_link.supported",
+        "gnss.position.supported",
+        "gnss.velocity.supported",
+        "imu.primary.supported",
+        "imu.reference.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported"
+      ],
+      "evidence_lost": [
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid",
+        "visual_odometry.supported"
+      ],
+      "intended_capability": "local_mapping",
+      "new_witnesses_possible": [],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [
+        "camera.rgb.available",
+        "visual_odometry.supported"
+      ],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": true,
+      "status": "EXPERIMENTAL",
+      "transition": "FULL_PAYLOAD -> CAMERA_STOWED",
+      "verdict": "SELF_OCCLUDING_RECONFIGURATION",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    },
+    {
+      "capabilities_enabled": [],
+      "capabilities_invalidated": [
+        "absolute_navigation",
+        "global_mapping"
+      ],
+      "capabilities_narrowed": [],
+      "capabilities_preserved": [
+        "RGB_capture",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "local_mapping",
+        "relative_navigation",
+        "stable_flight",
+        "telemetry_downlink",
+        "thermal_capture",
+        "timing"
+      ],
+      "detail": "the transition removes ['gnss.position.supported'], which 'absolute_navigation' requires (directly or through a subordinate capability). After R there is no evidence path by which the capability R was performed for can be established.",
+      "evidence_gained": [],
+      "evidence_kept": [
+        "actuator.elevon.command_echo",
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "comms.telemetry_link.supported",
+        "imu.primary.supported",
+        "imu.reference.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported",
+        "visual_odometry.supported"
+      ],
+      "evidence_lost": [
+        "gnss.position.supported",
+        "gnss.velocity.supported"
+      ],
+      "intended_capability": "absolute_navigation",
+      "new_witnesses_possible": [],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [
+        "gnss.position.supported"
+      ],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": true,
+      "status": "EXPERIMENTAL",
+      "transition": "FULL_PAYLOAD -> GNSS_DENIED",
+      "verdict": "SELF_OCCLUDING_RECONFIGURATION",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    },
+    {
+      "capabilities_enabled": [],
+      "capabilities_invalidated": [
+        "absolute_navigation",
+        "global_mapping"
+      ],
+      "capabilities_narrowed": [],
+      "capabilities_preserved": [
+        "RGB_capture",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "local_mapping",
+        "relative_navigation",
+        "stable_flight",
+        "telemetry_downlink",
+        "thermal_capture",
+        "timing"
+      ],
+      "detail": "",
+      "evidence_gained": [],
+      "evidence_kept": [
+        "actuator.elevon.command_echo",
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "comms.telemetry_link.supported",
+        "imu.primary.supported",
+        "imu.reference.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported",
+        "visual_odometry.supported"
+      ],
+      "evidence_lost": [
+        "gnss.position.supported",
+        "gnss.velocity.supported"
+      ],
+      "intended_capability": "relative_navigation",
+      "new_witnesses_possible": [],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [
+        "gnss.position.supported"
+      ],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": false,
+      "status": "EXPERIMENTAL",
+      "transition": "FULL_PAYLOAD -> GNSS_DENIED",
+      "verdict": "EVIDENCE_REDUCING",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    },
+    {
+      "capabilities_enabled": [],
+      "capabilities_invalidated": [
+        "RGB_capture",
+        "global_mapping",
+        "local_mapping"
+      ],
+      "capabilities_narrowed": [],
+      "capabilities_preserved": [
+        "absolute_navigation",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "relative_navigation",
+        "stable_flight",
+        "telemetry_downlink",
+        "thermal_capture",
+        "timing"
+      ],
+      "detail": "",
+      "evidence_gained": [],
+      "evidence_kept": [
+        "actuator.elevon.command_echo",
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "comms.telemetry_link.supported",
+        "gnss.position.supported",
+        "gnss.velocity.supported",
+        "imu.primary.supported",
+        "imu.reference.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported",
+        "visual_odometry.supported"
+      ],
+      "evidence_lost": [
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid"
+      ],
+      "intended_capability": "thermal_capture",
+      "new_witnesses_possible": [],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [
+        "camera.rgb.available"
+      ],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": false,
+      "status": "EXPERIMENTAL",
+      "transition": "FULL_PAYLOAD -> THERMAL_ONLY",
+      "verdict": "EVIDENCE_REDUCING",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    },
+    {
+      "capabilities_enabled": [
+        "local_mapping",
+        "relative_navigation",
+        "thermal_capture"
+      ],
+      "capabilities_invalidated": [],
+      "capabilities_narrowed": [],
+      "capabilities_preserved": [
+        "RGB_capture",
+        "absolute_navigation",
+        "airspeed_regulation",
+        "altitude_hold",
+        "attitude_hold",
+        "controlled_glide",
+        "global_mapping",
+        "stable_flight",
+        "telemetry_downlink",
+        "timing"
+      ],
+      "detail": "",
+      "evidence_gained": [
+        "actuator.elevon.command_echo",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "imu.reference.supported",
+        "visual_odometry.supported"
+      ],
+      "evidence_kept": [
+        "airspeed.supported",
+        "attitude.supported",
+        "baro.altitude.supported",
+        "camera.rgb.available",
+        "camera.rgb.calibration_valid",
+        "comms.telemetry_link.supported",
+        "gnss.position.supported",
+        "gnss.velocity.supported",
+        "imu.primary.supported",
+        "mag.field.supported",
+        "power.telemetry.supported",
+        "timebase.supported"
+      ],
+      "evidence_lost": [],
+      "intended_capability": "local_mapping",
+      "new_witnesses_possible": [
+        "actuator.elevon.command_echo",
+        "camera.thermal.available",
+        "camera.thermal.calibration_valid",
+        "camera_navigation_timing.supported",
+        "imu.reference.supported",
+        "visual_odometry.supported"
+      ],
+      "novelty": "NOVELTY_NOT_ESTABLISHED",
+      "post_transition_evidence_required": [],
+      "schema": "csia.mission.reconfiguration_analysis/1",
+      "self_occluding": false,
+      "status": "EXPERIMENTAL",
+      "transition": "MINIMAL_F1 -> FULL_PAYLOAD",
+      "verdict": "EVIDENCE_INCREASING",
+      "what_this_cannot_see": "evidence that configuration B would in fact produce but does not DECLARE. That direction produces a false alarm. The opposite error is impossible here: nothing is ever reported as available unless a configuration declares it."
+    }
+  ],
+  "schema": "csia.mission.reconfiguration_campaign/1",
+  "self_occluding": [
+    "FULL_PAYLOAD -> CAMERA_STOWED",
+    "FULL_PAYLOAD -> GNSS_DENIED"
+  ],
+  "status": "EXPERIMENTAL",
+  "transitions_analysed": 6
+}

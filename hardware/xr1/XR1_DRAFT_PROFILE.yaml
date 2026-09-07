@@ -1,0 +1,208 @@
+%YAML 1.2
+---
+# XR-1 DRAFT PROFILE --- NON_FLIGHT_DRAFT
+#
+# ============================================================================
+# THIS IS NOT A VALIDATED HARDWARE CONFIGURATION.
+# ============================================================================
+#
+# Nothing in this file has been built, weighed, wired or flown. It records
+# ONLY the facts supplied to this session, with each number's provenance
+# stated. A number without provenance is not carried.
+#
+# HOW TO READ THE STATUS FIELDS
+#   MEASURED      physically measured on the actual article
+#   GIVEN         supplied by the user or read from a manufacturer datasheet
+#   PROVISIONAL   a placeholder, an estimate, or an envelope rather than the
+#                 part. MUST be replaced before it can carry any conclusion
+#   UNKNOWN       not established. Deliberately not filled in
+#
+# WHY PROVISIONAL NUMBERS ARE CARRIED AT ALL: a mass budget with holes is
+# useful and a mass budget with invented numbers is worse than none. The
+# status field is what makes the first possible.
+#
+# NOTHING HERE MAY BE USED AS A CAD INPUT. csia_mission/registry.py's
+# SensorTransform model exists precisely because a package outline is not a
+# measurement origin, and this file records outlines.
+
+profile_id: xr1_draft_non_flight
+status: NON_FLIGHT_DRAFT
+schema: csia.mission.xr_draft_profile/1
+
+vehicle:
+  id: XR-1
+  role: >-
+    Research airframe for assured infrastructure damage assessment. Benign
+    inspection and disaster-assessment missions only.
+  airframe: flying_wing_elevon
+  # NOT SET. A total mass computed from placeholders would be a placeholder
+  # wearing a total's clothes.
+  total_mass_kg: null
+  total_mass_status: UNKNOWN
+
+# ---------------------------------------------------------------------------
+# ITEMS SUPPLIED TO THIS SESSION. Nothing is added that was not supplied.
+
+items:
+
+  autopilot:
+    part: Holybro Kakute H743-Wing
+    dimensions_mm: [45.0, 30.0, 13.5]
+    dimensions_status: GIVEN
+    mass_g: 28.0
+    mass_status: GIVEN
+    notes: >-
+      Package outline only. The IMU die position inside this board is NOT
+      known from these dimensions and must not be inferred from them.
+
+  reference_imu:
+    part: ICM-42688-P on Mikroe 6DOF IMU 14 Click
+    dimensions_mm: [28.6, 25.4, null]
+    dimensions_status: GIVEN
+    mass_g: null
+    mass_status: UNKNOWN
+    notes: >-
+      MASS NOT YET MEASURED. Carried as UNKNOWN rather than estimated from a
+      similar board.
+      SEE XR1_IMU_COMMON_MODE.md: this is the same device family as the
+      Kakute's IMU, which is a recorded independence limitation.
+
+  gnss:
+    part: u-blox SAM-M10Q-class
+    core_module_mm: [15.5, 15.5, 6.3]
+    core_module_status: GIVEN
+    carrier_envelope_mm: null
+    carrier_envelope_status: PROVISIONAL
+    mass_g: null
+    mass_status: UNKNOWN
+    notes: >-
+      The CORE MODULE dimensions are given. The carrier and antenna envelope
+      is PROVISIONAL and must be measured on the actual part.
+      THE ANTENNA PHASE CENTRE IS NOT THE MODULE CENTROID and is not derivable
+      from either figure. It is a SensorTransform with status UNKNOWN.
+
+  research_compute:
+    part: Raspberry Pi CM4 4GB
+    dimensions_mm: [55.0, 40.0, 4.7]
+    dimensions_status: GIVEN
+    mass_g: null
+    mass_status: UNKNOWN
+    carrier: REQUIRED_CUSTOM
+    carrier_status: UNKNOWN
+    notes: >-
+      A custom carrier is required and does not exist. Its dimensions, mass
+      and connector positions are all UNKNOWN, and the CM4 figures above
+      describe the module alone.
+
+  battery:
+    part: Tattu G-Tech 6S 8000 mAh 25C
+    mass_kg: 1.22
+    mass_status: GIVEN
+    dimensions_mm: null
+    dimensions_status: UNKNOWN
+    notes: >-
+      DIMENSIONS MUST BE MEASURED BEFORE ANY CAD FREEZE. At 1.22 kg this is
+      likely the single largest mass item, so its envelope and its position
+      dominate the CG. An estimated envelope here would propagate into every
+      subsequent balance figure.
+
+  motor:
+    part: SunnySky X3530 720 KV
+    envelope_mm: [43.0, 55.0, null]
+    envelope_status: PROVISIONAL
+    mass_g: 305.0
+    mass_status: PROVISIONAL
+    notes: >-
+      "Approximately 43 x 55 mm class envelope" and "approximately 305 g
+      conservative CAD mass" as supplied. Both PROVISIONAL: a conservative
+      CAD mass is a design allowance, not a measurement.
+
+  esc:
+    part: Hobbywing Platinum 80A V5
+    envelope_mm: [85.0, 40.0, 22.0]
+    envelope_status: PROVISIONAL
+    mass_g: 100.0
+    mass_status: PROVISIONAL
+    notes: >-
+      Both figures are explicitly PLACEHOLDERS as supplied.
+
+  main_elevon_servos:
+    part: UNRESOLVED
+    reserved_envelope_mm: [35.0, 20.0, 35.0]
+    reserved_envelope_status: PROVISIONAL
+    reserved_mass_g: 40.0
+    reserved_mass_status: PROVISIONAL
+    quantity: 2
+    notes: >-
+      THE PART IS NOT SELECTED. These are RESERVATIONS, not a servo. Hinge
+      moment has not been computed, so the reservation cannot yet be checked
+      against a requirement.
+
+  outer_servos:
+    part: KST X08H V6.0
+    dimensions_mm: [23.5, 8.0, 16.8]
+    dimensions_status: GIVEN
+    mass_g: 8.0
+    mass_status: GIVEN
+    quantity: 2
+
+# ---------------------------------------------------------------------------
+# WHAT THIS PROFILE DECLARES IT WOULD PROVIDE
+#
+# A DECLARATION, NOT A MEASUREMENT. It is the input the forge-seed compiler
+# uses to reject a dependency nothing provides. No sensor has produced any of
+# these; the vehicle does not exist.
+
+declares_evidence:
+  - attitude.supported
+  - imu.primary.supported
+  - imu.reference.supported
+  - airspeed.supported
+  - baro.altitude.supported
+  - gnss.position.supported
+  - gnss.velocity.supported
+  - mag.field.supported
+  - camera.rgb.available
+  - camera.rgb.calibration_valid
+  - camera.thermal.available
+  - camera.thermal.calibration_valid
+  - visual_odometry.supported
+  - camera_navigation_timing.supported
+  - timebase.supported
+  - power.telemetry.supported
+  - comms.telemetry_link.supported
+  - actuator.elevon.command_echo
+
+declares_compute:
+  - mapping
+  - logging
+
+declares_actuators:
+  - elevon_left
+  - elevon_right
+  - elevon_outer_left
+  - elevon_outer_right
+
+# ---------------------------------------------------------------------------
+# THE GAPS, LISTED RATHER THAN LEFT TO BE DISCOVERED
+
+must_be_measured_before_cad_freeze:
+  - battery envelope
+  - reference IMU mass
+  - GNSS carrier and antenna envelope
+  - CM4 carrier board, in full
+  - main elevon servo selection, then its envelope and mass
+
+must_be_measured_before_any_residual_analysis:
+  - every SensorTransform measurement origin
+  - every SensorTransform measurement axis convention
+  - GNSS antenna phase centre
+
+not_established_at_all:
+  - total mass
+  - centre of gravity
+  - aerodynamic envelope
+  - hinge moments
+  - glide performance
+  - endurance
+  - any flight characteristic whatsoever

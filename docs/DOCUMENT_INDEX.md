@@ -1,8 +1,8 @@
 # Document index
 
-372 markdown files exist in this repository. Most are the frozen research
+384 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 372 individually would
+once, cite a commit, and are never revised. Indexing all 384 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -43,6 +43,9 @@ updating what points at it.
 | `RESEARCH_STATE.md` | CANONICAL | what is scientifically established, refuted, and which paper owns which evidence | yes, for scientific truth | — | yes |
 | `CLAIMS_INDEX.md` | CANONICAL | which of the ten claim registers governs which class of claim, and two traps worth naming | yes, for register routing | — | yes |
 | `docs/DOCUMENT_INDEX.md` | CANONICAL | this file | yes | — | no |
+| `PAPER_I_SCOPE_GUARD.md` | **CANONICAL** | what the mission extension may and may not contribute to Paper I. Paper I's scientific scope is frozen | yes, for Paper I scope | — | **yes** — `tests/test_paper_i_scope_guard.py` |
+| `handoff/CSIA_TO_XR_FLIGHT_ARCHITECTURE.md` | CANONICAL | the whole stack from frozen core to future planner, with the prohibited claims listed | yes, for architecture | — | no |
+| `docs/mission/NOVELTY_CLASSIFICATION.md` | **CANONICAL** | every mission-layer idea classified. `NOVELTY_NOT_ESTABLISHED` on every row | yes, for novelty | — | **yes** — `tests/test_paper_i_scope_guard.py` |
 
 `CURRENT_PROGRAM_STATE` and `RESEARCH_STATE` do not compete: the first governs
 *what may be worked on*, the second governs *what is established*.
@@ -163,7 +166,8 @@ is usually two arms of one experiment, not duplication.
 | `research/maer/` | 9 | MAER jamming and raw-GNSS qualification |
 | `docs/validation/` | 9 | metric definitions, split policy, deduplication, exposure plan |
 | `research/dual_admissibility/` | 8 | the original dual-admissibility work |
-| `handoff/` | 12 | status and handoff reports written at a stated commit, for the writing agents and for the next session. Each is a snapshot, **never** a claim register — `POST_E1_HARDENING_AND_E2_STATUS.md` is the current one |
+| `hardware/xr1/` | 9 | XR-1 draft profile, registries and physical requirements. **NON_FLIGHT_DRAFT throughout** — nothing has been built, and every number carries a provenance status |
+| `handoff/` | 13 | status and handoff reports written at a stated commit, for the writing agents and for the next session. Each is a snapshot, **never** a claim register — `POST_E1_HARDENING_AND_E2_STATUS.md` is the current one |
 | `research/wp_c*/`, `research/v1_1/`, `research/invalidity_masking/`, `research/formalization/` | ~30 | work packages C2–C9, v1.1 campaigns, invalidity masking, formalization |
 
 ## How to keep this index true

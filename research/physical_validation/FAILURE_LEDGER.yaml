@@ -1021,3 +1021,198 @@ entries:
       scans the CODE, and it checks for the mechanisms as well as the phrase
       (difflib, get_close_matches). The docstring stays.
     artifact: tests/test_post_e1_hardening_round2.py
+
+  - id: MX-001
+    date: 2026-09-07
+    phase: MISSION EXTENSION (capability assurance)
+    kind: SEMANTIC_DEFECT
+    what_happened: >-
+      THE RECERTIFICATION HOLD WAS COSMETIC. A capability held pending
+      re-certification was given DEGRADED_SUPPORTED, on the reasoning that it
+      was "working but qualified". But DEGRADED_SUPPORTED is an AUTHORIZING
+      state: the planner gate accepts it and every product resting on the
+      capability qualifies from it. So the hold relabelled the capability and
+      changed nothing downstream -- a sensor coming back restored full
+      mission authority immediately, which is BAD_PRODUCT_05, the exact
+      defect the recovery machine exists to prevent.
+    found_by: >-
+      The disaster-corridor benchmark's S5 scenario, whose expected outcome
+      table was written BEFORE the scenario was ever run. S5 predicted that
+      the first tick after evidence returns would NOT restore the absolute
+      products. It did restore them, and the capability recovery latency came
+      out at 0.000 s -- which the metric definition had already named as the
+      signature of restoring on presence.
+    verdict: FIXED
+    consequence: >-
+      The hold is now UNKNOWN. That is semantically exact rather than a
+      compromise: during re-measurement the evidence is returning but the
+      re-establishment is incomplete, so the layer cannot yet SAY the
+      capability is supported. NOT_SUPPORTED would have been stronger than
+      what is known -- it asserts unavailability, which the returning
+      evidence contradicts.
+      UNKNOWN is also the one state that can never be promoted, so the hold
+      is now enforced by the same rule that protects everything else in the
+      layer rather than by a special case.
+      THE EXPECTATION WAS RIGHT AND THE IMPLEMENTATION WAS WRONG. That is the
+      direction a preregistered expectation is supposed to catch, and it is
+      the first time in this programme that a declared-in-advance table has
+      caught a defect in code written by the same session.
+    artifact: >-
+      csia_mission/capability.py;
+      research/mission/results/DISASTER_CORRIDOR.json
+
+  - id: MX-002
+    date: 2026-09-07
+    phase: MISSION EXTENSION (recovery)
+    kind: CIRCULAR_DEPENDENCY
+    what_happened: >-
+      THE RECOVERY MACHINE WAS FED ITS OWN OUTPUT AND DEADLOCKED. With MX-001
+      fixed, the hold makes a capability UNKNOWN. The benchmark then fed that
+      UNKNOWN back into RecoveryState.observe() -- the state the machine's own
+      hold had produced. An UNKNOWN observation correctly neither advances nor
+      abandons recovery, so the machine reset its streak every tick and stayed
+      in RESTRICTED forever. The capability never recovered, on any tick, and
+      the recovery latency was None.
+    found_by: >-
+      The same S5 expectation, which after the MX-001 fix still did not match:
+      the "after_recertification" row expected restoration and observed a
+      permanent hold.
+    verdict: FIXED
+    consequence: >-
+      The machine must observe the CANDIDATE state -- what the evidence says
+      with the hold ignored -- while products, certificates and the planner
+      consume the PUBLISHED state with the hold applied. Feeding it the
+      published state makes it decide whether to lift the hold by reading the
+      hold, which is circular and can only ever have one answer.
+      csia_mission.recovery.step() now does both evaluations in the right
+      order, so the wiring lives in a function rather than in a docstring
+      anyone can skip. A regression test drives a full loss-and-recovery
+      cycle and asserts the machine reaches NOMINAL.
+    artifact: csia_mission/recovery.py; tests/test_mission_assurance.py
+
+  - id: MX-003
+    date: 2026-09-07
+    phase: MISSION EXTENSION (benchmark)
+    kind: EXPECTATION_CORRECTED
+    what_happened: >-
+      ONE EXPECTATION IN THE DECLARED TABLE WAS WRONG AND WAS CORRECTED AFTER
+      THE RUN. S5's first tick expected global_rgb_orthomosaic to be
+      PRODUCT_NOT_SUPPORTED; the implementation returned
+      PRODUCT_NOT_EVALUABLE.
+    found_by: The benchmark's own comparison against the declared table.
+    verdict: EXPECTATION_CORRECTED_IMPLEMENTATION_UNCHANGED
+    consequence: >-
+      CHANGING AN EXPECTATION AFTER SEEING OUTPUT IS THE MOVE THIS DISCIPLINE
+      FORBIDS, so the justification has to be that the expectation
+      contradicted a rule declared BEFORE the run -- not that the output was
+      inconvenient. It did: the hold makes the capability UNKNOWN, UNKNOWN is
+      never promoted, and a product whose properties are all UNKNOWN with none
+      NOT_SUPPORTED is PRODUCT_NOT_EVALUABLE by the state rule written in
+      product.py before the table existed.
+      PRODUCT_NOT_SUPPORTED would have claimed the orthomosaic is KNOWN to be
+      unusable. It is not; nobody yet knows. That distinction is the entire
+      reason there are four product states instead of three, and the
+      expectation had collapsed it.
+      The correction is recorded in the artifact itself under
+      `expectations_corrected_after_the_run`, with the reason, and a test
+      fails if that record is removed.
+    artifact: >-
+      tools/xr/disaster_corridor.py;
+      research/mission/results/DISASTER_CORRIDOR.json
+
+  - id: MX-004
+    date: 2026-09-07
+    phase: MISSION EXTENSION (bounded verification)
+    kind: VACUOUS_PASS
+    what_happened: >-
+      TWO BOUNDED PROPERTIES REPORTED "NO COUNTEREXAMPLE" FROM ZERO CASES.
+      P7 and P8 -- ranking alone cannot certify a capability or a product --
+      tried to attach a ranking by calling setattr on the contract. Both
+      contracts are FROZEN dataclasses, so every route raised and was skipped,
+      leaving cases_checked = 0. The row then reported
+      NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN from having tested nothing.
+    found_by: >-
+      Printing the per-property case counts instead of reading only the
+      verdict column.
+    verdict: FIXED
+    consequence: >-
+      THIS IS HF-005's SHAPE REAPPEARING ONE ROUND AFTER IT WAS NAMED: an
+      absent answer read as a positive one. Recording it again, in new code,
+      by the same author, is the useful part -- the lesson did not transfer on
+      its own.
+      Two fixes, because one is not enough. First, the shared row builder now
+      returns VACUOUS whenever cases_checked == 0, so NO property in that file
+      can ever pass by testing nothing again -- the guard is at the
+      chokepoint, not at the two properties that happened to hit it. Second,
+      the ranking routes are now ones the API ACTUALLY ACCEPTS: the function
+      signature itself, a contract SUBCLASS carrying ranking attributes,
+      ranking-shaped extra keys in the evidence mapping, ranking-shaped
+      entries in the compute/timing/actuator/envelope state, and
+      highly-ranked-but-unsupported capability reports. P7 went from 0 cases
+      to 193 and P8 from 0 to 37.
+    artifact: >-
+      tools/xr/bounded_verify_mission.py;
+      research/mission/results/MISSION_BOUNDED_VERIFICATION.json
+
+  - id: MX-005
+    date: 2026-09-07
+    phase: MISSION EXTENSION (reconfiguration analysis)
+    kind: INCOMPLETE_ANALYSIS
+    what_happened: >-
+      THE SELF-OCCLUSION ANALYSER DID NOT FOLLOW THE CAPABILITY CHAIN. Its
+      satisfiability test checked only a capability's DIRECT evidence
+      requirements. A capability whose requirements are entirely subordinate
+      capabilities -- local_mapping requires relative_navigation and
+      RGB_capture and no evidence of its own -- therefore came out satisfiable
+      in every configuration, including ones that removed the camera it
+      depends on. The analyser reported stowing the RGB camera as NOT
+      self-occluding for local mapping, which is exactly wrong.
+    found_by: >-
+      Reading the analyser's own output table and noticing that the one
+      transition which should obviously have been flagged was not.
+    verdict: FIXED
+    consequence: >-
+      Satisfiability is now transitive over subordinate capabilities, with
+      cycle detection that fails closed and an unmodelled subordinate treated
+      as not-satisfiable rather than as absent. A capability with no direct
+      evidence requirements is not a capability with no requirements, and
+      following the chain is the difference between an analysis and a spot
+      check.
+      The analyser now DISCRIMINATES rather than flagging everything: stowing
+      the camera is self-occluding for local_mapping (which needs it) and NOT
+      for relative_navigation (whose reference-IMU path survives). A test
+      pins both directions, because an analyser that flagged every reduction
+      would make the term mean nothing.
+    artifact: >-
+      csia_mission/reconfiguration.py;
+      research/mission/results/RECONFIGURATION_ANALYSIS.json
+
+  - id: MX-006
+    date: 2026-09-07
+    phase: MISSION EXTENSION (guards)
+    kind: SELF_INFLICTED_GUARD
+    what_happened: >-
+      TWO MORE FORBIDDEN-WORD GUARDS FIRED ON THEIR OWN DOCUMENTATION. A check
+      that no certificate schema contains "certification-grade" fired on the
+      schema description reading "Not certified, not certification-grade". A
+      check that no conformance probe inspects its implementation fired on
+      isinstance(got, (tuple, list)) -- which inspects a RETURN VALUE to
+      tolerate two result shapes, and is precisely the behavioural check the
+      suite is supposed to make.
+    found_by: The test suite, on its first run, twice.
+    verdict: FIXED
+    consequence: >-
+      THAT IS THE EIGHTH AND NINTH GUARD IN THIS REPOSITORY TO TRIP OVER
+      PROSE OR CODE STATING THE VERY RULE IT ENFORCES. The pattern is now
+      stated as a rule rather than fixed case by case: A FORBIDDEN-WORD OR
+      FORBIDDEN-CONSTRUCT CHECK WHOSE ONLY CHEAP FIX IS TO DELETE THE
+      SENTENCE EXPLAINING THE RULE IS A CHECK THAT MAKES THE REPOSITORY
+      WORSE. Every one of them must look at CONTEXT, not presence.
+      The schema check now requires a negation within 40 characters before
+      the word, and is paired with a positive check on the status strings so
+      it cannot pass vacuously. The probe check now tracks the probe's `impl`
+      PARAMETER and flags only uses of it in an inspection position, leaving
+      return-value inspection alone.
+    artifact: >-
+      tests/test_mission_registries_and_schemas.py;
+      tests/test_bad_product_references.py

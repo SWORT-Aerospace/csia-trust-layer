@@ -208,7 +208,8 @@ release-check:
 # `check` still fails if EITHER bucket fails, so nothing is hidden; it just
 # says which kind of failure it is.
 BLOCKING_GUARDS  = artifact-map proof-audit-check figure-sync phase-guard \
-                   manuscript-rules secrets-scan release-check
+                   manuscript-rules secrets-scan release-check \
+                   mission-schema-check
 ADVISORY_GUARDS  = bib-guard
 
 .PHONY: check-blocking
@@ -807,3 +808,28 @@ paper-evidence: mechanism-a paper-mechanism-b proof-audit
 .PHONY: quickstart
 quickstart:
 	$(PY) engineering/v2/quickstart.py
+
+# ---------------------------------------------------------------------------
+# Mission-assurance extension (csia_mission). NOT part of the frozen core.
+
+.PHONY: mission-schema-check
+mission-schema-check:
+	@echo "== mission schemas match their dataclasses"
+	@$(PY) tools/xr/emit_schemas.py --check
+
+.PHONY: mission-artifacts
+mission-artifacts:
+	@$(PY) tools/xr/mission_artifacts.py --out-dir research/mission/results --regenerate
+	@$(PY) tools/xr/disaster_corridor.py --out research/mission/results/DISASTER_CORRIDOR.json --regenerate
+	@$(PY) tools/xr/bounded_verify_mission.py --out research/mission/results/MISSION_BOUNDED_VERIFICATION.json --regenerate
+	@$(PY) tools/xr/mission_replay.py --out research/mission/results/MISSION_REPLAY.json --regenerate
+	@$(PY) tools/xr/build_extension_manifest.py --out csia_mission/EXTENSION_MANIFEST.json
+	@$(PY) tools/xr/emit_schemas.py --out-dir csia_mission/schemas
+
+.PHONY: mission-tests
+mission-tests:
+	@$(PY) -m pytest tests/test_mission_assurance.py \
+	    tests/test_mission_independence.py \
+	    tests/test_mission_registries_and_schemas.py \
+	    tests/test_bad_product_references.py \
+	    tests/test_paper_i_scope_guard.py -q

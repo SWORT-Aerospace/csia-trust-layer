@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Platform-neutral. Unmeasurable fields stay UNKNOWN.",
+  "properties": {
+    "availability": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "compute_domain": {},
+    "deadline_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "detail": {
+      "type": "object"
+    },
+    "execution_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "integrity_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "memory_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "scheduler_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "thermal_state": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED",
+        "NOT_SUPPORTED",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "timestamp": {}
+  },
+  "required": [
+    "compute_domain"
+  ],
+  "title": "ComputeEvidence",
+  "type": "object",
+  "x-generated-from": "csia_mission.compute.ComputeEvidence",
+  "x-implementation-neutral": "Nothing here requires a trust coefficient, a Bayesian update, a graph, or this repository. CSIA-specific fields, where any, carry x-csia-specific with the reason they are kept."
+}

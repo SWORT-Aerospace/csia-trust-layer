@@ -1,0 +1,72 @@
+{
+  "allowed_dependencies": [
+    "the Python standard library"
+  ],
+  "append_only": true,
+  "extension": "csia_mission",
+  "forbidden_dependencies": [
+    "csia            -- the frozen scientific core",
+    "csia_assurance  -- the support firewall. The mission layer CONSUMES its output as data; importing it would couple two layers that must be able to version independently",
+    "numpy, scipy, yaml, or any third-party package"
+  ],
+  "frozen_core_diff_against_tag": "",
+  "frozen_core_diff_is_empty": true,
+  "frozen_core_digests_at_extension_time": {
+    "csia/diagnosis": {
+      "files": 12,
+      "sha256_of_file_manifest": "ac9926d735df6a2386ce6965ac723e7016ebef2fa760a4525abe26b6231938a4"
+    },
+    "csia/profiles.py": "7ff5ebd0589b82004cb30de0025a7ce0d4fa585c6e0032b2f425aa5abcca309e",
+    "csia/runtime/failsafe.py": "0a8d1f5fc8b29ab4b1fb89ffb09eca614fd6d3c183bbb4616f16147606acf2ef",
+    "csia/runtime/online.py": "d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa",
+    "csia/scenarios.py": "043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557",
+    "csia/trust_engine": {
+      "files": 4,
+      "sha256_of_file_manifest": "43bbcca2971630373b7e07a62b9988b233665208c49b5b67270a557055c39495"
+    }
+  },
+  "independence_is_verified_by": "tests/test_mission_independence.py, which runs a FRESH interpreter and inspects sys.modules. A list in a manifest is a promise; a sys.modules check is a measurement.",
+  "modules": [
+    "__init__.py",
+    "capability.py",
+    "compute.py",
+    "conformance.py",
+    "forge_seed.py",
+    "graphs.py",
+    "metrics.py",
+    "planner.py",
+    "product.py",
+    "provenance.py",
+    "reconfiguration.py",
+    "recovery.py",
+    "registry.py",
+    "xr1_contracts.py"
+  ],
+  "novelty": "NOVELTY_NOT_ESTABLISHED for every idea in this extension",
+  "paper_i_relationship": "NONE. See PAPER_I_SCOPE_GUARD.md. Paper I may reference this work only as FUTURE WORK, and no feature here may be described as an E1 result.",
+  "parent": {
+    "branch": "claude/code-reviewer-repo-export-zicovg",
+    "core_freeze_tag": "csia-v1.0-research-final",
+    "core_freeze_tag_is_local_only": true,
+    "e1_freeze_manifest": "research/physical_validation/E1_FREEZE_MANIFEST.yaml",
+    "e1_freeze_manifest_sha256": "f224a46a37d816a62debe7a40520f256db077f528bfef64072e6b296c30237cf",
+    "extension_creation_commit": "1e29ea0c2435b560b8f086def1607b98bac579fb"
+  },
+  "schema": "csia.mission.extension/1",
+  "state": "EXPERIMENTAL_MISSION_PRODUCT_ASSURANCE_EXTENSION",
+  "state_is_not": [
+    "part of the frozen CSIA scientific core",
+    "part of the E1 result",
+    "a certified or certification-grade artifact",
+    "Forge, SACA or ZETH",
+    "flight-authority software"
+  ],
+  "what_it_may_not_do": [
+    "modify anything under csia/",
+    "recompute any score, likelihood, posterior or ranking",
+    "read a hypothesis ranking at all",
+    "promote UNKNOWN to SUPPORTED",
+    "treat sensor presence as evidence a capability works",
+    "grant any component the ability to override a support state"
+  ]
+}

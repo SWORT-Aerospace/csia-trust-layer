@@ -1,0 +1,113 @@
+{
+  "bounds": {
+    "evidence_states_per_item": 4,
+    "max_capabilities": 3,
+    "max_evidence": 4,
+    "max_properties": 2,
+    "note": "EXHAUSTIVE over this domain, checked against the REAL implementation rather than a model of it"
+  },
+  "method": "Concrete exhaustive enumeration over a finite domain, executed against the actual csia_mission functions. NO SMT SOLVER IS USED, and therefore no encoding can differ from the implementation it claims to describe.",
+  "no_solver": true,
+  "properties": [
+    {
+      "cases_checked": 256,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P1_CAPABILITY_SUPPORT_IMPLIES_REQUIRED_DEPENDENCIES",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a capability reported SUPPORTED whose declared requirement is not met"
+    },
+    {
+      "cases_checked": 256,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P2_PRODUCT_SUPPORT_IMPLIES_REQUIRED_DEPENDENCIES",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a product property reported supported whose declared requirement is not met"
+    },
+    {
+      "cases_checked": 20,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P3_EXPIRED_EVIDENCE_CANNOT_SUPPORT_CURRENT_CAPABILITY",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a capability supported by evidence whose expiry has passed"
+    },
+    {
+      "cases_checked": 10,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P4_EXPIRED_EVIDENCE_CANNOT_SUPPORT_CURRENT_PRODUCT",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a product property supported by expired evidence"
+    },
+    {
+      "cases_checked": 16,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P5_CONFIG_CHANGE_INVALIDATES_DEPENDENT_CERTIFICATE",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a certificate still valid after its configuration or evidence manifest changed"
+    },
+    {
+      "cases_checked": 25,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "EXHAUSTIVE_OVER_BOUNDED_DOMAIN",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "",
+      "property": "P6_NOT_SUPPORTED_CAPABILITY_CANNOT_AUTHORIZE_ACTION",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "an action authorized while a required capability was not in an authorizing state"
+    },
+    {
+      "cases_checked": 193,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "STRUCTURAL_BY_CONSTRUCTION",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "Routes: the function signature itself, a contract SUBCLASS carrying ranking attributes, ranking-shaped extra keys in the evidence mapping, and ranking-shaped entries in the compute/timing/actuator/envelope state. All are routes the API accepts.",
+      "property": "P7_RANKING_ALONE_CANNOT_CERTIFY_CAPABILITY",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a capability state that changed when a ranking was attached"
+    },
+    {
+      "cases_checked": 37,
+      "counterexample_count": 0,
+      "counterexamples": [],
+      "kind": "STRUCTURAL_BY_CONSTRUCTION",
+      "licenses": "No counterexample exists within the verified bounded domain.",
+      "note": "same route discipline as P7",
+      "property": "P8_RANKING_ALONE_CANNOT_CERTIFY_PRODUCT",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN",
+      "what_would_violate_it": "a product state that changed when a ranking was attached"
+    }
+  ],
+  "schema": "csia.mission.bounded_verification/1",
+  "summary": {
+    "checked": 8,
+    "no_counterexample_in_bounds": 8,
+    "total_cases": 813,
+    "vacuous_zero_cases": 0,
+    "with_counterexamples": 0
+  },
+  "verdict": "NO_COUNTEREXAMPLE_IN_ANY_PROPERTY",
+  "what_unsat_does_not_license": "a general theorem. Nothing here is proved beyond the stated bounds, no row may be quoted as one, and NO NOVELTY IS CLAIMED for any property in this file.",
+  "what_unsat_licenses": "No counterexample exists within the verified bounded domain.",
+  "zero_cases_is_never_a_pass": "MX-004. A property that exercises no case reports VACUOUS, never NO_COUNTEREXAMPLE. The check is in the shared row builder so no future property can pass by testing nothing."
+}

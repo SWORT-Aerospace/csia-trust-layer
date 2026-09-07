@@ -50,13 +50,17 @@ SCANNED_DIRS = ("csia", "tests", "tools")
 #: scripts importing matplotlib, sympy and friends, which CI does not install
 #: and does not need to. Widening the scan to make the name lookup work would
 #: have imported that problem to solve this one.
-# `csia_assurance` is FIRST-PARTY: a top-level package in this
-# repository, packaged by the `csia*` include in pyproject.toml. It is
+# `csia_assurance` and `csia_mission` are FIRST-PARTY: top-level packages in
+# this repository, packaged by the `csia*` include in pyproject.toml. They are
 # listed here because the scan derives local names from directories it
 # walks, and a top-level package outside those directories would
 # otherwise be reported as an undeclared PyPI dependency.
+#
+# BOTH WERE CAUGHT BY THIS GUARD ON THEIR FIRST COMMIT, which is the guard
+# working: a genuinely undeclared dependency and a first-party package
+# outside the scanned set look identical to the scan, and the fix differs.
 LOCAL_NAME_DIRS = SCANNED_DIRS + ("research", "engineering",
-                                  "csia_assurance")
+                                  "csia_assurance", "csia_mission")
 
 #: import name -> PyPI distribution, where they differ
 IMPORT_TO_DIST = {"yaml": "pyyaml", "z3": "z3-solver"}
