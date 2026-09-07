@@ -71,6 +71,7 @@ REASON_CODES = (
     "SUBORDINATE_CAPABILITY_NOT_SUPPORTED",
     "SUBORDINATE_CAPABILITY_UNKNOWN",
     "NO_ALTERNATIVE_PATH_AVAILABLE",
+    "K_OF_N_NOT_MET",
     "ALTERNATIVE_PATH_IN_USE",
     "COMPUTE_NOT_SUPPORTED",
     "COMPUTE_UNKNOWN",
@@ -88,6 +89,33 @@ REASON_CODES = (
 
 class ContractError(ValueError):
     """A capability contract that cannot be read as written."""
+
+
+def _validated_k_of_n(spec, capability_id: str) -> tuple:
+    """Parse ONE k-of-n specification, or refuse it.
+
+    Accepts `{"k": int, "of": [ids]}` and NOTHING ELSE. The refusals matter
+    more than the acceptance: a bare list would have to be guessed at, and a
+    k outside [1, n] describes a requirement that is either vacuous (k <= 0)
+    or unsatisfiable (k > n), neither of which anybody means to write.
+    """
+    if not isinstance(spec, Mapping) or set(spec) != {"k", "of"}:
+        raise ContractError(
+            f"{capability_id}: a k-of-n dependency must be exactly "
+            f"{{'k': <int>, 'of': [<ids>]}} -- got {spec!r}. A bare list is "
+            f"NEVER read as 1-of-n: how many must hold is precisely what a "
+            f"reader would guess wrong.")
+    k, of = spec["k"], list(spec["of"])
+    if isinstance(k, bool) or not isinstance(k, int) or not of:
+        raise ContractError(
+            f"{capability_id}: k-of-n needs an integer k and a non-empty "
+            f"option list -- got k={k!r} over {len(of)} options")
+    if k < 1 or k > len(of):
+        raise ContractError(
+            f"{capability_id}: k={k} over {len(of)} options is "
+            f"{'vacuous' if k < 1 else 'unsatisfiable'}; k must be in "
+            f"[1, {len(of)}]")
+    return k, sorted(of)
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +176,10 @@ class CapabilityContract:
     capability_id: str
     requires_all: tuple = ()
     requires_one_of: tuple = ()
+    #: K-OF-N, in ONE explicit form only: ({"k": 2, "of": (a, b, c)}, ...).
+    #: A bare list is NEVER read as 1-of-n. "How many must hold" is exactly
+    #: what a reader guesses wrong, so it has to be written down.
+    requires_k_of_n: tuple = ()
     requires_capabilities: tuple = ()
     requires_compute: tuple = ()
     requires_timing: tuple = ()
@@ -168,6 +200,9 @@ class CapabilityContract:
         for group in self.requires_one_of:
             named |= set(group if isinstance(group, (list, tuple))
                          else (group,))
+        for spec in self.requires_k_of_n:
+            k, of = _validated_k_of_n(spec, self.capability_id)
+            named |= set(of)
         contradiction = named & set(self.does_not_require)
         if contradiction:
             raise ContractError(
@@ -349,6 +384,35 @@ def _evaluate_one(contract: CapabilityContract,
             chosen = eid
             reasons.append("ALTERNATIVE_PATH_IN_USE")
             parts.append(DEGRADED_SUPPORTED)
+
+    # -- 2b. k-of-n groups -------------------------------------------------
+    for spec in contract.requires_k_of_n:
+        k, options = _validated_k_of_n(spec, contract.capability_id)
+        got = unknown_here = 0
+        for eid in options:
+            item = evidence.get(eid)
+            if item is None:
+                continue
+            st = item.state_at(now)
+            if st == SUPPORTED:
+                got += 1
+                load_bearing.append(eid)
+            elif st == UNKNOWN:
+                unknown_here += 1
+            if item.expired_at(now) and eid not in expired:
+                expired.append(eid)
+        if got >= k:
+            parts.append(SUPPORTED)
+        elif got + unknown_here >= k:
+            # Enough MIGHT hold. Not enough is KNOWN to hold. That is
+            # UNKNOWN, and rounding it either way would be a claim.
+            reasons.append("EVIDENCE_UNKNOWN")
+            parts.append(UNKNOWN)
+            unknown.extend(o for o in options if o not in unknown)
+        else:
+            reasons.append("K_OF_N_NOT_MET")
+            parts.append(NOT_SUPPORTED)
+            missing.extend(o for o in options if o not in missing)
 
     # -- 3. subordinate capabilities ---------------------------------------
     subordinates = {}

@@ -1322,3 +1322,145 @@ entries:
     artifact: >-
       tools/xr/xr1_measurement.py;
       hardware/xr1/XR1_MEASUREMENT_PROTOCOL.md
+
+  - id: MX-010
+    date: 2026-09-07
+    phase: QUALITY AUDIT (mutation, frozen core)
+    kind: TEST_SENSITIVITY_MEASURED
+    what_happened: >-
+      THE FROZEN SCIENTIFIC CORE SCORES 0.35 ON THE MUTATION PROBE -- the
+      LOWEST of the three bodies of code measured, and it is the one every E1
+      claim rests on. 78 of 120 injected defects into csia/trust_engine,
+      csia/diagnosis, csia/runtime and csia/scenarios were not noticed by a
+      nine-file core test subset.
+      For comparison, measured by the same probe: the mission extension
+      0.6726, the csia_assurance firewall 0.6125.
+    found_by: >-
+      Running the probe against the frozen core, which had never been done.
+      The core was mutated only in a TEMPORARY COPY of the tree; the real
+      csia/ paths are byte-unchanged and the diff against
+      csia-v1.0-research-final is empty.
+    verdict: RECORDED_WITH_A_STATED_LIMIT
+    consequence: >-
+      WHAT THIS DOES NOT MEAN, because the number invites overreading:
+      it does NOT mean the frozen core is wrong, and it does NOT invalidate
+      E1. E1's evidence is campaign artifacts, reconciliations and the
+      three-campaign 120/120 record -- not unit tests. A low mutation score
+      says the TESTS constrain less of the code than the newer layers' tests
+      constrain theirs.
+      THE SUBSET IS A REAL LIMIT ON THE NUMBER. It was measured against NINE
+      test files, not the 2300-test suite, because a full-suite run per
+      mutant is hours. A wider 18-file subset was then run to find out how
+      much of the gap is subset choice rather than test weakness, and its
+      result is recorded beside this one rather than replacing it.
+      NO TEST WAS ADDED TO THE FROZEN CORE and none may be added to the core
+      itself; the core is frozen. Improving this number means adding tests
+      AROUND it, which is a deliberate decision with its own evidence and is
+      not taken here.
+    artifact: >-
+      research/mission/results/MUTATION_PROBE_FROZEN_CORE.json;
+      research/mission/results/MUTATION_PROBE_FROZEN_CORE_WIDE.json
+
+  - id: MX-011
+    date: 2026-09-07
+    phase: MISSION EXTENSION (forge-seed)
+    kind: DECLARED_BUT_UNSUPPORTED_CAPABILITY
+    what_happened: >-
+      K_OF_N WAS DECLARED AS A SUPPORTED DEPENDENCY FORM AND WAS NOT
+      IMPLEMENTED. `DEPENDENCY_FORMS` listed it, and forge_seed.py carried a
+      `_k_of_n` parser that NOTHING CALLED -- the compiler never emitted the
+      form, no contract could express it, and no test touched it.
+    found_by: >-
+      Reading the mutation survivors in forge_seed.py and noticing that a
+      whole function's worth of them sat in code no caller reached.
+    verdict: FIXED
+    consequence: >-
+      A DECLARED CAPABILITY WITH NO BEHAVIOUR BEHIND IT is the exact shape of
+      claim this repository exists to refuse, one level up from the science.
+      Two honest resolutions existed -- remove the declaration, or make it
+      true. The brief permits k-of-n "only if semantics are explicit and
+      tested", so it was made true.
+      `requires_k_of_n` now exists on CapabilityContract in ONE explicit form,
+      `{"k": int, "of": [ids]}`. A bare list is NEVER read as 1-of-n: how many
+      must hold is precisely what a reader guesses wrong. k outside [1, n] is
+      refused as vacuous or unsatisfiable rather than clamped. The dead
+      duplicate parser is gone and forge_seed delegates to the one in
+      capability.py, so two parsers for one syntax cannot drift.
+      The UNKNOWN rule holds here as everywhere else: one supported plus one
+      unknown against k=2 is UNKNOWN -- it MIGHT hold -- not NOT_SUPPORTED.
+      13 tests, including every boundary and seven malformed forms.
+    artifact: >-
+      csia_mission/capability.py; csia_mission/forge_seed.py;
+      csia_mission/graphs.py; tests/test_mission_survivor_kills.py
+
+  - id: MX-012
+    date: 2026-09-07
+    phase: MISSION EXTENSION (graphs)
+    kind: INCONSISTENT_ANSWER
+    what_happened: >-
+      `consumers_of` REPORTED A PROPERTY AS AFFECTED WHILE REPORTING ITS
+      PRODUCT AS UNAFFECTED. A product whose QUALITY PROPERTY depended on a
+      capability reaching the evidence appeared in
+      `transitive_product_properties` but not in `transitive_products`,
+      because the product list was computed only from the PRODUCT-level
+      capability requirements.
+    found_by: >-
+      A test written to kill a mutation survivor, which asserted both fields
+      and found them disagreeing.
+    verdict: FIXED
+    consequence: >-
+      Two answers to one question, and the narrower one was the wrong one for
+      "what breaks if I lose this?". A product is now affected when ANY of its
+      properties is.
+      THIS IS THE THIRD TIME THIS SHAPE HAS APPEARED: MX-005 (satisfiability
+      not following the capability chain), MX-007 (consumers_of returning only
+      direct dependents), and now this. All three are a query stopping short
+      over a graph whose entire point is that dependencies compose. The
+      pattern is worth naming: in this architecture, any query that answers
+      "what depends on X" must be checked at BOTH ends -- the thing found and
+      the thing that contains it.
+    artifact: csia_mission/graphs.py; tests/test_mission_survivor_kills.py
+
+  - id: MX-013
+    date: 2026-09-07
+    phase: PUBLICATION (prose literal binding)
+    kind: TOOL_PROPOSAL_REJECTED_BY_VERIFICATION
+    what_happened: >-
+      A BINDING TOOL PROPOSED FIVE ARTIFACT BINDINGS FOR THE UNBOUND PROSE
+      LITERALS AND TWO OF THEM WERE WRONG. The tool applied four rules --
+      value matches at printed precision, artifact not phase-2, the JSON
+      pointer's path shares a meaningful token with the literal's
+      description, and exactly one candidate survives. Five of 42 literals
+      passed all four. A human then opened each one.
+    found_by: Opening the five and checking them against their artifacts.
+    verdict: TWO_REJECTED_THREE_CONFIRMED
+    consequence: >-
+      REJECTED, 0.7000: the tool bound it to
+      misclassified_cells/0/ticks_from_boundary -- a TICK DISTANCE that
+      coincidentally equals 0.7. The prose is "measured minimum fused evidence
+      in the saturated cells". The artifact states that value only inside a
+      prose `statement` field and its one 0.7 scalar is `predicted_e_f` -- the
+      PREDICTION. Binding measured to predicted would have been wrong in the
+      most consequential way available.
+      REJECTED, 0.678: numerically 0.6785 -> 0.678, but `observed_range` spans
+      ALL 21 cells and tops out at 0.9422 while the prose says the floor
+      "ranges 0.678 to 0.700". The prose describes a NARROWER population whose
+      lower bound coincides with the wider one. A coincidence of value, not a
+      provenance chain.
+      CONFIRMED: 0.001597 (denial/channel_fresh_fraction, four shared tokens
+      on a specific path), 0.9998 (worst_case_unsupported_leader/posterior,
+      the pointer names the exact condition the prose describes), and
+      0.640319 with a caveat -- the value appears at both traces/clean/min and
+      traces/denial/min and a human must say which the manuscript means.
+      THIS IS THE ARGUMENT AGAINST NUMERIC BINDING, RESTATED WITH CASES. The
+      previous round refused to bind on numeric search and recorded why; this
+      round built the strictest defensible search and STILL got 40% of its
+      proposals wrong. Nothing is applied: bindings land in
+      PAPER1_ARTIFACT_MAP.yaml, which the immutable E1 freeze hashes, so the
+      three confirmed ones wait for a deliberate re-freeze.
+      TWO ARTIFACT CORRECTIONS ARE SPECIFIED AND NOT APPLIED: the response
+      surface artifact has no scalar for the MEASURED saturated-cell floor,
+      nor for the physics-residual-bound cell range the manuscript quotes.
+    artifact: >-
+      research/physical_validation/results/PROPOSED_PROSE_BINDINGS.json;
+      tools/publication/propose_prose_bindings.py

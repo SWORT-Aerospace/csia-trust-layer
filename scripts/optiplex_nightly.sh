@@ -50,6 +50,26 @@ stage recovery       "$PY" tools/assurance/process_recovery.py --out "$OUT/recov
 stage config_proof   "$PY" tools/assurance/config_proof.py --out "$OUT/config_proof.json"
 stage provenance     "$PY" tools/assurance/build_provenance.py --out "$OUT/provenance.json"
 
+# ---------------------------------------------------------------------------
+# QUALITY RATCHET. Coverage and mutation score may not fall below the recorded
+# floor. The floor is a MEASUREMENT of what was achieved, not a target, and it
+# only ever moves up -- by a deliberate `--update` in the commit that earned
+# it. See tools/xr/quality_ratchet.py.
+#
+# The mutation probe is SLOW (minutes, not seconds) and runs against a COPY of
+# the tree, so it is last: a nightly that never reaches the fast stages
+# because the slow one hung would be worse than no nightly.
+stage mission_tests  "$PY" -m pytest tests/test_mission_assurance.py \
+                        tests/test_mission_untested_modules.py \
+                        tests/test_mission_boundaries.py \
+                        tests/test_mission_survivor_kills.py \
+                        tests/test_mission_registries_and_schemas.py \
+                        tests/test_bad_product_references.py \
+                        tests/test_paper_i_scope_guard.py -q
+stage mutation_probe "$PY" tools/xr/mutation_probe.py --sample 250 \
+                        --out "$OUT/mutation.json"
+stage quality_ratchet "$PY" tools/xr/quality_ratchet.py --check
+
 if [ -f "$ROOT/research/physical_validation/results/PORTABILITY_HOST_current.json" ] \
    && [ -f "$OUT/host.json" ]; then
   stage portability "$PY" tools/assurance/portability_probe.py --compare \

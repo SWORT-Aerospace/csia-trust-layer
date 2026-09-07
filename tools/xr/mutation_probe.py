@@ -76,6 +76,7 @@ TEST_SUBSET = (
     "tests/test_mission_assurance.py",
     "tests/test_mission_untested_modules.py",
     "tests/test_mission_boundaries.py",
+    "tests/test_mission_survivor_kills.py",
     "tests/test_bad_product_references.py",
 )
 

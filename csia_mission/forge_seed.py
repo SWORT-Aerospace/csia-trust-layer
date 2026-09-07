@@ -100,23 +100,24 @@ def _groups(one_of) -> list:
     return sorted(out)
 
 
-def _k_of_n(spec) -> tuple | None:
-    """A k-of-n dependency, ONLY in the one explicit form.
+def _k_of_n_groups(contract) -> list:
+    """Compiled form of a contract's k-of-n groups.
 
-    `{"k": 2, "of": ["a", "b", "c"]}` and nothing else. A bare list is NOT
-    silently read as 1-of-n: the semantics of "how many must hold" is exactly
-    what a reader would guess wrong, so it must be written down.
+    DELEGATES to csia_mission.capability._validated_k_of_n rather than
+    parsing the spec a second time. This module previously carried its OWN
+    `_k_of_n` parser that NOTHING CALLED, while `K_OF_N` sat in
+    DEPENDENCY_FORMS as a form the compiler never emitted -- a declared
+    capability with no behaviour behind it, which is the exact shape of claim
+    this repository exists to refuse. Two parsers for one syntax would have
+    been the next problem.
     """
-    if not isinstance(spec, Mapping):
-        return None
-    if set(spec) != {"k", "of"}:
-        return None
-    k, of = spec["k"], list(spec["of"])
-    if not isinstance(k, int) or k < 1 or k > len(of):
-        raise CompileError(
-            f"k-of-n dependency {spec!r} has k={k!r} against {len(of)} "
-            f"options; k must be an integer in [1, n]")
-    return k, sorted(of)
+    from .capability import _validated_k_of_n
+    out = []
+    for spec in getattr(contract, "requires_k_of_n", ()) or ():
+        k, of = _validated_k_of_n(spec, getattr(contract, "capability_id",
+                                                "<contract>"))
+        out.append({"k": k, "of": of})
+    return sorted(out, key=lambda g: (g["k"], g["of"]))
 
 
 def compile_contracts(capabilities: Iterable[CapabilityContract],
@@ -157,6 +158,8 @@ def compile_contracts(capabilities: Iterable[CapabilityContract],
         note(c.requires_all)
         for g in c.requires_one_of:
             note(g if isinstance(g, (list, tuple)) else [g])
+        for g in _k_of_n_groups(c):
+            note(g["of"])
         for dep in c.requires_capabilities:
             if dep not in caps:
                 unresolved.append(f"{cid} requires capability {dep!r}")
@@ -194,9 +197,11 @@ def compile_contracts(capabilities: Iterable[CapabilityContract],
     cap_table: dict = {}
     for cid in sorted(caps):
         c = caps[cid]
+        k_groups = _k_of_n_groups(c)
         entry = {
             "AND": sorted(c.requires_all),
             "OR": _groups(c.requires_one_of),
+            "K_OF_N": k_groups,
             "capabilities": sorted(c.requires_capabilities),
             "compute": sorted(c.requires_compute),
             "timing": sorted(c.requires_timing),
@@ -207,6 +212,8 @@ def compile_contracts(capabilities: Iterable[CapabilityContract],
             forms_used.add("AND")
         if entry["OR"]:
             forms_used.add("OR")
+        if k_groups:
+            forms_used.add("K_OF_N")
         cap_table[cid] = entry
 
     prod_table: dict = {}
@@ -238,7 +245,8 @@ def compile_contracts(capabilities: Iterable[CapabilityContract],
     # reverse index: which capability or product does each evidence item feed
     consumers: dict = {}
     for cid, entry in cap_table.items():
-        for e in entry["AND"] + [x for g in entry["OR"] for x in g]:
+        k_ev = [x for g in entry.get("K_OF_N", []) for x in g["of"]]
+        for e in entry["AND"] + [x for g in entry["OR"] for x in g] + k_ev:
             consumers.setdefault(e, []).append(f"capability:{cid}")
     for pid, entry in prod_table.items():
         for e in entry["AND"] + [x for g in entry["OR"] for x in g]:
@@ -340,6 +348,8 @@ def check_compiled(tables: CompiledTables,
         out = set(c.requires_all)
         for g in c.requires_one_of:
             out |= set(g if isinstance(g, (list, tuple)) else [g])
+        for g in _k_of_n_groups(c):
+            out |= set(g["of"])
         return out
 
     # transitive closure by repeated expansion
@@ -363,7 +373,9 @@ def check_compiled(tables: CompiledTables,
             problems.append({"kind": "COMPILED_CAPABILITY_NOT_IN_SOURCE",
                              "id": cid})
             continue
-        recompiled = set(entry["AND"]) | {x for g in entry["OR"] for x in g}
+        recompiled = (set(entry["AND"])
+                      | {x for g in entry["OR"] for x in g}
+                      | {x for g in entry.get("K_OF_N", []) for x in g["of"]})
         if recompiled != direct_evidence(caps[cid]):
             problems.append({"kind": "DIRECT_EVIDENCE_MISMATCH", "id": cid,
                              "compiled": sorted(recompiled),

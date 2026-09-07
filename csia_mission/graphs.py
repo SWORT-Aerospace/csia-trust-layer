@@ -63,6 +63,17 @@ PERMITTED_EDGE_DIRECTIONS = (
 )
 
 
+def _k_of_n_of(contract) -> list:
+    """A capability's k-of-n groups, parsed once by the canonical parser."""
+    from .capability import _validated_k_of_n
+    out = []
+    for spec in getattr(contract, "requires_k_of_n", ()) or ():
+        k, of = _validated_k_of_n(spec, getattr(contract, "capability_id",
+                                                "<contract>"))
+        out.append({"k": k, "of": of})
+    return out
+
+
 def _evidence_of(*specs) -> set:
     out: set = set()
     for spec in specs:
@@ -84,7 +95,8 @@ def build(capabilities: Iterable[CapabilityContract],
 
     evidence_nodes: set = set(sources)
     for c in caps.values():
-        evidence_nodes |= _evidence_of(c.requires_all, c.requires_one_of)
+        evidence_nodes |= _evidence_of(c.requires_all, c.requires_one_of,
+                                       [g["of"] for g in _k_of_n_of(c)])
     for p in prods.values():
         evidence_nodes |= _evidence_of(p.requires_all, p.requires_one_of)
         for q in p.qualities:
@@ -93,8 +105,9 @@ def build(capabilities: Iterable[CapabilityContract],
     cap_to_evidence: dict = {}
     cap_to_cap: dict = {}
     for cid, c in sorted(caps.items()):
+        k_of = [g["of"] for g in _k_of_n_of(c)]
         cap_to_evidence[cid] = sorted(
-            _evidence_of(c.requires_all, c.requires_one_of))
+            _evidence_of(c.requires_all, c.requires_one_of, k_of))
         cap_to_cap[cid] = sorted(c.requires_capabilities)
 
     prod_to_cap: dict = {}
@@ -182,19 +195,31 @@ def consumers_of(graphs: Mapping, evidence_id: str) -> dict:
                     for pid, per in prop_edges.items()
                     for p, e in per.items() if evidence_id in e["evidence"]}
 
-    trans_prods = set(direct_prods) | {
+    # A product is affected at its BASE when it names the evidence directly
+    # or one of its own required capabilities reaches it. Every property of
+    # such a product goes with it -- there is no data to qualify.
+    base_hit_products = set(direct_prods) | {
         pid for pid, caps in prod_cap.items() if set(caps) & reaching}
+
     trans_props = set(direct_props)
+    for pid in base_hit_products:
+        for pname in prop_edges.get(pid, {}):
+            trans_props.add(f"{pid}.{pname}")
+    # A property may ALSO depend on a capability the product does not, and
+    # then only that property is affected.
     for pid, per in prop_edges.items():
-        base_hit = pid in trans_prods and pid in direct_prods
         for pname, edges in per.items():
-            if set(edges["capabilities"]) & reaching or base_hit:
+            if set(edges["capabilities"]) & reaching:
                 trans_props.add(f"{pid}.{pname}")
-    # A product whose BASE depends on it takes all of its properties.
-    for pid in trans_prods:
-        if pid in direct_prods or set(prod_cap.get(pid, ())) & reaching:
-            for pname in prop_edges.get(pid, {}):
-                trans_props.add(f"{pid}.{pname}")
+
+    # A PRODUCT IS AFFECTED WHEN ANY OF ITS PROPERTIES IS, and the first
+    # version computed it only from the product-level capability list. That
+    # left `transitive_product_properties` naming `p.survey_grade` while
+    # `transitive_products` was empty -- the property affected, the product
+    # apparently not. Two answers to one question, and the narrower one was
+    # the wrong one for "what breaks if I lose this?".
+    trans_prods = set(base_hit_products) | {
+        prop.rsplit(".", 1)[0] for prop in trans_props}
 
     return {
         "evidence": evidence_id,

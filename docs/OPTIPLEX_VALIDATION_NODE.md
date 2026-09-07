@@ -62,6 +62,17 @@ the rest. `scripts/optiplex_nightly.sh` is the script; the order is:
 | 12 | process failure and recovery | `tools/assurance/process_recovery.py` |
 | 13 | configuration proof | `tools/assurance/config_proof.py` |
 | 14 | build and dependency provenance | `tools/assurance/build_provenance.py` |
+| 15 | mission-layer tests | `pytest tests/test_mission_*.py` |
+| 16 | mutation probe | `tools/xr/mutation_probe.py` |
+| 17 | **quality ratchet** | `tools/xr/quality_ratchet.py --check` |
+
+**The ratchet is the stage that stops quality drifting down.** Coverage and
+mutation score may not fall below `research/mission/results/QUALITY_FLOOR.json`,
+which records what was actually achieved rather than a target. The floor only
+moves **up**, by a deliberate `--update` in the commit that earned it; lowering
+it is an edit somebody has to justify in review. Stage 16 is slow — minutes,
+not seconds — and runs against a copy of the tree, so it sits near the end
+where a hang cannot starve the fast stages.
 
 **Stage 8 is expected to FAIL, and that is not a broken node.** Decision replay
 is DIVERGENT on both platforms (HF-004) and the software-hardening gate does
