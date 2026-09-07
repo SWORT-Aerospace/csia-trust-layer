@@ -1519,3 +1519,75 @@ entries:
       research/mission/results/FROZEN_CORE_TEST_SENSITIVITY.json;
       research/mission/results/MUTATION_PROBE_FROZEN_CORE.json;
       research/mission/results/MUTATION_PROBE_FROZEN_CORE_WIDE.json
+
+  - id: MX-015
+    date: 2026-09-07
+    phase: QUALITY AUDIT (self-correction)
+    kind: MEASUREMENT_ERROR
+    what_happened: >-
+      MX-014 CONCLUDED THAT THE FROZEN CORE'S LOW MUTATION SCORE WAS "A
+      PROPERTY OF WHAT THE TESTS ASSERT, NOT OF WHICH TESTS WERE CHOSEN". THAT
+      CONCLUSION WAS WRONG for the two files that dominated the result.
+      NEITHER the nine-file subset NOR the eighteen-file "wide" subset
+      included tests/test_hypothesis.py -- 44 tests whose entire subject is
+      csia/diagnosis/hypothesis.py, the file carrying 46 of the 78 survivors.
+      With it included:
+        csia/diagnosis/hypothesis.py   0.000 -> 0.448  (13 of 29)
+        csia/diagnosis/causal.py       0.000 -> 0.273  (3 of 11)
+    found_by: >-
+      Grepping for what imports hypothesis.py while answering a question about
+      what to improve next, and finding a test file dedicated to it that both
+      of my subsets had omitted.
+    verdict: MX-014_PARTIALLY_RETRACTED
+    consequence: >-
+      WHAT IS RETRACTED: the generalisation. Adding tests DID move the number,
+      substantially, for the files that mattered most.
+      WHAT STILL STANDS: the narrow-versus-wide comparison itself is real --
+      9 files to 18, over 250 extra tests, zero additional kills, a
+      byte-identical surviving set. The error was reasoning from it while the
+      decisive file was absent from BOTH sides. A subset-sensitivity check is
+      only evidence if the subsets it varies contain the tests that matter;
+      comparing two subsets that both omit the decisive file measures the two
+      omissions.
+      ALSO STILL STANDS: the BIMODAL finding. trust_engine/engine.py,
+      runtime/failsafe.py and diagnosis/bayes.py score 1.000 -- every injected
+      defect caught in the files the E1 numbers come out of. And online.py's
+      88.8% coverage against 0.154 mutation remains the largest
+      coverage-versus-mutation gap measured in this repository.
+      THE FROZEN CORE IS BETTER TESTED THAN 0.35 SUGGESTED. The headline
+      number was an artifact of MY MEASUREMENT, not a property of the core,
+      and any downstream use of 0.35 should be read against this entry.
+    artifact: >-
+      research/mission/results/MUTATION_PROBE_HYPOTHESIS_FOCUSED.json;
+      research/mission/results/FROZEN_CORE_TEST_SENSITIVITY.json
+
+  - id: MX-016
+    date: 2026-09-07
+    phase: QUALITY AUDIT (duplication)
+    kind: DUPLICATED_EXISTING_CAPABILITY
+    what_happened: >-
+      I BUILT tools/xr/mutation_probe.py WITHOUT CHECKING WHETHER THE
+      REPOSITORY ALREADY HAD ONE. It does: tools/mutation/run_mutations.py,
+      with 24 hand-written mutants each carrying a stated scientific
+      justification for why its change is meaningful, run inside a GIT
+      WORKTREE sandbox -- stronger isolation than my temporary-copy approach,
+      because an orphaned worktree cannot leave the working tree modified.
+    found_by: >-
+      Grepping for what imports the frozen diagnosis modules, which surfaced
+      tools/mutation/run_mutations.py in the results.
+    verdict: RECORDED_BOTH_KEPT
+    consequence: >-
+      THE TWO ARE DIFFERENT INSTRUMENTS AND BOTH EARN THEIR PLACE, which is
+      the only reason this is not simply waste:
+        run_mutations.py asks "would the tests notice a SCIENTIFICALLY
+        MEANINGFUL change?" -- few mutants, each justified, each adjudicated.
+        mutation_probe.py asks "how much of the code do the tests CONSTRAIN AT
+        ALL?" -- hundreds of syntactic mutants, no per-mutant justification,
+        a coverage-like sweep.
+      A hand-written mutant set cannot answer the second question and an
+      automatic sweep cannot answer the first.
+      BUT THE DUPLICATION WAS NOT DELIBERATE, and the git-worktree sandbox in
+      the existing tool is better isolation than mine. If the probe is kept,
+      it should adopt that sandbox rather than the two diverging.
+    artifact: >-
+      tools/xr/mutation_probe.py; tools/mutation/run_mutations.py
