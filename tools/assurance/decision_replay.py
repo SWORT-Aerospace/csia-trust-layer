@@ -63,7 +63,7 @@ def replay(log_path: str, platform: str, node: str = "gps",
     `gate` selects how the hand-off sequence is reconstructed. "arrival"
     reproduces the live adapter, which keys on channel ARRIVAL TIME;
     "value" is the older approximation that compared values and missed
-    58.8% of hand-offs on a committed log. See HF-007.
+    58.8% of hand-offs on a committed log. See HF-010.
     """
     from csia.runtime.online import OnlineTrustLayer
     from csia.v1_1.staleness import build_runtime_stale_timeouts
@@ -190,7 +190,7 @@ def replay(log_path: str, platform: str, node: str = "gps",
             "which is what the live adapter's freshness gate does. The "
             "earlier reconstruction compared VALUES and so missed 58.8% of "
             "hand-offs on a committed log, because two identical consecutive "
-            "readings looked like no new reading (HF-007). That removed most "
+            "readings looked like no new reading (HF-010). That removed most "
             "of the ArduPilot divergence -- 511 categorical differences fell "
             "to 13 -- and left PX4 unchanged at 144, so what remains on PX4 "
             "has a DIFFERENT cause and is still unattributed. "

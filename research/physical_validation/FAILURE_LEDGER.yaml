@@ -1688,7 +1688,7 @@ entries:
       csia_stress/applicability.py;
       tests/test_stress_layer.py (test_dropout_on_vibration_is_lost_in_transport)
 
-  - id: HF-007
+  - id: HF-010
     date: 2026-09-07
     phase: PROGRAM A (HF-004 follow-up)
     kind: INSTRUMENT_FIDELITY
@@ -1748,7 +1748,7 @@ entries:
       tools/assurance/decision_replay.py;
       tests/test_handoff_reconstruction.py
 
-  - id: HF-008
+  - id: HF-011
     date: 2026-09-07
     phase: PROGRAM A (freeze verification)
     kind: GUARD_CANNOT_DO_ITS_JOB
@@ -1803,7 +1803,7 @@ entries:
       tools/csia_experiment/build_e1_freeze_manifest.py;
       tests/test_e1_freeze_manifest.py
 
-  - id: HF-009
+  - id: HF-012
     date: 2026-09-07
     phase: PROGRAM A (independent verification)
     kind: REPRODUCTION
@@ -1856,7 +1856,7 @@ entries:
       research/physical_validation/results/E1_INDEPENDENT_REDUCTION.json;
       tests/test_e1_independent_reduction.py
 
-  - id: HF-010
+  - id: HF-013
     date: 2026-09-07
     phase: PUBLICATION (prose-to-artifact bindings)
     kind: TRACEABILITY
@@ -1913,3 +1913,79 @@ entries:
       tools/publication/resolve_ambiguous_bindings.py;
       research/publication/AMBIGUOUS_BINDING_RESOLUTION.json;
       tests/test_ambiguous_binding_resolution.py
+
+  - id: SR-003
+    date: 2026-09-07
+    phase: STRESS (SR-001 remediation)
+    kind: GAP_CLOSED_ABOVE_THE_FREEZE
+    what_happened: >-
+      SR-001 IS CLOSED BY A LOSS-OF-DATA RULE FOR THE SEVEN SENSORS THAT
+      DID NOT HAVE ONE, ADDED ABOVE THE FROZEN CORE RATHER THAN INSIDE IT.
+      csia/runtime/failsafe.py is inside FROZEN_PATHS, so editing it would
+      break the E1 freeze manifest, byte-equivalence to
+      csia-v1.0-research-final, and every claim descending from them. The
+      rule therefore lives in a new package, csia_supervision, in the same
+      direction as csia_assurance and csia_mission: it CALLS the frozen
+      policy and never modifies it. A test asserts the frozen file still
+      matches the tag.
+      MEASURED, 40 s of loss in a 90 s flight, frozen -> supervised:
+        both IMUs        NORMAL -> EMERGENCY     (the SR-001 headline)
+        one IMU          NORMAL -> CAUTION
+        battery + baro   NORMAL -> CRITICAL
+        mag              NORMAL -> CAUTION
+        motor_esc        NORMAL -> CAUTION
+        GPS              CAUTION -> CAUTION      (not double-reported)
+        CLEAN FLIGHT     NORMAL -> NORMAL        (no false alarm)
+        vibration anomaly CRITICAL -> CRITICAL   (bad data, unchanged)
+    found_by: >-
+      Implementing the rule the SR-001 entry described, then running the
+      same reproducer SR-001 was recorded from.
+    verdict: CLOSED_ABOVE_THE_FROZEN_CORE
+    consequence: >-
+      THE LEVELS ARE DERIVED, NOT CHOSEN. Inventing a severity per sensor
+      would be exactly the retuning that must not happen, so each level is
+      read off the severity the FROZEN config already assigns that sensor:
+      heading_caution -> CAUTION for mag, power_critical -> CRITICAL for
+      battery, struct_critical -> CRITICAL for vibration, imu_isolation ->
+      CAUTION for a single IMU, and att_emergency -> EMERGENCY for the loss
+      of BOTH attitude sources, which is the exact analogue of the frozen
+      `attitude_lost` rule.
+      TWO LEVELS ARE A CHOICE AND ARE LABELLED AS ONE. baro and motor_esc
+      are referenced ZERO times in the frozen conditions -- they have no
+      rule of any kind, by trust or by loss -- so there is no severity to
+      derive. Their levels default to the lowest actionable level and carry
+      the provenance UNANCHORED_THIS_IS_A_CHOICE, so a reader can see which
+      two numbers are mine. Timing is not invented either: dwell_up,
+      arm_time and the disarmed behaviour all come from the frozen config.
+      THE OVERLAY CANNOT LOWER A FROZEN LEVEL. effective = max(frozen,
+      supervisor). A layer above the core that could de-escalate would be
+      able to overrule a frozen safety decision, and a test asserts it
+      cannot.
+      THE CLEAN-FLIGHT ROW IS THE ONE THAT MATTERS. A loss-of-data rule
+      that alarmed on healthy flight would be worse than the gap it fills,
+      because an alarm nobody believes is an alarm nobody acts on. It stays
+      NORMAL, and so does a sensor that was never fitted -- the same
+      _ever_fresh rule the frozen policy applies to GPS.
+      ONE RULE CANNOT BE EXERCISED IN THIS RIG. dropout on the vibration
+      node is live in the sampled stream and inert after transport
+      (SR-002), so fresh["vibration"] never goes false and the overlay
+      correctly stays quiet. The rule exists and its level is anchored;
+      what is missing is a way to deliver the stimulus. The test records
+      that rather than asserting an outcome the rig cannot produce.
+      TEST SENSITIVITY, same targets/seed/16 sites, only tests added:
+      0.6875 (11/16) -> 0.9375 (15/16) -> 1.000 (16/16). Every survivor was
+      a boundary: < versus <= at arm_time and at dwell_up, the fresh.get
+      default, proper-versus-improper subset on ever_fresh, and
+      once-per-condition action issuing. The last needed a vehicle whose
+      ONLY ever-fresh nodes are the two IMUs, the single case where subset
+      and proper subset differ.
+      STILL ADVISORY. CSIA has no command authority. This changes what the
+      layer would RAISE, not what any vehicle would do. And the recorded
+      stress baseline still describes the FROZEN policy alone --
+      run_profile(supervised=True) is an explicit request to measure a
+      different system.
+    artifact: >-
+      csia_supervision/dataloss.py;
+      tests/test_supervision_dataloss.py;
+      docs/SUPERVISION_LAYER.md;
+      research/mission/results/MUTATION_PROBE_SUPERVISION.json

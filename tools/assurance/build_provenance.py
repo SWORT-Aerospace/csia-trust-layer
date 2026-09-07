@@ -82,7 +82,7 @@ def _frozen_core_digests() -> dict:
 
     # DIRECTORIES ARE COMPARED OVER SOURCE ONLY, against the reproducible
     # source-digest artifact rather than the manifest's two contaminated
-    # directory values. HF-008: those hash `__pycache__` alongside source,
+    # directory values. HF-011: those hash `__pycache__` alongside source,
     # so they embed the source mtime through the .pyc header and report
     # drift after any tool touches a frozen file -- even one that restores
     # it byte-identically. This function warns in its own docstring that a
@@ -121,7 +121,7 @@ def _frozen_core_digests() -> dict:
             "how_directories_are_compared": (
                 "source only, against FROZEN_SOURCE_DIGESTS.json. The E1 "
                 "manifest's two directory digests include __pycache__ and "
-                "are not reproducible on a fresh clone (HF-008); its "
+                "are not reproducible on a fresh clone (HF-011); its "
                 "per-file hashes are unaffected and are still used."),
             "digest_functions": ("imported from "
                                  "tools/csia_experiment/"

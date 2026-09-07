@@ -36,6 +36,22 @@ from csia.runtime.online import OnlineTrustLayer
 
 from .source import StressFlightSource
 
+def _dwell_down(policy) -> float:
+    """The de-escalation dwell, whichever policy object is in use."""
+    cfg = getattr(policy, "cfg", None)
+    if cfg is None:
+        cfg = policy.supervisor.config
+    return cfg.dwell_down
+
+
+def _transitions(policy) -> list:
+    """Frozen-policy transitions; the overlay records conditions, not
+    transitions, and its escalations are visible in the level trace."""
+    if hasattr(policy, "transitions"):
+        return policy.transitions
+    return policy.policy.transitions
+
+
 #: Sensors the legacy cause vocabulary can accuse at all. Taken from the
 #: frozen `LEGACY_CAUSE_SOURCE` rather than restated here, so this cannot
 #: drift from it. Two of the eight sensor nodes -- `baro` and `motor_esc` --
@@ -127,14 +143,25 @@ class StressRun:
         }
 
 
-def run_profile(profile, truth=None) -> StressRun:
-    """Run one stress profile through the frozen core and measure it."""
+def run_profile(profile, truth=None, supervised: bool = False) -> StressRun:
+    """Run one stress profile through the frozen core and measure it.
+
+    `supervised=True` adds the loss-of-data overlay (csia_supervision) on
+    top of the frozen policy. THE DEFAULT IS FALSE so the recorded
+    baseline, and every number measured before the overlay existed, keep
+    describing the frozen core alone. Turning it on is an explicit request
+    to measure a different system.
+    """
     profile.validate()
     source = StressFlightSource(faults=profile.faults, truth=truth,
                                 flight_profile=profile.flight_profile,
                                 duration=profile.duration)
     layer = OnlineTrustLayer()
-    policy = FailsafePolicy()
+    if supervised:
+        from csia_supervision import SupervisedFailsafe
+        policy = SupervisedFailsafe()
+    else:
+        policy = FailsafePolicy()
 
     states = []
     last_t = 0.0
@@ -238,7 +265,7 @@ def run_profile(profile, truth=None) -> StressRun:
         # Faults may clear before or after the failsafe first fires; clamp
         # at zero rather than reporting a negative recovery.
         recovery_time = round(max(0.0, returned_normal - clear), 4)
-    elif observable_window < policy.cfg.dwell_down:
+    elif observable_window < _dwell_down(policy):
         # NOT a finding about the system. Calling this NOT_RECOVERED would
         # report the profile's length as if it were the layer's behaviour.
         recovery_status, recovery_time = WINDOW_TOO_SHORT, None
@@ -262,9 +289,9 @@ def run_profile(profile, truth=None) -> StressRun:
                       "from": int(tr.previous), "to": int(tr.level),
                       "to_name": FailsafeLevel(tr.level).name,
                       "reasons": list(tr.reasons)}
-                     for tr in policy.transitions],
+                     for tr in _transitions(policy)],
         min_trust={k: round(v, 4) for k, v in sorted(min_trust.items())},
-        dwell_down_s=policy.cfg.dwell_down,
+        dwell_down_s=_dwell_down(policy),
         flight_end_s=round(flight_end, 4),
         observable_recovery_window_s=round(observable_window, 4),
         attribution=attribution,

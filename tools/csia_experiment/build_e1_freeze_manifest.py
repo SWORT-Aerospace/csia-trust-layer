@@ -125,7 +125,7 @@ def sha256_tree(rel: str, source_only: bool = False) -> dict:
     `source_only=True` EXCLUDES BUILD ARTIFACTS, and that is the only form
     that means anything across machines.
 
-    WHY, MEASURED (HF-008): the default form walks every file, so
+    WHY, MEASURED (HF-011): the default form walks every file, so
     `__pycache__/*.pyc` is hashed alongside the source. CPython's default
     timestamp-based invalidation embeds the SOURCE MTIME in the .pyc
     header, so a file rewritten and restored byte-identically still yields

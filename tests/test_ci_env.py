@@ -61,7 +61,7 @@ SCANNED_DIRS = ("csia", "tests", "tools")
 # outside the scanned set look identical to the scan, and the fix differs.
 LOCAL_NAME_DIRS = SCANNED_DIRS + ("research", "engineering",
                                   "csia_assurance", "csia_mission",
-                                  "csia_stress")
+                                  "csia_stress", "csia_supervision")
 
 #: import name -> PyPI distribution, where they differ
 IMPORT_TO_DIST = {"yaml": "pyyaml", "z3": "z3-solver"}

@@ -90,7 +90,8 @@ INCONCLUSIVE_RC=2 stage quality_ratchet "$PY" tools/xr/quality_ratchet.py --chec
 # recorded under a different seed/count/applicability matrix, which is
 # INCONCLUSIVE rather than a failure.
 stage stress_tests   "$PY" -m pytest tests/test_stress_layer.py \
-                        tests/test_stress_regression.py -q
+                        tests/test_stress_regression.py \
+                        tests/test_supervision_dataloss.py -q
 stage stress_catalog "$PY" csia_stress/campaign.py --mode catalog --quiet \
                         --out "$OUT/stress_catalog.json"
 INCONCLUSIVE_RC=2 stage stress_regression "$PY" tools/xr/stress_regression.py --check

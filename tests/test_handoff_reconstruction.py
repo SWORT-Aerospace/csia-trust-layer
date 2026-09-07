@@ -1,6 +1,6 @@
 """The replay must rebuild the hand-offs the live run actually performed.
 
-HF-007. `PlatformAdapter.to_core_samples` gates on channel ARRIVAL TIME;
+HF-010. `PlatformAdapter.to_core_samples` gates on channel ARRIVAL TIME;
 the replay used to gate on channel VALUE. Two identical consecutive
 readings have different arrival times and equal values, so the live run
 hands the sensor over and the replay does not.
@@ -60,12 +60,12 @@ def test_the_undercount_is_large_not_slight():
     """It was documented as a SLIGHT under-count. It is not slight.
 
     If this ratio ever drops toward 1.0 the two reconstructions have
-    converged and HF-007's premise needs re-checking.
+    converged and HF-010's premise needs re-checking.
     """
     value = _count("ardupilot", GATE_VALUE)
     arrival = _count("ardupilot", GATE_ARRIVAL)
     assert arrival / value > 1.5, (
-        f"value={value} arrival={arrival}: the gap HF-007 measured has "
+        f"value={value} arrival={arrival}: the gap HF-010 measured has "
         f"closed; re-read the ledger entry before trusting either number")
 
 

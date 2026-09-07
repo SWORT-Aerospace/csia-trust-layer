@@ -37,7 +37,7 @@
   },
   "frozen_core": {
     "digest_functions": "imported from tools/csia_experiment/build_e1_freeze_manifest.py, shared with the manifest they check",
-    "how_directories_are_compared": "source only, against FROZEN_SOURCE_DIGESTS.json. The E1 manifest's two directory digests include __pycache__ and are not reproducible on a fresh clone (HF-008); its per-file hashes are unaffected and are still used.",
+    "how_directories_are_compared": "source only, against FROZEN_SOURCE_DIGESTS.json. The E1 manifest's two directory digests include __pycache__ and are not reproducible on a fresh clone (HF-011); its per-file hashes are unaffected and are still used.",
     "identical_to_the_freeze": true,
     "not_verifiable": [],
     "now": {
@@ -344,16 +344,25 @@
   "schema": "csia.assurance.build_provenance/1",
   "source": {
     "branch": "claude/code-reviewer-repo-export-zicovg",
-    "commit": "0a3cf141975a7699e37afa394896713d58f16d11",
-    "describe": "csia-dual-paper-evidence-freeze-57-g0a3cf14-dirty",
+    "commit": "c8b5dae3d055be5467e78a5330f73fbe96f352c2",
+    "describe": "csia-dual-paper-evidence-freeze-58-gc8b5dae-dirty",
     "dirty_paths": [
-      "esearch/physical_validation/FAILURE_LEDGER.yaml",
-      "research/physical_validation/results/E1_INDEPENDENT_REDUCTION.json",
-      "research/publication/",
-      "tests/test_ambiguous_binding_resolution.py",
-      "tests/test_e1_independent_reduction.py",
-      "tools/csia_experiment/reduce_e1_independently.py",
-      "tools/publication/resolve_ambiguous_bindings.py"
+      "csia_stress/observables.py",
+      "csia_supervision/",
+      "docs/SUPERVISION_LAYER.md",
+      "github/workflows/ci.yml",
+      "research/mission/results/MUTATION_PROBE_SUPERVISION.json",
+      "research/physical_validation/FAILURE_LEDGER.yaml",
+      "research/physical_validation/results/FROZEN_SOURCE_DIGESTS.json",
+      "scripts/optiplex_nightly.sh",
+      "tests/test_ci_env.py",
+      "tests/test_e1_freeze_manifest.py",
+      "tests/test_handoff_reconstruction.py",
+      "tests/test_supervision_dataloss.py",
+      "tools/assurance/build_provenance.py",
+      "tools/assurance/decision_replay.py",
+      "tools/csia_experiment/build_e1_freeze_manifest.py",
+      "tools/deploy/profile_core_from_log.py"
     ],
     "working_tree_dirty": true
   },

@@ -94,8 +94,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev,assurance]"
-      - name: stress layer and regression-gate tests
-        run: python -m pytest tests/test_stress_layer.py tests/test_stress_regression.py -q
+      - name: stress layer, regression gate and supervision overlay
+        run: |
+          python -m pytest tests/test_stress_layer.py \
+                          tests/test_stress_regression.py \
+                          tests/test_supervision_dataloss.py -q
       - name: named catalog — every profile detected and recovered
         run: python csia_stress/campaign.py --mode catalog --quiet
       # exit 1 = behaviour changed; exit 2 = the baseline is NOT COMPARABLE

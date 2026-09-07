@@ -68,7 +68,7 @@ def load_ticks(path: str):
 
 #: Reconstruction gates. `arrival` reproduces what the live adapter does;
 #: `value` is the original approximation, kept so the two can be COMPARED
-#: rather than one silently replacing the other. See HF-007.
+#: rather than one silently replacing the other. See HF-010.
 GATE_ARRIVAL = "arrival"
 GATE_VALUE = "value"
 

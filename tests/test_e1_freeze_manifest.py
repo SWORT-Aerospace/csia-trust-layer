@@ -95,7 +95,7 @@ def test_every_directory_digest_still_matches(doc):
 
     The two `frozen_core` directory digests are deliberately NOT checked
     here; `test_the_frozen_source_digests_still_match` covers that source
-    with a reproducible measurement. See HF-008 and the docstring on
+    with a reproducible measurement. See HF-011 and the docstring on
     `sha256_tree`: those two recorded values hash `__pycache__` alongside
     source, so they embed the source mtime through the .pyc header and
     cannot be reproduced on a fresh clone, which has no `__pycache__` at
