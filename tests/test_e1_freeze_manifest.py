@@ -17,6 +17,7 @@ WHAT IT CANNOT CHECK, AND SAYS SO
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 
@@ -90,11 +91,17 @@ def test_every_single_file_digest_still_matches(doc):
 
 
 def test_every_directory_digest_still_matches(doc):
+    """Directory digests OUTSIDE the frozen core, which contain no bytecode.
+
+    The two `frozen_core` directory digests are deliberately NOT checked
+    here; `test_the_frozen_source_digests_still_match` covers that source
+    with a reproducible measurement. See HF-008 and the docstring on
+    `sha256_tree`: those two recorded values hash `__pycache__` alongside
+    source, so they embed the source mtime through the .pyc header and
+    cannot be reproduced on a fresh clone, which has no `__pycache__` at
+    all. They are left in the manifest as the historical record they are.
+    """
     trees = []
-    for rel, digest in (doc.get("frozen_core", {}).get("digests")
-                        or {}).items():
-        if isinstance(digest, dict):
-            trees.append(("frozen_core", rel, digest))
     for rel, entry in (doc.get("raw_trace_archives") or {}).items():
         trees.append(("raw_trace_archives", rel, entry))
     for rel, entry in (doc.get("campaigns") or {}).items():
@@ -114,6 +121,66 @@ def test_every_directory_digest_still_matches(doc):
                 f"\n      actual   {got}")
     assert not wrong, ("directories have changed since the E1 freeze:\n  "
                        + "\n  ".join(wrong))
+
+
+def test_the_frozen_source_digests_still_match():
+    """THE FROZEN CORE, MEASURED OVER SOURCE ONLY.
+
+    This is the check the bytecode-contaminated directory digests were
+    meant to be. It is reproducible on a fresh clone because it hashes
+    only source, and `FROZEN_SOURCE_DIGESTS.json` records the values
+    measured from a tree verified byte-identical to the freeze tag.
+    """
+    path = os.path.join(ROOT, "research", "physical_validation", "results",
+                        "FROZEN_SOURCE_DIGESTS.json")
+    assert os.path.exists(path), "FROZEN_SOURCE_DIGESTS.json is missing"
+    with open(path, encoding="utf-8") as fh:
+        recorded = json.load(fh)
+
+    wrong = []
+    for rel, expected in sorted(recorded["digests"].items()):
+        full = os.path.join(ROOT, rel)
+        if os.path.isdir(full):
+            got = sha256_tree(rel, source_only=True)
+        elif os.path.exists(full):
+            got = {"files": 1, "sha256_of_file_manifest": sha256_file(full)}
+        else:
+            wrong.append(f"{rel} no longer exists")
+            continue
+        if got != expected:
+            wrong.append(f"{rel}\n      recorded {expected}"
+                         f"\n      actual   {got}")
+    assert not wrong, ("THE FROZEN CORE SOURCE HAS CHANGED:\n  "
+                       + "\n  ".join(wrong))
+
+
+def test_the_per_file_frozen_hashes_agree_with_the_source_digests():
+    """Two independent records of the same files must agree.
+
+    The E1 manifest's PER-FILE hashes were never bytecode-contaminated --
+    only its two DIRECTORY digests were -- so they must still match the
+    source-only artifact. If these two ever disagree, one of them has been
+    edited and the disagreement is the finding.
+    """
+    with open(os.path.join(ROOT, "research", "physical_validation",
+                           "results", "FROZEN_SOURCE_DIGESTS.json"),
+              encoding="utf-8") as fh:
+        source_digests = json.load(fh)["digests"]
+
+    with open(MANIFEST, encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
+    checked = 0
+    for rel, digest in (doc.get("frozen_core", {}).get("digests")
+                        or {}).items():
+        if isinstance(digest, dict):        # a directory: not comparable
+            continue
+        assert source_digests[rel]["sha256_of_file_manifest"] == digest, (
+            f"{rel}: the E1 manifest and the source-digest artifact "
+            f"disagree about a frozen file")
+        checked += 1
+    assert checked >= 4, (
+        f"only {checked} per-file frozen hashes compared; this test must "
+        f"not pass vacuously")
 
 
 def test_the_campaign_arithmetic_in_the_manifest_balances(doc):

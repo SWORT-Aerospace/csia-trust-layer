@@ -56,11 +56,18 @@ def _rel(a, b):
     return abs(a - b) / scale
 
 
-def replay(log_path: str, platform: str, node: str = "gps") -> dict:
-    """Re-drive the frozen core from a committed log and compare per tick."""
+def replay(log_path: str, platform: str, node: str = "gps",
+           gate: str = "arrival") -> dict:
+    """Re-drive the frozen core from a committed log and compare per tick.
+
+    `gate` selects how the hand-off sequence is reconstructed. "arrival"
+    reproduces the live adapter, which keys on channel ARRIVAL TIME;
+    "value" is the older approximation that compared values and missed
+    58.8% of hand-offs on a committed log. See HF-007.
+    """
     from csia.runtime.online import OnlineTrustLayer
     from csia.v1_1.staleness import build_runtime_stale_timeouts
-    from tools.deploy.profile_core_from_log import (core_samples_for_tick,
+    from tools.deploy.profile_core_from_log import (HandoffReconstructor,
                                                     load_ticks)
 
     ticks = list(load_ticks(log_path))
@@ -71,14 +78,12 @@ def replay(log_path: str, platform: str, node: str = "gps") -> dict:
         tick_hz=25.0, field_mode=True,
         stale_timeout_s=build_runtime_stale_timeouts(platform))
 
-    prev = None
+    reconstructor = HandoffReconstructor(gate=gate)
     replayed = []
     for tick in ticks:
         states = []
-        for sensor, t, chans in core_samples_for_tick(tick, prev):
+        for sensor, t, chans in reconstructor.samples_for_tick(tick):
             states.extend(layer.ingest(sensor, t, chans))
-        prev = {k: v["value"] for k, v in tick["canonical"]["channels"].items()
-                if v.get("usable")}
         for s in states:
             replayed.append((round(s.t, 6), s.trust.get(node),
                              dict(s.edges or {})))
@@ -179,14 +184,19 @@ def replay(log_path: str, platform: str, node: str = "gps") -> dict:
         "tolerance": TOLERANCE,
         "verdict": verdict,
         "divergence_examples": examples,
+        "reconstruction_gate": gate,
         "fidelity_note": (
-            "The hand-off reconstruction detects a change in a channel value, "
-            "so two identical consecutive readings look like no new reading. "
-            "FL-019 records that this reproduces PX4's measured trust to "
-            "~0.003 and does NOT reproduce ArduPilot's. A continuous-value "
-            "difference on ArduPilot is therefore EXPECTED and attributable, "
-            "not a new finding; a CATEGORICAL difference would be a finding "
-            "on either platform."),
+            "The hand-off reconstruction now keys on channel ARRIVAL TIME, "
+            "which is what the live adapter's freshness gate does. The "
+            "earlier reconstruction compared VALUES and so missed 58.8% of "
+            "hand-offs on a committed log, because two identical consecutive "
+            "readings looked like no new reading (HF-007). That removed most "
+            "of the ArduPilot divergence -- 511 categorical differences fell "
+            "to 13 -- and left PX4 unchanged at 144, so what remains on PX4 "
+            "has a DIFFERENT cause and is still unattributed. "
+            "THE VERDICT IS STILL DIVERGENT ON BOTH PLATFORMS: decision "
+            "replay does not yet serve as a verification instrument, and the "
+            "software-hardening gate must not count it as PASS."),
     }
 
 

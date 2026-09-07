@@ -103,19 +103,51 @@ def sha256_file(path: str) -> str:
     return h.hexdigest()
 
 
-def sha256_tree(rel: str) -> dict:
+#: Build artifacts that are NOT source and must not be hashed as if they
+#: were. See `sha256_tree`.
+BUILD_ARTIFACT_DIRS = ("__pycache__",)
+BUILD_ARTIFACT_SUFFIXES = (".pyc", ".pyo")
+
+
+def is_source(rel_path: str) -> bool:
+    parts = rel_path.replace("\\", "/").split("/")
+    if any(p in BUILD_ARTIFACT_DIRS for p in parts):
+        return False
+    return not rel_path.endswith(BUILD_ARTIFACT_SUFFIXES)
+
+
+def sha256_tree(rel: str, source_only: bool = False) -> dict:
     """A directory's digest, as a hash over sorted `sha256  relpath` lines.
 
-    Stable under mtime and filesystem ordering, unlike a tarball hash, and the
+    Stable under filesystem ordering, unlike a tarball hash, and the
     per-file count is reported so a silently-shrunk directory is visible.
+
+    `source_only=True` EXCLUDES BUILD ARTIFACTS, and that is the only form
+    that means anything across machines.
+
+    WHY, MEASURED (HF-008): the default form walks every file, so
+    `__pycache__/*.pyc` is hashed alongside the source. CPython's default
+    timestamp-based invalidation embeds the SOURCE MTIME in the .pyc
+    header, so a file rewritten and restored byte-identically still yields
+    a different .pyc and a different directory digest. The docstring used
+    to claim stability under mtime; through the bytecode it had none.
+
+    It is worse than a false alarm. The recorded E1 digests count
+    `csia/trust_engine` as 4 files where the directory holds 2 sources, and
+    `csia/diagnosis` as 12 where it holds 6. A FRESH CLONE HAS NO
+    `__pycache__` AT ALL, so those digests cannot be reproduced anywhere
+    the artifact was not built -- the same shape as the freeze-tag test
+    that skips on a fresh clone, and a skip looks like a pass.
     """
     base = os.path.join(ROOT, rel)
     entries = []
     for dirpath, _dirs, names in os.walk(base):
         for n in sorted(names):
             p = os.path.join(dirpath, n)
-            entries.append(f"{sha256_file(p)}  "
-                           f"{os.path.relpath(p, base)}")
+            rel_path = os.path.relpath(p, base)
+            if source_only and not is_source(rel_path):
+                continue
+            entries.append(f"{sha256_file(p)}  {rel_path}")
     entries.sort()
     body = "\n".join(entries) + "\n"
     return {"files": len(entries),

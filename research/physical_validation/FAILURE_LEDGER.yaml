@@ -1687,3 +1687,118 @@ entries:
     artifact: >-
       csia_stress/applicability.py;
       tests/test_stress_layer.py (test_dropout_on_vibration_is_lost_in_transport)
+
+  - id: HF-007
+    date: 2026-09-07
+    phase: PROGRAM A (HF-004 follow-up)
+    kind: INSTRUMENT_FIDELITY
+    what_happened: >-
+      HF-004'S ATTRIBUTED CAUSE WAS CORRECT AND ITS MAGNITUDE WAS BADLY
+      UNDERSTATED. The replay rebuilt the core hand-off sequence by
+      detecting a CHANGED CHANNEL VALUE; the live adapter
+      (PlatformAdapter.to_core_samples) gates on CHANNEL ARRIVAL TIME:
+        stamps = tuple(self._latest[ch][1] for ch in mapping.values() ...)
+        if stamps and self._emitted.get(sensor) == stamps: continue
+      Two identical consecutive readings have different arrival times and
+      equal values, so the live run hands the sensor over and the replay
+      does not. This was documented as a "slight" under-count.
+      MEASURED on a committed 751-tick shadow log: 1454 hand-offs by value
+      against 3527 by arrival time. THE VALUE METHOD MISSES 58.8% OF THEM.
+    found_by: >-
+      Reading the live gate and the replay side by side while working
+      HF-004, then counting both reconstructions over the committed logs
+      rather than assuming the documented "slight" was slight.
+    verdict: PARTIALLY_FIXED_HF_004_STILL_OPEN
+    consequence: >-
+      NOTHING NEW HAD TO BE LOGGED AND THE FROZEN CORE IS UNTOUCHED. Each
+      logged channel already carries `age_s`, so arrival time is
+      `t_mono - age_s` -- the same quantity `_latest` holds. The
+      reconstruction was reading the wrong field, not missing a field.
+      RESULT, decision replay, categorical differences of 750 compared:
+        ardupilot  511 -> 13     bit-identical 24 -> 51,
+                                 worst relative difference 0.0286 -> 0.0020
+        px4        144 -> 144    unchanged, worst relative 0.1045 unchanged
+      So HF-004's mechanism accounted for nearly all of the ArduPilot
+      divergence and NONE of the PX4 divergence. What remains on PX4 has a
+      different cause and is still unattributed. The PX4 hand-off sequence
+      did change (1314 -> 1372); the extra hand-offs simply do not touch
+      the compared node.
+      THE VERDICT IS STILL DIVERGENT ON BOTH PLATFORMS. Decision replay
+      still does not serve as a verification instrument and the
+      software-hardening gate must still not count it as PASS. HF-004
+      stays open with a much sharper characterisation.
+      MY FIRST VERSION OF THIS FIX WAS WRONG AND MADE PX4 WORSE (144 -> 282
+      divergent). Reconstructed arrival is `t_mono - age_s`, two
+      independently rounded quantities, so a HELD value's arrival wobbles
+      by microseconds instead of repeating exactly; compared at full
+      precision every stamp looks new, which is over-counting, not
+      reconstruction. The quantum that fixes it is set from two MEASURED
+      scales rather than chosen: held-value jitter maxes at 3.19e-05 s
+      (ardupilot) and 1.25e-04 s (px4), while the smallest real
+      inter-arrival gap is 0.0186 s and 0.0198 s -- populations separated
+      by 159x on the tighter platform. 1 ms sits ~8x above the worst
+      jitter and ~19x below the smallest real gap, and any value in
+      [1.3e-4, 1.8e-2] gives the same answer. That is what makes it a
+      quantisation and not a tuning knob.
+      The old gate is KEPT AND SELECTABLE (`gate="value"`) so the two can
+      be compared rather than one silently replacing the other, and the
+      report now names the gate it used.
+    artifact: >-
+      tools/deploy/profile_core_from_log.py (HandoffReconstructor);
+      tools/assurance/decision_replay.py;
+      tests/test_handoff_reconstruction.py
+
+  - id: HF-008
+    date: 2026-09-07
+    phase: PROGRAM A (freeze verification)
+    kind: GUARD_CANNOT_DO_ITS_JOB
+    what_happened: >-
+      THE FROZEN-CORE DIRECTORY DIGESTS HASH COMPILED BYTECODE ALONGSIDE
+      SOURCE. `sha256_tree` walks every file under a directory, so
+      `__pycache__/*.pyc` is hashed with the .py files. CPython's default
+      timestamp-based invalidation embeds the SOURCE MTIME in the .pyc
+      header, so a file rewritten and then restored BYTE-IDENTICALLY still
+      produces a different .pyc and a different directory digest.
+      The recorded counts show it plainly: the manifest records
+      csia/trust_engine as 4 files where the directory holds 2 sources, and
+      csia/diagnosis as 12 where it holds 6. The other half is bytecode.
+      CONSEQUENCE: A FRESH CLONE HAS NO __pycache__ AT ALL, so those two
+      digests cannot be reproduced anywhere the artifact was not built.
+      The check could never have passed on a fresh clone. That is the same
+      shape as the freeze-tag test that SKIPS on a fresh clone, already
+      recorded in docs/OPTIPLEX_VALIDATION_NODE.md: a guard that only works
+      where it was made.
+      `sha256_tree`'s own docstring claimed the digest was "stable under
+      mtime". Through the bytecode it had no such stability.
+    found_by: >-
+      The digest for csia/diagnosis failing after mutation-testing runs
+      rewrote and restored frozen source files byte-identically. Git
+      reported the tree clean and `git diff csia-v1.0-research-final`
+      reported EMPTY, so the source was provably unchanged while the
+      digest said otherwise.
+    verdict: FIXED_WITHOUT_TOUCHING_THE_RECORDED_EVIDENCE
+    consequence: >-
+      THE FROZEN SOURCE WAS NEVER MODIFIED. Verified two independent ways:
+      `git diff csia-v1.0-research-final -- <the six frozen paths>` is
+      empty, and the per-file hashes recomputed now equal the ones the E1
+      manifest recorded for online.py, failsafe.py, scenarios.py and
+      profiles.py. ONLY THE TWO DIRECTORY DIGESTS WERE EVER CONTAMINATED;
+      every per-file hash in the manifest was always correct.
+      THE RECORDED VALUES ARE NOT EDITED. Overwriting a frozen digest to
+      make a test pass is exactly what must not happen, so the two
+      contaminated values stay in E1_FREEZE_MANIFEST.yaml as the historical
+      record they are, and the manifest is byte-unchanged.
+      WHAT WAS ADDED INSTEAD: `sha256_tree(..., source_only=True)`, which
+      excludes build artifacts, and
+      research/physical_validation/results/FROZEN_SOURCE_DIGESTS.json,
+      which records source-only digests measured from a tree verified
+      byte-identical to the freeze tag and IS reproducible on a fresh
+      clone. Two tests now cover it: one recomputes those digests, and one
+      cross-checks them against the manifest's per-file hashes so the two
+      records cannot drift apart silently.
+      Verified to discriminate: appending one comment line to a frozen file
+      makes the new test fail, and restoring it makes it pass.
+    artifact: >-
+      research/physical_validation/results/FROZEN_SOURCE_DIGESTS.json;
+      tools/csia_experiment/build_e1_freeze_manifest.py;
+      tests/test_e1_freeze_manifest.py

@@ -80,12 +80,35 @@ def _frozen_core_digests() -> dict:
     from tools.csia_experiment.build_e1_freeze_manifest import (sha256_file,
                                                                 sha256_tree)
 
-    now, drift = {}, []
+    # DIRECTORIES ARE COMPARED OVER SOURCE ONLY, against the reproducible
+    # source-digest artifact rather than the manifest's two contaminated
+    # directory values. HF-008: those hash `__pycache__` alongside source,
+    # so they embed the source mtime through the .pyc header and report
+    # drift after any tool touches a frozen file -- even one that restores
+    # it byte-identically. This function warns in its own docstring that a
+    # provenance tool which cries drift is worse than none, and it was
+    # doing exactly that.
+    source_path = os.path.join(ROOT, "research", "physical_validation",
+                               "results", "FROZEN_SOURCE_DIGESTS.json")
+    source_digests = {}
+    if os.path.exists(source_path):
+        with open(source_path, encoding="utf-8") as fh:
+            source_digests = json.load(fh).get("digests") or {}
+
+    now, drift, unverifiable = {}, [], []
     for rel, entry in recorded.items():
         path = os.path.join(ROOT, rel)
         if os.path.isdir(path):
-            now[rel] = sha256_tree(rel)
-        elif os.path.exists(path):
+            expected = source_digests.get(rel)
+            if expected is None:
+                now[rel] = "NOT_VERIFIABLE_WITHOUT_SOURCE_DIGESTS"
+                unverifiable.append(rel)
+                continue
+            now[rel] = sha256_tree(rel, source_only=True)
+            if now[rel] != expected:
+                drift.append(rel)
+            continue
+        if os.path.exists(path):
             now[rel] = sha256_file(path)
         else:
             now[rel] = "ABSENT"
@@ -94,6 +117,12 @@ def _frozen_core_digests() -> dict:
     return {"recorded_at_freeze": recorded, "now": now,
             "paths_that_differ": sorted(drift),
             "identical_to_the_freeze": not drift,
+            "not_verifiable": sorted(unverifiable),
+            "how_directories_are_compared": (
+                "source only, against FROZEN_SOURCE_DIGESTS.json. The E1 "
+                "manifest's two directory digests include __pycache__ and "
+                "are not reproducible on a fresh clone (HF-008); its "
+                "per-file hashes are unaffected and are still used."),
             "digest_functions": ("imported from "
                                  "tools/csia_experiment/"
                                  "build_e1_freeze_manifest.py, shared with "

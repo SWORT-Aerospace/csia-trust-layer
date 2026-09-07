@@ -37,19 +37,21 @@
   },
   "frozen_core": {
     "digest_functions": "imported from tools/csia_experiment/build_e1_freeze_manifest.py, shared with the manifest they check",
+    "how_directories_are_compared": "source only, against FROZEN_SOURCE_DIGESTS.json. The E1 manifest's two directory digests include __pycache__ and are not reproducible on a fresh clone (HF-008); its per-file hashes are unaffected and are still used.",
     "identical_to_the_freeze": true,
+    "not_verifiable": [],
     "now": {
       "csia/diagnosis": {
-        "files": 12,
-        "sha256_of_file_manifest": "ac9926d735df6a2386ce6965ac723e7016ebef2fa760a4525abe26b6231938a4"
+        "files": 6,
+        "sha256_of_file_manifest": "b2164d1d357ac046bf070dbea4b00b2266a871a5d1e0a47857f9027936962710"
       },
       "csia/profiles.py": "7ff5ebd0589b82004cb30de0025a7ce0d4fa585c6e0032b2f425aa5abcca309e",
       "csia/runtime/failsafe.py": "0a8d1f5fc8b29ab4b1fb89ffb09eca614fd6d3c183bbb4616f16147606acf2ef",
       "csia/runtime/online.py": "d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa",
       "csia/scenarios.py": "043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557",
       "csia/trust_engine": {
-        "files": 4,
-        "sha256_of_file_manifest": "43bbcca2971630373b7e07a62b9988b233665208c49b5b67270a557055c39495"
+        "files": 2,
+        "sha256_of_file_manifest": "68984bbe2f4fcfa911c893858875b132be591136729eefada111c097fed6409e"
       }
     },
     "paths_that_differ": [],
@@ -342,16 +344,22 @@
   "schema": "csia.assurance.build_provenance/1",
   "source": {
     "branch": "claude/code-reviewer-repo-export-zicovg",
-    "commit": "83d68544be54d2972aecd23ea0a4ab90db4fe9af",
-    "describe": "csia-dual-paper-evidence-freeze-54-g83d6854-dirty",
+    "commit": "36f8cba95e41a24ebf3c63191c047cfdae7f5440",
+    "describe": "csia-dual-paper-evidence-freeze-55-g36f8cba-dirty",
     "dirty_paths": [
-      "csia_stress/",
-      "docs/STRESS_TESTING.md",
-      "esearch/physical_validation/FAILURE_LEDGER.yaml",
-      "research/stress/",
-      "tests/test_ci_env.py",
-      "tests/test_mission_properties.py",
-      "tests/test_stress_layer.py"
+      "ocs/DOCUMENT_INDEX.md",
+      "research/mission/results/MUTATION_PROBE_HYPOTHESIS_AFTER_KILLS.json",
+      "research/physical_validation/FAILURE_LEDGER.yaml",
+      "research/physical_validation/results/BUILD_PROVENANCE.json",
+      "research/physical_validation/results/FROZEN_SOURCE_DIGESTS.json",
+      "research/stress/results/STRESS_RANDOM_1000.json",
+      "tests/test_e1_freeze_manifest.py",
+      "tests/test_frozen_core_survivor_kills.py",
+      "tests/test_handoff_reconstruction.py",
+      "tools/assurance/build_provenance.py",
+      "tools/assurance/decision_replay.py",
+      "tools/csia_experiment/build_e1_freeze_manifest.py",
+      "tools/deploy/profile_core_from_log.py"
     ],
     "working_tree_dirty": true
   },

@@ -66,18 +66,128 @@ def load_ticks(path: str):
                 yield rec
 
 
+#: Reconstruction gates. `arrival` reproduces what the live adapter does;
+#: `value` is the original approximation, kept so the two can be COMPARED
+#: rather than one silently replacing the other. See HF-007.
+GATE_ARRIVAL = "arrival"
+GATE_VALUE = "value"
+
+#: Arrival times are reconstructed as `t_mono - age_s`, two independently
+#: rounded quantities, so a HELD value's arrival wobbles by a few
+#: microseconds instead of repeating exactly. Comparing at full precision
+#: therefore makes every stamp look new, which is over-counting rather than
+#: reconstruction -- the first version of this did exactly that.
+#:
+#: The quantum is set from TWO MEASURED SCALES, not chosen by taste. Across
+#: both committed shadow logs:
+#:
+#:     held-value arrival jitter   max 3.19e-05 s (ardupilot)
+#:                                 max 1.25e-04 s (px4)
+#:     real inter-arrival gaps     min 0.0186 s   (ardupilot)
+#:                                 min 0.0198 s   (px4)
+#:
+#: The two populations are separated by 159x on the tighter platform. One
+#: millisecond sits ~8x above the worst jitter and ~19x below the smallest
+#: real gap, in the middle of that gap on a log scale. Any value in
+#: [1.3e-4, 1.8e-2] gives the same answer, which is what makes this a
+#: quantisation rather than a tuning knob.
+ARRIVAL_QUANTUM_S = 1e-3
+
+
+class HandoffReconstructor:
+    """Rebuild the hand-off sequence a logged run actually performed.
+
+    THE LIVE GATE KEYS ON ARRIVAL TIME, NOT ON VALUE
+    ------------------------------------------------
+    `PlatformAdapter.to_core_samples` emits a sensor when its channels'
+    ARRIVAL TIMESTAMPS differ from the last hand-off::
+
+        stamps = tuple(self._latest[ch][1] for ch in mapping.values() ...)
+        if stamps and self._emitted.get(sensor) == stamps: continue
+
+    The original reconstruction compared VALUES instead, so two identical
+    consecutive readings -- a stationary vehicle, a saturated channel, a
+    slowly-varying temperature -- looked like no new reading. It was
+    documented as a slight under-count.
+
+    IT IS NOT SLIGHT. Measured on a committed 751-tick shadow log: 1454
+    hand-offs by value against 3527 by arrival time, so the value method
+    misses 58.8% of them. That is the mechanism behind HF-004's DIVERGENT
+    decision replay -- a sensor never handed over is an edge never made
+    live, which is exactly the shape of the recorded divergences.
+
+    The log already carries what is needed: each channel records `age_s`,
+    so arrival time is `t_mono - age_s`, the same quantity `_latest`
+    holds. NOTHING NEW HAD TO BE LOGGED and the frozen core is untouched;
+    the reconstruction was simply reading the wrong field.
+    """
+
+    def __init__(self, gate: str = GATE_ARRIVAL):
+        if gate not in (GATE_ARRIVAL, GATE_VALUE):
+            raise ValueError(f"unknown gate {gate!r}")
+        self.gate = gate
+        self._emitted: dict = {}      # sensor -> last emitted stamp tuple
+        self._values: dict = {}       # channel -> last value (value gate)
+
+    def samples_for_tick(self, tick) -> list:
+        chans = tick["canonical"]["channels"]
+        t_mono = tick["t_mono"]
+        out = []
+        for sensor, mapping in PlatformAdapter.CORE_MAP.items():
+            built, complete, changed, stamps = {}, True, False, []
+            for core_key, channel in mapping.items():
+                cv = chans.get(channel)
+                if cv is None or not cv.get("usable"):
+                    if channel == "baro.temp_c":
+                        continue
+                    complete = False
+                    break
+                val = cv["value"]
+                if channel in VECTOR_CHANNELS:
+                    val = np.asarray(val, dtype=float)
+                built[core_key] = val
+                # A channel that has never arrived is absent from the live
+                # adapter's `_latest` and so contributes no stamp.
+                age = cv.get("age_s")
+                if age is not None:
+                    stamps.append(
+                        (channel, round((t_mono - age) / ARRIVAL_QUANTUM_S)))
+                if self._values.get(channel) != cv["value"]:
+                    changed = True
+            if not complete or not built:
+                continue
+
+            if self.gate == GATE_ARRIVAL:
+                key = tuple(stamps)
+                if key and self._emitted.get(sensor) == key:
+                    self._remember(mapping, chans)
+                    continue
+                self._emitted[sensor] = key
+            elif not changed:
+                self._remember(mapping, chans)
+                continue
+
+            self._remember(mapping, chans)
+            if sensor == "gps":
+                built["vz_valid"] = False
+            if sensor != "vehicle_status":
+                built["valid"] = True
+            out.append((sensor, t_mono, built))
+        return out
+
+    def _remember(self, mapping, chans) -> None:
+        for channel in mapping.values():
+            cv = chans.get(channel)
+            if cv is not None and cv.get("usable"):
+                self._values[channel] = cv["value"]
+
+
 def core_samples_for_tick(tick, previous):
-    """Rebuild the (sensor, t, channels) hand-offs for one logged tick.
+    """Backwards-compatible wrapper around the VALUE gate.
 
-    Reconstructs what `to_core_samples` produced at the time, including its
-    freshness gate: a sensor is handed over only when one of its channels
-    carries a value different from the previous tick.
-
-    KNOWN LIMITATION, stated rather than hidden: two identical consecutive
-    readings are indistinguishable from no new reading, so this slightly
-    UNDER-counts hand-offs. The bias is toward reporting the core as cheaper
-    than it is, which is the safe direction for a budget claim -- and if the
-    replay still shows the cost, the cost is real.
+    Retained because it is the shape earlier callers used. New code should
+    use `HandoffReconstructor`, which carries its own state and defaults to
+    the arrival gate that matches the live adapter.
     """
     chans = tick["canonical"]["channels"]
     out = []
