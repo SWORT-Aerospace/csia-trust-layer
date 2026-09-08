@@ -3,21 +3,34 @@
 WHY THIS IS THE DECIDING MEASUREMENT
 -------------------------------------
 The low-trust threshold was chosen against the CLEAN-flight minimum baro
-trust of 0.9930, giving an apparently comfortable margin of 0.243 below the
-0.75 threshold. That margin is misleading, and a single control run showed
-why: on a flight where **GPS** drops out and baro is untouched, baro trust
-falls to **0.8182**. Baro's only trust-graph edge is `altitude_baro`,
-spanning (baro, gps) -- so losing GPS costs baro its only source of
-corroboration and its trust decays toward the prior through no fault of the
-barometer.
-
-Margin against a clean flight: 0.243. Margin against another sensor's
-failure: **0.068**. The second number is the one that decides whether this
-rule is safe to ship, and it is not obtainable from a clean flight.
+trust of 0.9930. A clean flight is the easy case; the question that decides
+whether the rule is safe to enable is what happens to baro when a DIFFERENT
+sensor fails. Baro's only trust-graph edge is `altitude_baro`, spanning
+(baro, gps), so it is not obvious that baro's trust survives a GPS failure
+with nothing wrong with the barometer.
 
 So this measures the thing that actually matters: across the campaign's
 multi-sensor degradations, **in runs where baro carries no fault at all**,
 how often would the baro low-trust rule fire?
+
+A CORRECTION THIS MODULE EXISTS TO RECORD
+------------------------------------------
+The first version of this measurement read `StressRun.min_trust`, which is
+the minimum over the WHOLE run including warm-up from the 0.8 Beta prior. It
+reported 0.8182 and that was taken as evidence of exactly the feared
+mechanism -- GPS loss starving baro of corroboration, leaving a margin of
+only 0.068 above the threshold.
+
+**That was a misreading.** 0.8182 is 9/11 to four decimals and appears in
+EVERY campaign run whatever is faulted: runs degrading only battery and
+imu1, GPS entirely healthy, report the identical value. It is the warm-up
+floor as trust climbs off the prior, and it says nothing about fault
+response at all. The rule cannot fire before `arm_time` anyway, so it was
+also the wrong window.
+
+Measured over the armed window instead, baro's minimum in runs without a
+baro fault is **0.993** -- the clean-flight figure. Another sensor's failure
+does not degrade baro. Margin 0.243, not 0.068.
 
     A FALSE ALARM HERE IS WORSE THAN THE GAP IT FILLS. An advisory layer
     that cries wolf on a healthy barometer trains an operator to ignore it,
@@ -41,7 +54,51 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
 from csia_stress.campaign import random_profile                 # noqa: E402
-from csia_stress.observables import run_profile                 # noqa: E402
+
+
+def _post_arm_min_trust(profile, sensor: str):
+    """Minimum trust AFTER `arm_time`, which is the only window that matters.
+
+    `StressRun.min_trust` is the minimum over the WHOLE run, warm-up
+    included. Trust starts at the 0.8 Beta prior and climbs, so that
+    minimum is an early-flight artifact -- measured at exactly 0.8182
+    (9/11) in every campaign run regardless of which sensors are faulted.
+
+    THIS CORRECTS A MISREADING. That constant was first taken as evidence
+    that losing GPS starves baro of its only corroborating edge and drags
+    its trust down. It is nothing of the kind: runs faulting only battery
+    and imu1, with GPS perfectly healthy, report the same 0.8182. The
+    number is the warm-up floor and says nothing about fault response.
+
+    The rule cannot fire before `arm_time`, so the margin that decides the
+    false-alarm question is the minimum over the ARMED window alone.
+    """
+    from csia.runtime.failsafe import FailsafeConfig
+    from csia.runtime.online import OnlineTrustLayer
+    from csia_stress.source import StressFlightSource
+
+    arm = FailsafeConfig().arm_time
+    source = StressFlightSource(faults=profile.faults, truth=None,
+                                flight_profile=profile.flight_profile,
+                                duration=profile.duration)
+    layer = OnlineTrustLayer()
+    worst, last = None, 0.0
+    for name, t, channels in source.samples():
+        for state in layer.ingest(name, t, channels):
+            if float(state.t) < arm:
+                continue
+            value = state.trust.get(sensor)
+            if value is not None:
+                worst = float(value) if worst is None \
+                    else min(worst, float(value))
+        last = t
+    for state in layer.flush(last):
+        if float(state.t) >= arm:
+            value = state.trust.get(sensor)
+            if value is not None:
+                worst = float(value) if worst is None \
+                    else min(worst, float(value))
+    return worst
 
 
 def run(count: int = 300, seed: int = 20260907) -> dict:
@@ -59,8 +116,7 @@ def run(count: int = 300, seed: int = 20260907) -> dict:
             continue                    # baro IS faulted; not a false alarm
         without_baro_fault += 1
 
-        result = run_profile(profile, supervised=True)
-        baro_min = result.min_trust.get("baro")
+        baro_min = _post_arm_min_trust(profile, "baro")
         if baro_min is None:
             continue
         margin = baro_min - rule.threshold
@@ -98,13 +154,15 @@ def run(count: int = 300, seed: int = 20260907) -> dict:
             "p00": pct(0.0), "p01": pct(0.01), "p05": pct(0.05),
             "p50": pct(0.5), "p95": pct(0.95)},
         "examples": fired_names[:10],
-        "why_a_clean_flight_is_not_enough": (
-            "baro's only trust-graph edge is `altitude_baro`, spanning "
-            "(baro, gps). Losing GPS removes baro's only corroboration and "
-            "its trust decays toward the prior with nothing wrong with the "
-            "barometer. Clean-flight margin 0.243; margin under another "
-            "sensor's failure was measured at 0.068 in a single control "
-            "run, which is what prompted this campaign."),
+        "measurement_window": (
+            "minimum baro trust AFTER arm_time, which is the only window "
+            "the rule can fire in. StressRun.min_trust spans the whole run "
+            "including warm-up from the 0.8 prior, and that whole-run "
+            "minimum is 0.8182 (9/11) in EVERY campaign run whatever is "
+            "faulted -- an early-flight artifact, not a fault response. "
+            "Reading it as GPS starving baro of its only corroborating edge "
+            "was a misreading, corrected here: runs faulting only battery "
+            "and imu1, GPS healthy, report the identical 0.8182."),
         "nothing_is_tuned_by_this_module": (
             "whatever the rate, the threshold is not adjusted here. An "
             "unacceptable rate is reported and the rule withdrawn or "

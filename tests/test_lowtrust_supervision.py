@@ -269,3 +269,47 @@ def test_explain_reports_both_supervisors_separately():
     assert "never reported twice" in doc["the_two_gaps_are_separate"] or \
         "never reported twice" in doc["the_two_gaps_are_separate"].lower() \
         or "twice" in doc["the_two_gaps_are_separate"]
+
+
+# ---------------------------------------------------------------------------
+# the false-alarm evidence, and the misreading that nearly buried it
+# ---------------------------------------------------------------------------
+
+def test_the_false_alarm_evidence_exists_and_says_zero():
+    """A rule with a chosen threshold is not shippable on an argument. The
+    measurement is the licence, so its absence must fail loudly."""
+    import json
+    path = os.path.join(ROOT, "research", "stress", "results",
+                        "LOW_TRUST_FALSE_ALARM.json")
+    if not os.path.exists(path):
+        pytest.skip("LOW_TRUST_FALSE_ALARM.json not generated")
+    with open(path, encoding="utf-8") as fh:
+        rep = json.load(fh)
+    assert rep["would_fire"] == 0
+    assert rep["runs_without_a_baro_fault"] >= 50
+    assert rep["threshold"] == lowtrust.RULES["baro"].threshold
+    # The margin must be the ARMED-window one, not the warm-up artifact.
+    assert rep["worst_margin_above_threshold"] > 0.2, (
+        "a margin near 0.068 means the whole-run minimum is being measured "
+        "again -- that is the warm-up floor, not a fault response")
+
+
+def test_the_measurement_uses_the_armed_window_not_the_whole_run():
+    """THE REGRESSION. StressRun.min_trust spans warm-up from the 0.8 prior
+    and reads 0.8182 (9/11) in every run whatever is faulted. Measuring
+    against that produced a confident, entirely fictional account of GPS
+    starving baro. The rule cannot fire before arm_time, so the armed
+    window is the only correct one."""
+    from csia.runtime.failsafe import FailsafeConfig
+    from csia_stress.campaign import random_profile
+    from csia_stress.low_trust_false_alarm import _post_arm_min_trust
+    import random as _random
+
+    profile = random_profile(_random.Random(20260907), 2)
+    assert "baro" not in {f.target for f in profile.faults}
+    armed_min = _post_arm_min_trust(profile, "baro")
+    assert armed_min is not None
+    assert armed_min > 0.9, (
+        f"baro's armed-window minimum is {armed_min}; a value near 0.8182 "
+        "means the warm-up period is being included again")
+    assert FailsafeConfig().arm_time == 10.0

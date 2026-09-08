@@ -2586,12 +2586,12 @@ entries:
   - id: SR-007
     date: 2026-09-08
     phase: SUPERVISION (SR-006 gap)
-    kind: RULE_ADDED_VERDICT_PENDING
+    kind: RULE_ADDED_AND_VALIDATED
     status: >-
-      PENDING. The rule is implemented and tested; the measurement that
-      decides whether it should be ENABLED is still running. Nothing in the
-      deployed default changes either way -- the whole overlay is opt-in via
-      --data-loss-supervision, which defaults to off.
+      RESOLVED. False-alarm measurement complete: 0 firings in 58 campaign
+      runs that carry no baro fault, worst margin 0.243 above the threshold.
+      The rule stands. Nothing in the deployed default changes -- the whole
+      overlay remains opt-in via --data-loss-supervision, off by default.
     what_happened: >-
       SR-006 measured a gap the data-loss overlay does not cover: baro keeps
       DELIVERING while its value walks away from truth. At a drift of 1.0
@@ -2635,23 +2635,36 @@ entries:
       never detected at any swept magnitude up to 1.00. Peak level CAUTION,
       matching the level dataloss.py already assigns baro.
     the_finding_that_decides_it: >-
-      A CLEAN-FLIGHT MARGIN IS THE WRONG MARGIN, and a control run showed
-      why. On a flight where GPS drops and baro is untouched, baro trust
-      falls to 0.8182 -- because baro's only edge partners it with gps, so
-      losing GPS removes baro's only corroboration and its trust decays
-      toward the prior with nothing wrong with the barometer.
-      Margin against a clean flight: 0.243. Margin against another sensor's
-      failure: 0.068. The second number is the one that decides whether this
-      rule is safe to enable, and it is invisible from a clean flight.
-    what_is_being_measured_now: >-
-      csia_stress/low_trust_false_alarm.py, across campaign variations in
-      which baro carries NO fault: how often would the rule fire anyway.
-      A FALSE ALARM HERE IS WORSE THAN THE GAP IT FILLS -- an advisory layer
-      that cries wolf on a healthy barometer trains an operator to ignore
-      it, and SR-006's gap is at least honest about itself.
-      WHATEVER THE NUMBER, THE THRESHOLD IS NOT ADJUSTED TO SUIT IT. An
-      unacceptable rate means the rule is withdrawn or re-scoped, and that
-      outcome will be recorded here as it stands.
+      A CLEAN-FLIGHT MARGIN IS THE WRONG MARGIN in principle, because baro's
+      only edge partners it with gps and a GPS failure could in theory
+      starve baro of corroboration with nothing wrong with the barometer.
+      MEASURED, IT DOES NOT. Across 58 campaign variations carrying no baro
+      fault, baro's minimum trust over the ARMED window is 0.993 -- the
+      clean-flight figure -- and the rule fires zero times. Margin 0.243.
+      Another sensor's failure does not degrade baro.
+    a_misreading_i_made_and_corrected: >-
+      The first version of that measurement read StressRun.min_trust, which
+      spans the WHOLE run including warm-up from the 0.8 Beta prior. It
+      returned 0.8182 and I reported it as the feared mechanism confirmed --
+      GPS loss starving baro, margin only 0.068, the rule possibly unsafe.
+      THAT WAS WRONG. 0.8182 is 9/11 to four decimals and appears in EVERY
+      campaign run whatever is faulted; runs degrading only battery and imu1
+      with GPS entirely healthy report the identical value. It is the
+      warm-up floor as trust climbs off the prior and says nothing about
+      fault response, and since the rule cannot fire before arm_time it was
+      also the wrong window. The uniform percentiles -- p00 through p95 all
+      exactly 0.8182 -- were the clue that the instrument, not the system,
+      was being measured.
+      Re-measured over the armed window: 0.993, margin 0.243, zero firings.
+      The conclusion the broken instrument reached (0 false alarms) happened
+      to be right, and conservatively so, since a whole-run minimum is a
+      lower bound on the armed-window minimum. The REASON it gave was
+      fiction. Recorded because a right answer from a wrong measurement is
+      still a wrong measurement.
+    the_threshold_was_not_adjusted: >-
+      At no point was the 0.75 moved. Had the false-alarm rate been
+      unacceptable the rule would have been withdrawn or re-scoped; the
+      number stayed fixed while the instrument was fixed instead.
     not_covered_and_said_so: >-
       motor_esc has the identical gap and is NOT covered. Its clean-flight
       trust margin under load has not been measured, and a rule whose
