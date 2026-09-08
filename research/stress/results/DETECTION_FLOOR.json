@@ -35,13 +35,33 @@
       "floor": 0.3,
       "reach": "ENTIRE_CAMPAIGN_RANGE_BELOW_FLOOR",
       "shape": "MONOTONIC"
+    },
+    "power_sag@battery": {
+      "campaign_draws": [
+        150.1,
+        699.4
+      ],
+      "floor": 25.0,
+      "reach": "ENTIRE_CAMPAIGN_RANGE_AT_OR_ABOVE_FLOOR",
+      "shape": "MONOTONIC"
+    },
+    "power_sag@motor_esc": {
+      "campaign_draws": [
+        150.1,
+        699.4
+      ],
+      "floor": 2200.0,
+      "reach": "ENTIRE_CAMPAIGN_RANGE_BELOW_FLOOR",
+      "shape": "MONOTONIC"
     }
   },
   "detection_floors": {
     "bias_drift@baro": null,
     "bias_drift@imu0": 0.05,
     "bias_drift@imu1": 0.02,
-    "bias_drift@mag": 0.3
+    "bias_drift@mag": 0.3,
+    "power_sag@battery": 25.0,
+    "power_sag@motor_esc": 2200.0
   },
   "fault_duration_s": 40.0,
   "flight_duration_s": 90.0,
@@ -63,15 +83,15 @@
     "emi_spike@imu1",
     "emi_spike@mag",
     "gps_spoof@gps",
-    "power_sag@battery",
-    "power_sag@motor_esc",
     "vibration_anomaly@vibration"
   ],
   "pairs_swept": [
     "bias_drift@baro",
     "bias_drift@imu0",
     "bias_drift@imu1",
-    "bias_drift@mag"
+    "bias_drift@mag",
+    "power_sag@battery",
+    "power_sag@motor_esc"
   ],
   "results": [
     {
@@ -417,6 +437,178 @@
       ],
       "target": "mag",
       "unit": "sensor units per second"
+    },
+    {
+      "detection_floor": 25.0,
+      "floor_means": "the smallest SWEPT magnitude that escalated, with every larger swept magnitude also escalating. It is bounded by the sweep grid: the true boundary lies between this value and the one below it, and no interpolation is done.",
+      "kind": "power_sag",
+      "param": "rpm_loss",
+      "points": [
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 25.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 50.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 100.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 150.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 250.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 350.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 500.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 700.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 1000.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 1500.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 2200.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.665,
+          "value": 3000.0
+        }
+      ],
+      "shape": "MONOTONIC",
+      "supervised": false,
+      "swept": [
+        25.0,
+        50.0,
+        100.0,
+        150.0,
+        250.0,
+        350.0,
+        500.0,
+        700.0,
+        1000.0,
+        1500.0,
+        2200.0,
+        3000.0
+      ],
+      "target": "battery",
+      "unit": "rpm lost"
+    },
+    {
+      "detection_floor": 2200.0,
+      "floor_means": "the smallest SWEPT magnitude that escalated, with every larger swept magnitude also escalating. It is bounded by the sweep grid: the true boundary lies between this value and the one below it, and no interpolation is done.",
+      "kind": "power_sag",
+      "param": "rpm_loss",
+      "points": [
+        {
+          "detected": false,
+          "min_trust": 0.8182,
+          "value": 25.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.8182,
+          "value": 50.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.8182,
+          "value": 100.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.7916,
+          "value": 150.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.6445,
+          "value": 250.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.5832,
+          "value": 350.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.533,
+          "value": 500.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.4933,
+          "value": 700.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.4518,
+          "value": 1000.0
+        },
+        {
+          "detected": false,
+          "min_trust": 0.4062,
+          "value": 1500.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.3804,
+          "value": 2200.0
+        },
+        {
+          "detected": true,
+          "min_trust": 0.3672,
+          "value": 3000.0
+        }
+      ],
+      "shape": "MONOTONIC",
+      "supervised": false,
+      "swept": [
+        25.0,
+        50.0,
+        100.0,
+        150.0,
+        250.0,
+        350.0,
+        500.0,
+        700.0,
+        1000.0,
+        1500.0,
+        2200.0,
+        3000.0
+      ],
+      "target": "motor_esc",
+      "unit": "rpm lost"
     }
   ],
   "schema": "csia.stress.detection_floor/1",
@@ -424,7 +616,9 @@
     "bias_drift@baro": "TRUST_RESPONDS_BUT_NO_FAILSAFE_RULE",
     "bias_drift@imu0": "MONOTONIC",
     "bias_drift@imu1": "MONOTONIC",
-    "bias_drift@mag": "MONOTONIC"
+    "bias_drift@mag": "MONOTONIC",
+    "power_sag@battery": "MONOTONIC",
+    "power_sag@motor_esc": "MONOTONIC"
   },
   "single_fault_only": "each point is ONE fault on a clean flight. A floor measured under simultaneous degradation would confound 'too small to detect' with 'masked by another fault'.",
   "supervised": false,

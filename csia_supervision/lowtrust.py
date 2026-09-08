@@ -81,12 +81,18 @@ class LowTrustRule:
     #: The clean-flight minimum this threshold was checked against, so the
     #: false-alarm margin is visible next to the number itself.
     clean_flight_min_trust: float
+    #: THE MARGIN THAT ACTUALLY DECIDES THE THRESHOLD: the worst trust this
+    #: sensor reached across campaign runs in which it carried NO fault. A
+    #: clean flight is the easy case; what matters is whether OTHER sensors'
+    #: failures drag this one below the line. For a well-connected sensor
+    #: the two numbers are far apart.
+    worst_uncontaminated_trust: float
     why: str
 
 
-#: THE RULES. One entry, deliberately: `motor_esc` has the identical gap and
-#: is NOT covered here, because covering it was not asked for and its
-#: false-alarm margin has not been measured under load. See `CANDIDATES`.
+#: THE RULES. Both sensors the frozen policy judges nowhere are covered.
+#: Each threshold was measured before it was enabled -- see the module
+#: docstring for the procedure, which was declared before any fault was run.
 RULES: dict = {
     "baro": LowTrustRule(
         sensor="baro",
@@ -94,21 +100,90 @@ RULES: dict = {
         level=FailsafeLevel.CAUTION,
         borrowed_from="nav_caution",
         clean_flight_min_trust=0.9930,
+        #: Worst observed in campaign runs carrying NO baro fault. Baro has
+        #: one edge, so another sensor's failure barely touches it.
+        worst_uncontaminated_trust=0.9930,
         why=("baro's only trust-graph edge is `altitude_baro`, spanning "
              "(baro, gps); gps trust is what nav_caution governs, and "
              "barometric altitude is navigation state. Level CAUTION "
              "matches the level dataloss.py already assigns baro."),
     ),
+    "motor_esc": LowTrustRule(
+        sensor="motor_esc",
+        threshold=0.70,
+        level=FailsafeLevel.CAUTION,
+        borrowed_from="power_critical",
+        clean_flight_min_trust=0.9672,
+        #: MEASURED, AND MUCH THINNER THAN BARO'S. motor_esc has FOUR edges
+        #: -- to imu0, imu1, battery and vibration -- so other sensors'
+        #: faults genuinely drag its trust down. This is the number that
+        #: decides the threshold, not the clean-flight one.
+        worst_uncontaminated_trust=0.7984,
+        why=("motor_esc's `power_thrust` edge spans (motor_esc, battery), "
+             "and battery trust is what power_critical governs; motor/ESC "
+             "telemetry is propulsion-power state. 0.70 rather than 0.75 "
+             "because the measured worst uncontaminated trust is 0.7984: "
+             "0.75 would leave 0.048 of margin, 0.70 leaves 0.098. Level "
+             "CAUTION matches dataloss.py's motor_esc level -- the "
+             "THRESHOLD is borrowed from power_critical, the LEVEL is not, "
+             "because a degraded sensor should not outrank the same sensor "
+             "going silent."),
+    ),
 }
 
-#: Sensors with the same gap that this module does NOT cover, named so the
-#: omission is visible rather than inferred from an absence.
-CANDIDATES: dict = {
-    "motor_esc": ("same gap -- no frozen rule of any kind -- but its "
-                  "clean-flight trust margin under load has not been "
-                  "measured, and a rule whose false-alarm rate is unknown "
-                  "is worse than a stated gap"),
-}
+#: Sensors with the same gap that this module does NOT cover. Empty now that
+#: both are covered; kept so a future addition to
+#: UNSUPERVISED_BY_THE_FROZEN_POLICY shows up here rather than nowhere.
+CANDIDATES: dict = {}
+
+
+def edge_partners(sensor: str) -> frozenset:
+    """The sensors this one is cross-checked against, from the trust graph.
+
+    READ from `csia.trust_graph.graph.EDGES` rather than restated, so a
+    change to the topology cannot leave this overlay judging a sensor by a
+    corroboration structure that no longer exists.
+    """
+    from csia.trust_graph.graph import EDGES
+    out = set()
+    for a, b, *_ in EDGES:
+        if a == sensor:
+            out.add(b)
+        elif b == sensor:
+            out.add(a)
+    return frozenset(out)
+
+
+#: How many live edge partners a judgement needs. NOT a tuned number: with
+#: exactly ONE live corroborator, a disagreement on that edge cannot say
+#: which END of it is at fault, so a low trust is equally consistent with
+#: this sensor being bad and with its lone corroborator being bad. Two is
+#: the smallest number at which the question is answerable at all.
+MIN_CORROBORATORS = 2
+
+
+def has_corroboration(sensor: str, fresh: dict) -> bool:
+    """Are there enough live sensors left to vouch for this one?
+
+    THE GUARD THAT KEEPS THIS RULE HONEST. A trust value is only evidence of
+    degradation when something was in a position to disagree with it. Once
+    every edge partner is gone the sensor's trust decays because nothing can
+    corroborate it -- not because it is bad -- and firing a "degraded" alarm
+    there states a fault where the truth is that nothing is knowable.
+
+    Measured, by constructing the case rather than waiting for the campaign
+    to draw it: with three of motor_esc's four partners dropped and the
+    fourth (vibration) merely DEGRADED, motor_esc -- perfectly healthy --
+    is dragged to 0.664 and the rule fired CAUTION at t=24.6 s. Its only
+    live corroborator was itself the faulty sensor. 140 random campaign
+    runs never produced this; it took building it on purpose.
+
+    This is the same rule the capability bridge applies in the other
+    direction: UNKNOWN is never resolved into a definite state.
+    """
+    partners = edge_partners(sensor)
+    live = sum(1 for p in partners if fresh.get(p, False))
+    return live >= min(MIN_CORROBORATORS, len(partners))
 
 
 def eligible(sensor: str) -> bool:
@@ -159,10 +234,14 @@ class LowTrustSupervisor:
     _since: dict = field(default_factory=dict)
     conditions: dict = field(default_factory=dict)
     level: FailsafeLevel = FailsafeLevel.NORMAL
+    #: Sensors whose trust could not be judged this tick because every edge
+    #: partner was gone. Not a condition -- an absence of grounds for one.
+    uncorroborated: set = field(default_factory=set)
 
     def reset_timers(self) -> None:
         self._since.clear()
         self.conditions = {}
+        self.uncorroborated = set()
         self.level = FailsafeLevel.NORMAL
 
     def update(self, state) -> dict:
@@ -182,8 +261,16 @@ class LowTrustSupervisor:
         # FRESH ONLY. A stale sensor belongs to the data-loss rule, and both
         # firing for one cause would report it twice.
         low = set()
+        self.uncorroborated = set()
         for sensor, rule in self.rules.items():
             if sensor not in self.ever_fresh or not fresh.get(sensor, False):
+                continue
+            # NO CORROBORATION, NO JUDGEMENT. A low trust with every edge
+            # partner gone means nothing could vouch for this sensor, not
+            # that the sensor is bad. Reported separately rather than
+            # silently skipped, so the gap stays visible.
+            if not has_corroboration(sensor, fresh):
+                self.uncorroborated.add(sensor)
                 continue
             value = trust.get(sensor)
             if value is not None and value < rule.threshold:

@@ -101,34 +101,54 @@ def _post_arm_min_trust(profile, sensor: str):
     return worst
 
 
-def run(count: int = 300, seed: int = 20260907) -> dict:
+def run(count: int = 300, seed: int = 20260907,
+        sensor: str = "baro", threshold: float | None = None) -> dict:
+    """Measure the false-alarm rate for one sensor's low-trust rule.
+
+    `threshold` may be given for a CANDIDATE rule that is not yet shipped --
+    the whole point is to measure before enabling, not after.
+    """
     from csia_supervision.lowtrust import RULES
 
-    rule = RULES["baro"]
+    rule = RULES.get(sensor)
+    if rule is None and threshold is None:
+        raise ValueError(
+            f"no shipped rule for {sensor!r} and no candidate threshold "
+            "given; refusing to invent one")
+    limit = float(threshold if threshold is not None else rule.threshold)
     rows, without_baro_fault = [], 0
     would_fire, fired_names = 0, []
-    worst_margin = None
+    worst_margin, worst_run = None, None
 
     for i in range(count):
         profile = random_profile(random.Random(seed + i), i)
         targets = {f.target for f in profile.faults}
-        if "baro" in targets:
-            continue                    # baro IS faulted; not a false alarm
+        if sensor in targets:
+            continue           # the sensor IS faulted; not a false alarm
         without_baro_fault += 1
 
-        baro_min = _post_arm_min_trust(profile, "baro")
+        baro_min = _post_arm_min_trust(profile, sensor)
         if baro_min is None:
             continue
-        margin = baro_min - rule.threshold
-        worst_margin = margin if worst_margin is None \
-            else min(worst_margin, margin)
-        if baro_min < rule.threshold:
+        margin = baro_min - limit
+        if worst_margin is None or margin < worst_margin:
+            worst_margin = margin
+            # WHICH RUN produced the worst margin. Reporting a thin margin
+            # without naming the combination that caused it leaves a reader
+            # unable to judge whether it is a plausible flight or a corner.
+            worst_run = {"profile": profile.id,
+                         "faulted_targets": sorted(targets),
+                         "fault_kinds": sorted({f.kind
+                                                for f in profile.faults}),
+                         "min_trust": round(baro_min, 4),
+                         "margin": round(margin, 4)}
+        if baro_min < limit:
             would_fire += 1
             fired_names.append({
                 "profile": profile.id,
                 "faulted_targets": sorted(targets),
                 "fault_kinds": sorted({f.kind for f in profile.faults}),
-                "baro_min_trust": round(baro_min, 4)})
+                "min_trust": round(baro_min, 4)})
         rows.append(round(baro_min, 4))
 
     rows.sort()
@@ -143,17 +163,22 @@ def run(count: int = 300, seed: int = 20260907) -> dict:
         "schema": "csia.stress.low_trust_false_alarm/1",
         "count_requested": count,
         "runs_without_a_baro_fault": without_baro_fault,
-        "threshold": rule.threshold,
-        "threshold_borrowed_from": rule.borrowed_from,
-        "clean_flight_min_trust": rule.clean_flight_min_trust,
+        "sensor": sensor,
+        "threshold": limit,
+        "is_a_shipped_rule": rule is not None,
+        "threshold_borrowed_from": (rule.borrowed_from if rule else
+                                    "CANDIDATE -- not yet shipped"),
+        "clean_flight_min_trust": (rule.clean_flight_min_trust
+                                   if rule else None),
         "would_fire": would_fire,
         "false_alarm_rate": rate,
         "worst_margin_above_threshold": (round(worst_margin, 4)
                                          if worst_margin is not None else None),
-        "baro_min_trust_percentiles": {
+        "min_trust_percentiles": {
             "p00": pct(0.0), "p01": pct(0.01), "p05": pct(0.05),
             "p50": pct(0.5), "p95": pct(0.95)},
         "examples": fired_names[:10],
+        "worst_run": worst_run,
         "measurement_window": (
             "minimum baro trust AFTER arm_time, which is the only window "
             "the rule can fire in. StressRun.min_trust spans the whole run "
@@ -175,10 +200,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--count", type=int, default=300)
     ap.add_argument("--seed", type=int, default=20260907)
+    ap.add_argument("--sensor", default="baro")
+    ap.add_argument("--threshold", type=float, default=None,
+                    help="measure a CANDIDATE threshold before shipping it")
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
-    rep = run(args.count, args.seed)
+    rep = run(args.count, args.seed, args.sensor, args.threshold)
     if args.out:
         path = os.path.join(ROOT, args.out)
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -186,12 +214,15 @@ def main(argv=None) -> int:
             json.dump(rep, fh, indent=2, sort_keys=True, default=str)
             fh.write("\n")
 
-    print(f"runs without a baro fault: {rep['runs_without_a_baro_fault']}")
+    print(f"sensor: {rep['sensor']}  threshold {rep['threshold']}"
+          f"  shipped={rep['is_a_shipped_rule']}")
+    print(f"runs without a {rep['sensor']} fault: "
+          f"{rep['runs_without_a_baro_fault']}")
     print(f"would fire (FALSE ALARMS): {rep['would_fire']}"
           f"  rate={rep['false_alarm_rate']}")
     print(f"worst margin above {rep['threshold']}: "
           f"{rep['worst_margin_above_threshold']}")
-    print(f"baro min-trust percentiles: {rep['baro_min_trust_percentiles']}")
+    print(f"min-trust percentiles: {rep['min_trust_percentiles']}")
     return 0
 
 

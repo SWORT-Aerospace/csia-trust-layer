@@ -135,10 +135,24 @@ def test_no_escalation_with_flat_trust_is_reported_as_unseen(monkeypatch):
 # the measured result
 # ---------------------------------------------------------------------------
 
-def test_the_four_live_pairs_were_all_swept(report):
+def test_every_live_pair_with_declared_parameters_was_swept(report):
+    """Six pairs: the four bias_drift targets, plus the two power_sag ones
+    added when motor_esc was brought under supervision (SR-008)."""
     assert set(report["pairs_swept"]) == {
         "bias_drift@baro", "bias_drift@imu0",
-        "bias_drift@imu1", "bias_drift@mag"}
+        "bias_drift@imu1", "bias_drift@mag",
+        "power_sag@battery", "power_sag@motor_esc"}
+
+
+def test_the_motor_esc_floor_is_far_above_the_campaign_range(report):
+    """The frozen core needs 2200 rpm lost before anything escalates, more
+    than three times the campaign's maximum draw of 700 -- and that
+    detection is not motor_esc being judged, it is the fault growing large
+    enough to trip some other sensor's rule."""
+    motor = report["campaign_range_vs_floor"]["power_sag@motor_esc"]
+    assert motor["reach"] == "ENTIRE_CAMPAIGN_RANGE_BELOW_FLOOR"
+    assert motor["floor"] >= 2000
+    assert motor["campaign_draws"][1] <= 700
 
 
 def test_baro_never_escalates_at_any_swept_magnitude(report):
@@ -183,13 +197,22 @@ def test_the_floors_are_consistent_with_the_observed_misses():
         k.split("@")[1] for k, v in floors["campaign_range_vs_floor"].items()
         if v["reach"] in ("ENTIRE_CAMPAIGN_RANGE_BELOW_FLOOR",
                           "NEVER_ESCALATES")}
-    assert out_of_reach == {"mag", "baro"}
+    assert out_of_reach == {"mag", "baro", "motor_esc"}
 
     counts = eff["still_undetected_targets"]
     ranked = sorted(counts, key=lambda k: -counts[k])
-    assert set(ranked[:2]) == out_of_reach, (
-        f"the two structurally-undetectable targets should dominate the "
-        f"misses; ranking was {ranked}")
+    # The two most-involved targets are both structurally out of reach.
+    assert set(ranked[:2]) <= out_of_reach, (
+        f"the most-involved miss targets should be ones the campaign "
+        f"cannot reach; ranking was {ranked}")
+    # And out-of-reach targets account for the bulk of the involvements.
+    # NOT a per-run attribution -- these are targets INVOLVED in a missed
+    # run and sum to more than the number of missed runs.
+    total = sum(counts.values())
+    unreachable = sum(counts.get(t, 0) for t in out_of_reach)
+    assert unreachable / total > 0.6, (
+        f"only {unreachable}/{total} involvements are structurally "
+        "unreachable; the floors no longer explain the misses")
 
 
 def test_the_artifact_says_nothing_was_tuned(report):
@@ -203,5 +226,10 @@ def test_the_sweep_grid_is_declared_not_fitted():
     unfalsifiable. Changing it should require editing this test."""
     values = df.SWEEP["bias_drift"]["values"]
     assert values[0] == 0.01 and values[-1] == 1.00
-    assert list(values) == sorted(values), "the grid must be ascending"
     assert len(values) == 12
+    power = df.SWEEP["power_sag"]["values"]
+    assert power[0] == 25.0 and power[-1] == 3000.0
+    assert len(power) == 12
+    for spec in df.SWEEP.values():
+        assert list(spec["values"]) == sorted(spec["values"]), \
+            "the grid must be ascending"

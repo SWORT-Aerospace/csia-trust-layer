@@ -2675,3 +2675,74 @@ entries:
       csia_supervision/lowtrust.py; csia_supervision/dataloss.py;
       csia_stress/low_trust_false_alarm.py;
       tests/test_lowtrust_supervision.py
+
+  - id: SR-008
+    date: 2026-09-08
+    phase: SUPERVISION (SR-006 gap, second sensor)
+    kind: RULE_ADDED_AND_A_FALSE_ALARM_FOUND_BY_CONSTRUCTION
+    what_happened: >-
+      motor_esc is the second and last sensor the frozen policy judges
+      nowhere. Measured over the declared magnitude sweep, `power_sag` on
+      motor_esc drags its trust to 0.79 at 150 rpm lost, 0.64 at 250 and
+      0.49 at 700 -- and the frozen core detects NONE of it below 2200 rpm
+      lost, which is more than three times the campaign's maximum draw of
+      700. Even that 2200 detection is not motor_esc being judged; it is
+      the fault growing large enough to trip some other sensor's rule.
+    consequence: >-
+      A low-trust rule at 0.70, borrowed from power_critical because
+      motor_esc's `power_thrust` edge spans (motor_esc, battery) and battery
+      trust is what power_critical governs. Level CAUTION, matching
+      dataloss.py's motor_esc level: the THRESHOLD is borrowed, the LEVEL is
+      not, because a degraded sensor should not outrank the same sensor
+      going silent.
+      Detection with the rule on: power_sag@motor_esc caught from 250 rpm
+      lost upward, covering most of the campaign range. 150 rpm still misses
+      (trust 0.7916, above the line) and that is the published floor.
+    the_margin_that_set_the_threshold: >-
+      NOT the clean-flight one. motor_esc has FOUR trust-graph edges --
+      imu0, imu1, battery, vibration -- so other sensors' faults genuinely
+      drag it down, unlike baro with its one. Clean-flight minimum 0.9672;
+      worst across 140 campaign runs carrying NO motor_esc fault, 0.7984.
+      0.75 would have left 0.048 of margin; 0.70 leaves 0.098. Baro's
+      equivalent margin is 0.243, and the two rules are recorded as the
+      unequally separated pair they are.
+    the_false_alarm_that_random_sampling_missed: >-
+      140 random campaign runs gave zero false alarms, and that was not
+      enough. CONSTRUCTING the adversarial case found one: drop three of
+      motor_esc's four partners and leave the fourth (vibration) merely
+      DEGRADED, and motor_esc -- perfectly healthy -- is dragged to 0.664
+      and the rule raised CAUTION at t=24.6 s. Its one remaining
+      corroborator was itself the faulty sensor.
+      A random campaign will not reliably draw a specific four-way
+      combination. Where the worst case can be reasoned about, it should be
+      built, not waited for.
+    the_fix_is_structural_not_a_moved_number: >-
+      The threshold was NOT lowered to make the case go away. A trust value
+      is only evidence of degradation when something was in a position to
+      disagree with it; with a single live corroborator, a disagreement
+      cannot say WHICH END of the edge is at fault, so a low trust is
+      equally consistent with this sensor being bad and with its lone
+      corroborator being bad.
+      `has_corroboration` therefore requires MIN_CORROBORATORS = 2 live edge
+      partners (capped at however many the sensor has) before any judgement,
+      with the partner set READ from csia.trust_graph.graph.EDGES rather
+      than restated. A sensor that cannot be judged is reported in
+      `uncorroborated` rather than silently skipped.
+      This is the same rule the capability bridge applies in the other
+      direction: UNKNOWN is never resolved into a definite state.
+      Verified both ways after the change: both constructed false-alarm
+      cases fire NOTHING (1250 unjudgeable ticks each), and every real fault
+      still fires -- power_sag@motor_esc at 250, 350 and 700 rpm, baro drift
+      at 0.05 and 1.00.
+    honest_limit: >-
+      MIN_CORROBORATORS = 2 is a structural argument, not a measured
+      optimum: two is simply the smallest number at which "which end is at
+      fault" is answerable at all. It also costs coverage -- a sensor down
+      to one live partner is now never judged, so a genuine degradation
+      during a multi-sensor failure will be missed. That is the deliberate
+      direction: a miss is a stated limit, a false alarm on a healthy sensor
+      trains an operator to ignore the layer.
+    artifact: >-
+      csia_supervision/lowtrust.py; tests/test_lowtrust_supervision.py;
+      research/stress/results/LOW_TRUST_FALSE_ALARM_MOTOR_ESC.json;
+      research/stress/results/DETECTION_FLOOR.json

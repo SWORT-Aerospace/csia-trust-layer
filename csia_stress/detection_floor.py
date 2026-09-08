@@ -79,6 +79,18 @@ SWEEP: dict = {
         "unit": "sensor units per second",
         "fixed": {"axis": 2, "channel": "accel"},
     },
+    # DECLARED BEFORE THE RUN, same rule as above. The campaign draws
+    # rpm_loss from [150, 700]; the grid starts well below and runs well
+    # above, so a floor inside the campaign's range is bracketed rather
+    # than assumed. depth_v is held at the campaign's midpoint so the swept
+    # parameter is the motor-side magnitude alone.
+    "power_sag": {
+        "param": "rpm_loss",
+        "values": (25.0, 50.0, 100.0, 150.0, 250.0, 350.0, 500.0, 700.0,
+                   1000.0, 1500.0, 2200.0, 3000.0),
+        "unit": "rpm lost",
+        "fixed": {"depth_v": 1.3},
+    },
 }
 
 #: Fault onset and length inside the flight. Long enough that the failsafe's
