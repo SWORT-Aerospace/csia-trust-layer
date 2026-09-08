@@ -109,6 +109,23 @@ COVERED = ("csia_mission", "csia_assurance")
 MUTATION_METRICS = ("mutation_mission", "mutation_frozen_core",
                     "mutation_assurance_baseline")
 
+#: Which artifact each metric is read from. Declared ONCE: a second copy of
+#: this mapping (there was one, in the tests) drifts the moment a metric is
+#: repointed, and then asserts against a file nothing is measuring.
+MUTATION_ARTIFACTS = {
+    "mutation_mission": "research/mission/results/MUTATION_PROBE.json",
+    # THE CORRECTED SUBSET, not the historical one. MX-015 records that the
+    # 9-file subset behind MUTATION_PROBE_FROZEN_CORE.json omitted
+    # tests/test_hypothesis.py, the file carrying most of the survivors, so
+    # 0.35 was never "the frozen core's mutation score". That artifact stays
+    # on disk unchanged as the record MX-015 refers to; gating on it would
+    # mean ratcheting on a measurement known to mislead.
+    "mutation_frozen_core": ("research/mission/results/"
+                             "MUTATION_PROBE_FROZEN_CORE_CORRECTED.json"),
+    "mutation_assurance_baseline": ("research/mission/results/"
+                                    "MUTATION_PROBE_ASSURANCE_BASELINE.json"),
+}
+
 COVERAGE_TESTS = (
     "tests/test_mission_assurance.py",
     "tests/test_mission_untested_modules.py",
@@ -402,14 +419,8 @@ def check(measured: dict, floor: dict) -> dict:
 
 
 def measure_all(skip_coverage: bool = False) -> dict:
-    out = {
-        "mutation_mission": read_mutation(
-            "research/mission/results/MUTATION_PROBE.json"),
-        "mutation_frozen_core": read_mutation(
-            "research/mission/results/MUTATION_PROBE_FROZEN_CORE.json"),
-        "mutation_assurance_baseline": read_mutation(
-            "research/mission/results/MUTATION_PROBE_ASSURANCE_BASELINE.json"),
-    }
+    out = {key: read_mutation(path)
+           for key, path in MUTATION_ARTIFACTS.items()}
     if not skip_coverage:
         out["coverage"] = measure_coverage()
     return out

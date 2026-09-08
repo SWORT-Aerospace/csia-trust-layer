@@ -311,7 +311,7 @@ as a gate.
 ### What a negative result is worth
 
 A negative result that is recorded is worth more than a positive one that is
-not. The ledger has 55 entries and the majority are things that did not work,
+not. The ledger has 57 entries and the majority are things that did not work,
 including several where the *instrument* was wrong rather than the system.
 That is the point of keeping it.
 

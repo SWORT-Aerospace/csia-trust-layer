@@ -2199,3 +2199,123 @@ entries:
       tools/xr/quality_ratchet.py; tools/xr/mutation_probe.py;
       tests/test_quality_ratchet.py;
       research/mission/results/QUALITY_FLOOR.json
+
+  - id: MX-019
+    date: 2026-09-08
+    phase: QUALITY (MX-015 loop closed)
+    kind: MEASUREMENT_CORRECTED
+    what_happened: >-
+      MX-015 recorded that the frozen-core mutation figure of 0.35 was
+      measured over a 9-file test subset that OMITTED
+      tests/test_hypothesis.py, the file whose subject carries most of the
+      survivors. Re-measured over a 13-file subset -- same eight targets,
+      same seed 20260907, same 244 sites, only tests added -- the frozen
+      core scores 0.5583 (67/120).
+      Per file: hypothesis.py 0.000 -> 0.326, causal.py 0.000 -> 0.421,
+      profiles.py 0.000 -> 0.500, online.py 0.154 -> 0.231; engine.py,
+      failsafe.py and bayes.py hold at 1.000. scenarios.py drew no sampled
+      sites in either run.
+    found_by: >-
+      Re-running tools/xr/mutation_probe.py with the decisive test file
+      restored, after MX-015 identified the omission.
+    verdict: CORRECTED_AND_RE_BASELINED
+    consequence: >-
+      The historical artifact MUTATION_PROBE_FROZEN_CORE.json is kept
+      UNCHANGED as the record MX-015 refers to; the corrected measurement is
+      a new artifact, MUTATION_PROBE_FROZEN_CORE_CORRECTED.json. The two are
+      NOT comparable under the fingerprint rule, which is exactly what the
+      ratchet reported. quality_ratchet.measure_all() now reads the
+      corrected artifact, because gating on a subset known to mislead is
+      worse than not gating, and the floor was re-baselined by a deliberate
+      --update that logged it as "RE-BASELINED onto a different subset
+      (0.35 -> 0.5583, NOT a quality comparison)".
+    negative_result: >-
+      A SECOND RUN ADDING tests/test_online_survivor_kills.py -- 22 tests
+      written specifically to kill online.py survivors -- produced
+      IDENTICAL numbers: 0.5583 (67/120) overall and online.py unchanged at
+      0.231 (3/13). The 12-file and 13-file subsets differ in fingerprint
+      but not in a single mutant verdict. Those tests raised online.py's
+      line coverage without killing any of the 10 sampled survivors, which
+      are all comparison-boundary and boolean-operator mutants at lines
+      104, 307, 316, 331, 351, 381 (x3), 409 and 494. Coverage moved and
+      mutation did not. That is recorded as it stands, not explained away.
+    honest_limit: >-
+      0.5583 is what THIS subset kills of a 120-mutant sample of 244 sites.
+      It is not "the frozen core's mutation score" any more than 0.35 was.
+      Both numbers are only meaningful beside the subset stored with them.
+    artifact: >-
+      research/mission/results/MUTATION_PROBE_FROZEN_CORE_CORRECTED.json;
+      research/mission/results/QUALITY_FLOOR.json;
+      tools/xr/quality_ratchet.py
+
+  - id: HF-014
+    date: 2026-09-08
+    phase: ASSURANCE (decision replay)
+    kind: DIVERGENCE_ATTRIBUTED_MECHANISM_NOT_ROOT_CAUSED
+    what_happened: >-
+      THE PX4 DECISION-REPLAY DIVERGENCE IS A FRESHNESS DISAGREEMENT, NOT A
+      TRUST DISAGREEMENT. HF-010 fixed the ArduPilot divergence (511 -> 13)
+      by keying hand-off reconstruction on channel arrival time, and left
+      PX4 unchanged at 144, so the PX4 cause was known to be different and
+      had never been named. It now is, in part.
+      Measured over all 144 divergences rather than the five that were
+      stored:
+      (1) EVERY divergence is the replay seeing MORE live edges than the
+      recording -- never fewer, in 144 of 144;
+      (2) 122 (84.7%) are exactly `altitude_baro`, 9 are
+      `velocity_gps_doppler_0`, 5 are `attitude_gravity_mag`, 8 are
+      two-edge combinations of those;
+      (3) every affected edge is one whose weight is a PRODUCT of per-sensor
+      freshness terms (weight = gate * fresh[a] * fresh[b], online.py:610),
+      and in every case the residual value agreed -- only the freshness
+      factor differed;
+      (4) the divergences form runs of exactly 10 ticks (0.40 s) recurring
+      at ~1.0 s intervals from t=0.16 to t=13.0, which is the cadence of
+      baro arrivals (median reconstructed inter-arrival 1.0022 s);
+      (5) in the replay baro freshness follows the declared rule exactly --
+      fresh for 0.48 s after each arrival against a 0.5 s timeout -- while
+      in the recording `altitude_baro` carried non-zero weight for about
+      ONE TICK after each baro arrival.
+    found_by: >-
+      tools/assurance/attribute_replay_divergence.py, written for this and
+      keeping every divergence with the exact symmetric difference of the
+      live-edge sets, the per-edge weights on each side, and the temporal
+      distribution.
+    verdict: MECHANISM_IDENTIFIED_ROOT_CAUSE_UNDETERMINED
+    falsified_hypothesis: >-
+      THE OBVIOUS EXPLANATION WAS TESTED AND FAILED. If the run had simply
+      used a shorter baro staleness timeout than the replay applies today,
+      a single threshold would separate the fresh ticks from the stale ones.
+      It does not: conditioned on GPS being live, the recording reads baro
+      FRESH at channel ages 0.044-0.125 s and STALE at ages 0.003-0.496 s.
+      The intervals overlap, so no single timeout value reproduces the
+      recording and configuration drift in the timeout is ruled out.
+    honest_limit: >-
+      THE ROOT CAUSE ON THE LIVE SIDE IS NOT DETERMINED, and this entry does
+      not claim it is. The committed logs cannot settle it: they record the
+      ADAPTER's per-channel `age_s`, which is a different clock from the
+      layer's ingest-keyed freshness, and the gate weights, which are
+      products of freshness terms and cannot be factored back apart -- a
+      zero weight is equally consistent with either endpoint being stale,
+      both, or the gate being closed. The one map that would decide it, the
+      layer's own per-sensor `fresh`, was never written to the log.
+      HF-004 therefore STAYS OPEN and decision replay still does not serve
+      as a verification instrument. The verdict remains DIVERGENT on both
+      platforms and the software-hardening gate must not count it as PASS.
+    consequence: >-
+      The missing instrument is now built rather than described:
+      csia/deploy/flight_log.py records the per-sensor `fresh` map on every
+      tick and the staleness configuration the run used in the header, and
+      csia/deploy/shadow.py supplies both from the values the layer was
+      actually constructed with. Neither file is frozen. A log recorded
+      after this change carries enough to finish the attribution; the
+      existing PX4 and ArduPilot logs do not, and cannot be made to.
+      NO FROZEN FILE WAS TOUCHED AND NO THRESHOLD WAS RETUNED. The finding
+      is that the replay follows the declared staleness rule and the
+      recording did not; which of the two is faithful to the intended
+      semantics is left open rather than decided by editing either side.
+    artifact: >-
+      tools/assurance/attribute_replay_divergence.py;
+      research/physical_validation/results/REPLAY_DIVERGENCE_PX4.json;
+      csia/deploy/flight_log.py; csia/deploy/shadow.py;
+      tests/test_replay_freshness_provenance.py

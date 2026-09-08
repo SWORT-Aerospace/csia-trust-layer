@@ -254,14 +254,10 @@ def test_the_committed_floor_fingerprints_match_their_artifacts():
     """The stored fingerprint must be the one the named artifact actually
     produces -- otherwise the floor records a subset nothing was measured
     over."""
-    sources = {
-        "mutation_mission": "research/mission/results/MUTATION_PROBE.json",
-        "mutation_frozen_core":
-            "research/mission/results/MUTATION_PROBE_FROZEN_CORE.json",
-        "mutation_assurance_baseline":
-            "research/mission/results/"
-            "MUTATION_PROBE_ASSURANCE_BASELINE.json",
-    }
+    # Taken from the tool, never re-typed here: a parallel copy of this
+    # mapping is exactly what drifted when the frozen-core metric was
+    # repointed at the corrected artifact.
+    sources = ratchet.MUTATION_ARTIFACTS
     floor = ratchet.load_floor()
     for key, rel in sorted(sources.items()):
         if key not in floor:
@@ -441,3 +437,30 @@ def test_a_missing_target_digests_to_none_rather_than_a_partial_hash():
     one taken before the deletion."""
     assert ratchet.targets_digest(["csia/does_not_exist.py"]) is None
     assert ratchet.targets_digest([]) is None
+
+
+def test_every_metric_has_an_artifact_and_they_are_declared_once():
+    """MUTATION_METRICS and MUTATION_ARTIFACTS must agree. A metric with no
+    artifact is silently never measured; an artifact with no metric is a
+    file nothing gates on."""
+    assert set(ratchet.MUTATION_METRICS) == set(ratchet.MUTATION_ARTIFACTS)
+    for key, path in ratchet.MUTATION_ARTIFACTS.items():
+        assert os.path.exists(os.path.join(ROOT, path)), \
+            f"{key} points at a missing artifact: {path}"
+
+
+def test_the_historical_frozen_core_artifact_is_still_on_disk():
+    """MX-015 refers to it. Repointing the GATE at the corrected subset must
+    not mean deleting the record that explains why the correction was
+    needed -- and it must not be what the gate reads either."""
+    historical = os.path.join(
+        ROOT, "research/mission/results/MUTATION_PROBE_FROZEN_CORE.json")
+    assert os.path.exists(historical), "the MX-015 record was removed"
+    with open(historical, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    assert doc["mutation_score"] == 0.35, "the historical record was edited"
+    assert not any("hypothesis" in t for t in doc["test_subset"]), (
+        "the historical artifact is defined by the omission MX-015 records")
+    assert ratchet.MUTATION_ARTIFACTS["mutation_frozen_core"] != \
+        "research/mission/results/MUTATION_PROBE_FROZEN_CORE.json", (
+        "the gate must not read the subset MX-015 says was misleading")

@@ -74,6 +74,15 @@ class FlightLogHeader:
     #: only RAISE the level. A log that does not say which describes a system
     #: the reader cannot identify, and logs from the two are NOT comparable.
     failsafe_policy: str = "FROZEN_ONLY"
+    #: The per-sensor staleness timeouts THIS RUN used, in seconds.
+    #:
+    #: Without it a log cannot be replayed faithfully. HF-014 is the cost of
+    #: the omission: the PX4 decision-replay divergence was traced to a
+    #: freshness disagreement, and the obvious explanation -- that the run
+    #: used different timeouts from the ones the replay applies today --
+    #: could be neither confirmed nor ruled out, because the run's
+    #: configuration was not written down anywhere in the log.
+    stale_timeout_s: dict = field(default_factory=dict)
     schema: str = "csia.flight_log/1"
     notes: dict = field(default_factory=dict)
 
@@ -163,7 +172,8 @@ class FlightLog:
     def tick(self, *, t_mono: float, sample, trust_pre: dict, trust_post: dict,
              residuals: dict, gates: dict, evidence: dict, diagnosis: dict,
              ambiguity: Optional[float], recommendation: dict,
-             autopilot: dict, latency_us: float, extra: Optional[dict] = None):
+             autopilot: dict, latency_us: float, extra: Optional[dict] = None,
+             fresh: Optional[dict] = None):
         """Record one tick. Never raises."""
         blocked = [{"channel": cv.channel,
                     "quality": cv.quality.value,
@@ -190,6 +200,15 @@ class FlightLog:
             "latency_us": round(latency_us, 3),
             "disagreement": self._disagreement(diagnosis, recommendation,
                                                autopilot),
+            # THE LAYER'S OWN per-sensor freshness verdict, which is NOT
+            # recoverable from anything else in the row. `canonical` carries
+            # the ADAPTER's per-channel age; the gate weights carry products
+            # of freshness terms that cannot be factored back apart. HF-014
+            # got stuck exactly here -- the divergence was localised to
+            # freshness and could go no further, because the one map that
+            # would settle it was never written down.
+            "fresh": ({k: bool(v) for k, v in fresh.items()}
+                      if fresh else None),
         }
         if extra:
             row["extra"] = extra
@@ -259,7 +278,8 @@ def make_header(*, adapter, mode: str, autopilot_version: str,
                 profile: str, vehicle_config: dict,
                 calibration_manifest: Optional[dict] = None,
                 flight_id: Optional[str] = None,
-                failsafe_policy: str = "FROZEN_ONLY") -> FlightLogHeader:
+                failsafe_policy: str = "FROZEN_ONLY",
+                stale_timeout_s: Optional[dict] = None) -> FlightLogHeader:
     from .. import __version__ as csia_version
     cfg_blob = json.dumps(vehicle_config, sort_keys=True).encode()
     import hashlib
@@ -277,6 +297,7 @@ def make_header(*, adapter, mode: str, autopilot_version: str,
         vehicle_config_hash=hashlib.sha256(cfg_blob).hexdigest()[:16],
         mode=mode,
         failsafe_policy=failsafe_policy,
+        stale_timeout_s=dict(sorted((stale_timeout_s or {}).items())),
         command_authority=command_authority,
         sensor_availability=sensor_availability,
         calibration_manifest=calibration_manifest or {},

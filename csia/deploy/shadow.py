@@ -318,6 +318,9 @@ class ShadowRunner:
             failsafe_policy=("FROZEN_PLUS_DATA_LOSS_SUPERVISION"
                              if self.cfg.data_loss_supervision
                              else "FROZEN_ONLY"),
+            # The timeouts THIS run used, not the ones a later replay would
+            # derive. See HF-014.
+            stale_timeout_s=self.stale_timeouts,
         )
         self.flight_log = FlightLog(self.cfg.log_dir, header,
                                     max_bytes=self.cfg.log_max_bytes)
@@ -493,6 +496,11 @@ class ShadowRunner:
                 autopilot=autopilot,
                 latency_us=latency_us,
                 extra={"watchdog_tripped": watchdog_tripped},
+                # The layer's own freshness verdict. Not derivable from any
+                # other field: the gate weights are PRODUCTS of freshness
+                # terms and cannot be factored back apart (HF-014).
+                fresh=(dict(state.fresh) if state is not None
+                       and getattr(state, "fresh", None) else None),
             )
 
         if self.consumer is not None and self.cfg.mode is Mode.ADVISORY:
