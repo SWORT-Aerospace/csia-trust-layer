@@ -92,6 +92,19 @@ class ShadowConfig:
     # AFTER the per-tick latency measurement stops, so tracing cannot inflate
     # the number R13 is judged on.
     trust_trace_path: Optional[str] = None
+    # LOSS-OF-DATA SUPERVISION (SR-001 / SR-003). OFF BY DEFAULT, ON PURPOSE.
+    #
+    # The frozen failsafe alarms when a sensor's TRUST falls and says nothing
+    # when the sensor stops delivering -- for seven of the eight nodes. The
+    # overlay in `csia_supervision` supplies the missing rule and can only
+    # RAISE the level, never lower it (effective = max(frozen, supervisor)).
+    #
+    # It defaults to False because shadow mode PRODUCES EVIDENCE. Turning it
+    # on silently would mean logs recorded before and after this change
+    # describe different systems while claiming the same mode, and nothing in
+    # the log would say which. So it is an explicit choice, and the flight
+    # log header records which policy was in force (`failsafe_policy`).
+    data_loss_supervision: bool = False
 
 
 class ShadowRunner:
@@ -123,7 +136,16 @@ class ShadowRunner:
         self.layer = OnlineTrustLayer(tick_hz=cfg.tick_hz,
                                       field_mode=cfg.field_mode,
                                       stale_timeout_s=self.stale_timeouts)
-        self.policy = FailsafePolicy()
+        # The FROZEN policy either way. With supervision on it is WRAPPED,
+        # never replaced: `SupervisedFailsafe` owns a `FailsafePolicy`,
+        # forwards its conditions and dwell timers untouched, and reports
+        # max(frozen, overlay) as the level. The frozen decision is always
+        # still visible via `.frozen_level`.
+        if cfg.data_loss_supervision:
+            from csia_supervision import SupervisedFailsafe
+            self.policy = SupervisedFailsafe(policy=FailsafePolicy())
+        else:
+            self.policy = FailsafePolicy()
         self.conn = None
         self.flight_log: Optional[FlightLog] = None
         self.authority_evidence: dict = {}
@@ -246,7 +268,7 @@ class ShadowRunner:
         except Exception:                                  # pragma: no cover
             conds = None
         since = getattr(self.policy, "_cond_since", None)
-        return {
+        row = {
             "conditions": conds,
             # dwell: how long each active condition has been held. The
             # failsafe DELETES the entry when a condition clears, so an
@@ -256,6 +278,15 @@ class ShadowRunner:
             "level": (self.policy.level.name
                       if hasattr(self.policy, "level") else None),
         }
+        # With supervision on, `level` above is the EFFECTIVE level. Record
+        # the frozen policy's own level beside it, so a reader can always
+        # separate what the frozen core decided from what the overlay added.
+        if hasattr(self.policy, "frozen_level"):
+            row["frozen_level"] = self.policy.frozen_level.name
+            data_loss = self.policy.data_loss_row()
+            if data_loss is not None:
+                row["data_loss"] = data_loss
+        return row
 
     # ------------------------------------------------------------------
     def connect(self):
@@ -284,6 +315,9 @@ class ShadowRunner:
             sensor_availability=self.adapter.status()["channels"],
             profile=self.cfg.profile,
             vehicle_config=self.cfg.vehicle_config,
+            failsafe_policy=("FROZEN_PLUS_DATA_LOSS_SUPERVISION"
+                             if self.cfg.data_loss_supervision
+                             else "FROZEN_ONLY"),
         )
         self.flight_log = FlightLog(self.cfg.log_dir, header,
                                     max_bytes=self.cfg.log_max_bytes)

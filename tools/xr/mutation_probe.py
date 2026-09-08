@@ -185,6 +185,19 @@ def run(sample: int = 60, seed: int = 20260907) -> dict:
         shutil.copytree(ROOT, work, symlinks=True, ignore=shutil.ignore_patterns(
             ".git", ".venv", "__pycache__", "build", "*.pyc"))
 
+        # A test path that does not exist makes pytest exit 4 (usage error),
+        # which `_run_subset` reads as "tests failed" -- i.e. as a KILL. The
+        # baseline check below would catch it, but only as an opaque "the
+        # unmutated copy does not pass", sending the reader hunting for a
+        # broken test that is really just a typo in --tests. Name it.
+        missing = [t for t in TEST_SUBSET
+                   if not os.path.exists(os.path.join(work, t))]
+        if missing:
+            return {"error": f"test path(s) do not exist: {missing}. pytest "
+                             f"would exit 4 and every mutant would read as "
+                             f"KILLED.", "aborted": True,
+                    "missing_test_paths": missing}
+
         # Sanity: the UNMUTATED copy must pass, or every "kill" is spurious.
         if not _run_subset(work):
             return {"error": "the unmutated copy does not pass; every kill "

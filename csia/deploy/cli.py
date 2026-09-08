@@ -136,6 +136,14 @@ def main(argv=None) -> int:
                          "shadow flight: zero usable channels means the "
                          "vehicle is not configured to stream.")
     ap.add_argument("--self-test-seconds", type=float, default=10.0)
+    ap.add_argument("--data-loss-supervision", action="store_true",
+                    help="add the SR-003 loss-of-data rule for the seven "
+                         "sensors the frozen failsafe does not cover on "
+                         "ABSENCE (it covers GPS only). The overlay can "
+                         "only RAISE the level, never lower it. OFF by "
+                         "default: shadow logs are evidence, and the two "
+                         "policies are not comparable, so the header "
+                         "records which was in force.")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
 
@@ -172,6 +180,9 @@ def main(argv=None) -> int:
         autopilot_version=cfg.get("autopilot", {}).get("firmware", "unknown"),
         vehicle_config=cfg,
         log_max_bytes=int(csia_cfg.get("log_max_bytes", 64 * 1024 * 1024)),
+        data_loss_supervision=bool(
+            args.data_loss_supervision
+            or csia_cfg.get("data_loss_supervision", False)),
     )
 
     runner = ShadowRunner(run_cfg)

@@ -224,6 +224,44 @@ class SupervisedFailsafe:
     def level(self) -> FailsafeLevel:
         return max(self.policy.level, self.supervisor.level)
 
+    # -- drop-in surface for the shadow runner ---------------------------
+    # The runner reads these off the policy to build its per-tick record.
+    # They are FORWARDED to the frozen policy rather than reimplemented: a
+    # second implementation of `_conditions` would be a copy of the thing
+    # under test, which the runner's own docstring warns against.
+
+    @property
+    def cfg(self) -> FailsafeConfig:
+        return self.policy.cfg
+
+    @property
+    def transitions(self) -> list:
+        return self.policy.transitions
+
+    @property
+    def _cond_since(self) -> dict:
+        return getattr(self.policy, "_cond_since", {})
+
+    def _conditions(self, state) -> dict:
+        return self.policy._conditions(state)
+
+    def data_loss_row(self) -> dict | None:
+        """The overlay's own conditions, for the flight log.
+
+        None when nothing is active, so a nominal flight does not carry an
+        empty dict on every tick.
+        """
+        if not self.supervisor.conditions:
+            return None
+        return {
+            "level": self.supervisor.level.name,
+            "conditions": {
+                name: {"sensor": c.sensor, "level": c.level.name,
+                       "since_s": round(c.since, 3),
+                       "provenance": c.provenance}
+                for name, c in sorted(self.supervisor.conditions.items())},
+        }
+
     def update(self, state) -> list:
         """Feed one state to both; returns the actions issued this tick."""
         issued = list(self.policy.update(state))

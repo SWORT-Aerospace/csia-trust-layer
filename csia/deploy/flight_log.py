@@ -69,6 +69,11 @@ class FlightLogHeader:
     t_start_unix: float
     t_start_mono: float
     t_end_unix: Optional[float] = None
+    #: Which failsafe was in force. "FROZEN_ONLY" is the frozen policy alone;
+    #: "FROZEN_PLUS_DATA_LOSS_SUPERVISION" adds the SR-003 overlay, which can
+    #: only RAISE the level. A log that does not say which describes a system
+    #: the reader cannot identify, and logs from the two are NOT comparable.
+    failsafe_policy: str = "FROZEN_ONLY"
     schema: str = "csia.flight_log/1"
     notes: dict = field(default_factory=dict)
 
@@ -253,7 +258,8 @@ def make_header(*, adapter, mode: str, autopilot_version: str,
                 command_authority: dict, sensor_availability: dict,
                 profile: str, vehicle_config: dict,
                 calibration_manifest: Optional[dict] = None,
-                flight_id: Optional[str] = None) -> FlightLogHeader:
+                flight_id: Optional[str] = None,
+                failsafe_policy: str = "FROZEN_ONLY") -> FlightLogHeader:
     from .. import __version__ as csia_version
     cfg_blob = json.dumps(vehicle_config, sort_keys=True).encode()
     import hashlib
@@ -270,6 +276,7 @@ def make_header(*, adapter, mode: str, autopilot_version: str,
         autopilot_version=autopilot_version,
         vehicle_config_hash=hashlib.sha256(cfg_blob).hexdigest()[:16],
         mode=mode,
+        failsafe_policy=failsafe_policy,
         command_authority=command_authority,
         sensor_availability=sensor_availability,
         calibration_manifest=calibration_manifest or {},
