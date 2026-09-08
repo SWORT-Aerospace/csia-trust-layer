@@ -1690,6 +1690,12 @@ entries:
 
   - id: HF-010
     date: 2026-09-07
+    introduced_as: >-
+      Commit 032fdf7 named this entry HF-007. That id was ALREADY IN USE by a
+      2026-09-06 finding, so it was renumbered to HF-010 before the ledger was
+      published. The commit subject is immutable history and still says HF-007;
+      this line is here so a reader following that commit lands on the right
+      entry rather than on the earlier one.
     phase: PROGRAM A (HF-004 follow-up)
     kind: INSTRUMENT_FIDELITY
     what_happened: >-
@@ -1750,6 +1756,12 @@ entries:
 
   - id: HF-011
     date: 2026-09-07
+    introduced_as: >-
+      Commit 032fdf7 named this entry HF-008. That id was ALREADY IN USE by a
+      2026-09-06 finding, so it was renumbered to HF-011 before the ledger was
+      published. The commit subject is immutable history and still says HF-008;
+      this line is here so a reader following that commit lands on the right
+      entry rather than on the earlier one.
     phase: PROGRAM A (freeze verification)
     kind: GUARD_CANNOT_DO_ITS_JOB
     what_happened: >-
@@ -1805,6 +1817,12 @@ entries:
 
   - id: HF-012
     date: 2026-09-07
+    introduced_as: >-
+      Commit c8b5dae named this entry HF-009. That id was ALREADY IN USE by a
+      2026-09-06 finding, so it was renumbered to HF-012 before the ledger was
+      published. The commit subject is immutable history and still says HF-009;
+      this line is here so a reader following that commit lands on the right
+      entry rather than on the earlier one.
     phase: PROGRAM A (independent verification)
     kind: REPRODUCTION
     what_happened: >-
@@ -1858,6 +1876,12 @@ entries:
 
   - id: HF-013
     date: 2026-09-07
+    introduced_as: >-
+      Commit c8b5dae named this entry HF-010. That id was ALREADY IN USE by a
+      2026-09-06 finding, so it was renumbered to HF-013 before the ledger was
+      published. The commit subject is immutable history and still says HF-010;
+      this line is here so a reader following that commit lands on the right
+      entry rather than on the earlier one.
     phase: PUBLICATION (prose-to-artifact bindings)
     kind: TRACEABILITY
     what_happened: >-
@@ -1916,6 +1940,25 @@ entries:
 
   - id: SR-003
     date: 2026-09-07
+    campaign_effect: >-
+      MEASURED OVER 1000 GENERATED MULTI-SENSOR VARIATIONS, seed 20260907,
+      each run twice (frozen policy and frozen+overlay):
+        detected            783 -> 969 of 1000
+        newly detected      186
+        DETECTIONS LOST     0
+        still undetected    217 -> 31
+        peak level raised   255 runs
+      THE ZERO IS THE ONE THAT MATTERS. The overlay computes
+      max(frozen, supervisor), so it can only add urgency; a non-zero
+      detections_lost would mean it had removed a detection the frozen core
+      made, which the composition forbids.
+      WHAT REMAINS IS A DIFFERENT CLASS. Every one of the 186 newly detected
+      runs involved a `dropout` -- exactly the absence-of-data mechanism
+      SR-001 named. The 31 still undetected are dominated by `bias_drift`:
+      degradation too weak to cross a frozen trust threshold. That is a
+      threshold question INSIDE the frozen core, not a supervision gap, and
+      it is not retuned here.
+      artifact: research/stress/results/SUPERVISION_EFFECT_1000.json
     phase: STRESS (SR-001 remediation)
     kind: GAP_CLOSED_ABOVE_THE_FREEZE
     what_happened: >-

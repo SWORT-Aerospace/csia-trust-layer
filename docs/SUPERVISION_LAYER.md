@@ -84,6 +84,31 @@ The clean-flight row is the one that decides whether this is an improvement or
 a nuisance: **a loss-of-data rule that alarms on healthy flight would be worse
 than the gap it fills.**
 
+### Across 1000 generated variations
+
+Each of the seeded multi-sensor variations run twice — frozen policy, then
+frozen + overlay:
+
+| | frozen | supervised |
+|---|---|---|
+| detected | 783 / 1000 | **969 / 1000** |
+| still undetected | 217 | **31** |
+| newly detected | — | 186 |
+| **detections lost** | — | **0** |
+| peak level raised | — | 255 runs |
+
+**The zero is the one that matters.** The overlay computes
+`max(frozen, supervisor)`, so it can only add urgency; a non-zero value there
+would mean it had removed a detection the frozen core made, which the
+composition forbids.
+
+**What remains is a different class of miss.** Every one of the 186 newly
+detected runs involved a `dropout` — exactly the absence-of-data mechanism
+SR-001 named. The 31 still undetected are dominated by `bias_drift`:
+degradation too weak to cross a frozen *trust* threshold. That is a threshold
+question **inside** the frozen core, not a supervision gap, and it is not
+retuned here.
+
 ## 5. Three safety properties, each with its own test
 
 1. **It escalates where the frozen policy was silent** — SR-001 closed.
