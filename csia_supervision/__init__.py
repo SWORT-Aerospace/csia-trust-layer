@@ -27,6 +27,9 @@ from .capability_bridge import (DERIVED, DIRECT,  # noqa: F401
 from .capability_bridge import apply as apply_evidence_overrides  # noqa: F401
 from .capability_bridge import evidence_overrides  # noqa: F401
 from .capability_bridge import report as capability_bridge_report  # noqa: F401
+from .lowtrust import (BORROWED, CANDIDATES,  # noqa: F401
+                       RULES as LOW_TRUST_RULES, LowTrustCondition,
+                       LowTrustRule, LowTrustSupervisor, eligible)
 from .dataloss import (ALREADY_COVERED, ANCHORED,  # noqa: F401
                        BOTH_IMUS_LOST, DERIVED_FROM, UNANCHORED,
                        UNSUPERVISED_BY_THE_FROZEN_POLICY,

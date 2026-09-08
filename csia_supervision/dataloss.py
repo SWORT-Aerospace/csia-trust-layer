@@ -210,8 +210,15 @@ class SupervisedFailsafe:
     policy: object = None
     supervisor: DataLossSupervisor = field(
         default_factory=DataLossSupervisor)
+    #: SR-006. Absence of data and presence of BAD data are different gaps
+    #: and are supervised separately; `low_trust` fires only on a sensor
+    #: that is still delivering, so the two never report one cause twice.
+    low_trust: object = None
 
     def __post_init__(self):
+        if self.low_trust is None:
+            from .lowtrust import LowTrustSupervisor
+            self.low_trust = LowTrustSupervisor()
         if self.policy is None:
             from csia.runtime.failsafe import FailsafePolicy
             self.policy = FailsafePolicy()
@@ -222,7 +229,8 @@ class SupervisedFailsafe:
 
     @property
     def level(self) -> FailsafeLevel:
-        return max(self.policy.level, self.supervisor.level)
+        return max(self.policy.level, self.supervisor.level,
+                   self.low_trust.level)
 
     # -- drop-in surface for the shadow runner ---------------------------
     # The runner reads these off the policy to build its per-tick record.
@@ -251,25 +259,35 @@ class SupervisedFailsafe:
         None when nothing is active, so a nominal flight does not carry an
         empty dict on every tick.
         """
-        if not self.supervisor.conditions:
+        if not self.supervisor.conditions and not self.low_trust.conditions:
             return None
-        return {
-            "level": self.supervisor.level.name,
+        row = {
+            "level": max(self.supervisor.level, self.low_trust.level).name,
             "conditions": {
                 name: {"sensor": c.sensor, "level": c.level.name,
                        "since_s": round(c.since, 3),
                        "provenance": c.provenance}
                 for name, c in sorted(self.supervisor.conditions.items())},
         }
+        if self.low_trust.conditions:
+            # SEPARATE KEY. Degradation and absence are different findings
+            # and a reader must not have to infer which one fired.
+            row["low_trust"] = {
+                name: {"sensor": c.sensor, "level": c.level.name,
+                       "since_s": round(c.since, 3), "trust": round(c.trust, 4),
+                       "threshold": c.threshold, "provenance": c.provenance}
+                for name, c in sorted(self.low_trust.conditions.items())}
+        return row
 
     def update(self, state) -> list:
         """Feed one state to both; returns the actions issued this tick."""
         issued = list(self.policy.update(state))
-        before = set(self.supervisor.conditions)
-        self.supervisor.update(state)
-        for name, condition in sorted(self.supervisor.conditions.items()):
-            if name not in before:
-                issued.extend(condition.actions)
+        for sup in (self.supervisor, self.low_trust):
+            before = set(sup.conditions)
+            sup.update(state)
+            for name, condition in sorted(sup.conditions.items()):
+                if name not in before:
+                    issued.extend(condition.actions)
         return issued
 
     def explain(self) -> dict:
@@ -278,6 +296,19 @@ class SupervisedFailsafe:
             "frozen_level_name": self.policy.level.name,
             "supervisor_level": int(self.supervisor.level),
             "supervisor_level_name": self.supervisor.level.name,
+            "low_trust_level": int(self.low_trust.level),
+            "low_trust_level_name": self.low_trust.level.name,
+            "low_trust_conditions": {
+                name: {"sensor": c.sensor, "level": c.level.name,
+                       "since_s": round(c.since, 3), "trust": round(c.trust, 4),
+                       "threshold": c.threshold, "reason": c.reason,
+                       "provenance": c.provenance}
+                for name, c in sorted(self.low_trust.conditions.items())},
+            "the_two_gaps_are_separate": (
+                "data_loss is ABSENCE of data (SR-001); low_trust is "
+                "presence of data the trust engine does not believe "
+                "(SR-006). low_trust fires only on a FRESH sensor, so one "
+                "cause is never reported twice."),
             "effective_level": int(self.level),
             "effective_level_name": self.level.name,
             "data_loss_conditions": {

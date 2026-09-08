@@ -2582,3 +2582,83 @@ entries:
       candidates -- two of which are a THRESHOLD, not a measurement -- is
       explicitly ruled out as a repeat of MX-013.
     artifact: research/publication/DECISION_0700_EVIDENCE_FLOOR.md
+
+  - id: SR-007
+    date: 2026-09-08
+    phase: SUPERVISION (SR-006 gap)
+    kind: RULE_ADDED_VERDICT_PENDING
+    status: >-
+      PENDING. The rule is implemented and tested; the measurement that
+      decides whether it should be ENABLED is still running. Nothing in the
+      deployed default changes either way -- the whole overlay is opt-in via
+      --data-loss-supervision, which defaults to off.
+    what_happened: >-
+      SR-006 measured a gap the data-loss overlay does not cover: baro keeps
+      DELIVERING while its value walks away from truth. At a drift of 1.0
+      units/s the altitude error reaches 327 m and baro trust falls to
+      0.231, and the frozen failsafe stays NORMAL at every swept magnitude,
+      because FailsafeConfig names baro nowhere.
+      Absence of data is SR-001 and dataloss.py covers it. Presence of data
+      the trust engine does not believe is a different failure and had no
+      rule at all.
+    consequence: >-
+      csia_supervision/lowtrust.py adds a low-trust rule for sensors the
+      frozen policy judges NOWHERE. It fires only on a FRESH sensor, so it
+      never double-reports a loss the data-loss rule already owns, and it
+      takes arm_time, dwell_up and the disarmed behaviour from the frozen
+      FailsafeConfig rather than choosing them.
+      STRUCTURAL SAFEGUARD: the module refuses AT IMPORT to carry a rule for
+      any sensor the frozen policy already judges. A rule for gps or imu0
+      would be this overlay restating -- and therefore able to shift -- a
+      frozen threshold, which is retuning the frozen core through the back
+      door. eligible() is asserted in tests in both directions.
+    the_threshold_is_a_choice_and_the_procedure_was_declared_first: >-
+      There is no frozen number for baro, so one had to be chosen, and the
+      selection procedure was written down BEFORE any fault was measured:
+      (1) measure the minimum baro trust on CLEAN flights, every profile;
+      (2) the threshold must sit strictly below that with margin;
+      (3) among values satisfying (2), take an EXISTING FailsafeConfig
+      constant rather than inventing a new float;
+      (4) if none satisfies (2), report it and invent nothing.
+      Measured at step 1: clean-flight minimum baro trust 0.9930
+      (hover_circle) and 0.9931 (fast_cruise), so all four frozen constants
+      clear step 2. Step 3 chose 0.75, the value of nav_caution, because
+      baro's ONLY trust-graph edge is altitude_baro spanning (baro, gps),
+      and gps trust is what nav_caution governs.
+      THAT IS AN ARGUMENT FROM TOPOLOGY, NOT A DERIVATION. The number is
+      frozen; applying it to this sensor is a judgement. Provenance is
+      recorded as BORROWED_FROM_A_FROZEN_CONSTANT -- weaker than the
+      ANCHORED entries in dataloss.py, stronger than a free choice.
+    detection_measured: >-
+      With the rule on, baro bias_drift is DETECTED from rate 0.02 upward,
+      against a campaign sampling range of [0.03, 0.20]. Previously it was
+      never detected at any swept magnitude up to 1.00. Peak level CAUTION,
+      matching the level dataloss.py already assigns baro.
+    the_finding_that_decides_it: >-
+      A CLEAN-FLIGHT MARGIN IS THE WRONG MARGIN, and a control run showed
+      why. On a flight where GPS drops and baro is untouched, baro trust
+      falls to 0.8182 -- because baro's only edge partners it with gps, so
+      losing GPS removes baro's only corroboration and its trust decays
+      toward the prior with nothing wrong with the barometer.
+      Margin against a clean flight: 0.243. Margin against another sensor's
+      failure: 0.068. The second number is the one that decides whether this
+      rule is safe to enable, and it is invisible from a clean flight.
+    what_is_being_measured_now: >-
+      csia_stress/low_trust_false_alarm.py, across campaign variations in
+      which baro carries NO fault: how often would the rule fire anyway.
+      A FALSE ALARM HERE IS WORSE THAN THE GAP IT FILLS -- an advisory layer
+      that cries wolf on a healthy barometer trains an operator to ignore
+      it, and SR-006's gap is at least honest about itself.
+      WHATEVER THE NUMBER, THE THRESHOLD IS NOT ADJUSTED TO SUIT IT. An
+      unacceptable rate means the rule is withdrawn or re-scoped, and that
+      outcome will be recorded here as it stands.
+    not_covered_and_said_so: >-
+      motor_esc has the identical gap and is NOT covered. Its clean-flight
+      trust margin under load has not been measured, and a rule whose
+      false-alarm rate is unknown is worse than a stated gap. It is listed
+      in lowtrust.CANDIDATES so the omission is visible rather than inferred
+      from an absence.
+    artifact: >-
+      csia_supervision/lowtrust.py; csia_supervision/dataloss.py;
+      csia_stress/low_trust_false_alarm.py;
+      tests/test_lowtrust_supervision.py
