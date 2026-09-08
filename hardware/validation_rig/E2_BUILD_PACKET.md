@@ -3,6 +3,10 @@
 **Written:** 2026-09-06, at the E1 freeze.
 **Audience:** whoever buys and wires the bench.
 **Predecessor:** `research/physical_validation/E1_FREEZE_MANIFEST.yaml`.
+**Once the bench is built:** `docs/FIELD_INTEGRATION_RUNBOOK.md` covers the
+SOFTWARE side — connecting CSIA to the autopilot, the preflight that must pass
+first, what to expect at each stage with numbers, which tool measures which
+part, and six falsifiable hypotheses with their pass/fail criteria.
 
 ---
 

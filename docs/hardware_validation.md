@@ -8,6 +8,13 @@ This plan takes CSIA from "deployable advisory software (desktop-validated)"
 to "validated on target hardware, flown in an advisory role." It maps to the
 embedded requirements REQ-050…REQ-053.
 
+**Companion documents.** The bench build (boards, wiring, power, fault
+injector) is `hardware/validation_rig/E2_BUILD_PACKET.md`. The software
+integration — how to connect CSIA, what each stage should produce, and how to
+prove out a hypothesis — is `docs/FIELD_INTEGRATION_RUNBOOK.md`. Run
+`tools/deploy/preflight.py` before every session; a trial without its
+preflight record cannot be attributed to a build.
+
 ## Test articles
 
 | Item | Role | Requirement |

@@ -2032,3 +2032,170 @@ entries:
       tests/test_supervision_dataloss.py;
       docs/SUPERVISION_LAYER.md;
       research/mission/results/MUTATION_PROBE_SUPERVISION.json
+
+  - id: SR-004
+    date: 2026-09-08
+    phase: STRESS (SR-003 follow-up)
+    kind: CAPABILITY_WITH_NO_CONSUMER
+    what_happened: >-
+      SR-003 ADDED A LOSS-OF-DATA RULE AND NOTHING CALLED IT. The overlay
+      was built, tested to a 1.000 mutation score and measured over 1000
+      variations -- and csia/deploy/shadow.py constructed a bare
+      FailsafePolicy(). On a real shadow flight SR-001 was therefore STILL
+      OPEN: the rule existed, was correct, and would never fire.
+      Found by grepping for consumers of SupervisedFailsafe outside the
+      tests and the stress harness, and finding none.
+    found_by: >-
+      Asking, while listing what to improve next, whether the thing I had
+      just built was actually reachable from the deployment path. It was
+      not.
+    verdict: FIXED
+    consequence: >-
+      Wired behind `ShadowConfig.data_loss_supervision`, exposed as
+      `csia-shadow --data-loss-supervision`, and OFF BY DEFAULT.
+      OFF BY DEFAULT IS THE DELIBERATE PART. Shadow mode PRODUCES EVIDENCE.
+      Turning supervision on silently would mean logs recorded before and
+      after the change describe different systems while both claiming mode
+      SHADOW, with nothing in the log able to tell them apart. So the
+      flight-log header now carries `failsafe_policy` -- FROZEN_ONLY or
+      FROZEN_PLUS_DATA_LOSS_SUPERVISION -- and the two are NOT comparable.
+      THE FROZEN POLICY IS WRAPPED, NEVER REPLACED. SupervisedFailsafe owns
+      a FailsafePolicy and FORWARDS `_conditions`, `_cond_since`, `cfg` and
+      `transitions` rather than reimplementing them: a second
+      implementation of `_conditions` would be a copy of the thing under
+      test, which the shadow runner's own docstring warns against. The
+      per-tick row records `frozen_level` beside the effective level, so a
+      reader can always separate the frozen decision from the overlay's
+      addition.
+      THE DEFAULT PATH IS BYTE-FOR-BYTE UNCHANGED. A test asserts the
+      policy row with supervision off has exactly the three keys it always
+      had, so old and new logs stay comparable.
+    artifact: >-
+      csia/deploy/shadow.py; csia/deploy/cli.py; csia/deploy/flight_log.py;
+      tests/test_shadow_supervision_wiring.py
+
+  - id: MX-017
+    date: 2026-09-08
+    phase: QUALITY (frozen-core sensitivity)
+    kind: MEASUREMENT_GAP_CLOSED
+    what_happened: >-
+      csia/runtime/online.py CARRIED THE LARGEST COVERAGE-VERSUS-MUTATION
+      GAP IN THE REPOSITORY: 88.8% line coverage against a 0.154 mutation
+      score, 11 survivors -- in the code that actually runs in deployment.
+      Coverage that high with sensitivity that low has one explanation: the
+      tests drive the module end to end and assert on the aggregate, so any
+      single comparison can be flipped without changing the answer they
+      check. 22 boundary tests were added (tests only; online.py is frozen
+      and stays byte-identical).
+    found_by: >-
+      Reading the per-file breakdown of the frozen-core probe rather than
+      its headline, and asking which file was worst.
+    verdict: TESTS_ADDED_SOURCE_UNTOUCHED
+    consequence: >-
+      FOUR OF THE PROBES I WROTE TO MEASURE IT WERE THEMSELVES WRONG, and
+      each is now recorded in the test that found it:
+        * the tilt-gate probe used a ZERO GYRO on a level vehicle, where
+          the integrated and accelerometer-derived attitudes are both zero
+          -- so an OPEN gate blends one value into an identical one and is
+          invisible. It now carries a sub-threshold rate to create the
+          divergence the correction pulls back.
+        * two tests fed samples entirely BELOW t_cal and measured an
+          attitude filter that had never been called.
+        * the adaptive-level test used a BENCH-MODE layer, where the whole
+          block is inside `if self._field` and cannot run. The bench case
+          is now pinned from both sides, so that vacuity cannot return.
+      THE PATTERN IS THE ONE THIS LEDGER KEEPS RECORDING: a probe that
+      cannot see the thing it is aimed at reports the same "no effect" as a
+      system that has none, and the two are indistinguishable without
+      checking that the probe can see anything at all.
+    artifact: tests/test_online_survivor_kills.py
+
+  - id: MX-018
+    date: 2026-09-08
+    phase: QUALITY (instrument hardening)
+    kind: INSTRUMENT_GUARD
+    what_happened: >-
+      A MISSING TEST PATH MAKES PYTEST EXIT 4, AND THE MUTATION PROBE READS
+      ANY NON-ZERO EXIT AS "TESTS FAILED", I.E. AS A KILL. I hit this by
+      passing two test files that do not exist to `--tests`.
+      The probe was ALREADY PROTECTED: it runs the unmutated copy first and
+      aborts if it does not pass, so no fake score was possible. I had
+      briefly believed otherwise and was wrong -- the guard was there and
+      it worked.
+    found_by: >-
+      Passing tests/test_failsafe.py and tests/test_scenarios.py to
+      --tests. Neither exists.
+    verdict: GUARD_MADE_SPECIFIC
+    consequence: >-
+      The existing baseline guard catches it but reports only "the
+      unmutated copy does not pass", sending the reader hunting for a
+      broken test that is really a typo in an argument. The probe now
+      validates every test path up front and names the missing ones, with
+      the reason spelled out. A correct refusal that misdirects the reader
+      is a small defect, but it is one that costs an hour at the wrong
+      moment.
+    artifact: tools/xr/mutation_probe.py
+
+  - id: MX-020
+    date: 2026-09-08
+    phase: QUALITY (gate integrity)
+    kind: GATE_COULD_NOT_FAIL
+    what_happened: >-
+      THE MUTATION HALF OF THE QUALITY RATCHET WAS INCAPABLE OF FAILING, AND
+      HAD BEEN REPORTING HOLDS. `quality_ratchet.py` does not run the
+      probes: it reads the three mutation artifacts committed under
+      research/mission/results/. Nothing regenerates them. The nightly's
+      mutation stage writes to a run-scoped build/nightly/<ts>/mutation.json
+      that the ratchet never opens, and no Makefile target, workflow or
+      script writes the three files it does open. So every night it compared
+      committed files against a floor derived from those same committed
+      files and found them equal, by construction.
+      A SECOND, SEPARATE DEFECT in the same function: the comparison loop ran
+      over ("mutation_mission", "mutation_frozen_core") only, while the floor
+      also stores `mutation_assurance_baseline`. That metric was measured on
+      every run, written into the floor, and never compared to anything.
+      The coverage half of the ratchet was never affected -- it shells out to
+      pytest and measures live.
+    found_by: >-
+      Reading measure_all() while preparing the deliberate re-baseline that
+      MX-015 called for, and asking what actually writes the file it reads.
+      Nothing does. Confirmed by grepping every script, workflow and Makefile
+      target for the three artifact paths: the only writers are the ledger
+      and the tools' own source.
+    verdict: REAL_DEFECT_FIXED
+    consequence: >-
+      The fix is not to run three probes every night, which would add hours
+      for no information while the code is unchanged. A stored score IS a
+      valid measurement of the code it was taken over; what was missing was
+      the link between the two. Three changes:
+      (1) both the floor and, for runs after this change, the artifact itself
+      record `targets_digest` -- a sha256 over the CONTENTS of the target
+      files -- and a score is comparable only while that digest still matches
+      the working tree;
+      (2) an independent staleness signal, SITE_COUNT_DRIFT: every artifact
+      already records the mutation-site count it saw, which is a pure
+      function of the targets' syntax, so a disagreement proves the artifact
+      is stale even if a digest was recorded wrongly;
+      (3) MUTATION_METRICS now names all three metrics, and a test asserts it
+      covers every mutation key present in the floor, so a metric cannot be
+      floored and ungated again.
+      Artifact-declared digests outrank the floor's own record, and the
+      report labels which of the two it used (ARTIFACT_DECLARED vs
+      FLOOR_RECORDED) so a weaker provenance is never shown as a stronger
+      one. Changing a target file now makes the gate NOT_COMPARABLE -- exit
+      2, INCONCLUSIVE, never a pass -- until the probe is re-run.
+      Verified in both directions: with no digests recorded the gate went
+      from HOLDS to NOT_COMPARABLE on all three metrics; a synthetic fall in
+      mutation_assurance_baseline, previously invisible, now reports
+      REGRESSION.
+    honest_limit: >-
+      This makes a stale score UNUSABLE, not fresh. While the targets are
+      unchanged the gate can still only confirm that the tests did not get
+      worse against code that also did not change; a regression introduced
+      by a test-only edit, with the targets untouched, is still not detected
+      until somebody re-runs the probe. Detecting that would need the probes
+      in the nightly, at a cost of hours per run, and has not been done.
+    artifact: >-
+      tools/xr/quality_ratchet.py; tools/xr/mutation_probe.py;
+      tests/test_quality_ratchet.py;
+      research/mission/results/QUALITY_FLOOR.json

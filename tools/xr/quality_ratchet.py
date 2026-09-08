@@ -51,6 +51,31 @@ INCONCLUSIVE: a check that could not be performed never reads as a check that
 succeeded. It exits non-zero, and the report separates it from a genuine
 regression so the two are not confused.
 
+WHY THE FLOOR ALSO RECORDS A SOURCE DIGEST (MX-020)
+----------------------------------------------------
+This tool does not run the probes. It reads the mutation artifacts committed
+under `research/mission/results/`, and **nothing regenerates them**: the
+nightly's mutation stage writes to a run-scoped `build/nightly/<ts>/`, which
+this tool never opens. So for a period the mutation half of the ratchet
+compared committed files against a floor derived from those same committed
+files, and reported HOLDS because the two sides were the same bytes. It could
+not have failed. A gate that cannot fail is not a gate -- the same rule these
+tests apply to everything else, applied here late.
+
+The fix is not to run three probes every night; a stored score IS a valid
+measurement of the code it was taken over, for as long as that code is
+unchanged. What was missing is the link between the two. So both the floor and
+(for probes run after this change) the artifact record a **digest of the target
+files' contents**, and a score is comparable only while that digest still
+matches the working tree. Change a target file and the gate goes
+NOT_COMPARABLE until the probe is re-run -- which is the honest state, because
+the stored number no longer describes the code.
+
+Artifact-declared digests are authoritative. Where an artifact predates the
+field, the floor's own recorded digest is used and the report marks the basis
+`FLOOR_RECORDED` rather than `ARTIFACT_DECLARED`, so a weaker provenance is
+never presented as a stronger one.
+
     python tools/xr/quality_ratchet.py --check
     python tools/xr/quality_ratchet.py --update    # raises the floor
 """
@@ -76,6 +101,13 @@ MUTATION_TOLERANCE = 0.03
 COVERAGE_TOLERANCE = 0.5      # percentage points
 
 COVERED = ("csia_mission", "csia_assurance")
+
+#: Every mutation metric the floor stores must appear here, or it is a number
+#: kept by hand and gated by nothing. `mutation_assurance_baseline` was in the
+#: floor and out of the loop for exactly that reason (MX-020); a test asserts
+#: this tuple covers every mutation key the floor contains.
+MUTATION_METRICS = ("mutation_mission", "mutation_frozen_core",
+                    "mutation_assurance_baseline")
 
 COVERAGE_TESTS = (
     "tests/test_mission_assurance.py",
@@ -133,19 +165,78 @@ def subset_fingerprint(doc: dict) -> str | None:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
+def targets_digest(targets) -> str | None:
+    """Digest the CONTENTS of the target files as they are on disk now.
+
+    A mutation score describes a specific body of code. Once that code
+    changes the score is a statement about something that no longer exists,
+    and comparing it to a new one is the MX-015 error in a different
+    dimension. Returns None if any target is missing, because a partial
+    digest that silently skips a deleted file would compare as equal.
+    """
+    if not targets:
+        return None
+    lines = []
+    for rel in sorted(targets):
+        full = os.path.join(ROOT, rel)
+        if not os.path.isfile(full):
+            return None
+        with open(full, "rb") as fh:
+            lines.append(f"{hashlib.sha256(fh.read()).hexdigest()}  {rel}")
+    return hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()[:16]
+
+
+def recount_sites(targets) -> int | None:
+    """Count mutation sites in the targets now, using the probe's own counter.
+
+    Imported from the probe rather than reimplemented: two counters that
+    drift apart would report drift that is not there.
+    """
+    if not targets:
+        return None
+    try:
+        import importlib.util
+        probe_path = os.path.join(ROOT, "tools", "xr", "mutation_probe.py")
+        spec = importlib.util.spec_from_file_location("_mp", probe_path)
+        mp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mp)
+    except Exception:
+        return None
+    total = 0
+    for rel in targets:
+        full = os.path.join(ROOT, rel)
+        if not os.path.isfile(full):
+            return None
+        with open(full, encoding="utf-8") as fh:
+            total += mp._count_sites(fh.read())
+    return total
+
+
 def read_mutation(path: str) -> dict:
     full = os.path.join(ROOT, path)
     if not os.path.exists(full):
         return {"error": f"{path} not present"}
     with open(full, encoding="utf-8") as fh:
         doc = json.load(fh)
+    targets = doc.get("targets")
     return {"score": doc.get("mutation_score"),
             "killed": doc.get("killed"),
             "evaluated": doc.get("evaluated"),
             "sites": doc.get("total_mutation_sites"),
             "subset_fingerprint": subset_fingerprint(doc),
-            "targets": doc.get("targets"),
-            "test_subset": doc.get("test_subset")}
+            "targets": targets,
+            "test_subset": doc.get("test_subset"),
+            # What the probe itself recorded, if it was run after MX-020.
+            "targets_digest_declared": doc.get("targets_digest"),
+            # What those same files hash to right now.
+            "targets_digest_live": targets_digest(targets),
+            # An INDEPENDENT staleness signal that needs nothing new in the
+            # artifact: the site count is a pure function of the targets'
+            # syntax trees, and every artifact already records the one it
+            # saw. Disagreement proves the artifact is stale even when the
+            # digest evidence is only the floor's own weaker record.
+            "sites_recomputed": recount_sites(targets),
+            "artifact": path}
 
 
 def load_floor() -> dict:
@@ -169,7 +260,11 @@ def check(measured: dict, floor: dict) -> dict:
                     "tests, or lower the floor DELIBERATELY in this commit "
                     "and say why in the message.")})
 
-    for key in ("mutation_mission", "mutation_frozen_core"):
+    # ALL THREE mutation metrics, not two. `mutation_assurance_baseline` was
+    # measured, stored in the floor and then left out of this loop, so it was
+    # a number kept up to date by hand and gated by nothing (MX-020).
+    provenance = {}
+    for key in MUTATION_METRICS:
         fm = (floor.get(key) or {}).get("score")
         mm = (measured.get(key) or {}).get("score")
         if fm is None or mm is None:
@@ -206,6 +301,62 @@ def check(measured: dict, floor: dict) -> dict:
                         "so. See MX-015.")})
             continue
 
+        # IS THE STORED SCORE STILL ABOUT THE CODE IN THE TREE? Nothing
+        # regenerates these artifacts, so without this the comparison is a
+        # file against itself and HOLDS is guaranteed (MX-020).
+        declared = (measured.get(key) or {}).get("targets_digest_declared")
+        live = (measured.get(key) or {}).get("targets_digest_live")
+        floor_digest = (floor.get(key) or {}).get("targets_digest")
+        basis, reference = (("ARTIFACT_DECLARED", declared) if declared
+                            else ("FLOOR_RECORDED", floor_digest))
+        provenance[key] = {
+            "basis": basis, "reference": reference, "live": live,
+            "artifact": (measured.get(key) or {}).get("artifact"),
+            "means": ("the probe recorded the source it measured"
+                      if basis == "ARTIFACT_DECLARED" else
+                      "the artifact predates targets_digest, so the floor's "
+                      "own record of the source at --update time is used "
+                      "instead. Weaker: it assumes the artifact was fresh "
+                      "when the floor was raised."),
+        }
+        if reference is None or live is None:
+            not_comparable.append({
+                "metric": key, "reason": "UNKNOWN_SOURCE_PROVENANCE",
+                "artifact_digest": declared, "floor_digest": floor_digest,
+                "live_digest": live,
+                "why": ("nothing links this score to a specific state of the "
+                        "target files, so it cannot be shown to describe the "
+                        "code in this tree. Re-run the probe and --update.")})
+            continue
+        # Independent of the digests: an artifact that saw a different number
+        # of mutation sites than the targets have now is stale, full stop.
+        stored_sites = (measured.get(key) or {}).get("sites")
+        now_sites = (measured.get(key) or {}).get("sites_recomputed")
+        provenance[key]["sites_recorded"] = stored_sites
+        provenance[key]["sites_recomputed"] = now_sites
+        if (stored_sites is not None and now_sites is not None
+                and stored_sites != now_sites):
+            not_comparable.append({
+                "metric": key, "reason": "SITE_COUNT_DRIFT",
+                "sites_in_artifact": stored_sites, "sites_now": now_sites,
+                "why": ("the targets contain a different number of mutation "
+                        "sites than when this artifact was written, so the "
+                        "artifact is stale regardless of what the digests "
+                        "say. Re-run the probe.")})
+            continue
+
+        if reference != live:
+            not_comparable.append({
+                "metric": key, "reason": "SOURCE_CHANGED", "basis": basis,
+                "reference_digest": reference, "live_digest": live,
+                "floor_score": fm, "measured_score": mm,
+                "why": ("the target files have changed since this score was "
+                        "recorded, so the stored number describes code that "
+                        "is no longer here. It is neither a pass nor a "
+                        "regression until the probe is re-run over the "
+                        "current source.")})
+            continue
+
         if mm < fm - MUTATION_TOLERANCE:
             problems.append({
                 "metric": key, "floor": fm, "measured": mm,
@@ -229,6 +380,13 @@ def check(measured: dict, floor: dict) -> dict:
                        "coverage_percentage_points": COVERAGE_TOLERANCE},
         "problems": problems,
         "not_comparable": not_comparable,
+        "source_provenance": provenance,
+        "this_tool_does_not_run_the_probes": (
+            "it reads the committed mutation artifacts; nothing regenerates "
+            "them automatically. That is safe only because a score is "
+            "compared against the source digest it was taken over, so a "
+            "stored number cannot keep reading green after the code it "
+            "describes has changed. See MX-020."),
         "verdict": verdict,
         "holds": verdict == "HOLDS",
         "not_comparable_is_not_pass": (
@@ -299,6 +457,17 @@ def main(argv=None) -> int:
                         "killed": value.get("killed"),
                         "evaluated": value.get("evaluated"),
                         "subset_fingerprint": new_fp,
+                        # WHAT SOURCE THIS SCORE DESCRIBES. Prefer what the
+                        # probe itself recorded; fall back to hashing the
+                        # targets now, which assumes the artifact is fresh --
+                        # so say which of the two it was rather than leaving
+                        # a reader to assume the stronger one.
+                        "targets_digest": (value.get("targets_digest_declared")
+                                           or value.get("targets_digest_live")),
+                        "targets_digest_basis": (
+                            "ARTIFACT_DECLARED"
+                            if value.get("targets_digest_declared")
+                            else "FLOOR_RECORDED_AT_UPDATE"),
                         "targets": value.get("targets"),
                         "test_subset": value.get("test_subset")}
                     # SAY WHICH OF THE THREE THINGS HAPPENED. A score that
@@ -329,7 +498,12 @@ def main(argv=None) -> int:
             "test subset it was measured over: a score earned under a "
             "different subset is a different measurement, not a better or "
             "worse one. See MX-015 in "
-            "research/physical_validation/FAILURE_LEDGER.yaml.")
+            "research/physical_validation/FAILURE_LEDGER.yaml. Each entry "
+            "also records targets_digest -- the contents of the target files "
+            "the score was taken over. Nothing regenerates the mutation "
+            "artifacts automatically, so this digest is what stops a stored "
+            "score from reading green about code that has since changed. "
+            "See MX-020.")
         os.makedirs(os.path.dirname(FLOOR), exist_ok=True)
         with open(FLOOR, "w", encoding="utf-8") as fh:
             json.dump(new_floor, fh, indent=2, sort_keys=True)
@@ -347,10 +521,19 @@ def main(argv=None) -> int:
         return 1
     if report["verdict"] == "NOT_COMPARABLE":
         # NOT PASS. The same rule as the nightly's INCONCLUSIVE.
+        # NAME THE ACTUAL REASON. "different subset" was the only reason
+        # once, and printing it for a stale artifact or an unprovenanced one
+        # would send the reader to fix the wrong thing.
+        reasons = {}
+        for nc in report["not_comparable"]:
+            reasons.setdefault(nc["reason"], []).append(nc["metric"])
         print("\nQUALITY RATCHET: NOT COMPARABLE -- "
-              f"{len(report['not_comparable'])} metric(s) measured over a "
-              "different subset than the floor. This is NOT a pass and NOT a "
-              "regression; nothing was compared.", file=sys.stderr)
+              f"{len(report['not_comparable'])} metric(s). This is NOT a "
+              "pass and NOT a regression; nothing was compared.",
+              file=sys.stderr)
+        for reason, metrics in sorted(reasons.items()):
+            print(f"  {reason}: {', '.join(sorted(metrics))}",
+                  file=sys.stderr)
         return 2
     print("\nQUALITY RATCHET: HOLDS", file=sys.stderr)
     return 0

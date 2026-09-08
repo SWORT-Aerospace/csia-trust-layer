@@ -77,6 +77,40 @@ it is an edit somebody has to justify in review. Stage 16 is slow — minutes,
 not seconds — and runs against a copy of the tree, so it sits near the end
 where a hang cannot starve the fast stages.
 
+**Stage 17 reads artifacts; it does not measure them (MX-020).** The ratchet
+opens the three mutation artifacts committed under `research/mission/results/`.
+**Nothing regenerates those files** — stage 16 writes to the run's own
+`build/nightly/<ts>/mutation.json`, which the ratchet never opens. For a period
+that meant the mutation half of the gate compared committed files against a
+floor derived from those same files, and reported HOLDS because both sides were
+the same bytes. It could not have failed. The same period had
+`mutation_assurance_baseline` stored in the floor and left out of the
+comparison loop entirely.
+
+Both are fixed. Running three probes nightly would cost hours for no
+information while the code is unchanged, so instead **a score is tied to the
+source it was taken over**: the floor and (for probes run after the fix) the
+artifact record `targets_digest`, a hash of the target files' contents, and the
+score is comparable only while that digest still matches the tree. An
+independent second signal, `SITE_COUNT_DRIFT`, compares the mutation-site count
+the artifact recorded against the count those files yield now — a pure function
+of their syntax, so a disagreement proves staleness even if a digest were
+recorded wrongly. Edit a target file and stage 17 goes NOT_COMPARABLE, exit 2,
+INCONCLUSIVE, until somebody re-runs the probe:
+
+```bash
+.venv/bin/python tools/xr/mutation_probe.py --targets <the floor's targets> \
+    --tests <the floor's test_subset> --sample <the floor's evaluated> \
+    --seed 20260907 --out research/mission/results/<the artifact> --regenerate
+.venv/bin/python tools/xr/quality_ratchet.py --update    # deliberate
+```
+
+**What this does not do:** it makes a stale score unusable, not fresh. While
+the targets are unchanged the gate confirms only that the tests did not get
+worse against code that also did not change. A quality regression caused by a
+*test-only* edit, with the targets untouched, is still invisible until the
+probe is re-run by hand.
+
 **A ratchet only ratchets within one measurement definition.** Each mutation
 entry in the floor records the *targets* and *test subset* it was measured
 over, and the ratchet compares scores only when both match. If they differ it
@@ -91,6 +125,17 @@ Including it moved `hypothesis.py` from 0.000 to 0.448.
 That also means the floor's `mutation_frozen_core: 0.35` must be read next to
 the nine-file `test_subset` stored beside it. **It is not "the frozen core's
 mutation score."** It is what that probe measured over those tests.
+
+**And that subset was the wrong one.** MX-015 recorded that it omitted
+`tests/test_hypothesis.py`, the file whose whole subject carries most of the
+survivors. Re-measured over a subset that includes it — same targets, same
+seed, same 244 sites, only tests added — the frozen core scores **0.5583
+(67/120)**, not 0.35. Per file: `hypothesis.py` 0.000 → 0.326, `causal.py`
+0.000 → 0.421, `profiles.py` 0.000 → 0.500, `online.py` 0.154 → 0.231, and
+engine/failsafe/bayes hold at 1.000. See
+`MUTATION_PROBE_FROZEN_CORE_CORRECTED.json`; the original artifact is kept
+unchanged as the historical record, and the two are **not comparable** under
+the fingerprint rule — which is exactly what the ratchet will say.
 
 **Stage 20 is exact, not tolerant.** The stress campaign is bit-for-bit
 deterministic, so the regression gate compares detection latency, recovery

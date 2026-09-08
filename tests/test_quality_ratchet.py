@@ -95,10 +95,25 @@ def test_fingerprint_is_none_when_undeclared(doc):
 FP_A = "aaaaaaaaaaaaaaaa"
 FP_B = "bbbbbbbbbbbbbbbb"
 
+#: Source digests, which are a SEPARATE axis from the subset fingerprint:
+#: the fingerprint says what was measured, the digest says what it was
+#: measured over. Both must agree before two scores may be compared.
+SRC_A = "1111111111111111"
+SRC_B = "2222222222222222"
+
 
 def _entry(score, fp, **kw):
+    """A comparable entry: same subset, same source, same site count.
+
+    Provenance defaults to *agreeing* so that a test about scores is about
+    scores. Tests that are about provenance override these explicitly.
+    """
     out = {"score": score, "subset_fingerprint": fp,
-           "killed": 1, "evaluated": 2}
+           "killed": 1, "evaluated": 2,
+           "targets_digest": SRC_A,           # floor side
+           "targets_digest_declared": SRC_A,  # measured side, authoritative
+           "targets_digest_live": SRC_A,
+           "sites": 100, "sites_recomputed": 100}
     out.update(kw)
     return out
 
@@ -283,3 +298,146 @@ def test_tolerances_are_not_silently_widened():
     test in the same commit and saying why."""
     assert ratchet.MUTATION_TOLERANCE == 0.03
     assert ratchet.COVERAGE_TOLERANCE == 0.5
+
+
+# --------------------------------------------------------------------------
+# MX-020: the mutation half of the ratchet could not fail
+# --------------------------------------------------------------------------
+#
+# This tool does not run the probes -- it reads committed artifacts, and
+# nothing regenerates them. So it was comparing files against a floor derived
+# from those same files and reporting HOLDS because both sides were the same
+# bytes. These tests pin the three things that fixed it: every floored metric
+# is actually compared, a score is tied to the source it was taken over, and
+# an artifact that saw a different shape of code is stale regardless of what
+# any digest says.
+
+
+def test_every_mutation_metric_in_the_floor_is_actually_compared():
+    """THE DEFECT ITSELF. `mutation_assurance_baseline` sat in the floor,
+    was measured on every run, and was left out of the comparison loop --
+    a number maintained by hand and gated by nothing."""
+    floored = {k for k in ratchet.load_floor()
+               if k.startswith("mutation_")}
+    assert floored, "the floor records no mutation metrics at all"
+    missing = floored - set(ratchet.MUTATION_METRICS)
+    assert not missing, (
+        f"{sorted(missing)} are stored in the floor but never compared")
+
+
+def test_a_floored_metric_left_out_of_the_loop_would_be_caught():
+    """The test above only holds while MUTATION_METRICS is honest. Verify it
+    is the loop's real source of keys, not a list that merely happens to
+    agree with one."""
+    r = ratchet.check(
+        {"mutation_assurance_baseline": _entry(0.10, FP_A)},
+        {"mutation_assurance_baseline": _entry(0.90, FP_A)})
+    assert r["verdict"] == "REGRESSION", (
+        "a fall in the assurance baseline was not reported")
+
+
+def test_a_score_measured_over_different_source_is_not_comparable():
+    """A stored score describes the code it was taken over. Once that code
+    changes it is a statement about something that is no longer here."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest_declared=SRC_A,
+                                    targets_digest_live=SRC_B)},
+        {"mutation_mission": _entry(0.90, FP_A)})
+    assert r["verdict"] == "NOT_COMPARABLE"
+    assert r["not_comparable"][0]["reason"] == "SOURCE_CHANGED"
+    assert r["holds"] is False
+
+
+def test_a_changed_source_is_not_reported_as_a_regression():
+    """Not a false accusation, either. A lower score over changed source is
+    unknown, not worse."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.10, FP_A, targets_digest_declared=SRC_A,
+                                    targets_digest_live=SRC_B)},
+        {"mutation_mission": _entry(0.90, FP_A)})
+    assert r["problems"] == []
+    assert r["verdict"] == "NOT_COMPARABLE"
+
+
+def test_a_score_with_no_source_provenance_is_not_comparable():
+    """Nothing links the number to any state of the code, so it cannot be
+    shown to describe this tree. That is not a pass."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest_declared=None,
+                                    targets_digest_live=None)},
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest=None)})
+    assert r["verdict"] == "NOT_COMPARABLE"
+    assert r["not_comparable"][0]["reason"] == "UNKNOWN_SOURCE_PROVENANCE"
+
+
+def test_the_artifact_s_own_digest_outranks_the_floor_s_record():
+    """The floor's digest is captured at --update time and assumes the
+    artifact was fresh then. Where the probe recorded what it actually
+    measured, that is the better evidence and must win."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest_declared=SRC_B,
+                                    targets_digest_live=SRC_B)},
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest=SRC_A)})
+    assert r["verdict"] == "HOLDS", (
+        "the floor's weaker record overrode the artifact's own")
+    assert r["source_provenance"]["mutation_mission"]["basis"] == \
+        "ARTIFACT_DECLARED"
+
+
+def test_the_weaker_basis_is_labelled_as_weaker():
+    """An artifact that predates the field still gets compared, but the
+    report must not present the floor's assumption as the probe's record."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest_declared=None,
+                                    targets_digest_live=SRC_A)},
+        {"mutation_mission": _entry(0.90, FP_A, targets_digest=SRC_A)})
+    assert r["verdict"] == "HOLDS"
+    prov = r["source_provenance"]["mutation_mission"]
+    assert prov["basis"] == "FLOOR_RECORDED"
+    assert "assumes" in prov["means"]
+
+
+def test_a_drifted_site_count_is_stale_whatever_the_digests_say():
+    """An INDEPENDENT staleness signal. The site count is a pure function of
+    the targets' syntax, so a disagreement proves the artifact predates the
+    code even if a digest was recorded wrongly."""
+    r = ratchet.check(
+        {"mutation_mission": _entry(0.90, FP_A, sites=100,
+                                    sites_recomputed=137)},
+        {"mutation_mission": _entry(0.90, FP_A)})
+    assert r["verdict"] == "NOT_COMPARABLE"
+    nc = r["not_comparable"][0]
+    assert nc["reason"] == "SITE_COUNT_DRIFT"
+    assert nc["sites_in_artifact"] == 100 and nc["sites_now"] == 137
+
+
+def test_the_report_admits_the_tool_does_not_run_the_probes():
+    """The property that makes the digest check load-bearing rather than
+    decorative. If this ever stops being said, a reader will assume the
+    numbers were measured on this run."""
+    r = ratchet.check({}, {})
+    said = " ".join(r["this_tool_does_not_run_the_probes"].split())
+    assert "nothing regenerates them" in said
+    assert "reads the committed mutation artifacts" in said
+
+
+def test_the_two_digest_implementations_agree():
+    """The probe writes `targets_digest` and this tool checks it. Two
+    implementations that drift apart would report drift that is not there,
+    so they are pinned to each other over real files."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "_mp_probe", os.path.join(ROOT, "tools", "xr", "mutation_probe.py"))
+    mp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mp)
+
+    targets = ["csia/runtime/failsafe.py", "csia/trust_engine/engine.py"]
+    assert mp.targets_digest(targets) == ratchet.targets_digest(targets)
+    assert mp.targets_digest(targets) is not None
+
+
+def test_a_missing_target_digests_to_none_rather_than_a_partial_hash():
+    """A digest that silently skipped a deleted file would compare equal to
+    one taken before the deletion."""
+    assert ratchet.targets_digest(["csia/does_not_exist.py"]) is None
+    assert ratchet.targets_digest([]) is None

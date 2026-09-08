@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import os
 import random
@@ -163,6 +164,25 @@ def _run_subset(workdir: str) -> bool:
     return proc.returncode == 0
 
 
+def targets_digest(targets) -> str | None:
+    """Digest the source this run is about, so the score stays attributable.
+
+    Must agree byte-for-byte with `quality_ratchet.targets_digest`; a test
+    pins the two together, because a provenance field the consumer computes
+    differently is worse than no provenance field.
+    """
+    if not targets:
+        return None
+    lines = []
+    for rel in sorted(targets):
+        full = os.path.join(ROOT, rel)
+        if not os.path.isfile(full):
+            return None
+        with open(full, "rb") as fh:
+            lines.append(f"{hashlib.sha256(fh.read()).hexdigest()}  {rel}")
+    return hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()[:16]
+
+
 def run(sample: int = 60, seed: int = 20260907) -> dict:
     rng = random.Random(seed)
 
@@ -246,6 +266,13 @@ def run(sample: int = 60, seed: int = 20260907) -> dict:
     return {
         "schema": "csia.mission.mutation_probe/1",
         "targets": list(TARGETS),
+        "targets_digest": targets_digest(TARGETS),
+        "targets_digest_means": (
+            "sha256 over the contents of the target files as they were when "
+            "this score was measured. Nothing regenerates this artifact "
+            "automatically, so a consumer must check this against the tree "
+            "before treating the score as a statement about current code. "
+            "See MX-020."),
         "test_subset": list(TEST_SUBSET),
         "total_mutation_sites": total_sites,
         "sampled": len(chosen),
