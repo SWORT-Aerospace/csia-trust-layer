@@ -218,16 +218,48 @@ def test_the_matrix_reports_what_it_could_not_deliver():
 @SETTINGS
 @given(start=st.floats(min_value=0.0, max_value=50.0, allow_nan=False),
        duration=st.floats(min_value=0.1, max_value=40.0, allow_nan=False))
-def test_a_profile_that_outruns_its_flight_is_rejected(start, duration):
-    """The stimulus is never shortened to fit the window; a profile whose
-    faults do not fit must fail rather than be silently truncated."""
+def test_a_profile_with_no_room_to_recover_is_refused_at_construction(
+        start, duration):
+    """The stimulus is never shortened to fit the window; a profile that
+    cannot answer its own recovery question must be REFUSED.
+
+    Two things about this test were wrong when first written, and the
+    property found both: the rule is not "the faults fit inside the flight"
+    but "more than `dwell_down` remains after they clear", and it is
+    enforced in `__post_init__`, not in `validate()`. Constructing the
+    profile outside the raises-block let the error escape.
+    """
     kind, target = LIVE[0]
-    profile = StressProfile(
-        id="prop", summary="property", duration=FLIGHT_DURATION,
-        faults=(Fault(kind, target, start, duration, {}),),
-        represents="property test", does_not_represent="a scenario")
-    if start + duration > FLIGHT_DURATION:
-        with pytest.raises(Exception):
-            profile.validate()
+    dwell = FailsafeConfig().dwell_down
+    room = FLIGHT_DURATION - (start + duration)
+
+    def _build():
+        return StressProfile(
+            id="prop", summary="property", duration=FLIGHT_DURATION,
+            faults=(Fault(kind, target, start, duration, {}),),
+            represents="property test", does_not_represent="a scenario")
+
+    if room <= dwell:
+        with pytest.raises(ValueError):
+            _build()
     else:
-        profile.validate()
+        _build().validate()
+
+
+@SETTINGS
+@given(start=st.floats(min_value=0.0, max_value=50.0, allow_nan=False),
+       duration=st.floats(min_value=0.1, max_value=40.0, allow_nan=False))
+def test_the_refusal_reads_the_dwell_from_the_frozen_config(start, duration):
+    """The boundary is `FailsafeConfig().dwell_down` read at runtime, not a
+    literal 5.0 copied into the check -- so a frozen-core change surfaces
+    here instead of silently shifting what profiles are allowed."""
+    kind, target = LIVE[0]
+    room = FLIGHT_DURATION - (start + duration)
+    if room > FailsafeConfig().dwell_down:
+        return
+    with pytest.raises(ValueError) as excinfo:
+        StressProfile(
+            id="prop", summary="property", duration=FLIGHT_DURATION,
+            faults=(Fault(kind, target, start, duration, {}),),
+            represents="property test", does_not_represent="a scenario")
+    assert str(FailsafeConfig().dwell_down) in str(excinfo.value)
