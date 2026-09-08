@@ -286,6 +286,16 @@ class ShadowRunner:
             data_loss = self.policy.data_loss_row()
             if data_loss is not None:
                 row["data_loss"] = data_loss
+                # WHAT THE LOSS MEANS FOR THE MISSION, not just for the
+                # alarm. Without this the log says "baro is gone" and never
+                # says that altitude_hold is therefore unsupportable, which
+                # is the fact a mission layer needs. Demote-only: the bridge
+                # withdraws evidence and never grants any.
+                conditions = getattr(self.policy.supervisor, "conditions", {})
+                if conditions:
+                    from csia_supervision import capability_bridge
+                    row["capability_impact"] = capability_bridge.report(
+                        {}, conditions)
         return row
 
     # ------------------------------------------------------------------

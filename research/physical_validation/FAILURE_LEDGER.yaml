@@ -2319,3 +2319,266 @@ entries:
       research/physical_validation/results/REPLAY_DIVERGENCE_PX4.json;
       csia/deploy/flight_log.py; csia/deploy/shadow.py;
       tests/test_replay_freshness_provenance.py
+
+  - id: SR-005
+    date: 2026-09-08
+    phase: SUPERVISION (layer integration)
+    kind: LAYERS_NOT_CONNECTED
+    what_happened: >-
+      A LOST SENSOR RAISED AN ALARM THAT REACHED NOTHING. `csia_supervision`
+      produced a DataLossCondition when a monitored sensor stopped
+      delivering, and `csia_mission.capability` went on reporting
+      capabilities against whatever evidence the firewall had last
+      certified. A cut baro line raised CAUTION while `altitude_hold` still
+      read SUPPORTED -- the alarm and the capability report describing the
+      same aircraft, disagreeing.
+    found_by: >-
+      Asking what consumes a DataLossCondition. Nothing did.
+    verdict: BRIDGED
+    consequence: >-
+      csia_supervision/capability_bridge.py, which is the adapter
+      xr1_contracts.py already said belonged there ("the mapping from a CSIA
+      relation to one of these belongs in an adapter"). It maps six of the
+      eight monitored sensors onto canonical evidence ids and withdraws
+      support for them when the sensor goes quiet.
+      THE RULE THAT MAKES IT SAFE IS THAT IT CAN ONLY DEMOTE. A lost sensor
+      proves the evidence riding on it is not supportable now; a PRESENT
+      sensor proves nothing, because support is the firewall's verdict to
+      give and delivering bytes is not a verdict. So the bridge withdraws
+      and never grants, it leaves UNKNOWN as UNKNOWN rather than resolving
+      it into a definite negative, and every override is stamped
+      CSIA_DATA_LOSS_SUPERVISOR so it is never mistaken for a firewall
+      certification. That mirrors the overlay's own max(frozen, supervisor):
+      one can only raise urgency, the other can only withdraw support.
+      Measured end to end: losing baro takes altitude_hold and stable_flight
+      to NOT_SUPPORTED and leaves absolute_navigation and attitude_hold
+      alone; losing gps takes absolute_navigation down and correctly leaves
+      relative_navigation, which the contract declares does NOT require
+      GNSS; losing one IMU DEGRADES rather than kills, selecting the
+      declared alternative path imu.reference.supported.
+    dependency_not_invented: >-
+      Losing ONE imu does not demote attitude.supported. The estimator has
+      two inertial sources and asserting that losing one destroys attitude
+      would be a dependency no evidence here establishes. Attitude is
+      demoted only when BOTH are lost, and that rule is labelled DERIVED
+      rather than DIRECT in the output so the difference stays visible.
+    honest_limit: >-
+      TWO OF THE EIGHT MONITORED SENSORS CANNOT REACH THE CAPABILITY LAYER
+      AT ALL: the XR-1 contract set names no evidence for propulsion or
+      structural telemetry, so `motor_esc` and `vibration` are listed in
+      UNMAPPED rather than attached to the nearest plausible id. Their loss
+      is reported as unmapped, not as "no impact".
+      A FURTHER GAP, MEASURED: `mag.field.supported` and
+      `power.telemetry.supported` are declared evidence ids that NO
+      capability contract and NO product contract requires, so withdrawing
+      them is correct and reaches nothing. Losing mag or battery therefore
+      changes no capability today. That is a gap in the contract set, not in
+      the bridge, and a test fails if it silently changes.
+    artifact: >-
+      csia_supervision/capability_bridge.py; csia/deploy/shadow.py;
+      tests/test_capability_bridge.py
+
+  - id: MX-021
+    date: 2026-09-08
+    phase: QUALITY (instrument)
+    kind: INSTRUMENT_BUG_PRESENTED_AS_A_FINDING
+    what_happened: >-
+      THE DETECTION-FLOOR SWEEP REPORTED "UNDETECTED AT EVERY MAGNITUDE" FOR
+      ALL FOUR PAIRS, AND EVERY ROW WAS MY BUG. The sweep asked the run
+      object for `.detected`, which does not exist -- the field is
+      `detection_status`. A per-point `except Exception` caught the
+      AttributeError and stored a point with no verdict; points with no
+      verdict were then filtered out, leaving zero detections, which the
+      floor logic correctly summarised as "never detected at any magnitude".
+      The output was clean, plausible, and would have been published as a
+      finding about the frozen core.
+    found_by: >-
+      Refusing to accept the negative result without a control. A dropout on
+      gps through the same harness escalated NORMAL -> CAUTION, so the
+      pipeline worked and the sweep did not -- which located the fault in
+      the instrument within one run.
+    verdict: FIXED_AND_GUARDED
+    consequence: >-
+      The broad per-point except is GONE. A point the sweep cannot interpret
+      raises SweepInstrumentError and stops the sweep, and the detection
+      verdict is compared against the module's declared DETECTED /
+      NOT_DETECTED constants rather than a string literal, so a rename
+      cannot quietly turn every point into a miss. A partial sweep raises
+      rather than locating a floor from the points that happened to work.
+      Three tests pin it, including one that monkeypatches an unparseable
+      status and asserts it RAISES.
+    the_general_lesson: >-
+      An exception must never become a data point. The failure was not that
+      the code was wrong -- code is wrong all the time -- it is that being
+      wrong produced a well-formed negative result instead of a crash. Every
+      swallowed error in a measurement path is a potential fabricated
+      finding.
+    artifact: csia_stress/detection_floor.py; tests/test_detection_floor.py
+
+  - id: SR-006
+    date: 2026-09-08
+    phase: SUPERVISION (capability boundary)
+    kind: LIMIT_MEASURED_AND_PUBLISHED
+    what_happened: >-
+      The 31 remaining misses out of 1000 variations are all sub-threshold
+      `bias_drift`, and fixing them would mean retuning frozen thresholds.
+      Instead the boundary was measured: one fault at a time, on an
+      otherwise clean flight, at twelve magnitudes declared before the first
+      run, for each of the four live (bias_drift, target) pairs.
+      DETECTION FLOORS, in sensor units per second:
+        bias_drift@imu1  0.02
+        bias_drift@imu0  0.05
+        bias_drift@mag   0.30
+        bias_drift@baro  NEVER ESCALATES AT ANY SWEPT MAGNITUDE
+      Each floor is the smallest swept magnitude that escalated with every
+      larger swept magnitude also escalating; a lone detection surrounded by
+      misses is reported NON_MONOTONIC rather than taken as a boundary. The
+      true boundary lies between the floor and the grid point below it, and
+      nothing is interpolated.
+    found_by: csia_stress/detection_floor.py
+    verdict: ENVELOPE_STATED
+    the_baro_result_is_not_a_sensing_limit: >-
+      baro is the important one. The stimulus REACHES the stream -- a 327 m
+      altitude error at the top of the sweep, verified directly against the
+      unfaulted stream -- and baro trust collapses from the 0.8 prior to
+      0.231. The trust layer sees it perfectly. The failsafe level never
+      leaves NORMAL because NO FROZEN FAILSAFE RULE NAMES BARO, which is the
+      same SR-001 family: `baro` is one of the two sensors already recorded
+      as UNSUPERVISED_BY_THE_FROZEN_POLICY. Reporting this as "undetected"
+      would blame the sensing and hide a missing rule, so the sweep reports
+      it as TRUST_RESPONDS_BUT_NO_FAILSAFE_RULE, a separate outcome.
+    what_this_explains: >-
+      The campaign draws bias_drift rates from [0.03, 0.20]. Against the
+      floors: mag's ENTIRE range is below its floor, baro never escalates at
+      all, imu0's range STRADDLES its floor, and imu1's range is entirely at
+      or above its floor. So mag and baro are structurally out of reach in
+      that campaign -- and they are exactly the two targets that dominate
+      the recorded miss counts (mag 21, baro 18, imu0 10, imu1 8).
+    honest_limit: >-
+      THIS IS NOT A PER-RUN ATTRIBUTION OF THE 31 MISSES. Campaign
+      variations carry two to four simultaneous faults, so the per-target
+      counts are targets INVOLVED in a missed run and sum to 67, more than
+      the 31 runs. The defensible claim is the weaker one: which pairs are
+      structurally undetectable in that parameter range. Floors are also
+      grid-bounded, single-fault, and simulated -- a floor under
+      simultaneous degradation would confound "too small to see" with
+      "masked by something else", which is why single faults were used.
+      NOTHING WAS TUNED. No threshold, weight, prior or dwell was changed to
+      produce any of these numbers.
+    artifact: >-
+      csia_stress/detection_floor.py;
+      research/stress/results/DETECTION_FLOOR.json;
+      tests/test_detection_floor.py
+
+  - id: MX-022
+    date: 2026-09-08
+    phase: QUALITY (property coverage)
+    kind: COVERAGE_GAP_CLOSED
+    what_happened: >-
+      The mission layer had property-based tests; the stress and supervision
+      layers had none. Those two are where a wrong answer is not a wrong
+      number but a wrong SAFETY DIRECTION, and direction is what
+      example-based tests cover unevenly -- you test the cases you thought
+      of.
+    verdict: TESTS_ADDED
+    consequence: >-
+      25 property tests over generated inputs, pinning the invariants both
+      layers rest on rather than the examples someone chose.
+      SUPERVISION (12): the bridge never improves any evidence over
+      arbitrary firewall verdicts and arbitrary loss sets; it never invents
+      or drops an evidence id; UNKNOWN is never resolved in either
+      direction; it is monotone in the loss set, so adding a lost sensor can
+      never restore support; every override is negative, attributable and
+      witnessed; applying it twice changes nothing further; only mapped
+      sensors withdraw anything. The supervisor's level never falls below
+      NORMAL, a sensor never seen fresh never raises a loss, and no
+      condition names a currently-fresh sensor.
+      STRESS (13): every generated profile uses only LIVE pairs, is
+      multi-fault, hits distinct sensors, leaves more than dwell_down to
+      observe its own recovery, and starts after arm_time; generated
+      parameters stay inside their declared ranges; the same seed gives a
+      byte-identical profile and the index changes only the label -- which
+      is what the zero-tolerance regression gate rests on; an inert pair is
+      refused loudly at construction and the refusal names what the target
+      does respond to; live and inert are a partition.
+    artifact: >-
+      tests/test_supervision_properties.py; tests/test_stress_properties.py
+
+  - id: MX-023
+    date: 2026-09-08
+    phase: PUBLICATION (prose bindings)
+    kind: AMBIGUITY_SEPARATED_NOT_GUESSED
+    what_happened: >-
+      19 prose literals remained STILL_AMBIGUOUS after section filtering.
+      Reading them shows they are not one problem but three, and lumping
+      them together is why they looked intractable:
+      4 are DUPLICATE_POINTER -- two JSON pointers into the same artifact
+      reaching the same quantity, because the artifact publishes a run both
+      in full and as a summary projection of itself. The quantity is not
+      ambiguous; only the path is, and that is decidable mechanically.
+      7 are DISTINCT_DATA_SHARING_A_VALUE -- genuinely different
+      measurements with the same rounded value.
+      1 is VALUE_TOO_COMMON_TO_BIND (1.000).
+      7 span more than one artifact and are untouched.
+    found_by: >-
+      tools/publication/resolve_duplicate_pointers.py. A candidate pair is
+      the same quantity only when both are in one artifact, carry one value,
+      and one containing object is a FIELD SUBSET of the other agreeing on
+      every shared field -- a summary projection agrees with its source on
+      everything it carries. Any disagreement and the tool says nothing.
+      Verified by hand on campaign_expanded.json: onset_variation[3] is a
+      5-field projection of per_run/onset[3] (17 fields, label onset_75s),
+      identical q_gvalid 0.9824.
+    verdict: FOUR_RESOLVED_FIFTEEN_LEFT_OPEN
+    consequence: >-
+      0.088, 0.208, 0.609 and 0.982 resolve to /per_run/duration/{0,1,2}
+      and /per_run/onset/3 -- the fuller record, because it identifies which
+      run the number came from. THAT PREFERENCE IS EDITORIAL AND SAID TO BE:
+      deciding two paths name one quantity is mechanical, deciding which a
+      paper should cite is not.
+      NOTHING IS APPLIED. These bind into PAPER1_ARTIFACT_MAP.yaml, which
+      the E1 freeze manifest hashes; writing them would break the freeze
+      they are recorded in.
+    honest_limit: >-
+      15 of 19 remain open ON PURPOSE. MX-013 records a tool binding two of
+      five such proposals wrongly; the response is to narrow what a tool
+      claims, not to raise its confidence.
+    artifact: >-
+      tools/publication/resolve_duplicate_pointers.py;
+      research/publication/DUPLICATE_POINTER_RESOLUTION.json
+
+  - id: MX-024
+    date: 2026-09-08
+    phase: PUBLICATION (prose/artifact conflict)
+    kind: DECISION_REQUIRED_FROM_A_HUMAN
+    what_happened: >-
+      main.tex:901 says "the model assumes a constant e_f where the measured
+      floor ranges 0.678 to 0.700". The artifact's observed_range is
+      [0.6785, 0.9422]. The lower end matches; THE UPPER END DOES NOT.
+      0.700 is the algebraic saturation value -- 8 of 21 cells whose
+      residual saturates land on exactly 0.7000 -- while the other 13 cells
+      have minimum evidence ABOVE 0.700, up to 0.9422, because their fault
+      never drove the physics residual to saturation.
+      So the prose quotes the band spanned by cells that REACH the floor,
+      silently excluding the 13 that do not, and the artifact stores no
+      scalar for that selection. Neither side is wrong about a number: the
+      sentence describes a selection the artifact does not record, which is
+      why the binding target does not exist.
+    verdict: OPEN_AWAITING_A_HUMAN
+    why_it_matters: >-
+      The sentence is defending a modelling assumption against two
+      misclassified cells. 0.678-0.700 makes the assumption look tight at
+      3%; across all 21 cells the spread is 0.678-0.942, and for the 13
+      non-saturating cells the constant-e_f assumption is wrong in the
+      OPPOSITE direction and by more. A reader checking whether e_f
+      variation explains the misses is entitled to the wider number.
+    consequence: >-
+      research/publication/DECISION_0700_EVIDENCE_FLOOR.md sets out the
+      three options with their costs and recommends stating the selection
+      explicitly in prose AND recording the derived quantity in the
+      artifact so the claim becomes machine-checkable. NOT APPLIED: it is an
+      editorial judgement about what the sentence asserts, and no
+      measurement settles it. Binding 0.700 to one of the four surfaced
+      candidates -- two of which are a THRESHOLD, not a measurement -- is
+      explicitly ruled out as a repeat of MX-013.
+    artifact: research/publication/DECISION_0700_EVIDENCE_FLOOR.md
