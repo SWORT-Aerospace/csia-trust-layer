@@ -388,6 +388,46 @@ def run(platform_name: str = "ardupilot", supervision: bool = False,
     }
 
 
+INSTRUMENT = "tools.deploy.preflight"
+
+
+def _controls():
+    """Preflight must still be able to say NO.
+
+    A preflight stuck on PASS is the most dangerous instrument in the
+    repository: it is the last check before a flight. The pair uses the
+    platform check, which depends on neither the working tree nor the host,
+    so a dirty tree cannot make the control ambiguous.
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def _adapter(platform):
+        rows = {r["check"]: r for r in check_platform(platform)}
+        return rows["adapter_present"]["status"]
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="an unknown platform is refused",
+            kind=POSITIVE,
+            run=lambda: _adapter("not_a_real_autopilot"),
+            expect=lambda st: st == FAIL,
+            basis=("no adapter is registered under that name; FAIL follows "
+                   "from the adapter registry, not from this tool"),
+        ),
+        negative=Control(
+            name="a real platform is not refused",
+            kind=NEGATIVE,
+            run=lambda: _adapter("ardupilot"),
+            expect=lambda st: st == PASS,
+            basis=("the ardupilot adapter is registered and imported by the "
+                   "runtime; a preflight that rejects it is broken"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--platform", default="ardupilot")
@@ -398,12 +438,19 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
+
     report = run(args.platform, args.data_loss_supervision, args.log_dir,
                  args.quick)
 
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".",
                     exist_ok=True)
+        report = stamp(report, _control_report)
         with open(args.out, "w", encoding="utf-8") as fh:
             json.dump(report, fh, indent=2, sort_keys=True)
             fh.write("\n")

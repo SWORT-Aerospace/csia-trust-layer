@@ -196,6 +196,76 @@ def run(count: int = 300, seed: int = 20260907,
     }
 
 
+INSTRUMENT = "csia_stress.low_trust_false_alarm"
+
+
+def _controls():
+    """The pair this measurement must pass before it may write anything.
+
+    THE NEGATIVE CONTROL IS THE ONE THAT MATTERS HERE, because it is exactly
+    the check that would have caught SR-007's misreading on the first run.
+    On a profile faulting battery and imu1 -- baro untouched, GPS healthy --
+    a correct armed-window measurement returns baro's clean-flight figure,
+    above 0.9. The broken version, reading a whole-run minimum that spans
+    warm-up from the 0.8 prior, returned 0.8182 and would fail this control
+    instead of being reported as a physical mechanism.
+
+    The POSITIVE control drives a severe drift into baro and requires the
+    measurement to see it fall below the rule's own threshold: an instrument
+    that returns a healthy-looking number whatever is happening is the
+    failure this pairs against.
+    """
+    from csia.sensors.faults import Fault
+    from csia_stress.profiles import StressProfile
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def _profile(faults, name):
+        return StressProfile(
+            id=name, summary="instrument control", duration=90.0,
+            faults=faults, represents="an instrument control, not a flight",
+            does_not_represent="any degradation profile of interest")
+
+    def positive():
+        return _post_arm_min_trust(_profile(
+            (Fault("bias_drift", "baro", 20.0, 40.0,
+                   {"axis": 2, "rate": 1.0, "channel": "accel"}),),
+            "control-baro-drift"), "baro")
+
+    def negative():
+        return _post_arm_min_trust(_profile(
+            (Fault("power_sag", "battery", 20.0, 40.0,
+                   {"depth_v": 1.3, "rpm_loss": 350.0}),
+             Fault("bias_drift", "imu1", 20.0, 40.0,
+                   {"axis": 2, "rate": 0.20, "channel": "accel"})),
+            "control-baro-untouched"), "baro")
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="a severe baro drift is seen as low trust",
+            kind=POSITIVE,
+            run=positive,
+            expect=lambda v: v is not None and v < 0.75,
+            basis=("SR-006 measured this stimulus driving a 327 m altitude "
+                   "error with baro trust at 0.231, by a separate "
+                   "instrument (the magnitude sweep) -- not by this one"),
+        ),
+        negative=Control(
+            name="an untouched baro reads healthy while others fail",
+            kind=NEGATIVE,
+            run=negative,
+            expect=lambda v: v is not None and v > 0.9,
+            basis=("baro's clean-flight minimum is 0.9930, measured "
+                   "directly from the trust layer; nothing in this profile "
+                   "faults baro or its gps partner. A value near 0.8182 is "
+                   "the warm-up floor of the 0.8 prior, which is the "
+                   "SR-007 defect"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--count", type=int, default=300)
@@ -206,7 +276,14 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
-    rep = run(args.count, args.seed, args.sensor, args.threshold)
+    # CONTROLS FIRST, AND THEY RAISE.
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    control_report = guard(INSTRUMENT)
+    print(f"instrument controls: {control_report['verdict']}")
+
+    rep = stamp(run(args.count, args.seed, args.sensor, args.threshold),
+                control_report)
     if args.out:
         path = os.path.join(ROOT, args.out)
         os.makedirs(os.path.dirname(path), exist_ok=True)

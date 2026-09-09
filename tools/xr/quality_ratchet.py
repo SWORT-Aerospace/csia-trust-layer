@@ -426,6 +426,62 @@ def measure_all(skip_coverage: bool = False) -> dict:
     return out
 
 
+INSTRUMENT = "tools.xr.quality_ratchet"
+
+
+def _controls():
+    """The pair this gate must pass before it reports anything.
+
+    MX-020 IS THE REASON. This gate spent its whole life reporting HOLDS
+    because it compared committed files against a floor derived from those
+    same files -- it was structurally incapable of saying anything else, and
+    nothing noticed. The POSITIVE control injects a synthetic regression and
+    requires the gate to call it: a gate that cannot fail on a fabricated
+    fall cannot fail on a real one.
+
+    The NEGATIVE control feeds an identical measured/floor pair and requires
+    HOLDS, catching the opposite defect -- a gate stuck on REGRESSION, which
+    would be just as useless and rather louder.
+
+    Both expectations follow from the definition of the comparison, not from
+    anything this tool has previously reported.
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def _entry(score):
+        return {"score": score, "subset_fingerprint": "c" * 16,
+                "killed": 1, "evaluated": 2,
+                "targets_digest": "d" * 16,
+                "targets_digest_declared": "d" * 16,
+                "targets_digest_live": "d" * 16,
+                "sites": 100, "sites_recomputed": 100}
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="an injected mutation-score fall is reported",
+            kind=POSITIVE,
+            run=lambda: check({"mutation_mission": _entry(0.10)},
+                              {"mutation_mission": _entry(0.90)})["verdict"],
+            expect=lambda verdict: verdict == "REGRESSION",
+            basis=("a fall of 0.80 is far outside the declared tolerance of "
+                   f"{MUTATION_TOLERANCE}; REGRESSION follows from the "
+                   "comparison's definition"),
+        ),
+        negative=Control(
+            name="an identical pair is not reported as a regression",
+            kind=NEGATIVE,
+            run=lambda: check({"mutation_mission": _entry(0.67)},
+                              {"mutation_mission": _entry(0.67)})["verdict"],
+            expect=lambda verdict: verdict == "HOLDS",
+            basis=("equal scores over an identical subset and source cannot "
+                   "be a quality change, by definition"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
@@ -434,9 +490,15 @@ def main(argv=None) -> int:
     ap.add_argument("--skip-coverage", action="store_true")
     args = ap.parse_args(argv)
 
+    # CONTROLS FIRST, AND THEY RAISE. A gate that cannot demonstrate it
+    # still detects a regression must not pronounce on a real one.
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    control_report = guard(INSTRUMENT)
+
     measured = measure_all(args.skip_coverage)
     floor = load_floor()
-    report = check(measured, floor)
+    report = stamp(check(measured, floor), control_report)
 
     if args.update:
         new_floor = dict(floor)

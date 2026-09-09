@@ -148,6 +148,57 @@ def _counts(values) -> dict:
     return dict(sorted(out.items(), key=lambda kv: -kv[1]))
 
 
+INSTRUMENT = "csia_stress.campaign"
+
+
+def _controls():
+    """The campaign must still detect what the frozen policy names.
+
+    POSITIVE is a GPS dropout, which the FROZEN policy carries an explicit
+    "GPS data invalid" rule for. NEGATIVE is a bias drift of rate ZERO,
+    which perturbs nothing by arithmetic. A campaign that has stopped
+    detecting, or that detects everything, produces a summary table that
+    looks entirely normal.
+    """
+    from csia.sensors.faults import Fault
+    from csia_stress.observables import DETECTED, run_profile
+    from csia_stress.profiles import StressProfile
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def _status(faults, name):
+        profile = StressProfile(
+            id=name, summary="instrument control", duration=90.0,
+            faults=faults, represents="an instrument control, not a flight",
+            does_not_represent="any degradation profile of interest")
+        return run_profile(profile).detection_status
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="a gps dropout is detected",
+            kind=POSITIVE,
+            run=lambda: _status(
+                (Fault("dropout", "gps", 20.0, 40.0, {}),), "ctl-gps"),
+            expect=lambda st: st == DETECTED,
+            basis=("the frozen FailsafePolicy carries an explicit 'GPS data "
+                   "invalid' rule; the escalation follows from that rule"),
+        ),
+        negative=Control(
+            name="a zero-rate drift is not detected",
+            kind=NEGATIVE,
+            run=lambda: _status(
+                (Fault("bias_drift", "imu0", 20.0, 40.0,
+                       {"axis": 2, "rate": 0.0, "channel": "accel"}),),
+                "ctl-null"),
+            expect=lambda st: st != DETECTED,
+            basis=("the fault model applies rate*elapsed; a rate of zero "
+                   "perturbs nothing, by arithmetic"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--mode", choices=("catalog", "random"), default="catalog")
@@ -157,6 +208,12 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args(argv)
+
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
 
     import logging
     if args.quiet:
@@ -215,6 +272,7 @@ def main(argv=None) -> int:
 
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+        report = stamp(report, _control_report)
         with open(args.out, "w", encoding="utf-8") as fh:
             json.dump(report, fh, indent=2, sort_keys=True)
             fh.write("\n")

@@ -2746,3 +2746,160 @@ entries:
       csia_supervision/lowtrust.py; tests/test_lowtrust_supervision.py;
       research/stress/results/LOW_TRUST_FALSE_ALARM_MOTOR_ESC.json;
       research/stress/results/DETECTION_FLOOR.json
+
+  - id: MX-025
+    date: 2026-09-08
+    phase: ASSURANCE (the apparatus itself)
+    kind: STRUCTURAL_GUARD_ADDED
+    what_happened: >-
+      THREE TIMES IN ONE SESSION AN INSTRUMENT IN THIS REPOSITORY PRODUCED A
+      CLEAN, PLAUSIBLE, ENTIRELY FICTIONAL RESULT.
+      MX-020: the quality ratchet compared committed files against a floor
+      derived from those same files. It reported HOLDS every night of its
+      life and could not have reported anything else.
+      MX-021: the detection-floor sweep asked a run object for `.detected`,
+      which does not exist. A per-point `except Exception` turned the
+      AttributeError into a point with no verdict, those points read as "not
+      detected", and the sweep announced UNDETECTED_AT_EVERY_MAGNITUDE for
+      all four pairs -- a finding about the FROZEN CORE produced entirely by
+      a typo.
+      SR-007: the false-alarm measurement read a whole-run minimum spanning
+      warm-up from the 0.8 prior. It returned 0.8182 in every run whatever
+      was faulted, and that constant was reported as evidence of a specific
+      physical mechanism that does not exist.
+      EVERY ONE WAS CAUGHT BY A HUMAN DECIDING, ON A HUNCH, TO RUN A
+      CONTROL. None was caught by anything structural. This repository tests
+      the SYSTEM thoroughly and the APPARATUS almost not at all.
+    verdict: RULE_MADE_STRUCTURAL
+    consequence: >-
+      tools/assurance/instrument_controls.py establishes one rule: an
+      instrument may not emit an artifact until it has demonstrated, IN THE
+      SAME RUN, that it still responds to a stimulus whose answer is known
+      and stays silent on a stimulus known to be null.
+      Both halves are required. An instrument stuck on "yes" passes every
+      positive control ever written; one stuck on "no" -- which is exactly
+      what MX-021 was -- passes every negative one.
+      `guard()` RAISES rather than logging, and `stamp()` attaches the
+      control evidence to the artifact it licensed, so a result cannot be
+      separated from the proof that its apparatus was working when it was
+      taken.
+      Registered so far: quality_ratchet (positive: an injected 0.80 fall
+      must report REGRESSION; negative: an identical pair must report
+      HOLDS), detection_floor (positive: dropout@gps, which the FROZEN
+      policy carries an explicit rule for; negative: a bias_drift of rate
+      ZERO, which perturbs nothing by arithmetic), and
+      low_trust_false_alarm (positive: a severe baro drift must read below
+      the rule's threshold; negative: an untouched baro must read above 0.9
+      while other sensors fail).
+    the_controls_are_themselves_proven_able_to_fail: >-
+      A control that cannot fail is the very disease this module treats, one
+      level up. tests/test_instrument_controls.py REINTRODUCES all three
+      real defects -- the swallowed AttributeError verbatim, the whole-run
+      minimum returning 0.8182, and a check() stuck on HOLDS -- and asserts
+      the control pair REFUSES in each case. It also covers the opposite
+      failures: an instrument stuck on "detected", a measurement stuck on
+      "healthy", a gate stuck on "REGRESSION". 14 tests.
+      A green control run means something only because a broken instrument
+      has been shown to make it red.
+    circularity_is_guarded: >-
+      A control whose expected answer comes from the instrument under test
+      proves only self-consistency, which is what MX-020 had. Every Control
+      therefore carries a `basis` naming where its answer comes from -- the
+      frozen policy's own rules, or arithmetic, or a DIFFERENT instrument --
+      and a test asserts none is missing or trivial.
+    honest_limit: >-
+      A CONTROL PAIR IS A LIVENESS AND DISCRIMINATION CHECK, NOT A
+      CALIBRATION. It shows the instrument still responds to a known
+      stimulus and stays silent on a null one; it says nothing about whether
+      the measurements BETWEEN those two poles are correct. Each pair states
+      this in `does_not_establish` and a test asserts it does.
+      Coverage is also partial: three instruments are registered, chosen
+      because each has a RECORDED fabrication. campaign.py,
+      attribute_replay_divergence.py, mutation_probe.py and the tools under
+      tools/assurance/ are NOT yet registered, and until they are, the rule
+      is enforced where it was learned rather than everywhere.
+    artifact: >-
+      tools/assurance/instrument_controls.py;
+      tests/test_instrument_controls.py; csia_stress/detection_floor.py;
+      csia_stress/low_trust_false_alarm.py; tools/xr/quality_ratchet.py
+
+  - id: MX-026
+    date: 2026-09-08
+    phase: ASSURANCE (the apparatus itself)
+    kind: RULE_EXTENDED_TO_FULL_COVERAGE
+    what_happened: >-
+      MX-025 established the control-pair rule and applied it to the three
+      instruments with a RECORDED fabrication. That left six other
+      artifact-writing instruments unguarded, which made the rule a habit
+      rather than a rule -- and the three that failed were not special, they
+      were simply the ones somebody happened to look at.
+    consequence: >-
+      All NINE artifact-writing instruments now carry a registered control
+      pair, call guard() before writing, and stamp the control evidence into
+      the artifact they emit:
+      quality_ratchet (injected fall -> REGRESSION / identical -> HOLDS);
+      mutation_probe (mutating a comparison must CHANGE the source / a
+      source with no operators has ZERO sites -- catching a mutation engine
+      that silently returns the original, which would make every mutant
+      equivalent and report a catastrophic score that is pure artefact);
+      stress_regression (injected difference -> CHANGED / identical ->
+      UNCHANGED); preflight (unknown platform -> FAIL / real platform ->
+      PASS, using the platform check so a dirty tree cannot make the control
+      ambiguous); decision_replay (_rel exceeds tolerance on a real
+      difference / is exactly zero on identical values);
+      attribute_replay_divergence (_live distinguishes differing gate sets /
+      does not distinguish identical ones -- the comparison the whole HF-014
+      attribution rests on); plus the three from MX-025.
+      Two new tests enforce it: every instrument in the declared set must be
+      registered, and every one must call guard() and stamp() in its source.
+    a_control_i_had_to_strengthen: >-
+      The test asserting no control is justified by the instrument it checks
+      also requires the `basis` to be a real justification rather than a
+      phrase. It rejected my own "a set equals itself" as too thin. I
+      strengthened the basis rather than lowering the bar -- the point of
+      that test is to stop a control being licensed by an assertion nobody
+      would accept from anyone else.
+    honest_limit: >-
+      A CONTROL PAIR IS STILL A LIVENESS AND DISCRIMINATION CHECK, NOT A
+      CALIBRATION, for all nine. It shows an instrument responds at the two
+      poles and says nothing about the measurements between them.
+      Several pairs also check a CORE FUNCTION rather than the whole
+      pipeline -- decision_replay's pair exercises `_rel`, and
+      attribute_replay_divergence's exercises `_live`. Those are the
+      comparisons their verdicts rest on, but a defect elsewhere in either
+      pipeline would pass. Full-pipeline controls for both need a fixture
+      log, which is the next increment.
+    artifact: >-
+      tools/assurance/instrument_controls.py; tests/test_instrument_controls.py;
+      tools/xr/mutation_probe.py; tools/xr/stress_regression.py;
+      tools/deploy/preflight.py; tools/assurance/decision_replay.py;
+      tools/assurance/attribute_replay_divergence.py; csia_stress/campaign.py
+
+  - id: MX-027
+    date: 2026-09-08
+    phase: DOCUMENTATION (onboarding)
+    kind: CONTEXT_CONSOLIDATED
+    what_happened: >-
+      System context was spread across 390 markdown files, 66 ledger entries
+      and the source. An agent or engineer arriving cold had no single
+      document giving the mathematics, the layer stack, the cyber posture,
+      the simulation apparatus, the measured numbers and the open problems.
+    consequence: >-
+      docs/CSIA_SYSTEM_REPORT.md. Twelve sections: what CSIA is; the
+      mathematics (Beta-conjugate trust with adaptive forgetting, the four
+      evidence channels, the eleven physical edges, diagnosis priors, the
+      six failsafe thresholds, the escalation-delay model); the layer stack
+      and the six FROZEN_PATHS; the layers above the core; cyber and safety
+      posture; the simulation apparatus; everything actually measured; the
+      open problems; the assurance apparatus and why it is the real story;
+      where we are; where it goes next including the theoretical direction;
+      how to work in the repository; and section 12, what the system is NOT.
+    section_12_is_the_load_bearing_one: >-
+      It states plainly that novelty is NOT shown because the prior-art
+      search has never run; that this is not a certified safety artifact;
+      that every number is simulated on two flight profiles, one simulator,
+      one host; that decision replay is DIVERGENT so results are one-shot;
+      and that latency figures are desktop Python, not embedded timing.
+      A context document that omitted those would make every number in it
+      more dangerous than useful.
+    artifact: docs/CSIA_SYSTEM_REPORT.md

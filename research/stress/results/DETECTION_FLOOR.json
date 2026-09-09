@@ -66,6 +66,29 @@
   "fault_duration_s": 40.0,
   "flight_duration_s": 90.0,
   "how_to_read_a_miss": "a miss BELOW a published floor is the system operating outside its declared envelope, which is a limit. A miss ABOVE one is a defect. Without a published floor every miss looks like the second, which is why these were measured.",
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "the frozen FailsafePolicy carries an explicit 'GPS data invalid' rule; escalation follows from that rule, not from any output of this sweep",
+        "control": "dropout@gps escalates",
+        "kind": "POSITIVE",
+        "observed": "True",
+        "status": "PASS"
+      },
+      {
+        "basis": "the fault model applies rate*elapsed; a rate of zero perturbs nothing, by arithmetic",
+        "control": "bias_drift@imu0 at rate 0.0 does not escalate",
+        "kind": "NEGATIVE",
+        "observed": "False",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "csia_stress.detection_floor",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
   "no_floor_found": [
     "bias_drift@baro"
   ],

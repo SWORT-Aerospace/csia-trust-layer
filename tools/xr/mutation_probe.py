@@ -303,6 +303,60 @@ def run(sample: int = 60, seed: int = 20260907) -> dict:
     }
 
 
+INSTRUMENT = "tools.xr.mutation_probe"
+
+
+def _controls():
+    """Controls for the mutation engine itself.
+
+    If `_mutate` ever returns source it did not actually change, every
+    mutant is equivalent to the original, every one "survives", and the
+    probe reports a catastrophic mutation score that is pure artefact. That
+    is the failure this pair exists to catch, and it is the same family as
+    MX-021: an instrument that quietly answers "no" to everything.
+
+    POSITIVE: mutating a source that contains a comparison MUST change the
+    text. NEGATIVE: a source with no mutable operator has ZERO sites -- by
+    the definition of the site enumerator, not by any measurement.
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    MUTABLE = "def f(a, b):\n    return a <= b\n"
+    INERT = "X = 1\nY = 'a string'\n"
+
+    def positive():
+        if _count_sites(MUTABLE) < 1:
+            return "NO_SITES"
+        mutated = _mutate(MUTABLE, 0)
+        text = mutated[0] if isinstance(mutated, tuple) else mutated
+        return "CHANGED" if text != MUTABLE else "UNCHANGED"
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="mutating a comparison changes the source",
+            kind=POSITIVE,
+            run=positive,
+            expect=lambda r: r == "CHANGED",
+            basis=("`a <= b` contains a mutable comparison operator by the "
+                   "AST definition the site enumerator uses; a mutation "
+                   "that leaves the text identical is a no-op that would "
+                   "read as a surviving mutant"),
+        ),
+        negative=Control(
+            name="a source with no operators has no sites",
+            kind=NEGATIVE,
+            run=lambda: _count_sites(INERT),
+            expect=lambda n: n == 0,
+            basis=("two constant assignments contain no comparison, boolean "
+                   "or bool-op node; zero follows from the enumerator's "
+                   "definition"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--sample", type=int, default=60)
@@ -317,11 +371,18 @@ def main(argv=None) -> int:
     ap.add_argument("--regenerate", action="store_true")
     args = ap.parse_args(argv)
 
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
+
     if args.targets:
         globals()["TARGETS"] = tuple(args.targets.split(","))
     if args.tests:
         globals()["TEST_SUBSET"] = tuple(args.tests.split(","))
     doc = run(args.sample, args.seed)
+    doc = stamp(doc, _control_report)
     text = json.dumps(doc, indent=2, sort_keys=True, default=str) + "\n"
     if args.out:
         from tools.evidence_guard import protected_write

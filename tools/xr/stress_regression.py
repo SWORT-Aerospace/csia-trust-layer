@@ -149,6 +149,47 @@ def compare(measured: dict, baseline: dict) -> dict:
     }
 
 
+INSTRUMENT = "tools.xr.stress_regression"
+
+
+def _controls():
+    """The exact-comparison gate must still be able to say CHANGED.
+
+    This gate compares detection latency, recovery, escalation and
+    attribution with NO tolerance band. A comparator stuck on UNCHANGED
+    would report a clean nightly forever -- the MX-020 failure in a
+    different gate. Both expectations follow from the definition of the
+    comparison, not from any previous run of this tool.
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def _doc(latency):
+        return {"seed": 1, "count": 1, "applicability_fingerprint": "f",
+                "runs": {"p0": {f: latency for f in COMPARED}}}
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="an injected behavioural difference is reported",
+            kind=POSITIVE,
+            run=lambda: compare(_doc(2.0), _doc(1.0))["verdict"],
+            expect=lambda v: v == "CHANGED",
+            basis=("every compared field differs; CHANGED follows from the "
+                   "exact-comparison rule this gate is defined by"),
+        ),
+        negative=Control(
+            name="identical campaigns are not reported as changed",
+            kind=NEGATIVE,
+            run=lambda: compare(_doc(1.0), _doc(1.0))["verdict"],
+            expect=lambda v: v == "UNCHANGED",
+            basis=("identical inputs cannot differ; UNCHANGED follows from "
+                   "the same definition"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
@@ -158,10 +199,17 @@ def main(argv=None) -> int:
     ap.add_argument("--max-listed", type=int, default=25)
     args = ap.parse_args(argv)
 
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
+
     measured = run_campaign(count=args.count, seed=args.seed)
 
     if args.update:
         os.makedirs(os.path.dirname(BASELINE), exist_ok=True)
+        measured = stamp(measured, _control_report)
         with open(BASELINE, "w", encoding="utf-8") as fh:
             json.dump(measured, fh, indent=2, sort_keys=True)
             fh.write("\n")

@@ -169,6 +169,45 @@ def collect(platform: str, node: str = "gps", gate: str = "arrival") -> dict:
     }
 
 
+INSTRUMENT = "tools.assurance.attribute_replay_divergence"
+
+
+def _controls():
+    """The whole attribution rests on `_live` telling two gate sets apart.
+
+    If it ever returned a constant, the tool would report either zero
+    divergences (and HF-014 would read as solved) or every tick divergent.
+    Both expectations follow from set equality, not from any measurement.
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    A = {"edge_x": [1.0, 1.0], "edge_y": [1.0, 0.0]}
+    B = {"edge_x": [1.0, 1.0], "edge_y": [1.0, 1.0]}
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="differing live-edge sets are distinguished",
+            kind=POSITIVE,
+            run=lambda: _live(A) != _live(B),
+            expect=lambda differ: differ is True,
+            basis=("edge_y has weight 0.0 in one and 1.0 in the other, so "
+                   "the live sets differ by set membership"),
+        ),
+        negative=Control(
+            name="identical live-edge sets are not distinguished",
+            kind=NEGATIVE,
+            run=lambda: _live(A) != _live(dict(A)),
+            expect=lambda differ: differ is False,
+            basis=("a frozenset equals a frozenset built from the "
+                   "same mapping; equality here is Python set "
+                   "semantics, not a property of this tool"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--platform", default="px4", choices=sorted(LOGS))
@@ -176,10 +215,17 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
+
     rep = collect(args.platform, gate=args.gate)
     if args.out:
         os.makedirs(os.path.dirname(os.path.join(ROOT, args.out)),
                     exist_ok=True)
+        rep = stamp(rep, _control_report)
         with open(os.path.join(ROOT, args.out), "w", encoding="utf-8") as fh:
             json.dump(rep, fh, indent=2, sort_keys=True, default=str)
             fh.write("\n")

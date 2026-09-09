@@ -208,6 +208,40 @@ def replay(log_path: str, platform: str, node: str = "gps",
     }
 
 
+INSTRUMENT = "tools.assurance.decision_replay"
+
+
+def _controls():
+    """The four-outcome verdict rests on `_rel` separating equal from not.
+
+    A comparator that returned 0.0 for everything would report
+    BIT_IDENTICAL on a divergent replay -- and this is the one instrument
+    whose green result would be read as "the system is verified".
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="a real numeric difference exceeds the tolerance",
+            kind=POSITIVE,
+            run=lambda: _rel(1.0, 2.0),
+            expect=lambda d: d > TOLERANCE,
+            basis=("a relative difference of 0.5 against a tolerance of "
+                   f"{TOLERANCE} is arithmetic"),
+        ),
+        negative=Control(
+            name="identical values differ by zero",
+            kind=NEGATIVE,
+            run=lambda: _rel(1.0, 1.0),
+            expect=lambda d: d == 0.0,
+            basis="a value equals itself; zero follows by arithmetic",
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--log", action="append", default=None)
@@ -215,6 +249,12 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     ap.add_argument("--regenerate", action="store_true")
     args = ap.parse_args(argv)
+
+    # CONTROLS FIRST, AND THEY RAISE. An instrument that cannot
+    # demonstrate it still works may not emit an artifact (MX-025).
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    _control_report = guard(INSTRUMENT)
 
     if not args.log:
         # Default: one committed log per platform.
@@ -243,6 +283,7 @@ def main(argv=None) -> int:
                  "decision failure, and a decision failure is never excused "
                  "as rounding."),
     }
+    doc = stamp(doc, _control_report)
     text = json.dumps(doc, indent=2, sort_keys=True, default=str) + "\n"
     if args.out:
         from tools.evidence_guard import protected_write

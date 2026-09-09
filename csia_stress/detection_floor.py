@@ -115,7 +115,10 @@ class SweepInstrumentError(RuntimeError):
 
 def _run_one(kind: str, target: str, value, spec, supervised: bool) -> tuple:
     params = dict(spec.get("fixed", {}))
-    params[spec["param"]] = value
+    # A control stimulus may have no swept parameter at all (a dropout takes
+    # none), signalled by value=None. Everything else is unchanged.
+    if value is not None:
+        params[spec["param"]] = value
     profile = StressProfile(
         id=f"floor-{kind}-{target}-{value}",
         summary=f"single {kind} on {target} at {spec['param']}={value}",
@@ -298,6 +301,58 @@ def run(supervised: bool = False) -> dict:
     }
 
 
+INSTRUMENT = "csia_stress.detection_floor"
+
+
+def _controls():
+    """The pair this sweep must pass before it may write anything.
+
+    POSITIVE is the control that would have killed MX-021 in one run: a GPS
+    dropout, which the FROZEN policy carries an explicit "GPS data invalid"
+    rule for, so the escalation is known without consulting this sweep. The
+    broken version answered NOT_DETECTED to everything and would have failed
+    here immediately instead of publishing a finding about the frozen core.
+
+    NEGATIVE is a bias drift of rate ZERO. The fault model applies
+    `rate * elapsed`, so a zero rate perturbs nothing by arithmetic -- no
+    measurement needed to know the answer. It catches the opposite defect,
+    an instrument stuck on "detected".
+    """
+    from tools.assurance.instrument_controls import (NEGATIVE, POSITIVE,
+                                                     Control, ControlPair,
+                                                     register)
+
+    def positive():
+        return _run_one("dropout", "gps", None,
+                        {"param": "unused", "fixed": {}}, False)
+
+    def negative():
+        return _run_one("bias_drift", "imu0", 0.0,
+                        {"param": "rate",
+                         "fixed": {"axis": 2, "channel": "accel"}}, False)
+
+    return register(ControlPair(
+        instrument=INSTRUMENT,
+        positive=Control(
+            name="dropout@gps escalates",
+            kind=POSITIVE,
+            run=lambda: positive()[0],
+            expect=lambda detected: detected is True,
+            basis=("the frozen FailsafePolicy carries an explicit 'GPS data "
+                   "invalid' rule; escalation follows from that rule, not "
+                   "from any output of this sweep"),
+        ),
+        negative=Control(
+            name="bias_drift@imu0 at rate 0.0 does not escalate",
+            kind=NEGATIVE,
+            run=lambda: negative()[0],
+            expect=lambda detected: detected is False,
+            basis=("the fault model applies rate*elapsed; a rate of zero "
+                   "perturbs nothing, by arithmetic"),
+        ),
+    ))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--supervised", action="store_true",
@@ -305,7 +360,14 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args(argv)
 
-    rep = run(supervised=args.supervised)
+    # CONTROLS FIRST, AND THEY RAISE. Nothing below runs if the apparatus
+    # cannot show it still responds.
+    from tools.assurance.instrument_controls import guard, stamp
+    _controls()
+    control_report = guard(INSTRUMENT)
+    print(f"instrument controls: {control_report['verdict']}")
+
+    rep = stamp(run(supervised=args.supervised), control_report)
     if args.out:
         path = os.path.join(ROOT, args.out)
         os.makedirs(os.path.dirname(path), exist_ok=True)
