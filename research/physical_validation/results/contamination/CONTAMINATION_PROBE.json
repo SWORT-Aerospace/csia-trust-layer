@@ -1,0 +1,375 @@
+{
+  "clean_baseline": {
+    "clean_min_restricted_trust": 0.9665208026101341,
+    "per_profile": {
+      "fast_cruise": {
+        "armed_ticks": 1249,
+        "core_min_trust": 0.9665208026101341,
+        "max_restricted_trust_at_zero_coverage": null,
+        "restricted_min_trust": 0.9665208026101341,
+        "worst_admitted_edge_consistency": 0.9494182907563951,
+        "zero_coverage_fraction": 0.0,
+        "zero_coverage_ticks": 0
+      },
+      "hover_circle": {
+        "armed_ticks": 1249,
+        "core_min_trust": 0.96701941959463,
+        "max_restricted_trust_at_zero_coverage": null,
+        "restricted_min_trust": 0.96701941959463,
+        "worst_admitted_edge_consistency": 1.0,
+        "zero_coverage_fraction": 0.0,
+        "zero_coverage_ticks": 0
+      }
+    },
+    "window": "armed only (t >= arm_time), per SR-007"
+  },
+  "combinations_enumerated": 95,
+  "combinations_run": 95,
+  "core_false_alarms": 27,
+  "counterexamples": [
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "bias_drift"
+        ],
+        [
+          "imu1",
+          "bias_drift"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9941607063289878,
+      "restricted_min_trust": 0.6500000000023543,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.3026513256628314,
+      "zero_coverage_ticks": 605
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "bias_drift"
+        ],
+        [
+          "imu1",
+          "dropout"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9973259562570032,
+      "restricted_min_trust": 0.6500124450804522,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.45572786393196596,
+      "zero_coverage_ticks": 911
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000747228,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "bias_drift"
+        ],
+        [
+          "imu1",
+          "emi_spike"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9975335623459151,
+      "restricted_min_trust": 0.6859406191321085,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.5157578789394698,
+      "zero_coverage_ticks": 1031
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "dropout"
+        ],
+        [
+          "imu1",
+          "bias_drift"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9976876704853241,
+      "restricted_min_trust": 0.6502654646153865,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.4867433716858429,
+      "zero_coverage_ticks": 973
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "dropout"
+        ],
+        [
+          "imu1",
+          "dropout"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9983229149848042,
+      "restricted_min_trust": 0.6548963370191316,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.5572786393196598,
+      "zero_coverage_ticks": 1114
+    }
+  ],
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "a weighted mean over an empty partner set has no admitted weight; coverage zero follows by arithmetic, and a trust computed without the neighbour term cannot equal one computed with it",
+        "control": "restricting to no admissible partner drops the neighbour evidence entirely",
+        "kind": "POSITIVE",
+        "observed": "{'coverage': {'baro': 0.0, 'battery': 0.0, 'gps': 0.0, 'imu0': 0.0, 'imu1': 0.0, 'mag': 0.0, 'motor_esc': 0.0, 'vibration': 0.0}, 'max_drift': 0.18503841276275412}",
+        "status": "PASS"
+      },
+      {
+        "basis": "the frozen core's own published trust in TrustState, computed by csia/trust_engine/engine.py and not by this module; the bound is 4 units in the last place of a double, which is arithmetic and not a chosen tolerance",
+        "control": "restricting to every partner reproduces the frozen core to within floating-point representation",
+        "kind": "NEGATIVE",
+        "observed": "{'coverage': {'baro': 1.0, 'battery': 1.0, 'gps': 1.0, 'imu0': 1.0, 'imu1': 1.0, 'mag': 1.0, 'motor_esc': 1.0, 'vibration': 1.0}, 'max_drift': 2.220446049250313e-16}",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "csia_stress.contamination_probe",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "kill_condition": "K2",
+  "mechanism": {
+    "max_restricted_trust_when_nothing_was_admissible": 0.9986739623741029,
+    "runs_where_an_ADMITTED_partner_carried_a_dead_edge": 78,
+    "why_THAT_is_worse": "With no admissible partner the neighbour term drops out and the sensor is scored on physics, temporal and statistical checks alone, all of which read healthy. Measured on combination 0: from t=49.6 s the restricted trust climbs from 0.65 to 0.987 while the core stays pinned at 0.65. A sensor nothing is in a position to vouch for then reports HIGH trust -- the opposite error, and the exact state the corroboration guard exists to refuse to judge.",
+    "why_that_matters": "Partner-level standing and edge-level agreement are different facts, and the restriction only filters on the first. Traced on combination 0 at t=40.0 s: motor_esc sat at 0.65000 with three incident edges all at consistency 0.0000, and the only ADMITTED partner was imu0 at trust 0.8528 against its att_caution standing of 0.82. imu0's bias drift breaks the accel/motor-current relation while imu0's own trust -- held up by its other edges and its physics checks -- stays above threshold. Restricting to partners in good standing therefore cannot clean the value: the contamination arrives through an admitted edge."
+  },
+  "procedure": "declared in this module's docstring before any adversarial combination was run",
+  "restricted_false_alarms": 14,
+  "runs_with_any_zero_coverage_tick": 18,
+  "schema": "csia.stress.contamination_probe/1",
+  "target": "motor_esc",
+  "threshold_applied": 0.82,
+  "threshold_selection": {
+    "basis": "an existing frozen FailsafeConfig constant, chosen as the largest that clears the clean-flight minimum by 0.05; no float invented",
+    "candidates": {
+      "att_caution": 0.82,
+      "att_emergency": 0.7,
+      "heading_caution": 0.6,
+      "nav_caution": 0.75,
+      "power_critical": 0.7,
+      "struct_critical": 0.6
+    },
+    "ceiling": 0.916520802610134,
+    "selected": "att_caution",
+    "value": 0.82
+  },
+  "verdict": "RULE_STAYS_WITHDRAWN",
+  "what_this_is_not": "NO_COUNTEREXAMPLE_IN_SEARCHED_SPACE is that sentence and nothing more. The space is fault assignments to this sensor's edge partners at the top of each campaign range, on one flight profile. Other sensors, other magnitudes, other timings and other profiles lie outside it. It does not reinstate the rule; reinstating a rule is a decision, and no stage promotes itself.",
+  "worst_five": [
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "bias_drift"
+        ],
+        [
+          "imu1",
+          "bias_drift"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9941607063289878,
+      "restricted_min_trust": 0.6500000000023543,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.3026513256628314,
+      "zero_coverage_ticks": 605
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "bias_drift"
+        ],
+        [
+          "imu1",
+          "dropout"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9973259562570032,
+      "restricted_min_trust": 0.6500124450804522,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.45572786393196596,
+      "zero_coverage_ticks": 911
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "dropout"
+        ],
+        [
+          "imu1",
+          "bias_drift"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9976876704853241,
+      "restricted_min_trust": 0.6502654646153865,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.4867433716858429,
+      "zero_coverage_ticks": 973
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000000000008,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "dropout"
+        ],
+        [
+          "imu1",
+          "dropout"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9983229149848042,
+      "restricted_min_trust": 0.6548963370191316,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.5572786393196598,
+      "zero_coverage_ticks": 1114
+    },
+    {
+      "armed_ticks": 1999,
+      "core_min_trust": 0.6500000002600395,
+      "core_would_fire": true,
+      "faulted": [
+        [
+          "battery",
+          "dropout"
+        ],
+        [
+          "imu0",
+          "dropout"
+        ],
+        [
+          "imu1",
+          "emi_spike"
+        ],
+        [
+          "vibration",
+          "vibration_anomaly"
+        ]
+      ],
+      "max_restricted_trust_at_zero_coverage": 0.9983229150987427,
+      "restricted_min_trust": 0.654896826122381,
+      "restricted_would_fire": true,
+      "worst_admitted_edge_consistency": 8.016507008716299e-210,
+      "zero_coverage_fraction": 0.5572786393196598,
+      "zero_coverage_ticks": 1114
+    }
+  ]
+}

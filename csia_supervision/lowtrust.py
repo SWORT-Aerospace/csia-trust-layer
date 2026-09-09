@@ -124,8 +124,24 @@ CANDIDATES: dict = {
         "vibration partner was dragging it there. A sensor cannot be judged "
         "by a trust value contaminated by the partners just deemed unfit to "
         "judge it. Reinstating this rule needs a trust value computed "
-        "WITHOUT the rejected partners, which is a frozen-core change and is "
-        "not made here."),
+        "WITHOUT the rejected partners. "
+        "TWO CORRECTIONS TO THAT SENTENCE, both measured (SR-011). "
+        "FIRST, it is NOT a frozen-core change. Every term the recursion "
+        "needs is already published in TrustState, so it reproduces exactly "
+        "outside the core -- measured drift 0.0 against the core's own "
+        "trust over 4500 ticks. `csia_supervision/contamination.py` does it "
+        "and changes no frozen file. "
+        "SECOND, AND THIS IS WHY THE RULE STILL STAYS WITHDRAWN: computing "
+        "the trust without the rejected partners does NOT fix it. Traced on "
+        "the same combination at t=40.0 s, motor_esc sits at 0.65000 with "
+        "all three incident edges at consistency 0.0000, and the only "
+        "ADMITTED partner is imu0 at 0.8528 against its own att_caution "
+        "standing of 0.82. imu0's bias drift breaks the accel/motor-current "
+        "relation while imu0's own trust stays above threshold. The "
+        "contamination arrives through an admitted edge, so filtering "
+        "partners by standing cannot remove it -- partner-level standing "
+        "and edge-level agreement are different facts and the guard only "
+        "tests the first."),
 }
 
 
