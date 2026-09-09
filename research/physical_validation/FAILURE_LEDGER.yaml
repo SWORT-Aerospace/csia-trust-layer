@@ -3428,3 +3428,141 @@ entries:
       research/physical_validation/results/DECISION_REPLAY_RESULTS.json;
       research/physical_validation/results/sitl_2026_09_09/DECISION_REPLAY_ALIGNMENT.json;
       tests/test_post_e1_hardening_round1_artifacts.py
+
+  - id: MX-029
+    date: 2026-09-09
+    phase: RESEARCH (headroom before machinery)
+    kind: SWEEP_FOUND_REAL_HEADROOM_IN_ONE_CONSISTENT_DIRECTION
+    what_was_asked: >-
+      Before proposing a learned component, measure whether a plain parameter
+      sweep already closes the gap. Six numbers control retention and fusion:
+      rho_max, rho_min, and the four evidence weights.
+    nothing_was_changed: >-
+      `OnlineTrustLayer` already accepts an `EngineConfig`. Every
+      configuration was passed in at construction. No frozen file was touched
+      and the shipped defaults are unchanged. THIS RECOMMENDS NOTHING --
+      choosing a configuration is a decision and no stage promotes itself.
+    the_metric_declared_before_the_run: >-
+      Threshold-free, because the frozen failsafe thresholds are calibrated
+      to the SHIPPED weights and judging different weights by them would
+      confound the two:
+        separation = clean_floor - fault_floor   (post-arm, per SR-007)
+        headroom   = clean_floor
+      BOTH REPORTED, NEVER COLLAPSED. A configuration can raise separation
+      purely by dragging clean flight down, and one score would hide it.
+    the_anti_vacuity_control_that_decided_the_answer: >-
+      The simulator fixes its sensor seeds, so one configuration on one seed
+      is one noise realisation. Every configuration was run over THREE
+      independent seed sets, built by constructing the sensor objects with
+      offset seeds -- `scenarios.py` is frozen and its `sample_streams` takes
+      no seed, but the sensor classes do, and offset 0 reproduces
+      `make_sensors` exactly (asserted by the negative control).
+      The seed-to-seed spread at the shipped configuration turned out to be
+      LARGE: 0.2338 on baro against a mean separation of 0.6417, i.e. 36 %.
+      Any apparent gain below that is noise, and one was.
+    the_result: >-
+      MORE PHYSICS WEIGHT, LESS NEIGHBOUR WEIGHT, AND IT IS A PARETO
+      IMPROVEMENT RATHER THAN A TRADE. w_phys = 0.40 (from 0.30) beat the
+      shipped configuration on separation AND on headroom, on all three
+      faults:
+                        separation            headroom
+                     shipped  w_phys=.40   shipped  w_phys=.40
+        baro          0.6417    0.6538      0.7465    0.7825
+        battery       0.2840    0.3859      0.9615    0.9668
+        gps           0.2776    0.3724      0.7877    0.8007
+      w_nbr = 0.25 points the same way and is nearly as good; the two are
+      the same move, since raising one weight renormalises the others down.
+      AGAINST SEED NOISE: battery's gain of 0.102 against a spread of 0.002
+      is decisive; gps's 0.095 against 0.071 is marginal; baro's 0.012
+      against 0.234 IS NOISE and is not claimed.
+    what_did_not_work: >-
+      rho_min = 0.85 raised baro and battery separation but LOWERED gps
+      separation and lowered headroom on two of three. It is a trade, not a
+      win, and its baro gain does not beat that channel's seed noise.
+      Retention length is therefore NOT where the headroom is -- the fusion
+      weights are.
+    what_this_is_not: >-
+      Three faults on one simulator, a coordinate sweep rather than an
+      optimum, and no hardware. It is a reason to run the same sweep on real
+      data before touching a shipped constant, not a reason to touch one.
+    artifact: >-
+      tools/research/config_sweep.py;
+      research/predictor_study/CONFIG_SWEEP.json
+
+  - id: MX-030
+    date: 2026-09-09
+    phase: RESEARCH (would a learned predictor help?)
+    kind: STANDARD_ARGUMENT_FALSIFIED_SMALL_REAL_GAIN_FOUND
+    what_was_asked: >-
+      The temporal sub-score is a one-step Holt innovation. The standard
+      argument for learning here is that a better nominal model produces
+      whiter innovations on healthy data, so the same lam machinery detects
+      smaller faults. Measured offline, on simulated flights, changing
+      nothing in CSIA.
+    the_standard_argument_is_FALSE_here: >-
+      THE WHITEST PREDICTOR ON CLEAN DATA IS NOT THE BEST DETECTOR IN 10 OF
+      11 CASES. Whiteness and detection come apart, and they come apart for
+      a reason that is structural rather than incidental: a predictor good
+      enough to whiten healthy data is often good enough to TRACK THE FAULT.
+      A slow bias drift is, to a model with a trend term or enough memory,
+      just a trend to be predicted. Measured in the instrument's own positive
+      control: on a pure ramp, an AR fitted on first differences leaves an
+      innovation of 2.1e-10 where persistence leaves 1e-2 -- a factor of
+      5e7. Reporting innovation variance alone would have shown every
+      candidate as an improvement.
+    the_real_gain_and_its_size: >-
+      Detection floors, d' >= 1.0 fixed for every predictor, over magnitude
+      grids read out of the sensors that consume them. Six channels scored:
+        baro.altitude   bias_drift   holt 1.0 -> AR(4) 0.5   (one grid step)
+        battery.voltage power_sag    holt NEVER -> AR(4) 3.0
+        imu0.accel      bias_drift   no change
+        mag.field_ut    emi_spike    no change
+        vibration.rms   vib_anomaly  no change
+        motor_esc.rpm   power_sag    neither detects
+      MEDIAN FLOOR RATIO 1.0. Four of six channels are unchanged.
+      Both gains REPRODUCE on three independent noise draws (seeds 100, 300,
+      500), identically.
+      BOTH ARE ALSO AT THE GRID'S RESOLUTION. baro's 2x is exactly one step
+      of a grid that steps by ~2x, so the true factor lies somewhere in
+      (1, 4] and this grid cannot say where. battery's floor is the LARGEST
+      value on its grid, so "AR(4) detects it" means "at the top of the grid
+      and no lower"; the true floor may be above it.
+    two_instrument_bugs_this_study_made_and_caught: >-
+      FIRST, the fault window was compared against WHOLE-FLIGHT clean
+      statistics, which confounds the fault with the flight phase --
+      `fast_cruise` manoeuvres inside that window. Six of nine channels came
+      back with NEGATIVE d', which is what sent me looking. Replaced with a
+      paired comparison: same window, same profile, same seed, clean against
+      faulted.
+      SECOND, AND WORSE: three of seven magnitude grids named a parameter the
+      sensor does not read -- `depth` for the battery, `amp` for the
+      magnetometer, `rate` for the GPS. A sensor silently ignores an unknown
+      parameter and applies its default, so the grid swept NOTHING while
+      perturbing the channel identically at every magnitude, and the study
+      reported "no detection floor" for a sweep that never varied the fault.
+      That is the MX-021 shape exactly. Every parameter name is now cited to
+      the line of the sensor that consumes it, and a `PARAMETER_INERT` guard
+      RAISES when perturbation does not vary across a grid.
+    a_structural_finding_worth_more_than_the_gain: >-
+      FIVE OF ELEVEN WATCHED CHANNELS SHOW NO STIMULUS AT ANY MAGNITUDE.
+      A GPS position spoof perturbs none of the four gps channels the
+      temporal predictor watches, and a power sag leaves battery current
+      untouched. For those channels no predictor of any kind could help, and
+      a floor reported for them would be an instrument artifact. This is not
+      a defect: HIST_CHANNELS deliberately leaves horizontal position to the
+      physics check because it is trend-dominated under manoeuvring. It does
+      mean the temporal sub-score is structurally blind to a spoof, and that
+      the place to look for spoof sensitivity is the physics predictor.
+    the_limitation_that_decides_what_this_is_worth: >-
+      Every fault here is a parametric injection from six known kinds, so a
+      predictor scored against them is scored against the INJECTOR. The
+      repository already records fault classes the simulator cannot produce
+      at all -- RF jamming as RF, urban multipath -- and notes that the
+      nearest proxy omits the degraded-but-present regime a real fault
+      produces first. Those are the regimes a better predictor would be
+      claimed to help with, and there is no data for them.
+      A median floor ratio of 1.0 on injected faults is not a case for
+      shipping a learned predictor. It is a reason to collect real data.
+    artifact: >-
+      tools/research/predictor_study.py;
+      research/predictor_study/PREDICTOR_STUDY.json
