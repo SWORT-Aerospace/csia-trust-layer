@@ -307,6 +307,9 @@ def run(limit: int | None = None) -> dict:
                       for r in worst
                       if r["max_restricted_trust_at_zero_coverage"]
                       is not None]
+    silenced = [r for r in worst
+                if r["core_would_fire"] and not r["restricted_would_fire"]]
+    silenced_blind = [r for r in silenced if r["zero_coverage_ticks"] > 0]
 
     result.update({
         "combinations_enumerated": len(_combinations(TARGET)),
@@ -343,6 +346,24 @@ def run(limit: int | None = None) -> dict:
                 "HIGH trust -- the opposite error, and the exact state the "
                 "corroboration guard exists to refuse to judge."),
         },
+        "silenced_but_blind": {
+            "count": len(silenced_blind),
+            "of_runs_silenced_by_the_restriction": len(silenced),
+            "why_this_is_not_a_win": (
+                "A run the core would have flagged and the restriction does "
+                "not is only an improvement if the restriction made the "
+                "evidence CLEANER. Where coverage fell to zero it made the "
+                "evidence ABSENT: the neighbour term drops out, the physics "
+                "checks read healthy, and the sensor is silent because "
+                "nothing was left to disagree with it. That is the same "
+                "state the corroboration guard refuses to judge in, and "
+                "counting it as a false alarm avoided would be counting "
+                "blindness as accuracy."),
+            "runs": silenced_blind,
+        },
+        # EVERY ROW, not a top-five. A claim about the other 90 that cannot
+        # be checked from the artifact is a claim that should not be made.
+        "all_runs": worst,
         "worst_five": worst[:5],
         "counterexamples": fired[:5],
     })

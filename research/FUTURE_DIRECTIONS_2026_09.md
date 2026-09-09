@@ -68,7 +68,53 @@ it works on both platforms, every result in this repository is one-shot.
 
 ---
 
-## 2. Contamination-aware trust, not just corroboration-gated trust
+## 2. Contamination-aware trust — BUILT, MEASURED, AND REJECTED ON ITS OWN KILL CONDITION
+
+**Status: RESOLVED 2026-09-09. Ledger SR-011.** The proposal below is left as
+written. It named what would kill it, and something adjacent to that killed
+it.
+
+It was built. `csia_supervision/contamination.py` recovers the per-edge terms
+exactly — 12000 comparisons against the core's own `c_nbr`, zero
+disagreements, worst 3.3e-16 — and re-runs the Beta recursion on a restricted
+partner set, reproducing `state.trust` at **max drift 0.0** when nothing is
+restricted. **It needed no frozen-core change**, which corrects the claim in
+the SR-010 withdrawal note.
+
+**It does not rescue the rule.** All 95 enumerated combinations, motor_esc
+unfaulted, threshold 0.82 chosen by the procedure declared beforehand:
+
+| trust used | false alarms of 95 |
+|---|---|
+| core | 27 |
+| restricted to partners in good standing | 14 |
+
+Fourteen is not zero, so kill condition K2 fires and the rule stays
+withdrawn.
+
+**Why, which is the part worth keeping.** Partner-level standing and
+edge-level agreement are different facts, and the restriction only filters on
+the first. At the minimum, motor_esc sits at 0.65000 with all three incident
+edges at consistency 0.0000 and its only *admitted* partner is imu0 at 0.8528
+against imu0's own standing of 0.82. imu0's bias drift breaks the
+accel/motor-current relation while imu0's own trust, held up by its other
+edges, stays above threshold. The contamination arrives through an admitted
+edge. Measured across the search: 78 of 95 runs.
+
+**And the restriction has a worse failure of its own.** With no admissible
+partner the neighbour term drops out and the sensor is scored on physics
+checks alone, which read healthy. Maximum restricted trust at zero coverage:
+**0.9987**. A sensor nothing can vouch for reports near-perfect trust. Five
+of the 13 runs the restriction silenced were silenced this way, so 27 → 14 is
+not a halving and must not be quoted as one.
+
+**What is kept.** The decomposition, for the second reason the proposal gave:
+`evidence_support` traces an evidence id to the edges holding it up. On a
+clean hover, `baro.altitude.supported` rests 83% on the baro–gps edge and 17%
+on the baro–battery thermal edge. Descriptive only — it promotes nothing and
+UNKNOWN is still never resolved.
+
+---
 
 **What today's measurement forces.** The motor_esc low-trust rule was
 withdrawn (SR-010) after the falsification search found a healthy sensor

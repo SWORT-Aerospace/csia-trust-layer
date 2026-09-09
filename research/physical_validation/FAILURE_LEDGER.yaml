@@ -3257,3 +3257,91 @@ entries:
       csia/deploy/flight_log.py; csia/deploy/shadow.py;
       tests/test_replay_alignment.py;
       research/physical_validation/results/sitl_2026_09_09/DECISION_REPLAY_ALIGNMENT.json
+
+  - id: SR-011
+    date: 2026-09-09
+    phase: SUPERVISION (contamination-aware trust, SR-010 follow-up)
+    kind: PROPOSAL_MEASURED_AND_REJECTED_ON_ITS_OWN_KILL_CONDITION
+    what_was_proposed: >-
+      SR-010 withdrew the motor_esc low-trust rule with the observation that
+      "the guard gates WHETHER TO JUDGE, it does not clean THE VALUE BEING
+      JUDGED". The proposed remedy, written up as FUTURE_DIRECTIONS section
+      2, was to carry a decomposition of where a sensor's trust came from --
+      the per-edge contribution to E_i -- so a judgement could rest on the
+      trust attributable to partners in good standing.
+      It was built, it was measured, and IT DOES NOT WORK. The rule stays
+      withdrawn.
+    what_was_built_and_verified: >-
+      csia_supervision/contamination.py reconstructs the per-edge terms the
+      frozen core computes and discards, and ShadowTrust re-runs the Beta
+      recursion on a restricted partner set. Both are exact:
+        per-edge decomposition vs the core's own published c_nbr --
+          12000 comparisons over three profiles, 0 disagreements,
+          worst absolute difference 3.3e-16;
+        unrestricted shadow vs state.trust -- max drift 0.0 over 4500 ticks;
+        shadow routed through the reconstruction -- 1 ulp, and it does NOT
+          accumulate: still 1 ulp 2250 ticks later.
+      Anti-vacuity both ways: weighting edges by THIS tick's trust instead of
+      the previous tick's produces disagreements, and restricting to no
+      partner moves trust by 0.185.
+    a_correction_to_sr_010: >-
+      SR-010 said reinstating the rule "needs a trust value computed WITHOUT
+      the rejected partners, which is a FROZEN-CORE CHANGE". THAT WAS WRONG.
+      Every term the recursion needs is already published in TrustState, so
+      it reproduces exactly outside the core. No frozen file was touched.
+    the_measurement: >-
+      Threshold selected by the procedure DECLARED BEFORE any adversarial
+      combination ran: clean-flight minimum restricted trust 0.9665 over the
+      ARMED window on both flight profiles, ceiling 0.9165 after the 0.05
+      margin, and the largest existing FailsafeConfig constant below it is
+      att_caution = 0.82. No float invented.
+      All 95 enumerated combinations run, motor_esc itself UNFAULTED:
+        core trust        27 false alarms of 95
+        restricted trust  14 false alarms of 95
+      KILL CONDITION K2 FIRES. A safety rule with 14 false alarms in 95
+      adversarial combinations is not usable, and 14 is not 0.
+    why_it_fails_which_is_the_useful_part: >-
+      PARTNER-LEVEL STANDING AND EDGE-LEVEL AGREEMENT ARE DIFFERENT FACTS,
+      AND THE RESTRICTION ONLY FILTERS ON THE FIRST.
+      Traced on combination 0 at t = 40.0 s: motor_esc sits at 0.65000 with
+      all three incident edges at consistency 0.0000, and the only ADMITTED
+      partner is imu0 at trust 0.8528 against its own att_caution standing of
+      0.82. imu0's bias drift breaks the accel/motor-current relation while
+      imu0's own trust -- held up by its other edges and its physics checks
+      -- stays above threshold. The contamination arrives through an admitted
+      edge, so filtering partners by standing cannot remove it. Measured
+      across the search: 78 of 95 runs had an ADMITTED partner carrying an
+      edge at consistency below 0.01.
+    the_second_failure_mode_which_is_worse: >-
+      With no admissible partner the neighbour term drops out entirely and
+      the sensor is scored on physics, temporal and statistical checks alone
+      -- all of which read healthy. On combination 0 the restricted trust
+      climbs from 0.65 to 0.987 from t = 49.6 s while the core stays pinned
+      at 0.65. Across the search the maximum restricted trust at zero
+      coverage is 0.9987. A sensor nothing is in a position to vouch for
+      reports NEAR-PERFECT trust, which is the exact state the corroboration
+      guard exists to refuse to judge in.
+    the_apparent_improvement_is_partly_blindness: >-
+      27 to 14 looks like a halving and must not be quoted as one. The
+      restriction silenced 13 runs the core would have flagged, and 5 of
+      those 13 had zero-coverage ticks -- silence bought by the evidence
+      going ABSENT rather than getting cleaner. Counting those as false
+      alarms avoided would be counting blindness as accuracy. The artifact
+      carries all 95 rows so this can be checked rather than taken on trust.
+    what_is_kept_anyway: >-
+      The decomposition itself, because it answers a question the system
+      could not answer before: WHICH evidence is holding a capability up.
+      `evidence_support` traces an evidence id through the sensor that reads
+      it to the edges corroborating that sensor. Measured on a clean hover,
+      baro.altitude.supported rests 83% on the baro-gps edge and 17% on the
+      baro-battery thermal edge. It is DESCRIPTIVE: it promotes nothing,
+      demotes nothing, and UNKNOWN is still never resolved.
+      "Weak leg" is reported as TWO fields because it is two questions --
+      smallest share and lowest consistency. A well-corroborated partner in
+      flat disagreement carries a LARGE share, so one combined field would
+      hide the case worth seeing.
+    artifact: >-
+      csia_supervision/contamination.py;
+      csia_stress/contamination_probe.py;
+      tests/test_contamination.py;
+      research/physical_validation/results/contamination/CONTAMINATION_PROBE.json
