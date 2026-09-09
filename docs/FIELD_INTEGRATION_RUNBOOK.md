@@ -245,11 +245,20 @@ not a fault.
 
 Run the whole set nightly with `scripts/optiplex_nightly.sh`.
 
-**One caution on decision replay.** It is currently `DIVERGENT` on both
-platforms (HF-004, HF-010). On ArduPilot the categorical differences fell from
-511 to 13 once the hand-off reconstruction was fixed; PX4 is unchanged at 144
-with an unattributed cause. **Do not treat replay agreement as a gate yet.** A
-`decision_replay FAIL` in a nightly is the current, correct state.
+**One caution on decision replay.** It reproduces decisions on both platforms
+and values on neither. As of 2026-09-09 the categorical
+divergence is 0 of 2248 on ArduPilot and 0 of 2242 on PX4 (HF-004 closed by
+HF-018), but ArduPilot puts **zero** of those 2248 within the declared 1e-12
+tolerance, worst relative difference 1.80e-05. PX4 manages 980 of 2242, worst
+6.74e-10.
+
+**Do not treat replay agreement as a gate.** Nothing here promotes it to one.
+Two things also remain true and matter more than the headline: the hand-offs
+are still *reconstructed* rather than logged at run time, and this is two
+90-second clean SITL flights, not hardware and not a fault campaign.
+
+A log that carries no `stale_timeout_s` in its header is reported
+`NOT_COMPARABLE` and yields no divergence count at all. That is not a pass.
 
 ---
 
@@ -311,7 +320,7 @@ as a gate.
 ### What a negative result is worth
 
 A negative result that is recorded is worth more than a positive one that is
-not. The ledger has 75 entries and the majority are things that did not work,
+not. The ledger has 76 entries and the majority are things that did not work,
 including several where the *instrument* was wrong rather than the system.
 That is the point of keeping it.
 

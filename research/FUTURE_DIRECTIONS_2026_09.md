@@ -36,9 +36,17 @@ long-standing "144 divergent" figure came from a log with no staleness
 configuration and was never a measurement, and the default log paths pointed
 into a gitignored directory.
 
-**What is still open.** This does not close HF-004, and a real numeric
-residual remains: 1.7e-14 at tick 52 accumulating to 6.7e-10 by tick 2250,
-above the declared 1e-12 tolerance. The tolerance has not been changed.
+**What followed.** HF-004 was closed on this evidence by an explicit decision
+of the program owner (HF-018), over my stated objection that two runs are not
+a general property. The objection is preserved in the ledger rather than
+removed.
+
+**What is still open.** The values are reproduced on neither platform.
+ArduPilot puts **zero** of 2248 decisions within the declared 1e-12
+tolerance, worst relative difference 1.80e-05; PX4 manages 980 of 2242, worst
+6.74e-10, appearing at tick 52 as 1.7e-14 and accumulating through the α/β
+recursion. The tolerance has not been changed. The hand-offs HF-004 asked to
+have logged at run time are still reconstructed.
 
 ---
 

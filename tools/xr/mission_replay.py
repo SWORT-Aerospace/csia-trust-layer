@@ -119,11 +119,32 @@ def _core_replay_status() -> dict:
              "divergent": r.get("divergent")}
             for r in runs],
         "all_divergent": all(r.get("verdict") == "DIVERGENT" for r in runs),
-        "finding": "HF-004",
-        "why": ("the hand-off reconstruction detects a CHANGE in a channel "
-                "value, so two identical consecutive readings look like no "
-                "new reading. Unfixed; the fix is to log real hand-offs at "
-                "run time, not to widen a tolerance."),
+        # DECISIONS AND VALUES ARE DIFFERENT QUESTIONS, and after HF-018 the
+        # answers differ. Reporting only the first would now overclaim.
+        "any_divergent": any((r.get("divergent") or 0) > 0 for r in runs),
+        "all_within_numeric_tolerance": all(
+            r.get("semantically_equivalent_only", 1) == 0 for r in runs),
+        "per_platform_numeric": [
+            {"platform": r.get("platform"),
+             "bit_identical": r.get("bit_identical"),
+             "within_tolerance": r.get("numerically_equivalent"),
+             "outside_tolerance": r.get("semantically_equivalent_only"),
+             "worst_relative_difference": r.get(
+                 "worst_relative_difference")}
+            for r in runs],
+        "finding": "HF-004 (closed 2026-09-09 by HF-018) / HF-018",
+        "why": ("The categorical divergence HF-004 recorded is gone: 0 on "
+                "both platforms on the 2026-09-09 SITL runs, once the "
+                "comparison joins on the layer's own tick index rather than "
+                "on wall time (HF-017). THE VALUES ARE STILL NOT "
+                "REPRODUCED: ArduPilot has 22 bit-identical decisions of "
+                "2248 and ZERO within the 1e-12 tolerance, worst relative "
+                "difference 1.80e-05; PX4 is 51 and 980 of 2242, worst "
+                "6.74e-10. So the core replay reproduces DECISIONS on both "
+                "platforms and VALUES on neither, and an extension whose "
+                "inputs are values is not covered by the first result. The "
+                "tolerance has not been widened, and the hand-offs HF-004 "
+                "asked to have LOGGED are still reconstructed."),
     }
 
 
@@ -161,13 +182,17 @@ def run(passes: int = 5) -> dict:
 
         # ---- AND THE SENTENCE THAT KEEPS THEM APART ------------------------
         "what_may_not_be_concluded": (
-            "THE COMPLETE PIPELINE IS NOT DEMONSTRATED DETERMINISTIC. The "
-            "core decision replay DIVERGES on both measured platforms "
-            "(HF-004), and this extension's determinism is conditional on "
-            "inputs the core replay cannot currently reproduce. An extension "
-            "that is a perfect function of its inputs is exactly as "
-            "reproducible as its input source, and the input source "
-            "diverges."),
+            "THE COMPLETE PIPELINE IS NOT DEMONSTRATED DETERMINISTIC. This "
+            "sentence survives HF-004's closure, for a narrower and now "
+            "precisely stated reason. The core decision replay no longer "
+            "DIVERGES -- 0 categorical differences on both platforms -- but "
+            "it does not reproduce the VALUES it hands on: ArduPilot has "
+            "ZERO of 2248 decisions within the declared 1e-12 tolerance. "
+            "This extension's determinism is conditional on inputs the core "
+            "replay reproduces only to within 1.80e-05. An extension that "
+            "is a perfect function of its inputs is exactly as reproducible "
+            "as its input source, and the input source is not yet "
+            "reproducible at the declared tolerance."),
         "transitions_observed": len(transitions),
         "capability_transitions": transitions,
         "evidence_sequence_is_synthetic": True,

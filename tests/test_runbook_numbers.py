@@ -99,12 +99,29 @@ def test_the_sr001_baseline_table_matches_the_overlay(doc):
 
 
 def test_the_runbook_does_not_promise_replay_agreement(doc):
-    """Decision replay is DIVERGENT on both platforms. A runbook that
-    presented it as a gate would have the operator chasing a failure that
-    is the current, correct state."""
+    """A runbook that presented replay as a gate would mislead the operator.
+
+    THE REASON CHANGED; THE RULE DID NOT. This test used to require the word
+    "divergent", because replay was DIVERGENT on both platforms. HF-018
+    closed that (0 of 2248 and 0 of 2242), so the word is gone and the demand
+    for it would now force a false statement into the doc.
+
+    What remains true is what the operator actually needs: replay reproduces
+    DECISIONS and not VALUES -- ArduPilot puts zero of its decisions within
+    the declared tolerance -- the hand-offs are still reconstructed rather
+    than logged, and it is not a gate.
+    """
     lowered = doc.lower()
-    assert "divergent" in lowered
     assert "do not treat replay agreement as a gate" in lowered
+    assert "values on neither" in lowered, (
+        "the runbook no longer says the VALUES are not reproduced; that is "
+        "the load-bearing limitation now that the divergence is gone")
+    assert "1.80e-05" in lowered, (
+        "the runbook must carry the ArduPilot worst-case number, not just "
+        "the word 'limitation'")
+    assert "reconstructed" in lowered, (
+        "the runbook no longer says the hand-offs are reconstructed rather "
+        "than logged; that is the weaker-of-two-results caveat on HF-018")
 
 
 def test_the_runbook_states_the_limits(doc):

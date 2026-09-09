@@ -228,27 +228,66 @@ def test_the_untested_band_boundary_is_still_admitted():
 
 # ------------------------------------------------------------ decision replay
 
-def test_decision_replay_is_still_divergent_and_still_not_counted_as_pass():
-    """HF-004, ASSERTED AS A CONTINUING FAILURE ON PURPOSE.
+def test_decision_replay_no_longer_diverges_and_the_reasons_still_hold():
+    """HF-004, CLOSED 2026-09-09 by HF-018, and this test rewritten with it.
 
-    Decision replay does NOT agree, on either platform, and the software
-    hardening gate may not count it as PASS. If this test ever fails because
-    the verdict turned non-DIVERGENT, that is not automatically good news:
-    check whether the reconstruction was genuinely fixed (by logging real
-    hand-offs at run time) or whether a comparison was widened until it
-    agreed. Only the first is a result.
+    THE QUESTION THE OLD VERSION ASKED, AND ITS ANSWER
+    ---------------------------------------------------
+    The old assertion demanded DIVERGENT and said: if this ever turns
+    non-DIVERGENT, check whether the reconstruction was genuinely fixed or
+    whether a comparison was widened until it agreed. Only the first is a
+    result.
+
+    IT WAS NOT WIDENED. The tolerance is unchanged at 1e-12, and the PX4
+    worst difference of 6.74e-10 sits ABOVE it -- which is why the verdict
+    is SEMANTICALLY_EQUIVALENT and not NUMERICALLY_EQUIVALENT. The alignment
+    was made STRICTER, from a nearest-within-half-tick match to an exact
+    integer equality on the layer's tick index.
+
+    So this test now guards the OTHER direction: the agreement must keep
+    resting on the strict join and the unwidened tolerance, and must not
+    quietly come to rest on a loose one.
     """
     doc = _load("DECISION_REPLAY_RESULTS.json")
     runs = [r for r in doc["runs"] if r.get("verdict") != "LOG_ABSENT"]
     assert runs, "no replay runs recorded"
     for r in runs:
+        assert r.get("verdict") != "NOT_COMPARABLE", (
+            f"{r.get('platform')}: NOT_COMPARABLE. A closed finding must not "
+            f"be held closed by an artifact that measured nothing")
         assert r["decisions_compared"] > 0, (
             f"{r['platform']}: zero comparisons. That is the NOT_COMPARABLE "
             f"silent-zero defect returning, not a clean replay")
-        assert r["verdict"] == "DIVERGENT", (
-            f"{r['platform']} replay is now {r['verdict']}. If the hand-off "
-            f"reconstruction was genuinely fixed, update HF-004 and this "
-            f"test together. If a tolerance was widened instead, revert it.")
+        assert r["divergent"] == 0, (
+            f"{r['platform']} replay diverges again ({r['divergent']} of "
+            f"{r['decisions_compared']}). HF-004 was closed on zero; reopen "
+            f"it rather than relaxing this number")
+        assert r["alignment"] == "EXACT_LAYER_TICK_INDEX", (
+            f"{r['platform']} is aligned by {r['alignment']!r}. The closure "
+            f"rests on the STRICT join; agreement reached under the "
+            f"wall-clock approximation is the artifact HF-017 removed")
+
+
+def test_the_hand_offs_hf_004_asked_for_are_still_not_logged():
+    """The closure must not be read as more than it is.
+
+    HF-004 prescribed one fix: LOG THE ACTUAL HAND-OFFS at run time instead
+    of reconstructing them afterwards. That was never done -- the finding
+    was closed by a corrected arrival comparison, a corrected tick alignment
+    and two new log fields, which is a different and weaker thing.
+
+    This test fails the day hand-offs ARE logged, which is the point: it is
+    a marker that the stronger fix is still available, not a prohibition.
+    Delete it then, and say so in the ledger.
+    """
+    src = open(os.path.join(ROOT, "csia", "deploy", "shadow.py"),
+               encoding="utf-8").read()
+    call = src[src.index("self.flight_log.tick("):]
+    call = call[:call.index("\n\n")]
+    assert "core_samples" not in call, (
+        "shadow.py now appears to log the real hand-offs. If so that is "
+        "GOOD NEWS and strictly stronger than what closed HF-004 -- record "
+        "it in the ledger and remove this test")
 
 
 def test_the_replay_tolerance_has_not_been_widened():

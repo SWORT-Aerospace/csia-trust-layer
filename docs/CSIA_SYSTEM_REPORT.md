@@ -387,19 +387,30 @@ mutants. Coverage is not the lever.
 
 ## 7. Open problems
 
-### 7.1 Decision replay: no longer divergent, still not closed (HF-004, open)
+### 7.1 Decision replay reproduces decisions, not values (HF-004 CLOSED, HF-018)
 Replay is the only mechanism that turns "the log says X" into "X is
 reproducible by an independent path". As of 2026-09-09 it reports **0
 categorical divergences on both platforms** on freshly recorded SITL runs,
 and on the PX4 log that produced the long-standing residual it is **2250 of
 2250 bit-identical**.
 
-That is two runs, not a general property, so **HF-004 stays open and the
-software-hardening gate still does not count replay as PASS.** A numeric
-residual also remains on the PX4 run: 1.7e-14 at tick 52, accumulating
-through the α/β recursion to 6.7e-10 by tick 2250 — six orders below any
-decision threshold and three orders *above* the declared 1e-12 portability
-tolerance. **The tolerance has not been changed to accommodate it.**
+**HF-004 was closed on that evidence by an explicit decision of the program
+owner** (HF-018). I had argued it should stay open on two runs; that was
+heard and overruled, and the objection is preserved in the ledger rather than
+removed.
+
+Three things the closure does not do, all recorded with it:
+
+- **It promotes no gate.** The software-hardening gate is unchanged; changing
+  it is a separate, explicit decision.
+- **The hand-offs are still reconstructed.** HF-004 prescribed logging real
+  hand-offs at run time. That was never done, so the agreement rests on a
+  corrected reconstruction rather than on recorded truth. Weaker.
+- **The values do not reproduce, on either platform.** ArduPilot puts **zero**
+  of 2248 decisions within the declared 1e-12 tolerance, worst relative
+  difference **1.80e-05**; PX4 manages 980 of 2242, worst **6.74e-10**. **The
+  tolerance has not been changed to accommodate this**, and it is now the
+  load-bearing limitation on the mission layer's determinism claim.
 
 ### 7.2 The PX4 divergence — cause found, and it was our instrument (HF-014 → HF-017)
 The 144 and then 119 divergence figures were **both wrong, in different

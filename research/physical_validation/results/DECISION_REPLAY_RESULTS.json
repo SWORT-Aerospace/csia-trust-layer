@@ -1,4 +1,27 @@
 {
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "a relative difference of 0.5 against a tolerance of 1e-12 is arithmetic; and an edge whose weight is 0.0 is not carrying weight, which is the definition the gate semantics give, not one this tool supplies",
+        "control": "a numeric difference exceeds tolerance AND a dead edge reads as a different decision",
+        "kind": "POSITIVE",
+        "observed": "{'rel': 0.5, 'cat_differs': True}",
+        "status": "PASS"
+      },
+      {
+        "basis": "a value equals itself and a set equals itself; both follow from the definitions of equality, not from this tool",
+        "control": "identical values differ by zero AND identical gate maps read as the same decision",
+        "kind": "NEGATIVE",
+        "observed": "{'rel': 0.0, 'cat_differs': False}",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.assurance.decision_replay",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
   "note": "Bit identity is NOT demanded where the platform contract does not guarantee it. The four outcomes are reported separately so a numerical difference is never read as a decision failure, and a decision failure is never excused as rounding.",
   "outcomes": [
     "BIT_IDENTICAL",
@@ -8,190 +31,50 @@
   ],
   "runs": [
     {
-      "bit_identical": 24,
-      "decisions_compared": 750,
-      "divergence_examples": [
-        {
-          "recorded_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "t": 1.04
-        },
-        {
-          "recorded_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "t": 1.52
-        },
-        {
-          "recorded_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "t": 1.56
-        },
-        {
-          "recorded_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "t": 1.6
-        },
-        {
-          "recorded_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "redundant_imu",
-            "temp_bias_drift",
-            "velocity_gps_doppler_0",
-            "velocity_gps_doppler_1"
-          ],
-          "t": 1.64
-        }
-      ],
-      "divergent": 511,
-      "fidelity_note": "The hand-off reconstruction detects a change in a channel value, so two identical consecutive readings look like no new reading. FL-019 records that this reproduces PX4's measured trust to ~0.003 and does NOT reproduce ArduPilot's. A continuous-value difference on ArduPilot is therefore EXPECTED and attributable, not a new finding; a CATEGORICAL difference would be a finding on either platform.",
-      "log": "logs/shadow-sitl-ardupilot/20260825T005244Z-8c32ffe5.part000.jsonl",
+      "alignment": "EXACT_LAYER_TICK_INDEX",
+      "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+      "bit_identical": 22,
+      "decisions_compared": 2248,
+      "divergence_examples": [],
+      "divergent": 0,
+      "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+      "flight_id": "20260909T132406Z-a8bb841c",
+      "log": "logs/shadow-sitl-ardupilot/20260909T132406Z-a8bb841c.part000.jsonl",
+      "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
       "node": "gps",
       "numerically_equivalent": 0,
       "platform": "ardupilot",
-      "replayed_states_unmatched": 1,
-      "semantically_equivalent_only": 215,
-      "ticks_in_log": 751,
+      "reconstruction_gate": "arrival",
+      "replayed_states_unmatched": 3,
+      "semantically_equivalent_only": 2226,
+      "ticks_carrying_tick_tau": 2248,
+      "ticks_in_log": 2251,
       "tolerance": 1e-12,
-      "verdict": "DIVERGENT",
-      "worst_relative_difference": 0.028618959637081127
+      "verdict": "SEMANTICALLY_EQUIVALENT",
+      "worst_relative_difference": 1.800345966983583e-05
     },
     {
-      "bit_identical": 3,
-      "decisions_compared": 750,
-      "divergence_examples": [
-        {
-          "recorded_live": [
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "t": 0.16
-        },
-        {
-          "recorded_live": [
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "t": 0.2
-        },
-        {
-          "recorded_live": [
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "t": 0.24
-        },
-        {
-          "recorded_live": [
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "t": 0.28
-        },
-        {
-          "recorded_live": [
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "replay_live": [
-            "altitude_baro",
-            "attitude_gravity_mag",
-            "velocity_gps_doppler_0"
-          ],
-          "t": 0.32
-        }
-      ],
-      "divergent": 144,
-      "fidelity_note": "The hand-off reconstruction detects a change in a channel value, so two identical consecutive readings look like no new reading. FL-019 records that this reproduces PX4's measured trust to ~0.003 and does NOT reproduce ArduPilot's. A continuous-value difference on ArduPilot is therefore EXPECTED and attributable, not a new finding; a CATEGORICAL difference would be a finding on either platform.",
-      "log": "logs/shadow-sitl-px4/20260825T005931Z-1b4add14.part000.jsonl",
+      "alignment": "EXACT_LAYER_TICK_INDEX",
+      "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+      "bit_identical": 51,
+      "decisions_compared": 2242,
+      "divergence_examples": [],
+      "divergent": 0,
+      "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+      "flight_id": "20260909T131511Z-687f2511",
+      "log": "logs/shadow-sitl-px4/20260909T131511Z-687f2511.part000.jsonl",
+      "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
       "node": "gps",
-      "numerically_equivalent": 0,
+      "numerically_equivalent": 980,
       "platform": "px4",
-      "replayed_states_unmatched": 1,
-      "semantically_equivalent_only": 603,
-      "ticks_in_log": 751,
+      "reconstruction_gate": "arrival",
+      "replayed_states_unmatched": 9,
+      "semantically_equivalent_only": 1211,
+      "ticks_carrying_tick_tau": 2242,
+      "ticks_in_log": 2251,
       "tolerance": 1e-12,
-      "verdict": "DIVERGENT",
-      "worst_relative_difference": 0.10449589663628599
+      "verdict": "SEMANTICALLY_EQUIVALENT",
+      "worst_relative_difference": 6.73651088260143e-10
     }
   ],
   "schema": "csia.assurance.decision_replay/1"

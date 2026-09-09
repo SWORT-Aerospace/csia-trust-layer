@@ -256,17 +256,29 @@ def test_the_replay_artifact_never_claims_the_pipeline_is_deterministic():
     """THE LOAD-BEARING TEST IN THIS FILE.
 
     The extension is deterministic given its inputs. The core replay that
-    would produce those inputs DIVERGES on both platforms (HF-004). An
-    artifact reporting only the first is quoting half a sentence.
+    would produce those inputs does not reproduce them at the declared
+    tolerance. An artifact reporting only the first is quoting half a
+    sentence.
+
+    UPDATED WITH HF-018. The old assertion was `all_divergent is True`, and
+    HF-004's closure retired it: the categorical divergence is 0 on both
+    platforms. The load-bearing claim did NOT retire with it -- it moved to
+    the numeric side, where ArduPilot reproduces ZERO of 2248 decisions
+    within 1e-12. So the guard now watches that, which is the thing the
+    extension actually depends on.
     """
     doc = _load("MISSION_REPLAY.json")
     assert doc["extension_determinism"]["verdict"] == \
         "DETERMINISTIC_GIVEN_ITS_INPUTS"
     core = doc["core_replay_limitation"]
     assert core["available"], "the core replay status is no longer reported"
-    assert core["all_divergent"] is True, (
-        "the core replay is no longer reported as divergent. If it was "
-        "genuinely fixed by logging real hand-offs at run time, update "
-        "HF-004 and this test together; if a tolerance was widened, revert.")
+    assert core["all_within_numeric_tolerance"] is False, (
+        "the core replay now reproduces every value within the declared "
+        "tolerance. If that is real, the pipeline determinism claim can be "
+        "strengthened -- update the ledger and this test together. If a "
+        "tolerance was widened instead, revert it.")
+    assert core["per_platform_numeric"], (
+        "the numeric breakdown is gone; `all_divergent` alone no longer "
+        "carries the limitation and must not be the only thing reported")
     assert "NOT DEMONSTRATED DETERMINISTIC" in doc["what_may_not_be_concluded"]
     assert doc["evidence_sequence_is_synthetic"] is True

@@ -3345,3 +3345,86 @@ entries:
       csia_stress/contamination_probe.py;
       tests/test_contamination.py;
       research/physical_validation/results/contamination/CONTAMINATION_PROBE.json
+
+  - id: HF-018
+    date: 2026-09-09
+    phase: ASSURANCE (HF-004 closure)
+    kind: FINDING_CLOSED_BY_HUMAN_DECISION_ON_STATED_EVIDENCE
+    closes: HF-004
+    decided_by: >-
+      THE PROGRAM OWNER, EXPLICITLY, in the instruction "close HF-004 with
+      these two SITL runs". Recorded because no stage promotes itself: the
+      measurement below does not close a finding on its own, a person does,
+      and a reader is entitled to know which.
+      I had stated in the preceding turn that two runs are not a general
+      property and that HF-004 should stay open. That objection was heard
+      and overruled. It is preserved here rather than removed.
+    what_hf_004_claimed: >-
+      "Decision-level replay from a flight log is not faithful enough to
+      serve as a verification instrument, on either platform." Measured
+      then: ArduPilot 511 of 750 compared ticks differed CATEGORICALLY,
+      PX4 144 of 750.
+    the_evidence_it_is_closed_on: >-
+      Two SITL flights recorded 2026-09-09, one per platform, each carrying
+      the run's own staleness configuration and the layer's own tick
+      boundary:
+        ardupilot  20260909T132406Z-a8bb841c
+                   2248 compared, 3 unmatched, 0 DIVERGENT
+                   22 bit-identical, 2226 semantically equivalent
+                   worst relative difference 1.80e-05
+        px4        20260909T131511Z-687f2511
+                   2242 compared, 9 unmatched, 0 DIVERGENT
+                   51 bit-identical, 980 numerically equivalent,
+                   1211 semantically equivalent
+                   worst relative difference 6.74e-10
+      Plus the controlled comparison in HF-017: on the PX4 log that produced
+      the 119 residual divergences, the tick-index join gives 2250 of 2250
+      BIT-IDENTICAL and 0 divergent.
+      THE CATEGORICAL CLAIM HF-004 MAKES IS THEREFORE NOT REPRODUCIBLE ON
+      EITHER PLATFORM ON THESE RUNS.
+    the_question_the_pinning_test_asked_and_its_honest_answer: >-
+      `test_decision_replay_is_still_divergent_and_still_not_counted_as_pass`
+      was written to say: if this ever turns non-DIVERGENT, check whether the
+      reconstruction was genuinely fixed or whether a comparison was widened
+      until it agreed. Only the first is a result.
+      IT WAS NOT WIDENED. The tolerance is unchanged at 1e-12 -- and the PX4
+      worst difference of 6.74e-10 sits ABOVE it, which is why the verdict is
+      SEMANTICALLY_EQUIVALENT and not NUMERICALLY_EQUIVALENT. The alignment
+      was made STRICTER: an exact integer equality on the layer's tick index,
+      replacing a nearest-within-half-tick match. On the same log the strict
+      join left 1 state unmatched where the loose one left 271.
+    what_hf_004_prescribed_and_was_NOT_done: >-
+      HF-004 said "THE FIX IS NOT A TOLERANCE. It is to LOG THE ACTUAL
+      HAND-OFFS at run time instead of reconstructing them afterwards."
+      THAT WAS NEVER DONE. `csia/deploy/shadow.py` computes `core_samples`,
+      feeds them to the layer, and does not write them to the log. The
+      replay still RECONSTRUCTS hand-offs from `t_mono - age_s`.
+      So the agreement was reached by a different route than the one HF-004
+      specified: a corrected arrival comparison (HF-016), a corrected tick
+      alignment (HF-017), and two new log fields (`fresh`, `tick_tau`). The
+      route matters, because "the reconstruction agrees on two runs" is a
+      weaker statement than "the hand-offs are recorded and cannot disagree".
+      A task list in an earlier session marked "record real hand-offs in
+      shadow.py" as COMPLETED. It is not. That claim is withdrawn here.
+    what_this_closure_does_NOT_do: >-
+      IT DOES NOT PROMOTE ANY GATE. HF-004's consequence line said the
+      software-hardening gate may not count decision replay as PASS. Closing
+      the finding does not flip that gate; changing a gate is a separate,
+      explicit decision and none is taken here.
+      IT DOES NOT MAKE REPLAY A CERTIFIED VERIFICATION INSTRUMENT.
+      IT DOES NOT COVER: hardware runs, other flight profiles, injected
+      faults, other durations, or any platform but these two. The evidence
+      is two 90-second clean SITL flights.
+    what_remains_open_and_is_recorded_as_open: >-
+      THE NUMERIC RESIDUAL, and it is LARGER ON ARDUPILOT than on PX4:
+      1.80e-05 against 6.74e-10, both above the declared 1e-12 tolerance.
+      ArduPilot manages only 22 bit-identical decisions out of 2248 and zero
+      within tolerance. So the replay reproduces DECISIONS on both platforms
+      and reproduces VALUES on neither. A 1e-12 relative tolerance may be
+      the wrong number for a filter carrying state across 2250 steps at
+      rho = 0.998 -- but it has NOT been changed, and it will not be changed
+      to make this look better.
+    artifact: >-
+      research/physical_validation/results/DECISION_REPLAY_RESULTS.json;
+      research/physical_validation/results/sitl_2026_09_09/DECISION_REPLAY_ALIGNMENT.json;
+      tests/test_post_e1_hardening_round1_artifacts.py

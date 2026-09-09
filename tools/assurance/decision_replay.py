@@ -338,13 +338,17 @@ def replay(log_path: str, platform: str, node: str = "gps",
             "a tick. Joining on the layer's own tick index instead gives 0 "
             "divergent and 2250 of 2250 bit-identical on the same log, with "
             "ArduPilot unchanged at 0. "
-            "WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL "
-            "runs replaying without a categorical divergence is not a "
-            "general property of the instrument, and the software-hardening "
-            "gate must not read it as one. A numeric residual also remains, "
-            "accumulating through the alpha/beta recursion to 6.7e-10, which "
-            "is above the declared 1e-12 tolerance; the tolerance has not "
-            "been changed to accommodate it."),
+            "HF-004 WAS CLOSED ON THAT EVIDENCE (HF-018), by an explicit "
+            "decision of the program owner rather than by this instrument. "
+            "WHAT THE CLOSURE DOES NOT MEAN. It promotes no gate. It covers "
+            "two 90-second clean SITL flights, not hardware, not a fault "
+            "campaign, not any other platform. The hand-offs HF-004 asked to "
+            "have LOGGED at run time are still RECONSTRUCTED, so this is the "
+            "weaker of the two available results. And the VALUES are still "
+            "not reproduced on either platform: ArduPilot has 22 "
+            "bit-identical decisions of 2248 and ZERO within the declared "
+            "1e-12 tolerance, worst 1.80e-05; PX4 has 51 and 980 of 2242, "
+            "worst 6.74e-10. The tolerance has not been changed."),
     }
 
 

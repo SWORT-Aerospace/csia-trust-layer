@@ -187,8 +187,12 @@ that was wrong and is recorded as corrected with its justification.
    measurement that could be taken today with the part and calipers.
 3. **Device-family IMU independence is `NO`.** Recorded, not resolved.
 4. **Surface position is not measurable.** `command_echo` is an echo.
-5. **The core decision replay diverges** (HF-004). The mission replay's
-   determinism is conditional on inputs the core replay cannot reproduce.
+5. **The core decision replay reproduces decisions but not values.** The
+   categorical divergence is gone (HF-004 closed by HF-018, 0 of 2248 and 0
+   of 2242), but ArduPilot puts **zero** decisions within the declared 1e-12
+   tolerance, worst 1.80e-05. The mission replay's determinism is still
+   conditional on inputs the core replay does not reproduce at that
+   tolerance.
 6. **No prior-art search has been done** for any mission-layer idea.
 7. **E2 has not run.** No hardware.
 

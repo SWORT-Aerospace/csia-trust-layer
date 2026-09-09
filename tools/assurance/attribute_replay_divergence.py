@@ -2,12 +2,22 @@
 
 WHY THIS TOOL EXISTS
 --------------------
-`decision_replay.py` reports DIVERGENT on both platforms. HF-010 explained
+`decision_replay.py` reported DIVERGENT on both platforms. HF-010 explained
 and largely removed the ArduPilot divergence -- keying hand-off
 reconstruction on channel ARRIVAL TIME rather than on a CHANGED VALUE took
 it from 511 categorical differences to 13. It left PX4 at 144, unchanged,
-which means whatever causes the PX4 divergence is a DIFFERENT mechanism and
-has never been named. HF-004 stays open because of it.
+which means whatever caused the PX4 divergence was a DIFFERENT mechanism.
+
+THAT MECHANISM WAS FOUND, AND IT WAS THE COMPARISON (HF-017). The replay was
+paired with the recorded row nearest in WALL TIME while carrying the layer's
+own exact tick grid; joining on the tick index instead gives 0 divergent on
+both platforms, and HF-004 was closed on that evidence (HF-018).
+
+THIS TOOL IS KEPT AND IS NOT VESTIGIAL. It answers "which edges differ, on
+which ticks, and is there a single mechanism" -- the question to ask the
+moment a divergence returns, and the one whose answer took three findings to
+reach last time. It is also the instrument that would catch a divergence
+reappearing under a future adapter or platform.
 
 This tool does not try to fix anything. It asks one question:
 

@@ -82,7 +82,7 @@ All in `research/physical_validation/FAILURE_LEDGER.yaml`.
 | HF-001 | a **subnormal** gate weight (5e-324) licensed `SUPPORTED_UNIQUE` | **FIXED** as a validity rule (`INVALID_GATE_STATE`), deliberately **not** a tolerance |
 | HF-002 | the minimizer produced a confident wrong answer **twice** | FIXED with a load-bearing invariant |
 | HF-003 | scalar S11's declared artifact does not contain its value | **SPECIFIED, NOT APPLIED** — the map is hashed by the immutable freeze |
-| HF-004 | decision replay **DIVERGENT on both platforms** | **RECORDED, NOT FIXED.** Not tuned until it agreed |
+| HF-004 | decision replay **DIVERGENT on both platforms** | **RECORDED, NOT FIXED** at the time. **Later CLOSED 2026-09-09 (HF-018)**: the divergence was in the comparison, not the replay (HF-017), and is 0 on both platforms once joined on the layer's tick index. Never tuned; the tolerance is unchanged and the join is stricter. Values still do not reproduce |
 | HF-005 | my differential harness read an absent firewall answer as a positive one, then **accused the firewall** of the defect | FIXED |
 | HF-006 | the deployment loader accepts all six smuggling forms | RECORDED; none reaches the core; strict gate written, not wired |
 | HF-007 | the provenance tool reported frozen-core drift where there was none | FIXED by sharing the freeze manifest's own digest functions |
