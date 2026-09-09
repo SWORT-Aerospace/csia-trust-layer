@@ -4,8 +4,35 @@ Four pieces of work are blocked here and **not** blocked on your machine. This
 document is the exact procedure for each, what to expect, and how to feed the
 result back so it lands in the evidence chain rather than in a chat window.
 
-**Why they are blocked here, verified rather than assumed** — every outbound
-host needed goes through an agent proxy that refuses the CONNECT:
+> **CORRECTION, 2026-09-09 (MX-028). ArduPilot SITL is NOT blocked here.**
+> This document previously said it was. What had actually been tested was
+> `firmware.ardupilot.org`, the BINARY firmware server, which does return 403.
+> The SOURCE path was never tested, and it works:
+> `git ls-remote https://github.com/ArduPilot/ardupilot.git` succeeds, gcc
+> 13.3 / g++ / make / cmake are present, passwordless sudo works, `apt-get`
+> resolves against archive.ubuntu.com, and 19 GB of disk is free. §1 below is
+> therefore a procedure that can be run HERE, not only elsewhere.
+>
+> A negative capability claim needs a test exactly like a positive one. This
+> one was an inference from a single adjacent 403, repeated often enough to
+> become a fact in the documentation.
+>
+> **It has since been RUN here (HF-015).** A built SITL binary was already on
+> disk at `/home/user/ardupilot/ardupilot/build/sitl/bin/arducopter`. CSIA
+> flew against it for 2251 ticks, and decision replay on the resulting log
+> reports SEMANTICALLY_EQUIVALENT with **zero** categorical divergences,
+> against DIVERGENT on every log that predates the HF-014 instrumentation.
+>
+> **One correction to §1 below, and it is not optional:** ArduPilot streams
+> telemetry to a link only after it has seen a GCS heartbeat on that link.
+> CSIA is read-only and can never send one, so **a forwarder in front of CSIA
+> is mandatory, not a convenience.** Pointing CSIA straight at a SITL serial
+> port yields heartbeats and almost nothing else — measured, 21 of 25
+> messages in 20 s. With a forwarder: 13556 messages in the same 20 s.
+> `sim_vehicle.py --out=` works because MAVProxy is that forwarder.
+
+**What genuinely is blocked** — these hosts go through an agent proxy that
+refuses the CONNECT:
 
 ```
 $ curl -sS -o /dev/null -w "%{http_code}\n" https://firmware.ardupilot.org/
@@ -14,7 +41,9 @@ $ curl -sS -o /dev/null -w "%{http_code}\n" https://api.crossref.org/works?query
 curl: (56) CONNECT tunnel failed, response 403
 ```
 
-and there is no Docker daemon (`/var/run/docker.sock` absent) and no hardware.
+and there is no Docker daemon (`/var/run/docker.sock` absent) and no
+hardware. Scholarly APIs and the ArduPilot *binary* server stay blocked;
+GitHub, apt and the toolchain do not.
 
 ---
 

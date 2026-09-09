@@ -6,8 +6,8 @@ software and cyber posture, the simulation apparatus, what has actually been
 measured, what has NOT, and where it goes next. Read §0 and §12 if you read
 nothing else: §0 is what the system is, §12 is what it is not.
 
-Status: 2026-09-08. Branch `claude/code-reviewer-repo-export-zicovg`.
-Ledger: 66 entries. Tests: 153 files. Frozen core: byte-identical to
+Status: 2026-09-09. Branch `claude/code-reviewer-repo-export-zicovg`.
+Ledger: 72 entries. Tests: 153 files. Frozen core: byte-identical to
 `csia-v1.0-research-final`.
 
 ---
@@ -482,10 +482,18 @@ instrument controls, quality ratchet with real comparisons.
 **Open:** decision replay (HF-004), the PX4 root cause (HF-014), 15 prose
 bindings, the 0.700 editorial decision, frozen-core mutation at 0.5583.
 
-**Blocked in this environment, not by effort:** SITL (ArduPilot not
-installable — 403), HITL and E2 (no hardware), cross-distribution
-portability (no Docker daemon), prior-art search (all scholarly APIs 403).
-Exact unblocking procedures: `docs/UNBLOCKING_THE_BLOCKED_WORK.md`.
+**Blocked in this environment:** HITL and E2 (no hardware),
+cross-distribution portability (no Docker daemon), prior-art search (all
+scholarly APIs 403).
+
+**NOT blocked, contrary to what this report previously said (MX-028):**
+ArduPilot SITL. The earlier claim rested on `firmware.ardupilot.org`
+returning 403 — that is the BINARY server, and the source path was never
+tested. `git ls-remote` against the GitHub repository succeeds, the
+toolchain (gcc 13.3, g++, make, cmake) is present, passwordless sudo works,
+apt resolves, and 19 GB of disk is free. SITL is therefore the highest-value
+OPEN item rather than a blocked one, because one SITL run is what closes
+HF-004/HF-014. Exact procedures: `docs/UNBLOCKING_THE_BLOCKED_WORK.md`.
 
 ---
 
@@ -510,8 +518,9 @@ Exact unblocking procedures: `docs/UNBLOCKING_THE_BLOCKED_WORK.md`.
    coverage is demonstrably not the lever.
 
 **Tier 3 — the real ceiling**
-8. SITL, HITL, hardware, cross-distribution. Everything above still runs on
-   one simulator, one host, one Python.
+8. SITL (runnable HERE — see MX-028), then HITL, hardware,
+   cross-distribution. Everything above still runs on one simulator, one
+   host, one Python.
 
 ### Further out — the theoretical direction
 

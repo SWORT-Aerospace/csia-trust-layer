@@ -49,9 +49,18 @@ class _State:
     ALL = ("imu0", "imu1", "baro", "mag", "gps", "motor_esc", "battery",
            "vibration")
 
+    #: Trust for every node NOT named by the caller. The corroboration
+    #: guard now requires a partner to be in GOOD STANDING as well as live,
+    #: so leaving partners at an implicit 0.0 made every state look like a
+    #: total-degradation scenario in which nothing may be judged. A test
+    #: about one degraded sensor means the others are HEALTHY, and the
+    #: fixture has to say so.
+    HEALTHY = 0.99
+
     def __init__(self, t, trust, fresh=None, armed=None):
         self.t = t
-        self.trust = dict(trust)
+        self.trust = {k: self.HEALTHY for k in self.ALL}
+        self.trust.update(trust)
         self.fresh = dict(fresh) if fresh is not None else \
             {k: True for k in self.ALL}
         self.armed = armed
@@ -120,11 +129,22 @@ def test_every_unsupervised_sensor_is_either_covered_or_named():
         UNSUPERVISED_BY_THE_FROZEN_POLICY - set(lowtrust.RULES)
 
 
-def test_both_unsupervised_sensors_are_now_covered():
-    """baro (SR-006) and motor_esc (SR-008). Both were measured before
-    being enabled, not after."""
-    assert set(lowtrust.RULES) == UNSUPERVISED_BY_THE_FROZEN_POLICY
-    assert lowtrust.CANDIDATES == {}
+def test_motor_esc_is_withdrawn_and_says_why():
+    """SR-010. The falsification search found a false alarm the corroboration
+    guard cannot fix, so the rule was WITHDRAWN rather than adjusted a second
+    time -- the commitment made before the first fix was written.
+
+    baro survives the same search because it has ONE edge partner: either gps
+    corroborates or it does not, and there is no middle state in which a
+    partner is rejected as unfit while its contamination of the trust value
+    remains. motor_esc's four partners create exactly that state.
+    """
+    assert set(lowtrust.RULES) == {"baro"}
+    assert "motor_esc" in lowtrust.CANDIDATES
+    why = lowtrust.CANDIDATES["motor_esc"]
+    assert "WITHDRAWN" in why
+    assert "0.667" in why, "the measured false alarm must stay in the record"
+    assert "frozen-core change" in why
 
 
 def test_each_threshold_clears_the_margin_that_actually_decides_it():
@@ -141,16 +161,12 @@ def test_each_threshold_clears_the_margin_that_actually_decides_it():
         assert rule.worst_uncontaminated_trust <= rule.clean_flight_min_trust
 
 
-def test_the_motor_esc_margin_is_recorded_as_the_thin_one_it_is():
-    """0.098, against baro's 0.243. A reader comparing the two rules must
-    see that they are not equally well separated."""
-    motor = lowtrust.RULES["motor_esc"]
+def test_the_surviving_rule_has_a_wide_margin():
+    """baro's margin is 0.243. motor_esc's was 0.098 -- and thin margin was
+    the symptom: a well-connected sensor's trust is moved by partners it
+    cannot vouch for, which is why that rule did not survive."""
     baro = lowtrust.RULES["baro"]
-    motor_margin = motor.worst_uncontaminated_trust - motor.threshold
-    baro_margin = baro.worst_uncontaminated_trust - baro.threshold
-    assert motor_margin == pytest.approx(0.0984, abs=5e-3)
-    assert motor_margin < baro_margin
-    assert "0.098" in motor.why or "0.048" in motor.why
+    assert baro.worst_uncontaminated_trust - baro.threshold > 0.2
 
 
 # ---------------------------------------------------------------------------
@@ -359,54 +375,64 @@ def test_the_measurement_uses_the_armed_window_not_the_whole_run():
 # SR-008: the corroboration guard, found by construction not by sampling
 # ---------------------------------------------------------------------------
 
-def test_a_sensor_with_too_few_live_corroborators_is_not_judged():
-    """THE CASE 140 RANDOM RUNS MISSED.
+def test_a_sensor_with_too_few_corroborators_in_good_standing_is_not_judged():
+    """THE CASE 140 RANDOM RUNS MISSED, now on the surviving rule.
 
-    motor_esc has four edge partners. Drop three and leave the fourth
-    DEGRADED, and motor_esc -- perfectly healthy -- is dragged to 0.664 by
-    its one remaining corroborator, which is itself the faulty sensor. The
-    rule fired CAUTION on a healthy sensor at t=24.6 s.
-
-    With one corroborator a disagreement cannot say WHICH END is at fault,
-    so the honest state is "not judgeable", not "degraded".
+    baro has two edge partners, gps and battery, so BOTH must be live and in
+    good standing. Drop one and the question "is baro degraded, or is its
+    lone remaining partner?" has no answer, and the honest state is "not
+    judgeable" rather than "degraded".
     """
     sup = lowtrust.LowTrustSupervisor()
-    fresh = {"motor_esc": True, "imu0": False, "imu1": False,
-             "battery": False, "vibration": True}
-    conds = _drive(sup, 20.0, {"motor_esc": 0.10}, fresh=fresh,
+    fresh = {"baro": True, "gps": False, "battery": True}
+    conds = _drive(sup, 20.0, {"baro": 0.10}, fresh=fresh,
                    start=FailsafeConfig().arm_time)
-    assert conds == {}, "judged a sensor with a single live corroborator"
-    assert "motor_esc" in sup.uncorroborated, (
+    assert conds == {}, "judged baro with a single live corroborator"
+    assert "baro" in sup.uncorroborated, (
         "the gap must be REPORTED, not silently skipped")
+
+
+def test_a_partner_that_is_itself_suspect_does_not_corroborate():
+    """SR-009. LIVENESS ALONE WAS NOT ENOUGH. A partner still delivering but
+    below the threshold the system applies to IT is not in a position to
+    disagree with anything -- its disagreement is equally explained by its
+    own fault."""
+    sup = lowtrust.LowTrustSupervisor()
+    fresh = {"baro": True, "gps": True, "battery": True}
+    # gps live but far below nav_caution: live, not in good standing.
+    conds = _drive(sup, 20.0, {"baro": 0.10, "gps": 0.20}, fresh=fresh,
+                   start=FailsafeConfig().arm_time)
+    assert conds == {}, "a suspect partner was counted as a corroborator"
+    assert "baro" in sup.uncorroborated
 
 
 def test_a_sensor_with_no_live_corroborator_is_not_judged():
     sup = lowtrust.LowTrustSupervisor()
-    fresh = {"motor_esc": True, "imu0": False, "imu1": False,
-             "battery": False, "vibration": False}
-    conds = _drive(sup, 20.0, {"motor_esc": 0.10}, fresh=fresh,
+    fresh = {"baro": True, "gps": False, "battery": False}
+    conds = _drive(sup, 20.0, {"baro": 0.10}, fresh=fresh,
                    start=FailsafeConfig().arm_time)
     assert conds == {}
-    assert "motor_esc" in sup.uncorroborated
+    assert "baro" in sup.uncorroborated
 
 
 def test_enough_corroborators_means_the_rule_still_fires():
     """The guard must not have quietly disabled the rule."""
     sup = lowtrust.LowTrustSupervisor()
-    fresh = {"motor_esc": True, "imu0": True, "imu1": True,
-             "battery": True, "vibration": True}
-    conds = _drive(sup, 20.0, {"motor_esc": 0.10}, fresh=fresh,
+    fresh = {"baro": True, "gps": True, "battery": True}
+    conds = _drive(sup, 20.0, {"baro": 0.10}, fresh=fresh,
                    start=FailsafeConfig().arm_time)
-    assert "low_trust_motor_esc" in conds
+    assert "low_trust_baro" in conds
     assert sup.uncorroborated == set()
 
 
 def test_the_partner_set_is_read_from_the_trust_graph():
     """Not restated here, so a topology change cannot leave this overlay
     judging by a corroboration structure that no longer exists."""
+    assert lowtrust.edge_partners("baro") == {"gps", "battery"}
+    # motor_esc is withdrawn but its topology is why -- four partners is
+    # what creates the state the guard cannot handle.
     assert lowtrust.edge_partners("motor_esc") == {
         "imu0", "imu1", "battery", "vibration"}
-    assert lowtrust.edge_partners("baro") == {"gps", "battery"}
     for sensor in lowtrust.RULES:
         assert lowtrust.edge_partners(sensor), (
             f"{sensor} has no edges; its trust rests on nothing and it "

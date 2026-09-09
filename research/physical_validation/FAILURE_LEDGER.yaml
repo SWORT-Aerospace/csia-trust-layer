@@ -2903,3 +2903,199 @@ entries:
       A context document that omitted those would make every number in it
       more dangerous than useful.
     artifact: docs/CSIA_SYSTEM_REPORT.md
+
+  - id: SR-009
+    date: 2026-09-09
+    phase: SUPERVISION (false alarm found by construction)
+    kind: SHIPPED_RULE_HAD_A_DEMONSTRATED_FALSE_ALARM
+    what_happened: >-
+      THE FALSIFICATION SEARCH FOUND A REAL FALSE ALARM IN THE motor_esc
+      LOW-TRUST RULE, ON ITS FIRST COMBINATION, IN CODE COMMITTED THE SAME
+      DAY. With battery DROPPED and imu0, imu1 and vibration all DEGRADED
+      BUT STILL DELIVERING, a perfectly healthy motor_esc was dragged to
+      trust 0.65 and the rule raised CAUTION at t=27.8 s.
+      The SR-008 corroboration guard did not stop it. That guard counted
+      LIVE edge partners: three were live, comfortably past
+      MIN_CORROBORATORS = 2, so the judgement was allowed -- and those same
+      three degraded partners were what dragged motor_esc down.
+      LIVENESS WAS THE WRONG TEST. The guard's own docstring stated the
+      principle it failed to implement: a trust value is only evidence of
+      degradation when something was IN A POSITION TO DISAGREE with it. A
+      partner that is itself failing is not in such a position, because its
+      disagreement is equally explained by its own fault.
+    found_by: >-
+      csia_stress/falsify.py, on combination 1 of 95 -- the most adversarial
+      one, which is where the most-adversarial-first ordering puts it.
+      140 RANDOMISED CAMPAIGN RUNS HAD REPORTED ZERO FALSE ALARMS FOR THIS
+      EXACT CLAIM. Enumeration found it immediately. This is the second time
+      in two days that construction found what sampling could not, and it
+      is the whole justification for the instrument.
+    verdict: STRUCTURAL_FIX_MADE_VERIFICATION_IN_FLIGHT
+    consequence: >-
+      A corroborator must now be live AND IN GOOD STANDING: above the
+      threshold the system ALREADY applies to it. GOVERNING_THRESHOLD maps
+      each sensor to that number -- att_caution for the IMUs,
+      struct_critical for vibration, power_critical for battery,
+      nav_caution for gps -- and the two sensors the frozen policy judges
+      nowhere use this overlay's own borrowed thresholds. NO NEW NUMBER IS
+      INTRODUCED ANYWHERE, and the threshold that was already chosen was
+      NOT moved.
+    the_commitment_made_before_the_fix: >-
+      ONE structural fix, verified by the full 103-combination search. If a
+      counterexample survives it, the motor_esc rule is WITHDRAWN, not
+      adjusted again. Iterating fix-then-search until the search comes back
+      clean is tuning by another name, and it is the failure mode this
+      programme exists to avoid. Stated before the fix was written so it
+      could not be revised after seeing the result.
+    artifact: >-
+      csia_supervision/lowtrust.py; csia_stress/falsify.py;
+      research/stress/results/FALSIFICATION_BEFORE_STANDING_GUARD.json;
+      tests/test_lowtrust_supervision.py
+
+  - id: MX-028
+    date: 2026-09-09
+    phase: ENVIRONMENT (a blocker that was not one)
+    kind: UNVERIFIED_CLAIM_CORRECTED
+    what_happened: >-
+      I REPEATEDLY REPORTED ArduPilot SITL AS BLOCKED IN THIS ENVIRONMENT,
+      INCLUDING IN THE SYSTEM REPORT AND THE UNBLOCKING GUIDE, ON EVIDENCE
+      THAT DID NOT SUPPORT IT. What was actually tested was
+      firmware.ardupilot.org, the BINARY firmware server, which returns 403
+      through the proxy. The SOURCE path was never tested.
+      When the user challenged the claim, the checks took under a minute:
+      `git ls-remote https://github.com/ArduPilot/ardupilot.git` succeeds;
+      gcc 13.3, g++, make and cmake are present; passwordless sudo works;
+      apt-get resolves against archive.ubuntu.com; 19 GB of disk is free;
+      pymavlink, empy, future and pexpect install cleanly.
+    verdict: CLAIM_WAS_WRONG
+    consequence: >-
+      SITL is very likely buildable here, which makes it the highest-value
+      open item rather than a blocked one -- one SITL run is what closes
+      HF-014 and turns decision replay from DIVERGENT into a verification
+      instrument. docs/CSIA_SYSTEM_REPORT.md and
+      docs/UNBLOCKING_THE_BLOCKED_WORK.md both assert the blocker and both
+      require correction.
+    the_general_lesson: >-
+      A NEGATIVE CAPABILITY CLAIM NEEDS A TEST, EXACTLY LIKE A POSITIVE ONE.
+      "Blocked" was an inference from one adjacent 403, and it was repeated
+      often enough to become a fact in the documentation. The same standard
+      that applies to a measurement applies to a statement about what the
+      environment can do: if it was not tested, it is not known.
+    artifact: >-
+      docs/CSIA_SYSTEM_REPORT.md; docs/UNBLOCKING_THE_BLOCKED_WORK.md
+
+  - id: SR-010
+    date: 2026-09-09
+    phase: SUPERVISION (rule withdrawn)
+    kind: RULE_WITHDRAWN_AFTER_VERIFICATION_FAILED
+    what_happened: >-
+      THE STRUCTURAL FIX IN SR-009 DID NOT HOLD, AND THE motor_esc LOW-TRUST
+      RULE IS WITHDRAWN. Per the commitment made BEFORE the fix was written:
+      one structural fix, verified by the full search, and if a
+      counterexample survives the rule is withdrawn rather than adjusted a
+      second time.
+      The fix worked exactly as designed and was still not enough. At the
+      firing moment, measured directly: battery was rejected (dropped),
+      vibration was rejected (trust 0.300 against struct_critical 0.60), and
+      imu0 (0.918) and imu1 (0.939) both passed their att_caution 0.82
+      standing -- supplying the two corroborators MIN_CORROBORATORS
+      requires. The judgement proceeded, and motor_esc, entirely healthy,
+      sat at 0.667 because the REJECTED vibration partner was dragging it
+      there through the trust graph.
+    the_architectural_finding: >-
+      THE GUARD GATES WHETHER TO JUDGE; IT DOES NOT CLEAN THE VALUE BEING
+      JUDGED. Rejecting a partner as unfit to corroborate does not remove
+      that partner's influence on the sensor's trust. So a sensor can be
+      judged on a trust value contaminated by exactly the partners just
+      deemed unfit to judge it -- which is incoherent, and no amount of
+      guarding at the decision point can repair it.
+      WHY baro SURVIVES THE SAME SEARCH: it has ONE edge partner. Either gps
+      corroborates or it does not; there is no middle state where a partner
+      is rejected while its contamination remains. A rule of this shape is
+      sound on a sparsely-connected sensor and unsound on a
+      well-connected one, and the four-partner topology is what makes the
+      difference. The thin 0.098 margin recorded in SR-008 was the symptom
+      of exactly this and was read at the time as merely "thin".
+    verdict: WITHDRAWN
+    consequence: >-
+      RULES contains `baro` alone. `motor_esc` moves to CANDIDATES carrying
+      the measured numbers and the reason, so the gap is a STATED LIMIT
+      rather than a silent absence. The SR-009 good-standing guard is KEPT:
+      it is correct and necessary, it demonstrably rejects unfit partners,
+      and a test now covers a live-but-suspect partner directly. It is
+      simply not sufficient on a well-connected sensor.
+      Reinstating motor_esc requires a trust value computed WITHOUT the
+      rejected partners -- a frozen-core change, which is not made here.
+    what_this_costs: >-
+      motor_esc degradation is again unsupervised. power_sag@motor_esc is
+      undetected below 2200 rpm lost against a campaign maximum of 700, and
+      that is now a published limit rather than a covered case. A stated
+      gap is worth more than a rule that raises CAUTION on healthy hardware.
+    artifact: >-
+      csia_supervision/lowtrust.py; tests/test_lowtrust_supervision.py;
+      research/stress/results/FALSIFICATION_BEFORE_STANDING_GUARD.json
+
+  - id: HF-015
+    date: 2026-09-09
+    phase: ASSURANCE (decision replay, on a live SITL log)
+    kind: DIVERGENCE_GONE_ON_A_PROPERLY_INSTRUMENTED_LOG
+    what_happened: >-
+      ARDUPILOT SITL WAS BUILT AND RUN, CSIA WAS DRIVEN AGAINST IT LIVE, AND
+      DECISION REPLAY ON THE RESULTING LOG REPORTS SEMANTICALLY_EQUIVALENT
+      WITH **ZERO** CATEGORICAL DIVERGENCES.
+      Measured: 2251 ticks, 61226 messages, 2 stale ticks, 0 watchdog trips.
+      Replay compared 1962 decisions: 1342 BIT_IDENTICAL, 620 semantically
+      equivalent only, 0 divergent, worst relative difference 0.0152.
+      The previous verdict was DIVERGENT on both platforms -- 511 ArduPilot
+      categorical differences, cut to 13 by HF-010, and 144 on PX4.
+    the_two_hf_014_instruments_did_their_job: >-
+      The log carries what no committed log carried. (1) The header records
+      the staleness configuration the run used, and it is BYTE-IDENTICAL to
+      what a replay derives -- so configuration drift is now ruled out by
+      direct measurement rather than by the inference in HF-014. (2) The
+      per-sensor `fresh` map is on 2248 of 2251 ticks, and comparing the
+      replay's reconstructed freshness against the recorded map gives 1967
+      agreements and **0 disagreements**, across every sensor.
+      HF-014 localised the PX4 divergence to freshness and could go no
+      further because that map was never written down. On a log where it IS
+      written down, the freshness reconstruction is exact.
+    verdict: MAJOR_PROGRESS_HF_004_NOT_CLOSED
+    what_this_does_not_establish: >-
+      HF-004 IS NOT CLOSED AND MUST NOT BE MARKED SO.
+      (1) THIS IS ARDUPILOT. The 144 divergences HF-014 attributed were
+      PX4's, and PX4 SITL was not built here. The PX4 case is untested.
+      (2) This is a NEW log from current code, not the committed 2026-08-25
+      logs. Those remain DIVERGENT and always will -- they cannot be
+      retro-instrumented.
+      (3) The verdict is SEMANTICALLY_EQUIVALENT, not BIT_IDENTICAL or
+      NUMERICALLY_EQUIVALENT: continuous trust values still differ, worst
+      relative difference 0.0152 against a 1e-12 tolerance. Categorical
+      decisions agree; the numbers behind them do not.
+      (4) 289 replayed states matched no recorded tick within half a tick
+      and were counted, not dropped.
+    the_integration_finding_that_cost_the_most: >-
+      ARDUPILOT STREAMS TELEMETRY TO A LINK ONLY AFTER IT HAS SEEN A GCS
+      HEARTBEAT ON THAT LINK. CSIA is read-only by construction and can
+      never send one, so a link where CSIA is the only endpoint carries
+      heartbeats and almost nothing else -- measured: 25 messages in 20 s,
+      of which 21 were heartbeats. With a forwarder in front (a GCS on the
+      primary link copying packets to CSIA's port) the same 20 s carried
+      13556 messages with full RAW_IMU, ATTITUDE, GLOBAL_POSITION_INT and
+      SYS_STATUS.
+      A FORWARDER IS THEREFORE MANDATORY, NOT A CONVENIENCE, and the
+      runbook's `sim_vehicle.py --out=` topology is load-bearing for a
+      reason it did not previously state. Setting SR1_* stream rates as
+      parameters -- over MAVLink or as SITL startup defaults -- did NOT
+      substitute for it.
+    also_measured: >-
+      Runbook Stage 1 predictions held: trust rose off the 0.8 prior to
+      1.000 on every fresh node, level stayed NORMAL for all 2251 ticks, and
+      no failsafe action occurred. motor_esc held at exactly the 0.8 prior
+      because SITL sends no ESC telemetry and the node was never fresh --
+      the documented "no data, no evidence, trust holds at the prior"
+      behaviour, observed live.
+      Preflight reported DO_NOT_FLY on a dirty working tree, which is the
+      correct verdict and is recorded rather than bypassed.
+    artifact: >-
+      research/physical_validation/results/sitl_2026_09_09/;
+      full flight log at /home/user/sitl-run/logs (14.8 MB, outside the repo)

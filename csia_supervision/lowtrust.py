@@ -108,33 +108,25 @@ RULES: dict = {
              "barometric altitude is navigation state. Level CAUTION "
              "matches the level dataloss.py already assigns baro."),
     ),
-    "motor_esc": LowTrustRule(
-        sensor="motor_esc",
-        threshold=0.70,
-        level=FailsafeLevel.CAUTION,
-        borrowed_from="power_critical",
-        clean_flight_min_trust=0.9672,
-        #: MEASURED, AND MUCH THINNER THAN BARO'S. motor_esc has FOUR edges
-        #: -- to imu0, imu1, battery and vibration -- so other sensors'
-        #: faults genuinely drag its trust down. This is the number that
-        #: decides the threshold, not the clean-flight one.
-        worst_uncontaminated_trust=0.7984,
-        why=("motor_esc's `power_thrust` edge spans (motor_esc, battery), "
-             "and battery trust is what power_critical governs; motor/ESC "
-             "telemetry is propulsion-power state. 0.70 rather than 0.75 "
-             "because the measured worst uncontaminated trust is 0.7984: "
-             "0.75 would leave 0.048 of margin, 0.70 leaves 0.098. Level "
-             "CAUTION matches dataloss.py's motor_esc level -- the "
-             "THRESHOLD is borrowed from power_critical, the LEVEL is not, "
-             "because a degraded sensor should not outrank the same sensor "
-             "going silent."),
-    ),
 }
 
-#: Sensors with the same gap that this module does NOT cover. Empty now that
-#: both are covered; kept so a future addition to
-#: UNSUPERVISED_BY_THE_FROZEN_POLICY shows up here rather than nowhere.
-CANDIDATES: dict = {}
+#: Sensors with the same gap that this module does NOT cover, and why.
+CANDIDATES: dict = {
+    "motor_esc": (
+        "WITHDRAWN after the falsification search found a false alarm the "
+        "corroboration guard cannot fix (SR-009/SR-010). motor_esc has FOUR "
+        "edge partners, which creates a state baro cannot reach: some "
+        "partners rejected as unfit to corroborate while their contamination "
+        "of the trust value REMAINS. Measured: battery dropped and vibration "
+        "at 0.300 were both correctly rejected, imu0 (0.918) and imu1 "
+        "(0.939) still supplied the two corroborators the guard requires, "
+        "and motor_esc -- healthy -- sat at 0.667 because the rejected "
+        "vibration partner was dragging it there. A sensor cannot be judged "
+        "by a trust value contaminated by the partners just deemed unfit to "
+        "judge it. Reinstating this rule needs a trust value computed "
+        "WITHOUT the rejected partners, which is a frozen-core change and is "
+        "not made here."),
+}
 
 
 def edge_partners(sensor: str) -> frozenset:
@@ -162,27 +154,70 @@ def edge_partners(sensor: str) -> frozenset:
 MIN_CORROBORATORS = 2
 
 
-def has_corroboration(sensor: str, fresh: dict) -> bool:
-    """Are there enough live sensors left to vouch for this one?
+#: The threshold that governs each sensor, so "is this partner itself in
+#: good standing?" is answered by the number the system ALREADY applies to
+#: that sensor -- not by a new one invented here. Five come straight from
+#: the frozen FailsafeConfig; the two the frozen policy judges nowhere use
+#: this overlay's own borrowed thresholds.
+GOVERNING_THRESHOLD: dict = {
+    "imu0": "att_caution",
+    "imu1": "att_caution",
+    "mag": "heading_caution",
+    "battery": "power_critical",
+    "vibration": "struct_critical",
+    "gps": "nav_caution",
+}
+
+
+def _standing(sensor: str, config: FailsafeConfig) -> float:
+    """The trust below which `sensor` is itself considered suspect."""
+    field = GOVERNING_THRESHOLD.get(sensor)
+    if field is not None:
+        return float(getattr(config, field))
+    rule = RULES.get(sensor)
+    return float(rule.threshold) if rule else 0.0
+
+
+def has_corroboration(sensor: str, fresh: dict, trust: dict | None = None,
+                      config: FailsafeConfig | None = None) -> bool:
+    """Are there enough sensors in GOOD STANDING left to vouch for this one?
 
     THE GUARD THAT KEEPS THIS RULE HONEST. A trust value is only evidence of
     degradation when something was in a position to disagree with it. Once
-    every edge partner is gone the sensor's trust decays because nothing can
-    corroborate it -- not because it is bad -- and firing a "degraded" alarm
-    there states a fault where the truth is that nothing is knowable.
+    the partners are gone -- or are themselves suspect -- the sensor's trust
+    decays because nothing can corroborate it, not because it is bad, and
+    firing a "degraded" alarm there states a fault where the truth is that
+    nothing is knowable.
 
-    Measured, by constructing the case rather than waiting for the campaign
-    to draw it: with three of motor_esc's four partners dropped and the
-    fourth (vibration) merely DEGRADED, motor_esc -- perfectly healthy --
-    is dragged to 0.664 and the rule fired CAUTION at t=24.6 s. Its only
-    live corroborator was itself the faulty sensor. 140 random campaign
-    runs never produced this; it took building it on purpose.
+    IT COUNTED LIVE PARTNERS, WHICH WAS NOT ENOUGH, AND THE FALSIFICATION
+    SEARCH PROVED IT ON ITS FIRST COMBINATION. With battery dropped and
+    imu0, imu1 and vibration all DEGRADED BUT STILL DELIVERING, motor_esc
+    had three live partners -- comfortably past MIN_CORROBORATORS -- and
+    those three degraded partners together dragged a perfectly healthy
+    motor_esc to 0.65, firing CAUTION at t=27.8 s. Liveness was the wrong
+    test: a partner that is itself failing is not in a position to disagree
+    with anything, because its disagreement is equally explained by its own
+    fault.
+
+    So a corroborator must now be live AND in good standing -- above the
+    threshold the system already applies to IT (`GOVERNING_THRESHOLD`),
+    which introduces no new number anywhere.
+
+    `trust` is optional only so the older two-argument call keeps working;
+    without it the check degrades to the liveness test that was shown to be
+    insufficient, and callers inside this module always pass it.
 
     This is the same rule the capability bridge applies in the other
     direction: UNKNOWN is never resolved into a definite state.
     """
     partners = edge_partners(sensor)
-    live = sum(1 for p in partners if fresh.get(p, False))
+    cfg = config or FailsafeConfig()
+    if trust is None:
+        live = sum(1 for p in partners if fresh.get(p, False))
+    else:
+        live = sum(1 for p in partners
+                   if fresh.get(p, False)
+                   and float(trust.get(p, 0.0)) >= _standing(p, cfg))
     return live >= min(MIN_CORROBORATORS, len(partners))
 
 
@@ -266,10 +301,14 @@ class LowTrustSupervisor:
             if sensor not in self.ever_fresh or not fresh.get(sensor, False):
                 continue
             # NO CORROBORATION, NO JUDGEMENT. A low trust with every edge
-            # partner gone means nothing could vouch for this sensor, not
-            # that the sensor is bad. Reported separately rather than
-            # silently skipped, so the gap stays visible.
-            if not has_corroboration(sensor, fresh):
+            # partner gone -- or every one of them itself suspect -- means
+            # nothing could vouch for this sensor, not that the sensor is
+            # bad. `trust` is passed because LIVENESS ALONE WAS NOT ENOUGH:
+            # three live-but-degraded partners passed the old check and
+            # dragged a healthy motor_esc below its threshold. Reported
+            # separately rather than silently skipped, so the gap stays
+            # visible.
+            if not has_corroboration(sensor, fresh, trust, self.config):
                 self.uncorroborated.add(sensor)
                 continue
             value = trust.get(sensor)
