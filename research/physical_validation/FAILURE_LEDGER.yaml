@@ -3099,3 +3099,74 @@ entries:
     artifact: >-
       research/physical_validation/results/sitl_2026_09_09/;
       full flight log at /home/user/sitl-run/logs (14.8 MB, outside the repo)
+
+  - id: HF-016
+    date: 2026-09-09
+    phase: ASSURANCE (PX4 SITL, HF-014 root cause)
+    kind: ROOT_CAUSE_PARTIALLY_FOUND_AND_PARTIALLY_FIXED
+    what_happened: >-
+      PX4 SITL WAS RUN AND HF-014's SIGNATURE REPRODUCED WITH BOTH SIDES
+      RECORDED FOR THE FIRST TIME. CSIA flew against PX4 SITL (SIH airframe
+      10040, sihsim_quadx) for 2251 ticks / 38543 messages. Replay-vs-recorded
+      freshness gave 133 disagreements, DOMINATED BY BARO (126) -- the same
+      shape HF-014 measured, where 122 of 144 divergences were `altitude_baro`.
+      Decision replay: DIVERGENT, 127 of 1980 compared.
+      Contrast with ArduPilot on the same day: 0 divergent.
+    the_bug_that_was_found_and_fixed: >-
+      The hand-off reconstructor derives arrival time as `t_mono - age_s` and
+      compared arrivals by ROUNDING both to a 1 ms grid. That derivation
+      carries sub-millisecond jitter: measured on this log, `baro.altitude`
+      gave 1094 samples with only 381 distinct arrival times, 683 consecutive
+      deltas below 20 ms, median 1 us and MAX 126 us. Rounding is
+      boundary-sensitive -- two values 126 us apart land on different integers
+      whenever they straddle a boundary -- so a spurious hand-off is emitted
+      for an arrival that never happened, perturbing when freshness is
+      evaluated.
+      Replaced with a tolerance comparison at the SAME magnitude the grid
+      used: nothing about the scale changed, only the operation, from one
+      that can flip on a 1 us difference to one that cannot.
+    measured_effect: >-
+      Reconstructed hand-offs moved toward the counts the log implies:
+      baro 93 -> 89 (implied 88), mag 1274 -> 1268 (implied 1266), gps
+      721 -> 711 (implied 709). PX4 replay divergences 127 -> 119.
+      ArduPilot unchanged at 0 divergent, 1342/1962 bit-identical -- no
+      regression.
+    what_is_still_open: >-
+      119 PX4 DIVERGENCES REMAIN AND THIS DOES NOT CLOSE HF-004.
+      The residual signature is now PERFECTLY SYMMETRIC: 59 ticks where the
+      replay has `altitude_baro` live and the recording does not, and 59
+      where the recording has it and the replay does not, plus 1 other. That
+      symmetry is the signature of a PHASE OFFSET of about one tick at baro's
+      staleness boundary, not a semantic disagreement -- around each of the
+      ~89 baro arrival cycles the replay's freshness edge lands a fraction of
+      a tick away from the live run's, producing one leading and one lagging
+      tick.
+      The likely mechanism, NOT yet demonstrated: the replay drives the layer
+      only at hand-off times, so its internal tick boundaries fall differently
+      from the live run's 25 Hz wall-clock ticks. Testing that needs the tick
+      boundaries themselves recorded, which no log carries.
+    a_correction_i_made_mid_analysis: >-
+      I first reported that the reconstructor over-produces imu0 hand-offs
+      (2250 emitted against 1196 "implied"). That was wrong: the implied
+      count came from a heuristic counting drops in `age_s`, which
+      systematically undercounts a channel arriving every tick. imu0's
+      derived arrival genuinely advances every tick -- 2250 distinct values,
+      2246 consecutive deltas above 20 ms. The flawed measurement was mine,
+      not the reconstructor's, and the real defect was baro's jitter.
+    the_px4_integration_finding: >-
+      CSIA MUST ATTACH TO PX4's ONBOARD MAVLINK INSTANCE, NOT ITS GCS ONE.
+      On the GCS link (udp 14550) PX4 streams 7354 messages in 20 s and CSIA
+      produced NO trust values at all -- the Normal stream set carries
+      ATTITUDE, GLOBAL_POSITION_INT and SERVO_OUTPUT_RAW but no HIGHRES_IMU,
+      no SCALED_PRESSURE, no SYS_STATUS, so every channel read UNAVAILABLE.
+      On the Onboard link (udp 14540) HIGHRES_IMU arrives at 49 Hz and CSIA
+      produced trust on 2250 of 2251 ticks.
+      NOTE THE CONTRAST WITH ARDUPILOT (HF-015): ArduPilot streams nothing
+      until it sees a GCS heartbeat on the link, so CSIA needs a forwarder;
+      PX4 streams to its configured remote unconditionally, so CSIA can
+      attach directly -- to the right instance. Two platforms, two different
+      integration constraints, both now measured rather than assumed.
+    artifact: >-
+      tools/deploy/profile_core_from_log.py;
+      tests/test_handoff_arrival_stability.py;
+      research/physical_validation/results/sitl_2026_09_09/

@@ -7,7 +7,7 @@ measured, what has NOT, and where it goes next. Read §0 and §12 if you read
 nothing else: §0 is what the system is, §12 is what it is not.
 
 Status: 2026-09-09. Branch `claude/code-reviewer-repo-export-zicovg`.
-Ledger: 72 entries. Tests: 153 files. Frozen core: byte-identical to
+Ledger: 73 entries. Tests: 153 files. Frozen core: byte-identical to
 `csia-v1.0-research-final`.
 
 ---

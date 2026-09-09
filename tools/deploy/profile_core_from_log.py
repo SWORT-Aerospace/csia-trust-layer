@@ -94,6 +94,31 @@ GATE_VALUE = "value"
 ARRIVAL_QUANTUM_S = 1e-3
 
 
+def _same_arrivals(previous, current) -> bool:
+    """Have these channels' arrival times genuinely not moved?
+
+    ROUNDING TO A GRID WAS THE BUG (HF-016). Arrival time is derived as
+    `t_mono - age_s`, and that derivation carries sub-millisecond jitter --
+    measured on a PX4 SITL log, baro.altitude produced 1094 samples with only
+    381 distinct arrival times and 683 consecutive deltas below 20 ms, median
+    1 us, MAX 126 us. Rounding to a 1 ms grid is boundary-sensitive: two
+    values 126 us apart straddle a boundary often enough to read as a new
+    arrival, and each spurious hand-off perturbs when freshness is evaluated
+    for that sensor.
+
+    A tolerance comparison has no boundaries. The tolerance is the SAME
+    magnitude the grid used, so nothing about the scale changed -- only the
+    operation, from one that can flip on a 1 us difference to one that
+    cannot.
+    """
+    if previous is None or len(previous) != len(current):
+        return False
+    for (chan_a, t_a), (chan_b, t_b) in zip(previous, current):
+        if chan_a != chan_b or abs(t_a - t_b) > ARRIVAL_QUANTUM_S:
+            return False
+    return True
+
+
 class HandoffReconstructor:
     """Rebuild the hand-off sequence a logged run actually performed.
 
@@ -151,7 +176,7 @@ class HandoffReconstructor:
                 age = cv.get("age_s")
                 if age is not None:
                     stamps.append(
-                        (channel, round((t_mono - age) / ARRIVAL_QUANTUM_S)))
+                        (channel, t_mono - age))
                 if self._values.get(channel) != cv["value"]:
                     changed = True
             if not complete or not built:
@@ -159,7 +184,7 @@ class HandoffReconstructor:
 
             if self.gate == GATE_ARRIVAL:
                 key = tuple(stamps)
-                if key and self._emitted.get(sensor) == key:
+                if key and _same_arrivals(self._emitted.get(sensor), key):
                     self._remember(mapping, chans)
                     continue
                 self._emitted[sensor] = key
