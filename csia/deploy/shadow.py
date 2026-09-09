@@ -509,6 +509,9 @@ class ShadowRunner:
                 # The layer's own freshness verdict. Not derivable from any
                 # other field: the gate weights are PRODUCTS of freshness
                 # terms and cannot be factored back apart (HF-014).
+                # The layer's internal tick clock, so a replay can align to
+                # the same grid instead of inferring it (HF-016).
+                tick_tau=(float(state.t) if state is not None else None),
                 fresh=(dict(state.fresh) if state is not None
                        and getattr(state, "fresh", None) else None),
             )

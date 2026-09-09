@@ -3170,3 +3170,90 @@ entries:
       tools/deploy/profile_core_from_log.py;
       tests/test_handoff_arrival_stability.py;
       research/physical_validation/results/sitl_2026_09_09/
+
+  - id: HF-017
+    date: 2026-09-09
+    phase: ASSURANCE (PX4 SITL, HF-016 residual)
+    kind: MY_INSTRUMENT_WAS_WRONG_NOT_THE_SYSTEM
+    what_happened: >-
+      THE 119 RESIDUAL PX4 DIVERGENCES WERE AN ARTIFACT OF MY OWN COMPARISON,
+      NOT A PROPERTY OF THE REPLAY. HF-016 read the perfectly symmetric
+      signature (59 leading, 59 lagging at baro's staleness boundary)
+      correctly as a phase offset, and then assumed the offset was inherent
+      to driving the layer from reconstructed hand-offs. It was not. It was
+      in the pairing.
+      The replayed states carry the layer's own tick clock -- exact multiples
+      of dt_tick anchored at 0.0. The recorded rows were stamped with wall
+      time and then shifted by the first row's t_mono. On the log that
+      produced the 119, that first row sits at t = 0.023607 s, which is 0.59
+      of a tick, so every pairing after it was off by MORE than half a tick.
+      At a staleness boundary that flips a freshness bit once on the rising
+      edge and once on the falling edge -- symmetric by construction, which
+      is exactly the signature that was observed.
+    the_falsification_test_and_its_result: >-
+      PREREGISTERED in research/FUTURE_DIRECTIONS_2026_09.md section 1,
+      written before the test ran: "If the residual persists with the tick
+      grid aligned, the phase-offset hypothesis is wrong and the cause is
+      elsewhere."
+      The residual did not persist. ONE log, ONE reconstruction, ONE
+      comparator, two alignments:
+        wall-clock join  119 divergent, 439 bit-identical, worst 1.8e-2,
+                         verdict DIVERGENT
+        tick-index join    0 divergent, 2250 of 2250 BIT-IDENTICAL, worst 0.0
+      ArduPilot is unchanged at 0 divergent under both alignments, so this is
+      not a change that buys agreement by loosening a comparison -- the
+      tick-index join is STRICTER (it is an exact integer equality, and it
+      left 1 state unmatched against the wall join's 271).
+    a_second_and_worse_defect_found_on_the_way: >-
+      THE LONG-STANDING "144 DIVERGENT" FIGURE WAS NEVER A MEASUREMENT.
+      It came from logs/shadow-sitl-px4/20260825T005931Z-1b4add14, whose
+      header carries `stale_timeout_s: None`. The replay applied timeouts
+      derived from the platform TODAY to a run whose timeouts were never
+      recorded, and reported the difference as a decision divergence. That is
+      a finding manufactured out of a gap in the log -- the same defect as
+      MX-021, where a swallowed AttributeError became "undetected at every
+      magnitude". Alignment does not explain that log (its t0 is 0.000097 s,
+      so both joins agree); the missing configuration does.
+      `replay` now returns NOT_COMPARABLE with reason
+      NO_STALENESS_CONFIG_IN_LOG, and emits NO divergence count at all, so
+      there is no number for a reader to quote. NOT_COMPARABLE IS NEVER PASS.
+    a_third_defect_found_on_the_way: >-
+      The default log paths were two hardcoded 2026-08-25 files. `logs/` is
+      gitignored in its entirety, so those paths are not in the repository
+      and resolve to LOG_ABSENT on any checkout but the one machine that
+      produced them -- and neither log was replayable there either. The
+      default now selects the newest log per platform that actually carries
+      the staleness config, and every run records the flight_id and
+      csia_commit of the log it read, because a path is not an identifier
+      when the directory is untracked.
+    what_i_got_wrong_mid_analysis: >-
+      I checked t0 on the WRONG LOG first. The freshly recorded run has
+      t0 = 0.000078 s, essentially zero, so I concluded the shift hypothesis
+      was wrong and went looking elsewhere. The log that actually diverges
+      has t0 = 0.023607 s. The hypothesis was right and my test of it was
+      aimed at a log that could not have shown it.
+    what_is_still_open: >-
+      THIS DOES NOT CLOSE HF-004. Two SITL runs on two platforms now replay
+      without a categorical divergence; that is not a general property of the
+      instrument.
+      A REAL RESIDUAL REMAINS AND HAS NOT BEEN TUNED AWAY: on the freshly
+      recorded PX4 run the replay is NOT bit-identical. A difference appears
+      at tick 52 at 1.7e-14 and accumulates through the alpha/beta recursion
+      to 6.7e-10 by tick 2250. That is six orders below any decision
+      threshold and three orders ABOVE the declared 1e-12 portability
+      tolerance, so the verdict is SEMANTICALLY_EQUIVALENT rather than
+      NUMERICALLY_EQUIVALENT. The tolerance has NOT been changed to
+      accommodate it. A 1e-12 relative tolerance may simply be the wrong
+      number for a filter that carries state for 2250 steps at rho = 0.998,
+      but changing it because a result would look better is exactly the move
+      this ledger exists to prevent.
+      The tick_tau field is, on these runs, derivable as
+      floor(t_mono/dt_tick)*dt_tick -- checked at 2242 agreements and 0
+      disagreements. It is not redundant in general (the layer's last fired
+      tick can lag t_mono when the final channel arrival crosses a boundary),
+      but on this evidence it did not.
+    artifact: >-
+      tools/assurance/decision_replay.py;
+      csia/deploy/flight_log.py; csia/deploy/shadow.py;
+      tests/test_replay_alignment.py;
+      research/physical_validation/results/sitl_2026_09_09/DECISION_REPLAY_ALIGNMENT.json

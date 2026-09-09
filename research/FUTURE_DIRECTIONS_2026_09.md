@@ -12,7 +12,35 @@ measured today walked into.
 
 ---
 
-## 1. Record the tick boundary, not just the tick
+## 1. Record the tick boundary, not just the tick — DONE, AND IT FALSIFIED THE STATED KILL CONDITION
+
+**Status: RESOLVED 2026-09-09. Ledger HF-017.** The proposal below is left
+exactly as written, because it names a kill condition and the kill condition
+is what makes the result worth anything.
+
+The test ran. The residual did **not** persist: on one log, one
+reconstruction and one comparator, the wall-clock join gave 119 divergences
+and the tick-index join gave **0 divergent, 2250 of 2250 bit-identical**.
+ArduPilot is unchanged at 0 under both, so agreement was not bought by
+loosening the comparison — the tick join is an exact integer equality and is
+the stricter of the two.
+
+The phase offset was real and its cause was **not** the one guessed below.
+It was not that the replay ticks only at hand-off times. It was that the
+recorded rows were shifted by the first row's `t_mono`, which on that log sat
+at 0.023607 s — 0.59 of a tick. The mechanism was in the comparison, not in
+the replay.
+
+Two further defects surfaced on the way and are recorded in HF-017: the
+long-standing "144 divergent" figure came from a log with no staleness
+configuration and was never a measurement, and the default log paths pointed
+into a gitignored directory.
+
+**What is still open.** This does not close HF-004, and a real numeric
+residual remains: 1.7e-14 at tick 52 accumulating to 6.7e-10 by tick 2250,
+above the declared 1e-12 tolerance. The tolerance has not been changed.
+
+---
 
 **What today's measurement forces.** PX4 replay has 119 residual divergences
 with a perfectly symmetric signature — 59 ticks where the replay has

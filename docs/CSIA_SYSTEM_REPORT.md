@@ -387,27 +387,48 @@ mutants. Coverage is not the lever.
 
 ## 7. Open problems
 
-### 7.1 Decision replay is DIVERGENT on both platforms (HF-004, open)
+### 7.1 Decision replay: no longer divergent, still not closed (HF-004, open)
 Replay is the only mechanism that turns "the log says X" into "X is
-reproducible by an independent path". Until it works, every result is
-one-shot. The software-hardening gate does **not** count it as PASS.
+reproducible by an independent path". As of 2026-09-09 it reports **0
+categorical divergences on both platforms** on freshly recorded SITL runs,
+and on the PX4 log that produced the long-standing residual it is **2250 of
+2250 bit-identical**.
 
-### 7.2 The PX4 divergence — mechanism found, root cause not (HF-014)
-All 144 divergences measured: every one is the replay seeing **more** live
-edges, never fewer; 122 are exactly `altitude_baro`; every affected edge has
-a weight that is a *product of freshness terms*, and residual values always
-agreed. They form 10-tick runs recurring at ~1.0 s — the baro arrival
-cadence.
+That is two runs, not a general property, so **HF-004 stays open and the
+software-hardening gate still does not count replay as PASS.** A numeric
+residual also remains on the PX4 run: 1.7e-14 at tick 52, accumulating
+through the α/β recursion to 6.7e-10 by tick 2250 — six orders below any
+decision threshold and three orders *above* the declared 1e-12 portability
+tolerance. **The tolerance has not been changed to accommodate it.**
 
-The obvious explanation was **tested and ruled out**: no single staleness
-timeout reproduces the recording (baro reads fresh at ages 0.044–0.125 s and
-stale at 0.003–0.496 s; overlapping).
+### 7.2 The PX4 divergence — cause found, and it was our instrument (HF-014 → HF-017)
+The 144 and then 119 divergence figures were **both wrong, in different
+ways**, and neither was evidence about the system.
 
-Root cause **undetermined and not claimed**. The logs record the adapter's
-per-channel age (a different clock) and gate weights (products, not
-factorable). The missing instrument is now built — logs carry the per-sensor
-`fresh` map and the staleness config — but existing logs cannot be fixed.
-**One SITL run closes this.**
+The **144** came from a log whose header carries `stale_timeout_s: None`. The
+replay applied timeouts derived from the platform *today* to a run whose
+timeouts were never recorded. That comparison is not meaningful in either
+direction; such a log is now `NOT_COMPARABLE` and emits **no divergence count
+at all**, so there is no number left to quote.
+
+The **119** was an artifact of pairing. Replayed states carry the layer's
+exact tick grid; recorded rows carry wall time, shifted by the first row's
+`t_mono`. On that log the first row sat 0.59 of a tick off the grid, so every
+pairing after it was more than half a tick out — which at baro's staleness
+boundary flips a freshness bit once on the rising edge and once on the
+falling edge. Hence the perfectly symmetric 59/59 signature, which was read
+correctly as a phase offset and then attributed to the wrong mechanism.
+
+Joining on the layer's own tick index (logged as `tick_tau`) gives 0
+divergent on the same log. ArduPilot is unchanged at 0 under both joins, so
+the agreement was not bought by loosening anything: the tick join is an exact
+integer equality and the stricter of the two.
+
+Both defects were in the measuring apparatus, and both were found only
+because the missing instrument was built first: logs now carry the per-sensor
+`fresh` map, the staleness config, and the layer's own tick boundary.
+Existing logs still cannot be fixed — they are refused rather than
+misreported.
 
 ### 7.3 Prose/artifact conflict awaiting a human (MX-024)
 `main.tex:901` quotes an evidence-floor range of 0.678–0.700; the artifact's

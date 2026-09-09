@@ -173,7 +173,7 @@ class FlightLog:
              residuals: dict, gates: dict, evidence: dict, diagnosis: dict,
              ambiguity: Optional[float], recommendation: dict,
              autopilot: dict, latency_us: float, extra: Optional[dict] = None,
-             fresh: Optional[dict] = None):
+             fresh: Optional[dict] = None, tick_tau: Optional[float] = None):
         """Record one tick. Never raises."""
         blocked = [{"channel": cv.channel,
                     "quality": cv.quality.value,
@@ -209,6 +209,16 @@ class FlightLog:
             # would settle it was never written down.
             "fresh": ({k: bool(v) for k, v in fresh.items()}
                       if fresh else None),
+            # THE LAYER'S OWN TICK BOUNDARY, which is a different clock from
+            # `t_mono`. The live run ticks on a wall clock; a replay driven
+            # from hand-offs builds its own grid and the two drift by a
+            # fraction of a tick. HF-016 measured the cost: 119 PX4
+            # divergences with a perfectly symmetric signature -- 59 ticks
+            # leading, 59 lagging at baro's staleness boundary -- which is
+            # what a phase offset looks like and what no log could confirm,
+            # because this number was never written down.
+            "tick_tau": (round(float(tick_tau), 6)
+                         if tick_tau is not None else None),
         }
         if extra:
             row["extra"] = extra

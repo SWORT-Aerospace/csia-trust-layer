@@ -22,11 +22,19 @@ ArduPilot unchanged at 0.
 
 WHAT THIS DOES NOT FIX, AND THE TESTS SAY SO
 ---------------------------------------------
-119 PX4 divergences remain. Their signature is now SYMMETRIC -- 59 ticks
-where the replay has `altitude_baro` live and the recording does not, and 59
-where the recording has it and the replay does not -- which is a phase
-offset of about one tick at baro's staleness boundary, not a semantic
-disagreement. That is a different problem and is recorded as one.
+119 PX4 divergences remained after this fix. Their signature was SYMMETRIC --
+59 ticks where the replay had `altitude_baro` live and the recording did not,
+and 59 the other way -- which is a phase offset of about one tick at baro's
+staleness boundary, not a semantic disagreement. That was a different problem
+and was recorded as one.
+
+FOLLOW-UP (HF-017): those 119 were an artifact of the COMPARISON, not of this
+reconstruction. The replay was paired with the recorded row nearest in WALL
+TIME, and on that log the recording sat 0.59 of a tick off the layer's grid.
+Joined on the layer's own tick index instead, the same log gives 0 divergent
+and 2250 of 2250 bit-identical. Nothing in this file changed as a result --
+the arrival-stability fix it pins is still needed and still measured -- but
+the residual it hands off to is now closed and attributed elsewhere.
 """
 
 from __future__ import annotations
