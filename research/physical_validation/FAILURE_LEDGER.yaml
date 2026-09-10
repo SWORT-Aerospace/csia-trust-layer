@@ -3700,3 +3700,80 @@ entries:
     artifact: >-
       csia_stress/falsify.py;
       research/predictor_study/FALSIFICATION_UNDER_W_PHYS_040.json
+
+  - id: MX-033
+    date: 2026-09-10
+    phase: RESEARCH (the sweep, widened)
+    kind: NARROW_RESULT_QUALIFIED_BY_WIDER_EVIDENCE_AND_A_PAIRING_DEFECT_FIXED
+    what_was_run: >-
+      The configuration sweep widened on every axis that was thin:
+        faults      3 hand-picked -> 18, every live (kind, target) pair the
+                                     applicability matrix admits, plus 10
+                                     multi-fault and degraded-environment
+                                     scenarios from the catalog
+        seeds       3 -> 5 independent noise realisations
+        profiles    faults on hover_circle -> faults on BOTH profiles
+        configs     16 coordinate variants -> 6, BOTH DIRECTIONS of the two
+                                     axes that mattered, because the config
+                                     axis was already swept
+      37 comparable cases after excluding 1 that saturated (mag dropout:
+      identical fault floor under every configuration, so it discriminates
+      nothing and is excluded rather than averaged in).
+    a_defect_in_the_narrow_sweep_found_on_the_way: >-
+      `config_sweep.py` computes the clean floor as a MINIMUM OVER BOTH
+      FLIGHT PROFILES and subtracts a fault floor measured on hover_circle
+      ALONE. The two sides of that subtraction come from different flights,
+      so every separation it reported is understated whenever fast_cruise
+      has the lower clean floor.
+      Here every separation is PAIRED within one seed and one profile. The
+      narrow tool is kept, not deleted -- MX-029 and MX-031 quote its
+      numbers and an artifact whose generator is gone cannot be checked --
+      but it is marked superseded in its own docstring.
+    the_headline_from_MX_029_DOES_NOT_GENERALISE_AS_STATED: >-
+      MX-029 and MX-031 recorded w_phys = 0.40 as "a Pareto improvement, not
+      a trade", on three faults. On 37 cases it is not that.
+        better on BOTH halves      26 of 37
+        worse on at least one      11 of 37
+        wins exceeding that case's own seed-and-profile spread   15
+      The claim as written was true of the three faults measured and is not
+      true in general. Corrected here rather than in place, because the
+      ledger is append-only and the earlier entry describes what was
+      actually measured then.
+    but_the_direction_survives_and_the_losses_are_noise: >-
+      EVERY LOSS IS SMALL AND ALL BUT ONE IS INSIDE ITS OWN NOISE.
+        worst separation loss   -0.0037   (that case's noise: 0.0781)
+        worst headroom loss     -0.00074
+        10 of 11 losses are smaller than that case's seed-and-profile spread
+        the 11th is a separation WIN of +0.0160 against a spread of 0.0055,
+          classified a loss only because headroom moved by -0.00004
+      Against a largest win of +0.0926, with 15 wins beating their own noise.
+      THE OPPOSITE DIRECTION IS THE CONTROL AND IT IS DECISIVE: w_phys = 0.20
+      is better on 8 of 37, worse on 29, and beats noise on ZERO. A one-sided
+      move can be luck on a fault set; a move whose reverse is clearly worse
+      is a direction.
+    the_pattern_which_is_the_useful_part: >-
+      THE LOSSES ARE THE INERTIAL PAIR, AND ONLY THE INERTIAL PAIR.
+      10 of the 11 losses are imu0 or imu1; the eleventh is a GNSS-denied
+      scenario scored on gps, 21x smaller than that case's own noise.
+      By sensor, wins against losses: gps 8/1, mag 4/0, battery 4/1,
+      motor_esc 3/1, vibration 3/0, baro 2/0, imu 0/10.
+      That is mechanically legible rather than a coincidence. Raising
+      `w_phys` raises the weight on PHYSICS residuals, which is where a
+      violated physical relation shows -- power against thrust, magnetic
+      field, position against Doppler. The dual-IMU check is a NEIGHBOUR
+      relation (`redundant_imu`), not a physics one, so weight moved toward
+      physics is weight moved away from the only cross-check the inertial
+      pair has.
+    what_is_still_NOT_established: >-
+      Nothing is promoted. The shipped w_phys is unchanged at 0.30, no gate
+      moved, and no frozen file was touched: every configuration is passed
+      to `OnlineTrustLayer` at construction.
+      This is a simulator, one fault window, one duration, and magnitudes at
+      the adversarial end of each campaign range. The IMU regression is
+      within noise HERE and that is not the same as absent -- an inertial
+      fault campaign at mid magnitudes is the measurement that would settle
+      it, and it has not been run.
+    artifact: >-
+      tools/research/config_sweep_wide.py;
+      tests/test_config_sweep_wide.py;
+      research/predictor_study/CONFIG_SWEEP_WIDE.json

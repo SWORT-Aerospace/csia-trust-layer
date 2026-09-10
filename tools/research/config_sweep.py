@@ -1,5 +1,21 @@
 """How much headroom is there in the six numbers that control retention?
 
+SUPERSEDED BY `config_sweep_wide.py` (MX-033). KEPT, NOT DELETED.
+------------------------------------------------------------------
+Two reasons it is superseded, and the first is a defect rather than a
+narrowness:
+
+  * ITS SEPARATIONS ARE NOT PAIRED. `clean_floor` is a minimum over BOTH
+    flight profiles, while `fault_floor` is measured on hover_circle alone,
+    so the two sides of the subtraction come from different flights and the
+    separation is understated whenever fast_cruise has the lower clean
+    floor. The wide sweep pairs within one seed and one profile.
+  * three faults, three seeds, one profile for the faulted arm.
+
+It is kept because MX-029 and MX-031 quote its numbers, and an artifact
+whose generator has been deleted cannot be checked. Do not start new work
+from it.
+
 THE QUESTION
 ------------
 Before proposing a learned component, measure whether a parameter sweep
