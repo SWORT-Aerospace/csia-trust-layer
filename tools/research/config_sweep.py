@@ -91,15 +91,35 @@ DURATION = 60.0
 #: single-sensor degradation at a magnitude in the middle of the campaign
 #: range, so the metric is sensitive rather than saturated: a fault big
 #: enough to floor trust under every configuration measures nothing.
+#:
+#: EVERY PARAMETER NAME IS CHECKED AGAINST THE SENSOR AT IMPORT, by
+#: `csia_stress.fault_params`. The first version of this table wrote `depth`
+#: for the battery and `rate` for the GPS; both sensors read something else
+#: (`depth_v`, `drift`) and silently applied their own defaults, so those two
+#: faults ran at a magnitude this file did not choose and did not record.
+#: The comparison between configurations survived that -- every configuration
+#: saw the same fault -- but the magnitudes MX-029 reported were wrong.
 FAULTS = {
     "baro_bias_drift": Fault("bias_drift", "baro", 20.0, 30.0,
                              {"rate": 0.5}),
     "battery_power_sag": Fault("power_sag", "battery", 20.0, 30.0,
-                               {"depth": 0.25}),
-    "gps_spoof": Fault("gps_spoof", "gps", 20.0, 30.0, {"rate": 1.0}),
+                               {"depth_v": 1.3}),
+    "gps_spoof": Fault("gps_spoof", "gps", 20.0, 30.0,
+                       {"drift": (4.0, 4.0, 0.0)}),
 }
 FAULT_SENSOR = {"baro_bias_drift": "baro", "battery_power_sag": "battery",
                 "gps_spoof": "gps"}
+
+
+def _check_fault_parameters():
+    """AT IMPORT, not at report time. A sweep whose magnitude parameter is
+    inert must not be able to run at all, let alone reach an artifact."""
+    from csia_stress.fault_params import assert_fault_effective
+    for fault in FAULTS.values():
+        assert_fault_effective(fault)
+
+
+_check_fault_parameters()
 
 
 def _sensors(offset: int) -> dict:

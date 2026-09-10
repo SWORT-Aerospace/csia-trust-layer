@@ -29,7 +29,13 @@ sensor's EDGE PARTNERS -- because those are the only sensors whose failure
 can move that sensor's trust -- with the rule's own sensor left UNFAULTED,
 at the TOP of each parameter's campaign range. That is where the SR-008 case
 lives, and it is small enough to enumerate rather than sample: 95
-combinations for motor_esc's four partners, 15 for baro's two.
+combinations for motor_esc's four partners, 8 for baro's two.
+
+    THE 8 WAS WRITTEN AS 15 HERE UNTIL 2026-09-10. Nothing depended on it --
+    the search enumerates from the applicability matrix and never read this
+    sentence -- but a reader checking "did it run the whole space" against a
+    prose number would have concluded it ran roughly half. The count is
+    printed by every run and asserted by a test rather than restated here.
 
     ORDERED MOST ADVERSARIAL FIRST. Combinations degrading more partners are
     tried before those degrading fewer, so a bounded run still covers the
@@ -113,8 +119,22 @@ def _combinations(sensor: str):
     return out
 
 
-def _fires(sensor: str, assignment: dict, profile: str) -> dict:
-    """Run one candidate. Does the rule fire with `sensor` UNFAULTED?"""
+def _fires(sensor: str, assignment: dict, profile: str,
+           config=None) -> dict:
+    """Run one candidate. Does the rule fire with `sensor` UNFAULTED?
+
+    `config` is an `EngineConfig` passed to the layer at construction. The
+    default is the shipped one, and every result recorded before this
+    parameter existed was produced with it. IT CHANGES NO FROZEN FILE:
+    `OnlineTrustLayer` has always taken a config, and this only stops the
+    search from being locked to one.
+
+    A NON-DEFAULT CONFIG MOVES THE TRUST DISTRIBUTION, SO IT ALSO MOVES WHAT
+    THE RULE'S THRESHOLD MEANS. The threshold was selected against the
+    SHIPPED configuration's clean-flight minimum, and a search run under a
+    different one is measuring a different system. Results from the two are
+    not comparable and the artifact says which produced it.
+    """
     from csia_supervision import SupervisedFailsafe
 
     faults = tuple(
@@ -122,11 +142,28 @@ def _fires(sensor: str, assignment: dict, profile: str) -> dict:
         for partner, kind in sorted(assignment.items()))
     source = StressFlightSource(faults=faults, truth=None,
                                 flight_profile=profile, duration=FLIGHT)
-    layer = OnlineTrustLayer()
+    layer = OnlineTrustLayer(config=config)
     supervised = SupervisedFailsafe(policy=FailsafePolicy())
 
     key = f"low_trust_{sensor}"
+    # TWO WINDOWS, REPORTED SEPARATELY (SR-007 again).
+    #
+    # `worst_trust` over the WHOLE run is dominated by the warm-up: trust
+    # starts at the 0.8 Beta prior and climbs, and the first armed tick is
+    # preceded by ~250 ticks of that climb. Every search reported
+    # worst_trust = 0.8182 -- exactly 9/11, the prior after one step -- in
+    # every combination, faulted or not. SR-007 is the record of that number
+    # being read as a fault response once already.
+    #
+    # It cannot affect a verdict: `lowtrust.py:309` returns before
+    # `arm_time`, so the rule cannot fire in the warm-up and no
+    # counterexample can live there. It can and did mislead a reader, which
+    # is enough reason to report the armed window separately rather than
+    # instead -- replacing the field silently would change what an existing
+    # number means.
+    arm = FailsafeConfig().arm_time
     fired_at, worst_trust, below_frozen = None, None, False
+    worst_trust_armed = None
     unjudgeable = 0
     last = 0.0
     for name, t, channels in source.samples():
@@ -138,12 +175,19 @@ def _fires(sensor: str, assignment: dict, profile: str) -> dict:
                 unjudgeable += 1
             value = state.trust.get(sensor)
             if value is not None:
-                worst_trust = float(value) if worst_trust is None \
-                    else min(worst_trust, float(value))
+                value = float(value)
+                worst_trust = value if worst_trust is None \
+                    else min(worst_trust, value)
+                if float(state.t) >= arm:
+                    worst_trust_armed = value if worst_trust_armed is None \
+                        else min(worst_trust_armed, value)
             if key in supervised.low_trust.conditions and fired_at is None:
                 fired_at = float(state.t)
         last = t
-    return {"fired_at": fired_at, "worst_trust": worst_trust,
+    return {"fired_at": fired_at,
+            "worst_trust": worst_trust,
+            "worst_trust_whole_run_includes_warmup": worst_trust,
+            "worst_trust_post_arm": worst_trust_armed,
             "effective_below_frozen": below_frozen,
             "unjudgeable_ticks": unjudgeable,
             "faulted": sorted(assignment.items()),
@@ -151,7 +195,7 @@ def _fires(sensor: str, assignment: dict, profile: str) -> dict:
 
 
 def search(sensor: str, limit: int | None = None,
-           profiles=("hover_circle",)) -> dict:
+           profiles=("hover_circle",), config=None) -> dict:
     """Enumerate and run, stopping at the first counterexample."""
     from csia_supervision.lowtrust import RULES, edge_partners
 
@@ -167,11 +211,12 @@ def search(sensor: str, limit: int | None = None,
         for assignment in combinations:
             if limit is not None and ran >= limit:
                 break
-            result = _fires(sensor, assignment, profile)
+            result = _fires(sensor, assignment, profile, config=config)
             ran += 1
-            if result["worst_trust"] is not None:
-                worst_seen = result["worst_trust"] if worst_seen is None \
-                    else min(worst_seen, result["worst_trust"])
+            armed = result.get("worst_trust_post_arm")
+            if armed is not None:
+                worst_seen = armed if worst_seen is None \
+                    else min(worst_seen, armed)
             if result["effective_below_frozen"]:
                 c3_violations.append(result)
             if result["fired_at"] is not None:
@@ -197,6 +242,13 @@ def search(sensor: str, limit: int | None = None,
         "effective_below_frozen_violations": len(c3_violations),
         "worst_trust_seen": (round(worst_seen, 4)
                              if worst_seen is not None else None),
+        "worst_trust_seen_window": (
+            "POST-ARM ONLY. The whole-run minimum is the 0.8 Beta prior "
+            "climbing through warm-up -- 0.8182 in every combination, "
+            "faulted or not -- and SR-007 records that number being read as "
+            "a fault response. The rule cannot fire before arm_time "
+            "(lowtrust.py:309), so nothing here changes a verdict; it "
+            "changes what a reader is shown."),
         "ordering": ("most adversarial first -- combinations degrading more "
                      "edge partners are run before those degrading fewer"),
         "not_a_proof": (
@@ -214,12 +266,28 @@ def search(sensor: str, limit: int | None = None,
     }
 
 
-def run(limit: int | None = None) -> dict:
+def run(limit: int | None = None, config=None) -> dict:
+    from csia.trust_engine.engine import EngineConfig
     from csia_supervision.lowtrust import MIN_CORROBORATORS, RULES
 
-    results = [search(sensor, limit=limit) for sensor in sorted(RULES)]
+    shipped = EngineConfig()
+    cfg = config or shipped
+    results = [search(sensor, limit=limit, config=config)
+               for sensor in sorted(RULES)]
     return {
         "schema": "csia.stress.falsification/1",
+        # WHICH SYSTEM WAS SEARCHED. A rule's threshold was selected against
+        # the SHIPPED configuration's clean-flight minimum, so a search under
+        # a different one is a search of a different system and its result
+        # must not be compared to a shipped-configuration result.
+        "engine_config": {"rho_max": cfg.rho_max, "rho_min": cfg.rho_min,
+                          "w_nbr": cfg.w_nbr, "w_phys": cfg.w_phys,
+                          "w_temp": cfg.w_temp, "w_stat": cfg.w_stat},
+        "engine_config_is_shipped_default": (
+            (cfg.rho_max, cfg.rho_min, cfg.w_nbr, cfg.w_phys, cfg.w_temp,
+             cfg.w_stat)
+            == (shipped.rho_max, shipped.rho_min, shipped.w_nbr,
+                shipped.w_phys, shipped.w_temp, shipped.w_stat)),
         "min_corroborators": MIN_CORROBORATORS,
         "worst_params": WORST_PARAMS,
         "onset_s": ONSET, "fault_duration_s": DURATION,
@@ -273,13 +341,17 @@ def _controls():
         finally:
             scope["_fires"] = original
 
-    def _fired(sensor, assignment, profile):
+    # `**_` absorbs `config`, which `search` now forwards. The stubs are
+    # deliberately indifferent to it: these controls check the SEARCH
+    # HARNESS, and the harness must behave identically whatever engine
+    # configuration it is asked to search under.
+    def _fired(sensor, assignment, profile, **_):
         return {"fired_at": 30.0, "worst_trust": 0.5,
                 "effective_below_frozen": False, "unjudgeable_ticks": 0,
                 "faulted": sorted(assignment.items()),
                 "flight_profile": profile, "_last": 90.0}
 
-    def _never(sensor, assignment, profile):
+    def _never(sensor, assignment, profile, **_):
         return {"fired_at": None, "worst_trust": 0.99,
                 "effective_below_frozen": False, "unjudgeable_ticks": 0,
                 "faulted": sorted(assignment.items()),

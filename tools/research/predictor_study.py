@@ -121,6 +121,18 @@ MAGNITUDES = {
                                               1000.0, 2200.0)),
 }
 
+def _check_grid_parameters():
+    """AT IMPORT. `PARAMETER_INERT` inside `run_floors` catches this too, but
+    only after a full sweep has run; this catches it before one starts, and
+    names the parameters the sensor does read."""
+    from csia_stress.fault_params import assert_effective
+    for (sensor, kind), (param, _values) in MAGNITUDES.items():
+        assert_effective(sensor, kind, [param])
+
+
+_check_grid_parameters()
+
+
 #: The single-magnitude faults used by the whiteness-versus-detection half of
 #: the study, DERIVED from the grids above rather than restated, so the two
 #: halves cannot drift apart and be compared anyway. The representative
