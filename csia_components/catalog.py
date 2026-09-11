@@ -49,10 +49,20 @@ throttle to hold the same velocity. The fault hides in the plant output and
 appears in the CONTROL EFFORT.
 
 So the informative residual is usually on the command side: effort rising
-while output holds nominal. `EFFORT_DRIFT` below is that relation, and it is
-the one most likely to matter on a real vehicle. This is the same shape as
-the finding that a better predictor can track a fault and hide it (MX-030) --
-a compensating element upstream of the residual destroys the residual.
+while output holds nominal. `EFFORT_DRIFT` below is that relation. This is
+the same shape as the finding that a better predictor can track a fault and
+hide it (MX-030) -- a compensating element upstream of the residual destroys
+the residual.
+
+CORRECTED BY MEASUREMENT (MX-036). The paragraph above was written to
+conclude that commanded-versus-achieved is dead under a closed loop. IT IS
+NOT. What the loop kills is the TRACKING ERROR -- setpoint against output.
+A residual spanning COMMAND to EFFECT survives, because the compensation the
+controller applies is itself visible in the command: an 0.5% efficiency loss
+reads 2.0x the worst clean excursion on `actuator_response` and 299x at 40%.
+The lesson is narrower and more useful than the one first written: watch the
+command, not the tracking error. Both `actuator_response` and `effort_drift`
+do; a setpoint-versus-output check would not.
 
 **2. BLAME IS AMBIGUOUS IN A WAY IT IS NOT BETWEEN TWO IMUs.**
 Two IMUs measuring the same acceleration are PEERS: if they disagree, one of
@@ -190,9 +200,17 @@ RELATIONS = (
         gate=("the command is EXCITING -- outside a commanded change, a "
               "stuck actuator and a healthy idle one are identical"),
         blames=("actuator", "the plant", "motion_sensor"),
-        blind_to=("anything the controller has already compensated; see "
-                  "`effort_drift`, which is the residual that survives a "
-                  "closed loop"),
+        blind_to=("the TRACKING ERROR alone. This claim was written as "
+                  "'anything the controller has already compensated' and "
+                  "MX-036 FALSIFIED IT. The controller compensates the "
+                  "OUTPUT, and to do so it must move the COMMAND -- so a "
+                  "residual spanning command to effect sees the divergence "
+                  "GROW, caused by the compensation itself. Measured: an "
+                  "0.5% efficiency loss reads 2.0x the worst clean "
+                  "excursion, rising to 299x at 40%. What is genuinely "
+                  "blind is a check watching setpoint against output, which "
+                  "this is not. `effort_drift` also survives; it is not the "
+                  "only residual that does"),
     ),
     Relation(
         key="actuator_agreement",

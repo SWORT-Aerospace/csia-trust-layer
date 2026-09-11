@@ -3915,3 +3915,104 @@ entries:
     artifact: >-
       csia_components/catalog.py; csia_components/combined.py;
       tests/test_components.py
+
+  - id: MX-036
+    date: 2026-09-11
+    phase: RESEARCH (component simulator and relation validation)
+    kind: PREDICTION_TEST_ONE_CLAIM_FALSIFIED_TWO_CONFOUNDS_CAUGHT
+    what_was_built: >-
+      `csia_components/simulate.py`, a four-rotor electric platform written
+      FROM PHYSICS: pack open-circuit voltage and internal resistance, motor
+      torque-to-current, thrust as rpm squared, I^2R dissipation into a
+      thermal time constant, a PI controller closing a vertical-velocity
+      loop, a scheduler, and a link with sequence numbers. Seven fault kinds,
+      each named for what breaks in hardware rather than for the check that
+      might find it: efficiency loss, bearing friction, pack impedance rise,
+      shunt bias, thermal path loss, cpu overrun, bus drops.
+      Plus `residuals.py`, one residual per catalogued relation -- 12 of 14,
+      with the two ground-vehicle relations recorded as not implemented and
+      why, so "12 of 14" cannot be read as 14.
+    why_this_is_not_pure_circularity_and_why_it_is_still_partly_so: >-
+      The simulator implements physics and never imports a residual. More
+      importantly, EVERY CLAIM TESTED WAS COMMITTED BEFORE THE SIMULATOR
+      EXISTED: each relation's gate, blames and blind_to were written in
+      MX-035 with no component simulator in the repository. Running them
+      afterwards is a test of statements made in advance.
+      IT REMAINS TRUE that simulator and residuals share one author and one
+      week. A relation passing here is consistent with a model of the
+      physics, not with any vehicle.
+    the_falsified_prediction: >-
+      `actuator_response` was declared BLIND to `esc_efficiency_loss`, on the
+      argument that the controller compensates. IT IS NOT BLIND, robustly:
+      an 0.5% efficiency loss reads 2.0x the worst clean excursion and 40%
+      reads 299x, at every magnitude on the grid and every seed.
+      THE REASON IS THE USEFUL PART. The controller compensates the OUTPUT,
+      and to do so it must move the COMMAND. A residual spanning command to
+      effect therefore sees the divergence GROW, caused by the compensation
+      itself. What a closed loop actually kills is the TRACKING ERROR --
+      setpoint against output -- which is a narrower and more useful lesson
+      than the one first written: watch the command, not the tracking error.
+      MX-035's claim that `effort_drift` is "the residual that survives a
+      closed loop" was also too strong; two survive.
+      The catalogue was corrected. The test that would have hidden this by
+      agreeing with me was never written.
+    two_confounds_the_cross_relation_matrix_caught: >-
+      Running EVERY fault against EVERY relation, not only its own, exposed
+      two defects in the simulator that no per-relation test would have seen.
+      FIRST: `actuator_response` "detected" bus drops at 1.3x clean, which no
+      physics in the model supports. Cause: a random number was drawn only
+      when a drop was possible, so a faulted run consumed a different number
+      of draws than a clean one and EVERY downstream noise sample differed.
+      Fixed by drawing unconditionally; a clean and a faulted run now differ
+      only by the fault, asserted bit-for-bit by a test.
+      SECOND: `clock_agreement` reported a 4e7-fold excursion on `cpu_overrun`,
+      a fault with no clock involvement. Cause: `clock_a` advanced by the
+      NOMINAL period while the loop was stretched, so a scheduling fault
+      silently desynchronised the two clocks. Fixed so both clocks see the
+      same wall time; the residual fell to 1.4x, which is a real and small
+      coupling.
+    two_defects_in_my_own_campaign_found_on_the_first_run: >-
+      `effort_drift` took its reference effort from the SAME run it scored,
+      so the clean residual was identically zero, every fault "detected" and
+      the floor meant nothing. That is the train-on-test error MX-030 had to
+      fix on the predictor side, committed again eleven days later. The
+      reference now comes from a held-out seed that appears in no scored run.
+      Four relations have a clean baseline of EXACTLY zero, so "exceeds the
+      clean maximum" degenerates to "is not zero" and the ratio is undefined.
+      For three of them that is honest -- a link with no dropped frames
+      really has zero gaps. It is now flagged per row rather than producing a
+      confident-looking ratio from nothing.
+    what_was_measured: >-
+      Detection floors against this platform's own clean-run noise, 5 seeds,
+      every fault against every relation. Examples, as multiples of the worst
+      clean excursion:
+        shunt_bias          -> power_balance          0.2% bias, 13.3x
+        bearing_friction    -> actuator_agreement     0.02 A,    5.3x
+        esc_efficiency_loss -> actuator_response      0.5%,      2.0x
+        cpu_overrun         -> loop_rate              0.2 ms,    3.1x
+        bus_drops           -> sequence_continuity    0.2%, against a zero
+                                                      clean baseline
+    four_faults_with_NO_responder_and_one_matters: >-
+      `pack_impedance_rise` IS UNDETECTABLE ON A STEADY HOVER, at every
+      magnitude to 0.25 ohm. Not a relation failure: `source_impedance` is
+      gated on current variation, a constant load cannot identify an
+      impedance, and the gate correctly refuses to run. The operational
+      consequence is real -- a degrading pack is invisible until the vehicle
+      manoeuvres -- and it is the kind of thing that is obvious only once
+      measured.
+      The other three are `thermal_path_loss` on motors 0, 2 and 3, and that
+      is an instrumentation limit of the campaign rather than of the
+      relation: `thermal_rise` was configured to watch motor 1 only. One
+      relation instance per motor is needed.
+    what_is_still_NOT_established: >-
+      No number here is a measurement of any real vehicle, and a floor
+      against simulated noise is a floor against simulated noise. The
+      phenomena this simulator cannot produce are exactly the ones it cannot
+      warn about, and unlike the sensor side that list has not been
+      enumerated yet. Two of the fourteen relations have no residual at all.
+      No component node feeds the failsafe. No novelty is claimed.
+    artifact: >-
+      csia_components/simulate.py; csia_components/residuals.py;
+      tools/research/component_validation.py;
+      tests/test_component_validation.py;
+      research/predictor_study/COMPONENT_VALIDATION.json
