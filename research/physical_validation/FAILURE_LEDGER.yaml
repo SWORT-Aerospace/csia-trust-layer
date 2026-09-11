@@ -3777,3 +3777,141 @@ entries:
       tools/research/config_sweep_wide.py;
       tests/test_config_sweep_wide.py;
       research/predictor_study/CONFIG_SWEEP_WIDE.json
+
+  - id: MX-034
+    date: 2026-09-11
+    phase: RESEARCH (the measurement MX-033 named)
+    kind: HYPOTHESIS_KILLED_CAUTION_DISCHARGED
+    what_was_open: >-
+      MX-033 found that raising w_phys from 0.30 to 0.40 loses on 11 of 37
+      cases and that TEN OF THE ELEVEN ARE THE INERTIAL PAIR. Every loss was
+      inside its own noise, but the wide sweep measured only at the
+      ADVERSARIAL magnitude, where a large fault floors trust under every
+      configuration and a real difference would be hardest to see. MX-033
+      named the measurement that would settle it and did not run it.
+    the_hypothesis_declared_before_the_run: >-
+      Raising w_phys degrades inertial detection, because the dual-IMU
+      cross-check is a NEIGHBOUR relation and weight moved to physics is
+      weight moved off the only cross-check the pair has.
+      KILLED IF at no magnitude does the w_phys=0.40 separation fall below
+      SHIPPED by more than that magnitude's own seed-and-profile spread.
+    what_was_run: >-
+      660 runs. Three fault kinds on both inertial nodes -- bias_drift over
+      six magnitudes, emi_spike over four, dropout -- across 5 seeds and BOTH
+      flight profiles, under SHIPPED, w_phys=0.40 and w_phys=0.20. Grids span
+      well below and well above, so the discriminating band is bracketed
+      rather than assumed.
+    the_result: >-
+      HYPOTHESIS KILLED ON THIS GRID. Losses exceeding noise: ZERO of 16
+      points that showed any trust response at all.
+      THE GRID DID BRACKET THE BAND, which is what makes the null meaningful
+      rather than a measurement taken in a dead zone. Separation on
+      bias_drift climbs 0.0000 -> 0.0166 -> 0.1198 -> 0.2653 -> 0.4913 across
+      rates 0.002 to 0.20, so the instrument was plainly responding.
+      Across that whole band the configuration difference is FLAT: every
+      delta lies between -0.0006 and +0.0005, against seed-and-profile
+      spreads of 0.02 to 0.10. The effect of the weight change on inertial
+      separation is roughly two orders of magnitude smaller than the noise,
+      at every magnitude tried.
+      MX-033's caution is therefore discharged: the inertial regression it
+      flagged is not real on this grid, and it was not merely invisible at
+      the adversarial end.
+    a_second_finding_that_was_not_being_looked_for: >-
+      DROPOUT PRODUCES NEGATIVE SEPARATION: -0.0235 on imu0 and -0.0240 on
+      imu1, meaning the minimum trust during the fault is HIGHER than on a
+      clean flight. That is not a defect in the metric. When a sensor stops
+      delivering it is not fresh, the Beta recursion does not update, and
+      trust HOLDS instead of falling -- so a total loss of data looks
+      healthier than a noisy but live sensor.
+      This is SR-001 reproduced through a completely different instrument:
+      the frozen policy alarms on falling trust and says nothing when a
+      sensor stops delivering. The supervision overlay exists for exactly
+      this and is off by default.
+    what_this_does_not_establish: >-
+      KILLED_ON_THIS_GRID is that sentence. Three fault kinds on a
+      simulator, one fault window, one duration. `bias_drift` is a linear
+      ramp and `emi_spike` is additive noise at a fixed rate; neither is a
+      bearing failure, a mounting resonance or a saturating gyro. Nothing is
+      promoted, the shipped w_phys is unchanged at 0.30, and no frozen file
+      was touched.
+    artifact: >-
+      tools/research/imu_campaign.py;
+      research/predictor_study/IMU_CAMPAIGN.json
+
+  - id: MX-035
+    date: 2026-09-11
+    phase: RESEARCH (cross-component trust, specification)
+    kind: SPECIFICATION_AND_REFERENCE_IMPLEMENTATION_UNVALIDATED
+    what_was_asked: >-
+      Apply the CSIA idea to every component an automated vehicle has
+      BESIDES its sensors, and combine that with the existing cross-sensor
+      layer.
+    the_one_fact_it_rests_on_and_it_is_measured: >-
+      THE FROZEN TRUST CORE IS NODE-AGNOSTIC. `TrustCore(names, cfg)` takes
+      arbitrary node names and `step` takes arbitrary edges carrying a
+      residual and a gate; the file contains no reference to any sensor.
+      Driving it over nodes called `esc_fl`, `pack` and `cpu` works today,
+      and a test asserts it.
+      So extending CSIA past its sensors needs NO frozen change. It needs the
+      two things the core does not supply: the RELATIONS that must hold
+      between component observables, and the GATES saying when each is
+      observable at all.
+    what_was_built: >-
+      `csia_components/`: a catalogue of 14 relations across 8 constraint
+      families -- redundancy, conservation, actuation, effort, timing,
+      thermal, integrity, kinematic -- of which 12 apply to every powered,
+      actuated, computer-controlled platform regardless of whether it flies,
+      drives or floats. Each relation records what must hold, what
+      observables it needs, WHEN IT IS CHECKABLE, which nodes a violation
+      implicates, and what it is blind to.
+      Plus `CombinedGraph`, which runs the frozen core over sensor nodes and
+      component nodes together.
+    the_two_design_problems_that_make_this_harder_than_the_sensor_case: >-
+      CLOSED-LOOP MASKING INVERTS THE OBVIOUS EDGE. The intuitive actuator
+      check is commanded-versus-achieved, and on any vehicle with a
+      controller that is the WRONG residual, because the controller exists
+      to drive it to zero. A motor losing authority does not show as a
+      velocity error; it shows as the controller quietly commanding more to
+      hold the same velocity. The informative residual is on the COMMAND
+      side -- effort rising while output holds. Same shape as MX-030, where
+      a better predictor tracked a fault and hid it.
+      BLAME IS AMBIGUOUS IN A WAY IT IS NOT BETWEEN TWO IMUs. Two IMUs are
+      peers; a command and its effect are not. Every non-redundancy relation
+      implicates a SET, and a test enforces that no such relation names a
+      single culprit.
+    a_gap_found_and_fixed_in_the_writing: >-
+      `implicated_by` was written to report a node implicated by two
+      independent constraint families, which is the whole reason for
+      combining the graphs. It could never do so: `blames` names relation
+      ROLES ("actuator", "power_source"), not platform nodes, so two
+      families never coincided and the cross-family result was ALWAYS EMPTY.
+      Fixed by taking a platform binding from role to node; unbound roles are
+      now reported with a warning rather than silently producing a null.
+      A test pins both the empty case and the bound one.
+      Separately, the test that no relation names a single culprit FAILED on
+      first run and caught two catalogue entries -- `source_impedance` and
+      `error_rate` -- that blamed one node when their own measurement chain
+      implicates three. The catalogue was corrected, not the test.
+    what_is_deliberately_NOT_done: >-
+      No component node feeds the failsafe: the frozen policy names eight
+      sensor nodes and nothing here changes what it reads, so a component
+      trust value is published and judged by nobody -- the same state SR-006
+      recorded for baro, recorded rather than quietly fixed. No capability is
+      promoted on component evidence. Nothing runs in the flight-time path.
+    what_is_NOT_established_and_it_is_most_of_it: >-
+      NOTHING HERE HAS BEEN MEASURED ON ANYTHING. There is no
+      component-fault simulator in this repository and no recorded
+      component-fault data, so no detection floor, no false-alarm rate and
+      no latency is known for any of the 14 relations. THE THRESHOLDS DO NOT
+      EXIST, because a threshold is a property of a specific platform's noise
+      and cannot be chosen from a desk.
+      The component side is in a strictly WEAKER evidential position than the
+      sensor side, which is itself unvalidated on hardware. Closed-loop
+      masking is argued from what a controller does and measured only in its
+      analogue (MX-030), not here. NO NOVELTY IS CLAIMED: cross-checking
+      actuators against plant models, power against conservation and tasks
+      against deadlines are standard fault-detection practice, and the
+      prior-art search still cannot run from this environment.
+    artifact: >-
+      csia_components/catalog.py; csia_components/combined.py;
+      tests/test_components.py
