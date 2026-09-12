@@ -4016,3 +4016,127 @@ entries:
       tools/research/component_validation.py;
       tests/test_component_validation.py;
       research/predictor_study/COMPONENT_VALIDATION.json
+
+  - id: MX-037
+    date: 2026-09-12
+    phase: RESEARCH (active evidence acquisition, E0 simulation)
+    kind: FOUR_OF_MY_OWN_CLAIMS_FALSIFIED_BY_THE_TESTS_I_WROTE_TO_CHECK_THEM
+    what_was_asked: >-
+      Build CSIA Active Evidence Acquisition: convert detected
+      non-identifiability into a request for the smallest safe diagnostic
+      action that separates the remaining causal hypotheses, keeping CSIA
+      outside flight-control authority and preserving abstention.
+    what_was_built: >-
+      csia_active_evidence/, six modules and no learned component of any
+      kind: identifiability (the error model, inverted into a probe
+      requirement in closed form), probes (seven bounded excitations with
+      their statistics COMPUTED from the realised waveform, never declared),
+      authority (an independent ALLOW/CLIP/DENY mock with no override
+      parameter), selector (cheapest probe meeting the requirement, or a
+      refusal), updater (set-valued hypothesis elimination with four
+      verdicts), contract (the versioned episode and the stopping rule).
+      Plus tools/research/active_evidence_campaign.py, 91 tests across
+      tests/test_identifiability.py and tests/test_active_evidence.py, and
+      eight documents under research/active_evidence/.
+    the_hypothesis_declared_before_the_run: >-
+      research/active_evidence/PREREGISTRATION.md, committed before the
+      campaign ran. A probe meeting all three closed-form necessary
+      conditions resolves delta_r in an independent plant; a probe failing
+      any one does not. A SINGLE FALSE POSITIVE FALSIFIES IT.
+    the_result: >-
+      28 cells: 20 met-and-resolved, 7 failed-and-unresolved, 0 false
+      positives, 1 false negative. Verdict
+      NO_COUNTEREXAMPLE_IN_THIS_GRID, which is exactly that sentence: four
+      deltas, seven probes, five seeds, one simulator, E0.
+    the_measurement_that_makes_the_case: >-
+      The null probe under a 0.040 ohm pack rise. The terminal voltage moves
+      -0.959 V, which is unmistakable, and the fitted resistance moves
+      8.6e-12 ohm, which is nothing. The information is not missing from the
+      vehicle; it is missing from the excitation. This also discharges both
+      halves of Rule A: the null arm resolves nothing AND is not vacuous.
+    four_things_i_got_wrong_and_the_tests_that_caught_them: >-
+      (AE-F1) The module's docstring asserted a Monte Carlo agreement that
+      had never been committed -- exactly the CURRENT_PROGRAM_STATE.md
+      section 6 failure, a result living only in a transcript. Writing the
+      test made the mean claim TRUE and better (2.1e-05 ohm) and the scatter
+      claim FALSE. (AE-F2) The textbook slope variance
+      sigma_V/sqrt(sum(I-Ibar)^2) is optimistic by up to 85% for a measured
+      regressor, over 108 cases in three noise regimes. It errs in the
+      DANGEROUS direction: a requirement inverted from an over-confident
+      scatter authorises a probe that cannot deliver. Replaced with a
+      delta-method expansion, within 2.2%; the falsified expression is KEPT
+      as naive_estimate_sd and re-measured every run. (AE-F3) from_measured
+      refused only a non-positive remainder after subtracting the noise
+      power, so a pure-noise hover was accepted as excited on 45 to 48
+      percent of windows, measured. Now the excess must clear k sigma times
+      the chi-squared sampling error of the variance estimate. (AE-F6) The
+      amps-per-m/s constant was 9.0 by invention; measured 2.519. The guess
+      was optimistic by 3.6x and the constant is now coupled to the campaign
+      artifact by a test.
+    the_design_rule_i_derived_and_then_falsified: >-
+      A profile symmetric about its window midpoint has cov(t,I)=0 EXACTLY,
+      measured at 1e-16, so drift aliasing is removed by construction rather
+      than budgeted. The probe library was rebuilt around it. Then the
+      campaign measured the REALISED current: the closed loop lags the
+      command, a lag breaks a palindrome, and four of six probes lose the
+      property with realised drift biases up to 0.0052 ohm -- LARGER THAN
+      THE SMALLEST DELTA IN THE GRID. Only the two multi-cycle bursts keep
+      it (+0.019 s, +0.004 s), because the lag averages across cycles. The
+      campaign's own cell verdicts could not have caught this: they score a
+      differential comparison and a common bias cancels. It was found only
+      because the rule had been stated sharply enough to be checkable, and
+      because the realisation was measured separately on purpose.
+    what_did_not_change: >-
+      No frozen path read, imported or edited. No threshold, gate, weight,
+      prior, signature, hypothesis semantic, smoothing, freshness semantic,
+      failsafe semantic or support semantic touched. No paper number, no
+      claim row, no figure. Nothing promoted: the package writes no trust
+      value, no capability state and no support verdict. A test parses every
+      module with ast and asserts none can reach a transmit path, none
+      imports the frozen core, and no episode may set
+      active_action_prohibited False.
+    the_governance_conflict_i_did_not_route_around: >-
+      docs/CURRENT_PROGRAM_STATE.md section 1 lists ENERGY DOMAIN among the
+      FORBIDDEN work areas while the dual-paper freeze holds, and states it
+      governs where documents disagree. Pack internal resistance is the
+      energy domain. The work proceeded on the program owner's explicit
+      instruction. PREREGISTRATION.md section 0 records the conflict and the
+      narrowing under which it proceeded; this line records that it was
+      recorded rather than quietly reframed.
+    honest_limit: >-
+      E0. The plant shares a linear terminal-voltage law with the
+      derivation, so agreement cannot rule out an error common to both. The
+      resolved verdict compares populations of five seeds, four degrees of
+      freedom, roughly 35 percent sampling error on the scatter; re-running
+      the false-negative cell at 5, 20 and 40 seeds gave 0.00119, 0.00134
+      and 0.00129, so that one is stable, but a cell near the threshold
+      could flip. No RC dynamics, no temperature coupling, no cell
+      imbalance, no actuator authority limit. Not a safety argument.
+    novelty: >-
+      NOVELTY_NOT_ESTABLISHED. All four scholarly endpoints (arxiv.org,
+      api.semanticscholar.org, api.crossref.org, api.openalex.org) returned
+      HTTP 000 with the proxy reporting connect_rejected, the same denial
+      already recorded as publication blockers 1, 3 and 4. The search is
+      INCOMPLETE and NO NOVELTY CLAIM IS PERMITTED for any part of this
+      work. The closest named prior art the repository already knows about
+      is Matei et al., ACM TCPS 8(1) 2024, DOI 10.1145/3631612, recorded in
+      forge/PRIOR_ART_REQUIRED.md as covering interventions to disambiguate
+      uncertain diagnosis. It has not been read.
+    verdict: RECORDED
+    consequence: >-
+      A closed-form identifiability model that says what excitation a
+      diagnosis needs, an authorizer that can refuse it, and a set-valued
+      update that abstains. No gate was promoted, no stage promoted itself,
+      and nothing here is wired into any runtime path.
+    artifact: >-
+      csia_active_evidence/; tools/research/active_evidence_campaign.py;
+      tests/test_identifiability.py; tests/test_active_evidence.py;
+      research/active_evidence/PREREGISTRATION.md;
+      research/active_evidence/PRIOR_ART_MATRIX.md;
+      research/active_evidence/DERIVATIONS.md;
+      research/active_evidence/SIMULATOR_VALIDITY_ENVELOPE.md;
+      research/active_evidence/FAILURE_AND_COUNTEREXAMPLE_LOG.md;
+      research/active_evidence/CLAIM_LEDGER.md;
+      research/active_evidence/RESULTS.md;
+      research/active_evidence/EXPERIMENT_MANIFEST.json;
+      research/active_evidence/results/ACTIVE_EVIDENCE_CAMPAIGN.json
