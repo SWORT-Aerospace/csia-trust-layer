@@ -4140,3 +4140,109 @@ entries:
       research/active_evidence/RESULTS.md;
       research/active_evidence/EXPERIMENT_MANIFEST.json;
       research/active_evidence/results/ACTIVE_EVIDENCE_CAMPAIGN.json
+
+  - id: MX-038
+    date: 2026-09-12
+    phase: RESEARCH (active evidence acquisition, baselines and rejection)
+    kind: NEGATIVE_RESULT_THE_PROPOSED_SUBSYSTEM_EARNS_NOTHING
+    what_was_asked: >-
+      The same active-evidence work order, supplied in full. Measured against
+      it, MX-037 covered perhaps a third: it had a closed-form
+      identifiability model, a probe library, an authorizer and a set-valued
+      updater, but NO BASELINES. It tested whether the model's prediction was
+      right, not whether active evidence acquisition is worth anything.
+    what_was_built: >-
+      csia_active_evidence/hypotheses.py (an eight-entry model bank read from
+      the simulator's own applicability matrix, plus an UNKNOWN sentinel that
+      is deliberately not a generative model), csia_active_evidence/
+      signatures.py (twelve residuals with declared physical scales, lineage
+      families so residuals sharing a raw channel count once, and set-valued
+      envelope separation), tools/research/aea_pair_campaign.py with five
+      comparison arms, and 23 tests in tests/test_active_evidence_pairs.py.
+    the_result: >-
+      ACTIVE_PROBING_NOT_SUPPORTED_ON_THIS_GRID. Unresolved pairs out of 28
+      summed over a three-point magnitude bracket: passive 5, and SIX for
+      every one of opportunistic, fixed, random_safe and selected. All four
+      active arms are identical in effect while costing 0.00, 3.03, 4.50 and
+      2.40 amp-seconds. All four preregistered falsifiers fired.
+    the_mechanism_exact_and_measured: >-
+      source_impedance is gated on the load VARYING. effort_drift is gated on
+      the operating point being STATIONARY. Every action opens the first and
+      closes the second, exactly. A PROBE IS NOT FREE INFORMATION, IT IS A
+      SWAP: minus two pairs at the low end of the bracket, zero at the
+      middle, plus one at the top, net minus one.
+    what_survived: >-
+      The anchor. A steady hover cannot separate nominal from pack impedance
+      rise at ANY magnitude in the bracket, and every active arm resolves it
+      at the top -- so the pair is not unidentifiable, it is unidentifiable
+      at a constant load. And abstention: a fault outside the bank entirely
+      stayed ambiguous across three or more hypotheses on every arm, never
+      forced into a single label.
+    two_instrument_defects_caught_before_the_artifact: >-
+      (AE-F10) The first pilot reported a PASSIVE hover separating 27 of 28
+      pairs. Six of the twelve residuals have zero-width envelopes in this
+      simulator -- the loop reads true vz, and the frame and sequence
+      quantities are integers -- so disjointness degenerated into float
+      inequality and pairs separated on 1e-17. The work order names this
+      hazard in its own adversarial list and the first run walked into it.
+      Fixed with a declared physical scale per residual, each one sigma of a
+      declared sensor channel or one count of a counter. (AE-F11) The second
+      pilot found the SELECTED probe was the worst of five arms at 9
+      unresolved. triangle_soft closed effort_drift without opening
+      source_impedance: the closed-form requirement said the probe was
+      adequate while residuals.source_impedance refused to run at a realised
+      0.2438 A against its declared min_current_sd of 0.25. Two unreconciled
+      eligibility criteria for one relation. Fixed by reading the threshold
+      out of the residual by introspection rather than copying it. The fix
+      moved the arm from 9 to 6 and DID NOT RESCUE THE RESULT.
+    what_this_means: >-
+      On this evidence CSIA should WAIT rather than ASK. An ordinary mission
+      manoeuvre delivers every bit of the separation a purpose-built probe
+      delivers, at zero incremental energy, and the machinery to choose a
+      probe earns nothing over choosing one at random. That is a reason not
+      to build a subsystem. It does not retire the identifiability model,
+      which is what predicts which manoeuvres carry information; it retires
+      the selector as a source of value.
+    a_process_failure_of_my_own: >-
+      The pair campaign was NOT preregistered in a committed document before
+      its first outcome-producing run. The arms, metric and falsifiers were
+      fixed in the source beforehand and not edited after, but the H1 to H5
+      labelling was written after seeing the numbers. That is weaker than a
+      preregistration and is recorded as such rather than presented as one.
+    honest_limit: >-
+      E0. One simulator, one platform, eight hypotheses, three magnitudes,
+      five seeds. The min-max envelope over five seeds is not a confidence
+      interval; it understates the spread and is OPTIMISTIC about
+      separation. Every arm is measured the same way so the comparison is
+      fair, but the absolute counts are not bounds. The result is specific
+      to a bank in which effort_drift is load-bearing: a platform without a
+      stationarity-gated effort check would not pay this cost and the
+      conclusion could reverse.
+    novelty: >-
+      NOVELTY_NOT_ESTABLISHED, and Gate G is BLOCKED. The nine sources the
+      work order names were retried on this date and every scholarly host
+      returned HTTP 000 with the proxy reporting connect_rejected. The
+      matrix in research/active_evidence/PRIOR_ART_MATRIX.md now carries all
+      eleven rows with every cell requiring a full text marked NOT READ.
+      One row matters especially: the work order describes arXiv:2505.06410
+      as showing why the naive delta-V over delta-I estimate is biased when
+      open-circuit voltage changes, which on that description is the same
+      drift-aliasing term derived in DERIVATIONS.md section 3. That
+      derivation is therefore recorded as ASSUME KNOWN.
+    verdict: RECORDED
+    consequence: >-
+      A measured reason not to add an active-probing subsystem to CSIA, with
+      the mechanism named and a test that fails if the negative is ever
+      softened rather than re-measured. The frozen core was not touched and
+      nothing was promoted.
+    artifact: >-
+      csia_active_evidence/hypotheses.py;
+      csia_active_evidence/signatures.py;
+      csia_active_evidence/selector.py;
+      tools/research/aea_pair_campaign.py;
+      tests/test_active_evidence_pairs.py;
+      research/active_evidence/results/AEA_PAIR_CAMPAIGN.json;
+      research/active_evidence/RESULTS_PAIR_CAMPAIGN.md;
+      research/active_evidence/PRIOR_ART_MATRIX.md;
+      research/active_evidence/FAILURE_AND_COUNTEREXAMPLE_LOG.md;
+      research/active_evidence/CLAIM_LEDGER.md

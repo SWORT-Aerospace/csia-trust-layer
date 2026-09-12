@@ -36,3 +36,23 @@ simulation. Nothing here is above E0.
 * that a real pack behaves like `V = E - I R` over a probe window;
 * that this improves diagnosis, detection, or anything measured elsewhere in
   this repository. No frozen number moved and none was re-measured.
+
+## Second campaign: does probing beat not probing?
+
+| id | claim | status | tier | evidence |
+|---|---|---|---|---|
+| AE-20 | A steady hover cannot separate nominal from pack impedance rise | `CONFIRMED AT EVERY MAGNITUDE` | E0 | passive arm, all three bracket points |
+| AE-21 | That pair is inseparable in principle | **`REFUTED`** | E0 | every active arm resolves it at the top of the bracket |
+| AE-22 | An active probe reduces unresolved pairs relative to passive | **`REJECTED`** | E0 | net −1 over the bracket on every arm |
+| AE-23 | A probe trades one relation for another, exactly | `MEASURED` | E0 | gains `source_impedance`, loses `effort_drift`, on every arm |
+| AE-24 | Probing is a net loss at small fault magnitudes | `MEASURED` | E0 | −2 pairs at the low end of every bracket |
+| AE-25 | A purpose-built selector beats a fixed or random probe | **`REJECTED`** | E0 | identical outcomes on all three |
+| AE-26 | A free mission manoeuvre matches a purpose-built probe | `MEASURED` | E0 | 0.00 A·s against 2.40 A·s, same result |
+| AE-27 | An unmodelled fault is never forced into a single label | `SUPPORTED` | E0 | ambiguous across ≥3 hypotheses on every arm |
+| AE-28 | The drift-aliasing bias derived in `DERIVATIONS.md` §3 is new | **`ASSUME KNOWN`** | — | the work order describes arXiv:2505.06410 as covering exactly it; **NOT READ**, so treat the derivation as a re-derivation |
+
+## What the second campaign retires
+
+The **selector** as a source of value on this platform and this bank. Not the
+identifiability model, which is what predicts *which* manoeuvres carry
+information and whose prediction held in MX-037.

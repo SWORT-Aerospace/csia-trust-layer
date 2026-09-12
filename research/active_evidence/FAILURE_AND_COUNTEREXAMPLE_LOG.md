@@ -162,3 +162,98 @@ frozen path, changes no frozen behaviour, adds nothing to `csia/`, and makes
 no paper, product or readiness claim. `PREREGISTRATION.md` §0 records the
 conflict and the narrowing; this entry records that it was recorded rather
 than routed around.
+
+## AE-F10 — a passive hover "separated" 27 of 28 pairs on differences of 1e-17
+
+The first pilot of `tools/research/aea_pair_campaign.py` reported that doing
+nothing resolved 27 of 28 hypothesis pairs. Had it been believed, active
+evidence acquisition would have been pointless and the campaign would have
+said so for entirely the wrong reason.
+
+Six of the twelve residuals have **zero-width envelopes** in this simulator:
+the control loop reads true vertical velocity rather than a noisy one, and
+the frame, sequence and clock quantities are integers or exact constants. A
+min-max envelope over five seeds is then a single point, and the separation
+test — *are the envelopes disjoint* — degenerated into *are these two floats
+unequal*. Pairs separated on `6.17e-17` versus `6.17e-17 + epsilon`.
+
+**The governing work order names this hazard in its adversarial list:
+"zero-width clean baselines and ratios with undefined denominators". The
+first run walked into it anyway.**
+
+**Fixed** by requiring the gap to exceed a declared physical scale per
+residual (`signatures.SCALES`). Every scale is either one sigma of a declared
+sensor channel or one count of a counter, because a counter cannot
+meaningfully differ by less than one count. None is derived from the campaign
+it gates and none was chosen after seeing a result.
+`test_a_zero_width_envelope_cannot_separate_on_a_hairline` pins it.
+
+## AE-F11 — the purpose-built selector was the WORST of five arms
+
+With the scales in place, the second pilot found the SELECTED probe left 9
+pairs unresolved against 5 for passive and 6 for every other arm. The
+sophisticated thing was the worst thing.
+
+`triangle_soft` closed `effort_drift`, which is gated on a stationary
+operating point, **without opening `source_impedance`**, which is gated on the
+load varying. It paid the entire cost of probing and collected none of the
+benefit.
+
+The cause is an integration defect, not a modelling error: **two independent
+eligibility criteria existed for the same relation and nobody had reconciled
+them.**
+
+| criterion | source | verdict on `triangle_soft` |
+|---|---|---|
+| the closed-form error model | `identifiability.probe_requirement` | adequate |
+| the relation's own gate | `residuals.source_impedance`, `min_current_sd = 0.25` | refused, realised 0.2438 A |
+
+Both are in this repository and both are defensible. The selector was
+optimising against one while the evidence obeyed the other.
+
+**Fixed** by adding the relation's gate as a fourth necessary condition,
+with `selector.gate_threshold()` reading `min_current_sd` out of the residual
+by introspection rather than copying the number, so the two cannot drift
+apart again. The condition is applied to the PREDICTED excitation, which the
+AE-F5 realisation measurement showed understates the realised one by 1.46x
+to 1.76x, so it is conservative in the safe direction.
+
+The fix moved the selected arm from 9 unresolved to 6. **It did not rescue
+the result**: 6 is what a fixed triangle, a random probe, and a free mission
+manoeuvre all achieve.
+
+## AE-F12 — H2 rejected, and the selector earns nothing
+
+Recorded as a finding rather than a defect, because the instrument was
+working. All four preregistered falsifiers fired:
+
+* a free mission manoeuvre matches the selected probe, at zero incremental
+  energy against 2.40 A·s;
+* the selected probe does not beat the fixed probe;
+* the selected probe does not beat a randomly chosen probe;
+* the selected probe is worse than passive at low fault magnitudes.
+
+Every active arm produced identical per-magnitude results while costing
+between 0.00 and 4.50 amp-seconds. **The conclusion is that CSIA should wait
+for an ordinary manoeuvre rather than ask for a probe**, which is a reason
+not to build a subsystem.
+
+Preserved permanently under `docs/CURRENT_PROGRAM_STATE.md` §9.1: negative
+results are permanent, and a refuted claim quietly removed is worse than one
+never made. `tests/test_active_evidence_pairs.py::test_active_probing_is_a_net_loss_over_the_bracket`
+fails if the result is ever softened rather than re-measured.
+
+## AE-F13 — the pair campaign was not preregistered before its first run
+
+`PREREGISTRATION.md` was committed before the MX-037 identifiability
+campaign and covers that claim only. The arm set, metric and falsifiers for
+this campaign were fixed in the source before the run that produced the
+artifact, but **no preregistration document was committed first**, and the
+H1–H5 labelling in `RESULTS_PAIR_CAMPAIGN.md` was written after seeing the
+numbers.
+
+That is weaker than a preregistration and it is recorded rather than
+presented as one. The mitigating facts, such as they are: the falsifiers are
+in the campaign's own `run()` and were not edited after the first outcome
+run, and the two pilot runs that preceded it were instrument fixes recorded
+as AE-F10 and AE-F11 rather than outcome inspections.
