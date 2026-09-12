@@ -1,6 +1,7 @@
 # Results — Realized-Current Excitation Certificate
 
-**Verdict: `SUPPORTED_WITH_NARROW_SCOPE`. E0, simulation only, synthetic
+**Verdict: `SUPPORTED_WITH_NARROW_SCOPE`, and one genuine false
+certification was found and closed. E0, simulation only, synthetic
 pack. Post-freeze, research-only, quarantined. No novelty claimed.**
 
 Artifact: `results/RCEC_CAMPAIGN.json`, schema
@@ -101,7 +102,46 @@ changed a reported number:
 * **The P3 search grid did not contain the optimum.** It offered 2, 3 and 5
   cycles; the optimum is 6 to 12. A search cannot find what its grid excludes.
 
-## 7. What this does not establish
+## 7. The multi-RC pack with hysteresis
+
+Added after the first campaign, as the experiment predicted to break the
+certificate. It did, in a way I did not predict.
+
+**The prediction failed.** A richer pack was expected to trip the open-set
+detector on healthy data. It did not: the clean residual ratio came in at
+1.84 against the one-RC pack's 2.17.
+
+**A genuine false certification was found instead.** A pack with 0.12 V of
+voltage hysteresis returned `CERTIFIED_IN_MODEL` with an estimate **4.81
+times its own declared bound** from the truth, and the residual check sat at
+2.39 of a 3.0 tolerance. The cause is structural: hysteresis voltage follows
+`sign(I)`, which is nearly in phase with the current, so least squares
+attributes it to resistance and the fit looks clean.
+
+> A nuisance correlated with the regressor is absorbed into the slope and
+> leaves no residual. A residual check is blind to exactly the errors that
+> matter most.
+
+**A sixth budget term closes it**, derived from the realized current:
+`|B_hysteresis| <= M_max |cov(sign(I), I)| / var(I)`, which is exactly zero
+when the current never reverses.
+
+| envelope | draws | certified | false certifications | worst ratio |
+|---|---|---|---|---|
+| inside the declared bound | 400 | 331 | **0** | 0.43 |
+| outside it | 400 | 290 | 11 | 1.53 |
+
+**And the limit that remains.** The certificate is told `M`, never measures
+it. An under-declared bound produces confident wrong answers and no test
+here detects it. A cross-probe consistency check was built and **does not
+work**: measured disagreement-to-bound ratios of 0.33, 0.55 and 0.85 across
+three probe pairs, never reaching one, because the same hysteresis that
+creates the disagreement also inflates the bound on the reversing probe.
+
+This is reported as a null result. It is also the concrete reason the first
+item below is not supported.
+
+## 8. What this does not establish
 
 Fixed in the preregistration before the run, and unchanged:
 

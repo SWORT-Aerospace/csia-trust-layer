@@ -2,7 +2,13 @@
   "adversarial_draws": 2000,
   "best_cycles": "6",
   "campaign_verdict": "ACTIVE_PROBING_NOT_SUPPORTED",
+  "cross_probe_check": "CROSS_PROBE_CHECK_DOES_NOT_DETECT_AN_UNDER_DECLARED_HYSTERESIS_BOUND",
   "evidence_tier": "E0",
+  "false_certification_found_and_closed": {
+    "cause": "hysteresis voltage is correlated with the regressor and is absorbed into the slope",
+    "error_multiple_of_own_bound": 4.81,
+    "fix": "B_hysteresis = M_max*|cov(sign(I),I)|/var(I), derived from the realized current"
+  },
   "false_certifications": 0,
   "falsifiers_fired": [
     "one_rc:no_arm_beats_naive_palindrome",
@@ -18,12 +24,21 @@
     "H5": "SUPPORTED",
     "H6": "PROBING_BEATS_WAITING_ON_THIS_BANK"
   },
+  "hysteresis_hunt": {
+    "inside_declared": 0,
+    "outside_declared": 11
+  },
   "not_established": [
     "robust operation across real battery chemistries",
     "reliable behaviour on hardware",
     "novelty relative to the literature",
     "production integration into CSIA's authority path",
     "any formal safety guarantee"
+  ],
+  "plants": [
+    "simple",
+    "one_rc",
+    "multi_rc"
   ],
   "schema": "csia.active_evidence.rcec_summary/1",
   "strongest_defensible_result": "At constant amplitude and energy, moving a probe's energy from 0.41 Hz to 0.77 Hz cut the smallest resolvable pack resistance change from 0.020 to 0.005 ohm, and the certificate's own error decomposition predicted the optimum without running the sweep.",

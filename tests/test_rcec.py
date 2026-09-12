@@ -41,7 +41,11 @@ def doc():
 def budget(**kw):
     base = dict(r_reference=0.040, target_delta_r=0.020, sigma_v=0.020,
                 sigma_i=0.080, d_max=0.008, r1_max=0.020, tau1_min_s=5.0,
-                scale_error_max=0.005, c_fraction=0.5, min_samples=50)
+                scale_error_max=0.005,
+                # battery_1rc has no hysteresis at all, so zero is the
+                # truthful declaration for it, not a convenience.
+                hysteresis_v_max=0.0,
+                c_fraction=0.5, min_samples=50)
     base.update(kw)
     return rcec.ErrorBudget(**base)
 
@@ -227,7 +231,8 @@ def test_control_14_units_are_dimensionally_consistent():
 def test_control_15_missing_configuration_is_not_defaulted():
     p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
     w = _win(p.command)
-    for missing in ("r1_max", "tau1_min_s", "scale_error_max"):
+    for missing in ("r1_max", "tau1_min_s", "scale_error_max",
+                    "hysteresis_v_max"):
         cert = rcec.certify(w.t, w.i_meas, w.v_meas,
                             budget(**{missing: None}))
         assert cert.state == rcec.MODEL_MISMATCH_LIMITED, missing
@@ -408,3 +413,183 @@ def test_the_search_grid_now_contains_the_optimum():
     assert {6, 9, 12} <= cycles, (
         "the P3 search grid no longer spans the frequency optimum; a search "
         "cannot find what its grid excludes")
+
+
+# --- the multi-RC pack with hysteresis, and the false certification it found -
+
+def test_the_multirc_plant_does_not_import_the_estimator():
+    src = open(os.path.join(ROOT, "csia_active_evidence",
+                            "battery_multirc.py"), encoding="utf-8").read()
+    for node in ast.walk(ast.parse(src)):
+        mod = None
+        if isinstance(node, ast.Import):
+            mod = " ".join(a.name for a in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+        if mod:
+            assert "rcec" not in mod and "identifiability" not in mod, mod
+
+
+def test_hysteresis_needs_current_reversal_to_do_anything():
+    """MY FIRST TEST OF IT WAS VACUOUS. With a 20 A base and an 8 A probe the
+    current never reverses, the hysteresis state never moves, and the term is
+    a constant the regression absorbs into the intercept."""
+    from csia_active_evidence import battery_multirc as MR
+    t = RS.window_times(6.0, 8.0, 50.0)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 8.0, 3), t)
+    tr = MR.simulate(cmd, duration=20.0, seed=999)
+    assert tr.i_true.min() > 0.0, "the probe reversed the current after all"
+    w = tr.window(6.0, 14.0)
+    cert = rcec.certify(w.t, w.i_meas, w.v_meas, budget(hysteresis_v_max=0.05))
+    assert cert.terms["B_hysteresis"] == 0.0
+
+
+def test_a_reversing_current_earns_a_nonzero_hysteresis_bound():
+    from csia_active_evidence import battery_multirc as MR
+    t = RS.window_times(6.0, 8.0, 50.0)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 15.0, 6), t)
+    loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0})
+    tr = MR.simulate(cmd, duration=20.0, seed=999, loop=loop)
+    assert tr.i_true.min() < 0.0, "the probe did not reverse the current"
+    w = tr.window(6.0, 14.0)
+    cert = rcec.certify(w.t, w.i_meas, w.v_meas, budget(hysteresis_v_max=0.05))
+    assert cert.terms["B_hysteresis"] > 0.001
+
+
+def test_the_hysteresis_counterexample_is_covered_when_declared_truthfully():
+    """THE FALSE CERTIFICATION THAT FORCED THE TERM.
+
+    A pack with M = 0.12 V produced a certified estimate 4.81x its own bound
+    from the truth. Declared truthfully the certificate now refuses; declared
+    at 0.05 it still certifies and is still wrong, which is the point of
+    `test_an_under_declared_bound_cannot_be_caught_from_one_probe`.
+    """
+    from csia_active_evidence import battery_multirc as MR
+    t = RS.window_times(6.0, 8.0, 50.0)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 15.0, 6), t)
+    loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0})
+    pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC, "hysteresis_v": 0.12,
+                             "hysteresis_gamma": 20000.0})
+    tr = MR.simulate(cmd, duration=20.0, seed=999, pack=pack, loop=loop)
+    w = tr.window(6.0, 14.0)
+    truth = pack.r0_at(float(np.mean(w.temp_c)))
+
+    honest = rcec.certify(w.t, w.i_meas, w.v_meas,
+                          budget(hysteresis_v_max=0.15))
+    assert honest.state == rcec.MODEL_MISMATCH_LIMITED
+    assert honest.terms["B_hysteresis"] > 0.01
+
+    r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
+    assert abs(r_hat - truth) > 0.005, "the counterexample stopped biting"
+
+
+def test_an_under_declared_bound_cannot_be_caught_from_one_probe():
+    """THE LIMIT, MEASURED AND RECORDED RATHER THAN PAPERED OVER.
+
+    Declaring 0.05 V of hysteresis for a pack that has 0.12 V yields a
+    CERTIFIED estimate that is wrong by more than its bound. Nothing inside
+    the certificate can detect this, because the certificate never measures
+    M -- it is told M. The declaration is load-bearing and must come from
+    cell characterisation, which this repository does not have.
+    """
+    from csia_active_evidence import battery_multirc as MR
+    t = RS.window_times(6.0, 8.0, 50.0)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 15.0, 6), t)
+    loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0})
+    pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC, "hysteresis_v": 0.12,
+                             "hysteresis_gamma": 20000.0})
+    tr = MR.simulate(cmd, duration=20.0, seed=999, pack=pack, loop=loop)
+    w = tr.window(6.0, 14.0)
+    cert = rcec.certify(w.t, w.i_meas, w.v_meas,
+                        budget(hysteresis_v_max=0.05))
+    assert cert.state == rcec.CERTIFIED
+    truth = pack.r0_at(float(np.mean(w.temp_c)))
+    r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
+    assert abs(r_hat - truth) > cert.resolution["achieved_error"], (
+        "the under-declared case stopped producing a wrong certificate; "
+        "if the certificate now catches it, this limit has been removed and "
+        "MODEL_VALIDITY_ENVELOPE.md must be rewritten")
+
+
+def test_the_residual_check_is_blind_to_a_regressor_aligned_nuisance():
+    """WHY THE RESIDUAL CHECK COULD NOT HAVE CAUGHT IT. Hysteresis voltage
+    follows sign(I), which is nearly in phase with I, so least squares
+    attributes it to resistance and the fit looks clean."""
+    from csia_active_evidence import battery_multirc as MR
+    t = RS.window_times(6.0, 8.0, 50.0)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 15.0, 6), t)
+    loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0})
+    pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC, "hysteresis_v": 0.12,
+                             "hysteresis_gamma": 20000.0})
+    tr = MR.simulate(cmd, duration=20.0, seed=999, pack=pack, loop=loop)
+    w = tr.window(6.0, 14.0)
+    cert = rcec.certify(w.t, w.i_meas, w.v_meas,
+                        budget(hysteresis_v_max=0.05))
+    assert cert.coverage["residual_ratio"] < 3.0, (
+        cert.coverage["residual_ratio"])
+
+
+def test_a_healthy_multirc_pack_is_not_refused_at_low_probe_frequency():
+    """THE FALSE ALARM THE POLARIZATION-AWARE RESIDUAL FIXED.
+
+    Before the predicted residual included the declared polarization, a
+    healthy multi-RC pack at 3 cycles and 22 A was refused as model mismatch
+    while its estimate sat comfortably inside its own bound.
+    """
+    from csia_active_evidence import battery_multirc as MR
+    pack = MR.MultiRCPack(**MR.SYNTHETIC_MULTIRC)
+    for amp in (8.0, 15.0, 22.0, 30.0):
+        t = RS.window_times(6.0, 8.0, 50.0)
+        cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, amp, 3), t)
+        tr = MR.simulate(cmd, duration=20.0, seed=999)
+        w = tr.window(6.0, 14.0)
+        cert = rcec.certify(w.t, w.i_meas, w.v_meas,
+                            budget(hysteresis_v_max=0.05))
+        assert cert.state == rcec.CERTIFIED, (amp, cert.state)
+        r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
+        truth = pack.r0_at(float(np.mean(w.temp_c)))
+        assert abs(r_hat - truth) <= cert.resolution["achieved_error"], amp
+
+
+# --- the campaign's multi-RC and hysteresis phases --------------------------
+
+def test_the_campaign_covers_three_plants(doc):
+    from tools.research import rcec_campaign as V
+    assert set(V.PLANTS) == {"simple", "one_rc", "multi_rc"}
+    for model in V.PLANTS:
+        assert f"{model}/P1_palindromic" in doc["results"]
+
+
+def test_the_bound_holds_inside_the_declared_hysteresis_envelope(doc):
+    """If this fails the bound is falsified and RESULTS.md must be rewritten
+    rather than the envelope widened."""
+    inside = doc["hysteresis_hunt"]["inside_declared_envelope"]
+    assert inside["draws"] >= 400
+    assert inside["certified"] > 0
+    assert inside["false_certifications"] == 0
+    assert inside["worst_ratio"] < 1.0, inside["worst_ratio"]
+
+
+def test_an_under_declared_envelope_costs_wrong_certificates(doc):
+    """The measured price of a declaration that is too small. Recorded as a
+    fact about the method, not hidden as an inconvenience."""
+    outside = doc["hysteresis_hunt"]["outside_declared_envelope"]
+    assert outside["false_certifications"] > 0
+    assert outside["worst_ratio"] > 1.0
+    assert "under-declared" in doc["hysteresis_hunt"]["reading"]
+
+
+def test_the_cross_probe_check_is_reported_as_a_null_result(doc):
+    """It does not work. Reporting the failure is the point: a reader must
+    not assume a second probe rescues an under-declared bound."""
+    cross = doc["cross_probe_check"]
+    assert cross["verdict"].startswith("CROSS_PROBE_CHECK_DOES_NOT_DETECT")
+    assert cross["detected_at"] == []
+    for row in cross["rows"].values():
+        if row.get("ratio") is not None:
+            assert row["ratio"] < 1.0, row
+
+
+def test_the_adversarial_hunt_still_finds_nothing(doc):
+    assert doc["adversarial"]["draws"] >= 2000
+    assert doc["adversarial"]["false_certifications"] == 0

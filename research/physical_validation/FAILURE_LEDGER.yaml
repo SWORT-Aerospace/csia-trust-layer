@@ -4352,3 +4352,84 @@ entries:
       csia_active_evidence/rcec_selector.py;
       tools/research/rcec_campaign.py; tests/test_rcec.py;
       research/active_evidence/realized_current/
+
+  - id: MX-040
+    date: 2026-09-12
+    phase: RESEARCH (multi-RC pack with hysteresis, E0, owner-authorized energy-domain exception)
+    kind: A_GENUINE_FALSE_CERTIFICATION_FOUND_CLOSED_AND_A_LIMIT_THAT_CANNOT_BE_CLOSED
+    what_was_asked: >-
+      Run the multi-RC pack with hysteresis, which MX-039's validity envelope
+      named as the highest-value next experiment, and make it work without
+      lying, verifying every point.
+    the_prediction_that_failed: >-
+      MX-039 predicted a richer pack would trip the open-set detector on
+      HEALTHY data, because the clean residual ratio was already 2.17 of a
+      3.0 tolerance. It went the other way: the multi-RC clean ratio is 1.84,
+      LOWER, because the branch parameters happened to be gentler. A
+      prediction that fails in the safe direction is still a failed
+      prediction.
+    a_vacuous_test_of_my_own: >-
+      Hysteresis only moves when the current REVERSES SIGN. With a 20 A base
+      current and an 8 A probe the current never went below 13 A and the
+      hysteresis state sat at exactly +1.0000 for the entire window, so the
+      term was a constant the regression absorbs into the intercept. Three of
+      my first four configurations were testing nothing at all.
+    a_false_alarm_on_a_healthy_pack: >-
+      At 22 A and 3 cycles the certificate refused a HEALTHY multi-RC pack as
+      UNKNOWN_OR_MODEL_MISMATCH at a residual ratio of 3.06, while its
+      estimate was 0.00163 ohm from truth and inside the bound it would have
+      issued. The predicted residual counted sensor noise only while the
+      budget already declared a polarization branch. Conflating a mechanism
+      nobody declared with a declared mechanism I chose a bad probe for is
+      the error. Fixed by adding the declared polarization in quadrature;
+      verified in BOTH directions, and detection improved, now catching 0.10
+      V of ringing where it previously needed 0.20 V.
+    the_false_certification: >-
+      A multi-RC pack with 0.12 V of voltage hysteresis and fast relaxation
+      returned CERTIFIED_IN_MODEL with an estimate of 0.032167 ohm against a
+      truth of 0.039998, a signed error of -0.007831 ohm against a declared
+      bound of 0.001627 -- FOUR POINT EIGHT ONE TIMES ITS OWN BOUND. The
+      residual check sat at 2.39 of a 3.0 tolerance and could not have caught
+      it at any tolerance.
+    the_structural_reason: >-
+      A NUISANCE THAT IS CORRELATED WITH THE REGRESSOR IS ABSORBED INTO THE
+      SLOPE AND LEAVES NO RESIDUAL. Hysteresis voltage follows sign(I), which
+      for a reversing probe is nearly in phase with I, so least squares
+      attributes it to resistance and the fit looks clean. A residual check is
+      structurally blind to exactly the errors that matter most.
+    the_fix_and_its_verification: >-
+      A sixth budget term derived from the realized current,
+      B_hysteresis <= M_max * |cov(sign(I), I)| / var(I), which is exactly
+      zero when the current never reverses. Verified at four points: declared
+      truthfully at 0.15 the counterexample returns MODEL_MISMATCH_LIMITED; a
+      non-reversing probe earns exactly 0.000000; an undeclared bound returns
+      UNBOUNDED_TERM:B_hysteresis and fails closed; and over 400 draws inside
+      the declared envelope there are ZERO false certifications with a worst
+      ratio of 0.43.
+    the_limit_that_cannot_be_closed_from_here: >-
+      The certificate is TOLD M and never measures it. Declaring 0.05 V for a
+      pack that has 0.12 V still yields certified estimates wrong by more than
+      their bound: 11 false certifications out of 290 certified over 400
+      draws, worst ratio 1.53. A CROSS-PROBE CONSISTENCY CHECK WAS BUILT AND
+      DOES NOT WORK: measured disagreement-to-bound ratios of 0.33, 0.55 and
+      0.85 for true M of 0.05, 0.08 and 0.12 against a declared 0.05, across
+      three different probe pairs, never reaching one, because the same M that
+      creates the disagreement also inflates the declared bound on the
+      reversing probe. The two scale together. This is reported as a NULL
+      RESULT rather than omitted.
+    what_this_settles: >-
+      It is the concrete reason robust operation across real battery
+      chemistries is NOT SUPPORTED and cannot be supported from this host: the
+      hysteresis declaration must come from cell characterisation, this
+      repository has none, and no internal test substitutes for it.
+    verdict: RECORDED
+    consequence: >-
+      A six-term certificate that holds inside its declared envelope over 400
+      hysteresis draws and 2000 adversarial draws with zero false
+      certifications, a measured price for under-declaring, and a documented
+      null result for the check that would have rescued it. Frozen core
+      untouched, nothing promoted.
+    artifact: >-
+      csia_active_evidence/battery_multirc.py; csia_active_evidence/rcec.py;
+      tools/research/rcec_campaign.py; tests/test_rcec.py;
+      research/active_evidence/realized_current/

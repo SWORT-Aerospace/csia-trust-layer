@@ -34,3 +34,17 @@ Tier **E0** throughout. Quarantined post-freeze, research-only.
 | novelty | **`BLOCKED_EXTERNAL_ACCESS`** |
 | production integration into CSIA's authority path | **forbidden by the owner authorization** and not attempted |
 | any formal safety guarantee | not claimed; Monte Carlo is not a proof |
+
+## Multi-RC pack with hysteresis
+
+| id | claim | status | evidence |
+|---|---|---|---|
+| RC-D1 | A richer pack trips the open-set detector on healthy data | **`REFUTED`** | multi-RC clean ratio 1.84 against one-RC's 2.17 |
+| RC-D2 | Hysteresis acts without current reversal | **`REFUTED`** | `h` pinned at +1.0000 for the whole window at 20 A base |
+| RC-D3 | The residual check catches a regressor-aligned nuisance | **`REFUTED`** | ratio 2.39 of 3.0 on a 4.81x wrong certificate |
+| RC-D4 | A polarization-aware predicted residual removes the healthy-pack false alarm | `VERIFIED` | all four amplitudes certify, every error inside its bound |
+| RC-D5 | `B_hysteresis = M_max |cov(sign I, I)|/var(I)` bounds the effect | `VERIFIED` | truthful declaration refuses the counterexample |
+| RC-D6 | The bound holds inside its declared envelope | `NO_COUNTEREXAMPLE_IN_400_DRAWS` | 0 false, worst ratio 0.43 |
+| RC-D7 | An under-declared bound produces wrong certificates | `MEASURED` | 11 of 290 certified, worst ratio 1.53 |
+| RC-D8 | A second probe detects an under-declared bound | **`REFUTED`** | ratio 0.33, 0.55, 0.85 across three pairs, never above one |
+| RC-D9 | Robust operation across real battery chemistries | **`NOT SUPPORTED`** | RC-D7 and RC-D8 together: the declaration must come from characterisation data this repository does not have |

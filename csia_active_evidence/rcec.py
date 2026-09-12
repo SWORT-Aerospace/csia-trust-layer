@@ -18,7 +18,8 @@ The command is a proposal; the certificate is about what happened.
 
 THE ERROR DECOMPOSITION, AND WHY IT IS A UNION BOUND
 ------------------------------------------------------
-    B_total = |B_drift| + |B_EIV| + |B_dynamic| + |B_mismatch| + |B_sampling|
+    B_total = |B_drift| + |B_EIV| + |B_dynamic| + |B_mismatch|
+            + |B_sampling| + |B_hysteresis|
 
 `B_dynamic` is the polarization term and it DEPENDS ON THE PROBE'S SPECTRUM,
 not only on the pack. A probe whose energy sits above `1/(2 pi tau1)` sees
@@ -47,6 +48,33 @@ with `c < 1` declared in advance. A statistical interval would need an
 exchangeability argument that flight ticks do not satisfy, so `SE` enters
 only as one term inside a declared margin and never as a p-value.
 
+`B_hysteresis` WAS ADDED AFTER A FALSE CERTIFICATION, NOT BEFORE
+------------------------------------------------------------------
+A multi-RC pack with voltage hysteresis produced a `CERTIFIED_IN_MODEL`
+whose estimate was **4.81 times its own declared bound** away from the truth:
+-0.00783 ohm against a bound of 0.00163. The residual check did not see it,
+at a ratio of 2.39 against a tolerance of 3.0.
+
+The reason is structural and worth stating plainly:
+
+    A NUISANCE THAT IS CORRELATED WITH THE REGRESSOR IS ABSORBED INTO THE
+    SLOPE AND LEAVES NO RESIDUAL.
+
+Hysteresis voltage follows `sign(I)`. When the probe reverses the current,
+`M sign(I)` is very nearly in phase with `I`, so least squares attributes it
+to resistance and the fit looks clean. A residual check is blind to exactly
+the errors that matter most, and no amount of tightening its tolerance would
+have caught this.
+
+The term is bounded by the worst case in which the hysteresis state tracks
+the sign instantly:
+
+    |B_hysteresis| <= M_max * |cov(sign(I), I)| / var(I)
+
+computed from the REALIZED current. If the current never reverses, `sign(I)`
+is constant, the covariance is zero, and the bound is zero -- which is
+correct, because an unreversed current cannot move the hysteresis state.
+
 THE RESIDUAL CHECK, AND WHY IT WAS MISSING
 --------------------------------------------
 An error budget bounds the terms a model KNOWS ABOUT. It says nothing about
@@ -58,7 +86,12 @@ with a confident number.
 `certify` therefore fits the estimator and compares the RMS of its own
 residual against what the declared channel noise predicts:
 
-    expected residual RMS  =  sqrt(sigma_V^2 + R_ref^2 sigma_I^2)
+    expected residual RMS
+        =  sqrt(sigma_V^2 + R_ref^2 sigma_I^2 + (B_dynamic std(I))^2)
+
+The third term is the polarization the budget ALREADY declares. Leaving it
+out made a healthy multi-RC pack fail the check at low probe frequency while
+its estimate was comfortably inside its own bound.
 
 If the realized residual exceeds that by more than `residual_tolerance`, the
 data is not described by `V = E - I R` at all and the state is
@@ -131,6 +164,7 @@ class ErrorBudget:
     r1_max: Optional[float] = None   # ohm, bound on polarization resistance
     tau1_min_s: Optional[float] = None  # s, LOWER bound on the RC time constant
     scale_error_max: Optional[float] = None   # fractional current-gain error
+    hysteresis_v_max: Optional[float] = None  # V, bound on |M| in OCV += M h
     delay_max_s: float = 0.0         # s, current-channel transport delay
     quantum_i: float = 0.0           # A, current quantisation step
     c_fraction: float = 0.5          # the resolution fraction, c < 1
@@ -258,6 +292,24 @@ def _dynamic_bias(t, i_meas, budget: ErrorBudget):
     f_eff = effective_frequency(t, i_meas)
     denom = math.sqrt(1.0 + (2.0 * math.pi * f_eff * budget.tau1_min_s) ** 2)
     return abs(budget.r1_max) / denom
+
+
+def _hysteresis_bias(i_meas, budget: ErrorBudget, m: Moments):
+    """Worst-case apparent resistance from open-circuit voltage hysteresis.
+
+    Zero when the current does not reverse, because the hysteresis state
+    cannot move. Computed from the realized current, not declared.
+    """
+    if budget.hysteresis_v_max is None:
+        return UNBOUNDED
+    x = np.asarray(i_meas, dtype=float)
+    if x.size < 3 or m.var_i_measured <= 0:
+        return 0.0
+    sgn = np.sign(x)
+    if np.all(sgn == sgn[0]):
+        return 0.0
+    lever = float(np.cov(sgn, x, bias=True)[0, 1] / np.var(x))
+    return abs(budget.hysteresis_v_max) * abs(lever)
 
 
 def _sampling_bias(t, i_meas, budget: ErrorBudget, m: Moments) -> float:
@@ -411,15 +463,35 @@ def certify(t, i_measured, v_measured, budget: ErrorBudget,
             budget=budget.to_dict())
 
     # --- 5. does the model fit at all? -------------------------------------
+    #
+    # THE PREDICTED RESIDUAL MUST INCLUDE THE POLARIZATION THE BUDGET ALREADY
+    # DECLARES. An earlier version compared the fit residual against sensor
+    # noise alone. On a multi-RC pack at low probe frequency that produced a
+    # FALSE ALARM: a healthy pack whose estimate was within its own bound was
+    # refused as UNKNOWN_OR_MODEL_MISMATCH, because the slow branch leaves a
+    # large deterministic residual the estimator has no term for -- and which
+    # the budget nonetheless already bounds through `B_dynamic`.
+    #
+    # Conflating "a mechanism nobody declared" with "a declared mechanism I
+    # chose a bad probe for" is the error. A polarization branch of apparent
+    # magnitude `B_dynamic` driven by a current of spread `std(I)` contributes
+    # about `B_dynamic * std(I)` volts of residual, so that is added in
+    # quadrature to the sensor terms. It is a DECLARED term, not a fitted
+    # one: shrinking it requires a better probe, never a looser tolerance.
     r_hat = estimate_resistance(i_meas, v_meas)
     design = np.column_stack([np.ones(i_meas.size), -i_meas])
     coeffs = np.linalg.lstsq(design, v_meas, rcond=None)[0]
     resid = v_meas - design @ coeffs
     resid_rms = float(np.sqrt(np.mean(resid ** 2)))
+    _dyn = _dynamic_bias(t, i_meas, budget)
+    _dyn_v = 0.0 if _dyn == UNBOUNDED else abs(_dyn) * math.sqrt(
+        max(m.var_i_measured, 0.0))
     predicted_rms = math.sqrt(budget.sigma_v ** 2
-                              + (budget.r_reference * budget.sigma_i) ** 2)
+                              + (budget.r_reference * budget.sigma_i) ** 2
+                              + _dyn_v ** 2)
     cov["residual_rms"] = resid_rms
     cov["residual_rms_predicted"] = predicted_rms
+    cov["residual_polarization_component_v"] = _dyn_v
     cov["residual_ratio"] = (resid_rms / predicted_rms
                              if predicted_rms > 0 else float("inf"))
     if resid_rms > budget.residual_tolerance * predicted_rms:
@@ -440,15 +512,17 @@ def certify(t, i_measured, v_measured, budget: ErrorBudget,
         s = abs(budget.scale_error_max)
         b_mismatch = abs(budget.r_reference) * s / max(1.0 - s, 1e-9)
     b_sampling = _sampling_bias(t, i_meas, budget, m)
+    b_hyst = _hysteresis_bias(i_meas, budget, m)
 
     terms = {"B_drift": b_drift, "B_EIV": b_eiv, "B_dynamic": b_dynamic,
              "B_mismatch": b_mismatch, "B_sampling": b_sampling,
+             "B_hysteresis": b_hyst,
              "attenuation": lam, "lever_arm_s": lever,
              "effective_frequency_hz": effective_frequency(t, i_meas),
              "combination": "union bound, absolute values summed; the terms "
                             "are not independent and no cancellation is "
                             "assumed"}
-    unbounded = sorted(k for k in ("B_dynamic", "B_mismatch")
+    unbounded = sorted(k for k in ("B_dynamic", "B_mismatch", "B_hysteresis")
                        if terms[k] == UNBOUNDED)
     if unbounded:
         return Certificate(
@@ -458,7 +532,8 @@ def certify(t, i_measured, v_measured, budget: ErrorBudget,
             execution=execution.to_dict() if execution else {},
             budget=budget.to_dict())
 
-    b_total = b_drift + b_eiv + b_dynamic + b_mismatch + b_sampling
+    b_total = (b_drift + b_eiv + b_dynamic + b_mismatch + b_sampling
+               + b_hyst)
     se = sigma_eff / math.sqrt(true_s_ii)
     margin = budget.c_fraction * budget.target_delta_r
     achieved = b_total + budget.k_sigma * se
@@ -473,10 +548,10 @@ def certify(t, i_measured, v_measured, budget: ErrorBudget,
 
     if achieved >= margin:
         dominant = max(("B_drift", "B_EIV", "B_dynamic", "B_mismatch",
-                        "B_sampling"), key=lambda k: terms[k])
+                        "B_sampling", "B_hysteresis"), key=lambda k: terms[k])
         reasons.append(f"ERROR_EXCEEDS_MARGIN_DOMINATED_BY:{dominant}")
         state = (MODEL_MISMATCH_LIMITED
-                 if dominant in ("B_dynamic", "B_mismatch")
+                 if dominant in ("B_dynamic", "B_mismatch", "B_hysteresis")
                  else MEASUREMENT_LIMITED)
         return Certificate(
             state=state, reasons=tuple(reasons), moments=m.to_dict(),

@@ -30,9 +30,10 @@ reason agreement between them means anything.
 
 | excluded | why it matters |
 |---|---|
-| multi-RC / diffusion | a real pack has more than one time constant; `B_dynamic` bounds one |
-| hysteresis | open-circuit voltage depends on charge history, not only on state of charge |
-| cell imbalance | a weak cell in series does not behave like a lumped resistance |
+| ~~multi-RC / diffusion~~ | **NOW MODELLED** in `battery_multirc.py`, two branches at 1 s and 32 s |
+| ~~hysteresis~~ | **NOW MODELLED**, and it found a false certification; see `COUNTEREXAMPLE_LOG.md` RC-11 |
+| cell imbalance | modelled only as a scalar `weak_cell_scale`; a real weak cell is not a lumped resistance |
+| three or more RC branches, distributed relaxation | still excluded |
 | aerodynamic and rotor effects | the current demand here is a scalar, not a vehicle |
 | ESC commutation and current-loop dynamics | the loop is one first-order lag |
 | flexible structure and vibration coupling | absent |
@@ -40,13 +41,40 @@ reason agreement between them means anything.
 | correlated common-cause faults | faults are injected one at a time |
 | wind, thermal environment | absent |
 
+## THE LIMIT THAT MATTERS MOST, MEASURED
+
+`hysteresis_v_max` is **told** to the certificate and never measured by it.
+Declaring 0.05 V for a pack that has 0.12 V produces a certified estimate
+wrong by more than its own bound, and nothing inside this framework detects
+it:
+
+| envelope | draws | certified | false certifications | worst ratio |
+|---|---|---|---|---|
+| inside the declaration | 400 | 331 | **0** | 0.43 |
+| outside it | 400 | 290 | **11** | 1.53 |
+
+A cross-probe consistency check was implemented and **does not work**: the
+same hysteresis that creates the disagreement also inflates the declared
+bound on the reversing probe, so the ratio never reaches one. Measured at
+0.33, 0.55 and 0.85 for true M of 0.05, 0.08 and 0.12 V against a declared
+0.05 V, across three probe pairs.
+
+> **The hysteresis declaration must come from cell characterisation.
+> This is the concrete reason "robust operation across real battery
+> chemistries" is not supported and cannot be supported from this host.**
+
 ## Known thin margins
 
-* **the clean residual ratio is 2.17 against a tolerance of 3.0.** The
-  polarization branch and the curved open-circuit characteristic already
-  consume most of the headroom the open-set detector has. A pack with more
-  structure would trip `UNKNOWN_OR_MODEL_MISMATCH` on clean data, and the
-  detector would have to be re-derived rather than re-tuned;
+* the clean residual ratio was 2.17 against a tolerance of 3.0 and the
+  prediction above it was that a richer pack would trip the detector on
+  healthy data. **That prediction was wrong**: the multi-RC pack came in at
+  1.84. What did happen is RC-10, a false alarm at high amplitude and low
+  frequency, fixed by putting the declared polarization into the predicted
+  residual. The clean ratio is now 2.04;
+* **the residual check is structurally blind to any nuisance correlated with
+  the current**, because such a nuisance is absorbed into the slope. This is
+  not a tolerance that can be tightened. It is why `B_hysteresis` had to be
+  derived and declared;
 * `tau1_min` is a declared lower bound. If a real pack's polarization is
   faster than declared, `B_dynamic` is under-bounded and the certificate is
   optimistic. This is the single most load-bearing declaration in the budget;

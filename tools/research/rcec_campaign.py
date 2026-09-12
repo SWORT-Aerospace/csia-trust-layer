@@ -52,6 +52,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from csia_active_evidence import battery_1rc as B                # noqa: E402
+from csia_active_evidence import battery_multirc as MR          # noqa: E402
 from csia_active_evidence import rcec                            # noqa: E402
 from csia_active_evidence import rcec_selector as RS             # noqa: E402
 from csia_active_evidence import realized_moments as RM          # noqa: E402
@@ -79,6 +80,7 @@ D_MAX = 0.008
 R1_MAX = 0.020
 TAU1_MIN_S = 5.0
 SCALE_ERROR_MAX = 0.005
+HYSTERESIS_V_MAX = 0.05
 
 R0_DELTAS = (0.0, 0.005, 0.010, 0.020, 0.040)
 
@@ -94,6 +96,7 @@ def budget(**kw) -> rcec.ErrorBudget:
                 sigma_i=B.SYNTHETIC_SENSING["sigma_i"],
                 d_max=D_MAX, r1_max=R1_MAX, tau1_min_s=TAU1_MIN_S,
                 scale_error_max=SCALE_ERROR_MAX,
+                hysteresis_v_max=HYSTERESIS_V_MAX,
                 c_fraction=C_FRACTION, k_sigma=K_SIGMA, min_samples=50)
     base.update(kw)
     return rcec.ErrorBudget(**base)
@@ -105,19 +108,27 @@ def _plant(**kw):
     return sim
 
 
-def _run(arm_proposal, seed, *, r0_delta=0.0, plant_kw=None, feedback=None):
+#: The three plants. `multi_rc` adds a second polarization branch and
+#: voltage hysteresis, neither of which the estimator has a term for.
+PLANTS = {"simple": (B, {"r1_scale": 0.0}),
+          "one_rc": (B, {"r1_scale": 1.0}),
+          "multi_rc": (MR, {})}
+
+
+def _run(arm_proposal, seed, *, r0_delta=0.0, plant_kw=None, feedback=None,
+         plant=B):
     """Fly one proposal once and return the evaluation window."""
     plant_kw = dict(plant_kw or {})
     plant_kw["r0_delta"] = r0_delta
     if feedback is None:
-        tr = B.simulate(arm_proposal.command, duration=DURATION, seed=seed,
-                        **plant_kw)
+        tr = plant.simulate(arm_proposal.command, duration=DURATION,
+                            seed=seed, **plant_kw)
     else:
-        tr = _run_with_feedback(feedback, seed, plant_kw)
+        tr = _run_with_feedback(feedback, seed, plant_kw, plant=plant)
     return tr.window(ACTION_START, ACTION_START + ACTION_DURATION)
 
 
-def _run_with_feedback(probe, seed, plant_kw):
+def _run_with_feedback(probe, seed, plant_kw, plant=B):
     """P4 with the loop genuinely closed around the plant, one sample late.
 
     THE WIRING THIS REPLACES DID NOTHING. The first version kept a `state`
@@ -132,13 +143,13 @@ def _run_with_feedback(probe, seed, plant_kw):
     therefore reacts to realized current it has actually seen, one tick late,
     and cannot reach a future sample.
     """
-    return B.simulate(probe.demand, duration=DURATION, seed=seed,
-                      observer=lambda t, i, v: probe.observe(t, i),
-                      **plant_kw)
+    return plant.simulate(probe.demand, duration=DURATION, seed=seed,
+                          observer=lambda t, i, v: probe.observe(t, i),
+                          **plant_kw)
 
 
-def evaluate_arm(name, proposal, seeds, *, plant_kw=None, feedback_factory=None
-                 ) -> dict:
+def evaluate_arm(name, proposal, seeds, *, plant_kw=None,
+                 feedback_factory=None, plant=B) -> dict:
     """Fly one arm over a seed set at every R0 delta and certify each run."""
     rows = []
     for seed in seeds:
@@ -146,7 +157,7 @@ def evaluate_arm(name, proposal, seeds, *, plant_kw=None, feedback_factory=None
         for delta in R0_DELTAS:
             fb = feedback_factory() if feedback_factory else None
             w = _run(proposal, seed, r0_delta=delta, plant_kw=plant_kw,
-                     feedback=fb)
+                     feedback=fb, plant=plant)
             if w.n < 5:
                 per_delta[delta] = {"state": rcec.ABORTED_INCOMPLETE}
                 continue
@@ -293,6 +304,124 @@ def p3_objective(cand, plant_kw=None) -> float:
     return (shortfall + 4.0 * (refusals / n)
             + ENERGY_SCALE_WEIGHT * (energy / ENERGY_SCALE_AS)
             + 10.0 * (sat_total / n))
+
+
+def hysteresis_hunt(n_draws: int, seeds) -> dict:
+    """Hunt for a false certification on the multi-RC pack WITH hysteresis.
+
+    Two halves, and the second is the point.
+
+      * INSIDE the declared envelope, M drawn at or below
+        `HYSTERESIS_V_MAX`. A false certification here would falsify the
+        bound.
+      * OUTSIDE it, M drawn above the declaration. False certifications here
+        are EXPECTED and are recorded, because they are what an
+        under-declared bound costs. The certificate never measures M; it is
+        told M.
+    """
+    rng = np.random.default_rng(776644)
+    t = RS.window_times(ACTION_START, ACTION_DURATION, HZ)
+    out = {}
+    for label, lo, hi in (("inside_declared_envelope", 0.0,
+                           HYSTERESIS_V_MAX),
+                          ("outside_declared_envelope", HYSTERESIS_V_MAX,
+                           5.0 * HYSTERESIS_V_MAX)):
+        rows = {"draws": 0, "certified": 0, "false_certifications": 0,
+                "worst_ratio": 0.0, "states": {}}
+        for k in range(n_draws):
+            seed = int(seeds[k % len(seeds)])
+            amp = float(rng.uniform(8.0, 18.0))
+            cyc = int(rng.choice([3, 6, 9, 12]))
+            base = float(rng.uniform(2.0, 8.0))
+            m_v = float(rng.uniform(lo, hi))
+            gamma = float(rng.uniform(500.0, 25000.0))
+            pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC,
+                                     "hysteresis_v": m_v,
+                                     "hysteresis_gamma": gamma})
+            loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": base})
+            cmd = WC.as_callable(
+                RS.palindromic(t, ACTION_START, ACTION_DURATION, amp, cyc), t)
+            r0_delta = float(rng.choice(R0_DELTAS))
+            tr = MR.simulate(cmd, duration=DURATION, seed=seed, pack=pack,
+                             loop=loop, r0_delta=r0_delta)
+            w = tr.window(ACTION_START, ACTION_START + ACTION_DURATION)
+            rows["draws"] += 1
+            if w.n < 5:
+                continue
+            cert = rcec.certify(w.t, w.i_meas, w.v_meas, budget())
+            rows["states"][cert.state] = rows["states"].get(cert.state, 0) + 1
+            if cert.state != rcec.CERTIFIED:
+                continue
+            rows["certified"] += 1
+            r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
+            truth = pack.r0_at(float(np.mean(w.temp_c))) + r0_delta
+            bound = cert.resolution["achieved_error"]
+            ratio = abs(r_hat - truth) / bound
+            rows["worst_ratio"] = max(rows["worst_ratio"], ratio)
+            if ratio > 1.0:
+                rows["false_certifications"] += 1
+        rows["false_certification_rate"] = (
+            rows["false_certifications"] / rows["certified"]
+            if rows["certified"] else None)
+        out[label] = rows
+    out["declared_bound_v"] = HYSTERESIS_V_MAX
+    out["reading"] = (
+        "Inside the declared envelope the bound must hold. Outside it, wrong "
+        "certificates are the measured cost of an under-declared bound, and "
+        "no test inside this framework detects them: the certificate is told "
+        "M and cannot measure it.")
+    return out
+
+
+def cross_probe_check(seeds) -> dict:
+    """Can two probes with different sign-reversal content catch it? NO.
+
+    Measured, and reported as a null result rather than left out. A probe
+    that never reverses the current has a zero hysteresis lever; one that
+    reverses heavily has a large one. If the declared bound were too small
+    their estimates should disagree by more than their combined bounds.
+
+    They do not, at any over-declaration factor where the certificate still
+    certifies, because the same M that creates the disagreement also inflates
+    the declared bound on the reversing probe. The two scale together.
+    """
+    t = RS.window_times(ACTION_START, ACTION_DURATION, HZ)
+    quiet = (B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 20.0}),
+             WC.as_callable(RS.palindromic(t, ACTION_START, ACTION_DURATION,
+                                           8.0, 6), t))
+    reversing = (B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0}),
+                 WC.as_callable(RS.palindromic(t, ACTION_START,
+                                               ACTION_DURATION, 15.0, 6), t))
+    rows = {}
+    for m_v in (0.0, 0.05, 0.08, 0.12):
+        est = []
+        for loop, cmd in (quiet, reversing):
+            pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC,
+                                     "hysteresis_v": m_v,
+                                     "hysteresis_gamma": 20000.0})
+            tr = MR.simulate(cmd, duration=DURATION, seed=int(seeds[0]),
+                             pack=pack, loop=loop)
+            w = tr.window(ACTION_START, ACTION_START + ACTION_DURATION)
+            cert = rcec.certify(w.t, w.i_meas, w.v_meas, budget())
+            est.append((rcec.estimate_resistance(w.i_meas, w.v_meas),
+                        cert.resolution.get("achieved_error"), cert.state))
+        (ra, ba, sa), (rb, bb, sb) = est
+        if ba is None or bb is None:
+            rows[str(m_v)] = {"states": [sa, sb], "detected": None}
+            continue
+        rows[str(m_v)] = {
+            "disagreement": abs(ra - rb), "combined_bound": ba + bb,
+            "ratio": abs(ra - rb) / (ba + bb),
+            "detected": bool(abs(ra - rb) > ba + bb),
+            "states": [sa, sb]}
+    detected = [k for k, v in rows.items() if v.get("detected")]
+    return {"rows": rows, "detected_at": detected,
+            "verdict": ("CROSS_PROBE_CHECK_DOES_NOT_DETECT_AN_UNDER_DECLARED_"
+                        "HYSTERESIS_BOUND" if not detected
+                        else "DETECTED"),
+            "why": ("the same M that creates the disagreement also inflates "
+                    "the declared bound on the reversing probe, so the two "
+                    "scale together and the ratio stays below one")}
 
 
 def true_resistance(trace, r0_delta: float) -> float:
@@ -581,15 +710,12 @@ def run(quick: bool = False) -> dict:
         _, probe = RS.p4_feedback(**common)
         return probe
 
-    models = {"simple": {"r1_scale": 0.0},
-              "one_rc": {"r1_scale": 1.0}}
-
     results = {}
-    for model, plant_kw in models.items():
+    for model, (plant, plant_kw) in PLANTS.items():
         for name, prop in proposals.items():
             key = f"{model}/{name}"
             results[key] = evaluate_arm(
-                name, prop, seeds, plant_kw=plant_kw,
+                name, prop, seeds, plant_kw=plant_kw, plant=plant,
                 feedback_factory=fb_factory if name == "P4_feedback" else None)
             rows = results[key]["rows"]
             results[key]["separation"] = {
@@ -603,15 +729,17 @@ def run(quick: bool = False) -> dict:
             results[key]["model"] = model
 
     freq = frequency_sweep(seeds)
+    hyst = hysteresis_hunt(40 if quick else 400, seeds)
+    cross = cross_probe_check(seeds)
     adv = adversarial(120 if quick else 2000, seeds)
     opens = open_set(seeds)
     execs = execution_ablation(seeds)
     return _summarise(results, lag, proposals, seeds, started, quick,
-                      adv, opens, execs, freq)
+                      adv, opens, execs, freq, hyst, cross)
 
 
 def _summarise(results, lag, proposals, seeds, started, quick,
-               adv, opens, execs, freq) -> dict:
+               adv, opens, execs, freq, hyst, cross) -> dict:
     def metric(model, arm, field):
         return results[f"{model}/{arm}"].get(field)
 
@@ -633,7 +761,7 @@ def _summarise(results, lag, proposals, seeds, started, quick,
         return sum(vals) / len(vals)
 
     falsifiers = {}
-    for model in ("simple", "one_rc"):
+    for model in PLANTS:
         best_active = max(swept(model, a) for a in
                           ("P2_compensated", "P3_shaped", "P4_feedback"))
         falsifiers[f"{model}:mission_matches_best_closed_loop_aware_arm"] = (
@@ -646,6 +774,8 @@ def _summarise(results, lag, proposals, seeds, started, quick,
         r["false_certifications"] > 0 for r in results.values())
     falsifiers["adversarial_found_a_false_certification"] = (
         adv["false_certifications"] > 0)
+    falsifiers["hysteresis_inside_declared_envelope_false_certified"] = (
+        hyst["inside_declared_envelope"]["false_certifications"] > 0)
     falsifiers["an_unmodelled_fault_was_certified_at_the_largest_size"] = (
         opens[str(0.40)].get(rcec.CERTIFIED, 0) > 0)
     falsifiers["a_clipped_action_kept_its_certificate"] = (
@@ -683,6 +813,8 @@ def _summarise(results, lag, proposals, seeds, started, quick,
         "not_executable": list(RS.NOT_EXECUTABLE),
         "results": results,
         "frequency_sweep": freq,
+        "hysteresis_hunt": hyst,
+        "cross_probe_check": cross,
         "adversarial": adv,
         "open_set": opens,
         "execution_ablation": execs,
@@ -755,6 +887,14 @@ def main(argv=None) -> int:
               f"{r['achieved_error']:9.5f}"
               f"{(f'{fr:.2f}' if fr is not None else '   -'):>11s}")
     print(f"  best cycle count: {f['best_cycles']}")
+    h = doc["hysteresis_hunt"]
+    print("\nhysteresis hunt (multi-RC pack with voltage hysteresis):")
+    for k in ("inside_declared_envelope", "outside_declared_envelope"):
+        r = h[k]
+        print(f"  {k:30s} {r['draws']:4d} draws, {r['certified']:4d} "
+              f"certified, {r['false_certifications']:3d} false, worst "
+              f"ratio {r['worst_ratio']:.2f}")
+    print(f"cross-probe: {doc['cross_probe_check']['verdict']}")
     a = doc["adversarial"]
     print(f"\nadversarial: {a['draws']} draws, {a['certified']} certified, "
           f"{a['false_certifications']} false certifications")
