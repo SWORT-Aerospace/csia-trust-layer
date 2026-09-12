@@ -4246,3 +4246,109 @@ entries:
       research/active_evidence/PRIOR_ART_MATRIX.md;
       research/active_evidence/FAILURE_AND_COUNTEREXAMPLE_LOG.md;
       research/active_evidence/CLAIM_LEDGER.md
+
+  - id: MX-039
+    date: 2026-09-12
+    phase: RESEARCH (realized-current excitation certificate, E0, owner-authorized energy-domain exception)
+    kind: SIX_OF_MY_OWN_INSTRUMENTS_FAILED_AND_THE_RESULT_SURVIVED_ANYWAY
+    owner_authorization: >-
+      Recorded verbatim in
+      research/active_evidence/realized_current/OWNER_AUTHORIZATION.md. The
+      program owner authorized simulator-only energy-domain research on an
+      isolated research branch. docs/CURRENT_PROGRAM_STATE.md section 1 is
+      UNCHANGED and its energy-domain prohibition still stands; this is
+      recorded as a narrow exception, not a revision of the rule. All
+      results are quarantined post-freeze, research-only, awaiting review.
+    what_was_asked: >-
+      First, directly: run the MX-038 hypothesis bank without the
+      stationarity-gated relation. Then build and falsify a Realized-Current
+      Excitation Certificate that judges a diagnostic probe on the current
+      the vehicle ACTUALLY drew rather than on the waveform it was asked for.
+    the_direct_answer_first: >-
+      MX-038's negative REVERSES. Removing effort_drift from the signature
+      takes passive from 5 unresolved pairs to 9 while every active arm stays
+      at 6. The MX-038 finding that active probing is a net loss was an
+      artifact of one stationarity-gated relation, and is now bounded to
+      platforms that have one.
+    what_was_built: >-
+      csia_active_evidence/battery_1rc.py (an independent one-RC Thevenin
+      pack with curved OCV, temperature coefficient, command-to-current lag,
+      saturation, and a measurement chain with offset, scale error, transport
+      delay, quantisation, dropout and six independent noise streams; it
+      imports nothing from the estimator under test and a test asserts that),
+      realized_moments.py, rcec.py (ten states, five-term union-bounded error
+      decomposition, and a fit-residual check that is the open-set detector),
+      waveform_compensation.py, moment_feedback.py, rcec_selector.py with
+      eight arms P0 to P7, tools/research/rcec_campaign.py, and 39 tests
+      implementing the seventeen required controls.
+    the_strongest_defensible_result: >-
+      At constant amplitude and constant energy of 40.7 amp-seconds, moving
+      a probe's energy from 0.41 Hz to 0.77 Hz cut the smallest resolvable
+      pack resistance change from 0.020 ohm to 0.005 ohm, a factor of four.
+      The certificate's own error decomposition predicted where the optimum
+      would be WITHOUT running the sweep: the polarization bound falls as
+      1/sqrt(1+(2 pi f tau)^2) while the noise term rises as the loop lag
+      attenuates realized excitation, and at 6 cycles the two are equal to
+      two significant figures (0.00083 against 0.00083).
+    certificate_integrity: >-
+      2000 adversarial draws over RC values, loop lag, sensor bias, scale
+      error, transport delay, quantisation, dropout and open-circuit drift.
+      1921 certified, ZERO false certifications. The bound is used rather
+      than slack: worst observed error is 0.928 of the run's own limit and
+      the median is 0.332, so it is neither violated nor vacuous. A 0.040 ohm
+      rise moving the terminal voltage by -0.80 V at constant current is
+      refused as INSUFFICIENT_EXCITATION, which is the control that matters
+      most.
+    six_instrument_failures_all_mine: >-
+      (RC-1) The lag fit was biased 2.3x by a linearisation that diverges at
+      the asymptote; replaced with direct residual minimisation, now
+      recovering 0.71 to 0.93 of a known plant lag and under-estimating,
+      which is conservative. (RC-2) The polarization bound used worst-case
+      R1 outright, which made NO excitation able to clear the margin; the
+      campaign's own negative control refused and forced the frequency-
+      dependent derivation that made the main result possible. (RC-3) P3
+      optimised a proxy rather than the certificate and chose a waveform the
+      certificate then rejected, scoring zero certificates. (RC-4) THE WORST:
+      the feedback arm's plumbing kept a state dict nothing ever wrote, so
+      the accumulator saw ZERO samples and P4 ran as a byte-identical copy of
+      P1 while being reported under its own name for a whole pilot campaign.
+      (RC-5) Once wired, the feedback law capped 330 of 401 corrections and
+      made the lever arm four times WORSE; the correction gain was guessed
+      rather than derived and called a method that does not exist. (RC-6) The
+      P3 search grid offered 2, 3 and 5 cycles and the optimum is 6 to 12 --
+      a search cannot find what its grid excludes.
+    what_was_rejected: >-
+      H2 on outcome. P4 now genuinely cuts the realized lever arm from +0.033
+      to -0.022 seconds and raises S_II by 12 percent, and the separation does
+      not move at all, because B_drift is 9 percent of the error while
+      B_dynamic is 59 percent. THE COMPENSATION IMPROVES A TERM THAT IS NOT
+      BINDING. No closed-loop-aware arm beats the naive palindrome or a
+      randomly chosen probe.
+    what_this_does_not_establish: >-
+      Robust operation across real battery chemistries: NOT SUPPORTED and not
+      supportable from this host, because every pack parameter is synthetic
+      and no cell data exists in this repository. Reliable hardware
+      behaviour: E0 only. Novelty: BLOCKED_EXTERNAL_ACCESS, rechecked this
+      session with every scholarly host returning HTTP 000 under
+      organization policy; the drift-aliasing derivation is recorded as
+      ASSUME KNOWN because the work order describes arXiv:2505.06410 as
+      covering it. Production integration: forbidden by the authorization and
+      not attempted. Formal safety: not claimed, Monte Carlo is not a proof.
+      The clean-data residual ratio is 2.17 against a tolerance of 3.0, so
+      the open-set detector already has thin headroom, and tau1_min is the
+      single most load-bearing declaration in the budget.
+    verdict: RECORDED
+    consequence: >-
+      A certificate that judges realized excitation rather than commanded
+      waveforms, with a measured design rule for probe frequency and zero
+      false certifications across its declared envelope. Frozen core
+      untouched, nothing promoted, no production path altered.
+    artifact: >-
+      csia_active_evidence/battery_1rc.py;
+      csia_active_evidence/realized_moments.py;
+      csia_active_evidence/rcec.py;
+      csia_active_evidence/waveform_compensation.py;
+      csia_active_evidence/moment_feedback.py;
+      csia_active_evidence/rcec_selector.py;
+      tools/research/rcec_campaign.py; tests/test_rcec.py;
+      research/active_evidence/realized_current/
