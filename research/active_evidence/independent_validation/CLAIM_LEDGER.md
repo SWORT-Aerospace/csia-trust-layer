@@ -47,6 +47,45 @@ quarantined.
 | B6 | H6 open-set detectability boundary | OPEN |
 | B7 | H7 commanded information is insufficient | OPEN |
 
+## B2. Claims settled on the development partition
+
+These are measured, not preregistered predictions, and they are development
+results: the instrument is connected and these are what it read. None is a
+final result and none opens the seal.
+
+| # | claim | status | evidence |
+|---|---|---|---|
+| D1 | The Q plants are numerically independent of the prior simulator: exact ZOH against forward Euler, 4.05% apart on the per-step coefficient at the 0.25 s command lag. | VERIFIED | `PLANT_INDEPENDENCE_AUDIT.md` §1, `test_zoh_step_is_the_exact_solution` |
+| D2 | Every declared effect is wired into the observed voltage: removing R1 moves the resistance estimate by 24% of the smallest grid magnitude, R2 by 5.4%, hysteresis by 3.1%, OCV curvature by 2.5%. | VERIFIED | `PLANT_INDEPENDENCE_AUDIT.md` §2 |
+| D3 | `M_R^cert` is bit-identical across Q0, Q1 and Q2 in 48 of 48 matched development cells, reproducing IV-4 on independent code. | VERIFIED | `results/PLANT_INDEPENDENCE.json` |
+| D4 | The preregistered change error `e_ΔR` is near-identical across plants (4e-6 Ω on all three) because the paired design cancels every plant-common nuisance exactly; what survives is the finite-sample EIV factor λ̂ = 1.0009463544, matching the observed ratio to seven digits. | VERIFIED, DERIVED | IV-9, `test_the_paired_change_error_is_exactly_the_finite_sample_eiv_factor` |
+| D5 | The point error `AE_R` does separate the plants: 1.94e-4, 6.57e-4 and 5.06e-4 Ω for Q0, Q1, Q2. | VERIFIED | `results/PLANT_INDEPENDENCE.json` |
+| D6 | The P7b ceiling invariant holds: 216 checks against all 72 admissible actions each, 15 552 comparisons, zero violations, on both losses. | VERIFIED | `ORACLE_TAXONOMY.md` §3 |
+| D7 | P7a never agrees with the outcome oracle (0.0% of 108 cells), loses by a median factor of 11.0, and spends 2.4× the energy. | VERIFIED | `ORACLE_TAXONOMY.md` §4 |
+| D8 | P7a's objective is exactly the classical A-optimal design for resistance: `var(R) = σ_V²/S_II`, and `argmin var(R)`, `argmax S_II` and P7a's selection are the same action. | VERIFIED, DERIVED | `BASELINE_MAPPING.md` §3, `test_the_cramer_rao_variance_of_r_is_sigma_squared_over_s_ii` |
+| D9 | Set-membership model invalidation separates the plants at 2.46, 4.90 and 7.31 σ for Q0, Q1, Q2. | VERIFIED | `BASELINE_MAPPING.md` §4 |
+| D10 | The unknown-fault detectability boundary is 3.363 σ: routing rate 0.901 above it over 426 trials, 0.000 below it over 870. | VERIFIED | `UNKNOWN_BOUNDARY.md` §4 |
+| D11 | The 0.10 V ringing case lies at 1.461 σ, about one σ above the 0.445 σ no-fault floor, so its absorption is structural rather than a classifier defect. | VERIFIED | `UNKNOWN_BOUNDARY.md` §5 |
+| D12 | Four sensing parameters have exactly zero effect on the outcome, each for a derived reason: voltage offset absorbed by the intercept, current offset absorbed by the free intercept, voltage noise cancelled by the paired design, timestamps never read by the estimator. | VERIFIED, DERIVED | `SENSITIVITY_AUDIT.md` §3 |
+| D13 | Current gain error is the dominant sensitivity, and `e_ΔR ≈ −s·Δ/(1+s)` matches measurement to 2e-6 Ω. | VERIFIED | `test_a_one_percent_gain_error_moves_the_change_estimate_by_about_one_percent` |
+| D14 | Proposition A: a palindromic command with zero drift lever and 20050 A² of second moment yields a realized lever of −0.0276 s through an ordinary causal bounded lag, violating a declared γ of 0.01 s. | PROVEN BY COUNTEREXAMPLE | `FORMAL_PROPOSITIONS.md` A |
+| D15 | Proposition B: disjoint error sets imply correct change sign, **conditional** on the declared error set containing the true error. | CONDITIONALLY PROVEN | `FORMAL_PROPOSITIONS.md` B |
+| D16 | Proposition C: truncation always costs excitation and moves the drift lever non-monotonically and with a sign change, so a full-window certificate bounds a prefix in neither direction. | PROVEN FOR TRUNCATION | `FORMAL_PROPOSITIONS.md` C |
+| D17 | A conventional post-execution fit reports a truth-covering interval on a full window and a non-covering one, in identical language, on the same run truncated to 25%. | VERIFIED, single instance | `BASELINE_MAPPING.md` §5 |
+
+## B3. Constructs withdrawn or corrected in this phase
+
+| # | construct | disposition |
+|---|---|---|
+| W1 | "Zero false certificates in 8640 runs" as evidence of soundness | **WITHDRAWN** — empty by construction (IV-1) |
+| W2 | "The locked false-certificate check scored against plant truth" | **WITHDRAWN** — no row carried a true resistance (IV-1) |
+| W3 | The label "90% resolution frontier" for a margin-only predicate | **CORRECTED** — both predicates now reported (IV-2) |
+| W4 | Paired-win denominators 140 and 240 as campaign-wide | **CORRECTED** — they are the one-RC slice (IV-3) |
+| W5 | "Median margin identical to twelve decimal places" | **STRENGTHENED** — bit-identical (IV-4) |
+| W6 | `P7_oracle` as an oracle | **WITHDRAWN** — renamed P7a benchmark (IV-15) |
+| W7 | My own belief that a prefix of a palindrome carries more drift leverage | **FALSIFIED** by its own test (IV-10) |
+| W8 | P7c as "robust" under the change loss | **QUALIFIED** — six different actions in six seeds (IV-11) |
+
 ## C. Claims explicitly not made
 
 | # | claim | status |
