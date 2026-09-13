@@ -401,3 +401,47 @@ the energy.
 looked. The object that failed is the classical A-optimal design, and it failed
 because the model it is optimal *for* is not the plant. Any write-up that
 presents this as a design flaw in P7a is wrong; it is a model-mismatch result.
+
+---
+
+## IV-16 — One arena for the whole campaign meant every ceiling solved the wrong problem
+
+**Found, while building the runner, before any campaign row existed:** the
+first `Campaign` held a single `ceilings.Arena`, and `Arena` simulated with
+default conditions — nominal drift, no ringing, nominal sensing — regardless of
+the cell.
+
+So under elevated drift, P0–P6 and S0–S3 ran in a drifting world while P7a,
+P7b and P7c were computed in a quiet one. The ceiling invariant would still
+have *passed*, because P7b was a valid argmin for the problem it was solving;
+it would simply have been the wrong problem, and every regret number under
+elevated drift would have been meaningless. Gate B would have reported green on
+exactly the cells where it mattered most.
+
+**Fix:** `Conditions` is now a first-class object, one arena per distinct
+world, keyed by drift, ringing and the full sensing configuration.
+
+**Test:** `tests/test_iv_runner.py::test_conditions_key_the_arena`,
+`::test_ringing_and_sensing_also_key_the_arena`,
+`::test_the_oracle_is_computed_under_the_cell_conditions`, and
+`tests/test_iv_ceilings.py::test_the_invariant_holds_under_elevated_drift_too`.
+
+**Also fixed alongside:** the arena cached the full observation and ground
+truth for every (action, plant, seed). At campaign scale that is roughly 400 MB
+of arrays nobody reads twice. Only the scalars the comparison needs are kept
+now, and traces are stripped from cached truths.
+
+---
+
+## IV-17 — A clipped execution is not an incomplete one
+
+**Found by a test, before the campaign ran:** the runner marked a clipped
+execution `completed=False`. `certify` checks completeness before it checks
+clipping, so every clipped row came back `ABORTED_INCOMPLETE` and the
+`CLIPPED_CERTIFICATE_INVALID` path was never exercised at all.
+
+A clipped action runs to the end of its window; what changed is the waveform
+the authority allowed. Only an abort is incomplete. The fix is one line, and
+the value is entirely in the two tests that now distinguish the cases —
+without them the campaign would have reported an execution ablation in which
+one of its three levels quietly did not exist.

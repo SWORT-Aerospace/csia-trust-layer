@@ -42,7 +42,7 @@ super-oracular.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -106,34 +106,77 @@ def _second_moment(observation: Observation) -> float:
     return float(np.sum((current - current.mean()) ** 2))
 
 
+@dataclass(frozen=True)
+class Conditions:
+    """Everything about a trial except the action, the plant and the fault.
+
+    An arena carries one set of conditions. Two arenas with different drift or
+    different sensing are different experiments, and keeping them in separate
+    objects is what stops a ceiling being computed under nominal conditions and
+    then compared against deployable arms that ran under elevated drift -- a
+    mistake the first version of the runner made.
+    """
+
+    drift_v_per_s: float = 0.0
+    ringing_amplitude_v: float = 0.0
+    sensing: Optional[object] = None
+
+    def to_dict(self) -> Dict:
+        return {"drift_v_per_s": self.drift_v_per_s,
+                "ringing_amplitude_v": self.ringing_amplitude_v,
+                "sensing": (None if self.sensing is None
+                            else self.sensing.to_dict())}
+
+
 class Arena:
     """Runs actions against plants and caches what does not depend on the fault.
 
     The nominal half of a matched pair does not depend on the injected change,
     so it is computed once per (action, plant, seed). Without the cache an
     exhaustive oracle over 72 actions is six times more expensive than it needs
-    to be; with it, the nominal trace is also guaranteed to be *the same trace*
-    for every magnitude, which is what makes the paired comparison honest.
+    to be; with it, the nominal estimate is also guaranteed to be *the same
+    estimate* for every magnitude, which is what makes the paired comparison
+    honest.
+
+    **Traces are not cached.** An earlier version kept the full observation and
+    ground truth for every (action, plant, seed), which at campaign scale is
+    hundreds of megabytes of arrays nobody reads twice. Only the scalars the
+    comparison needs are kept, and a caller that wants a trace asks for a fresh
+    simulation.
     """
 
-    def __init__(self, duration_default: float = 8.0) -> None:
+    def __init__(self, duration_default: float = 8.0,
+                 conditions: Optional[Conditions] = None) -> None:
         self._nominal: Dict[Tuple[str, str, int], Tuple] = {}
         self._outcomes: Dict[Tuple[str, str, int, float], ActionOutcome] = {}
         self._duration_default = duration_default
+        self.conditions = conditions or Conditions()
+        self._simulations = 0
 
     @property
     def simulations(self) -> int:
-        """How many distinct plant runs this arena has actually performed."""
-        return len(self._nominal) + len(self._outcomes)
+        """How many plant runs this arena has actually performed."""
+        return self._simulations
+
+    def simulate_one(self, action: Action, plant: str, seed: int,
+                     delta: float) -> Tuple[Observation, GroundTruth]:
+        """One plant run under this arena's conditions. Never cached."""
+        duration = action.duration_s or self._duration_default
+        self._simulations += 1
+        return simulate(
+            action.command(), plant=plant, duration=duration, seed=seed,
+            sensing=self.conditions.sensing, r0_delta=delta,
+            drift_v_per_s=self.conditions.drift_v_per_s,
+            ringing_amplitude_v=self.conditions.ringing_amplitude_v)
 
     def nominal(self, action: Action, plant: str, seed: int
-                ) -> Tuple[Observation, GroundTruth, float, float]:
+                ) -> Tuple[GroundTruth, float, float]:
+        """``(truth, r_hat_nominal, S_II)``. The truth carries no traces."""
         key = (action.name, plant, seed)
         if key not in self._nominal:
-            duration = action.duration_s or self._duration_default
-            observation, truth = simulate(
-                action.command(), plant=plant, duration=duration, seed=seed)
-            self._nominal[key] = (observation, truth, _estimate(observation),
+            observation, truth = self.simulate_one(action, plant, seed, 0.0)
+            light = replace(truth, i_true=(), v_true=(), v1_true=())
+            self._nominal[key] = (light, _estimate(observation),
                                   _second_moment(observation))
         return self._nominal[key]
 
@@ -151,12 +194,10 @@ class Arena:
         cached = self._outcomes.get(key)
         if cached is not None:
             return cached
-        observation, nominal_truth, r_nominal, s_ii = self.nominal(
-            action, plant, seed)
-        duration = action.duration_s or self._duration_default
-        fault_observation, fault_truth = simulate(
-            action.command(), plant=plant, duration=duration, seed=seed,
-            r0_delta=delta)
+        nominal_truth, r_nominal, s_ii = self.nominal(action, plant, seed)
+        fault_observation, fault_truth = self.simulate_one(
+            action, plant, seed, delta)
+        fault_truth = replace(fault_truth, i_true=(), v_true=(), v1_true=())
         r_fault = _estimate(fault_observation)
         pair = TruthPair(nominal=nominal_truth, fault=fault_truth)
         change = ev.evaluate_change(r_nominal, r_fault, pair)
@@ -190,7 +231,7 @@ def p7a_select(arena: Arena, plant: str, seed: int, *,
     equivalent to diagnosis quality, and that is exactly why it is kept.
     """
     space = candidates(constraint)
-    return max(space, key=lambda a: arena.nominal(a, plant, seed)[3])
+    return max(space, key=lambda a: arena.nominal(a, plant, seed)[2])
 
 
 def p7b_select(arena: Arena, plant: str, seed: int, delta: float, *,

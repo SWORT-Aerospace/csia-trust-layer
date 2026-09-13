@@ -92,9 +92,9 @@ def test_p7a_uses_no_truth():
 def test_p7a_maximises_the_second_moment_it_claims_to():
     arena = ceilings.Arena()
     chosen = ceilings.p7a_select(arena, "Q1", DEV[0])
-    best = max(arena.nominal(a, "Q1", DEV[0])[3]
+    best = max(arena.nominal(a, "Q1", DEV[0])[2]
                for a in ceilings.candidates())
-    assert arena.nominal(chosen, "Q1", DEV[0])[3] == pytest.approx(best)
+    assert arena.nominal(chosen, "Q1", DEV[0])[2] == pytest.approx(best)
 
 
 def test_the_word_oracle_is_not_attached_to_p7a():
@@ -195,14 +195,46 @@ def test_p7c_may_differ_from_p7b_because_it_is_not_told_the_answer():
 
 # --- the arena itself -----------------------------------------------------
 
-def test_the_nominal_trace_is_shared_across_magnitudes(arena):
+def test_the_nominal_baseline_is_shared_across_magnitudes(arena):
     """Otherwise the paired comparison is against a moving baseline."""
-    first = arena.nominal(by_name("cosine3_10A_8s"), "Q1", DEV[0])
-    arena.run(by_name("cosine3_10A_8s"), "Q1", DEV[0], 0.004)
-    arena.run(by_name("cosine3_10A_8s"), "Q1", DEV[0], 0.040)
-    second = arena.nominal(by_name("cosine3_10A_8s"), "Q1", DEV[0])
-    assert first[2] == second[2]
-    assert np.array_equal(first[0].v_meas, second[0].v_meas)
+    action = by_name("cosine3_10A_8s")
+    before = arena.simulations
+    first = arena.nominal(action, "Q1", DEV[0])
+    arena.run(action, "Q1", DEV[0], 0.004)
+    arena.run(action, "Q1", DEV[0], 0.040)
+    second = arena.nominal(action, "Q1", DEV[0])
+    assert first[1] == second[1]          # the same nominal estimate
+    assert first[2] == second[2]          # the same second moment
+    assert first[0] == second[0]          # the same (trace-free) truth
+    assert arena.simulations - before <= 3
+
+
+def test_the_arena_does_not_hoard_traces(arena):
+    """Campaign scale makes trace caching hundreds of megabytes of dead weight."""
+    truth, _, _ = arena.nominal(by_name("cosine3_10A_8s"), "Q1", DEV[0])
+    assert truth.i_true == ()
+    assert truth.v_true == ()
+    assert truth.v1_true == ()
+
+
+def test_conditions_travel_with_the_arena():
+    """A ceiling computed under nominal drift is not a ceiling for a drifting cell."""
+    from csia_independent_validation.ceilings import Conditions
+    quiet = ceilings.Arena()
+    drifting = ceilings.Arena(conditions=Conditions(drift_v_per_s=2.0e-3))
+    assert quiet.conditions.drift_v_per_s == 0.0
+    assert drifting.conditions.drift_v_per_s == 2.0e-3
+    action = by_name("cosine3_10A_8s")
+    assert quiet.nominal(action, "Q1", DEV[0])[1] != \
+        drifting.nominal(action, "Q1", DEV[0])[1]
+
+
+def test_the_invariant_holds_under_elevated_drift_too():
+    from csia_independent_validation.ceilings import Conditions
+    drifting = ceilings.Arena(conditions=Conditions(drift_v_per_s=2.0e-3))
+    report = ceilings.ceiling_invariant(
+        drifting, "Q1", DEV[0], 0.010, deployable=ceilings.candidates())
+    assert report["holds"], report["violations"]
 
 
 def test_layer_b_estimator_is_written_here_not_imported():
