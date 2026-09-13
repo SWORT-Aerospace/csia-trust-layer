@@ -477,3 +477,57 @@ sentence, is the honest cost of a guard that works.
 
 **Full suite at this point:** 3410 collected, 3409 passing before the
 regeneration and 3410 after — the single failure was this and nothing else.
+
+---
+
+## IV-19 — The pre-action gate's safety half cannot fail, and I nearly shipped it that way
+
+**Found immediately after implementing `GATE_PRE`:** every admissible action
+has a peak excess of at most 14 A on a 20 A hover draw, so the worst predicted
+current is 34 A against a declared limit of 56 A. **No admissible action can
+fail the safety sub-gate.** It fails only for an abstention, where there is no
+action to check.
+
+This is the same shape as IV-1 — a check whose selected set is empty by
+construction — arriving in a different place, two hundred commits later,
+written by somebody who had just spent a day documenting IV-1.
+
+**It is a property of the action space, not of the check.** `PEAK_EXCESS_LIMIT_A`
+is 16 A and was frozen before any of this. The check itself works: a 45 A hold
+fails it, and that positive control is a test.
+
+**Not repaired by moving the margin.** Widening `CLIP_MARGIN_A` until the
+sub-gate bites would be choosing a threshold to manufacture a result, and the
+threshold has no independent justification at any value.
+
+**Consequence, which now travels with every gate result:** the pre-action
+gate's entire discriminating power comes from the **separation** sub-gate. Any
+reading of the 2×2 table as evidence about pre-action *safety* screening is
+unsupported here, and `RESULTS.md` says so where the table appears.
+
+**Tests:** `tests/test_iv_gates.py::test_no_admissible_action_can_fail_the_safety_sub_gate`,
+`::test_the_safety_check_itself_works`,
+`::test_the_module_says_the_sub_gate_is_vacuous` — the last one fails if
+somebody deletes the caveat from the source.
+
+---
+
+## IV-20 — The volume surrogate cannot distinguish touching from separated
+
+**Not my defect, and not the paper's either — a property of the objective**,
+flagged by the supplied related-work draft and confirmed here as an executable
+counterexample.
+
+The pairwise objective minimises intersection **volume**. For `[0, 1]` and
+`[1, 2]` the intersection is `{1}`: measure zero, and **not empty**. A baseline
+that reads zero volume as separation calls those two hypotheses
+distinguishable when they are not.
+
+So `PairOutcome` reports three fields and never collapses them: `zero_volume`,
+`empty_intersection` (strictly apart), and the signed `separation_margin`. The
+gate requires `empty_intersection`, not `zero_volume`. Hausdorff distance is
+reported beside the volume because it separates the two cases the volume
+cannot: 1.0 for the touching pair, 5.0 for a far one.
+
+**Test:** `tests/test_iv_discrimination.py::test_touching_sets_have_zero_volume_and_a_non_empty_intersection`
+and `::test_the_volume_surrogate_cannot_tell_those_two_cases_apart`.
