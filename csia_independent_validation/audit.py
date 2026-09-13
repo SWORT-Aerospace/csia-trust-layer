@@ -33,6 +33,10 @@ LAYER_A_MODULES: Tuple[str, ...] = (
     "csia_active_evidence.polarization",
     "csia_active_evidence.identifiability",
     "csia_active_evidence.authority",
+    # Deployable by construction: it chooses actions from observable state
+    # only, so it is held to Layer A's rules even though it lives in this
+    # package.
+    "csia_independent_validation.strategies",
 )
 
 #: Local top-level packages worth following. Anything outside these is a
@@ -94,8 +98,23 @@ def direct_imports(module: str) -> Set[str]:
             if name.split(".")[0] in LOCAL_ROOTS}
 
 
+def _ancestors(module: str) -> List[str]:
+    """Package ``__init__`` modules that run when ``module`` is imported.
+
+    Importing ``a.b.c`` executes ``a/__init__.py`` and ``a/b/__init__.py``
+    first. A walk that ignores that would call Layer A clean while a package
+    initialiser quietly pulled in ground truth at runtime.
+    """
+    parts = module.split(".")
+    return [".".join(parts[:i]) for i in range(1, len(parts))]
+
+
 def transitive_imports(modules: Iterable[str]) -> Set[str]:
-    """Everything reachable from ``modules`` through local imports."""
+    """Everything reachable from ``modules`` through local imports.
+
+    Includes the package initialisers Python runs on the way, because those
+    execute too and can import anything they like.
+    """
     seen: Set[str] = set()
     queue: List[str] = list(modules)
     while queue:
@@ -103,7 +122,7 @@ def transitive_imports(modules: Iterable[str]) -> Set[str]:
         if current in seen:
             continue
         seen.add(current)
-        for name in direct_imports(current):
+        for name in list(direct_imports(current)) + _ancestors(current):
             if name not in seen:
                 queue.append(name)
     return seen

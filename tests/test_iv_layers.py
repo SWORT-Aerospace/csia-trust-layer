@@ -25,10 +25,23 @@ def test_layer_a_cannot_reach_ground_truth():
 
 
 def test_layer_a_closure_is_small_enough_to_read():
-    """If Layer A's import closure explodes, this guarantee stops meaning much."""
+    """If Layer A's import closure explodes, this guarantee stops meaning much.
+
+    Two packages only, and from this one exactly the two truth-free modules a
+    deployable strategy needs: the action space and the strategies themselves.
+    """
     reachable = audit.transitive_imports(audit.LAYER_A_MODULES)
     packages = {name.split(".")[0] for name in reachable}
-    assert packages == {"csia_active_evidence"}
+    assert packages == {"csia_active_evidence", "csia_independent_validation"}
+    ours = {name for name in reachable
+            if name.startswith("csia_independent_validation")}
+    assert ours == {"csia_independent_validation",
+                    "csia_independent_validation.actions",
+                    "csia_independent_validation.strategies",
+                    "csia_independent_validation.actions.ACTION_SPACE",
+                    "csia_independent_validation.actions.Action",
+                    "csia_independent_validation.actions.PASSIVE",
+                    "csia_independent_validation.actions.by_name"}
 
 
 def test_the_certificate_itself_imports_nothing_from_this_package():
@@ -114,3 +127,20 @@ def test_a_pair_must_share_its_seed_and_its_plant():
         TruthPair(nominal=a, fault=c)
     ok = TruthPair(nominal=a, fault=dataclasses.replace(b, seed=1))
     assert ok.true_delta_r == pytest.approx(0.01)
+
+
+# --- package initialisers run too ----------------------------------------
+
+def test_the_walk_includes_package_initialisers():
+    """Importing a.b.c executes a/__init__.py, which can import anything."""
+    assert audit._ancestors("csia_independent_validation.plants") == [
+        "csia_independent_validation"]
+    assert audit._ancestors("csia_active_evidence") == []
+    reachable = audit.transitive_imports(
+        ["csia_independent_validation.strategies"])
+    assert "csia_independent_validation" in reachable
+
+
+def test_the_package_initialiser_itself_is_truth_free():
+    """If it ever imports plants or truth, every Layer A guarantee dies."""
+    assert audit.layer_a_leaks(["csia_independent_validation"]) == {}

@@ -120,8 +120,12 @@ class Action:
                 "digest": self.digest()}
 
 
+#: Duration zero, not eight seconds. Passive draws no excess current, so no
+#: time budget should ever exclude it; giving it a nominal window made it fail
+#: a remaining-time constraint it does not actually consume. Consumers that
+#: need a window length fall back to their own default when this is zero.
 PASSIVE = Action(name="passive", shape_name="zero", amplitude_a=0.0,
-                 duration_s=8.0)
+                 duration_s=0.0)
 
 
 def _build() -> Tuple[Action, ...]:
