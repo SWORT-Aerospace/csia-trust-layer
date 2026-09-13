@@ -288,3 +288,116 @@ Minimising it across an envelope minimises a noise realisation, so the
 It is a property of the objective it was handed. Recorded so that no reading of
 the P7c results treats action selection under the change loss as a statement
 about actions.
+
+---
+
+## IV-12 — I pushed with a red test. Again.
+
+**What happened:** `tests/test_post_e1_hardening_round2.py::test_the_build_provenance_describes_this_checkout`
+requires `research/physical_validation/results/BUILD_PROVENANCE.json` to name a
+commit within the last three. It named `c3ee776`, the prior phase's final
+bookkeeping commit. The moment this phase reached its second commit, `c3ee776`
+fell out of the window and the test went red.
+
+It stayed red through commits `8d7a625`, `45544bb`, `cfbfadd`, `f9e007c` and
+`cbe90cb`, all of which were pushed.
+
+**How it got past me:** I ran the full suite, but I read its progress dots while
+it was still running, committed on the strength of targeted runs of the tests I
+had just written, and never went back to the tail of the completed log. That is
+the same mechanism as `RC-22` in the prior phase — where a shell pipeline
+masked pytest's exit status — wearing different clothes. The lesson from RC-22
+was "check the exit code", and I did capture the exit code this time; I simply
+did not read it before committing.
+
+**Fix:** `BUILD_PROVENANCE.json` regenerated with `--regenerate`, which the
+tool requires and which demands the diff be explained. The diff is the `source`
+block only: commit, `describe` string and dirty-path list. `declared`,
+`frozen_core`, `host`, `installed`, `interpreter`, `schema` and
+`undeclared_dependency_check` are byte-identical, which is what one would
+expect from the same container an hour later.
+
+**Process change:** the artifact has to be regenerated in the last commit of
+any series, which is what the prior phase's `c3ee776` was for. And a full-suite
+exit code that has not been *read* is not a full-suite run.
+
+**Not amended away.** The five commits that carried the red test stay as they
+are.
+
+---
+
+## IV-13 — My routing predicate made every case look like an unknown fault
+
+**Found:** the first unknown-fault sweep counted a case as "routed to unknown"
+when the certificate returned `UNKNOWN_OR_MODEL_MISMATCH` **or**
+`MODEL_MISMATCH_LIMITED`. The second is the in-model "my error budget cannot
+resolve this" answer, and at a 0.010 Ω target it is what a **no-fault** run
+returns.
+
+The result was a routing rate of 1.000 at every amplitude including zero, and a
+"boundary" of 0.439 σ with **zero observations below it** — a number produced
+entirely by the predicate.
+
+**Compounding it:** the operating point was saturated. At 0.010 Ω this
+command's union bound is 0.005161 against an allowed 0.005000, dominated by the
+polarization term, so the certificate never certifies anything, fault or no
+fault.
+
+**Fix:** count `UNKNOWN_OR_MODEL_MISMATCH` only, and run at a 0.020 Ω target
+where the no-fault case certifies — the operating point the prior phase's
+ablation used. Both changed before the boundary was read.
+
+**After the fix:** routing is 0.000 up to 0.15 V, 0.333 at 0.20 V, 0.667 at
+0.30 and 0.40 V, 1.000 at 0.60 V, and the boundary is 3.363 σ with a rate of
+0.901 above and **0.000 below**, over 426 and 870 trials.
+
+**Test:** `tests/test_iv_openset.py::test_no_boundary_is_invented_when_the_data_has_none`
+pins the estimator's refusal to produce a boundary the data does not contain.
+
+---
+
+## IV-14 — Dropout was disconnected, and its sensitivity of exactly zero looked like a finding
+
+**Found:** the sensitivity audit reported `∂M_R^out/∂dropout = 0` exactly. The
+harness passed the full measured arrays to the estimator, so samples the
+telemetry layer had marked invalid were still being fitted. A 20% dropout
+changed nothing because nothing was dropped.
+
+This is the preregistered falsifier "sensing defects remain absent because the
+evaluator forgot them", and for one parameter it was true.
+
+**Fix:** the harness now uses `Observation.kept()`. Dropout registers at
+−2.25e-5 on the outcome and −9.43e-4 on the certificate.
+
+**Why it was not obvious:** four *other* parameters are also exactly zero, and
+all four are correct — a constant voltage offset is absorbed by the intercept,
+a constant current offset leaves the centred regressor alone, voltage noise
+cancels in the paired difference, and the estimator never reads time so
+timestamp jitter cannot reach it. A zero is not evidence of a bug and it is not
+evidence of insensitivity. It is evidence of nothing until somebody derives it,
+which is why every zero in `SENSITIVITY_AUDIT.md` now carries a derivation and
+a test.
+
+**Test:** `tests/test_iv_sensitivity.py::test_dropout_is_connected_which_it_was_not_at_first`,
+plus one derivation test per exact zero.
+
+---
+
+## IV-15 — The benchmark that failed is the textbook optimal design
+
+**Not a failure of mine, and worth recording as a correction to how the prior
+result should be read.**
+
+Inverting the Fisher matrix for `(E, R)` under `V = E − R·I + η` gives
+`var(R) = σ_V²/S_II` exactly. So minimising the Cramér–Rao variance of the
+resistance is *identically* maximising the centred second moment of current —
+P7a's objective. Measured over the 72-action space, `argmin var(R)`,
+`argmax S_II` and P7a's selection are the same action, `doublet_10A_8s`.
+
+P7a loses to the hindsight oracle by a median factor of 11 while spending 2.4×
+the energy.
+
+**Consequence:** "the oracle was not an oracle" is a sharper claim than it
+looked. The object that failed is the classical A-optimal design, and it failed
+because the model it is optimal *for* is not the plant. Any write-up that
+presents this as a design flaw in P7a is wrong; it is a model-mismatch result.
