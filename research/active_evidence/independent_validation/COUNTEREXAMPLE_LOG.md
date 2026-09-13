@@ -238,3 +238,53 @@ closed-loop fault that changed the current trajectory would break it.
 **Tests:** `tests/test_iv_plants.py::test_a_fault_in_r0_changes_the_voltage_by_exactly_minus_delta_times_i`,
 `::test_the_paired_change_error_is_exactly_the_finite_sample_eiv_factor`,
 `::test_the_point_estimate_does_not_enjoy_that_cancellation`.
+
+---
+
+## IV-10 — I assumed a prefix of a palindrome carries more drift leverage. It does not.
+
+**Believed, while drafting Proposition C:** truncating a palindromic probe
+breaks its symmetry, so the realized drift lever of the prefix must be worse
+than the full window's. That would make truncation at least *predictably* bad.
+
+**Found:** measured across the executed fraction, the realized lever is
+non-monotone and changes sign. Against a full-window lever of −0.02753 s:
+
+| fraction | lever (s) | |
+|---|---|---|
+| 0.20 | −0.07692 | 2.8× worse |
+| 0.25 | −0.09162 | 3.3× worse |
+| 0.40 | **+0.02828** | sign flipped |
+| 0.50 | +0.00193 | nearly vanishes |
+| 0.75 | +0.03864 | |
+| 0.90 | −0.04726 | |
+
+The test written to confirm the belief failed at 0.5 and the belief was
+replaced by the table. What survives, and is measured at every tested fraction,
+is that `S_II` strictly drops — so truncation always costs excitation, and the
+lever is not bounded in either direction.
+
+**Status:** Proposition C is stated as "not conservative in either direction"
+rather than "worse", which is what the data supports. Same shape as the prior
+phase's finding that lag underestimation is not automatically conservative.
+
+**Test:** `tests/test_iv_propositions.py::test_truncation_is_not_conservative_in_either_direction`.
+
+---
+
+## IV-11 — P7c is not robust under the metric it was given
+
+**Found:** the robust model-envelope oracle, taking a minimax over all three
+plants and all six magnitudes, selects **six different actions in six seeds**
+under the preregistered change loss. Under the point loss it selects three
+distinct actions in six seeds and converges on `cosine3_14A_8s`.
+
+**Why:** the same mechanism as IV-9. The change loss is `|λ̂ − 1|·Δ` and `λ̂` is
+a finite-sample quantity depending on the action and the current-noise draw.
+Minimising it across an envelope minimises a noise realisation, so the
+"robust" choice changes completely when the seed does.
+
+**Status:** not a defect in P7c, which does exactly what it is specified to do.
+It is a property of the objective it was handed. Recorded so that no reading of
+the P7c results treats action selection under the change loss as a statement
+about actions.
