@@ -240,3 +240,48 @@ def test_a_sign_change_in_the_active_advantage_is_reported():
 def test_the_oracle_is_marked_not_deployable():
     assert "P7_oracle" in DF.NOT_DEPLOYABLE
     assert "P7_oracle" in DF.specification()["not_deployable"]
+
+
+# --- the locked campaign runner, before it is run ---------------------------
+
+def test_the_sealed_partition_is_opened_in_exactly_one_place():
+    """The whole of the exposure must be one greppable import."""
+    import subprocess
+    out = subprocess.run(
+        ["git", "grep", "-l", "AMENDED_LOCKED", "--", "*.py"],
+        cwd=ROOT, capture_output=True, text=True)
+    files = {f for f in out.stdout.split() if f.endswith(".py")}
+    assert files <= {"csia_active_evidence/partitions.py",
+                     "tools/research/rcec_locked_campaign.py",
+                     "tests/test_rcec_repair.py"}, files
+
+
+def test_the_locked_runner_does_not_search_or_tune_at_run_time():
+    """P3's waveform is frozen before the partition opens; the runner must
+    not re-search it against locked outcomes."""
+    src = open(os.path.join(ROOT, "tools", "research",
+                            "rcec_locked_campaign.py"), encoding="utf-8").read()
+    assert "_P3_CACHE" in src
+    assert "frozen before the locked partition was opened" in src
+    for banned in ("locked_rows", "tune", "refit"):
+        assert f"def {banned}" not in src
+
+
+def test_the_oracle_is_excluded_from_deployable_comparisons():
+    src = open(os.path.join(ROOT, "tools", "research",
+                            "rcec_locked_campaign.py"), encoding="utf-8").read()
+    assert "a for a in DF.STRATEGIES\n                      if a not in DF.NOT_DEPLOYABLE" in src
+
+
+def test_the_runner_records_the_required_per_row_quantities():
+    from tools.research import rcec_locked_campaign as L
+    src = open(os.path.join(ROOT, "tools", "research",
+                            "rcec_locked_campaign.py"), encoding="utf-8").read()
+    for field in ("proposed_command_digest", "authorized_command_digest",
+                  "predicted_s_ii", "realized_s_ii", "predicted_drift_lever",
+                  "realized_drift_lever", "B_total", "U_R", "M_R", "state",
+                  "energy_as", "mission_deviation_as",
+                  "min_safety_margin_a", "runtime_s", "config_hash",
+                  "rng_streams"):
+        assert f'"{field}"' in src, field
+    assert L.source_sha()
