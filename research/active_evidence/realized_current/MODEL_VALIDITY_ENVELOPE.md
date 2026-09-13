@@ -41,6 +41,17 @@ reason agreement between them means anything.
 | correlated common-cause faults | faults are injected one at a time |
 | wind, thermal environment | absent |
 
+## SUPERSEDED MEASUREMENT — READ THIS FIRST
+
+> **The hysteresis numbers below were measured with a polarization bound that
+> has since been shown UNSOUND** (`COUNTEREXAMPLE_LOG.md` RC-13, understating
+> the truth fivefold). Re-measured with the corrected bound and a six-cycle
+> probe, the specific window closes: at 2.4x over-declaration the estimate
+> sits inside the correctly larger bound, and at 4x the residual check routes
+> it to `UNKNOWN_OR_MODEL_MISMATCH`. **This retires one measurement, not the
+> limit.** The 400-draw hunt has to be repeated across the whole envelope
+> before anything stronger is said.
+
 ## THE LIMIT THAT MATTERS MOST, MEASURED
 
 `hysteresis_v_max` is **told** to the certificate and never measured by it.

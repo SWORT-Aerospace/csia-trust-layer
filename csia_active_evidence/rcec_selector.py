@@ -88,12 +88,13 @@ def p0_passive(**_) -> Proposal:
                              "non-identifiable baseline"})
 
 
-def p1_palindromic(*, start, duration, amplitude, hz, **_) -> Proposal:
+def p1_palindromic(*, start, duration, amplitude, hz, cycles=3, **_) -> Proposal:
     t = window_times(start, duration, hz)
-    w = palindromic(t, start, duration, amplitude)
+    w = palindromic(t, start, duration, amplitude, cycles)
     return Proposal("P1_palindromic", WC.as_callable(w, t), w, duration,
                     _energy(w, hz),
-                    {"commanded_lever_is_zero_by_construction": True})
+                    {"commanded_lever_is_zero_by_construction": True,
+                     "cycles": cycles})
 
 
 def p2_compensated(*, start, duration, amplitude, hz, lag, authority_a,

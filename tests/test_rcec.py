@@ -23,6 +23,7 @@ if ROOT not in sys.path:
 
 from csia_active_evidence import battery_1rc as B                 # noqa: E402
 from csia_active_evidence import moment_feedback as MF            # noqa: E402
+from csia_active_evidence import polarization as PZ                # noqa: E402
 from csia_active_evidence import rcec                             # noqa: E402
 from csia_active_evidence import rcec_selector as RS              # noqa: E402
 from csia_active_evidence import realized_moments as RM           # noqa: E402
@@ -40,7 +41,8 @@ def doc():
 
 def budget(**kw):
     base = dict(r_reference=0.040, target_delta_r=0.020, sigma_v=0.020,
-                sigma_i=0.080, d_max=0.008, r1_max=0.020, tau1_min_s=5.0,
+                sigma_i=0.080, d_max=0.008,
+                polarization=PZ.PolarizationEnvelope(0.004, 0.020, 1.0, 40.0),
                 scale_error_max=0.005,
                 # battery_1rc has no hysteresis at all, so zero is the
                 # truthful declaration for it, not a convenience.
@@ -124,7 +126,8 @@ def test_control_04_a_large_voltage_step_at_constant_current_does_not_certify():
 
 
 def test_control_05_an_adequate_waveform_resolves_an_obvious_change():
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     clean = _win(p.command)
     faulted = _win(p.command, r0_delta=0.040)
     for w in (clean, faulted):
@@ -143,14 +146,16 @@ def test_control_06_an_inadequate_waveform_is_rejected():
 
 
 def test_control_07_an_unsafe_candidate_is_denied():
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command)
     cert = rcec.certify(w.t, w.i_meas, w.v_meas, budget(), safety_ok=False)
     assert cert.state == rcec.NO_SAFE_INFORMATIVE_ACTION
 
 
 def test_control_08_a_clipped_waveform_cannot_inherit_the_proposal():
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command)
     proposal = rcec.digest(p.samples)
     clipped = rcec.digest(p.samples * 0.5)
@@ -163,7 +168,8 @@ def test_control_08_a_clipped_waveform_cannot_inherit_the_proposal():
 
 
 def test_control_09_an_aborted_waveform_cannot_be_complete():
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command)
     d = rcec.digest(p.samples)
     assert rcec.certify(w.t, w.i_meas, w.v_meas, budget(),
@@ -173,7 +179,8 @@ def test_control_09_an_aborted_waveform_cannot_be_complete():
 
 
 def test_control_10_an_omitted_fault_does_not_become_a_known_label(doc):
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command, unmodelled_ringing=0.40)
     assert rcec.certify(w.t, w.i_meas, w.v_meas,
                         budget()).state == rcec.UNKNOWN_OR_MODEL_MISMATCH
@@ -229,9 +236,10 @@ def test_control_14_units_are_dimensionally_consistent():
 
 
 def test_control_15_missing_configuration_is_not_defaulted():
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command)
-    for missing in ("r1_max", "tau1_min_s", "scale_error_max",
+    for missing in ("polarization", "scale_error_max",
                     "hysteresis_v_max"):
         cert = rcec.certify(w.t, w.i_meas, w.v_meas,
                             budget(**{missing: None}))
@@ -242,7 +250,8 @@ def test_control_15_missing_configuration_is_not_defaulted():
 @pytest.mark.parametrize("mutation", ["s_ti_sign", "no_current_noise",
                                       "reversed_safety", "stale_certificate"])
 def test_control_16_mutations_are_killed(mutation):
-    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0)
+    p = RS.p1_palindromic(start=6.0, duration=8.0, amplitude=8.0, hz=50.0,
+                      cycles=6)
     w = _win(p.command)
     if mutation == "s_ti_sign":
         t = np.arange(0.0, 8.0, 0.02)
@@ -436,7 +445,7 @@ def test_hysteresis_needs_current_reversal_to_do_anything():
     a constant the regression absorbs into the intercept."""
     from csia_active_evidence import battery_multirc as MR
     t = RS.window_times(6.0, 8.0, 50.0)
-    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 8.0, 3), t)
+    cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 8.0, 6), t)
     tr = MR.simulate(cmd, duration=20.0, seed=999)
     assert tr.i_true.min() > 0.0, "the probe reversed the current after all"
     w = tr.window(6.0, 14.0)
@@ -483,32 +492,54 @@ def test_the_hysteresis_counterexample_is_covered_when_declared_truthfully():
     assert abs(r_hat - truth) > 0.005, "the counterexample stopped biting"
 
 
-def test_an_under_declared_bound_cannot_be_caught_from_one_probe():
-    """THE LIMIT, MEASURED AND RECORDED RATHER THAN PAPERED OVER.
+def test_the_under_declared_hysteresis_window_closed_when_the_bound_was_fixed():
+    """A LIMIT I RECORDED THAT NO LONGER HOLDS AS MEASURED, AND WHY.
 
-    Declaring 0.05 V of hysteresis for a pack that has 0.12 V yields a
-    CERTIFIED estimate that is wrong by more than its bound. Nothing inside
-    the certificate can detect this, because the certificate never measures
-    M -- it is told M. The declaration is load-bearing and must come from
-    cell characterisation, which this repository does not have.
+    MX-040 recorded that declaring 0.05 V of hysteresis for a pack with
+    0.12 V produced a CERTIFIED estimate wrong by more than its bound, and
+    that no test inside the framework detected it. That was measured with
+    the polarization bound that has since been shown UNSOUND, understating
+    the truth fivefold.
+
+    With the corrected envelope-evaluated bound and a six-cycle probe there
+    is no window left on this case: at 2.4x over-declaration the estimate
+    sits inside the (correctly larger) bound, and at 4x the residual check
+    fires and routes to UNKNOWN_OR_MODEL_MISMATCH.
+
+        true M    state                       |err|     bound
+        0.05      CERTIFIED_IN_MODEL          0.00280   0.00802
+        0.12      CERTIFIED_IN_MODEL          0.00767   0.00802
+        0.20      UNKNOWN_OR_MODEL_MISMATCH   0.01323   --
+        0.60      UNKNOWN_OR_MODEL_MISMATCH   0.04104   --
+
+    THIS DOES NOT RETIRE THE LIMIT. It retires one measurement of it. The
+    400-draw hysteresis hunt that produced "11 false certificates in 290"
+    also ran under the unsound bound and has to be repeated across the whole
+    envelope before anything stronger is said. `MODEL_VALIDITY_ENVELOPE.md`
+    carries that qualification.
     """
     from csia_active_evidence import battery_multirc as MR
     t = RS.window_times(6.0, 8.0, 50.0)
     cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, 15.0, 6), t)
     loop = B.Loop(**{**B.SYNTHETIC_LOOP, "base_current": 5.0})
-    pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC, "hysteresis_v": 0.12,
-                             "hysteresis_gamma": 20000.0})
-    tr = MR.simulate(cmd, duration=20.0, seed=999, pack=pack, loop=loop)
-    w = tr.window(6.0, 14.0)
-    cert = rcec.certify(w.t, w.i_meas, w.v_meas,
-                        budget(hysteresis_v_max=0.05))
-    assert cert.state == rcec.CERTIFIED
-    truth = pack.r0_at(float(np.mean(w.temp_c)))
-    r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
-    assert abs(r_hat - truth) > cert.resolution["achieved_error"], (
-        "the under-declared case stopped producing a wrong certificate; "
-        "if the certificate now catches it, this limit has been removed and "
-        "MODEL_VALIDITY_ENVELOPE.md must be rewritten")
+    seen = {}
+    for m_v in (0.12, 0.60):
+        pack = MR.MultiRCPack(**{**MR.SYNTHETIC_MULTIRC,
+                                 "hysteresis_v": m_v,
+                                 "hysteresis_gamma": 20000.0})
+        tr = MR.simulate(cmd, duration=20.0, seed=11000, pack=pack, loop=loop)
+        w = tr.window(6.0, 14.0)
+        cert = rcec.certify(w.t, w.i_meas, w.v_meas,
+                            budget(hysteresis_v_max=0.05))
+        r_hat = rcec.estimate_resistance(w.i_meas, w.v_meas)
+        truth = pack.r0_at(float(np.mean(w.temp_c)))
+        seen[m_v] = (cert.state, abs(r_hat - truth),
+                     cert.resolution.get("achieved_error"))
+
+    state, err, bnd = seen[0.12]
+    assert state == rcec.CERTIFIED
+    assert err <= bnd, (err, bnd)
+    assert seen[0.60][0] == rcec.UNKNOWN_OR_MODEL_MISMATCH
 
 
 def test_the_residual_check_is_blind_to_a_regressor_aligned_nuisance():
@@ -540,7 +571,7 @@ def test_a_healthy_multirc_pack_is_not_refused_at_low_probe_frequency():
     pack = MR.MultiRCPack(**MR.SYNTHETIC_MULTIRC)
     for amp in (8.0, 15.0, 22.0, 30.0):
         t = RS.window_times(6.0, 8.0, 50.0)
-        cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, amp, 3), t)
+        cmd = WC.as_callable(RS.palindromic(t, 6.0, 8.0, amp, 6), t)
         tr = MR.simulate(cmd, duration=20.0, seed=999)
         w = tr.window(6.0, 14.0)
         cert = rcec.certify(w.t, w.i_meas, w.v_meas,

@@ -21,11 +21,12 @@ THE ERROR DECOMPOSITION, AND WHY IT IS A UNION BOUND
     B_total = |B_drift| + |B_EIV| + |B_dynamic| + |B_mismatch|
             + |B_sampling| + |B_hysteresis|
 
-`B_dynamic` is the polarization term and it DEPENDS ON THE PROBE'S SPECTRUM,
-not only on the pack. A probe whose energy sits above `1/(2 pi tau1)` sees
-almost no polarization impedance. That is the one place in this file where a
-better waveform earns a smaller error, and it is why waveform design is
-worth doing at all.
+`B_dynamic` is the polarization term and it DEPENDS ON THE WAVEFORM, not
+only on the pack. It is the one place in this file where a better waveform
+earns a smaller error, and it is why waveform design is worth doing at all.
+It is computed by `polarization.bound`, which evaluates the branch over a
+declared envelope rather than using a closed form; the two closed forms
+tried before it were unsound, one in each direction.
 
 Added in absolute value, not in quadrature. The terms are NOT independent:
 open-circuit drift, polarization and a current-channel scale error all act on
@@ -119,6 +120,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 
+from . import polarization as _pz
 from .realized_moments import (Moments, attenuation, deconvolved_s_ii,
                                moments)
 
@@ -161,8 +163,10 @@ class ErrorBudget:
     sigma_v: float                   # V, commissioned
     sigma_i: float                   # A, commissioned
     d_max: float                     # V/s, bound on open-circuit drift
-    r1_max: Optional[float] = None   # ohm, bound on polarization resistance
-    tau1_min_s: Optional[float] = None  # s, LOWER bound on the RC time constant
+    #: The declared polarization envelope. Replaces the `r1_max` /
+    #: `tau1_min_s` pair, whose closed-form bound was measured to understate
+    #: the truth by a factor of five; see `polarization.py`.
+    polarization: Optional["_pz.PolarizationEnvelope"] = None
     scale_error_max: Optional[float] = None   # fractional current-gain error
     hysteresis_v_max: Optional[float] = None  # V, bound on |M| in OCV += M h
     delay_max_s: float = 0.0         # s, current-channel transport delay
@@ -182,7 +186,10 @@ class ErrorBudget:
             raise ValueError("sigma_i and d_max must be non-negative")
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        out = asdict(self)
+        out["polarization"] = (self.polarization.to_dict()
+                               if self.polarization is not None else None)
+        return out
 
 
 @dataclass(frozen=True)
@@ -265,33 +272,28 @@ def effective_frequency(t, i_meas) -> float:
 def _dynamic_bias(t, i_meas, budget: ErrorBudget):
     """Bound on the apparent resistance contributed by RC polarization.
 
-    THE TERM THAT MADE THE FIRST VERSION OF THIS FILE REFUSE EVERYTHING.
-    It originally used the worst case `R1_max` outright, which is correct
-    only if the polarization branch can respond instantly. With `R1_max`
-    equal to the target change, no excitation of any kind could clear the
-    margin, and the campaign's own negative control -- an 8 A cosine that
-    must certify -- refused. That is the control doing its job: the
-    certificate was not broken, the error model was too crude to let
-    waveform design matter at all.
+    THE TERM THAT HAS BEEN WRONG TWICE. It first used worst-case `R1`
+    outright, which made every waveform fail and was caught by a control
+    (RC-2). It then used `R1_max / sqrt(1 + (2 pi f_eff tau_min)^2)`, which
+    shipped, and which direct simulation of the branch measured as
+    understating the truth by a factor of five on a three-cycle palindromic
+    probe -- the false-certification direction.
 
-    A first-order polarization branch has impedance magnitude
-
-        |Z1(f)| = R1 / sqrt(1 + (2 pi f tau1)^2)
-
-    so a probe whose energy sits well above `1/(2 pi tau1)` sees almost none
-    of it. The bound therefore uses the realized current's power-weighted
-    mean frequency against a DECLARED LOWER BOUND on `tau1`. The lower bound
-    is the conservative direction: a faster polarization branch follows the
-    probe more closely and contributes more.
-
-    Returns `UNBOUNDED` unless BOTH `r1_max` and `tau1_min_s` are declared.
-    A missing declaration is never a zero.
+    Both closed forms assume the branch reaches steady state. Over a window
+    shorter than its time constant it does not, and the initial-condition
+    transient dominates. `polarization.bound` therefore evaluates the branch
+    directly over the declared envelope. It uses the waveform and nothing
+    else: no fault label, no hypothesis, no outcome.
     """
-    if budget.r1_max is None or budget.tau1_min_s is None:
+    if budget.polarization is None:
         return UNBOUNDED
-    f_eff = effective_frequency(t, i_meas)
-    denom = math.sqrt(1.0 + (2.0 * math.pi * f_eff * budget.tau1_min_s) ** 2)
-    return abs(budget.r1_max) / denom
+    t = np.asarray(t, dtype=float)
+    if t.size < 3:
+        return UNBOUNDED
+    dt = float(t[-1] - t[0]) / max(t.size - 1, 1)
+    if dt <= 0:
+        return UNBOUNDED
+    return _pz.bound(i_meas, dt, budget.polarization)
 
 
 def _hysteresis_bias(i_meas, budget: ErrorBudget, m: Moments):
@@ -299,6 +301,12 @@ def _hysteresis_bias(i_meas, budget: ErrorBudget, m: Moments):
 
     Zero when the current does not reverse, because the hysteresis state
     cannot move. Computed from the realized current, not declared.
+
+    Added after a false certification whose estimate was 4.81 times its own
+    bound from the truth: hysteresis voltage follows `sign(I)`, which for a
+    reversing probe is nearly in phase with `I`, so least squares attributes
+    it to resistance and the fit residual stays clean. A nuisance correlated
+    with the regressor is absorbed into the slope and leaves no residual.
     """
     if budget.hysteresis_v_max is None:
         return UNBOUNDED
@@ -523,7 +531,7 @@ def certify(t, i_measured, v_measured, budget: ErrorBudget,
                             "are not independent and no cancellation is "
                             "assumed"}
     unbounded = sorted(k for k in ("B_dynamic", "B_mismatch", "B_hysteresis")
-                       if terms[k] == UNBOUNDED)
+                       if terms[k] == _pz.UNBOUNDED or terms[k] == UNBOUNDED)
     if unbounded:
         return Certificate(
             state=MODEL_MISMATCH_LIMITED,

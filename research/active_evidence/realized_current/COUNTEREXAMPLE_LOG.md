@@ -16,7 +16,11 @@ failure of the compensation idea rather than of the fit.
 
 **Fixed** by direct residual minimisation over a `tau` grid. Known-answer
 check across three plant lags now recovers 0.71 to 0.93 of truth; it
-**under**-estimates, which under-compensates, which is conservative.
+**under**-estimates.
+
+> **AMENDED 2026-09-13.** This entry originally continued "which
+> under-compensates, which is conservative." **That claim is withdrawn.** See
+> RC-14.
 
 ## RC-2 — the polarization bound made the certificate refuse everything
 
@@ -213,3 +217,100 @@ different probe pairs were tried and all three behave the same way.
 **This is reported as a null result, not omitted.** The hysteresis
 declaration must come from cell characterisation. This repository has none,
 and this host cannot obtain any.
+
+---
+
+# Repair phase, 2026-09-13
+
+## RC-13 — the shipped polarization bound is unsound, by a factor of five
+
+`B_dynamic` shipped as `R1_max / sqrt(1 + (2 pi f_eff tau_min)^2)`. Measured
+against direct simulation of the branch it bounds, on the three-cycle
+palindromic probe the campaign's headline arms used:
+
+| | |
+|---|---|
+| committed bound | 0.00155 ohm |
+| true worst case over the declared envelope | 0.00797 ohm |
+
+**Understated fivefold, which is the false-certification direction.** Two
+independent errors: it used the magnitude of the branch impedance where a
+regression sees only its in-phase part, and the entire frequency-domain
+argument assumes a steady state the branch never reaches over a window
+shorter than its time constant.
+
+A Cauchy-Schwarz transient term was tried: sound for oscillating probes,
+**violated in 80 of 1200** (waveform, R1, tau, initial condition)
+combinations, because the transform's implicit periodic extension
+misrepresents a ramp.
+
+**Replaced by direct evaluation over the declared envelope.** Zero violations
+in 1800 draws, tightness 0.57 to 0.90, 40 ms per bound, and it uses only the
+waveform.
+
+**This invalidates part of MX-039.** A three-cycle probe now totals 0.01065
+against an allowed 0.01000 and does not certify. P1, P2, P4, P5 and P7 all
+used it. The arm comparison must be re-run.
+
+## RC-14 — "conservative" withdrawn for lag underestimation
+
+MX-039 said underestimating the loop lag is conservative because it
+under-compensates. **Asserted, not shown.** A signed sweep over assumed/true
+ratios from 0.25 to 4.0 measured:
+
+* the achieved error is **not monotone** in the lag ratio;
+* at a four-fold underestimate the **realized drift lever changes sign**, at
+  true lags of 0.10 s and 0.25 s. A sign change puts the bias on the other
+  side of the truth, which is not what conservative means.
+
+What survives, as a fact about the grid rather than a property: worst error
+under underestimation 0.0196 ohm, under the exact lag 0.0204 ohm, under
+overestimation 0.0232 ohm.
+
+## RC-15 — P3's pilot failure classified: optimizer, not infeasibility
+
+RC-3 asserted a cause from one observation. The binding-constraint table over
+all 120 grid candidates on the diagnostic partition settles it:
+
+| first binding condition | candidates |
+|---|---|
+| model mismatch / error budget | 76 |
+| **certified** | **24** |
+| excitation | 20 |
+
+**The feasible set is not empty.** The cheapest feasible witness is a
+palindromic probe, 4 A, 8 s, 6 cycles. The repaired objective finds it. The
+reconstructed pilot objective selects a 2 A, 2 s chirp that does not certify.
+
+So the failure was **objective misspecification, a form of optimizer
+failure** — not mathematical infeasibility, not prediction/realization
+mismatch, and not a certificate defect. RC-3's conclusion was right and its
+evidence was one data point; this is the table.
+
+It also confirms RC-3's secondary claim with a count rather than an anecdote:
+excitation binds for only 20 of 120 candidates, so `S_II_min` was never the
+constraint that mattered.
+
+## RC-16 — the pilot artifact cannot be recovered, only reconstructed
+
+`git log -S` over the campaign file finds no commit containing the failing
+objective. The pilot ran from uncommitted working state. Everything about it
+in this repository is **`RECONSTRUCTED_NOT_RECOVERED`**, rebuilt from RC-3's
+wording and re-run deterministically on the diagnostic partition. It is
+labelled that way in `results/RCEC_DIAGNOSTICS.json` and must not be cited as
+a recovered original.
+
+## RC-17 — a limit I recorded was measured under the unsound bound
+
+MX-040 recorded that an under-declared hysteresis bound produces certified
+estimates wrong by more than their bound, with no internal test able to catch
+it. **That was measured with the polarization bound RC-13 shows to be
+unsound.** Re-measured with the corrected bound and a six-cycle probe, the
+window closes on that case: at 2.4x over-declaration the estimate sits inside
+the correctly larger bound, and at 4x the residual check routes it to
+`UNKNOWN_OR_MODEL_MISMATCH`.
+
+**This retires one measurement, not the limit.** The 400-draw hunt that
+produced "11 false certificates in 290" also ran under the unsound bound and
+has to be repeated across the whole envelope before anything stronger is
+said.

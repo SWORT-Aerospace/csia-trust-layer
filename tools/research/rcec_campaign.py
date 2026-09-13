@@ -53,6 +53,7 @@ if ROOT not in sys.path:
 
 from csia_active_evidence import battery_1rc as B                # noqa: E402
 from csia_active_evidence import battery_multirc as MR          # noqa: E402
+from csia_active_evidence import polarization as PZ              # noqa: E402
 from csia_active_evidence import rcec                            # noqa: E402
 from csia_active_evidence import rcec_selector as RS             # noqa: E402
 from csia_active_evidence import realized_moments as RM          # noqa: E402
@@ -77,8 +78,10 @@ TARGET_DELTA_R = 0.020
 C_FRACTION = 0.5
 K_SIGMA = 3.0
 D_MAX = 0.008
-R1_MAX = 0.020
-TAU1_MIN_S = 5.0
+#: The declared polarization envelope, replacing the R1_MAX/TAU1_MIN pair
+#: whose closed-form bound was measured to understate the truth fivefold.
+POLARIZATION_ENVELOPE = PZ.PolarizationEnvelope(
+    r1_min=0.004, r1_max=0.020, tau_min_s=1.0, tau_max_s=40.0)
 SCALE_ERROR_MAX = 0.005
 HYSTERESIS_V_MAX = 0.05
 
@@ -94,7 +97,7 @@ def budget(**kw) -> rcec.ErrorBudget:
     base = dict(r_reference=R_REFERENCE, target_delta_r=TARGET_DELTA_R,
                 sigma_v=B.SYNTHETIC_SENSING["sigma_v"],
                 sigma_i=B.SYNTHETIC_SENSING["sigma_i"],
-                d_max=D_MAX, r1_max=R1_MAX, tau1_min_s=TAU1_MIN_S,
+                d_max=D_MAX, polarization=POLARIZATION_ENVELOPE,
                 scale_error_max=SCALE_ERROR_MAX,
                 hysteresis_v_max=HYSTERESIS_V_MAX,
                 c_fraction=C_FRACTION, k_sigma=K_SIGMA, min_samples=50)
@@ -644,7 +647,7 @@ def _an_adequate_waveform_is_certified(**_):
     refusal elsewhere is meaningless.
     """
     p = RS.p1_palindromic(start=ACTION_START, duration=ACTION_DURATION,
-                          amplitude=AMPLITUDE, hz=HZ)
+                          amplitude=AMPLITUDE, hz=HZ, cycles=6)
     w = _run(p, CAL_SEED)
     return rcec.certify(w.t, w.i_meas, w.v_meas, budget()).state
 
@@ -671,10 +674,15 @@ def _controls():
             name="an adequate realized waveform is certified",
             kind=NEGATIVE, run=_an_adequate_waveform_is_certified,
             expect=lambda s: s == rcec.CERTIFIED,
-            basis=("an 8 A whole-cycle cosine through a pack whose current "
-                   "channel has sigma 0.08 A gives a realized second moment "
-                   "orders of magnitude above the declared requirement; a "
-                   "certificate that refused it would refuse everything"),
+            basis=("an 8 A SIX-cycle cosine puts its energy above the "
+                   "polarization envelope's fastest declared time constant "
+                   "while delivering a realized second moment orders of "
+                   "magnitude above the requirement; a certificate that "
+                   "refused it would refuse everything. SIX rather than "
+                   "three because the corrected polarization bound measures "
+                   "a three-cycle probe as no longer adequate, which is "
+                   "itself a finding and is recorded in the counterexample "
+                   "log"),
         ),
     ))
 

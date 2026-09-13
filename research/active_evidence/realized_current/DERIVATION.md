@@ -46,7 +46,12 @@ corresponding term is `UNBOUNDED_TERM` and the state is
 `MODEL_MISMATCH_LIMITED`. There is no path by which an unbounded term
 becomes a zero.
 
-## 3. `B_dynamic`, and the control that forced it to be derived properly
+## 3. `B_dynamic` — SUPERSEDED. See §3a.
+
+> **The closed form described in this section was measured to be UNSOUND on
+> 2026-09-13 and has been replaced.** It is retained here because it is what
+> MX-039 and MX-040 were computed with, and removing it would make those
+> artifacts unreproducible. Read §3a before relying on anything below.
 
 The first version used `R1_max` outright. With `R1_max` equal to the target
 change, **no excitation of any kind could clear the margin**, and the
@@ -71,6 +76,48 @@ declared `tau1_min = 5 s`:
 
 This is the one place where a better waveform earns a smaller error, and it
 is why waveform design is worth doing at all.
+
+## 3a. `B_dynamic`, corrected: the branch is evaluated, not approximated
+
+The closed form in §3 understates the truth. Measured against direct
+simulation of the branch it bounds, on a three-cycle palindromic probe over
+an eight-second window with `R1` in [0.004, 0.020] and `tau` in [1, 40]:
+
+| | |
+|---|---|
+| committed closed-form bound | 0.00155 ohm |
+| true worst case | 0.00797 ohm |
+
+**A factor of five, in the false-certification direction.** Two errors:
+
+* `Re[Z1] = R1/(1 + (w tau)^2)`, not `R1/sqrt(1 + (w tau)^2)`. A regression
+  attributes the IN-PHASE part of the branch voltage to resistance, not its
+  magnitude;
+* the whole frequency-domain argument assumes **steady state**. Over a window
+  shorter than the branch's time constant it never reaches it, and the
+  initial-condition transient dominates. On a 1.2 A/s ramp over 8 s with
+  `tau = 13.5 s` the true apparent resistance is 0.0176 ohm, **larger than
+  `R1` itself**, which no steady-state formula produces.
+
+A Cauchy-Schwarz transient term was tried and is sound for oscillating probes
+and violated for low-variance ones: 80 violations in 1200 combinations.
+
+**No closed form is needed.** The branch is linear with one scalar state, so
+`polarization.bound` integrates it over the declared envelope of `R1`, `tau`
+and initial condition and takes the worst case. It uses **only the waveform**
+— no fault label, no hypothesis, no outcome — and the signature has no
+argument through which one could be passed.
+
+Measured: **zero violations in 1800 draws** inside the envelope across nine
+waveform families, tightness 0.57 to 0.90, about 40 ms per bound. It
+discriminates by a factor of 336 between a six-cycle palindromic probe and a
+slow ramp.
+
+**Consequence for the published arms.** Under the corrected bound a
+three-cycle palindromic probe no longer certifies: total error 0.01065
+against an allowed 0.01000. That is the probe P1, P2, P4, P5 and P7 all used
+in MX-039, so **that arm comparison was computed on an unsound bound and
+cannot stand as reported.**
 
 ## 4. The resolution rule
 
@@ -117,9 +164,14 @@ lever arms up to -1.138 s against a commanded 1e-16 (AE-F5).
 The lead compensator `u = w + tau dw/dt` inverts a first-order lag. Two
 things stop it being free: differentiation amplifies noise and can demand
 more authority than the vehicle has, and the inverse is only as good as
-`tau`. The fitted `tau` recovers a known plant value within 7 to 29 percent
-and **under-estimates**, which under-compensates, which is the conservative
-direction.
+`tau`. The fitted `tau` recovers a known plant value within 7 to 29 percent and
+under-estimates. **That is not the same as conservative**, and the word has
+been withdrawn: a signed sweep measured the achieved error to be
+non-monotone in the lag ratio, and at a four-fold underestimate the realized
+drift lever changes sign at true lags of 0.10 s and 0.25 s. On the swept grid
+the worst error under underestimation (0.0196 ohm) was not larger than under
+the exact lag (0.0204 ohm), and overestimation was worse (0.0232 ohm). That
+is a fact about the grid, not a property.
 
 ## 7. Units
 

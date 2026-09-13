@@ -4523,3 +4523,99 @@ entries:
     artifact: >-
       csia_evidence/; tests/test_evidence_base.py;
       docs/architecture/EVIDENCE_BASE_LAYER.md
+
+  - id: MX-042
+    date: 2026-09-13
+    phase: "RESEARCH (RCEC repair: unsound bound found, P3 failure classified)"
+    kind: MY_OWN_SHIPPED_ERROR_BOUND_WAS_UNSOUND_AND_INVALIDATES_PART_OF_MX_039
+    what_was_asked: >-
+      Diagnose and repair the RCEC experiment rather than improve its
+      reported result. Do not launch the final campaign.
+    two_premises_corrected_before_acting: >-
+      The instruction stated P3 never reaches a valid certificate. That is
+      true of the PILOT and not of the committed state, where P3 reports
+      CERTIFIED_IN_MODEL 50 of 50 in all three plant models; the failure was
+      repaired before the first artifact existed and is recorded as RC-3. The
+      instruction also stated the task metric reached its upper bound; it is
+      worse than that, floored at 0.00 for every arm at 0.005 ohm AND
+      ceilinged at 1.00 at 0.020 and 0.040, so exactly one of four grid
+      points discriminates and every reported difference between arms rests
+      on it.
+    the_finding_that_matters: >-
+      THE SHIPPED POLARIZATION BOUND IS UNSOUND. B_dynamic shipped as
+      R1_max/sqrt(1+(2 pi f_eff tau_min)^2). Measured against direct
+      simulation of the branch it bounds, on the three-cycle palindromic
+      probe the headline arms used: committed bound 0.00155 ohm, true worst
+      case over the declared envelope 0.00797 ohm. UNDERSTATED FIVEFOLD,
+      which is the false-certification direction. Two independent errors: it
+      used the MAGNITUDE of the branch impedance where a regression sees only
+      the in-phase part, and the whole frequency-domain argument assumes a
+      steady state the branch never reaches over a window shorter than its
+      time constant. On a 1.2 A/s ramp the true apparent resistance is 0.0176
+      ohm, LARGER THAN R1 ITSELF, which no steady-state formula produces.
+    what_this_invalidates: >-
+      Under the corrected bound a three-cycle palindromic probe totals
+      0.01065 against an allowed 0.01000 and DOES NOT CERTIFY. That is the
+      probe P1, P2, P4, P5 and P7 all used in MX-039, so that arm comparison
+      was computed on an unsound bound and cannot stand as reported. It is
+      withdrawn pending the amended campaign, and the MX-040 hysteresis limit
+      is marked SUPERSEDED for the same reason.
+    the_fix_and_why_no_closed_form: >-
+      A Cauchy-Schwarz transient term was tried and is sound for oscillating
+      probes and VIOLATED in 80 of 1200 (waveform, R1, tau, initial
+      condition) combinations. No closed form is needed: the branch is linear
+      with one scalar state, so polarization.bound integrates it over the
+      declared envelope and takes the worst case. Zero violations in 1800
+      draws across nine waveform families, tightness 0.57 to 0.90, about 40
+      ms per bound, and it discriminates by a factor of 336 between a
+      six-cycle probe and a slow ramp. It takes a waveform and an envelope
+      and there is NO argument through which a fault label, hypothesis or
+      outcome could reach it.
+    p3_failure_classified_with_a_table_not_an_anecdote: >-
+      Over all 120 grid candidates on the diagnostic partition the first
+      binding condition is model mismatch or error budget for 76, CERTIFIED
+      for 24, and excitation for only 20. THE FEASIBLE SET IS NOT EMPTY: the
+      cheapest witness is a palindromic probe at 4 A over 8 s with 6 cycles,
+      the repaired objective finds it, and the reconstructed pilot objective
+      picks a 2 A 2 s chirp that does not certify. So the pilot failure was
+      OBJECTIVE MISSPECIFICATION, a form of optimizer failure, not
+      infeasibility, not prediction mismatch and not a certificate defect.
+      RC-3's conclusion was right and its evidence was one data point.
+    conservative_withdrawn: >-
+      MX-039 called lag underestimation conservative because it
+      under-compensates. Asserted, not shown. A signed sweep over
+      assumed/true ratios from 0.25 to 4.0 measured the achieved error to be
+      NOT MONOTONE in the lag ratio, and at a fourfold underestimate the
+      REALIZED DRIFT LEVER CHANGES SIGN at true lags of 0.10 s and 0.25 s. A
+      sign change puts the bias on the other side of the truth. What survives
+      is a fact about the grid, not a property: worst error under
+      underestimation 0.0196, exact 0.0204, overestimation 0.0232.
+    a_process_failure_of_my_own: >-
+      The failing pilot objective was never committed, so the pilot artifact
+      never existed as a file and cannot be recovered. Fixing a defect before
+      the first commit leaves no evidence and the correction trail then rests
+      on prose alone. Everything preserved is labelled
+      RECONSTRUCTED_NOT_RECOVERED.
+    what_was_built_not_run: >-
+      csia_active_evidence/partitions.py with four new immutable partitions,
+      a hashed manifest and an accessor that refuses a sealed partition;
+      csia_active_evidence/polarization.py; csia_active_evidence/difficulty.py
+      declaring the sixteen-factor ladder, the signed resolution margin and
+      the strategy x effort-drift x plant factorial; and
+      tools/research/rcec_diagnostics.py. THE AMENDED LOCKED CAMPAIGN HAS NOT
+      BEEN RUN and no locked seed, original or amended, was read.
+    verdict: RECORDED
+    consequence: >-
+      An error bound that is sound over its declared envelope rather than
+      fivefold optimistic, P3's failure classified against all four candidate
+      causes with a table, a withdrawn conservatism claim, and a continuous
+      signed margin replacing a metric that discriminated at one grid point.
+      Part of MX-039 is withdrawn as a result.
+    artifact: >-
+      csia_active_evidence/polarization.py;
+      csia_active_evidence/partitions.py;
+      csia_active_evidence/difficulty.py;
+      tools/research/rcec_diagnostics.py; tests/test_rcec_repair.py;
+      research/active_evidence/realized_current/PREREGISTRATION_AMENDMENT_1.md;
+      research/active_evidence/realized_current/FAILED_PILOT_RECONSTRUCTION.md;
+      research/active_evidence/realized_current/results/RCEC_DIAGNOSTICS.json

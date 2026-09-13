@@ -48,3 +48,19 @@ Tier **E0** throughout. Quarantined post-freeze, research-only.
 | RC-D7 | An under-declared bound produces wrong certificates | `MEASURED` | 11 of 290 certified, worst ratio 1.53 |
 | RC-D8 | A second probe detects an under-declared bound | **`REFUTED`** | ratio 0.33, 0.55, 0.85 across three pairs, never above one |
 | RC-D9 | Robust operation across real battery chemistries | **`NOT SUPPORTED`** | RC-D7 and RC-D8 together: the declaration must come from characterisation data this repository does not have |
+
+## Repair phase, 2026-09-13
+
+| id | claim | status | evidence |
+|---|---|---|---|
+| RC-E1 | The shipped polarization bound is sound | **`REFUTED`** | understates fivefold: 0.00155 against a true 0.00797 |
+| RC-E2 | A steady-state spectral form can bound the branch over a short window | **`REFUTED`** | a 1.2 A/s ramp gives 0.0176, larger than `R1` itself |
+| RC-E3 | A Cauchy-Schwarz transient term repairs it | **`REFUTED`** | 80 violations in 1200 combinations |
+| RC-E4 | Direct evaluation over the declared envelope is sound | `NO_COUNTEREXAMPLE_IN_1800_DRAWS` | zero violations, tightness 0.57–0.90 |
+| RC-E5 | The MX-039 arm comparison stands as reported | **`WITHDRAWN`** | its three-cycle probe does not certify under the corrected bound |
+| RC-E6 | Lag underestimation is conservative | **`WITHDRAWN`** | error non-monotone in the lag ratio; lever sign flips at 4x underestimate |
+| RC-E7 | P3's pilot failure was infeasibility | **`REFUTED`** | 24 of 120 candidates certify; a witness exists |
+| RC-E8 | P3's pilot failure was optimizer/objective misspecification | `SUPPORTED` | repaired objective finds the witness, pilot objective does not |
+| RC-E9 | Excitation was the binding constraint | **`REFUTED`** | binds for 20 of 120; the error budget binds for 76 |
+| RC-E10 | The MX-040 hysteresis limit as measured | **`SUPERSEDED`** | measured under the unsound bound; that window closes with the corrected one, the limit itself is not retired |
+| RC-E11 | The failed pilot can be recovered | **`REFUTED`** | never committed; reconstruction only |

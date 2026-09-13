@@ -80,6 +80,24 @@ def estimate_lag(simulate, seeds, *, hz: float = 50.0,
     Minimising the RMS residual against the model directly has no such
     weighting: every sample counts once, in amps.
 
+    THE WORD "CONSERVATIVE" WAS WITHDRAWN HERE. An earlier revision said
+    underestimating `tau` is conservative because it under-compensates. That
+    was asserted, not shown, and a signed sweep over ratios from 0.25 to 4.0
+    of the true lag measured two things that contradict it:
+
+      * the achieved error is NOT monotone in the lag ratio
+        (`error_is_monotone_in_lag_ratio: false` in
+        `results/RCEC_DIAGNOSTICS.json`);
+      * at a four-fold underestimate the REALIZED DRIFT LEVER CHANGES SIGN,
+        at true lags of 0.10 s and 0.25 s. A sign change moves the bias to
+        the other side of the truth, which is not what conservative means.
+
+    What survives is narrower and is stated as a measurement rather than a
+    property: on the swept grid the worst achieved error under
+    underestimation (0.0196 ohm) was not larger than under the exact lag
+    (0.0204 ohm), while overestimation was worse (0.0232 ohm). That is a
+    fact about this grid. It is not monotonicity and it is not a guarantee.
+
     `simulate` is passed in rather than imported so this module never
     depends on one particular plant, and so a test can hand it a plant with
     a known `tau` and check the fit recovers it.
