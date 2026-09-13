@@ -25,6 +25,13 @@ BASE = ROOT / "research/active_evidence/independent_validation"
 RESULTS = BASE / "results"
 
 
+def _is_committed(path: pathlib.Path) -> bool:
+    import subprocess
+    result = subprocess.run(("git", "check-ignore", str(path)), cwd=ROOT,
+                            capture_output=True, text=True)
+    return result.returncode != 0
+
+
 def _load(name: str) -> Optional[Dict]:
     path = RESULTS / name
     return json.loads(path.read_text()) if path.is_file() else None
@@ -42,14 +49,26 @@ def _campaign_summary(campaign: Optional[Dict]) -> Dict:
             oracle[(row["plant"], row["drift_state"], row["magnitude"],
                     row["seed"])] = abs(row["e_delta_r"])
 
+    point_oracle: Dict[tuple, float] = {}
+    for row in main:
+        if row["arm"] == "P7b_point_oracle" and row["ae_r"] is not None:
+            point_oracle[(row["plant"], row["drift_state"], row["magnitude"],
+                          row["seed"])] = row["ae_r"]
+
     regret: Dict[str, List[float]] = collections.defaultdict(list)
+    point_regret: Dict[str, List[float]] = collections.defaultdict(list)
     violations: List[Dict] = []
     for row in main:
-        if row["e_delta_r"] is None:
-            continue
         key = (row["plant"], row["drift_state"], row["magnitude"],
                row["seed"])
-        if key not in oracle:
+        if row["ae_r"] is not None and key in point_oracle:
+            gap = row["ae_r"] - point_oracle[key]
+            point_regret[row["arm"]].append(gap)
+            if row["deployable"] and gap < -1e-12:
+                violations.append({k: row[k] for k in
+                                   ("arm", "plant", "drift_state",
+                                    "magnitude", "seed", "action", "ae_r")})
+        if row["e_delta_r"] is None or key not in oracle:
             continue
         value = abs(row["e_delta_r"]) - oracle[key]
         regret[row["arm"]].append(value)
@@ -78,9 +97,12 @@ def _campaign_summary(campaign: Optional[Dict]) -> Dict:
         "by_plant": reduction["by_plant"],
         "ceiling_invariant_violations": violations,
         "ceiling_invariant_holds": not violations,
-        "median_regret_by_arm": {
+        "median_regret_by_arm_change_loss": {
             arm: statistics.median(values) for arm, values in regret.items()
             if values},
+        "median_regret_by_arm_point_loss": {
+            arm: statistics.median(values)
+            for arm, values in point_regret.items() if values},
     }
 
 
@@ -100,7 +122,16 @@ def main() -> int:
             "hardware representativeness implied. Not a certified safety "
             "artifact, not airworthy, not production-ready. Nothing here "
             "promotes anything."),
-        "novelty_status": "BLOCKED_EXTERNAL_ACCESS",
+        "novelty_status": "NOVELTY_UNRESOLVED",
+        "novelty_status_note": (
+            "Amendment 3 moved this from BLOCKED_EXTERNAL_ACCESS, and that is "
+            "not an upgrade. The closest named source, arXiv:2606.19590v1, "
+            "could not be retrieved -- seven endpoints, all refused, see "
+            "results/EXTERNAL_ACCESS_CHECK.json -- so its primary text is "
+            "unread and no content hash exists. The claim-element matrix is "
+            "built against two user-supplied secondary characterisations and "
+            "every row of its Ni column is marked FROM_BRIEF_NOT_PRIMARY_TEXT. "
+            "Both facts travel together wherever this status appears."),
         "provenance": {
             "branch": provenance["git"]["branch"],
             "base_head": provenance["git"]["head"],
@@ -182,7 +213,11 @@ def main() -> int:
                 "not_implemented": list(baselines["not_implemented"]),
             }),
         "campaigns": {
-            name: _campaign_summary(_load(f"CAMPAIGN_{name.upper()}.json"))
+            name: {
+                **_campaign_summary(_load(f"CAMPAIGN_{name.upper()}.json")),
+                "committed": _is_committed(
+                    RESULTS / f"CAMPAIGN_{name.upper()}.json"),
+            }
             for name in ("calibration", "validation", "final")},
     }
     (BASE / "FINAL_SUMMARY.json").write_text(

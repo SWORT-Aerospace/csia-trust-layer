@@ -79,7 +79,15 @@ def main() -> int:
     from csia_independent_validation.actions import ACTION_SPACE
     from csia_independent_validation.runner import ARMS, MAGNITUDES, PLANTS
 
-    raw = sorted(p for p in RESULTS.glob("*.json"))
+    # Only files git will actually carry. A checksum manifest that pins an
+    # ignored local artifact fails for everyone who clones the repository,
+    # which is IV-5's lesson wearing a different hat.
+    ignored = subprocess.run(
+        ("git", "check-ignore", *[str(p) for p in RESULTS.glob("*.json")]),
+        cwd=ROOT, capture_output=True, text=True).stdout.split()
+    ignored_paths = {pathlib.Path(line).resolve() for line in ignored}
+    raw = sorted(p for p in RESULTS.glob("*.json")
+                 if p.resolve() not in ignored_paths)
     checksum_lines = [f"{_sha256(p)}  {p.relative_to(ROOT)}" for p in raw]
     (BASE / "RAW_CHECKSUMS.sha256").write_text(
         "\n".join(checksum_lines) + "\n")
