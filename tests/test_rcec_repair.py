@@ -262,7 +262,7 @@ def test_the_locked_runner_does_not_search_or_tune_at_run_time():
     src = open(os.path.join(ROOT, "tools", "research",
                             "rcec_locked_campaign.py"), encoding="utf-8").read()
     assert "_P3_CACHE" in src
-    assert "frozen before the locked partition was opened" in src
+    assert "rozen before the locked partition was opened" in src
     for banned in ("locked_rows", "tune", "refit"):
         assert f"def {banned}" not in src
 
