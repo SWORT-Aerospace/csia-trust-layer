@@ -62,11 +62,40 @@ that.
 
 ## 3. Certificate calibration, and every false certificate
 
-**Zero false certificates, on both metrics, out of 12 960 main-block cells.**
+**Zero false certificates observed, on both metrics, out of 12 960 main-block
+cells. That is a count, not a rate, and the denominator matters more than the
+zero.**
 
 Unlike the prior phase's identical-sounding claim, this one comes from a check
 that can be non-empty: `evaluator.false_certificates` compares a certified cell
 against simulator truth, and a test constructs a case where it returns one.
+
+### The denominator, and the bound
+
+For zero observed failures in `N` independent trials the one-sided 95% upper
+bound is approximately `3/N`. `N` is **not** the row count:
+
+| denominator | `N` | 95% upper bound | |
+|---|---|---|---|
+| certified rows | 2404 | 1.25e-3 | inflated — see below |
+| **distinct experiments** | **1227** | **2.45e-3** | **the honest count** |
+| distinct seeds | 24 | 1.25e-1 | the most conservative reading |
+
+Several arms choose the **same action in the same cell**, and when they do they
+are one simulation counted several times — up to **seven** arms share a single
+experiment here. Counting rows would halve the bound for free, and that is
+exactly the sort of free tightening that should not be available.
+
+Even 1227 assumes distinct simulations are independent, which they are not:
+they share 24 seeds, one plant family, one command library and one declared
+envelope. The true effective count lies between 1227 and 24 and this phase does
+not claim to know where.
+
+**So the defensible statement is: zero false certificates observed, with a 95%
+upper bound of 2.4e-3 on the false-certificate rate under the most favourable
+independence assumption this data supports.** Reaching a 1e-4 bound would need
+roughly **24 times** more distinct experiments. `zero` alone is never a rate
+claim (`results/ZERO_EVENT_BOUND_VALIDATION.json`).
 
 | certificate state | n | resolved (change) | resolved (point) | median `AE_R` | meets 90% target |
 |---|---|---|---|---|---|

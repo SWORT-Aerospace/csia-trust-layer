@@ -29,6 +29,26 @@ test in this repository, and those are verifiable here.
 A claim-element comparison against an unread primary text cannot settle
 novelty. This matrix narrows the question and records what would close it.
 
+**Update.** A third secondary source arrived after this matrix was written: the
+downstream roadmap `XR_AHE_CSIA_FORGE_MODEL_SPECIFIC_ROADMAP_V0_3_1.md`, whose
+§15 states the primary HTML text **was** accessible during that document's
+revision and adds detail — GPU runtimes from 3.84 ms to 47.2 ms across the
+paper's cases, exact nonlinear reachability intractable, the
+output-anticipating refinement dependent on a computable closed-form interval
+preimage, and the volumetric objective explicitly a tractable surrogate.
+
+That is a better secondary source and it is still secondary **from here**. A
+report that somebody read a paper is not a claim-element comparison performed
+against it, and it does not put the text in this container. Every row below
+stays `FROM_BRIEF_NOT_PRIMARY_TEXT` and the status stays
+`NOVELTY_UNRESOLVED`.
+
+What it does do is corroborate: all three secondary sources agree on the two
+qualifications this phase acted on — the objective is volumetric, and zero
+volume is not empty intersection. That agreement is why the touching-set
+distinction was built into `discrimination.py` rather than assumed away, and it
+turned out to matter in 48 of 12 960 cells.
+
 ## 2. The matrix
 
 | # | Claim element | Ni et al. (secondary) | RCEC current evidence (verified here) | Consequence |
