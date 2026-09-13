@@ -15,6 +15,7 @@ import dataclasses
 import pytest
 
 from csia_independent_validation import audit
+from csia_independent_validation.plants import Observation
 
 
 # --- the guarantee --------------------------------------------------------
@@ -67,3 +68,49 @@ def test_relative_imports_are_resolved_not_skipped():
 def test_checker_is_not_vacuous_on_an_empty_module_list():
     assert audit.layer_a_leaks([]) == {}
     assert audit.transitive_imports([]) == set()
+
+
+# --- the data schema is a leak path too ----------------------------------
+
+def test_observation_carries_nothing_that_smells_of_truth():
+    names = [f.name for f in dataclasses.fields(Observation)]
+    assert audit.observation_schema_is_clean(names) == []
+
+
+def test_observation_fields_are_exactly_what_was_declared():
+    """Pinned. Adding a field to the Layer A observation is a design change."""
+    names = {f.name for f in dataclasses.fields(Observation)}
+    assert names == {"t", "i_meas", "v_meas", "i_command", "valid",
+                     "saturated", "dt_nominal"}
+
+
+@pytest.mark.parametrize("leaked", ["r0_true", "fault_label", "true_delta",
+                                    "hidden_state", "oracle_choice",
+                                    "gt_resistance", "actual_r0"])
+def test_schema_checker_catches_a_planted_field(leaked):
+    assert audit.observation_schema_is_clean(["t", "i_meas", leaked]) == [
+        leaked]
+
+
+# --- truth refuses to cross the boundary ---------------------------------
+
+def test_there_is_no_supported_way_to_hand_truth_to_layer_a():
+    from csia_independent_validation import truth
+    with pytest.raises(PermissionError):
+        truth.strip(None)
+
+
+def test_a_pair_must_share_its_seed_and_its_plant():
+    from csia_independent_validation.truth import GroundTruth, TruthPair
+    a = GroundTruth(plant="Q1", r0_nominal=0.04, r0_realized=0.04,
+                    fault_label="none", seed=1)
+    b = GroundTruth(plant="Q1", r0_nominal=0.04, r0_realized=0.05,
+                    fault_label="r0_increase", seed=2)
+    with pytest.raises(ValueError):
+        TruthPair(nominal=a, fault=b)
+    c = GroundTruth(plant="Q0", r0_nominal=0.04, r0_realized=0.05,
+                    fault_label="r0_increase", seed=1)
+    with pytest.raises(ValueError):
+        TruthPair(nominal=a, fault=c)
+    ok = TruthPair(nominal=a, fault=dataclasses.replace(b, seed=1))
+    assert ok.true_delta_r == pytest.approx(0.01)

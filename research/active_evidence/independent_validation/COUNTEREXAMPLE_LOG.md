@@ -130,3 +130,111 @@ by enumerating ten plausible formulations and testing each; nine did not match.
 Now pinned in `tools/research/iv_base_provenance.py` and asserted in
 `tests/test_iv_provenance.py::test_frozen_core_digest_and_its_derivation`. All
 12 files match their recorded digests.
+
+---
+
+## IV-7 — An inactive branch was shifting an active stream (found in construction)
+
+**Found:** the first draft of `csia_independent_validation/plants.py` drew the
+timestamp-jitter block only when jitter was enabled:
+
+```python
+jitter = rng["telemetry"].normal(...) if sensing.timestamp_jitter_s > 0 \
+    else np.zeros(n)
+keep = rng["telemetry"].random(n) >= sensing.dropout
+```
+
+Both draws come from the `telemetry` generator, so enabling jitter consumed
+`n` values and silently changed the dropout mask of the same seed. Two runs
+differing only in a timestamp setting would have dropped different samples, and
+any effect attributed to jitter would have been partly an effect of losing
+different data.
+
+**Fix:** draw the block unconditionally and scale it afterwards. The decision
+to enable a defect now consumes exactly the same randomness as the decision not
+to.
+
+**Test:** `tests/test_iv_plants.py::test_enabling_jitter_does_not_change_the_dropout_mask`
+and `::test_injecting_ringing_does_not_disturb_the_current_channel`.
+
+Found before any outcome was produced. Recorded because the same class of
+defect cost the prior phase a whole pilot campaign (the P4 arm that never ran).
+
+---
+
+## IV-8 — A "dynamic" effect slower than the probe is not a dynamic effect
+
+**Found:** Q2's Plett hysteresis was first parameterised with
+`hysteresis_gamma = 0.08`. With `dh/dt = -(γ|I|/Q)(h - sign I)` at 20 A and
+4 Ah that is a rate of 1.1e-4 s⁻¹, a time constant near **9000 s**. Across a
+12 s probe the state moves by 0.13% of its range: removing hysteresis entirely
+changed the terminal voltage by 4.7e-5 V, below the 0.020 V sensor noise.
+
+Q2 exists to carry at least one dynamic effect the deployable estimator has no
+term for. At that rate it carried a **constant offset** instead, which the
+estimator absorbs into its intercept for free. The plant would have looked
+richer than the others while being, in the only respect that mattered,
+identical.
+
+**Fix:** use `hysteresis_gamma = 60.0`, the value already declared by the prior
+phase's `battery_multirc.py`. At 20 A that is a time constant near 12 s,
+comparable to a probe window. This is a repository-backed value, not a number
+chosen to make an effect appear; the check that it lands in a usable range is
+an executable test, not a judgement.
+
+**Test:** `tests/test_iv_plants.py::test_hysteresis_moves_within_a_probe_window`,
+`::test_removing_hysteresis_is_detectable_on_q2`.
+
+Found before any outcome was produced.
+
+---
+
+## IV-9 — The preregistered change metric cancels the plant almost entirely
+
+**Found, in the development partition, before any campaign:** on matched
+nominal/fault pairs driven by common random numbers, the paired change error is
+the same to within a factor of two across Q0, Q1 and Q2 — median `|e_ΔR|` of
+4e-6 ohm on all three — while the *point* error separates them cleanly: median
+`AE_R` of 1.94e-4 (Q0), 6.57e-4 (Q1) and 5.06e-4 (Q2) ohm.
+
+**Why.** The current trajectory in these plants is driven by command and lag,
+not by terminal voltage, so a change in `R₀` does not change `I(t)`. Between a
+matched pair every state is identical sample for sample and
+
+```
+V_fault(t) − V_nominal(t) = −ΔR₀ · I_true(t)
+```
+
+to floating point — verified at 1e-12. Least squares is linear in the response
+and the regressor is shared, so
+
+```
+R̂_fault − R̂_nominal = ΔR₀ · cov(I_true, I_meas)/var(I_meas) = ΔR₀ · λ̂
+```
+
+Every plant-common nuisance — OCV curvature, both polarization branches,
+hysteresis, self-heating, open-circuit drift, and the voltage-noise draw
+itself — cancels exactly. What survives is only the finite-sample
+errors-in-variables factor on the shared regressor. Measured: the ratio is
+1.000946 for Δ = 0.002, 0.010 and 0.040 alike, and λ̂ computed directly from
+the traces is 1.0009463544, agreeing to seven digits. The population value is
+0.9998157; this particular noise draw happens to sit above one.
+
+**Status:** not a defect, and **not repaired**. `e_ΔR` is the metric §5 of the
+task defines and §2 of the preregistration froze, and it stays primary. But it
+is now known to be near-blind to plant structure *by construction of the
+paired design*, so:
+
+* plant discrimination (H5) rests on the point metric `AE_R`, which was
+  preregistered in §4.1 and does not cancel;
+* any claim that "the richer plant did not change the outcome" must name which
+  outcome, because for `e_ΔR` that is a theorem about the design and not a
+  finding about the plant.
+
+The cancellation is a property of this experimental design — common random
+numbers, and a fault that does not move the current — not of the world. A
+closed-loop fault that changed the current trajectory would break it.
+
+**Tests:** `tests/test_iv_plants.py::test_a_fault_in_r0_changes_the_voltage_by_exactly_minus_delta_times_i`,
+`::test_the_paired_change_error_is_exactly_the_finite_sample_eiv_factor`,
+`::test_the_point_estimate_does_not_enjoy_that_cancellation`.
