@@ -199,3 +199,47 @@ def test_slice_rows_matches_on_every_named_condition():
     assert runner.slice_rows(rows, arm="A") == rows[:2]
     assert runner.slice_rows(rows, arm="A", plant="Q1") == [rows[1]]
     assert runner.slice_rows(rows, arm="Z") == []
+
+
+# --- the nominal cache ----------------------------------------------------
+
+def test_the_nominal_cache_returns_what_a_fresh_run_would():
+    """An optimisation is only allowed if it is provably the same answer."""
+    from csia_active_evidence import rcec
+
+    campaign = runner.Campaign()
+    action = st.p2_compensated(runner.observable())
+    target = cell()
+    cached_r, cached_truth = campaign._nominal_summary(action, target)
+
+    fresh_obs, fresh_truth = campaign._run(action, target, magnitude=0.0)
+    _, current, voltage = fresh_obs.kept()
+    assert cached_r == rcec.estimate_resistance(current, voltage)
+    assert cached_truth.r0_nominal == fresh_truth.r0_nominal
+    assert cached_truth.r0_realized == fresh_truth.r0_realized
+    assert cached_truth.seed == fresh_truth.seed
+
+
+def test_the_nominal_cache_is_shared_across_magnitudes():
+    campaign = runner.Campaign()
+    campaign.row("P2_compensated", cell(magnitude=0.002))
+    after_first = campaign.plant_runs
+    campaign.row("P2_compensated", cell(magnitude=0.040))
+    # the second magnitude costs one fault run, not two
+    assert campaign.plant_runs - after_first == 1
+
+
+def test_the_nominal_cache_is_not_shared_across_conditions():
+    campaign = runner.Campaign()
+    quiet, _ = campaign._nominal_summary(
+        st.p2_compensated(runner.observable()), cell(drift_state="nominal"))
+    drifting, _ = campaign._nominal_summary(
+        st.p2_compensated(runner.observable()), cell(drift_state="elevated"))
+    assert quiet != drifting
+
+
+def test_the_cache_stores_no_traces():
+    campaign = runner.Campaign()
+    _, truth = campaign._nominal_summary(
+        st.p2_compensated(runner.observable()), cell())
+    assert truth.i_true == () and truth.v_true == () and truth.v1_true == ()

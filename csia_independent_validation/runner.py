@@ -113,6 +113,7 @@ class Campaign:
 
     def __init__(self) -> None:
         self._arenas: Dict[Tuple, ceilings.Arena] = {}
+        self._nominal: Dict[Tuple, Tuple] = {}
         self.plant_runs = 0
 
     # -- plant access -----------------------------------------------------
@@ -147,6 +148,26 @@ class Campaign:
             seed=cell.seed, sensing=self._sensing(cell),
             r0_delta=magnitude, drift_v_per_s=cell.drift_v_per_s,
             ringing_amplitude_v=cell.ringing_v)
+
+    def _nominal_summary(self, action: Action, cell: Cell) -> Tuple:
+        """``(r_hat_nominal, trace-free truth)``, cached.
+
+        The nominal half of a matched pair depends on the action, the plant,
+        the conditions and the seed -- never on the magnitude -- and
+        :func:`simulate` is deterministic in exactly those. Only the two
+        scalars the comparison needs are kept, so the cache costs nothing in
+        memory, and a test asserts the cached answer equals a fresh one.
+        """
+        sensing = self._sensing(cell)
+        key = (action.name, cell.plant, cell.drift_state, cell.seed,
+               cell.ringing_v, tuple(sorted(sensing.to_dict().items())))
+        if key not in self._nominal:
+            observation, truth = self._run(action, cell, magnitude=0.0)
+            _, current, voltage = observation.kept()
+            self._nominal[key] = (
+                _rcec.estimate_resistance(current, voltage),
+                replace(truth, i_true=(), v_true=(), v1_true=()))
+        return self._nominal[key]
 
     # -- arms --------------------------------------------------------------
 
@@ -192,11 +213,9 @@ class Campaign:
                     "P7a_benchmark", "P7b_oracle", "P7c_robust"),
             }
 
-        nominal_obs, nominal_truth = self._run(proposal, cell, magnitude=0.0)
+        r_nominal, nominal_truth = self._nominal_summary(proposal, cell)
         fault_obs, fault_truth = self._run(proposal, cell,
                                            magnitude=cell.magnitude)
-
-        nominal_t, nominal_i, nominal_v = nominal_obs.kept()
         fault_t, fault_i, fault_v = fault_obs.kept()
 
         if cell.execution == "aborted":
@@ -222,12 +241,13 @@ class Campaign:
             fault_t, fault_i, fault_v, _budget(cell.magnitude),
             execution=execution)
 
+        r_fault = _rcec.estimate_resistance(fault_i, fault_v)
         change = ev.evaluate_change(
-            _rcec.estimate_resistance(nominal_i, nominal_v),
-            _rcec.estimate_resistance(fault_i, fault_v),
-            TruthPair(nominal=nominal_truth, fault=fault_truth))
-        point = ev.evaluate_point(
-            _rcec.estimate_resistance(fault_i, fault_v), fault_truth)
+            r_nominal, r_fault,
+            TruthPair(nominal=nominal_truth,
+                      fault=replace(fault_truth, i_true=(), v_true=(),
+                                    v1_true=())))
+        point = ev.evaluate_point(r_fault, fault_truth)
 
         return {
             "arm": arm, "plant": cell.plant, "drift_state": cell.drift_state,

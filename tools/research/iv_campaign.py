@@ -64,10 +64,18 @@ EXECUTIONS = ("full", "clipped", "aborted")
 ABLATION_ARMS = tuple(st.STRATEGIES) + tuple(st.SELECTORS)
 
 
+def _progress(message: str) -> None:
+    """Flushed, because a run that dies silently is indistinguishable from one
+    that is still working."""
+    print(message, flush=True)
+
+
 def main_block(campaign: Campaign, seeds) -> List[Dict]:
     rows: List[Dict] = []
     for plant in PLANTS:
         for drift in DRIFT_STATES:
+            _progress(f"  main: {plant} / {drift} drift "
+                      f"({len(rows)} rows so far)")
             for seed in seeds:
                 for magnitude in MAGNITUDES:
                     cell = Cell(plant=plant, drift_state=drift,
@@ -239,9 +247,15 @@ def run(partition: str, *, open_the_seal: bool) -> int:
     campaign = Campaign()
     started = time.time()
 
+    _progress(f"partition {partition}: {len(seeds)} seeds")
     rows = main_block(campaign, seeds)
+    _progress(f"  main block done: {len(rows)} rows, "
+              f"{campaign.simulations} plant runs, "
+              f"{time.time() - started:.0f} s")
     for name, cells in ablation_cells(seeds).items():
         rows.extend(ablation_block(campaign, seeds, name=name, cells=cells))
+        _progress(f"  ablation {name}: {len(rows)} rows total, "
+                  f"{time.time() - started:.0f} s")
     elapsed = time.time() - started
 
     document = {
