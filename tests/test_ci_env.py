@@ -56,15 +56,17 @@ SCANNED_DIRS = ("csia", "tests", "tools")
 # walks, and a top-level package outside those directories would
 # otherwise be reported as an undeclared PyPI dependency.
 #
-# ALL SIX WERE CAUGHT BY THIS GUARD ON THEIR FIRST COMMIT, which is the
+# ALL SEVEN WERE CAUGHT BY THIS GUARD ON THEIR FIRST COMMIT, which is the
 # guard working: a genuinely undeclared dependency and a first-party package
 # outside the scanned set look identical to the scan, and the fix differs.
 # `csia_components` is the fifth, caught 2026-09-11 (MX-035).
 # `csia_active_evidence` is the sixth, caught 2026-09-12 (MX-037).
+# `csia_evidence` is the seventh, caught 2026-09-13 (MX-041).
 LOCAL_NAME_DIRS = SCANNED_DIRS + ("research", "engineering",
                                   "csia_assurance", "csia_mission",
                                   "csia_stress", "csia_supervision",
-                                  "csia_components", "csia_active_evidence")
+                                  "csia_components", "csia_active_evidence",
+                                  "csia_evidence")
 
 #: import name -> PyPI distribution, where they differ
 IMPORT_TO_DIST = {"yaml": "pyyaml", "z3": "z3-solver"}

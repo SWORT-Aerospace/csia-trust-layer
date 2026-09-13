@@ -4433,3 +4433,93 @@ entries:
       csia_active_evidence/battery_multirc.py; csia_active_evidence/rcec.py;
       tools/research/rcec_campaign.py; tests/test_rcec.py;
       research/active_evidence/realized_current/
+
+  - id: MX-041
+    date: 2026-09-13
+    phase: "RESEARCH (evidence-base layer: ingestion, intent, corpus)"
+    kind: THREE_GAPS_CLOSED_AND_TWO_OF_MY_OWN_DESIGNS_WERE_TOO_WEAK_ON_FIRST_RUN
+    what_was_asked: >-
+      Read an external requirements document as a specification for an
+      evidence layer, take what generalises, and build it so it strengthens
+      the CSIA core rather than serving one domain.
+    what_was_built: >-
+      csia_evidence/, three modules that qualify THE EVIDENCE rather than the
+      vehicle, with 40 tests. Nothing in the package knows what an aircraft
+      is: a channel is a named series, a commitment is a checkable predicate,
+      a run is a record with declared factors.
+    the_rule_the_package_is_built_under: >-
+      NOTHING IN THIS PACKAGE PROMOTES ANYTHING. Each module returns a record
+      and a human or an explicit policy decides. Asserted by a test against
+      the package docstring and against the public API, and it is the same
+      discipline csia_supervision/capability_bridge.py follows one layer
+      down.
+    gap_one_ingestion: >-
+      CSIA's answer to an undeclared channel was NOT_EVALUABLE, which is safe
+      and, against data it did not design, useless. Recognition now reports
+      itself across seven ordered evidence kinds with NO NUMBER attached to
+      any of them, because there is no calibrated population from which one
+      could be computed. Only DECLARED and NAME_EXACT are usable without
+      review. Conflicts are first class: when a name says one thing and a
+      declared unit says another, the disagreement IS the finding and a
+      conflicted mapping is never usable whatever its best grade.
+    gap_two_intent: >-
+      CSIA had no representation of tasking, so it could not tell a fault
+      from a deliberate change of plan; those look identical in telemetry and
+      mean opposite things. The non-obvious part is the reason to build it: a
+      deviation CHANGES WHICH EVIDENCE IS ADMISSIBLE, because half of CSIA's
+      relations are gated on an operating condition. A debrief that says it
+      deviated at t=340 and stops has discarded the more useful half, which
+      is that for the next 90 seconds these relations could not run.
+      NOT_EVALUABLE is deliberately distinct from HELD, and the module
+      refuses to judge whether deviating was correct -- a system that
+      abandons a commitment to avoid a hazard has done the right thing.
+    gap_three_corpus: >-
+      This is the lineage rule lifted one level. csia_active_evidence/
+      signatures.py refuses to let three residuals reading the same raw
+      current count as three pieces of evidence; two runs sharing an airframe
+      are likewise two views of one airframe. Effective n is the number of
+      DISTINCT FACTOR VALUES, never the number of runs, and when a claim
+      depends on several factors the honest figure is the smallest, because
+      that is the one that runs out first. accumulate REFUSES to report a
+      rate at an effective n of one; the naive rate is still returned so
+      nothing is hidden, but it is labelled an observation about a single
+      article.
+    two_of_my_own_designs_were_too_weak: >-
+      (1) DIMENSIONAL EVIDENCE COULD IDENTIFY A FIELD. A field named qqq
+      holding the values 1.0 and 2.0 was confidently mapped to current,
+      because those values are inside the plausible range of a current, a
+      voltage and a temperature alike. Plausibility is a weak NEGATIVE test:
+      it can say a field named like a current holds values no current takes,
+      and it cannot say an unnamed field is a current. Dimensional evidence
+      now corroborates and conflicts but never places, and it is still listed
+      so a reader can see it was considered and rejected. (2) NORMALISATION
+      FOLDED SEPARATORS ONLY, so PackCurrent became the single token
+      packcurrent and matched nothing. Camel case is not an edge case in
+      telemetry, it is the house style of most systems this layer exists to
+      read.
+    validated_against_something_real: >-
+      Not only toy fields. The ingestion layer is run against the component
+      simulator's actual channels, an existing independent part of this
+      repository written before this module existed, and places
+      pack_current, pack_voltage and vz with nothing unrecognised. A second
+      test hands it the voltage series under the name pack_current and
+      confirms the disagreement surfaces rather than being resolved in favour
+      of the name.
+    what_none_of_it_establishes: >-
+      ingestion does not establish that any field IS the channel it
+      resembles, only what evidence was found. intent does not establish that
+      a deviation was wrong. corpus gives an UPPER BOUND on the independence
+      available: runs sharing no declared factor value may still share
+      something nobody declared. No domain-specific content from the external
+      document is implemented, no mission autonomy, no targeting, nothing
+      that decides anything.
+    verdict: RECORDED
+    consequence: >-
+      CSIA can now be pointed at data it did not design and say what it
+      recognised and what it could not, can distinguish a fault from a
+      change of plan and price what the change cost in evidence, and can
+      refuse to inflate twenty runs on one article into a population claim.
+      Frozen core untouched, nothing promoted.
+    artifact: >-
+      csia_evidence/; tests/test_evidence_base.py;
+      docs/architecture/EVIDENCE_BASE_LAYER.md
