@@ -43,7 +43,8 @@ MAGNITUDES = (0.002, 0.004, 0.006, 0.010, 0.020, 0.040)
 DRIFT_STATES = {"nominal": 0.0, "elevated": 2.0e-3}
 
 #: P0-P6 plus the three ceilings plus the four selectors.
-ARMS = tuple(st.STRATEGIES) + ("P7a_benchmark", "P7b_oracle", "P7c_robust") \
+ARMS = tuple(st.STRATEGIES) + ("P7a_benchmark", "P7b_oracle",
+                                  "P7b_point_oracle", "P7c_robust") \
     + tuple(st.SELECTORS)
 
 DURATION_DEFAULT = 8.0
@@ -184,6 +185,14 @@ class Campaign:
             action, _ = ceilings.p7b_select(
                 arena, cell.plant, cell.seed, cell.magnitude, loss="change")
             return action
+        if arm == "P7b_point_oracle":
+            # Same exhaustive hindsight argmin, same action space, different
+            # loss. Added by PREREGISTRATION_AMENDMENT_2.md because the
+            # change loss turned out to be saturated: a ceiling on a metric
+            # that cannot tell thirteen arms apart is valid and useless.
+            action, _ = ceilings.p7b_select(
+                arena, cell.plant, cell.seed, cell.magnitude, loss="point")
+            return action
         if arm == "P7c_robust":
             action, _ = ceilings.p7c_select(
                 arena, cell.seed, plants_in_envelope=PLANTS,
@@ -263,7 +272,7 @@ class Campaign:
             "e_delta_r": change.e_delta_r, "m_r_out": change.m_r_out,
             "resolved": change.resolved, "ae_r": point.ae_r,
             "deployable": arm not in ("P7a_benchmark", "P7b_oracle",
-                                      "P7c_robust"),
+                                      "P7b_point_oracle", "P7c_robust"),
         }
 
 

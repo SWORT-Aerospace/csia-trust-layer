@@ -37,14 +37,15 @@ def cell(**overrides) -> runner.Cell:
 # --- the arm list -------------------------------------------------------
 
 def test_every_declared_arm_is_runnable(campaign):
-    assert len(runner.ARMS) == 14
+    assert len(runner.ARMS) == 15
     for arm in runner.ARMS:
         row = campaign.row(arm, cell())
         assert row["arm"] == arm
 
 
 def test_ceilings_are_marked_not_deployable(campaign):
-    for arm in ("P7a_benchmark", "P7b_oracle", "P7c_robust"):
+    for arm in ("P7a_benchmark", "P7b_oracle", "P7b_point_oracle",
+                "P7c_robust"):
         assert campaign.row(arm, cell())["deployable"] is False
     for arm in st.STRATEGIES:
         assert campaign.row(arm, cell())["deployable"] is True
@@ -243,3 +244,14 @@ def test_the_cache_stores_no_traces():
     _, truth = campaign._nominal_summary(
         st.p2_compensated(runner.observable()), cell())
     assert truth.i_true == () and truth.v_true == () and truth.v1_true == ()
+
+
+def test_the_point_oracle_optimises_a_different_loss_from_the_change_oracle():
+    """Amendment 2's arm. Same search, same space, different objective."""
+    campaign = runner.Campaign()
+    target = cell(magnitude=0.006)
+    change = campaign.row("P7b_oracle", target)
+    point = campaign.row("P7b_point_oracle", target)
+    assert change["action"] != point["action"]
+    assert point["ae_r"] <= change["ae_r"] + 1e-12
+    assert abs(change["e_delta_r"]) <= abs(point["e_delta_r"]) + 1e-12
