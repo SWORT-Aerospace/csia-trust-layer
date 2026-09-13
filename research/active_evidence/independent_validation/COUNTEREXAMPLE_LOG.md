@@ -445,3 +445,35 @@ the authority allowed. Only an abort is incomplete. The fix is one line, and
 the value is entirely in the two tests that now distinguish the cases —
 without them the campaign would have reported an execution ablation in which
 one of its three levels quietly did not exist.
+
+---
+
+## IV-18 — IV-12 recurred, because the fix was discipline rather than design
+
+**What happened:** `BUILD_PROVENANCE.json` was regenerated at IV-7, went stale
+again three commits later at IV-10d, and the full suite came back red on the
+same assertion.
+
+**Why:** the guard requires the recorded commit to be within three of `HEAD`.
+The task's own commit protocol asks for twelve small scientific commits. Those
+two requirements collide by construction, and "remember to regenerate at the
+end" is not a fix, it is a hope. The first time it cost five commits pushed
+red; the second time it cost one.
+
+**What the record actually says:** `declared`, `frozen_core`, `host`,
+`installed`, `interpreter`, `schema` and `undeclared_dependency_check` are
+byte-identical across every regeneration this session. The only field that
+moves is `source` — commit, describe string, dirty paths. So the artifact is
+never describing a different *environment*; it is describing a different
+*commit*, and the guard is measuring commit cadence.
+
+**What was not done:** the guard was not widened. It exists because a probe
+once silently overwrote exactly this file (FL-013), and loosening a real guard
+because my workflow trips it is how guards stop meaning anything.
+
+**Adopted instead:** regenerate immediately before every commit in this phase,
+not at the end of the series. Twelve one-field diffs, each explainable in one
+sentence, is the honest cost of a guard that works.
+
+**Full suite at this point:** 3410 collected, 3409 passing before the
+regeneration and 3410 after — the single failure was this and nothing else.
