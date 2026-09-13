@@ -47,6 +47,27 @@ quarantined.
 | B6 | H6 open-set detectability boundary | OPEN |
 | B7 | H7 commanded information is insufficient | OPEN |
 
+## B1a. The seven hypotheses, on validation
+
+24 hash-derived validation seeds, 41 472 rows, 117 627 plant runs. These are
+**validation** dispositions. The sealed final partition is a confirmatory run
+of the same frozen design, and where it disagrees that disagreement is recorded
+beside these rather than replacing them.
+
+| # | hypothesis | disposition on validation | evidence |
+|---|---|---|---|
+| H1 | independent outcome advantage | **SUPPORTED** | P2 beats P6 864/864 matched cells on `AE_R`, P0 863/864, P5 809/864, P1 827/864 |
+| H2 | nominal/robust tradeoff | **REJECTED** | P4 is worse than P2 in *both* drift conditions (0.873/0.884 against 1.000/1.000). P2 does not collapse under elevated drift here |
+| H3 | robust selection | **REJECTED** | S2 worst-case `A_s` 0.884 against always-P2's 1.000, and the worst `I_s` of any arm at −0.1019. S3 ties S0 by never choosing P4 |
+| H4 | certificate calibration | **SUPPORTED** | `CERTIFIED_IN_MODEL` n = 2404, resolved 1.0000 on both metrics, zero false certificates |
+| H5 | plant discrimination | **SUPPORTED on the point metric** | median `AE_R` 3.10e-4 / 1.55e-3 / 1.29e-3 Ω for Q0/Q1/Q2, against three identical figures on the change metric |
+| H6 | open-set boundary | **SUPPORTED, narrow** | boundary 3.363 σ, routing 0.901 above over 426 trials and 0.000 below over 870. One ringing family |
+| H7 | commanded information insufficient | **SUPPORTED by counterexample** | realized lever −0.0276 s from a command lever of zero, 2.8× the declared γ |
+
+| # | preregistered claim | disposition | evidence |
+|---|---|---|---|
+| C-2gate | requiring both gates reduces false accepted inferences relative to **either** alone | **REJECTED** | `pre=False/post=True` is empty; accept-if-both is identical to accept-if-post, 2404 accepted and 0 wrong. Beats the pre gate alone, not the post gate alone |
+
 ## B2. Claims settled on the development partition
 
 These are measured, not preregistered predictions, and they are development
@@ -73,6 +94,17 @@ final result and none opens the seal.
 | D16 | Proposition C: truncation always costs excitation and moves the drift lever non-monotonically and with a sign change, so a full-window certificate bounds a prefix in neither direction. | PROVEN FOR TRUNCATION | `FORMAL_PROPOSITIONS.md` C |
 | D17 | A conventional post-execution fit reports a truth-covering interval on a full window and a non-covering one, in identical language, on the same run truncated to 25%. | VERIFIED, single instance | `BASELINE_MAPPING.md` §5 |
 
+## B2a. Findings from building the instrument, validation phase
+
+| # | finding | status | evidence |
+|---|---|---|---|
+| E1 | The pre-action gate's safety half cannot fail for any admissible action: 34 A worst case against a 56 A limit. | VERIFIED, and it is a defect in the experiment's discriminating power | IV-19, `test_no_admissible_action_can_fail_the_safety_sub_gate` |
+| E2 | Zero intersection volume does not imply empty intersection, and the touching case occurs in 48 of 12 960 validation cells (0.37%). | VERIFIED | IV-20, IV-22 |
+| E3 | The certificate is sound and conservative: it declined 8655 cells of which 86.4% would have resolved, and 76 unknowns of which 100% would have. | VERIFIED | `RESULTS.md` §3 |
+| E4 | The post-action gate's accepted set is strictly contained in the pre-action gate's. | VERIFIED | IV-21 |
+| E5 | No selector abstained in 12 960 cells. All three abstention paths are reachable and tested; none was reached. | VERIFIED | `RESULTS.md` §6 |
+| E6 | The worst independently scored error among certified cells is P7a on Q1 at Δ = 0.040, `AE_R` 4.506e-3 Ω — still inside τ_R = 0.020. | VERIFIED | `results/WORST_COUNTEREXAMPLE.json` |
+
 ## B3. Constructs withdrawn or corrected in this phase
 
 | # | construct | disposition |
@@ -85,6 +117,10 @@ final result and none opens the seal.
 | W6 | `P7_oracle` as an oracle | **WITHDRAWN** — renamed P7a benchmark (IV-15) |
 | W7 | My own belief that a prefix of a palindrome carries more drift leverage | **FALSIFIED** by its own test (IV-10) |
 | W8 | P7c as "robust" under the change loss | **QUALIFIED** — six different actions in six seeds (IV-11) |
+| W9 | My belief that the pre-action gate would add safety screening | **FALSIFIED** — its safety half cannot fail over this action space (IV-19) |
+| W10 | The preregistered two-gate combined claim | **REJECTED** — the pre gate is redundant given the post gate in this envelope (IV-21) |
+| W11 | H2 and H3, both preregistered by me | **REJECTED on validation** — P4 is worse than P2 in both drift conditions, and the threshold selector built on the prior phase's finding is strictly worse than committing to P2 |
+| W12 | "Closest **verified** source" in the supplied related-work draft | **CORRECTED** — the primary text could not be retrieved; seven endpoints refused (`RELATED_WORK.md` §0) |
 
 ## C. Claims explicitly not made
 
