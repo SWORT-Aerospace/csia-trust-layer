@@ -47,7 +47,8 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .plants import QParams, SYNTHETIC_Q, SYNTHETIC_SENSING, Sensing, simulate
+from .plants import (Loop, QParams, SYNTHETIC_LOOP, SYNTHETIC_Q,
+                     SYNTHETIC_SENSING, Sensing, simulate)
 
 LAYER = "B"
 TRUTH_BEARING = True
@@ -147,6 +148,13 @@ def output_set(command, *, magnitude: float, plant: str = "Q1",
     """
     base = QParams(**SYNTHETIC_Q)
     sensing = Sensing(**{**SYNTHETIC_SENSING, "sigma_v": 0.0, "sigma_i": 0.0})
+    # Controller and process noise are switched off too, which makes the set
+    # independent of the seed. That is not an optimisation, it is what a
+    # PREDICTED set means: a prediction that changes with which noise draw the
+    # world happened to take is not a prediction. The declared sensor bound is
+    # added back as the interval padding below.
+    loop = Loop(**{**SYNTHETIC_LOOP, "controller_sigma": 0.0,
+                   "process_sigma": 0.0})
     lows: Optional[np.ndarray] = None
     highs: Optional[np.ndarray] = None
     times: Optional[np.ndarray] = None
@@ -154,7 +162,7 @@ def output_set(command, *, magnitude: float, plant: str = "Q1",
         observation, _ = simulate(
             command, plant=plant, duration=duration, seed=seed,
             params=replace(base, r1=r1, tau1_s=tau), sensing=sensing,
-            r0_delta=magnitude, drift_v_per_s=drift)
+            loop=loop, r0_delta=magnitude, drift_v_per_s=drift)
         values = np.asarray(observation.v_meas, dtype=float)
         if lows is None:
             lows, highs, times = values.copy(), values.copy(), observation.t

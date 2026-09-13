@@ -531,3 +531,73 @@ cannot: 1.0 for the touching pair, 5.0 for a far one.
 
 **Test:** `tests/test_iv_discrimination.py::test_touching_sets_have_zero_volume_and_a_non_empty_intersection`
 and `::test_the_volume_surrogate_cannot_tell_those_two_cases_apart`.
+
+---
+
+## IV-21 — The preregistered combined claim is rejected: the pre-action gate is redundant here
+
+**The claim, as preregistered verbatim in `PREREGISTRATION_AMENDMENT_3.md` §4:**
+
+> accepting an inference only when both the pre-action separation/safety gate
+> and the post-action RCEC gate pass reduces false accepted inferences relative
+> to **either** gate alone
+
+**Measured on validation, 12 960 main-block cells, point metric:**
+
+| | post fails | post passes |
+|---|---|---|
+| **pre fails** | n = 5473, wrong 1934 | **n = 0** |
+| **pre passes** | n = 5083, wrong 892 | n = 2404, wrong **0** |
+
+The `pre=False / post=True` cell is **empty**. Every cell that passes the
+post-action gate already passes the pre-action gate, so the post gate's
+accepted set is strictly contained in the pre gate's.
+
+| policy | accepted | coverage | false accepted | rate |
+|---|---|---|---|---|
+| accept always | 12 960 | 1.000 | 2826 | 0.2181 |
+| accept if pre | 7 487 | 0.578 | 892 | 0.1191 |
+| accept if post | 2 404 | 0.186 | **0** | **0.0000** |
+| accept if both | 2 404 | 0.186 | **0** | **0.0000** |
+
+`accept_if_both` is **identical to `accept_if_post`**, cell for cell.
+
+**Verdict: the combined claim is REJECTED as stated.** Requiring both gates
+beats the pre gate alone — 892 false acceptances down to zero — and does not
+beat the post gate alone, which already had zero. Within this envelope the
+pre-action separation gate is **redundant** given the post-action gate.
+
+This is one of the two negative outcomes Amendment 3 named in advance, in those
+words: *"If `GATE_PRE` prevents no unsafe or non-separating action, the
+reachability layer is redundant within this envelope."* It is reported as the
+result, not as a disappointment.
+
+**What it does not show.** Not that pre-action reachability analysis is
+redundant in general. The pre-gate here is an interval over-approximation over
+an enumerated envelope with a **safety half that cannot fail** (IV-19), on a
+one-output battery model where the post-action certificate is unusually strong.
+A pre-action gate that could reject on safety, on a plant where it could bite,
+is a different object and this result says nothing about it.
+
+**The other half is a strong positive.** The post-action gate accepted 2404
+inferences and got **zero** of them wrong on both metrics, at a coverage cost
+of 39.2 percentage points against the pre gate alone. Unlike the prior phase's
+"zero false certificates", this count comes from a check that can be non-empty
+and was measured against simulator truth.
+
+---
+
+## IV-22 — The touching case is not hypothetical: it occurs 48 times
+
+**Found in the gate table:** across 12 960 cells, the predicted output sets are
+`zero_volume` and **not** `empty_intersection` — touching, not separated — in
+**48** of them.
+
+A baseline reporting only intersection volume would have scored those 48 cells
+as separated hypotheses. They are not: the intersection is non-empty and the
+separation margin is exactly zero.
+
+The counterexample in `tests/test_iv_discrimination.py` was constructed by
+hand to make the distinction visible. It turns out not to have needed the
+construction — the distinction the supplied related-work draft insists on has a
+measurable frequency in this experiment, and it is 0.37% of cells.

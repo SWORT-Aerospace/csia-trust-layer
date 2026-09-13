@@ -126,25 +126,33 @@ def conditions() -> List[Tuple[str, bool, str]]:
     return out
 
 
+#: Each ceiling and the field it is a ceiling *on*. Amendment 2 added the
+#: second one, so checking only the first would leave half the invariant
+#: unverified -- and it is the half that bounds the metric that discriminates.
+ORACLES = (("P7b_oracle", "e_delta_r"), ("P7b_point_oracle", "ae_r"))
+
+
 def _oracle_beaten(campaign: Dict) -> bool:
-    """Did any deployable arm beat P7b on the change loss in a matched cell?"""
-    oracle: Dict[Tuple, float] = {}
-    for row in campaign["rows"]:
-        if row["block"] != "main" or row["e_delta_r"] is None:
+    """Did any deployable arm beat a ceiling on that ceiling's own loss?"""
+    for arm, field in ORACLES:
+        oracle: Dict[Tuple, float] = {}
+        for row in campaign["rows"]:
+            if row["block"] != "main" or row.get(field) is None:
+                continue
+            if row["arm"] == arm:
+                oracle[(row["plant"], row["drift_state"], row["magnitude"],
+                        row["seed"])] = abs(row[field])
+        if not oracle:
             continue
-        key = (row["plant"], row["drift_state"], row["magnitude"],
-               row["seed"])
-        if row["arm"] == "P7b_oracle":
-            oracle[key] = abs(row["e_delta_r"])
-    for row in campaign["rows"]:
-        if row["block"] != "main" or row["e_delta_r"] is None:
-            continue
-        if not row["deployable"]:
-            continue
-        key = (row["plant"], row["drift_state"], row["magnitude"],
-               row["seed"])
-        if key in oracle and abs(row["e_delta_r"]) < oracle[key] - 1e-12:
-            return True
+        for row in campaign["rows"]:
+            if row["block"] != "main" or row.get(field) is None:
+                continue
+            if not row["deployable"]:
+                continue
+            key = (row["plant"], row["drift_state"], row["magnitude"],
+                   row["seed"])
+            if key in oracle and abs(row[field]) < oracle[key] - 1e-12:
+                return True
     return False
 
 
