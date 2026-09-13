@@ -314,3 +314,65 @@ the correctly larger bound, and at 4x the residual check routes it to
 produced "11 false certificates in 290" also ran under the unsound bound and
 has to be repeated across the whole envelope before anything stronger is
 said.
+
+---
+
+# Amended locked campaign, 2026-09-13 — run once
+
+## RC-18 — P7 is not a ceiling. The oracle claim is falsified.
+
+P7 was declared a non-deployable oracle upper bound. On locked data it has
+the **highest realized excitation (21445), the lowest drift lever (0.018) and
+the worst detection frontier of every arm (0.040 ohm)**, against 0.006 for
+P2.
+
+It maximises the second moment of current, which is not the objective. Its
+energy sits at the window fundamental near 0.125 Hz, where the polarization
+branch follows it completely.
+
+> **A quantity that upper-bounds excitation does not upper-bound
+> resolution.**
+
+The claim is withdrawn. P7 stays in the tables, marked not deployable, as a
+measured counterexample to its own description.
+
+## RC-19 — the resolution margin cannot distinguish plant models
+
+Median `M_R` is identical to twelve decimal places across simple, one-RC and
+multi-RC in all 2012 comparable cells, and `B_total` takes exactly one value
+per cell.
+
+By construction: `M_R` is built from the **declared envelope** and the
+**realized current**, and the realized current is set by the control loop,
+which the polarization branch barely affects. The margin measures **what the
+certificate can bound, not what the plant does.**
+
+The arm comparison under a common envelope stands. **The
+simple-versus-one-RC comparison is withdrawn before being reported**, because
+this campaign cannot make it.
+
+## RC-20 — the drift interaction is real and its scalar is undefined
+
+At elevated drift, P2 and P3 collapse from 0.006 and 0.010 to **never**,
+while P4 holds at 0.010. The best arm at nominal drift is the most fragile.
+
+The preregistered scalar `delta_interaction` came out **not a number**,
+because "never" encodes as infinity and the difference of two infinities is
+undefined. The interaction is reported as the table. No number is quoted in
+its place and the scalar is not redefined after the fact.
+
+## RC-21 — the unknown-fault detector has a floor
+
+Unmodelled ringing at 0.10 V is **certified**, at 0.40 V routed to
+`UNKNOWN_OR_MODEL_MISMATCH`. A small unmodelled dynamic is absorbed into the
+estimate. The routing works at the top of the range tested and there is a
+band below it where it does not.
+
+## RC-22 — a commit went in with a red test
+
+The runner-guard commit was made while
+`test_the_locked_runner_does_not_search_or_tune_at_run_time` was failing on a
+case-sensitive string assertion, because a shell pipeline masked pytest's
+exit status. Caught and fixed in the next commit, before the seal was opened.
+Recorded rather than amended away: the guard suite must be green before a
+locked partition is touched, and for one commit it was not.

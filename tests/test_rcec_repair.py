@@ -285,3 +285,92 @@ def test_the_runner_records_the_required_per_row_quantities():
                   "rng_streams"):
         assert f'"{field}"' in src, field
     assert L.source_sha()
+
+
+# --- the locked campaign, after it was run ----------------------------------
+
+LOCKED = os.path.join(ROOT, "research", "active_evidence", "realized_current",
+                      "results", "RCEC_LOCKED_CAMPAIGN.json")
+
+
+@pytest.fixture(scope="module")
+def locked():
+    with open(LOCKED, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def test_the_locked_campaign_used_the_sealed_partition_once(locked):
+    assert set(locked["locked_seeds"]) == set(PT.AMENDED_LOCKED)
+    assert locked["partition_manifest_sha256"] == PT.manifest_hash()
+    assert locked["dry_run_partition"] is None
+    assert locked["n_rows"] == 8640
+
+
+def test_zero_false_certificates(locked):
+    assert locked["false_certificate_count"] == 0
+    assert locked["false_certificates"] == []
+
+
+def test_a_deployable_arm_beats_passive_and_the_mission_manoeuvre(locked):
+    f = locked["detection_frontier"]
+    p2 = f["one_rc/nominal/P2_compensated"]["smallest_resolvable_delta"]
+    assert p2 == 0.006, p2
+    for arm in ("P0_passive", "P6_mission"):
+        assert f[f"one_rc/nominal/{arm}"]["smallest_resolvable_delta"] is None
+
+
+def test_the_best_arm_collapses_under_elevated_drift(locked):
+    """RC-20. The best arm at nominal drift is the most fragile."""
+    f = locked["detection_frontier"]
+    for arm in ("P2_compensated", "P3_shaped"):
+        assert f[f"one_rc/nominal/{arm}"]["smallest_resolvable_delta"] \
+            is not None
+        assert f[f"one_rc/elevated/{arm}"]["smallest_resolvable_delta"] is None
+    assert f["one_rc/elevated/P4_feedback"]["smallest_resolvable_delta"] \
+        == 0.010
+
+
+def test_the_oracle_is_not_a_ceiling(locked):
+    """RC-18. P7 has the highest excitation and the worst frontier."""
+    f = locked["detection_frontier"]
+    p7 = f["one_rc/nominal/P7_oracle"]["smallest_resolvable_delta"]
+    p2 = f["one_rc/nominal/P2_compensated"]["smallest_resolvable_delta"]
+    assert p7 > p2, (p7, p2)
+    assert "P7_oracle" in locked["not_deployable"]
+
+
+def test_the_margin_is_plant_independent_and_that_is_recorded(locked):
+    """RC-19. A limitation found after the run and withdrawn before report."""
+    by = {}
+    for r in locked["rows"]:
+        if r["M_R"] is None:
+            continue
+        k = (r["arm"], r["drift_state"], r["r0_delta"], r["seed"])
+        by.setdefault(k, {})[r["plant"]] = r["M_R"]
+    full = [v for v in by.values() if len(v) == 3]
+    assert full
+    assert all(max(v.values()) - min(v.values()) < 1e-12 for v in full), (
+        "the margin now distinguishes plants; RC-19 has changed and "
+        "RESULTS_LOCKED.md section 7 must be rewritten")
+
+
+def test_clipping_and_abort_do_not_survive(locked):
+    ex = locked["ablations"]["execution"]
+    assert ex["full"] == rcec.CERTIFIED
+    assert ex["clipped"] == rcec.CLIPPED_INVALID
+    assert ex["aborted"] == rcec.ABORTED_INCOMPLETE
+
+
+def test_unknown_fault_routing_has_a_floor(locked):
+    """RC-21. Reported as a floor, not as clean routing."""
+    u = locked["ablations"]["unmodelled_fault_routing"]
+    assert u["0.4"] == rcec.UNKNOWN_OR_MODEL_MISMATCH
+    assert u["0.1"] == rcec.CERTIFIED
+
+
+def test_only_the_exact_lag_certifies(locked):
+    lag = locked["ablations"]["lag_error"]
+    assert lag["1.0"]["state"] == rcec.CERTIFIED
+    for ratio in ("0.25", "0.5", "2.0", "4.0"):
+        assert lag[ratio]["state"] != rcec.CERTIFIED, ratio
+    assert lag["0.25"]["lever_sign"] != lag["1.0"]["lever_sign"]

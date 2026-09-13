@@ -64,3 +64,20 @@ Tier **E0** throughout. Quarantined post-freeze, research-only.
 | RC-E9 | Excitation was the binding constraint | **`REFUTED`** | binds for 20 of 120; the error budget binds for 76 |
 | RC-E10 | The MX-040 hysteresis limit as measured | **`SUPERSEDED`** | measured under the unsound bound; that window closes with the corrected one, the limit itself is not retired |
 | RC-E11 | The failed pilot can be recovered | **`REFUTED`** | never committed; reconstruction only |
+
+## Amended locked campaign, 2026-09-13
+
+| id | claim | status | evidence |
+|---|---|---|---|
+| RC-F1 | A deployable active probe beats passive hover | `SUPPORTED` | P2 frontier 0.006 ohm; P0 never certifies |
+| RC-F2 | A deployable active probe beats the ordinary mission manoeuvre | `SUPPORTED` | 140 of 140 matched pairs, median +0.03918 ohm; P6 never resolves |
+| RC-F3 | A closed-loop-aware probe beats the naive palindrome | `SUPPORTED` | 240 of 240 matched pairs, median +0.00606 ohm |
+| RC-F4 | The advantage survives an elevated nuisance | **`REFUTED`** | P2 and P3 collapse to never; only P4 holds |
+| RC-F5 | P7 is an oracle ceiling | **`FALSIFIED`** | worst frontier of all arms |
+| RC-F6 | Zero false certificates | `NO_COUNTEREXAMPLE_IN_8640_ROWS` | 0 of 8640 |
+| RC-F7 | Clipping and abort invalidate a certificate | `VERIFIED` | both states returned |
+| RC-F8 | The campaign distinguishes plant models | **`WITHDRAWN`** | M_R identical across all three by construction |
+| RC-F9 | Unknown faults are routed | `SUPPORTED WITH A FLOOR` | 0.40 V routed, 0.10 V absorbed |
+| RC-F10 | Lag error is benign in some direction | **`REFUTED`** | only the exact lag certifies; sign flips at 0.25x |
+| RC-F11 | P3 is feasible and cheapest | `SUPPORTED` | 0.010 ohm at 20.37 A·s, half of P1's energy |
+| RC-F12 | Sensing defects break the certificate | **`REFUTED`** | bias, scale, noise, delay, dropout, quantisation all certify |

@@ -4619,3 +4619,94 @@ entries:
       research/active_evidence/realized_current/PREREGISTRATION_AMENDMENT_1.md;
       research/active_evidence/realized_current/FAILED_PILOT_RECONSTRUCTION.md;
       research/active_evidence/realized_current/results/RCEC_DIAGNOSTICS.json
+
+  - id: MX-043
+    date: 2026-09-13
+    phase: "RESEARCH (amended locked campaign, opened once, E0)"
+    kind: ACTIVE_PROBING_WINS_HERE_AND_THREE_MORE_OF_MY_CONSTRUCTS_FAILED
+    authorization: >-
+      Owner-authorized to open the sealed amended_locked partition exactly
+      once, after a documentation-only clarification of the polarization
+      bound's scope. Preregistration 84576af, amendment 020b0dd, scope
+      clarification ef572c0, HEAD at run c3ee776, partition manifest
+      e872d36f. Baseline 3069 tests green and blocking guards PASS
+      immediately before opening. Frozen core identical.
+    the_result: >-
+      8640 rows, 209 s, ZERO false certificates. The delay-compensated probe
+      P2 resolves a 0.006 ohm pack-resistance change where the naive
+      palindromic probe needs 0.020 and where passive hover and an ordinary
+      mission manoeuvre NEVER resolve at any magnitude tested. Paired on
+      matched drift, magnitude and seed, P2 beats the mission manoeuvre on
+      140 of 140 triples with a median difference of +0.03918 ohm, and the
+      naive probe on 240 of 240 with +0.00606.
+    this_reverses_mx_038_and_does_not_replicate_it: >-
+      MX-038 concluded CSIA should wait rather than ask. On this plant and
+      this metric the opposite holds and waiting never works, because a slow
+      mission manoeuvre correlates current with time and carries a realized
+      drift lever of 0.64 s, an order of magnitude worse than any
+      purpose-built probe. The two results are on different plants with
+      different nuisances and neither transfers to the other.
+    the_worst_counterexample: >-
+      THE BEST ARM IS THE MOST FRAGILE. At elevated drift P2 collapses from
+      0.006 to never and P3 from 0.010 to never, while P4 feedback holds at
+      0.010. An arm chosen on nominal performance is the wrong choice under
+      the nuisance.
+    three_more_of_my_own_constructs_failed: >-
+      (RC-18) P7 IS NOT A CEILING. It has the highest realized excitation
+      21445, the lowest drift lever 0.018 and the WORST frontier of every arm
+      at 0.040, because it maximises the second moment of current, which is
+      not the objective, and puts its energy at the window fundamental where
+      the polarization branch follows it completely. A quantity that
+      upper-bounds excitation does not upper-bound resolution; the oracle
+      claim is withdrawn. (RC-19) THE RESOLUTION MARGIN CANNOT DISTINGUISH
+      PLANT MODELS. Median M_R is identical to twelve decimal places across
+      simple, one-RC and multi-RC in all 2012 comparable cells, because M_R
+      is built from the DECLARED ENVELOPE and the realized current and the
+      realized current is set by the control loop. The margin measures what
+      the certificate can bound, not what the plant does; the
+      simple-versus-one-RC comparison is withdrawn before being reported.
+      (RC-20) The preregistered scalar delta_interaction came out NOT A
+      NUMBER, because never encodes as infinity and the difference of two
+      infinities is undefined. The interaction is reported as a table and the
+      scalar is not redefined after the fact.
+    other_findings: >-
+      Unknown-fault routing has a floor: 0.40 V of unmodelled ringing routes
+      to UNKNOWN_OR_MODEL_MISMATCH and 0.10 V is absorbed and certified. Only
+      the EXACT lag certifies; both under and over estimation fail, and the
+      fourfold underestimate flips the realized lever sign on locked data,
+      confirming the withdrawal of conservative. Sensing defects barely move
+      the margin: bias 1.0 A, scale 2 percent, current noise 0.2 A, 40 ms
+      delay, 20 percent dropout and 0.05 A quantisation all certify. P3 is
+      the cheapest feasible arm at 0.010 ohm for 20.37 amp-seconds, half of
+      P1's energy.
+    a_process_failure_of_my_own: >-
+      One commit went in with a red guard test because a shell pipeline
+      masked pytest's exit status. Caught and fixed in the next commit,
+      before the seal was opened. Recorded rather than amended away.
+    what_was_withdrawn: >-
+      The MX-039 arm comparison (computed on a polarization bound
+      understating fivefold), MX-039's P7 oracle ceiling (falsified), MX-039's
+      conservative lag claim (withdrawn), the MX-040 hysteresis limit as
+      measured (superseded), and this campaign's own plant-model comparison
+      (withdrawn before reporting).
+    honest_limit: >-
+      E0, one synthetic pack family, one loop family, one platform. The
+      polarization bound is exhaustive over a discrete 105-point grid and
+      SAMPLED beyond it: zero observed violations in 1800 preregistered
+      evaluations, rule-of-three upper limit p < 0.00167 under an IID
+      interpretation, which is not a formal guarantee. Nothing here has run
+      on hardware and no chemistry is characterised. Novelty remains
+      BLOCKED_EXTERNAL_ACCESS.
+    verdict: RECORDED
+    consequence: >-
+      A repaired experiment that discriminates: a continuous signed margin
+      instead of a metric saturated at both ends, a detection frontier that
+      separates seven arms into five levels, zero false certificates over
+      8640 rows, and three of my own constructs falsified by their own
+      locked data. The frozen core was not touched and nothing was promoted.
+    artifact: >-
+      tools/research/rcec_locked_campaign.py;
+      research/active_evidence/realized_current/results/RCEC_LOCKED_CAMPAIGN.json;
+      research/active_evidence/realized_current/RESULTS_LOCKED.md;
+      research/active_evidence/realized_current/POLARIZATION_BOUND_SCOPE.md;
+      tests/test_rcec_repair.py
