@@ -56,18 +56,39 @@ That is the circularity the governing instruction warns about, and the
 signature of `bound()` is arranged so there is no argument through which one
 could be passed.
 
-MEASURED
---------
-Zero violations in 1800 random draws inside the declared envelope, across
-nine waveform families. Tightness, meaning worst truth over bound, ranges
-from 0.57 to 0.90, so the bound is between 1.1 and 1.8 times the worst case
-it must cover. It discriminates: a six-cycle palindromic probe earns 0.0013
-and a slow ramp earns 0.44, a factor of 336, which is the whole reason
-waveform design is worth doing.
+MEASURED, AND THE SCOPE OF THE CLAIM
+--------------------------------------
+Two different objects, kept apart. `bound` is an exhaustive maximum over a
+FINITE grid of 105 model instances (5 values of R1, 7 of tau, 3 initial
+conditions), so for those instances:
+
+    BOUNDED OVER THE DECLARED DISCRETE MODEL GRID.
+
+The true parameters are continuous and the grid has gaps between its nodes.
+`validate` samples the continuum and finds:
+
+    ZERO OBSERVED BOUND VIOLATIONS IN 1,800 PREREGISTERED SIMULATOR
+    EVALUATIONS.
+
+THAT IS NOT A PROOF OF SOUNDNESS ON THE CONTINUUM. Under an
+independent-and-identically-distributed interpretation of those draws the
+one-sided 95% rule-of-three upper limit on the violation rate is
+
+    p_violation < 3/1800 ~= 0.00167
+
+which is an upper confidence limit under an assumption, NOT a formal
+guarantee. A bound holding at 105 enumerated and 1800 sampled points may
+still fail between them. `research/active_evidence/realized_current/
+POLARIZATION_BOUND_SCOPE.md` states what may and may not be said.
+
+Tightness, meaning worst truth over bound, ranges from 0.57 to 0.90.
+It discriminates: a six-cycle palindromic probe earns 0.0013 and a slow ramp
+earns 0.44, a factor of 336, which is the whole reason waveform design is
+worth doing.
 
 WHAT IT DOES NOT ESTABLISH
 ---------------------------
-Soundness holds INSIDE the declared envelope. If the true `R1`, `tau` or
+Coverage is exhaustive only on the discrete grid, and sampled beyond it. If the true `R1`, `tau` or
 initial condition lies outside what was declared, the bound is silent, and
 `csia_active_evidence` has already measured what an under-declared envelope
 costs for hysteresis: eleven false certificates in 290. The declaration is

@@ -108,8 +108,12 @@ and initial condition and takes the worst case. It uses **only the waveform**
 — no fault label, no hypothesis, no outcome — and the signature has no
 argument through which one could be passed.
 
-Measured: **zero violations in 1800 draws** inside the envelope across nine
-waveform families, tightness 0.57 to 0.90, about 40 ms per bound. It
+Measured: **bounded over the declared discrete model grid** of 105 instances,
+and **zero observed bound violations in 1,800 preregistered simulator
+evaluations** sampled from the continuous envelope. Under an IID
+interpretation the rule-of-three upper limit is `p < 3/1800 ≈ 0.00167`, which
+is **not a formal guarantee**. Tightness 0.57 to 0.90, about 40 ms per bound.
+Scope: `POLARIZATION_BOUND_SCOPE.md`. It
 discriminates by a factor of 336 between a six-cycle palindromic probe and a
 slow ramp.
 
