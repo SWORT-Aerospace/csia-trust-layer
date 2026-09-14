@@ -765,3 +765,162 @@ anything was actually downloaded rather than asserted. Re-measured at
 `2026-09-14T01:14:18Z` across eight endpoints including the HTML URL the
 roadmap cites: still `PRIMARY_TEXT_NOT_RETRIEVED`, seven refused connections
 and one direct 403.
+
+## IV-26 — The result that held because two windows shared a noise draw
+
+Every change estimate in the sealed phase-one campaign compared a fault window
+to a nominal window drawn on the **same seed**. Nothing said so. It was not a
+decision anybody recorded; it was the shape the runner happened to have, and
+the primary metric's headline behaviour rested on it.
+
+The mechanism was already written down in `IV-9`: the fault does not move the
+current, so `V_fault − V_nominal = −ΔR₀·I_true` exactly, least squares is
+linear in the response, the regressor is shared, and
+`R̂_fault − R̂_nominal = ΔR₀·λ̂` with `λ̂` a finite-sample errors-in-variables
+factor. What `IV-9` did not say is that **no deployment has this property**. No
+vehicle re-flies the identical probe under the identical noise realisation with
+and without a fault. A real baseline comes from an earlier window.
+
+So `nominal_source` was promoted from a silent assumption to a declared factor
+with three levels, and the campaign was run over all three.
+
+| level | development, median &#124;e_ΔR&#124; | validation, median &#124;e_ΔR&#124; |
+|---|---|---|
+| `paired_crn` — the original design | 3.5386e-06 | 5.5230e-06 |
+| `independent_seed` | 2.3140e-04 | 1.8496e-04 |
+| `independent_window` — deployment-faithful | 5.1242e-04 | 4.6225e-04 |
+
+A factor of 145 on development and 84 on validation, between the design that
+was run and the one a vehicle would have.
+
+Two things make this a finding rather than a demolition. The point metric is
+**bit-identical** across the three levels — spread exactly `0.000e+00` over
+3168 matched groups on development and 6336 on validation — because `AE_R`
+scores the fault window alone and never reads the baseline. And the
+certificate issued **zero false certificates at every level**, on both
+metrics, in both partitions. The cancellation was load-bearing for the change
+metric's *resolution* and for nothing else.
+
+`H9` is the sharp version. Under `paired_crn` the three plants return medians
+equal to the last digit — 5.5230e-06 for Q0, Q1 and Q2 alike on validation —
+which is what `ΔR₀·λ̂` with a plant-independent `λ̂` looks like and is not a
+coincidence. Under `independent_window` they separate to
+2.03e-04 / 1.03e-03 / 8.22e-04. The plant structure was there the whole time;
+the pairing was subtracting it out.
+
+### The metric resolving with no signal at all
+
+`P0_passive` injects nothing — mean energy `0.0000 A·s` across every one of its
+rows. Under `independent_seed` it nonetheless scored 22 resolutions out of 288
+on development and 30 out of 576 on validation, because two noise-only
+estimates differ by less than `τ_R` often enough to land inside it. Under
+`paired_crn` the two windows are the same draw, the difference is exactly zero,
+`|e_ΔR| = Δ` never clears `τ_R = 0.5Δ`, and the count is 0.
+
+The change metric can therefore report a resolution with nothing behind it. The
+certificate marked all of those rows `INSUFFICIENT_EXCITATION` and let none
+through, so none became a false certificate. Both halves are measured now,
+because only one of them is reassuring.
+
+## IV-27 — I preregistered a hypothesis that could not fail
+
+`PREREGISTRATION_AMENDMENT_4.md` §3 stated H8 as: under the two broken levels,
+`A_s` on the change metric is no longer constant across arms, *at least one
+deployable arm differing from another by more than 0.05*.
+
+Development, 9504 rows:
+
+| level | `A_s` spread across all eleven arms | exceeds 0.05 |
+|---|---|---|
+| `paired_crn` — **the control** | 1.0000 | **yes** |
+| `independent_seed` | 0.9236 | yes |
+| `independent_window` | 1.0000 | yes |
+
+**The control passes.** `P0_passive` emits no probe, resolves nowhere, and
+scores `A_s = 0` at every level, so the spread between it and any excited arm
+is ~1.0 by construction and the statistic cannot come out any other way.
+
+This is `VACUOUS_IN_ENVELOPE` — the taxonomy added two commits earlier, in
+`IV-25`, for precisely this failure, appearing in my own preregistration a day
+later. Writing the machinery did not stop me making the mistake; running the
+development partition did, which is what a development partition is for.
+
+§1 of the same amendment had described the saturation correctly — *"`A_s` is
+0.933 for every arm except passive"* — and §3 stated the hypothesis without
+carrying the exception across. The prose was right and the statistic was not.
+
+`PREREGISTRATION_AMENDMENT_5.md` reports H8 **unchanged and labelled vacuous**,
+with its number printed next to the control's. Deleting a preregistered
+statistic because it came out useless is how a phase stops being falsifiable.
+It adds `H8′` over the arms that inject a probe, with the control **part of the
+claim** — `H8′` fails if `paired_crn` is not flat, which is the property whose
+absence made H8 unfalsifiable — and defines "excited" as
+`{arm : mean energy_as == 0}`, measured from the campaign's own rows, because
+writing `P0_passive` into the code would be a hand-pick that happens to be
+right today. A test drains another arm's energy and watches it leave the set.
+
+| level | `H8′` spread, development | validation |
+|---|---|---|
+| `paired_crn` — the control | 0.0000 | 0.0000 |
+| `independent_seed` | 0.2604 | 0.3698 |
+| `independent_window` | 0.9340 | 0.9306 |
+
+`H8_SPREAD` is still 0.05. No threshold moved.
+
+## IV-28 — A hand-maintained list that had already drifted
+
+`tools/research/iv_manifest.py` recorded "everything that produced a result" in
+two hand-written tuples. By the time anybody looked, they held **20 source
+files where 33 existed** and **14 test files where 17 existed**:
+`discrimination.py`, `gates.py`, `vacuity.py` and `followup_partitions.py` had
+all produced committed results while the manifest recorded nothing about them.
+
+This is `FL-010`'s defect — a number that was true once, in a document that
+calls itself a record — wearing a different hat. The repository already
+solves it for the markdown count with a guard that fails the commit. Here the
+better answer was to remove the opportunity: both lists are globs now, and a
+glob cannot drift.
+
+## IV-29 — The guard fired on me, and the commit keeps its red
+
+`76708f0` committed `FOLLOWUP_DEVELOPMENT.json` as a tracked raw artifact and
+did not regenerate `RAW_CHECKSUMS.sha256`. The next full run came back
+`PYTEST_EXIT=1` with exactly one failure out of 3544 tests:
+`test_no_tracked_raw_artifact_is_missing_from_the_manifest`.
+
+That test exists because `IV-5` established that a manifest which mixes
+verification targets with living files goes permanently red and gets ignored.
+The fix went in the following commit rather than into an amend, and `76708f0`
+keeps its red. A phase that quietly rewrites the one commit where its own guard
+caught it has learned nothing and left no evidence that the guard works.
+
+It is also why the *first* seal-gate suite is the run that mattered: the
+generator described in `IV-30` would have refused to write a record claiming a
+green tree from it.
+
+## IV-30 — `unknown` where a digest belongs
+
+The seal-record generator read the frozen-core digest from
+`BUILD_PROVENANCE.json`. That file records *whether* the core drifted —
+`identical_to_the_freeze`, and the paths that differ — but does not store the
+digest, so `core.get("digest", "unknown")` took its default every time and the
+first generated record read:
+
+```
+| frozen-core digest | `unknown` (identical) |
+```
+
+A field that reads `unknown` is worse than a missing field, because a missing
+field is visibly missing while this one sits in a table looking checked. It is
+the same family as `IV-1` and `IV-23`: a value that was never computed,
+presented where a computed value is expected.
+
+The digest is now derived where its own guard derives it — from
+`docs/v1/FROZEN_BASELINE.json`, by the construction in
+`test_frozen_core_digest_and_its_derivation` — and all twelve files are
+re-hashed against the baseline rather than trusting a boolean somebody else
+computed. If any path differs the generator refuses to write at all, which it
+could not do before because it never looked.
+
+The record written before the fix was deleted rather than kept. It was never
+committed, and a wrong record is not evidence of anything.
