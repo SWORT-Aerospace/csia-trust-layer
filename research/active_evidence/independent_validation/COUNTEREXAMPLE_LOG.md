@@ -601,3 +601,41 @@ The counterexample in `tests/test_iv_discrimination.py` was constructed by
 hand to make the distinction visible. It turns out not to have needed the
 construction — the distinction the supplied related-work draft insists on has a
 measurable frequency in this experiment, and it is 0.37% of cells.
+
+---
+
+## IV-23 — I wrote a checksum manifest and never read it, and it was already wrong
+
+**Found by writing the test that reads it**, which should have existed from the
+moment the manifest did.
+
+`tools/research/iv_manifest.py` writes `RAW_CHECKSUMS.sha256`. No test, tool,
+guard or CI step had ever checked a single line of it. On the first run of the
+new verifier, **two entries were already wrong**:
+
+1. `EXTERNAL_ACCESS_CHECK.json` had been amended — the roadmap's §15 note about
+   the primary text being accessible elsewhere — and the manifest was never
+   regenerated, so its pinned digest had been stale since that commit;
+2. `ZERO_EVENT_BOUND_VALIDATION.json` was committed as a tracked raw artifact
+   and was **not listed at all**, so nothing would ever have checked it.
+
+**This is IV-1 and IV-19 a third time, and this time I built it.** IV-1 was a
+check whose selected set was empty by construction. IV-19 was a gate half that
+could not fail over its action space. This is a manifest nobody runs, which is
+not weaker than a manifest that always fails — it is the same thing.
+
+I spent this session documenting that pattern and then shipped a fresh instance
+of it four commits later.
+
+**Fix:** `tests/test_iv_integrity.py` reads both directions. Every pinned
+artifact must still match its digest, and every *tracked* raw artifact must be
+pinned — because a manifest that silently omits a file is the other way for
+this to stop meaning anything. It also verifies the prior phase's locked
+campaign against the digest `BASE_PROVENANCE.json` records for it, which was
+likewise recorded and never compared: every §1 verification in this phase was
+performed against that 13 MB file and nothing confirmed it was the same file.
+
+**Not repaired:** the prior phase's own stale manifest. A test now pins it at
+exactly nine documented failures, so its staleness is a checked fact rather
+than a known-ignored red, and asserts that its immutable raw JSON entry still
+verifies — which is the part that matters.
