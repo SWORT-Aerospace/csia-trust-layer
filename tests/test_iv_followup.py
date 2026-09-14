@@ -218,7 +218,8 @@ def _row(**kw):
                 magnitude=0.010, seed=1, nominal_source="paired_crn",
                 resolved=True, m_r_out=1.0, ae_r=1e-4, e_delta_r=1e-6,
                 state="CERTIFIED_IN_MODEL", abstention=None, action="a",
-                baseline_action="a", baseline_seed=1, block="main")
+                baseline_action="a", baseline_seed=1, block="main",
+                energy_as=50.0)
     base.update(kw)
     return base
 
@@ -342,6 +343,23 @@ def _document(**overrides):
                           for s in fr.SOURCES},
             "levels_that_broke_saturation": [],
             "verdict": "REJECTED",
+            "vacuity": {"verdict": "DISCRIMINATING",
+                        "control_also_exceeds_the_threshold": False,
+                        "why": "the control does not exceed the threshold",
+                        "superseded_by": "H8_prime"},
+            "H8_prime": {
+                "statement": "s8p",
+                "preregistration": "PREREGISTRATION_AMENDMENT_5.md",
+                "excited_arms": ["P2_lag_aware"], "excluded_arms": [],
+                "excluded_because": "mean energy_as == 0",
+                "by_source": {s: {"A_s_by_excited_arm": {"P2_lag_aware": 0.9},
+                                  "spread": 0.0, "flat": True}
+                              for s in fr.SOURCES},
+                "control_is_flat": True,
+                "levels_that_broke_saturation": [],
+                "verdict": "REJECTED",
+                "falsifier": "f8p",
+            },
         },
         "H9_change_metric_recovers_plant_structure": {
             "factor_threshold": 2.0, "control_tolerance": 0.05,
@@ -369,6 +387,8 @@ def _document(**overrides):
         "arms": ["P2_lag_aware"],
         "arms_omitted": ["P7b_oracle"],
         "reference_action": "cosine3_10A_8s",
+        "preregistration": "PREREGISTRATION_AMENDMENT_4.md + "
+                           "PREREGISTRATION_AMENDMENT_5.md",
         "n_rows": 30, "plant_simulations": 60, "elapsed_s": 12.0,
         "what_this_is_not": "Simulator only.",
         "reduction": reduction,
@@ -381,9 +401,11 @@ def test_the_report_prints_a_rejection_verbatim():
     """There is no branch in the renderer that softens a rejected
     hypothesis, and this is what stops one being added."""
     text = fr.render(_document())
-    assert text.count("**Verdict: REJECTED.**") == 2
+    # H8, H8' and H9 in the fixture. H8' is a separate verdict line and must
+    # be printed too, not folded into H8's.
+    assert text.count("**Verdict: REJECTED.**") == 3
     assert "**Verdict: UNDEFINED_ONE_SIDE_IS_CONSTANT.**" in text
-    for falsifier in ("f8", "f9", "f10"):
+    for falsifier in ("f8", "f8p", "f9", "f10"):
         assert falsifier in text
 
 
@@ -421,3 +443,146 @@ def test_the_report_surfaces_a_contaminated_factor_instead_of_hiding_it():
     text = fr.render(document)
     assert "identical everywhere: **no**" in text
     assert "Offending cells" in text
+
+
+# --- H8', Amendment 5 -----------------------------------------------------
+
+def _h8_rows(source, *, passive_zero=True, excited_spread=0.0):
+    """Rows shaped like a campaign: one zero-energy arm, ten excited ones."""
+    out = []
+    for index, arm in enumerate(fc.FOLLOWUP_ARMS):
+        passive = arm == "P0_passive"
+        energy = 0.0 if (passive and passive_zero) else 50.0
+        for magnitude in (0.002, 0.040):
+            if passive and passive_zero:
+                resolved = False
+            elif excited_spread and index == 1:
+                resolved = False
+            else:
+                resolved = True
+            out.append(_row(arm=arm, magnitude=magnitude, resolved=resolved,
+                            nominal_source=source, energy_as=energy))
+    return out
+
+
+def test_excited_arms_is_measured_not_a_hard_coded_name():
+    """Naming P0_passive in the code would be a hand-pick that happens to be
+    right today. The property is zero injected energy."""
+    rows = _h8_rows("paired_crn")
+    assert "P0_passive" not in fc.excited_arms(rows)
+    assert len(fc.excited_arms(rows)) == len(fc.FOLLOWUP_ARMS) - 1
+
+    # Give the passive arm energy and it comes back; take it away from another
+    # arm and that one leaves. Nothing is keyed on the string.
+    energised = [dict(r, energy_as=50.0) for r in rows]
+    assert "P0_passive" in fc.excited_arms(energised)
+    drained = [dict(r, energy_as=0.0) if r["arm"] == "P2_compensated" else r
+               for r in rows]
+    assert "P2_compensated" not in fc.excited_arms(drained)
+
+
+def test_the_preregistered_h8_is_reported_as_vacuous_not_deleted():
+    """The control passes it, so it measures nothing -- and it still appears
+    in the artifact, with its number next to the control's."""
+    rows = (_h8_rows("paired_crn")
+            + _h8_rows("independent_seed", excited_spread=1)
+            + _h8_rows("independent_window", excited_spread=1))
+    block = fc.assess_h8(rows)
+    assert block["by_source"]["paired_crn"]["exceeds_threshold"] is True
+    assert block["vacuity"]["verdict"] == "VACUOUS_IN_ENVELOPE"
+    assert block["vacuity"]["control_also_exceeds_the_threshold"] is True
+    assert block["verdict"] == "SUPPORTED"      # and worth nothing
+    assert "A_s_by_arm" in block["by_source"]["paired_crn"]
+
+
+def test_h8_is_discriminating_when_no_arm_is_degenerate():
+    """Vacuity is computed from the control, not asserted. Give every arm a
+    probe and the literal statistic separates the levels again."""
+    rows = []
+    for source, spread in (("paired_crn", 0), ("independent_seed", 1),
+                           ("independent_window", 1)):
+        rows += [dict(r, energy_as=50.0)
+                 for r in _h8_rows(source, passive_zero=False,
+                                   excited_spread=spread)]
+    block = fc.assess_h8(rows)
+    assert block["by_source"]["paired_crn"]["exceeds_threshold"] is False
+    assert block["vacuity"]["verdict"] == "DISCRIMINATING"
+
+
+def test_h8_prime_excludes_the_zero_energy_arm_and_flattens_the_control():
+    rows = (_h8_rows("paired_crn")
+            + _h8_rows("independent_seed", excited_spread=1)
+            + _h8_rows("independent_window", excited_spread=1))
+    prime = fc.assess_h8(rows)["H8_prime"]
+    assert prime["excluded_arms"] == ["P0_passive"]
+    assert prime["by_source"]["paired_crn"]["spread"] == pytest.approx(0.0)
+    assert prime["control_is_flat"] is True
+    assert prime["verdict"] == "SUPPORTED"
+    assert "P0_passive" not in prime["by_source"]["paired_crn"][
+        "A_s_by_excited_arm"]
+
+
+def test_h8_prime_fails_when_the_control_is_not_flat():
+    """The property that made H8 unfalsifiable: an unconstrained control.
+    H8' fails here rather than reporting a broken level as a success."""
+    rows = (_h8_rows("paired_crn", excited_spread=1)
+            + _h8_rows("independent_seed", excited_spread=1)
+            + _h8_rows("independent_window", excited_spread=1))
+    prime = fc.assess_h8(rows)["H8_prime"]
+    assert prime["control_is_flat"] is False
+    assert prime["verdict"] == "REJECTED_CONTROL_IS_NOT_FLAT"
+
+
+def test_h8_prime_is_rejected_when_breaking_the_pairing_changes_nothing():
+    rows = (_h8_rows("paired_crn")
+            + _h8_rows("independent_seed")
+            + _h8_rows("independent_window"))
+    prime = fc.assess_h8(rows)["H8_prime"]
+    assert prime["control_is_flat"] is True
+    assert prime["levels_that_broke_saturation"] == []
+    assert prime["verdict"] == "REJECTED"
+
+
+# --- resolution with no signal behind it ----------------------------------
+
+def test_zero_energy_resolutions_are_counted_and_the_certificate_refuses():
+    """The change metric can score a resolution where no probe was injected.
+    Both halves get a number: how often it happens, and how many of those the
+    certificate let through."""
+    rows = [
+        _row(arm="P0_passive", energy_as=0.0, resolved=True,
+             state="INSUFFICIENT_EXCITATION", nominal_source="independent_seed"),
+        _row(arm="P0_passive", energy_as=0.0, resolved=False,
+             state="INSUFFICIENT_EXCITATION", nominal_source="independent_seed"),
+        _row(arm="P2_lag_aware", energy_as=50.0, resolved=True,
+             nominal_source="independent_seed"),
+    ]
+    block = fc.resolution_without_excitation(rows)["by_source"]
+    seed = block["independent_seed"]
+    assert seed["zero_energy_rows"] == 2       # the excited arm is excluded
+    assert seed["resolved_anyway"] == 1
+    assert seed["rate"] == pytest.approx(0.5)
+    assert seed["of_those_certified"] == 0
+    assert seed["states"] == {"INSUFFICIENT_EXCITATION": 1}
+
+
+def test_a_certified_zero_energy_resolution_would_be_counted_separately():
+    """If the certificate ever did let one through, the count would move. It
+    is a separate field precisely so a zero there means something."""
+    rows = [_row(arm="P0_passive", energy_as=0.0, resolved=True,
+                 state="CERTIFIED_IN_MODEL", nominal_source="paired_crn")]
+    seed = fc.resolution_without_excitation(rows)["by_source"]["paired_crn"]
+    assert seed["of_those_certified"] == 1
+
+
+def test_the_report_prints_the_zero_energy_table():
+    document = _document()
+    document["reduction"]["resolution_without_excitation"] = {
+        "by_source": {s: {"zero_energy_rows": 288, "resolved_anyway": 22,
+                          "rate": 22 / 288, "of_those_certified": 0,
+                          "states": {}} for s in fr.SOURCES},
+        "what_it_shows": "the outcome metric can score a resolution",
+    }
+    text = fr.render(document)
+    assert "## Resolution with nothing injected" in text
+    assert "0.0764" in text

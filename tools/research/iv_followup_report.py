@@ -38,6 +38,13 @@ def _fmt(value, spec: str = ".4e") -> str:
     return format(value, spec)
 
 
+def _sentence(text: str) -> str:
+    """Upper-case the first letter only. `str.capitalize` lower-cases the
+    rest, which turns `A_s` into `a_s` inside a sentence about `A_s`."""
+    text = text.rstrip().rstrip(".")
+    return (text[:1].upper() + text[1:] + ".") if text else ""
+
+
 def _arms_in(block: Dict) -> List[str]:
     seen: List[str] = []
     for key in block["by_arm_and_drift"]:
@@ -58,9 +65,11 @@ def render(document: Dict) -> str:
     w(f"`results/FOLLOWUP_{document['partition'].upper()}.json`. Edit the")
     w("script, not this file.")
     w("")
-    w("Preregistered in `PREREGISTRATION_AMENDMENT_4.md`, written and")
-    w("committed before the first follow-up seed was drawn. This campaign")
-    w("does not touch the sealed phase-one result, which stands as it is.")
+    w(f"Preregistered in {document['preregistration']}. Amendment 4 was")
+    w("written and committed before the first follow-up seed was drawn;")
+    w("Amendment 5 records that one of its three hypotheses turned out")
+    w("unfalsifiable and adds the version that is not. This campaign does")
+    w("not touch the sealed phase-one result, which stands as it is.")
     w("")
 
     w("## What ran")
@@ -106,6 +115,30 @@ def render(document: Dict) -> str:
             w(f"* `{offender['cell']}` → {offender['ae_r']}")
     w("")
 
+    lucky = reduction.get("resolution_without_excitation")
+    if lucky:
+        w("## Resolution with nothing injected")
+        w("")
+        w("`P0_passive` emits no probe, so its resistance estimate is a fit to")
+        w("noise. Under `paired_crn` both windows are the same draw, the")
+        w("difference is exactly zero, and `|e_ΔR| = Δ` never clears")
+        w("`τ_R = 0.5Δ`. Under `independent_seed` the draws differ, the")
+        w("difference is a random quantity, and it lands inside the tolerance")
+        w("often enough to score.")
+        w("")
+        w("| nominal source | zero-energy rows | scored resolved | rate | "
+          "of those, certified |")
+        w("|---|---|---|---|---|")
+        for source in SOURCES:
+            block = lucky["by_source"][source]
+            w(f"| `{source}` | {block['zero_energy_rows']} | "
+              f"{block['resolved_anyway']} | "
+              f"{_fmt(block['rate'], '.4f')} | "
+              f"{block['of_those_certified']} |")
+        w("")
+        w(f"{_sentence(lucky['what_it_shows'])}")
+        w("")
+
     w("## The cancellation, level by level")
     w("")
     w("| nominal source | rows | median &#124;e_ΔR&#124; | resolved "
@@ -147,24 +180,67 @@ def render(document: Dict) -> str:
         w(f"Predeclared falsifier: {block['falsifier']}.")
         w("")
         if key.startswith("H8"):
-            w("| nominal source | A_s spread across arms | exceeds "
+            vac = block["vacuity"]
+            w(f"| nominal source | A_s spread across all arms | exceeds "
               f"{block['threshold']} |")
             w("|---|---|---|")
             for source in SOURCES:
                 cut = block["by_source"][source]
-                w(f"| `{source}` | {_fmt(cut['spread'], '.4f')} | "
+                label = ("`paired_crn` — **the control**"
+                         if source == "paired_crn" else f"`{source}`")
+                w(f"| {label} | {_fmt(cut['spread'], '.4f')} | "
                   f"{_fmt(cut['exceeds_threshold'])} |")
             w("")
-            w("Per-arm `A_s` on the change metric:")
+            w(f"**Vacuity: {vac['verdict']}.** {_sentence(vac['why'])}")
+            if vac["control_also_exceeds_the_threshold"]:
+                w("")
+                w("The control passes the test, so the verdict above carries")
+                w("no information. It is printed rather than deleted: a")
+                w("preregistered statistic that came out useless is evidence")
+                w("about the preregistration, and removing it is how a phase")
+                w("stops being falsifiable.")
+            w("")
+
+            prime = block["H8_prime"]
+            w(f"### H8′ — {prime['preregistration']}")
+            w("")
+            w(f"> {prime['statement']}")
+            w("")
+            w(f"**Verdict: {prime['verdict']}.**")
+            w("")
+            w(f"Excluded: "
+              f"{', '.join('`' + a + '`' for a in prime['excluded_arms'])
+                 or '—'}, because {prime['excluded_because']}. The remaining")
+            w(f"{len(prime['excited_arms'])} arms all inject a probe.")
+            w("")
+            w(f"| nominal source | A_s spread, excited arms | flat "
+              f"(≤ {block['threshold']}) |")
+            w("|---|---|---|")
+            for source in SOURCES:
+                cut = prime["by_source"][source]
+                label = ("`paired_crn` — **the control**"
+                         if source == "paired_crn" else f"`{source}`")
+                w(f"| {label} | {_fmt(cut['spread'], '.4f')} | "
+                  f"{_fmt(cut['flat'])} |")
+            w("")
+            w(f"Control is flat: **{_fmt(prime['control_is_flat'])}**. Unlike")
+            w("H8, this is part of the claim: H8′ fails if the control is not")
+            w("flat.")
+            w("")
+            w(f"Predeclared falsifier: {prime['falsifier']}.")
+            w("")
+            w("Per-arm `A_s` on the change metric, all arms:")
             w("")
             arms = list(block["by_source"]["paired_crn"]["A_s_by_arm"])
-            w("| arm | " + " | ".join(f"`{s}`" for s in SOURCES) + " |")
-            w("|---|" + "---|" * len(SOURCES))
+            w("| arm | excited | " + " | ".join(f"`{s}`" for s in SOURCES)
+              + " |")
+            w("|---|---|" + "---|" * len(SOURCES))
             for arm in arms:
                 cells = " | ".join(
                     _fmt(block["by_source"][s]["A_s_by_arm"][arm], ".4f")
                     for s in SOURCES)
-                w(f"| `{arm}` | {cells} |")
+                mark = "yes" if arm in prime["excited_arms"] else "**no**"
+                w(f"| `{arm}` | {mark} | {cells} |")
             w("")
         if key.startswith("H9"):
             w("| nominal source | Q0 | Q1 | Q2 | max/min |")
