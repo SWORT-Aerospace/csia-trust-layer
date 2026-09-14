@@ -121,6 +121,47 @@ final result and none opens the seal.
 | W10 | The preregistered two-gate combined claim | **REJECTED** — the pre gate is redundant given the post gate in this envelope (IV-21) |
 | W11 | H2 and H3, both preregistered by me | **REJECTED on validation** — P4 is worse than P2 in both drift conditions, and the threshold selector built on the prior phase's finding is strictly worse than committing to P2 |
 | W12 | "Closest **verified** source" in the supplied related-work draft | **CORRECTED** — the primary text could not be retrieved; seven endpoints refused (`RELATED_WORK.md` §0) |
+| W13 | The undeclared assumption that a nominal baseline may share its seed with the fault window | **WITHDRAWN as a modelling choice** — promoted to the declared factor `nominal_source` (IV-26). It stays available as the `paired_crn` control; what is withdrawn is treating it as the only design |
+| W14 | H8 as I preregistered it in Amendment 4 | **WITHDRAWN as uninformative** — `VACUOUS_IN_ENVELOPE`; its control passes its own test (IV-27). Reported, not deleted, and replaced by H8′ whose control is part of the claim |
+
+## B3. The paired-design follow-up, on its own sealed partition
+
+`PREREGISTRATION_AMENDMENT_4.md` and `PREREGISTRATION_AMENDMENT_5.md`, both
+committed before the follow-up's seal was opened. 24 seeds in a domain of their
+own, 28 512 rows, 30 528 plant runs. The seeds are disjoint from the
+follow-up's own development and validation sets, from all 100 phase-one seeds,
+and from all 148 companion baseline seeds — checked, not assumed.
+
+**Phase one's sealed partition was not reopened.** Nothing in this section
+revises a phase-one conclusion; H1–H7 and the two-gate claim stand as they
+were settled.
+
+**No regret figure exists here.** The three ceilings were omitted by Amendment
+4 §4, and no follow-up number may be compared to a sealed-campaign regret.
+
+| # | claim | status | evidence |
+|---|---|---|---|
+| F1 | `nominal_source` moves the change metric and nothing else: `AE_R` is bit-identical across all three levels, spread exactly `0.000e+00` over 9504 matched groups. | VERIFIED | `FOLLOWUP_FINAL.json`, `point_metric_invariance` |
+| F2 | Median &#124;e_ΔR&#124; is 4.5234e-06 / 1.9831e-04 / 5.3909e-04 for `paired_crn` / `independent_seed` / `independent_window`. The deployment-faithful baseline costs 119× the paired control. | VERIFIED | `by_nominal_source` |
+| F3 | Zero false certificates at every level, on both metrics, across all 28 512 rows. | VERIFIED | `false_certificates_change_metric`, `false_certificates_point_metric` |
+| F4 | H8 **as preregistered in Amendment 4** is `VACUOUS_IN_ENVELOPE`: the control's `A_s` spread is 1.0000 and also exceeds the 0.05 threshold, so the statistic cannot come out any other way. | VERIFIED, and the hypothesis is **withdrawn as uninformative** rather than counted | `H8_saturation_is_a_design_artifact.vacuity` |
+| F5 | H8′ (Amendment 5, excited arms only): control flat at 0.0000, `independent_seed` 0.3912, `independent_window` 0.9317. | **SUPPORTED** | `H8_prime` |
+| F6 | H9: under `paired_crn` the three plants return medians identical to the last digit (4.5234e-06 for Q0, Q1 and Q2); under `independent_window` they separate to 2.4693e-04 / 9.9757e-04 / 8.7308e-04, ratio 4.040. | **SUPPORTED** | `H9_change_metric_recovers_plant_structure` |
+| F7 | H10: Spearman ρ = 0.98595 between the arm ordering by `A_s` on the change metric under `independent_window` and the ordering on the point metric under `paired_crn`, against a preregistered floor of 0.7. | **SUPPORTED** | `H10_ordering_is_preserved` |
+| F8 | The change metric scores resolutions with no probe injected: `P0_passive`, mean energy 0.0000 A·s, resolves 73/864 under `independent_seed` and 35/864 under `independent_window`, and 0/864 under `paired_crn`. | VERIFIED | `resolution_without_excitation` |
+| F9 | The certificate refused every one of those: all 2592 zero-energy rows are `INSUFFICIENT_EXCITATION` and none was certified. | VERIFIED | `resolution_without_excitation.of_those_certified` |
+| F10 | The sealed partition agrees with validation on every disposition, with no hypothesis flipping between the two. | VERIFIED | `PAIRED_DESIGN_FOLLOWUP_VALIDATION.md` against `PAIRED_DESIGN_FOLLOWUP.md` |
+
+**What F2 does not mean.** The `paired_crn` figure is not a measurement of
+estimator accuracy. It is the residual of an identity that holds because the
+two windows share a noise draw, and reporting it as an accuracy would be the
+error this follow-up exists to correct.
+
+**What F5–F7 do not establish.** That the change metric is saturated *by
+construction in this design* is a statement about an experimental design, not
+a contribution to anybody's literature. No novelty is claimed for it. It says
+what a future campaign should use; it does not retroactively edit what phase
+one found.
 
 ## C. Claims explicitly not made
 
