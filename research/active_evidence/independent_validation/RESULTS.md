@@ -5,10 +5,14 @@ Not a certified safety artifact. Not airworthy. Not production-ready. Synthetic
 pack, no chemistry claimed, no hardware representativeness implied. Novelty
 status `NOVELTY_UNRESOLVED`; the closest named source could not be retrieved.
 
-Evidence: `results/CAMPAIGN_VALIDATION.json` (41 472 rows, 117 627 plant runs,
-4005 s, 24 hash-derived validation seeds), `results/GATE_TABLE_VALIDATION.json`,
-and the four development artifacts. Every number below is computed by a
-committed tool, not transcribed by hand.
+**Primary evidence: the sealed final partition**,
+`results/CAMPAIGN_FINAL.json` — 69 120 rows, 196 045 plant runs, 6674 s, 40
+hash-derived seeds opened exactly once under the conditions recorded in
+`SEAL_OPENING_RECORD.md`. Validation (`CAMPAIGN_VALIDATION.json`, 41 472 rows,
+24 seeds) ran the same frozen design first and is quoted where the two are
+worth comparing; **every finding below reproduces across both**.
+
+Every number is computed by a committed tool, not transcribed by hand.
 
 ---
 
@@ -19,12 +23,14 @@ preregistered hypotheses rejected and one preregistered claim rejected.
 
 The strongest defensible sentence:
 
-> Within a declared simulator envelope, on 864 matched validation cells, the
-> compensated active probe P2 achieved a lower independent point error than the
-> ordinary mission manoeuvre in 864/864 cells, passive hover in 863/864,
-> random-safe excitation in 809/864 and the naive palindrome in 827/864, and
-> every one of the 2404 inferences accepted by the realized-telemetry
-> certificate was correct against simulator truth at a coverage cost of 81.4%.
+> Within a declared simulator envelope, on 1440 matched sealed-partition
+> cells, the compensated active probe P2 achieved a lower independent point
+> error than the ordinary mission manoeuvre in 1440/1440 cells, passive hover
+> in 1439/1440, random-safe excitation in 1346/1440 and the naive palindrome in
+> 1399/1440; and every one of the 3925 inferences accepted by the
+> realized-telemetry certificate was correct against simulator truth — zero
+> false certificates, one-sided 95% upper bound 1.5e-3 on 2009 distinct
+> experiments — at a coverage cost of 81.8%.
 
 ---
 
@@ -37,16 +43,16 @@ for a derivable reason.**
 
 | arm | `A_s` point | frontier | mean energy | median `AE_R` |
 |---|---|---|---|---|
-| P0 passive | 0.062 | `> 0.04` | 0 A·s | 5.61e-2 Ω |
-| P6 mission | 0.051 | `> 0.04` | 48.0 A·s | 7.71e-2 Ω |
-| P7a benchmark | 0.683 | 0.010 | 80.0 A·s | 2.04e-3 Ω |
-| P5 random-safe | 0.713 | 0.010 | 20.4 A·s | 2.54e-3 Ω |
-| P3 shaped | 0.725 | 0.010 | 14.0 A·s | 2.04e-3 Ω |
-| P4 feedback | 0.873 | 0.004 | 56.0 A·s | 1.48e-3 Ω |
-| P7b change-oracle | 0.882 | 0.006 | 51.4 A·s | 5.66e-4 Ω |
-| P1 palindromic | 0.995 | 0.002 | 50.9 A·s | 4.91e-4 Ω |
-| **P2 compensated** | **1.000** | **0.002** | 71.3 A·s | **2.86e-4 Ω** |
-| **P7b point-oracle** | **1.000** | **0.002** | 52.5 A·s | **4.10e-5 Ω** |
+| P0 passive | 0.017 | `> 0.04` | 0 A·s | 4.81e-2 Ω |
+| P6 mission | 0.056 | `> 0.04` | 48.0 A·s | 7.66e-2 Ω |
+| P7a benchmark | 0.681 | 0.010 | 80.0 A·s | 2.09e-3 Ω |
+| P5 random-safe | 0.711 | 0.010 | 20.4 A·s | 2.55e-3 Ω |
+| P3 shaped | 0.753 | 0.010 | 14.0 A·s | 1.82e-3 Ω |
+| P7b change-oracle | 0.862 | 0.010 | 48.1 A·s | 8.10e-4 Ω |
+| P4 feedback | 0.871 | 0.006 | 56.0 A·s | 1.54e-3 Ω |
+| P1 palindromic | 1.000 | 0.002 | 50.9 A·s | 4.42e-4 Ω |
+| **P2 compensated** | **1.000** | **0.002** | 71.3 A·s | **2.10e-4 Ω** |
+| **P7b point-oracle** | **1.000** | **0.002** | 52.2 A·s | **4.25e-5 Ω** |
 
 On the preregistered change metric every arm except P0 scores `A_s = 0.933`
 identically. That is not a finding about the arms; it is
@@ -62,8 +68,8 @@ that.
 
 ## 3. Certificate calibration, and every false certificate
 
-**Zero false certificates observed, on both metrics, out of 12 960 main-block
-cells. That is a count, not a rate, and the denominator matters more than the
+**Zero false certificates observed, on both metrics, out of 21 600
+sealed-partition main-block cells. That is a count, not a rate, and the denominator matters more than the
 zero.**
 
 Unlike the prior phase's identical-sounding claim, this one comes from a check
@@ -77,44 +83,51 @@ bound is approximately `3/N`. `N` is **not** the row count:
 
 | denominator | `N` | 95% upper bound | |
 |---|---|---|---|
-| certified rows | 2404 | 1.25e-3 | inflated — see below |
-| **distinct experiments** | **1227** | **2.45e-3** | **the honest count** |
-| distinct seeds | 24 | 1.25e-1 | the most conservative reading |
+| certified rows | 3925 | 7.64e-4 | inflated — see below |
+| **distinct experiments** | **2009** | **1.49e-3** | **the honest count** |
+| distinct seeds | 40 | 7.50e-2 | the most conservative reading |
 
 Several arms choose the **same action in the same cell**, and when they do they
 are one simulation counted several times — up to **seven** arms share a single
 experiment here. Counting rows would halve the bound for free, and that is
 exactly the sort of free tightening that should not be available.
 
-Even 1227 assumes distinct simulations are independent, which they are not:
-they share 24 seeds, one plant family, one command library and one declared
-envelope. The true effective count lies between 1227 and 24 and this phase does
+Even 2009 assumes distinct simulations are independent, which they are not:
+they share 40 seeds, one plant family, one command library and one declared
+envelope. The true effective count lies between 2009 and 40 and this phase does
 not claim to know where.
 
 **So the defensible statement is: zero false certificates observed, with a 95%
-upper bound of 2.4e-3 on the false-certificate rate under the most favourable
+upper bound of 1.5e-3 on the false-certificate rate under the most favourable
 independence assumption this data supports.** Reaching a 1e-4 bound would need
-roughly **24 times** more distinct experiments. `zero` alone is never a rate
-claim (`results/ZERO_EVENT_BOUND_VALIDATION.json`).
+roughly **15 times** more distinct experiments. `zero` alone is never a rate
+claim (`results/ZERO_EVENT_BOUND_FINAL.json`).
 
-| certificate state | n | resolved (change) | resolved (point) | median `AE_R` | meets 90% target |
-|---|---|---|---|---|---|
-| `CERTIFIED_IN_MODEL` | 2404 | 1.0000 | **1.0000** | 3.52e-4 Ω | **yes** |
-| `UNKNOWN_OR_MODEL_MISMATCH` | 76 | 1.0000 | 1.0000 | 7.51e-4 Ω | yes |
-| `MODEL_MISMATCH_LIMITED` | 8655 | 1.0000 | 0.8644 | 6.04e-4 Ω | no |
-| `INSUFFICIENT_EXCITATION` | 1813 | 0.5234 | 0.0954 | 4.21e-2 Ω | no |
-| `DRIFT_COUPLED` | 12 | 1.0000 | 0.0000 | 1.13e-2 Ω | no |
+**And the zero is the good kind, which is now a measured fact rather than an
+argument.** `results/VACUITY_AUDIT_FINAL.json` classifies every declared check
+in this phase: 12 `DISCRIMINATING`, 3 `SOUND_BUT_UNEXERCISED`, 1
+`VACUOUS_IN_ENVELOPE`, 0 `UNVERIFIED`. The false-certificate checks are
+`SOUND_BUT_UNEXERCISED` — constant on the data, with controls proving they can
+fire. The prior phase's equivalent would have scored `VACUOUS_IN_ENVELOPE`.
 
-**H4 supported.** `CERTIFIED_IN_MODEL` predicts a correct estimate in 2404 of
-2404 cells.
+| certificate state | n | resolved (point) | median `AE_R` | meets 90% target |
+|---|---|---|---|---|
+| `CERTIFIED_IN_MODEL` | 3925 | **1.0000** | 3.12e-4 Ω | **yes** |
+| `UNKNOWN_OR_MODEL_MISMATCH` | 196 | 0.9898 | 7.51e-4 Ω | yes |
+| `MODEL_MISMATCH_LIMITED` | 14469 | 0.8617 | 5.87e-4 Ω | no |
+| `INSUFFICIENT_EXCITATION` | 2986 | 0.0794 | 4.25e-2 Ω | no |
+| `DRIFT_COUPLED` | 24 | 0.0000 | 1.02e-2 Ω | no |
 
-**And the certificate is markedly conservative.** It declined 8655 cells as
-model-mismatch-limited of which 86.4% would in fact have resolved, and 76 as
-unknown of which 100% would have. That is roughly 7560 correct inferences
+**H4 supported.** `CERTIFIED_IN_MODEL` predicts a correct estimate in 3925 of
+3925 cells.
+
+**And the certificate is markedly conservative.** It declined 14 469 cells as
+model-mismatch-limited of which 86.2% would in fact have resolved, and 196 as
+unknown of which 99.0% would have. That is roughly 12 660 correct inferences
 refused. Soundness here is bought with a large amount of coverage, and a reader
 deciding whether this is a good trade needs both numbers.
 
-`DRIFT_COUPLED` is the cleanest refusal in the table: 12 cells, none of which
+`DRIFT_COUPLED` is the cleanest refusal in the table: 24 cells, none of which
 would have resolved.
 
 ---
@@ -124,14 +137,14 @@ would have resolved.
 **H5 supported on the point metric, and the change metric is blind, exactly as
 derived before the run.**
 
-| plant | n | median `AE_R` | median `\|e_ΔR\|` | `A_s` point | `A_s` change |
-|---|---|---|---|---|---|
-| Q0 zero-RC | 4320 | **3.10e-4 Ω** | 2.92e-6 Ω | 0.868 | 0.933 |
-| Q1 one-RC | 4320 | **1.55e-3 Ω** | 2.93e-6 Ω | 0.746 | 0.933 |
-| Q2 richer | 4320 | **1.29e-3 Ω** | 2.87e-6 Ω | 0.732 | 0.933 |
+| plant | n | median `AE_R` | `A_s` point | `A_s` change |
+|---|---|---|---|---|
+| Q0 zero-RC | 7200 | **2.94e-4 Ω** | 0.868 | 0.933 |
+| Q1 one-RC | 7200 | **1.68e-3 Ω** | 0.741 | 0.933 |
+| Q2 richer | 7200 | **1.37e-3 Ω** | 0.728 | 0.933 |
 
-A five-fold spread on the point error, and three identical figures to three
-decimal places on the change metric and on `A_s` change. The certificate margin
+A **5.7-fold** spread on the point error, and three identical figures to three
+decimal places on `A_s` change. The certificate margin
 is bit-identical across plants in 48 of 48 development cells
 (`PLANT_INDEPENDENCE_AUDIT.md` §3); the preregistered change metric is
 effectively so; the point metric is not.
@@ -152,32 +165,33 @@ Paired on matched cells, point error, P2 as the reference:
 
 | comparison | matched cells | P2 better | median advantage |
 |---|---|---|---|
-| P2 vs P6 mission | 864 | **864 (100%)** | +7.38e-2 Ω |
-| P2 vs P0 passive | 864 | 863 (99.9%) | +5.53e-2 Ω |
-| P2 vs P5 random-safe | 864 | 809 (93.6%) | +2.23e-3 Ω |
-| P2 vs P1 palindromic | 864 | 827 (95.7%) | +1.66e-4 Ω |
-| P4 vs P1 palindromic | 864 | **55 (6.4%)** | −8.49e-4 Ω |
+| P2 vs P6 mission | 1440 | **1440 (100%)** | +7.28e-2 Ω |
+| P2 vs P0 passive | 1440 | 1439 (99.9%) | +4.74e-2 Ω |
+| P2 vs P5 random-safe | 1440 | 1346 (93.5%) | +2.43e-3 Ω |
+| P2 vs P1 palindromic | 1440 | 1399 (97.2%) | +1.65e-4 Ω |
+| P4 vs P1 palindromic | 1440 | **63 (4.4%)** | −9.46e-4 Ω |
 
 **Gate E, honestly:** P2's advantage over P1 is real and it is bought. P2 spends
-71.3 A·s against P1's 50.9 — 40% more energy for a 1.66e-4 Ω median improvement
-and 0.005 of `A_s`. Whether that is worth it is an application question this
+71.3 A·s against P1's 50.9 — 40% more energy for a 1.65e-4 Ω median improvement
+and, on the sealed partition, no difference in `A_s` at all: both reach 1.000. Whether that is worth it is an application question this
 phase cannot answer, and the numbers are given so somebody with an application
 can.
 
-**P4 loses to the naive palindrome in 93.6% of matched cells.**
+**P4 loses to the naive palindrome in 95.6% of matched cells.**
 
 ### The ceiling
 
-**Both invariants hold. 864 matched cells each, zero violations, on both
-losses, on development and validation.** No deployable arm beat either oracle
-on that oracle's own objective.
+**Both invariants hold on development, validation and the sealed partition.**
+1440 matched cells each on the sealed run, zero violations, on both losses. No
+deployable arm beat either oracle on that oracle's own objective, anywhere.
 
-`P7b_point_oracle` reaches `AE_R` of 4.10e-5 Ω at 52.5 A·s, against P2's
-2.86e-4 Ω at 71.3 A·s. **A seven-fold accuracy gap at 74% of the energy**, and
-that gap is the regret of the best deployable arm against perfect hindsight.
+`P7b_point_oracle` reaches `AE_R` of 4.25e-5 Ω at 52.2 A·s, against P2's
+2.10e-4 Ω at 71.3 A·s. **A five-fold accuracy gap at 73% of the energy.** The
+median regret of the best deployable arm against perfect hindsight is
+**1.09e-4 Ω**; the worst deployable arm, P6, is at 7.29e-2 Ω.
 
-`P7a` is never called an oracle, and its performance is the reason: `A_s` 0.683
-at the full 80 A·s energy cap, worse than five deployable arms while spending
+`P7a` is never called an oracle, and its performance is the reason: `A_s` 0.681
+at the full 80 A·s energy cap, worse than four deployable arms while spending
 more than any of them. `BASELINE_MAPPING.md` §3 shows why — its objective is
 exactly the classical A-optimal design for resistance, `var(R) = σ_V²/S_II`,
 and the classical optimum for the *assumed* model is not optimal for the plant.
@@ -188,10 +202,10 @@ and the classical optimum for the *assumed* model is not optimal for the plant.
 
 | selector | `A_s` nominal | `A_s` elevated | worst-case | `I_s` |
 |---|---|---|---|---|
-| S0 always-P2 | 1.000 | 1.000 | **1.000** | +0.0139 |
-| S1 always-P4 | 0.873 | 0.884 | 0.884 | +0.0255 |
-| **S2 threshold** | 1.000 | **0.884** | 0.884 | **−0.1019** |
-| S3 minimax | 1.000 | 1.000 | **1.000** | +0.0139 |
+| S0 always-P2 | 1.000 | 1.000 | **1.000** | −0.0056 |
+| S1 always-P4 | 0.871 | 0.885 | 0.871 | +0.0083 |
+| **S2 threshold** | 1.000 | **0.885** | 0.885 | **−0.1208** |
+| S3 minimax | 1.000 | 1.000 | **1.000** | −0.0056 |
 
 **H3 is rejected.** S2 does not match the worst case of committing globally to
 P2; it is strictly worse. Its threshold switches to P4 under elevated drift,
@@ -208,7 +222,8 @@ of always choosing P2.
 nominal, P4 better worst case". P4 is worse than P2 in both conditions.
 
 **No selector ever abstained.** All three abstention paths are reachable and
-tested, and none was reached in 12 960 cells: the declared conditions never
+tested, and none was reached in 69 120 rows — `SOUND_BUT_UNEXERCISED` in the
+vacuity audit, not `VACUOUS`: the declared conditions never
 made energy, headroom, lag knowledge or mission phase binding. Architecturally
 present, empirically unexercised, and neither fact should be read as the other.
 
@@ -220,14 +235,15 @@ Primary statistic, point metric, difference in differences against passive:
 
 | arm | `I_s` |
 |---|---|
-| P7a benchmark | +0.1088 |
-| P6 mission | +0.0394 |
-| P3 shaped | +0.0301 |
-| P4 feedback / S1 | +0.0255 |
-| P2 / S0 / S3 / P7b-point | +0.0139 |
+| P7a benchmark | +0.0917 |
+| P6 mission | +0.0194 |
+| P3 shaped | +0.0111 |
+| P7b change-oracle / P7c | +0.0097 |
+| P4 feedback / S1 | +0.0083 |
 | P0 passive | 0.0000 |
-| P5 random-safe | −0.0671 |
-| **S2 threshold** | **−0.1019** |
+| P1 / P2 / S0 / S3 / P7b-point | −0.0056 |
+| P5 random-safe | −0.0931 |
+| **S2 threshold** | **−0.1208** |
 
 Every value is finite. The statistic this replaces went `NaN` the moment an arm
 never resolved, because "never" was encoded as infinity
@@ -238,19 +254,19 @@ is not a probability, so that failure cannot recur silently.
 
 ## 8. The two-gate contract: the combined claim is rejected
 
-Full 2×2, point metric, 12 960 cells:
+Full 2×2, point metric, **21 600 sealed-partition cells**:
 
 | | post fails | post passes |
 |---|---|---|
-| pre fails | 5473 (1934 wrong) | **0** |
-| pre passes | 5083 (892 wrong) | 2404 (**0** wrong) |
+| pre fails | 9143 (3272 wrong) | **0** |
+| pre passes | 8532 (1504 wrong) | 3925 (**0** wrong) |
 
 | policy | accepted | coverage | false accepted | rate |
 |---|---|---|---|---|
-| accept always | 12 960 | 1.000 | 2826 | 0.2181 |
-| accept if pre | 7487 | 0.578 | 892 | 0.1191 |
-| accept if post | 2404 | 0.186 | **0** | 0.0000 |
-| accept if both | 2404 | 0.186 | **0** | 0.0000 |
+| accept always | 21 600 | 1.000 | 4776 | 0.2211 |
+| accept if pre | 12 457 | 0.577 | 1504 | 0.1207 |
+| accept if post | 3925 | 0.182 | **0** | 0.0000 |
+| accept if both | 3925 | 0.182 | **0** | 0.0000 |
 
 The `pre=False / post=True` cell is empty, so `accept_if_both` is identical to
 `accept_if_post`. **The combined claim is rejected as preregistered**: both
@@ -267,8 +283,14 @@ screening. And the pre-gate is an interval over-approximation over an
 enumerated envelope, **not a formal reachable-set guarantee**, on a one-output
 battery model.
 
-The volume surrogate's blind spot occurred in the data: **48 cells** (0.37%)
-were `zero_volume` and not `empty_intersection` — touching, not separated.
+The volume surrogate's blind spot occurred in the data: **80 cells** on the
+sealed partition (0.37%, the same rate as validation) were `zero_volume` and
+not `empty_intersection` — touching, not separated.
+
+**The pre-gate's safety half is `VACUOUS_IN_ENVELOPE`** in
+`results/VACUITY_AUDIT_FINAL.json`, firing rate exactly 1.0000 — the audit
+confirms mechanically what §IV-19 found by hand, and a test fails if a second
+vacuous check ever appears.
 
 ---
 
@@ -312,13 +334,14 @@ must be worse was falsified by its own test.
 
 ## 11. Worst counterexample
 
-The worst independently scored error among *certified* cells is the closest
-thing this phase has to a failure of the certificate, and there is no false
-certificate to report. `results/WORST_COUNTEREXAMPLE.json` records the certified
-cell with the largest `AE_R`.
+There is no false certificate to report, so the closest thing to one is the
+certified cell with the largest independent error: **P7a on Q1 at Δ = 0.040,
+`AE_R` = 4.534e-3 Ω** — still well inside its own tolerance of τ_R = 0.020 Ω,
+and produced by the non-deployable benchmark rather than by any deployable arm
+(`results/WORST_COUNTEREXAMPLE.json`).
 
 The worst outcome overall belongs to `INSUFFICIENT_EXCITATION` at a median
-`AE_R` of 4.21e-2 Ω — cells where the certificate declined and was right to.
+`AE_R` of 4.25e-2 Ω — cells where the certificate declined and was right to.
 
 ---
 
@@ -348,6 +371,22 @@ coverage beyond one ringing family.
 
 Frozen core `b0b011c61426a70e…`, 12 of 12 files matching. Prior sealed-partition
 manifest `e872d36f…5c6f65c2` unchanged. This phase's partition manifest
-`b293e30f…01786731`. No old raw artifact was edited. The sealed final partition
-was not opened during development and `tools/research/iv_gate_check.py` refuses
-to report it openable until every listed condition holds.
+`b293e30f…01786731`. No old raw artifact was edited.
+
+The sealed final partition was opened **once**, from the state recorded in
+`SEAL_OPENING_RECORD.md` before the run began, after
+`tools/research/iv_gate_check.py` reported all ten conditions passing.
+
+Three integrity checks that did not exist when this phase started now do, each
+because something slipped past its absence:
+
+* `tests/test_iv_integrity.py` reads both checksum manifests in both
+  directions, refuses a pinned file git does not track, and verifies every
+  campaign artifact carries the row count its own header claims — a digest
+  proves a file has not changed since it was pinned and proves nothing about
+  whether it was whole at the time (`COUNTEREXAMPLE_LOG.md` IV-23, IV-24);
+* `tests/test_iv_vacuity.py` pins the vacuity audit: no check may be
+  `UNVERIFIED`, and the vacuous set must be exactly `["gate::pre_safe"]`;
+* `tests/test_ci_env.py` now catches pipelines that discard a pytest exit
+  status, across every committed shell surface rather than the workflows
+  alone.
