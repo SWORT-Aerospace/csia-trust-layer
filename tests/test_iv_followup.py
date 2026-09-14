@@ -586,3 +586,48 @@ def test_the_report_prints_the_zero_energy_table():
     text = fr.render(document)
     assert "## Resolution with nothing injected" in text
     assert "0.0764" in text
+
+
+# --- the seal-opening record ----------------------------------------------
+
+from tools.research import iv_followup_seal_record as sr    # noqa: E402
+
+
+def test_the_seal_record_reads_a_recorded_exit_code_rather_than_asserting(
+        tmp_path):
+    green = tmp_path / "green.txt"
+    green.write_text("....... [100%]\nPYTEST_EXIT=0\n")
+    code, count, _ = sr._suite(green)
+    assert code == 0 and count == 7
+
+    red = tmp_path / "red.txt"
+    red.write_text("F..\n3 passed\nPYTEST_EXIT=1\n")
+    code, count, _ = sr._suite(red)
+    assert code == 1 and count == 3
+
+
+def test_the_seal_record_refuses_to_write_after_a_red_suite(tmp_path,
+                                                            monkeypatch):
+    """A record that says the seal was opened from a green tree, written from
+    a red one, is worse than no record."""
+    red = tmp_path / "red.txt"
+    red.write_text("PYTEST_EXIT=1\n")
+    monkeypatch.setattr(sr, "_dirty_paths", lambda: [])
+    assert sr.main(red, force_dirty=False) == 1
+
+
+def test_the_seal_record_refuses_to_write_from_a_dirty_tree(tmp_path,
+                                                            monkeypatch):
+    green = tmp_path / "green.txt"
+    green.write_text("PYTEST_EXIT=0\n")
+    monkeypatch.setattr(sr, "_dirty_paths", lambda: [" M some/file.py"])
+    assert sr.main(green, force_dirty=False) == 1
+
+
+def test_a_missing_exit_marker_is_not_read_as_success(tmp_path):
+    """`pytest ... | tail` loses the exit status -- this phase's most
+    repeated defect. A file with no marker must not pass for zero."""
+    silent = tmp_path / "silent.txt"
+    silent.write_text("........ [100%]\n")
+    code, _, _ = sr._suite(silent)
+    assert code is None
