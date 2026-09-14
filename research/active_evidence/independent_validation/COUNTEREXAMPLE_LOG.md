@@ -690,3 +690,78 @@ discarding an exit code (IV-12, IV-18, IV-24). Writing the lesson down did not
 prevent the repeat, on either. The only things that have actually caught these
 are executable checks that fail loudly, which is an argument for more of them
 and none at all for more prose.
+
+---
+
+## IV-25 — The three repeats, fixed executably instead of described again
+
+`IV-1`, `IV-19` and `IV-23` are one failure mode: a check that reports a
+constant, where the constant was the only possible answer. `IV-12`, `IV-18` and
+`IV-24` are another: a pytest result discarded before anybody read it. Writing
+each one down prevented neither repeat. Both now have code.
+
+### Vacuity, `csia_independent_validation/vacuity.py`
+
+The central problem is that **"never fired" and "cannot fire" look identical in
+a results table and mean opposite things.** Zero false certificates out of 3925
+is the strongest result in this phase. Zero because zero was the only available
+answer is the weakest possible defect. Both print `0`.
+
+Telling them apart needs two independent pieces of evidence, and every audited
+check now carries both: how often the predicate came out each way on real
+campaign rows, and a **positive and negative control** on constructed input.
+The verdict follows from the pair and never from either alone:
+
+| verdict | meaning |
+|---|---|
+| `DISCRIMINATING` | fired both ways on real data |
+| `SOUND_BUT_UNEXERCISED` | constant on data, controls prove it can go both ways — **the good zero** |
+| `VACUOUS_IN_ENVELOPE` | constant on data, and constant over the whole admissible domain — **the bad zero** |
+| `UNVERIFIED` | constant with no controls; neither, and reported as neither |
+
+On the validation partition, 16 checks: **12 `DISCRIMINATING`, 3
+`SOUND_BUT_UNEXERCISED`, 1 `VACUOUS_IN_ENVELOPE`, 0 `UNVERIFIED`.**
+
+The vacuous one is `gate::pre_safe` at a firing rate of exactly `1.0000`, with
+its reason attached. **It was declared vacuous before the audit ran**, so the
+audit confirming it is a working detector rather than a discovery. Had this
+existed earlier it would have flagged IV-19 automatically, and IV-1 would have
+come out `VACUOUS_IN_ENVELOPE` instead of being reported as soundness for a
+whole phase.
+
+The good zeros — `false_certificate::point`, `false_certificate::change`,
+`selector::abstained` — are now *labelled* good rather than argued to be.
+
+A test pins the whole table: no check may be `UNVERIFIED`, the vacuous set must
+be exactly `["gate::pre_safe"]`, and every certificate state must actually
+occur. A second vacuous check appearing is a failure, not a note.
+
+### Exit codes, `tests/test_ci_env.py`
+
+The existing guard caught `|| true` and `|| :`, in workflow files only. Neither
+restriction covered the form that has actually caused damage here: a
+**pipeline** takes its exit status from its last command, so `pytest | tail`
+succeeds whenever `tail` does.
+
+The guard now covers `|| true`, `|| :`, `; true` and unguarded pipelines, over
+workflows, the `Makefile` and every committed shell script, and it accepts
+pipelines protected by `pipefail` or `PIPESTATUS` so it is not satisfied by
+banning pipes. Five positive controls and four negative ones.
+
+It cannot see an interactive shell command, which is where all three of my
+occurrences were. That limit is stated rather than papered over.
+
+### The hand-typed timestamp
+
+`results/EXTERNAL_ACCESS_CHECK.json` was authored by hand. Its HTTP codes were
+real, but `retrieval_attempt_utc` was **typed**, not captured — an invented
+number in an evidence artifact, which is the one thing the standing rules put
+above everything else, however nearly right it was.
+
+It is generated now by `tools/research/iv_access_check.py`. Timestamp, status,
+curl exit code, bytes downloaded, elapsed time and the proxy's own report are
+all measured at run time, and the outcome field is derived from whether
+anything was actually downloaded rather than asserted. Re-measured at
+`2026-09-14T01:14:18Z` across eight endpoints including the HTML URL the
+roadmap cites: still `PRIMARY_TEXT_NOT_RETRIEVED`, seven refused connections
+and one direct 403.

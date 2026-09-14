@@ -227,29 +227,105 @@ def test_every_test_path_named_in_a_workflow_exists():
         f"if nothing swallows it")
 
 
+def _executable_lines(path):
+    """Lines that can actually run. A comment cannot swallow anything.
+
+    This guard once scanned raw lines and reported the comment DOCUMENTING the
+    `|| true` defect as the defect -- a guard firing on its own explanation.
+    """
+    comment = "#"
+    with open(path, encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, 1):
+            stripped = line.lstrip()
+            if not stripped or stripped.startswith(comment):
+                continue
+            yield lineno, line
+
+
+def _swallows_result(line):
+    """Ways a shell line can run pytest and throw the answer away.
+
+    `|| true` was the only form this guard knew. It is not the only form, and
+    it is not the one that has actually caused damage here: a PIPELINE takes
+    its exit status from its LAST command, so `pytest | tail` succeeds
+    whenever `tail` does. That form went unnoticed three times in one session
+    (COUNTEREXAMPLE_LOG IV-12, IV-18, IV-24 under
+    research/active_evidence/independent_validation).
+    """
+    if "|| true" in line or "|| :" in line:
+        return "|| true"
+    if "; true" in line:
+        return "; true"
+    # A pipeline whose status is neither guarded by pipefail nor read out of
+    # PIPESTATUS discards pytest's answer.
+    without_or = line.replace("||", "")
+    if "|" in without_or:
+        if "pipefail" in line or "PIPESTATUS" in line:
+            return None
+        return "pipeline discards exit status"
+    return None
+
+
+def _shell_surfaces():
+    """Every committed surface that can invoke pytest from a shell."""
+    surfaces = list(_workflow_files())
+    makefile = os.path.join(ROOT, "Makefile")
+    if os.path.isfile(makefile):
+        surfaces.append(makefile)
+    for base in ("tools", "scripts"):
+        root = os.path.join(ROOT, base)
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d != "__pycache__"]
+            for name in filenames:
+                if name.endswith((".sh", ".bash")):
+                    surfaces.append(os.path.join(dirpath, name))
+    return surfaces
+
+
 def test_no_pytest_invocation_swallows_its_own_result():
-    """`|| true` on a test step makes the step decorative.
+    """A test step whose result nobody can see is not a test step.
 
     Same defect class as the qualification gate that printed FAIL and exited
-    0: a guard whose result nobody can see is not a guard.
+    0. Now covers every committed shell surface, not only the workflows, and
+    every way of discarding the answer, not only `|| true`.
     """
     offenders = []
-    for path in _workflow_files():
-        with open(path, encoding="utf-8") as fh:
-            for lineno, line in enumerate(fh, 1):
-                # A YAML COMMENT CANNOT SWALLOW ANYTHING. This guard scanned
-                # raw lines, so the comment DOCUMENTING the `|| true` defect
-                # was itself reported as the defect -- a guard firing on its
-                # own explanation. Only executable lines can discard a result.
-                if line.lstrip().startswith("#"):
-                    continue
-                if "pytest" not in line:
-                    continue
-                if "|| true" in line or "|| :" in line:
-                    offenders.append(
-                        f"{os.path.basename(path)}:{lineno}: {line.strip()}")
+    for path in _shell_surfaces():
+        for lineno, line in _executable_lines(path):
+            if "pytest" not in line:
+                continue
+            reason = _swallows_result(line)
+            if reason:
+                offenders.append(
+                    f"{os.path.relpath(path, ROOT)}:{lineno}: [{reason}] "
+                    f"{line.strip()}")
     assert not offenders, (
         f"pytest results are being discarded: {offenders}")
+
+
+def test_the_swallow_detector_catches_every_form_it_claims_to():
+    """Positive control. A detector nobody has fooled is not evidence."""
+    assert _swallows_result("python -m pytest -q || true")
+    assert _swallows_result("python -m pytest -q || :")
+    assert _swallows_result("python -m pytest -q ; true")
+    assert _swallows_result("python -m pytest -q | tail -3")
+    assert _swallows_result("python -m pytest -q | grep -c PASS")
+
+
+def test_the_swallow_detector_accepts_the_forms_that_are_safe():
+    """Negative control, so the guard cannot be satisfied by rejecting all."""
+    assert _swallows_result("python -m pytest -q") is None
+    assert _swallows_result("$(PY) -m pytest -q -m 'not sitl'") is None
+    assert _swallows_result(
+        "set -o pipefail; python -m pytest -q | tail -3") is None
+    assert _swallows_result(
+        "python -m pytest -q | tail -3; exit ${PIPESTATUS[0]}") is None
+
+
+def test_the_guard_looks_at_more_than_the_workflows():
+    surfaces = {os.path.basename(p) for p in _shell_surfaces()}
+    assert "Makefile" in surfaces
+    assert len(surfaces) > 1
 
 
 def test_the_determinism_selection_actually_selects_something():

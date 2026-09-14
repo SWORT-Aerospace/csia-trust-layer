@@ -153,3 +153,47 @@ def test_the_prior_phase_checksum_file_is_still_stale_and_that_is_recorded():
         f"expected the nine documented failures, got {len(failures)}: "
         f"{failures}")
     assert raw_json_ok, "the prior phase's immutable raw JSON no longer verifies"
+
+
+# --- truncation, which nothing would have caught --------------------------
+
+def test_every_campaign_artifact_is_internally_complete():
+    """A half-written JSON is the failure the manifest cannot see.
+
+    `CAMPAIGN_FINAL.json` was swept into a commit by `git add -A` while the
+    sealed campaign was still running (`COUNTEREXAMPLE_LOG.md` IV-24). It
+    happened to be finished. A minute earlier and a truncated 1.6-million-line
+    file would have been committed, its digest would have been pinned quite
+    happily, and every downstream reduction would have run on a prefix.
+
+    A digest proves a file has not changed since it was pinned. It proves
+    nothing about whether the file was whole when that happened. This checks
+    the only thing that does: the artifact parses, and it contains the number
+    of rows its own header claims.
+    """
+    for path in sorted(RESULTS.glob("CAMPAIGN_*.json")):
+        if not _tracked(path):
+            continue
+        document = json.loads(path.read_text())
+        assert len(document["rows"]) == document["n_rows"], (
+            f"{path.relative_to(ROOT)} claims {document['n_rows']} rows and "
+            f"carries {len(document['rows'])}")
+        assert document["rows"], f"{path.relative_to(ROOT)} has no rows"
+        assert document["partition_manifest_sha256"]
+        assert len(document["seeds"]) > 0
+
+
+def test_every_derived_artifact_parses_and_names_its_source():
+    """A derived table that outlives its campaign is a different hazard."""
+    sources = {p.name for p in RESULTS.glob("CAMPAIGN_*.json")}
+    for stem in ("GATE_TABLE", "ZERO_EVENT_BOUND", "VACUITY_AUDIT"):
+        for path in sorted(RESULTS.glob(f"{stem}_*.json")):
+            if not _tracked(path):
+                continue
+            document = json.loads(path.read_text())
+            assert "schema" in document
+            named = document.get("source_campaign")
+            if named:
+                assert pathlib.Path(named).name in sources, (
+                    f"{path.relative_to(ROOT)} derives from {named}, which is "
+                    "not present")
