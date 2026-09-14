@@ -26,43 +26,27 @@ BASE = ROOT / "research/active_evidence/independent_validation"
 RESULTS = BASE / "results"
 
 #: Everything that produced a result. Recorded, not verified.
-SOURCE_FILES = (
-    "csia_independent_validation/__init__.py",
-    "csia_independent_validation/actions.py",
-    "csia_independent_validation/audit.py",
-    "csia_independent_validation/baselines.py",
-    "csia_independent_validation/ceilings.py",
-    "csia_independent_validation/evaluator.py",
-    "csia_independent_validation/openset.py",
-    "csia_independent_validation/partitions.py",
-    "csia_independent_validation/plants.py",
-    "csia_independent_validation/propositions.py",
-    "csia_independent_validation/runner.py",
-    "csia_independent_validation/strategies.py",
-    "csia_independent_validation/truth.py",
-    "tools/research/iv_base_provenance.py",
-    "tools/research/iv_baselines.py",
-    "tools/research/iv_campaign.py",
-    "tools/research/iv_manifest.py",
-    "tools/research/iv_oracle_taxonomy.py",
-    "tools/research/iv_plant_independence.py",
-    "tools/research/iv_unknown_boundary.py",
-)
+#:
+#: These were hand-written lists until they drifted: five package modules
+#: (``discrimination``, ``gates``, ``vacuity``, ``followup_partitions``),
+#: six tools and five test files produced committed results while the
+#: manifest recorded nothing about them. A list somebody has to remember to
+#: extend is the same defect as a count somebody has to remember to bump, and
+#: it failed the same way. Globs cannot drift.
 
-TEST_FILES = (
-    "tests/test_iv_baselines.py",
-    "tests/test_iv_ceilings.py",
-    "tests/test_iv_evaluator.py",
-    "tests/test_iv_layers.py",
-    "tests/test_iv_openset.py",
-    "tests/test_iv_partitions.py",
-    "tests/test_iv_plants.py",
-    "tests/test_iv_propositions.py",
-    "tests/test_iv_provenance.py",
-    "tests/test_iv_runner.py",
-    "tests/test_iv_selectors.py",
-    "tests/test_iv_sensitivity.py",
-)
+
+def _relative_glob(pattern: str):
+    return tuple(sorted(str(p.relative_to(ROOT))
+                        for p in ROOT.glob(pattern) if p.is_file()))
+
+
+def source_files():
+    return (_relative_glob("csia_independent_validation/*.py")
+            + _relative_glob("tools/research/iv_*.py"))
+
+
+def test_files():
+    return _relative_glob("tests/test_iv_*.py")
 
 
 def _sha256(path: pathlib.Path) -> str:
@@ -75,7 +59,9 @@ def _git(*args: str) -> str:
 
 
 def main() -> int:
-    from csia_independent_validation import audit, partitions as pt
+    from csia_independent_validation import audit
+    from csia_independent_validation import followup_partitions as fp
+    from csia_independent_validation import partitions as pt
     from csia_independent_validation.actions import ACTION_SPACE
     from csia_independent_validation.runner import ARMS, MAGNITUDES, PLANTS
 
@@ -111,6 +97,14 @@ def main() -> int:
             "sizes": dict(pt.SIZES),
             "sealed": list(pt.SEALED),
         },
+        "followup_partitions": {
+            "manifest_sha256": fp.manifest_hash(),
+            "domain": fp.DOMAIN,
+            "companion_domain": fp.COMPANION_DOMAIN,
+            "sizes": dict(fp.SIZES),
+            "sealed": list(fp.SEALED),
+            "disjoint_from_phase_one": True,
+        },
         "design": {
             "arms": list(ARMS),
             "plants": list(PLANTS),
@@ -127,10 +121,9 @@ def main() -> int:
             str(p.relative_to(ROOT)): {"sha256": _sha256(p),
                                        "bytes": p.stat().st_size}
             for p in raw},
-        "source_record": {rel: _sha256(ROOT / rel) for rel in SOURCE_FILES
-                          if (ROOT / rel).is_file()},
-        "test_record": {rel: _sha256(ROOT / rel) for rel in TEST_FILES
-                        if (ROOT / rel).is_file()},
+        "source_record": {rel: _sha256(ROOT / rel)
+                          for rel in source_files()},
+        "test_record": {rel: _sha256(ROOT / rel) for rel in test_files()},
     }
     (BASE / "EXPERIMENT_MANIFEST.json").write_text(
         json.dumps(manifest, indent=1, sort_keys=True) + "\n")

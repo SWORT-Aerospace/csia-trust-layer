@@ -157,3 +157,267 @@ def test_the_plant_guard_survives_independence():
         TruthPair(nominal=_truth(1, plant="Q0"),
                   fault=_truth(2, plant="Q1", realized=0.050),
                   independent_windows=True)
+
+
+# --- the follow-up campaign tool ------------------------------------------
+#
+# The reductions, not the run. A campaign takes an hour; the arithmetic that
+# turns it into a verdict takes microseconds and is where a wrong answer would
+# actually hide.
+
+from tools.research import iv_followup_campaign as fc   # noqa: E402
+
+
+def test_the_followup_omits_every_ceiling():
+    """Amendment 4 section 4. A ceiling here would need `nominal_source`
+    threaded through the arena, and a regret number that ignored the factor
+    would be worse than no regret number."""
+    assert len(fc.FOLLOWUP_ARMS) == 11
+    for arm in fc.FOLLOWUP_ARMS:
+        assert not arm.startswith("P7"), arm
+
+
+def test_the_preregistered_thresholds_match_the_amendment():
+    assert fc.H8_SPREAD == 0.05
+    assert fc.H9_FACTOR == 2.0
+    assert fc.H9_CONTROL_TOLERANCE == 0.05
+    assert fc.H10_RHO == 0.7
+
+
+def test_spearman_is_tie_aware():
+    """Average ranks. Midranks on a tied block, not first-seen order."""
+    assert fc._ranks([3.0, 1.0, 2.0]) == [3.0, 1.0, 2.0]
+    assert fc._ranks([1.0, 1.0, 2.0]) == [1.5, 1.5, 3.0]
+    assert fc._ranks([5.0, 5.0, 5.0]) == [2.0, 2.0, 2.0]
+
+
+def test_spearman_agrees_with_the_textbook_case():
+    a = [1.0, 2.0, 3.0, 4.0, 5.0]
+    assert fc.spearman(a, a) == pytest.approx(1.0)
+    assert fc.spearman(a, list(reversed(a))) == pytest.approx(-1.0)
+    # Monotone but not linear: rank correlation is still exactly one.
+    assert fc.spearman(a, [1.0, 4.0, 9.0, 16.0, 25.0]) == pytest.approx(1.0)
+
+
+def test_spearman_refuses_a_constant_vector():
+    """This is the case that matters: the sealed change metric IS constant
+    across thirteen arms. A correlation against a constant is undefined, and
+    reporting 0.0 would read as 'the orderings disagree' -- a claim the data
+    does not make."""
+    assert fc.spearman([1.0, 2.0, 3.0, 4.0], [7.0] * 4) is None
+    assert fc.spearman([2.0] * 4, [1.0, 2.0, 3.0, 4.0]) is None
+
+
+def test_spearman_declines_a_sample_too_small_to_rank():
+    assert fc.spearman([1.0, 2.0], [1.0, 2.0]) is None
+    assert fc.spearman([1.0, 2.0, 3.0], [1.0, 2.0]) is None
+
+
+def _row(**kw):
+    base = dict(arm="P2_lag_aware", plant="Q1", drift_state="nominal",
+                magnitude=0.010, seed=1, nominal_source="paired_crn",
+                resolved=True, m_r_out=1.0, ae_r=1e-4, e_delta_r=1e-6,
+                state="CERTIFIED_IN_MODEL", abstention=None, action="a",
+                baseline_action="a", baseline_seed=1, block="main")
+    base.update(kw)
+    return base
+
+
+def test_h10_reports_undefined_rather_than_a_number_when_one_side_is_flat():
+    rows = []
+    for index, arm in enumerate(fc.FOLLOWUP_ARMS):
+        for magnitude in (0.002, 0.040):
+            rows.append(_row(arm=arm, magnitude=magnitude,
+                             nominal_source="independent_window",
+                             resolved=index % 2 == 0))
+            # point metric identical for every arm -> constant A_s
+            rows.append(_row(arm=arm, magnitude=magnitude,
+                             nominal_source="paired_crn", ae_r=1e-9))
+    verdict = fc.assess_h10(rows)
+    assert verdict["spearman_rho"] is None
+    assert verdict["verdict"] == "UNDEFINED_ONE_SIDE_IS_CONSTANT"
+
+
+def test_h9_says_precondition_failed_rather_than_rejected():
+    """If the paired_crn control does not behave as the amendment predicts,
+    H9's comparison has no reference and the honest answer is neither
+    SUPPORTED nor REJECTED."""
+    rows = []
+    for plant, value in zip(("Q0", "Q1", "Q2"), (1e-6, 5e-6, 9e-6)):
+        rows.append(_row(plant=plant, e_delta_r=value,
+                         nominal_source="paired_crn"))
+        rows.append(_row(plant=plant, e_delta_r=value,
+                         nominal_source="independent_seed"))
+        rows.append(_row(plant=plant, e_delta_r=value * 10,
+                         nominal_source="independent_window"))
+    verdict = fc.assess_h9(rows)
+    assert verdict["control_precondition_holds"] is False
+    assert verdict["verdict"] == "PRECONDITION_FAILED"
+
+
+def test_h9_is_supported_only_when_the_control_is_flat_and_the_break_is_not():
+    rows = []
+    for plant, factor in zip(("Q0", "Q1", "Q2"), (1.0, 3.0, 9.0)):
+        rows.append(_row(plant=plant, e_delta_r=1e-6,
+                         nominal_source="paired_crn"))
+        rows.append(_row(plant=plant, e_delta_r=1e-6 * factor,
+                         nominal_source="independent_seed"))
+        rows.append(_row(plant=plant, e_delta_r=1e-6 * factor,
+                         nominal_source="independent_window"))
+    verdict = fc.assess_h9(rows)
+    assert verdict["control_precondition_holds"] is True
+    assert verdict["by_source"]["independent_window"]["ratio"] == \
+        pytest.approx(9.0)
+    assert verdict["verdict"] == "SUPPORTED"
+
+
+def test_the_point_metric_invariance_check_catches_a_contaminated_factor():
+    """`nominal_source` touches the baseline only. If AE_R ever moves with it
+    the factor is leaking, and every H8/H9/H10 reading is void."""
+    clean = [_row(nominal_source=source, ae_r=2.5e-4)
+             for source in runner.NOMINAL_SOURCES]
+    assert fc.point_metric_invariance(clean)["identical_everywhere"] is True
+
+    dirty = list(clean)
+    dirty[2] = _row(nominal_source="independent_window", ae_r=2.6e-4)
+    report = fc.point_metric_invariance(dirty)
+    assert report["identical_everywhere"] is False
+    assert report["max_ae_r_spread_across_levels"] == pytest.approx(1e-5)
+    assert report["first_offenders"]
+
+
+def test_h8_needs_both_broken_levels_for_an_unqualified_verdict():
+    def area_rows(source, spread):
+        out = []
+        for index, arm in enumerate(fc.FOLLOWUP_ARMS):
+            resolved = index == 0 or not spread
+            for magnitude in (0.002, 0.040):
+                out.append(_row(arm=arm, magnitude=magnitude,
+                                nominal_source=source, resolved=resolved))
+        return out
+
+    rows = (area_rows("paired_crn", False)
+            + area_rows("independent_seed", True)
+            + area_rows("independent_window", False))
+    verdict = fc.assess_h8(rows)
+    assert verdict["levels_that_broke_saturation"] == ["independent_seed"]
+    assert verdict["verdict"] == "PARTIALLY_SUPPORTED"
+
+    rows = (area_rows("paired_crn", False)
+            + area_rows("independent_seed", False)
+            + area_rows("independent_window", False))
+    assert fc.assess_h8(rows)["verdict"] == "REJECTED"
+
+
+# --- the report renderer --------------------------------------------------
+
+from tools.research import iv_followup_report as fr        # noqa: E402
+
+
+def _document(**overrides):
+    reduction = {
+        "regret": "not computed.",
+        "point_metric_invariance": {
+            "matched_groups_compared": 12,
+            "max_ae_r_spread_across_levels": 0.0,
+            "identical_everywhere": True,
+            "first_offenders": [],
+        },
+        "by_nominal_source": {
+            source: {
+                "n": 10,
+                "resolved_fraction_change": 0.5,
+                "median_abs_e_delta_r": value,
+                "by_arm_and_drift": {"P2_lag_aware/nominal": {}},
+                "false_certificates_change_metric": [],
+                "false_certificates_point_metric": [],
+                "state_counts": {},
+            }
+            for source, value in zip(fr.SOURCES, (1e-6, 1e-4, 3e-4))
+        },
+        "H8_saturation_is_a_design_artifact": {
+            "threshold": 0.05, "statement": "s8", "falsifier": "f8",
+            "by_source": {s: {"A_s_by_arm": {"P2_lag_aware": 0.9},
+                              "spread": 0.0, "exceeds_threshold": False}
+                          for s in fr.SOURCES},
+            "levels_that_broke_saturation": [],
+            "verdict": "REJECTED",
+        },
+        "H9_change_metric_recovers_plant_structure": {
+            "factor_threshold": 2.0, "control_tolerance": 0.05,
+            "statement": "s9", "falsifier": "f9",
+            "by_source": {s: {"median_abs_e_delta_r":
+                              {"Q0": 1e-6, "Q1": 1e-6, "Q2": 1e-6},
+                              "ratio": 1.0} for s in fr.SOURCES},
+            "control_precondition_holds": True,
+            "verdict": "REJECTED",
+        },
+        "H10_ordering_is_preserved": {
+            "rho_threshold": 0.7, "statement": "s10", "falsifier": "f10",
+            "arms": ["P2_lag_aware"],
+            "A_s_change_independent_window": {"P2_lag_aware": 0.9},
+            "A_s_point_paired_crn": {"P2_lag_aware": 0.8},
+            "spearman_rho": None,
+            "verdict": "UNDEFINED_ONE_SIDE_IS_CONSTANT",
+            "if_rejected": "conditional on the metric",
+        },
+    }
+    document = {
+        "partition": "final", "seeds": [1, 2, 3],
+        "partition_manifest_sha256": "aa",
+        "phase_one_partition_manifest_sha256": "bb",
+        "arms": ["P2_lag_aware"],
+        "arms_omitted": ["P7b_oracle"],
+        "reference_action": "cosine3_10A_8s",
+        "n_rows": 30, "plant_simulations": 60, "elapsed_s": 12.0,
+        "what_this_is_not": "Simulator only.",
+        "reduction": reduction,
+    }
+    document.update(overrides)
+    return document
+
+
+def test_the_report_prints_a_rejection_verbatim():
+    """There is no branch in the renderer that softens a rejected
+    hypothesis, and this is what stops one being added."""
+    text = fr.render(_document())
+    assert text.count("**Verdict: REJECTED.**") == 2
+    assert "**Verdict: UNDEFINED_ONE_SIDE_IS_CONSTANT.**" in text
+    for falsifier in ("f8", "f9", "f10"):
+        assert falsifier in text
+
+
+def test_the_report_prints_an_undefined_rho_as_a_dash_not_a_zero():
+    text = fr.render(_document())
+    assert "Spearman ρ = **—**" in text
+    assert "0.0000** against a floor" not in text
+
+
+def test_the_report_says_regret_was_not_computed():
+    text = fr.render(_document())
+    assert "**Regret.** not computed." in text
+    assert "no comparison to a sealed-campaign regret" in text.lower() or \
+        "sealed-campaign regret" in text
+
+
+def test_the_report_refuses_to_claim_novelty_or_certification():
+    text = fr.render(_document()).lower()
+    assert "nothing here is a novelty claim" in text
+    assert "no certified safety artifact" in text
+    for forbidden in ("first to", "state of the art", "novel contribution",
+                      "airworthy", "production ready"):
+        assert forbidden not in text
+
+
+def test_the_report_surfaces_a_contaminated_factor_instead_of_hiding_it():
+    document = _document()
+    document["reduction"]["point_metric_invariance"] = {
+        "matched_groups_compared": 12,
+        "max_ae_r_spread_across_levels": 1e-5,
+        "identical_everywhere": False,
+        "first_offenders": [{"cell": ["P2_lag_aware", "Q1", "nominal",
+                                      0.01, 7], "ae_r": {"paired_crn": 1.0}}],
+    }
+    text = fr.render(document)
+    assert "identical everywhere: **no**" in text
+    assert "Offending cells" in text
