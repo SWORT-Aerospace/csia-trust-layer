@@ -29,7 +29,8 @@ from csia_active_evidence import polarization as _pz
 from csia_active_evidence import rcec as _rcec
 
 from . import ceilings, evaluator as ev, strategies as st
-from .actions import Action, PASSIVE, energy_class
+from . import followup_partitions as _fp
+from .actions import Action, PASSIVE, by_name, energy_class
 from .plants import (SYNTHETIC_LOOP, SYNTHETIC_Q, SYNTHETIC_SENSING, Loop,
                      Sensing, simulate)
 from .truth import TruthPair
@@ -49,6 +50,16 @@ ARMS = tuple(st.STRATEGIES) + ("P7a_benchmark", "P7b_oracle",
 
 DURATION_DEFAULT = 8.0
 TRUE_LAG_S = SYNTHETIC_LOOP["lag_s"]
+
+#: Where the nominal half of a matched pair comes from. Added by
+#: PREREGISTRATION_AMENDMENT_4.md. ``paired_crn`` is the original behaviour and
+#: is kept as the control so the comparison is visible rather than asserted.
+NOMINAL_SOURCES = ("paired_crn", "independent_seed", "independent_window")
+
+#: The baseline waveform for ``independent_window``. Already in the frozen
+#: action space and already P1's fixed choice, so it predates the amendment and
+#: was not selected for anything it scores.
+REFERENCE_ACTION = "cosine3_10A_8s"
 
 
 def _budget(target_delta: float) -> _rcec.ErrorBudget:
@@ -95,6 +106,13 @@ class Cell:
     ringing_v: float = 0.0
     sensing: Optional[Sensing] = None
     execution: str = "full"      # "full", "clipped", "aborted"
+    nominal_source: str = "paired_crn"
+
+    def __post_init__(self) -> None:
+        if self.nominal_source not in NOMINAL_SOURCES:
+            raise ValueError(
+                f"unknown nominal_source {self.nominal_source!r}; "
+                f"have {NOMINAL_SOURCES}")
 
     @property
     def drift_v_per_s(self) -> float:
@@ -150,20 +168,46 @@ class Campaign:
             r0_delta=magnitude, drift_v_per_s=cell.drift_v_per_s,
             ringing_amplitude_v=cell.ringing_v)
 
+    def _baseline(self, action: Action, cell: Cell) -> Tuple[Action, int]:
+        """Which window the nominal estimate is taken from.
+
+        ``paired_crn`` is the original design: the same action under the same
+        seed, so the pair shares every noise draw. That makes
+        ``V_fault - V_nominal = -dR.I_true`` exact and cancels every
+        plant-common nuisance, which is why the change metric saturated
+        (COUNTEREXAMPLE_LOG.md IV-9).
+
+        The other two are what a deployment actually has. No vehicle re-flies
+        the identical probe under the identical noise with and without a
+        fault; a baseline comes from an earlier window, measured with whatever
+        excitation was available then.
+        """
+        if cell.nominal_source == "paired_crn":
+            return action, cell.seed
+        if cell.nominal_source == "independent_seed":
+            return action, _fp.companion(cell.seed)
+        if cell.nominal_source == "independent_window":
+            return by_name(REFERENCE_ACTION), _fp.companion(cell.seed)
+        raise ValueError(f"unknown nominal_source {cell.nominal_source!r}")
+
     def _nominal_summary(self, action: Action, cell: Cell) -> Tuple:
         """``(r_hat_nominal, trace-free truth)``, cached.
 
-        The nominal half of a matched pair depends on the action, the plant,
-        the conditions and the seed -- never on the magnitude -- and
+        The nominal half depends on the baseline action, the plant, the
+        conditions and the baseline seed -- never on the magnitude -- and
         :func:`simulate` is deterministic in exactly those. Only the two
-        scalars the comparison needs are kept, so the cache costs nothing in
-        memory, and a test asserts the cached answer equals a fresh one.
+        scalars the comparison needs are kept, and a test asserts the cached
+        answer equals a fresh one.
         """
         sensing = self._sensing(cell)
-        key = (action.name, cell.plant, cell.drift_state, cell.seed,
-               cell.ringing_v, tuple(sorted(sensing.to_dict().items())))
+        baseline_action, baseline_seed = self._baseline(action, cell)
+        key = (baseline_action.name, cell.plant, cell.drift_state,
+               baseline_seed, cell.ringing_v,
+               tuple(sorted(sensing.to_dict().items())))
         if key not in self._nominal:
-            observation, truth = self._run(action, cell, magnitude=0.0)
+            observation, truth = self._run(
+                baseline_action, replace(cell, seed=baseline_seed),
+                magnitude=0.0)
             _, current, voltage = observation.kept()
             self._nominal[key] = (
                 _rcec.estimate_resistance(current, voltage),
@@ -215,6 +259,8 @@ class Campaign:
                 "seed": cell.seed, "lag_ratio": cell.lag_ratio,
                 "ringing_v": cell.ringing_v, "execution": cell.execution,
                 "action": None, "abstention": proposal,
+                "nominal_source": cell.nominal_source,
+                "baseline_action": None, "baseline_seed": None,
                 "energy_as": 0.0, "energy_class": "none",
                 "duration_s": 0.0, "state": None, "m_r_cert": None,
                 "e_delta_r": None, "m_r_out": None, "resolved": False,
@@ -255,7 +301,9 @@ class Campaign:
             r_nominal, r_fault,
             TruthPair(nominal=nominal_truth,
                       fault=replace(fault_truth, i_true=(), v_true=(),
-                                    v1_true=())))
+                                    v1_true=()),
+                      independent_windows=cell.nominal_source
+                      != "paired_crn"))
         point = ev.evaluate_point(r_fault, fault_truth)
 
         return {
@@ -263,6 +311,9 @@ class Campaign:
             "magnitude": cell.magnitude, "seed": cell.seed,
             "lag_ratio": cell.lag_ratio, "ringing_v": cell.ringing_v,
             "execution": cell.execution, "action": proposal.name,
+            "nominal_source": cell.nominal_source,
+            "baseline_action": self._baseline(proposal, cell)[0].name,
+            "baseline_seed": self._baseline(proposal, cell)[1],
             "abstention": None,
             "energy_as": proposal.energy_as,
             "energy_class": energy_class(proposal),

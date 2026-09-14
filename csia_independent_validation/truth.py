@@ -70,21 +70,38 @@ class GroundTruth:
 
 @dataclass(frozen=True)
 class TruthPair:
-    """A matched nominal/fault pair driven by common random numbers.
+    """A nominal/fault pair, scored against each other.
 
-    Change estimation is only meaningful against a pair, and the pair has to
-    share its randomness or the difference is dominated by noise rather than
-    by the fault.
+    By default the two windows must share a seed. That is the common-random-
+    numbers design, and the guard exists because a pair that accidentally
+    mismatched seeds would report noise as signal.
+
+    ``independent_windows`` switches the guard off **deliberately**, for the
+    design in ``PREREGISTRATION_AMENDMENT_4.md``. That amendment exists
+    because sharing a seed turned out to be too strong an assumption, not too
+    weak: the fault does not move the current, so a shared seed makes
+    ``V_fault - V_nominal = -dR.I_true`` exact, every plant-common nuisance
+    cancels, and the change metric saturates (``COUNTEREXAMPLE_LOG.md`` IV-9).
+    No deployment re-flies the identical probe under identical noise with and
+    without a fault.
+
+    The flag is required rather than inferred, so that an accidental seed
+    mismatch still fails and only an intended one passes. It must be spelled
+    out at the call site.
     """
 
     nominal: GroundTruth
     fault: GroundTruth
+    independent_windows: bool = False
 
     def __post_init__(self) -> None:
-        if self.nominal.seed != self.fault.seed:
+        if not self.independent_windows and self.nominal.seed != \
+                self.fault.seed:
             raise ValueError(
                 "a nominal/fault pair must share its seed, otherwise the "
-                "change estimate is comparing two different noise draws")
+                "change estimate is comparing two different noise draws. If "
+                "the windows are meant to be independent, say so with "
+                "independent_windows=True")
         if self.nominal.plant != self.fault.plant:
             raise ValueError("a pair must be on one plant")
 
