@@ -631,3 +631,15 @@ def test_a_missing_exit_marker_is_not_read_as_success(tmp_path):
     silent.write_text("........ [100%]\n")
     code, _, _ = sr._suite(silent)
     assert code is None
+
+
+def test_the_seal_record_derives_the_frozen_core_digest_it_prints():
+    """An earlier version printed `unknown` in the digest column, because
+    BUILD_PROVENANCE.json records whether the core drifted but not its digest.
+    A record that says `unknown` where a digest belongs looks complete and
+    tells a reader nothing."""
+    digest, count, differ = sr._frozen_core()
+    assert count == 12
+    assert differ == [], differ
+    assert digest == (
+        "b0b011c61426a70ead42e170855a2650d5c62feb640c7a50fffc27bb915ba5a8")

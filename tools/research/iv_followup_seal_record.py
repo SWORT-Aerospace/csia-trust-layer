@@ -62,13 +62,28 @@ def _suite(path: pathlib.Path) -> Tuple[Optional[int], Optional[int], str]:
     return code, count, tail
 
 
-def _frozen_core() -> Tuple[str, str]:
-    doc = json.loads(
-        (ROOT / "research/physical_validation/results/BUILD_PROVENANCE.json")
-        .read_text())
-    core = doc["frozen_core"]
-    return (core.get("digest", "unknown"),
-            "identical" if core.get("identical_to_the_freeze") else "DRIFTED")
+def _frozen_core() -> Tuple[str, int, List[str]]:
+    """Recompute the frozen-core digest the way its own guard does.
+
+    `BUILD_PROVENANCE.json` records whether the core drifted but does not
+    store the digest, so an earlier version of this printed `unknown` in the
+    digest column. A record that says `unknown` where a digest belongs is a
+    record that tells a reader nothing while looking complete, so the digest
+    is derived here from `docs/v1/FROZEN_BASELINE.json` exactly as
+    `tests/test_iv_provenance.py::test_frozen_core_digest_and_its_derivation`
+    derives it, and every file is re-hashed against it.
+    """
+    baseline = json.loads(
+        (ROOT / "docs/v1/FROZEN_BASELINE.json").read_text())
+    files = baseline["files"]
+    differ: List[str] = []
+    for rel, expected in files.items():
+        want = expected if isinstance(expected, str) else expected["sha256"]
+        if _sha256(ROOT / rel) != want:
+            differ.append(rel)
+    digest = hashlib.sha256(
+        json.dumps(files, sort_keys=True).encode()).hexdigest()
+    return digest, len(files), differ
 
 
 def _sha256(path: pathlib.Path) -> str:
@@ -94,7 +109,11 @@ def main(suite_output: pathlib.Path, force_dirty: bool) -> int:
         print(f"last line of {suite_output}: {tail}", file=sys.stderr)
         return 1
 
-    digest, drift = _frozen_core()
+    digest, n_core, differ = _frozen_core()
+    if differ:
+        print(f"frozen core has drifted on {len(differ)} path(s): {differ}",
+              file=sys.stderr)
+        return 1
     validation = (BASE / "results/FOLLOWUP_VALIDATION.json")
     lines = [
         "# Seal Opening Record — the paired-design follow-up",
@@ -116,7 +135,8 @@ def main(suite_output: pathlib.Path, force_dirty: bool) -> int:
         f"| working tree | {'clean, 0 dirty paths' if not dirty else f'**DIRTY**, {len(dirty)} paths'} |",
         f"| recorded suite | `{suite_output.name}`, {count} tests, "
         f"`PYTEST_EXIT={code}` |",
-        f"| frozen-core digest | `{digest}` ({drift}) |",
+        f"| frozen-core digest | `{digest}`, {n_core}/{n_core} files "
+        f"re-hashed and matching |",
         f"| phase-one partition manifest | `{pt.manifest_hash()}`, untouched |",
         f"| follow-up partition manifest | `{fp.manifest_hash()}` |",
         f"| follow-up sealed partition | `final`, {len(fp.PARTITIONS['final'])} seeds |",
@@ -159,6 +179,7 @@ def main(suite_output: pathlib.Path, force_dirty: bool) -> int:
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}")
     print(f"suite {count} tests exit {code}; tree clean; "
+          f"frozen core {n_core}/{n_core} matching; "
           f"follow-up manifest {fp.manifest_hash()[:16]}…")
     return 0
 
