@@ -639,3 +639,54 @@ performed against that 13 MB file and nothing confirmed it was the same file.
 exactly nine documented failures, so its staleness is a checked fact rather
 than a known-ignored red, and asserts that its immutable raw JSON entry still
 verifies — which is the part that matters.
+
+---
+
+## IV-24 — RC-22's exact mechanism, third occurrence, mine
+
+**What happened:** the commit carrying IV-23 — the entry about writing a
+checksum manifest and never reading it — was itself made **with that manifest's
+test failing**.
+
+**How:** the command chain ended
+
+```
+... && pytest tests/... -q | tail -3 && git commit ...
+```
+
+A pipeline's exit status is its **last** command's. `tail` succeeds whatever
+pytest does, so `&&` saw success and the commit proceeded.
+
+That is the identical mechanism as the prior phase's `RC-22`, which I quoted in
+`IV-12` and again in `IV-18` while writing "a full-suite exit code that has not
+been *read* is not a full-suite run". I then wrote a pipeline that discards the
+exit code entirely, one commit later.
+
+**Why the test was red:** the sealed final campaign finished while the commit
+was being assembled. `git add -A` swept `CAMPAIGN_FINAL.json` into the commit,
+and the manifest — regenerated seconds earlier — did not list it. The new
+`test_no_tracked_raw_artifact_is_missing_from_the_manifest` fired correctly, on
+its first real opportunity, against me.
+
+**The artifact itself is intact.** The committed copy parses and carries all
+69 120 rows. That is luck, not design: had the sweep happened a minute earlier
+it would have committed a truncated 1.6-million-line JSON, and nothing in the
+commit path would have noticed.
+
+**Fixes, both narrow:**
+
+* the manifest is regenerated to pin `CAMPAIGN_FINAL.json` and the integrity
+  tests pass, verified by reading `EXIT=0` rather than by looking at dots;
+* no pytest invocation in this phase's remaining work is piped. Exit status is
+  captured to a variable and printed.
+
+**Not amended away.** `b7e2d75` keeps its red test in the history, as `RC-22`
+did.
+
+**The uncomfortable observation:** three instances of the same failure mode now
+sit in this log — a check empty by construction (IV-1), a gate half that cannot
+fail (IV-19), a manifest nobody reads (IV-23) — plus three instances of
+discarding an exit code (IV-12, IV-18, IV-24). Writing the lesson down did not
+prevent the repeat, on either. The only things that have actually caught these
+are executable checks that fail loudly, which is an argument for more of them
+and none at all for more prose.
