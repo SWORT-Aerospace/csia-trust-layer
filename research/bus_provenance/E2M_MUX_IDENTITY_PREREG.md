@@ -20,7 +20,8 @@ hold:**
    domain** exists. The current authorization
    (`research/active_evidence/realized_current/OWNER_AUTHORIZATION.md`) is
    **energy-domain, simulator-only**, and explicitly does not permit real
-   hardware operation. See §7.
+   hardware operation. See §7. The request is written and awaiting a decision:
+   `OWNER_AUTHORIZATION_REQUEST.md`.
 4. Every `[FILL: …]` is replaced with an observed value.
 5. It is committed and the hash recorded **before the first trial**.
 
@@ -138,6 +139,13 @@ any sibling.
 Running it needs a separate, explicit owner authorization naming sensor-bus
 hardware operation. Writing the model, the simulator and this template does not,
 and is what has been done.
+
+That authorization has been **requested**, not assumed:
+`OWNER_AUTHORIZATION_REQUEST.md` states what is asked for, what is explicitly
+not asked for, and what declining costs. It grants nothing, and the status
+there is `AWAITING OWNER DECISION`. Note that permission alone would not start
+this tier — the datasheet and the parts are separate open blockers, neither in
+the owner's gift.
 
 ## 8. What this tier cannot speak to
 

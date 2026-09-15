@@ -84,6 +84,13 @@ that clause still holds.
 hardware operation. It does not exist. The tier is `NOT_RUN` and the code
 cannot reach a bus.**
 
+It has been requested rather than assumed — `OWNER_AUTHORIZATION_REQUEST.md`,
+status `AWAITING OWNER DECISION`. That document grants nothing, sets out what
+is *not* being asked for at least as precisely as what is, and states the
+consequence of declining so the cost of "no" is visible. Permission would not
+be sufficient on its own: the unretrieved datasheet and the non-existent parts
+are independent blockers.
+
 ## What this is not
 
 Not a certified artifact, not airworthy, not production-ready, not validated
