@@ -1,6 +1,14 @@
 # E2M — device identity behind an I²C multiplexer
 
-**TEMPLATE, NOT A COMMITTED PREREGISTRATION. `E2M_STATUS` = `NOT_RUN`.**
+**TEMPLATE, NOT A COMMITTED PREREGISTRATION.
+`E2M_STATUS` = `AUTHORIZED_NOT_RUN`.**
+
+Owner authorization now exists — `OWNER_DECISION_E2M_2026-09-16.md`,
+`APPROVED_WITH_CONDITIONS`, 16 September 2026 — and requirement 3 below is
+therefore met. Requirements 1, 2 and 4 are not: the datasheet is unretrieved,
+no sensor is declared, and no `[FILL: …]` has been replaced. See
+`E2M_GATE_STATUS.md`. The owner's decision also supersedes this file's §4
+experiment list with the fuller ladder E2M-0 … E2M-5; that ladder governs.
 
 Every field marked `[FILL: …]` is blank because it cannot honestly be written
 before parts exist on a bench. Everything else is fixed **now**, before any

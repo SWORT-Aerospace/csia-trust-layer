@@ -24,6 +24,12 @@ dev = ["pytest>=8", "jsonschema>=4", "build>=1", "pyflakes>=3"]
 # only by tools/assurance/ and its tests.
 assurance = ["z3-solver>=4.12", "hypothesis>=6", "psutil>=5.9"]
 mavlink = ["pymavlink>=2.4"]
+# E2M sensor-bus bench acquisition. pyserial is imported by exactly one
+# module -- csia_e2m/transport.py -- and lazily, inside SerialTransport.open(),
+# so importing csia_e2m pulls in no hardware library and the test suite needs
+# no port to exist. Declared as its own extra rather than folded into `dev`
+# because a hardware dependency should be visible as one.
+hardware = ["pyserial>=3.5"]
 logs = ["pyulog>=1.0"]
 # Research data lake only — the embedded runtime path (csia/runtime,
 # csia/native) must never import these; enforced by test.

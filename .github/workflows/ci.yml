@@ -19,7 +19,7 @@ jobs:
       # Every third-party package the suite imports must come from a declared
       # extra (tests/test_ci_env.py enforces the same invariant from inside
       # the suite, so a new undeclared import fails even locally).
-      - run: pip install -e ".[dev,data,logs,mavlink,assurance]"
+      - run: pip install -e ".[dev,data,logs,mavlink,assurance,hardware]"
       - name: dependency smoke — fail at install time, not mid-collection
         run: python -c "import duckdb, huggingface_hub, jsonschema, polars, pyarrow, pymavlink, pyulog, yaml"
       - run: bash csia/native/build.sh   # so the C-vs-Python parity tests run

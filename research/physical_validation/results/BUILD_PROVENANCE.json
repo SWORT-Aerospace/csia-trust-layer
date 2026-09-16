@@ -25,6 +25,9 @@
         "build>=1",
         "pyflakes>=3"
       ],
+      "hardware": [
+        "pyserial>=3.5"
+      ],
       "logs": [
         "pyulog>=1.0"
       ],
@@ -352,20 +355,49 @@
   "schema": "csia.assurance.build_provenance/1",
   "source": {
     "branch": "claude/code-reviewer-repo-export-zicovg",
-    "commit": "33116c2e3071850801ab8b38584c639662f6e239",
-    "describe": "csia-dual-paper-evidence-freeze-132-g33116c2-dirty",
+    "commit": "9cbffa45c760f65e86e2879564b67914b7cd0b03",
+    "describe": "csia-dual-paper-evidence-freeze-133-g9cbffa4-dirty",
     "dirty_paths": [
-      "ocs/DOCUMENT_INDEX.md",
+      ".gitignore",
+      "csia_e2m/__init__.py",
+      "csia_e2m/ancestry.py",
+      "csia_e2m/fake_controller.py",
+      "csia_e2m/faults.py",
+      "csia_e2m/identity.py",
+      "csia_e2m/logging.py",
+      "csia_e2m/protocol.py",
+      "csia_e2m/replay.py",
+      "csia_e2m/transport.py",
+      "docs/CURRENT_PROGRAM_STATE.md",
+      "docs/DOCUMENT_INDEX.md",
+      "github/workflows/ci.yml",
+      "hardware/arduino/e2m_mux_acquisition/e2m_mux_acquisition.ino",
+      "hardware/inventory/e2m_sensors.yaml",
+      "hardware/wiring/E2M_PIN_TABLE.md",
+      "pyproject.toml",
+      "research/bus_provenance/E2M_GATE_STATUS.md",
       "research/bus_provenance/E2M_MUX_IDENTITY_PREREG.md",
+      "research/bus_provenance/E2M_RUNBOOK.md",
       "research/bus_provenance/OWNER_AUTHORIZATION_REQUEST.md",
-      "research/bus_provenance/README.md"
+      "research/bus_provenance/OWNER_DECISION_E2M_2026-09-16.md",
+      "research/bus_provenance/README.md",
+      "research/physical_validation/results/BUILD_PROVENANCE.json",
+      "schemas/e2m/fault_event.schema.json",
+      "schemas/e2m/raw_bus_observation.schema.json",
+      "schemas/e2m/run_manifest.schema.json",
+      "tests/test_ci_env.py",
+      "tests/test_e2m_acquisition.py",
+      "tools/hardware/e2m_acquire.py",
+      "tools/hardware/e2m_replay.py",
+      "tools/hardware/ingest_datasheet.py",
+      "tools/hardware/validate_inventory.py"
     ],
     "working_tree_dirty": true
   },
   "undeclared_dependency_check": {
     "clean": true,
     "imported_but_not_installed_by_ci": [],
-    "installed_by_ci": 18,
+    "installed_by_ci": 19,
     "scanner": "tests/test_ci_env.py (shared, not reimplemented)",
     "third_party_modules_imported": [
       "duckdb",
@@ -380,6 +412,7 @@
       "pytest",
       "pyulog",
       "scipy",
+      "serial",
       "yaml",
       "z3"
     ]

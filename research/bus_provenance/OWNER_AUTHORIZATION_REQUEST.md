@@ -179,5 +179,14 @@ so in advance.
 
 ---
 
-**Status: AWAITING OWNER DECISION. No hardware operated. No permission
-assumed.**
+**Status: DECIDED — `APPROVED_WITH_CONDITIONS`, 16 September 2026.**
+
+The owner's decision is recorded verbatim in
+`OWNER_DECISION_E2M_2026-09-16.md`. This request document is preserved
+**unchanged above** so that what was asked can be compared with what was
+granted; only this status line was appended.
+
+Campaign state is `AUTHORIZED_NOT_RUN`. Permission was granted; the datasheet,
+sensor-inventory, electrical-compatibility and execution-environment gates are
+independent of permission and **all four remain open** — see
+`E2M_GATE_STATUS.md`. No hardware has been operated.

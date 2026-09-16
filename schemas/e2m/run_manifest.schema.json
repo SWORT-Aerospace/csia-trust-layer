@@ -1,0 +1,73 @@
+{
+ "$id": "csia.e2m.run_manifest/1",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "baud": {
+   "type": "integer"
+  },
+  "complete": {
+   "type": "boolean"
+  },
+  "device": {
+   "description": "'FAKE' marks a synthetic run, which can never establish a physical inventory state",
+   "type": "string"
+  },
+  "experiment": {
+   "type": "string"
+  },
+  "host_span_ns": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "malformed_frames": {
+   "type": "integer"
+  },
+  "raw_log": {
+   "type": "string"
+  },
+  "raw_log_bytes": {
+   "type": "integer"
+  },
+  "raw_log_sha256": {
+   "pattern": "^[0-9a-f]{64}$",
+   "type": "string"
+  },
+  "records": {
+   "type": "integer"
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "schema": {
+   "const": "csia.e2m.run_manifest/1"
+  },
+  "sequence_gaps": {
+   "type": "array"
+  },
+  "status": {
+   "enum": [
+    "CLOSED",
+    "INTERRUPTED"
+   ]
+  }
+ },
+ "required": [
+  "schema",
+  "run_id",
+  "experiment",
+  "complete",
+  "status",
+  "raw_log",
+  "raw_log_sha256",
+  "device",
+  "baud",
+  "records",
+  "malformed_frames",
+  "sequence_gaps"
+ ],
+ "title": "One acquisition run, closed and hashed",
+ "type": "object"
+}

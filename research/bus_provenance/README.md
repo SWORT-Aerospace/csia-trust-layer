@@ -84,8 +84,13 @@ that clause still holds.
 hardware operation. It does not exist. The tier is `NOT_RUN` and the code
 cannot reach a bus.**
 
-It has been requested rather than assumed — `OWNER_AUTHORIZATION_REQUEST.md`,
-status `AWAITING OWNER DECISION`. That document grants nothing, sets out what
+**Granted on 16 September 2026**, `APPROVED_WITH_CONDITIONS` —
+`OWNER_DECISION_E2M_2026-09-16.md`, recorded verbatim. Campaign state is
+`AUTHORIZED_NOT_RUN`: permission exists and **all four gates remain open**
+(`E2M_GATE_STATUS.md`). The host-side acquisition layer is `csia_e2m/`, the
+firmware is `hardware/arduino/e2m_mux_acquisition/`, and the operator runbook
+is `E2M_RUNBOOK.md`. The original request is preserved unchanged at
+`OWNER_AUTHORIZATION_REQUEST.md`, status `DECIDED`. That document grants nothing, sets out what
 is *not* being asked for at least as precisely as what is, and states the
 consequence of declining so the cost of "no" is visible. Permission would not
 be sufficient on its own: the unretrieved datasheet and the non-existent parts

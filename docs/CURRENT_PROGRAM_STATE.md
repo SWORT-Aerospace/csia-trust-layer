@@ -126,6 +126,24 @@ blocked by anything in the code.
 The freeze lifts when **both** tags exist: `systems-paper-submission-candidate`
 and `math-paper-submission-candidate`. Not one. Both.
 
+### 1a. Owner-authorized narrow exceptions
+
+Recorded here as pointers. **Neither rewrites the table above, and the table
+above governs where they disagree.** Each is a scoped permission on a research
+branch, not a lifting of the freeze.
+
+| exception | scope | state | record |
+|---|---|---|---|
+| energy-domain Active Evidence Acquisition | **simulator only**; no hardware operation | in force | `research/active_evidence/realized_current/OWNER_AUTHORIZATION.md` |
+| E2M sensor-bus bench | unarmed, non-flight, low-voltage I²C bench: TCA9548A, low-power sensors, Arduino-class controller, USB host | **`AUTHORIZED_NOT_RUN`** — permission granted 2026-09-16, all four gates still open | `research/bus_provenance/OWNER_DECISION_E2M_2026-09-16.md`, gates in `E2M_GATE_STATUS.md` |
+
+The E2M exception moves exactly one boundary — sensor-bus preparation and
+narrowly scoped bench operation. It does not authorize motors, propellers,
+ESCs, servos, flight batteries, autopilot or MAVLink commands, actuator
+control, armed aircraft, flight testing, or hardware access from inside
+`csia_bus_provenance`. **HARDWARE — NOT CURRENT GATE still reads as written
+above** for everything outside that one bench.
+
 ## 2. Frozen points
 
 | what | at | enforced by |
