@@ -7,7 +7,7 @@ Permission exists (`OWNER_DECISION_E2M_2026-09-16.md`,
 not satisfy the other gates, and it does not. **Four gates are open, and any
 one of them alone keeps E2M from running.**
 
-Measured on 2026-09-16 at commit `9cbffa4`. Nothing here is asserted from
+Measured on 2026-09-16 at commit `9cbffa4`; gate 1 re-measured 2026-09-17. Nothing here is asserted from
 memory; each row says how it was checked.
 
 | gate | state | checked by |
@@ -21,12 +21,30 @@ memory; each row says how it was checked.
 
 ## Gate 1 — TCA9548A datasheet: OPEN
 
-**Measured.** Both official locators refused at the agent proxy on 2026-09-16:
+**Measured 2026-09-16, re-measured 2026-09-17 across six routes and four
+domains. Every one refused, with redirects followed:**
 
 ```
-https://www.ti.com/lit/ds/symlink/tca9548a.pdf   ->  HTTP 000 (CONNECT tunnel failed, 403)
-https://www.ti.com/lit/gpn/tca9548a              ->  HTTP 000 (CONNECT tunnel failed, 403)
+www.ti.com/lit/ds/symlink/tca9548a.pdf                 HTTP 000, 0 bytes
+www.ti.com/lit/gpn/tca9548a                            HTTP 000, 0 bytes
+www.ti.com/product/TCA9548A                            HTTP 000, 0 bytes
+cdn-shop.adafruit.com/datasheets/tca9548a.pdf          HTTP 000, 0 bytes
+cdn-learn.adafruit.com/.../adafruit-tca9548a-...pdf    HTTP 000, 0 bytes
+www.mouser.com/datasheet/2/405/tca9548a-1237952.pdf    HTTP 000, 0 bytes
 ```
+
+The proxy names the cause itself rather than leaving it to be inferred:
+
+```
+kind:   connect_rejected
+detail: gateway answered 403 to CONNECT (policy denial or upstream failure)
+host:   www.ti.com:443
+```
+
+**This is structural, not transient.** Four independent domains refused at the
+CONNECT layer, which is an egress policy and not a server problem, so no amount
+of retrying changes it. Per the protocol this repository already follows for
+its bibliography work, structurally denied endpoints are not retried for hours.
 
 A filesystem search finds no TCA9548A document anywhere in the repository.
 
