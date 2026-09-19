@@ -12,7 +12,7 @@ what E2M-0 runs on.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterator, List, Optional, Protocol
+from typing import Callable, Iterator, List, Optional, Protocol
 
 
 class Transport(Protocol):
@@ -40,14 +40,30 @@ class FakeTransport:
 
 @dataclass
 class SerialTransport:
-    """A real USB serial port. Opens nothing until :meth:`open` is called."""
+    """A real USB serial port. Opens nothing until :meth:`open` is called.
+
+    ``factory`` exists so the read loop can be tested without hardware. It
+    defaults to ``None``, which means pyserial; a test supplies a callable
+    returning an object with ``readline()`` and ``close()``. The injection
+    point is deliberately narrow -- it replaces the PORT, not the loop -- so
+    what the tests exercise is the same framing, decoding and shutdown code
+    that will run against a real board.
+
+    This is not a fake that lets a test claim hardware was exercised. A run
+    driven through an injected factory still reports whatever ``device`` it
+    was given, and `test_e2m_transport.py` asserts the distinction.
+    """
 
     device: str
     baud: int = 115200
     timeout_s: float = 2.0
+    factory: Optional[Callable[[], object]] = None
     _port: Optional[object] = field(default=None, init=False, repr=False)
 
     def open(self) -> None:
+        if self.factory is not None:
+            self._port = self.factory()
+            return
         try:
             import serial           # noqa: PLC0415  -- lazy on purpose
         except ImportError as error:        # pragma: no cover
@@ -58,11 +74,34 @@ class SerialTransport:
                                    timeout=self.timeout_s)
 
     def close(self) -> None:
+        """Idempotent. Closing twice is not an error; leaking a port is."""
         if self._port is not None:
             self._port.close()      # type: ignore[attr-defined]
             self._port = None
 
+    @property
+    def is_open(self) -> bool:
+        return self._port is not None
+
+    def reopen(self) -> None:
+        """Close and open again, for a board that reset mid-run.
+
+        The sequence number does NOT restart from the host's point of view --
+        the controller's does, and that discontinuity is what
+        :class:`~csia_e2m.logging.RunLogger` records as a sequence gap. Hiding
+        the reconnection would erase the evidence that one happened.
+        """
+        self.close()
+        self.open()
+
     def lines(self) -> Iterator[str]:
+        """Yield decoded lines until the port returns nothing.
+
+        An empty read is how pyserial reports a timeout, and it ends the
+        stream rather than spinning. A partial line -- no trailing newline --
+        is yielded as it arrived; the protocol layer rejects it on CRC, which
+        is where that decision belongs.
+        """
         if self._port is None:
             raise RuntimeError("call open() first")
         while True:

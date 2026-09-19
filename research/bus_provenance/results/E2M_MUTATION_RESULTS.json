@@ -1,0 +1,295 @@
+{
+ "by_family": {
+  "CHANNEL": {
+   "evaluated": 2,
+   "killed": 2,
+   "score": 1.0
+  },
+  "CRC": {
+   "evaluated": 4,
+   "killed": 4,
+   "score": 1.0
+  },
+  "IDENTITY": {
+   "evaluated": 5,
+   "killed": 5,
+   "score": 1.0
+  },
+  "MISSING": {
+   "evaluated": 3,
+   "killed": 3,
+   "score": 1.0
+  },
+  "SEQUENCE": {
+   "evaluated": 1,
+   "killed": 1,
+   "score": 1.0
+  },
+  "TIME": {
+   "evaluated": 1,
+   "killed": 1,
+   "score": 1.0
+  },
+  "TOPOLOGY": {
+   "evaluated": 2,
+   "killed": 2,
+   "score": 1.0
+  }
+ },
+ "canary": {
+  "first_failure": "tests/test_e2m_properties.py::test_any_single_bit_corruption_is_detected",
+  "verdict": "KILLED"
+ },
+ "elapsed_s": 23.6,
+ "evaluated": 18,
+ "invalid": 0,
+ "killed": 18,
+ "results": [
+  {
+   "breaks": "Promotes ASSUMED to an established identity. This is the exact defect an earlier draft of the module shipped, and the one its own counterexample refuted. If nothing fails, the central claim is unpinned.",
+   "family": "IDENTITY",
+   "first_failure": "tests/test_bus_provenance.py::test_only_a_measured_register_establishes_identity",
+   "id": "ID-01",
+   "new": "ESTABLISHED = frozenset({VERIFIED, ASSUMED})",
+   "note": "",
+   "old": "ESTABLISHED = frozenset({VERIFIED})",
+   "path": "csia_bus_provenance/provenance.py",
+   "seconds": 1.0,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Makes accepts() take ASSUMED regardless of the caller's opt-in, so the cost stops appearing in the caller's source.",
+   "family": "IDENTITY",
+   "first_failure": "tests/test_bus_provenance.py::test_accepting_an_assumed_binding_must_be_said_out_loud",
+   "id": "ID-02",
+   "new": "    if binding == ASSUMED:\n        return True",
+   "note": "",
+   "old": "    if binding == ASSUMED:\n        return allow_assumed",
+   "path": "csia_bus_provenance/provenance.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Treats a control-register readback as proof of which part is on the channel. The owner's section 11 forbids exactly this equivalence.",
+   "family": "IDENTITY",
+   "first_failure": "tests/test_e2m_acquisition.py::test_readback_confirmed_does_not_establish_attribution",
+   "id": "ID-03",
+   "new": "ESTABLISHES_ATTRIBUTION = frozenset({PHYSICALLY_VERIFIED, READBACK_CONFIRMED})",
+   "note": "",
+   "old": "ESTABLISHES_ATTRIBUTION = frozenset({PHYSICALLY_VERIFIED})",
+   "path": "csia_e2m/identity.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Promotes ASSUMED in the longer chain-of-custody vocabulary.",
+   "family": "IDENTITY",
+   "first_failure": "tests/test_e2m_acquisition.py::test_assumed_does_not_establish_attribution",
+   "id": "ID-04",
+   "new": "ESTABLISHES_ATTRIBUTION = frozenset({PHYSICALLY_VERIFIED, ASSUMED})",
+   "note": "",
+   "old": "ESTABLISHES_ATTRIBUTION = frozenset({PHYSICALLY_VERIFIED})",
+   "path": "csia_e2m/identity.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops treating a conflict between operator and device identity as bad news, so a disagreement reads as merely weak evidence.",
+   "family": "IDENTITY",
+   "first_failure": "tests/test_e2m_properties.py::test_any_single_bit_corruption_is_detected",
+   "id": "ID-05",
+   "new": "CONTRADICTED = frozenset({MISATTRIBUTED})",
+   "note": "",
+   "old": "CONTRADICTED = frozenset({MISATTRIBUTED, CONFLICTED})",
+   "path": "csia_e2m/identity.py",
+   "seconds": 1.1,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Widens the commanded-channel bound past what a TCA9548A has. A frame naming channel 11 would be accepted as a real read.",
+   "family": "CHANNEL",
+   "first_failure": "tests/test_e2m_acquisition.py::test_an_impossible_channel_is_refused",
+   "id": "CH-01",
+   "new": "        if not 0 <= self.commanded_channel <= 15:",
+   "note": "",
+   "old": "        if not 0 <= self.commanded_channel <= 7:",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Same widening at the replay boundary, where an impossible channel would reach a CSIA-facing observation.",
+   "family": "CHANNEL",
+   "first_failure": "tests/test_e2m_acquisition.py::test_replay_refuses_an_impossible_channel",
+   "id": "CH-02",
+   "new": "        if not 0 <= channel <= 255:",
+   "note": "",
+   "old": "        if not 0 <= channel <= 7:",
+   "path": "csia_e2m/replay.py",
+   "seconds": 0.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Declares every record to carry a measurement, so an ERR_SENSOR_NACK frame's milli=0 is served as a real reading of zero.",
+   "family": "MISSING",
+   "first_failure": "tests/test_e2m_acquisition.py::test_a_non_ok_status_carries_no_measurement",
+   "id": "MISS-01",
+   "new": "        return True",
+   "note": "",
+   "old": "        return self.status == OK",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "The same, one layer up: a NACKed sensor becomes an observation of 0.",
+   "family": "MISSING",
+   "first_failure": "tests/test_e2m_acquisition.py::test_missing_is_never_zero",
+   "id": "MISS-02",
+   "new": "        has_value = True",
+   "note": "",
+   "old": "        has_value = status == OK",
+   "path": "csia_e2m/replay.py",
+   "seconds": 0.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Accepts a measurement with no unit. A number without a unit is not a measurement.",
+   "family": "MISSING",
+   "first_failure": "tests/test_e2m_acquisition.py::test_replay_refuses_a_measurement_with_no_unit",
+   "id": "MISS-03",
+   "new": "        if False:",
+   "note": "",
+   "old": "        if has_value and not unit:",
+   "path": "csia_e2m/replay.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Disables CRC verification entirely. Every corrupted frame parses.",
+   "family": "CRC",
+   "first_failure": "tests/test_e2m_acquisition.py::test_a_single_flipped_character_is_rejected",
+   "id": "CRC-01",
+   "new": "    if False:",
+   "note": "",
+   "old": "    if actual != given_value:",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Accepts a frame with no CRC delimiter at all.",
+   "family": "CRC",
+   "first_failure": "tests/test_e2m_properties.py::test_any_single_bit_corruption_is_detected",
+   "id": "CRC-02",
+   "new": "    if False:",
+   "note": "",
+   "old": "    if \"*\" not in line:",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 1.2,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Accepts a truncated frame with too few fields, which is what a board resetting mid-write produces.",
+   "family": "CRC",
+   "first_failure": "tests/test_e2m_acquisition.py::test_a_wrong_field_count_is_refused",
+   "id": "CRC-03",
+   "new": "    if len(parts) > 99:",
+   "note": "",
+   "old": "    if len(parts) != FIELD_COUNT:",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Breaks the CRC polynomial itself. The host and the firmware would then disagree, which the differential test exists to catch.",
+   "family": "CRC",
+   "first_failure": "tests/test_e2m_acquisition.py::test_crc_is_ccitt_false",
+   "id": "CRC-04",
+   "new": "        crc ^= byte",
+   "note": "",
+   "old": "        crc ^= byte << 8",
+   "path": "csia_e2m/protocol.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops recording sequence gaps, so a dropped run of records becomes an unbroken stream.",
+   "family": "SEQUENCE",
+   "first_failure": "tests/test_e2m_acquisition.py::test_sequence_gaps_are_recorded",
+   "id": "SEQ-01",
+   "new": "        if False:",
+   "note": "",
+   "old": "        if self._last_seq is not None and record.seq != self._last_seq + 1:",
+   "path": "csia_e2m/logging.py",
+   "seconds": 0.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Accepts a backwards host timestamp instead of refusing to replay, which silently permits out-of-order event time.",
+   "family": "TIME",
+   "first_failure": "tests/test_e2m_acquisition.py::test_replay_refuses_a_backwards_timestamp",
+   "id": "TIME-01",
+   "new": "        if False:",
+   "note": "",
+   "old": "        if previous_host_ns is not None and host_ns < previous_host_ns:",
+   "path": "csia_e2m/replay.py",
+   "seconds": 0.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops reporting AMBIGUOUS when two devices share an address under one register value, so the first candidate is returned as the source.",
+   "family": "TOPOLOGY",
+   "first_failure": "tests/test_bus_provenance.py::test_two_enabled_channels_make_the_source_undeterminable",
+   "id": "TOPO-01",
+   "new": "    if False:",
+   "note": "",
+   "old": "    if len(candidates) > 1:",
+   "path": "csia_bus_provenance/provenance.py",
+   "seconds": 1.0,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops reporting NO_RESPONDER when nothing holds the address.",
+   "family": "TOPOLOGY",
+   "first_failure": "tests/test_bus_provenance.py::test_no_device_on_the_enabled_channel_is_not_a_silent_pass",
+   "id": "TOPO-02",
+   "new": "    if False:",
+   "note": "",
+   "old": "    if not candidates:",
+   "path": "csia_bus_provenance/provenance.py",
+   "seconds": 1.0,
+   "verdict": "KILLED"
+  }
+ ],
+ "schema": "csia.e2m.mutation_results/1",
+ "score": 1.0,
+ "selection": [
+  "tests/test_e2m_acquisition.py",
+  "tests/test_bus_provenance.py",
+  "tests/test_e2m_properties.py",
+  "tests/test_e2m_schemas.py",
+  "tests/test_e2m_transport.py"
+ ],
+ "survived": 0,
+ "targets": [
+  "csia_bus_provenance/provenance.py",
+  "csia_e2m/identity.py",
+  "csia_e2m/logging.py",
+  "csia_e2m/protocol.py",
+  "csia_e2m/replay.py"
+ ],
+ "what_this_is_not": "not evidence about hardware. Every mutant and every test here runs against a fake controller and recorded fixtures. A high score means the tests would notice a change in the SOFTWARE.",
+ "working_tree_files_synced_into_sandbox": [
+  "csia_bus_provenance/provenance.py",
+  "csia_e2m/identity.py",
+  "csia_e2m/logging.py",
+  "csia_e2m/protocol.py",
+  "csia_e2m/replay.py",
+  "tests/test_bus_provenance.py",
+  "tests/test_e2m_acquisition.py",
+  "tests/test_e2m_properties.py",
+  "tests/test_e2m_schemas.py",
+  "tests/test_e2m_transport.py"
+ ]
+}

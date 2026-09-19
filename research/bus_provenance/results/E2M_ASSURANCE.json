@@ -1,0 +1,131 @@
+{
+ "branch": "claude/code-reviewer-repo-export-zicovg",
+ "campaign_state": "AUTHORIZED_NOT_RUN",
+ "commit": "4d63d8370773376208aa45dc7e71fe9f29f18fbb",
+ "coverage": {
+  "by_file": {
+   "csia_bus_provenance/__init__.py": 100.0,
+   "csia_bus_provenance/datasheet.py": 92.6,
+   "csia_bus_provenance/provenance.py": 94.8,
+   "csia_bus_provenance/simulator.py": 98.4,
+   "csia_bus_provenance/topology.py": 90.9,
+   "csia_e2m/__init__.py": 100.0,
+   "csia_e2m/ancestry.py": 92.3,
+   "csia_e2m/fake_controller.py": 98.2,
+   "csia_e2m/faults.py": 95.1,
+   "csia_e2m/identity.py": 97.1,
+   "csia_e2m/logging.py": 93.4,
+   "csia_e2m/protocol.py": 93.1,
+   "csia_e2m/replay.py": 95.9,
+   "csia_e2m/transport.py": 90.0
+  },
+  "total_percent": 94.49
+ },
+ "distinctions_that_must_not_collapse": {
+  "authorized_is_not_executed": true,
+  "bench_tested_is_not_flight_tested": true,
+  "fake_driver_tested_is_not_live_sensor_tested": true,
+  "replay_tested_is_not_acquisition_tested": true,
+  "skipped_hardware_tests_are_not_passes": true,
+  "software_tested_is_not_hardware_tested": true
+ },
+ "floor_comparison": {
+  "coverage_meets_repository_floor": true,
+  "mutation_meets_highest_repository_floor": true,
+  "note": "the repository floors were measured on OTHER packages with other mutant sets. Clearing them is evidence that this suite is in the same league, not that it is equivalent. Mutation scores are not comparable across different mutant lists."
+ },
+ "hardware_status": "NOT_RUN",
+ "mutation": {
+  "by_family": {
+   "CHANNEL": {
+    "evaluated": 2,
+    "killed": 2,
+    "score": 1.0
+   },
+   "CRC": {
+    "evaluated": 4,
+    "killed": 4,
+    "score": 1.0
+   },
+   "IDENTITY": {
+    "evaluated": 5,
+    "killed": 5,
+    "score": 1.0
+   },
+   "MISSING": {
+    "evaluated": 3,
+    "killed": 3,
+    "score": 1.0
+   },
+   "SEQUENCE": {
+    "evaluated": 1,
+    "killed": 1,
+    "score": 1.0
+   },
+   "TIME": {
+    "evaluated": 1,
+    "killed": 1,
+    "score": 1.0
+   },
+   "TOPOLOGY": {
+    "evaluated": 2,
+    "killed": 2,
+    "score": 1.0
+   }
+  },
+  "evaluated": 18,
+  "invalid": 0,
+  "killed": 18,
+  "score": 1.0,
+  "survived": 0,
+  "survivors": []
+ },
+ "mutation_command": "python tools/mutation/run_e2m_mutations.py",
+ "repository_floors": {
+  "coverage_percent": 86.86,
+  "mutation_assurance": 0.6125,
+  "mutation_frozen_core": 0.5583,
+  "mutation_mission": 0.6726
+ },
+ "schema": "csia.e2m.assurance/1",
+ "suite": {
+  "exit_code": 0,
+  "failed": 0,
+  "failures": [],
+  "passed": 3733,
+  "skip_reasons": [
+   "SKIPPED [1] tests/test_e2m_acquisition.py:612: E2M gate 4: NO_HARDWARE_ACCESS. No /dev/ttyACM*, /dev/ttyUSB* or COM* port is present. This test is NOT evidence about hardware and a skip must not be reported as physical validation.",
+   "SKIPPED [1] tests/test_e2m_acquisition.py:618: E2M gate 4: NO_HARDWARE_ACCESS. No /dev/ttyACM*, /dev/ttyUSB* or COM* port is present. This test is NOT evidence about hardware and a skip must not be reported as physical validation."
+  ],
+  "skipped": 2
+ },
+ "test_command": "python -m pytest -q -rs",
+ "unresolved_blockers": [
+  {
+   "gate": 1,
+   "name": "TCA9548A datasheet",
+   "removal": "place the original PDF at hardware/datasheets/tca9548a/tca9548a.pdf and run tools/hardware/ingest_datasheet.py; a human then checks each constant against a cited page",
+   "state": "OPEN"
+  },
+  {
+   "gate": 2,
+   "name": "sensor inventory",
+   "removal": "fill hardware/inventory/e2m_sensors.yaml",
+   "state": "OPEN"
+  },
+  {
+   "gate": 3,
+   "name": "electrical compatibility",
+   "removal": "fill hardware/wiring/E2M_PIN_TABLE.md from the primary documents",
+   "state": "OPEN, blocked by gates 1 and 2"
+  },
+  {
+   "gate": 4,
+   "name": "execution environment",
+   "removal": "clearable only on the operator's machine",
+   "state": "NO_HARDWARE_ACCESS"
+  }
+ ],
+ "what_this_report_is_not": "not evidence about hardware. Every number here comes from tests against a fake controller, recorded fixtures and a compiled host copy of the firmware CRC. No frame in this repository came from a bus.",
+ "working_tree_dirty": true
+}
