@@ -303,3 +303,86 @@ def test_no_opt_in_rescues_a_binding_that_establishes_nothing(binding):
 def test_assumed_is_accepted_only_on_an_explicit_opt_in(allow):
     from csia_bus_provenance import accepts
     assert accepts(BUS_ASSUMED, allow_assumed=allow) is allow
+
+
+# --- the CRC-field case hole ----------------------------------------------
+# `test_any_single_bit_corruption_is_detected` asserts a UNIVERSAL claim, and
+# for a while the claim was false. `int(given, 16)` is case-insensitive, so
+# flipping bit 5 of an uppercase hex letter in the CRC field -- 'B' 0x42 ->
+# 'b' 0x62 -- left the parsed value identical and the frame decoded as valid.
+#
+# The property test found it, and found it INTERMITTENTLY: the flip has to
+# land on one of the field's A-F digits at bit 5, about 0.4% of examples, so a
+# default 100-example run failed roughly a third of the time. It first showed
+# up in a mutation sandbox, where the unmutated baseline refused to report.
+# The three tests below make the same evidence deterministic, so a future
+# regression fails every run rather than one run in three.
+
+def _canonical_record(**over):
+    fields = dict(seq=1, sweep=0, commanded_channel=2, readback_channel=2,
+                  sensor="bme280", status=OK, milli=23150, unit="milliC",
+                  controller_us=1234, i2c_error=0, retries=0)
+    fields.update(over)
+    return Record(**fields)
+
+
+def test_the_exact_counterexample_is_refused():
+    """The frame that used to decode. Pinned literally, not regenerated."""
+    line = _canonical_record().encode()
+    body, _, given = line.rpartition("*")
+    assert given.isupper() or given.isdigit(), given
+    lowered = f"{body}*{given.lower()}"
+    assume_changed = lowered != line
+    assert assume_changed, "pick a record whose CRC has a letter in it"
+    assert int(given, 16) == int(given.lower(), 16)   # why it slipped through
+    with pytest.raises(ProtocolError, match="UPPERCASE"):
+        decode(lowered)
+
+
+@pytest.mark.parametrize("sensor,status,milli,unit", [
+    ("bme280", OK, 23150, "milliC"),
+    ("mpu6050", "ERR_SENSOR_NACK", 0, "milliG"),
+    ("ina219", OK, -1000, "milliA"),
+])
+def test_every_single_bit_flip_is_refused_exhaustively(sensor, status, milli,
+                                                       unit):
+    """Not sampled. Every bit of every byte of the frame, one at a time.
+
+    Hypothesis says 'no counterexample was found in 100 tries'. This says
+    'there is none', for these frames, which is the claim the docstring of
+    `test_any_single_bit_corruption_is_detected` actually makes.
+    """
+    line = _canonical_record(sensor=sensor, status=status, milli=milli,
+                             unit=unit).encode()
+    undetected = []
+    for index in range(len(line)):
+        for bit in range(7):
+            raw = bytearray(line.encode("ascii"))
+            raw[index] ^= 1 << bit
+            corrupted = raw.decode("ascii", errors="replace")
+            if corrupted == line:
+                continue
+            try:
+                decode(corrupted)
+            except ProtocolError:
+                continue
+            undetected.append((index, line[index], bit, corrupted))
+    assert undetected == [], undetected
+
+
+def test_a_lowercase_crc_is_refused_for_every_hex_letter():
+    """Each of a-f, in each of the four positions, on a frame that admits it."""
+    seen = set()
+    for seq in range(4000):
+        line = _canonical_record(seq=seq).encode()
+        body, _, given = line.rpartition("*")
+        for position, char in enumerate(given):
+            if char not in "ABCDEF" or (position, char) in seen:
+                continue
+            seen.add((position, char))
+            mutated = given[:position] + char.lower() + given[position + 1:]
+            with pytest.raises(ProtocolError, match="UPPERCASE"):
+                decode(f"{body}*{mutated}")
+    # 4 positions x 6 letters. If the search did not reach them all, the
+    # coverage claim in the name is false and the test says so.
+    assert len(seen) == 24, sorted(seen)

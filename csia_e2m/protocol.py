@@ -150,10 +150,32 @@ def decode(line: str) -> Record:
     body, _, given = line.rpartition("*")
     if len(given) != 4:
         raise ProtocolError(f"CRC field {given!r} is not four hex digits")
-    try:
-        given_value = int(given, 16)
-    except ValueError as error:
-        raise ProtocolError(f"CRC field {given!r} is not hex") from error
+    # UPPERCASE IS PART OF THE GRAMMAR, AND THIS IS NOT COSMETIC.
+    #
+    # `int(given, 16)` is case-insensitive, so "28B9" and "28b9" parse to the
+    # same value and a frame whose CRC field had one bit flipped -- 'B' 0x42
+    # -> 'b' 0x62, bit 5 -- decoded as valid. That is a real hole:
+    # `test_any_single_bit_corruption_is_detected` claims EVERY single-bit
+    # flip is refused, and an exhaustive sweep over one frame found exactly
+    # one that was not, at index 43 in the CRC field.
+    #
+    # It was found by the property test failing, not by inspection, and it
+    # had been failing intermittently: the flip has to land on one of the CRC
+    # field's A-F digits at bit 5, roughly 0.4% of examples, so a 100-example
+    # run failed about a third of the time and passed the rest. Earlier green
+    # full-suite runs in this repository were luck.
+    #
+    # The fix is to the GRAMMAR, not to the test's claim. The firmware emits
+    # `Serial.println(crc, HEX)`, which is uppercase, so a lowercase CRC field
+    # did not come from the firmware. Requiring the canonical form makes the
+    # universal claim true: every flip inside the field now either yields a
+    # different uppercase hex digit (CRC mismatch) or a character outside
+    # [0-9A-F] (grammar error).
+    if any(c not in "0123456789ABCDEF" for c in given):
+        raise ProtocolError(
+            f"CRC field {given!r} is not four UPPERCASE hex digits; the "
+            f"firmware emits uppercase, so this frame is not canonical")
+    given_value = int(given, 16)
     actual = crc16_ccitt(body.encode("ascii", errors="replace"))
     if actual != given_value:
         raise ProtocolError(

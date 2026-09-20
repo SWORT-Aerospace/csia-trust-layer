@@ -47,11 +47,91 @@ from run_mutations import (classify, drop_sandbox,  # noqa: E402
 # working-tree version of every target and every selected test file is copied
 # in, and the copy is what gets mutated and restored.
 #
-# The first version reused `apply_mutation` from the science runner, which
-# restores with `git checkout --`. Against a synced file that silently
-# reverted to the committed version, and every mutant came back
-# INVALID_MUTANT because the uncommitted test files were absent from the
-# sandbox entirely. Restoring from a remembered copy removes both problems.
+# TWO DEFECTS THIS MACHINERY HAS ALREADY PRODUCED, BOTH RECORDED RATHER THAN
+# QUIETLY REPAIRED:
+#
+# 1. The first version reused `apply_mutation` from the science runner, which
+#    restores with `git checkout --`. Against a synced file that silently
+#    reverted to the committed version, and every mutant came back
+#    INVALID_MUTANT because the uncommitted test files were absent from the
+#    sandbox entirely. Restoring from a remembered copy removes both problems.
+#
+# 2. Syncing only the MUTATED files is not enough. The SUPPORT mutants added
+#    `csia_consequence/gates.py` and `support.py`, but no mutant touches
+#    `csia_consequence/partitions.py`, which `tests/test_consequence_gates.py`
+#    imports. In the sandbox that import failed, pytest reported a COLLECTION
+#    ERROR and exited 1, and `classify()` -- which cannot tell a collection
+#    error from a behavioural failure -- returned KILLED for all 24 mutants.
+#    A reported score of 1.0000 was therefore meaningless. The signature was
+#    visible in the artifact: every `first_failure` was a bare file path with
+#    no `::test_name`.
+#
+#    Two changes follow from that. `package_files()` syncs the whole package
+#    directory of every mutant target, not just the mutated module. And
+#    `main()` now runs the selection UNMUTATED first and aborts unless it
+#    exits zero -- the counterpart to the canary. The canary proves the
+#    selection is CONNECTED to the target; the baseline proves the selection
+#    is GREEN, so that a later failure can be attributed to the mutant.
+
+def working_tree_delta() -> list:
+    """Every ``*.py`` where the working tree differs from HEAD.
+
+    Defect 3, found by the baseline check the moment it was added:
+    `tests/test_consequence_gates.py` puts `research/consequence/` on
+    `sys.path` and imports `independent_gate_evaluator`, which is untracked
+    and lives in no package directory, so `package_files()` did not reach it
+    either. The full selection failed to collect and the baseline refused to
+    report -- which is the check doing its job.
+
+    Rather than name a third special case, this takes the general definition:
+    the sandbox IS `HEAD`, so what it is missing is exactly the set of files
+    the working tree has changed or added. Restricted to `*.py` because every
+    failure of this kind so far has been an import, and because untracked
+    non-source files in this repository include campaign artifacts large
+    enough to make the copy itself a problem.
+    """
+    proc = _run(["git", "status", "--porcelain", "--untracked-files=all"],
+                cwd=ROOT)
+    if proc.returncode != 0:
+        raise SystemExit(f"git status failed:\n{proc.stderr}")
+    out = []
+    for line in (proc.stdout or "").splitlines():
+        if len(line) < 4:
+            continue
+        status, rel = line[:2], line[3:].strip()
+        if "D" in status:            # deleted; nothing to copy
+            continue
+        if " -> " in rel:            # rename; take the destination
+            rel = rel.split(" -> ", 1)[1]
+        rel = rel.strip('"')
+        if not rel.endswith(".py") or "__pycache__" in rel:
+            continue
+        if os.path.isfile(os.path.join(ROOT, rel)):
+            out.append(rel)
+    return out
+
+
+def package_files(paths) -> list:
+    """Every ``*.py`` in every package directory that holds a target.
+
+    Coarser than the mutant list on purpose. A test importing a sibling
+    module the mutant list never mentions is exactly the case that produced
+    defect 2 above, and listing siblings by hand would reintroduce it the
+    next time a module is added.
+    """
+    out = []
+    for rel in paths:
+        directory = os.path.dirname(rel)
+        if not directory:
+            continue
+        full = os.path.join(ROOT, directory)
+        if not os.path.isdir(full):
+            continue
+        for name in sorted(os.listdir(full)):
+            if name.endswith(".py"):
+                out.append(os.path.join(directory, name))
+    return out
+
 
 def sync_working_tree(sandbox: str, paths) -> list:
     copied = []
@@ -194,6 +274,15 @@ M("CRC-04", "CRC", "csia_e2m/protocol.py",
   "Breaks the CRC polynomial itself. The host and the firmware would then "
   "disagree, which the differential test exists to catch.")
 
+M("CRC-05", "CRC", "csia_e2m/protocol.py",
+  '    if any(c not in "0123456789ABCDEF" for c in given):',
+  "    if False:",
+  "Drops the uppercase requirement on the CRC field. `int(given, 16)` is "
+  "case-insensitive, so 28B9 and 28b9 parse identically and a frame with one "
+  "bit flipped in the CRC field decodes as valid. This was a live hole until "
+  "the property test caught it; the mutant exists so it cannot come back "
+  "unnoticed.")
+
 # ---------------------------------------------------------- SEQUENCE + TIME
 
 M("SEQ-01", "SEQUENCE", "csia_e2m/logging.py",
@@ -221,6 +310,48 @@ M("TOPO-02", "TOPOLOGY", "csia_bus_provenance/provenance.py",
   "    if False:",
   "Stops reporting NO_RESPONDER when nothing holds the address.")
 
+# ------------------------------------------------------- SUPPORT (phase 2/5)
+# Each of these is a way the support classifier could silently stop meaning
+# what the preregistration says it means.
+
+M("SUP-01", "SUPPORT", "csia_consequence/support.py",
+  "    return low_sets[a] ^ low_sets[b]",
+  "    return low_sets[a] | low_sets[b]",
+  "Replaces symmetric difference with union, so a feature present in BOTH "
+  "LOW-sets counts as separating. That feature contributes an identical term "
+  "to both log-likelihoods and cancels exactly; treating it as a witness "
+  "manufactures support that does not exist.")
+
+M("SUP-02", "SUPPORT", "csia_consequence/support.py",
+  "    if len(hypotheses) == 1:",
+  "    if False:",
+  "Lets a one-hypothesis set report IDENTIFIABLE. A set with nothing to "
+  "distinguish trivially 'identifies' its only member, which is not evidence.")
+
+M("SUP-03", "SUPPORT", "csia_consequence/support.py",
+  "    active = tuple(sorted(k for k, w in gates.items() if w > gate_epsilon))",
+  "    active = tuple(sorted(k for k, w in gates.items()))",
+  "Counts gated-off features as active, so self-occlusion becomes "
+  "IDENTIFIABLE.")
+
+M("SUP-04", "SUPPORT", "csia_consequence/support.py",
+  "    if not unseparated:",
+  "    if True:",
+  "Reports IDENTIFIABLE whenever anything separates, collapsing AMBIGUOUS "
+  "into a confident answer.")
+
+M("SUP-05", "SUPPORT", "csia_consequence/gates.py",
+  "        return (self.coupling == FRESHNESS_INDEPENDENT",
+  "        return (self.coupling != FRESHNESS_INDEPENDENT",
+  "Inverts the uncovered-candidate test, so freshness-coupled gates are "
+  "reported as uncovered and the eight become the wrong eight.")
+
+M("SUP-06", "SUPPORT", "csia_consequence/support.py",
+  "        if self.reason not in REASONS:",
+  "        if False:",
+  "Lets an unknown reason code through, so a state could be explained by a "
+  "string nobody defined.")
+
 #: The canary must be killed. If it survives, the sandbox is not live or the
 #: selection is disconnected, and every reported survivor would be false.
 CANARY = {
@@ -232,7 +363,9 @@ CANARY = {
 
 SELECTION = ["tests/test_e2m_acquisition.py", "tests/test_bus_provenance.py",
              "tests/test_e2m_properties.py", "tests/test_e2m_schemas.py",
-             "tests/test_e2m_transport.py"]
+             "tests/test_e2m_transport.py",
+             "tests/test_consequence_gates.py",
+             "tests/test_consequence_support.py"]
 
 OUT = os.path.join(ROOT, "research", "bus_provenance", "results",
                    "E2M_MUTATION_RESULTS.json")
@@ -253,9 +386,10 @@ def main(argv=None) -> int:
     sandbox = make_sandbox()
     started = time.time()
     try:
+        targets = [m["path"] for m in MUTANTS] + [CANARY["path"]]
         synced = sync_working_tree(
-            sandbox, [m["path"] for m in MUTANTS] + [CANARY["path"]]
-            + selection)
+            sandbox, targets + package_files(targets) + selection
+            + working_tree_delta())
         originals = read_originals(
             sandbox, [m["path"] for m in MUTANTS] + [CANARY["path"]])
         # The sandbox must import the sandbox, not the editable install.
@@ -270,6 +404,17 @@ def main(argv=None) -> int:
             raise SystemExit(
                 f"ABORT: sandbox not live. csia_e2m resolved to {loaded}, "
                 f"outside {sandbox}; every result would be a false SURVIVED.")
+
+        # BASELINE. Unmutated, and it must be green. Without this a broken
+        # sandbox reads as a perfect score, because every mutant "fails".
+        baseline = run_tests(sandbox, selection, timeout=args.timeout)
+        if baseline["returncode"] != 0:
+            raise SystemExit(
+                "ABORT: the UNMUTATED selection does not pass in the "
+                f"sandbox (exit {baseline['returncode']}, first failure "
+                f"{baseline['first_failure']!r}). Every mutant would be "
+                "reported KILLED by that same failure, so the score would "
+                "be meaningless. Refusing to report.")
 
         if not apply_from(sandbox, originals, CANARY):
             raise SystemExit("ABORT: canary anchor not found")
@@ -293,8 +438,16 @@ def main(argv=None) -> int:
             outcome = run_tests(sandbox, selection, timeout=args.timeout)
             restore_from(sandbox, originals, mutant["path"])
             verdict = classify(mutant, outcome)
+            first = outcome["first_failure"]
             results.append({**mutant, "verdict": verdict,
-                            "first_failure": outcome["first_failure"],
+                            "first_failure": first,
+                            # A kill attributed to a bare file path rather
+                            # than a test node is the collection-error
+                            # signature of defect 2. The baseline check above
+                            # should make it impossible; recording it means a
+                            # reader does not have to take that on trust.
+                            "first_failure_is_test_node":
+                                bool(first) and "::" in first,
                             "seconds": outcome["seconds"]})
             print(f"  {mutant['id']:10s} {verdict:15s} "
                   f"{outcome['first_failure'] or ''}", flush=True)
@@ -310,14 +463,24 @@ def main(argv=None) -> int:
         "targets": sorted({m["path"] for m in MUTANTS}),
         "selection": selection,
         "working_tree_files_synced_into_sandbox": synced,
+        "uncommitted_python_synced": working_tree_delta(),
         "evaluated": len(evaluated),
         "killed": len(killed),
         "survived": len(evaluated) - len(killed),
         "invalid": len(results) - len(evaluated),
         "score": score,
         "elapsed_s": round(time.time() - started, 1),
+        "baseline_unmutated": {"returncode": baseline["returncode"],
+                               "seconds": baseline["seconds"]},
         "canary": {"verdict": "KILLED", "first_failure":
                    canary["first_failure"]},
+        "kills_attributed_to_a_test_node": sum(
+            1 for r in results
+            if r["verdict"] == "KILLED" and r.get("first_failure_is_test_node")),
+        "kills_attributed_to_a_bare_file": sum(
+            1 for r in results
+            if r["verdict"] == "KILLED"
+            and not r.get("first_failure_is_test_node")),
         "by_family": {},
         "results": results,
         "what_this_is_not": (
