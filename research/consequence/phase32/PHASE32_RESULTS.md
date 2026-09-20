@@ -155,42 +155,70 @@ a fresh partition.
 **Nothing here supports a claim that P2 is safe or unsafe in general.** It is
 a statement about this implementation, with a known invalid input.
 
-## Mutation — 7 of 12, five survivors kept, and one of them is uncomfortable
+## Mutation — 12 evaluated, **12 killed**, 0 survived, after FL-032 was closed
 
-A **third separate runner**. `run_e2m_mutations.py` (38/36/2) and
-`run_phase31_mutations.py` (11/8) are untouched, so none of their five
-survivors can be killed as a side effect. 12 evaluated, **7 killed, 5
-survived, score 0.5833**; unmutated baseline exit 0, canary killed, every kill
-attributed to a named test node.
+**The Phase-3.2 scientific result is unchanged by this section.** The locked
+result file is byte-identical (sha256 pinned by test) and `build()` still
+reproduces it from its own traces. What changed is the assurance around the
+analysis pipeline, done as Part A of the FL-032 work.
 
-| survivor | what it changes |
+At the time Phase 3.2 was first reported this run was **7 killed, 5 survived**
+(`32-02`, `32-03`, `32-10`, `32-11`, `32-12`), because nothing exercised
+`build()` end to end. `tests/test_phase32_pipeline.py` now does, and every
+mutant is killed by a distinct, behaviourally relevant test node:
+
+| mutant | killed by |
 |---|---|
-| `32-02` | `MAX_DROPPED_PAIRS` 4 → 40, so any number of exclusions passes |
-| `32-03` | **picks the best-performing grid point as confirmatory instead of the preregistered one** |
-| `32-10` | `false_escalation` always False, so the nominal control cannot veto |
-| `32-11` | disables the evidence gating in EG |
-| `32-12` | stops detecting one class of invalid run |
+| `32-01` effect-size threshold removed | `test_a_significant_but_small_effect_does_not_pass_the_threshold` |
+| `32-02` exclusion cap raised | `test_too_many_exclusions_are_reported_as_underpowered` |
+| `32-03` **cherry-picked confirmatory point** | `test_the_locked_results_are_what_the_evaluator_produces` |
+| `32-04` grid sorted | `test_the_grid_is_iterated_in_declaration_order_and_never_sorted` |
+| `32-05` McNemar one-sided | `test_mcnemar_is_unchanged_from_the_earlier_phases` |
+| `32-06` finite odds ratio fabricated | `test_the_odds_ratio_is_not_reported_when_it_is_not_finite` |
+| `32-07` conditional-interval flag dropped | `test_the_risk_difference_interval_declares_that_it_is_conditional` |
+| `32-08` lower CI bound pinned at zero | `test_clopper_pearson_matches_the_exact_interval[40-40-…]` |
+| `32-09` conflict decided on labels | `test_hand_built_controls[nothing issued where TERMINATE was required]` |
+| `32-10` nominal-control veto disabled | `test_a_false_escalation_in_the_nominal_arm_vetoes_the_verdict` |
+| `32-11` evidence gating disabled | `test_the_gated_condition_really_gates_the_evidence` |
+| `32-12` invalid-run detection removed | `test_a_nonfinite_sample_is_rejected_as_an_invalid_run` |
 
-**`32-03` is the cherry-pick mutant, and its survival is the most important
-thing in this section.** It survives for a reason worth stating precisely
-rather than glossing: **every structural grid point in this campaign gives
-40/40 versus 0/40, and the maximum-RD point over all ten is `imu_isolation`
-0.03 with RD = 1.0 and the same p-value.** Substituting a cherry-pick for the
-preregistration produces the identical verdict here. *This study has no cherry
-to pick* — which is why no test could catch the mutant on this data, and which
-is not the same as the discipline being verified.
+### Two ways this score was nearly manufactured, both caught
 
-**Not patched.** Writing a test to catch a specific mutant is what this
-repository's mutation doctrine forbids, and the survivors were seen before the
-decision was taken. What they reveal, plainly: the Phase-3.2 suite tests the
-statistical primitives thoroughly and **does not test the analysis pipeline's
-use of them** — nothing runs `build()` over a synthetic document and checks
-the verdict logic, the exclusion accounting or the confirmatory selection.
+**First, by a hash guard.** The run immediately after the Part-A tests landed
+reported 12 of 12 with **four kills attributed to
+`test_the_manifest_matches_every_file_it_lists`** — a sha256 manifest check
+that fails for *every* mutant, because mutating a file changes its hash. That
+is not a behavioural kill. The guard is now deselected from the mutation
+selection, and a test asserts no kill is ever attributed to a deselected node.
 
-**This is the second phase in a row with the same gap.** Phase 3.1's `31-03`,
-`31-07` and `31-11` survived for the same reason, I named an end-to-end
-regression test as the removal action, and I did not write one before running
-Phase 3.2. That is a finding about my own process, not only about the tests.
+**Second, by self-reference.** Pinning this run's counts in a test that sits
+*inside* the selection the run measures makes the unmutated baseline fail
+whenever the score changes. The baseline check refused to report, which is
+the third time that check has stopped a false result in this programme. The
+count assertion is now deselected too, and a structural test that does not
+depend on the score stays in.
+
+Both are recorded as `FL-033`.
+
+### The cherry-pick mutant, and why `32-03` is now genuinely dead
+
+`32-03` is killed by the real locked artifact, and independently by a
+**synthetic canary built for the purpose**. Phase 3.2's own dataset cannot
+test the property — every grid point gives the same answer, so the choice of
+row does not matter there. The canary is built so that it does:
+
+- `structural` at 1.0, the preregistered point: 0 conflicts in both arms,
+  RD = 0, honest verdict **NOT SUPPORTED**;
+- a `decoy` family at 5.0: 10/10 against 0/10, RD = 1.0, p < α.
+
+A pipeline that selects the maximum-effect row returns SUPPORTED on that data;
+the honest one returns NOT SUPPORTED. Verified both ways: the canary fails
+under the mutant applied by hand, and passes unmutated.
+
+The Phase-3.2 data-specific invariant is kept and **relabelled**
+(`test_no_cherry_pick_changes_THIS_DATASETS_verdict`) so it cannot be read as
+the general property: it proves no cherry-pick changes *this dataset's*
+verdict, and nothing more.
 
 ## CLAIMS WE CAN MAKE
 
@@ -244,5 +272,8 @@ crossing time explicitly; use development and locked partitions; implement
 CUSUM correctly as the baseline, not a straw man; and report delay quantiles
 alongside false-alarm rates.
 
-**And it should close the gap `32-03` exposed first** — an end-to-end test of
-the analysis pipeline, not more tests of its primitives.
+**The gap `32-03` exposed is closed** — `tests/test_phase32_pipeline.py`
+exercises `build()` end to end, rejects malformed, duplicated and
+out-of-grid input, classifies incomplete pairs, and carries a synthetic
+cherry-pick canary. FL-032 is resolved; FL-033 records two ways the re-run
+nearly manufactured its own score.

@@ -283,10 +283,21 @@ def _locked():
 
 
 def test_the_locked_results_are_what_the_evaluator_produces():
+    """The committed locked result is NOT regenerated.
+
+    Part A added an `intake` provenance block to `build()`. The Phase-3.2
+    locked artifact is sealed and stays byte-identical, so the comparison is
+    over every key the committed file has, and the only key `build` may add
+    is named here. A second, additive key would fail this.
+    """
     traces = json.loads(
         (P32 / "results" / "PHASE32_TRACES_LOCKED.json").read_text(
             encoding="utf-8"))
-    assert ev32.build(traces) == _locked()
+    rebuilt = ev32.build(traces)
+    committed = _locked()
+    assert set(rebuilt) - set(committed) == {"intake"}
+    for key in committed:
+        assert rebuilt[key] == committed[key], key
 
 
 def test_the_locked_run_declares_it_executed_nothing_and_pooled_nothing():
@@ -385,24 +396,68 @@ def test_the_p2_table_is_labelled_exploratory_and_explains_why():
         RESULTS_MD.read_text(encoding="utf-8")
 
 
-def test_the_mutation_run_is_reported_with_its_five_survivors():
-    doc = json.loads(
+def _mutation_doc():
+    return json.loads(
         (P32 / "results" / "PHASE32_MUTATION_RESULTS.json").read_text(
             encoding="utf-8"))
+
+
+def test_the_mutation_run_is_structurally_sound():
+    """Properties a reportable mutation run must have, whatever its score.
+
+    This one STAYS in the mutation selection, because none of it depends on
+    the score. What it forbids is the three ways a score gets manufactured:
+    a red baseline, a kill attributed to a bare file path (a collection
+    error), and a kill attributed to a guard that fails for every mutant
+    regardless of behaviour.
+    """
+    doc = _mutation_doc()
     assert doc["baseline_unmutated"]["returncode"] == 0
     assert doc["kills_attributed_to_a_bare_file"] == 0
-    assert (doc["evaluated"], doc["killed"]) == (12, 7)
+    assert doc["canary"]["verdict"] == "KILLED"
+    assert doc["invalid"] == 0
+    for r in doc["results"]:
+        first = r.get("first_failure")
+        if r["verdict"] == "KILLED":
+            assert first and "::" in first, r["id"]
+            assert first not in doc.get("deselected", []), (
+                f"{r['id']} was killed by a deselected guard")
+
+
+def test_the_mutation_counts_match_the_write_up():
+    """The exact counts, and the survivors named in the document.
+
+    DESELECTED from the mutation selection: a test that pins a mutation score
+    cannot sit inside the selection that run measures, because changing the
+    code changes the score and the baseline then fails for a reason that has
+    nothing to do with the mutant. The first attempt did exactly that and the
+    baseline check caught it. See FL-033.
+    """
+    doc = _mutation_doc()
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    assert f"{doc['evaluated']} evaluated" in text
+    assert f"**{doc['killed']} killed" in text
     survivors = sorted(r["id"] for r in doc["results"]
                        if r["verdict"] == "SURVIVED")
-    assert survivors == ["32-02", "32-03", "32-10", "32-11", "32-12"]
-    text = RESULTS_MD.read_text(encoding="utf-8")
     for s in survivors:
         assert f"`{s}`" in text, s
+    if not survivors:
+        assert "0 survived" in text or "no survivors" in text.lower()
 
 
-def test_the_cherry_pick_claim_is_true_of_this_data():
-    """The write-up says a cherry-pick could not have changed the verdict.
-    That is a checkable statement about the artifact, not a reassurance."""
+def test_no_cherry_pick_changes_THIS_DATASETS_verdict():
+    """A DATA-SPECIFIC invariant, and only that.
+
+    It proves that on the Phase-3.2 locked dataset no choice of grid point
+    changes the verdict, because every structural point is identical and the
+    maximum-effect point over all ten has the same risk difference.
+
+    **It does NOT prove the analysis is resistant to cherry-picking.** A
+    pipeline that always selected the best row would pass this test on this
+    data. The general property is tested by the synthetic canary in
+    `tests/test_phase32_pipeline.py`, which is built so that the selected row
+    DOES change the verdict.
+    """
     d = _locked()
     structural = [t for t in d["tests"] if t["family"] == "structural"]
     assert len({(t["count_left"], t["count_right"], t["risk_difference"])

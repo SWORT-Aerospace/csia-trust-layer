@@ -63,6 +63,9 @@ ALLOWED_MISSING = {
     "csia/direct_consequence_test_phase32/2026-09-20":
         "seed-derivation domain string in csia_consequence/"
         "phase32_partitions.py, not a filesystem path",
+    "csia/detector_performance_phase4/2026-09-20":
+        "seed-derivation domain string in csia_consequence/"
+        "phase4_partitions.py, not a filesystem path",
     # Directory placeholders in planning documents.
     "docs/adr/": "planned directory named in an organisational blueprint",
     "docs/external/reading/":

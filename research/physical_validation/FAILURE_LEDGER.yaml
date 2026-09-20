@@ -5090,3 +5090,73 @@ entries:
     artifact: >-
       tools/mutation/run_phase32_mutations.py;
       research/consequence/phase32/results/PHASE32_MUTATION_RESULTS.json
+
+  - id: FL-033
+    date: 2026-09-20
+    phase: Consequence Phase 3.2 Part A (analysis-pipeline assurance)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      Closing FL-032 nearly manufactured its own mutation score, twice.
+      First, the run immediately after the end-to-end tests landed reported
+      12 of 12 killed with FOUR kills attributed to
+      test_the_manifest_matches_every_file_it_lists -- a sha256 manifest
+      guard that fails for every mutant, because mutating a file changes its
+      hash. That is not a behavioural kill. Second, after deselecting that
+      guard, the unmutated baseline went red because a test inside the
+      selection pinned the very score the run was measuring: changing the
+      code changed the score, so the baseline failed for a reason unrelated
+      to any mutant.
+    found_by: >-
+      Reading the kill attributions rather than the total, and then the
+      runner's own unmutated-baseline check -- the third time that check has
+      stopped a false result in this programme.
+    honest_limit: >-
+      Both were caught before anything was reported or committed. The first
+      would have been invisible from the score alone; only the per-mutant
+      first_failure column showed it.
+    verdict: RECORDED
+    consequence: >-
+      The Phase-3.2 mutation runner now carries an explicit DESELECT list
+      with its reason recorded in the artifact, and a structural test asserts
+      no kill is ever attributed to a deselected node, that the baseline is
+      green, that no kill is attributed to a bare file path, and that the
+      canary died. The count assertion lives outside the selection. Final
+      honest result: 12 evaluated, 12 killed, 0 survived, every kill on a
+      distinct behaviourally relevant test node.
+    artifact: >-
+      tools/mutation/run_phase32_mutations.py;
+      research/consequence/phase32/results/PHASE32_MUTATION_RESULTS.json;
+      tests/test_phase32_pipeline.py
+
+  - id: FL-034
+    date: 2026-09-20
+    phase: Consequence Phase 3.2 Part A (FL-032 resolution)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      FL-032 is resolved. The analysis pipeline is now exercised end to end:
+      build() runs on the real locked artifact and on a small fixture,
+      malformed documents and duplicated scenarios and out-of-grid magnitudes
+      are refused, incomplete pairs are classified and dropped with a reason,
+      an empty declared grid point is reported, scenario reordering changes
+      no conclusion, and the campaign's gating and invalid-run detection are
+      exercised on a real seed.
+    found_by: The five surviving Phase-3.2 mutants, which named the gap.
+    honest_limit: >-
+      The Phase-3.2 dataset CANNOT test cherry-pick resistance -- every grid
+      point gives the same answer there, so the choice of row does not
+      matter. A synthetic canary was built for the property, in which the
+      preregistered point gives RD = 0 and a decoy family gives RD = 1.0, so
+      the selection decides the verdict. Verified in both directions: the
+      canary fails under the mutant applied by hand and passes unmutated.
+      The Phase-3.2 data-specific invariant is kept and RELABELLED so it
+      cannot be read as the general property.
+    verdict: RECORDED
+    consequence: >-
+      The Phase-3.2 locked result is byte-identical, pinned by sha256 and
+      re-derived from its own traces. Mutation went from 7/12 with five
+      survivors to 12/12 with none, by adding genuine end-to-end tests rather
+      than mutant-killers.
+    artifact: >-
+      tests/test_phase32_pipeline.py;
+      research/consequence/phase32/evaluate32.py;
+      research/consequence/phase32/PHASE32_RESULTS.md

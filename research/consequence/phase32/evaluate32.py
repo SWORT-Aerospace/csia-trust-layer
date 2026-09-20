@@ -282,7 +282,76 @@ def paired_test(rows, invalid, *, family, magnitude, policy="P0",
     return out
 
 
+#: Top-level keys `build` cannot work without. Missing any of them is a
+#: malformed document, not a document with an empty result.
+REQUIRED_KEYS = ("scenarios", "grids", "confirmatory_point")
+
+
+def validate_document(document: dict) -> dict:
+    """Refuse or explicitly classify a document that is not what it claims.
+
+    FL-032: five mutants survived Phase 3.2 because nothing exercised
+    `build()` end to end, and one of them was the cherry-pick. Part of
+    closing that is making the pipeline say what it will and will not accept,
+    rather than producing a verdict from whatever it is handed.
+
+    Rejected outright, because a result computed from them would be wrong
+    rather than incomplete:
+      * a missing required top-level key
+      * two scenarios sharing (seed, family, condition, magnitude)
+      * a scenario at a magnitude the declared grid does not contain
+      * a confirmatory point that is not in the declared grid
+
+    Explicitly classified rather than rejected, because they are ordinary
+    experimental facts:
+      * a seed present in one arm of a pair and not the other -- dropped by
+        `paired_test` with the reason recorded
+      * a declared grid point with no scenarios at all -- reported here and
+        carried into the result as an empty test
+
+    NOT an error: scenario order. The grid is read from `document["grids"]`
+    in declaration order and never from the order scenarios happen to appear
+    in, so a reordered document must give an identical result. A test asserts
+    that rather than this function assuming it.
+    """
+    missing = [k for k in REQUIRED_KEYS if k not in document]
+    if missing:
+        raise TraceError(f"document is missing required keys: {missing}")
+
+    grids = document["grids"]
+    seen = {}
+    for s in document["scenarios"]:
+        for field in ("seed", "gate_group", "condition", "policies",
+                      "correct_response"):
+            if field not in s:
+                raise TraceError(f"scenario is missing {field!r}: "
+                                 f"{ {k: s.get(k) for k in ('seed', 'gate_group')} }")
+        key = (s["seed"], s["gate_group"], s["condition"], s["magnitude"])
+        if key in seen:
+            raise TraceError(f"duplicate scenario {key}")
+        seen[key] = True
+        if s["condition"] != "N":
+            declared = grids.get(s["gate_group"], [])
+            if s["magnitude"] not in declared:
+                raise TraceError(
+                    f"scenario at magnitude {s['magnitude']!r} is not in the "
+                    f"declared grid for {s['gate_group']!r}: {declared}")
+
+    for family, point in document["confirmatory_point"].items():
+        if point not in grids.get(family, []):
+            raise TraceError(
+                f"confirmatory point {family}={point} is not in the declared "
+                f"grid {grids.get(family)}")
+
+    empty = [f"{family}|{m}" for family in grids for m in grids[family]
+             if not any(s["gate_group"] == family and s["magnitude"] == m
+                        for s in document["scenarios"])]
+    return {"grid_points_with_no_scenarios": empty,
+            "scenarios_seen": len(seen)}
+
+
 def build(document: dict) -> dict:
+    intake = validate_document(document)
     rows = evaluate(document)
     invalid = document.get("invalid_runs", [])
     grids = document["grids"]
@@ -401,6 +470,7 @@ def build(document: dict) -> dict:
         "touched_hardware": False,
         "pooled_with_phase3": False, "pooled_with_phase31": False,
         "partition": document.get("partition"),
+        "intake": intake,
         "invalid_run_count": document.get("invalid_run_count", 0),
         "invalid_runs": invalid,
         "grid_order": document.get("grid_order"),

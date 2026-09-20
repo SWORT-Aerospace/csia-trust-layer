@@ -139,7 +139,31 @@ CANARY = {
     "breaks": "changes the support sentinel; nothing should classify",
 }
 
-SELECTION = ["tests/test_consequence_phase32.py"]
+#: The hash-guard test is DESELECTED, and this is not a convenience.
+#:
+#: `test_the_manifest_matches_every_file_it_lists` compares every listed
+#: file's sha256 against the SHA-256 manifest. Mutating a file changes its
+#: hash, so that test fails for EVERY mutant regardless of behaviour. The
+#: first run after the Part-A tests landed reported 12 of 12 killed with four
+#: of the kills attributed to it -- a manufactured score, and exactly what
+#: the brief forbids. It is a file-integrity guard, not a behavioural test,
+#: and it belongs in the suite and not in a mutation selection.
+#:
+#: The other hash-pinned tests stay in: they hash the SEALED RESULT files and
+#: the earlier phases' artifacts, none of which any mutant touches, so they
+#: cannot fire spuriously.
+DESELECT = [
+    "tests/test_consequence_phase32.py::test_the_manifest_matches_every_file_it_lists",
+    # A test that pins THIS run's score cannot be inside the selection this
+    # run measures: changing the code changes the score, so the unmutated
+    # baseline fails for a reason that has nothing to do with any mutant.
+    # The baseline check caught that on the first attempt. See FL-033.
+    "tests/test_consequence_phase32.py::test_the_mutation_counts_match_the_write_up",
+]
+
+SELECTION = ["tests/test_consequence_phase32.py",
+             "tests/test_phase32_pipeline.py"] + \
+            [f"--deselect={node}" for node in DESELECT]
 
 OUT = os.path.join(ROOT, "research", "consequence", "phase32", "results",
                    "PHASE32_MUTATION_RESULTS.json")
@@ -153,7 +177,8 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     selection = [s for s in SELECTION
-                 if os.path.isfile(os.path.join(ROOT, s))]
+                 if s.startswith("--")
+                 or os.path.isfile(os.path.join(ROOT, s))]
     wanted = [m for m in MUTANTS
               if args.only is None or m["id"] in args.only]
 
@@ -213,6 +238,11 @@ def main(argv=None) -> int:
                           "five survivors can be killed as a side effect"),
         "targets": sorted({m["path"] for m in MUTANTS}),
         "selection": selection,
+        "deselected": DESELECT,
+        "why_deselected": (
+            "a sha256 manifest guard fails for every mutant because mutating "
+            "a file changes its hash; including it manufactures a perfect "
+            "score. See FL-033."),
         "working_tree_files_synced_into_sandbox": synced,
         "evaluated": len(evaluated), "killed": len(killed),
         "survived": len(evaluated) - len(killed),
