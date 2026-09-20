@@ -31,6 +31,13 @@ from __future__ import annotations
 
 from . import gates, partitions, support
 
+# NOT re-exported here, on purpose: `action_adapter`, `consequence_model` and
+# `phase3_partitions` are the Phase-3 measurement layer, and the first two
+# import the frozen core (`csia.runtime.failsafe`, `csia.diagnosis.causal`).
+# Pulling them in at package import would make `import csia_consequence` --
+# which Phase 2 uses for pure source analysis -- depend on the runtime. Import
+# them by name when you want them.
+
 #: Analysis only. Nothing here commands anything.
 LAYER = "analysis"
 HAS_ACTUATOR_AUTHORITY = False

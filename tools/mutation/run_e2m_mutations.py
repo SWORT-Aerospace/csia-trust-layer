@@ -352,6 +352,81 @@ M("SUP-06", "SUPPORT", "csia_consequence/support.py",
   "Lets an unknown reason code through, so a state could be explained by a "
   "string nobody defined.")
 
+# ----------------------------------------------- PHASE 3 (consequence/policy)
+# Each of these is a way the Phase-3 measurement could silently stop measuring
+# what the preregistration says it measures.
+
+M("P3-01", "PHASE3", "csia_consequence/action_adapter.py",
+  "    if base.response in ATTRIBUTING and \\\n            pair_report.status != _support.IDENTIFIABLE:",
+  "    if False:",
+  "Stops P2 withdrawing an attribution when the pair that attribution "
+  "discriminates is not identifiable. P2 then IS P0, and any H3 result would "
+  "be an artefact of nothing.")
+
+M("P3-02", "PHASE3", "csia_consequence/action_adapter.py",
+  "    if base.response in ATTRIBUTING and",
+  "    if base.response not in ATTRIBUTING and",
+  "Makes P2 withdraw exactly the responses that assert no attribution -- a "
+  "controlled descent cancelled because attribution is ambiguous. That is a "
+  "false refusal with a real cost, and the phase claims it does not happen.")
+
+M("P3-03", "PHASE3", "csia_consequence/action_adapter.py",
+  "        weights[key] = float(gate)",
+  "        weights[key] = 1.0",
+  "Reports every edge gate as fully open, so no occlusion is ever visible to "
+  "support and the whole Phase-3 question disappears.")
+
+M("P3-04", "PHASE3", "csia_consequence/action_adapter.py",
+  "    return p2_support(state, sources=DECISION_PAIR, provenance=provenance)",
+  "    return p2_support(state, provenance=provenance)",
+  "Asks whether ANY two sources are separable instead of whether THIS "
+  "attribution is supported. The policy would then consult a different "
+  "question from the one it is about to act on.")
+
+M("P3-05", "PHASE3", "csia_consequence/consequence_model.py",
+  "        return (WRONG_SOURCE_FACTOR if chosen == faulty_source\n"
+  "                else MITIGATED_FRACTION)",
+  "        return MITIGATED_FRACTION",
+  "Makes selecting the FAULTY inertial unit cost the same as selecting the "
+  "good one. H2 then cannot be falsified in either direction, because a "
+  "confident wrong attribution becomes indistinguishable from a right one.")
+
+M("P3-06", "PHASE3", "csia_consequence/consequence_model.py",
+  "        if tick[\"airborne\"]:",
+  "        if True:",
+  "Accrues position error while the vehicle is on the ground, which would "
+  "manufacture a consequence out of a pre-flight fault that has none.")
+
+M("P3-07", "PHASE3", "csia_consequence/consequence_model.py",
+  "        return R_SELECT_IMU1 if faulty_source == \"imu0\" else R_SELECT_IMU0",
+  "        return R_SELECT_IMU0 if faulty_source == \"imu0\" else R_SELECT_IMU1",
+  "Inverts ground truth: the correct response becomes selecting the faulty "
+  "unit. Every CORRECT_ACTIONABLE and INCORRECT_ACTIONABLE verdict flips.")
+
+M("P3-08", "PHASE3",
+  "research/consequence/phase3/independent_consequence_evaluator.py",
+  "    return RESPONSE_CLASS[a] != RESPONSE_CLASS[b]",
+  "    return False",
+  "Declares no two responses materially different, so H2's third clause can "
+  "never be satisfied and the evaluator would report a rejection whatever "
+  "the traces said.")
+
+M("P3-09", "PHASE3",
+  "research/consequence/phase3/independent_consequence_evaluator.py",
+  "            if response in ATTRIBUTING:\n                unsupported_s += span",
+  "            if False:\n                unsupported_s += span",
+  "Stops counting a confident attribution issued while its separating "
+  "evidence is gated off -- the one measurement the phase is for.")
+
+M("P3-10", "PHASE3",
+  "research/consequence/phase3/independent_consequence_evaluator.py",
+  "        if not seg[\"airborne\"]:\n            continue\n"
+  "        if not all(seg[\"gates_open\"].values()):",
+  "        if not all(seg[\"gates_open\"].values()):",
+  "Counts occlusion on the ground toward the overlap with the decision "
+  "window. The armed-gate result turns on that overlap being zero, and this "
+  "would make it non-zero for a reason that means nothing.")
+
 #: The canary must be killed. If it survives, the sandbox is not live or the
 #: selection is disconnected, and every reported survivor would be false.
 CANARY = {
@@ -365,7 +440,8 @@ SELECTION = ["tests/test_e2m_acquisition.py", "tests/test_bus_provenance.py",
              "tests/test_e2m_properties.py", "tests/test_e2m_schemas.py",
              "tests/test_e2m_transport.py",
              "tests/test_consequence_gates.py",
-             "tests/test_consequence_support.py"]
+             "tests/test_consequence_support.py",
+             "tests/test_consequence_phase3.py"]
 
 OUT = os.path.join(ROOT, "research", "bus_provenance", "results",
                    "E2M_MUTATION_RESULTS.json")

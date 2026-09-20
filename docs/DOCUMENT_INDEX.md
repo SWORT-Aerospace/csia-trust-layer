@@ -1,8 +1,8 @@
 # Document index
 
-454 markdown files exist in this repository. Most are the frozen research
+455 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 454 individually would
+once, cite a commit, and are never revised. Indexing all 455 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
