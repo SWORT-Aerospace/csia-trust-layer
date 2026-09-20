@@ -22,20 +22,27 @@ support it. If a row has no artifact, the claim is not made.
 | C6 | ArduPilot states the feedback-loss mechanism in its own source comment | `SOURCE_ANALYSIS` | `results/CROSSARCH_AUDIT.json`, finding `AP-COMMENT` |
 | C7 | A standard-library reimplementation reproduces both mechanisms without importing CSIA, by a different derivation | `DETERMINISTIC_SIMULATION` | `CSIA_LITE.md`, `results/CSIA_LITE_DEMO.json` |
 | C8 | Occlusion changes the support state only where the closing relation is the sole separator of two candidates | `DETERMINISTIC_SIMULATION` | `results/CSIA_LITE_DEMO.json`, `redundancy_note` |
+| C9 | For `accel_motor_current` and `accel_esc_rpm` on this airframe, the occlusion window has **zero** overlap with airborne flight: 0.00 s of fault-window occlusion over 48 locked scenarios | `MODEL_BASED_ACTION_CONSEQUENCE` | `phase3/results/PHASE3_RESULTS_LOCKED.json` |
+| C10 | Conditions B and C for those gates give identical first-response times and position errors to three decimal places | `MODEL_BASED_ACTION_CONSEQUENCE` | same |
+| C11 | For `heading_course`, the gate is shut for 3.992 s of a 4.0 s fault in a physically consistent regime, and the fault is still detected in 21 of 24 seeds | `MODEL_BASED_ACTION_CONSEQUENCE` | same |
+| C12 | The seed-paired gate-shut versus gate-open difference is 3/24 vs 1/24, exact McNemar p = 0.625, not distinguishable from chance at α = 0.05 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `paired_tests` |
+| C13 | P0, P1 and P2 are identical on all 216 locked scenarios | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `policy_table` |
+| C14 | The campaign replays byte-identically (two full locked runs) | measured | `phase3/REPRODUCE.md`, `SHA256_MANIFEST.json` |
 
 ## Hypotheses
 
 | | status | why |
 |---|---|---|
 | H1 | **consistent at `SOURCE_ANALYSIS`, not tested** | H1 also requires that no independent freshness path forces an equivalent warning. That clause is established from source structure only, which is not a test of it. |
-| H2 | **untouched** | needs phase 3 |
-| H3 | **untouched** | needs phase 3 |
+| H2 | **NOT SUPPORTED** | 28 conflicts; 24 in a physically inconsistent control and excluded; the remaining 4 are not separated from their matched control (p = 0.625). Rejection criteria (a) and (d). |
+| H3 | **NOT SUPPORTED** | P0 made 0 incorrect actionable decisions, so there was nothing to reduce. P2 was inert. This is the absence of a test, not a result about the policy. |
 | H4 | **untouched** | needs phase 4, at matched false-alarm operating points |
 | H5 | **not killed** | twelve paths classified; H5 predicts nothing, so classification is the whole test |
 | H6 | **not killed** | both mechanisms reproduce, fresh-interpreter import check clean |
 
-**No hypothesis in this phase has been tested above `SOURCE_ANALYSIS` except
-H6, and H6's test is about code, not about aircraft.**
+**H2 and H3 were tested at `MODEL_BASED_ACTION_CONSEQUENCE` and both were
+rejected.** H1 and H5 remain at `SOURCE_ANALYSIS`; H6's test is about code,
+not about aircraft. H4 is untouched and needs Phase 4.
 
 ## Claims this phase does NOT support, listed so they cannot be borrowed
 
@@ -52,6 +59,10 @@ H6, and H6's test is about code, not about aircraft.**
 - **That CUSUM is inferior**, or superior, or comparable. Phase 4 has not run,
   and the preregistration forbids the comparison except at matched false-alarm
   operating points over a preregistered threshold grid.
+- **That the occlusion is harmless in general.** Phase 3 tested 3 of 8
+  candidates, one airframe profile, one trajectory family, two fault families.
+- **That the support-aware policy is safe, unnecessary or beneficial**, and
+  **that freshness logic covers the occlusion**. Neither P1 nor P2 ever fired.
 - **That abstention is a solved safety problem.** `AMBIGUOUS` is a report that
   a question cannot be answered. Reporting it is not the same as handling it,
   and the tradeoff curve phase 3 would produce does not exist yet.

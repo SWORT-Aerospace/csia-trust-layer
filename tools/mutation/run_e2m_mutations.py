@@ -73,6 +73,19 @@ from run_mutations import (classify, drop_sandbox,  # noqa: E402
 #    selection is CONNECTED to the target; the baseline proves the selection
 #    is GREEN, so that a later failure can be attributed to the mutant.
 
+#: Working-tree files larger than this are not copied into the sandbox.
+#: The first value tried was 1 MB, and it was wrong: the Phase-3 locked trace
+#: file is 2.3 MB and `tests/test_consequence_phase3.py` reads it, so the cap
+#: would have re-created the exact false-red it was meant to avoid. The sync
+#: runs ONCE per campaign, not once per mutant, so a few megabytes costs
+#: nothing measurable. The cap is here to stop an accidental multi-hundred-
+#: megabyte artifact, not to shave megabytes off a copy.
+MAX_SYNC_BYTES = 16_000_000
+
+#: Files skipped by that cap, recorded so the omission is visible.
+OVERSIZE: list = []
+
+
 def working_tree_delta() -> list:
     """Every ``*.py`` where the working tree differs from HEAD.
 
@@ -85,10 +98,18 @@ def working_tree_delta() -> list:
 
     Rather than name a third special case, this takes the general definition:
     the sandbox IS `HEAD`, so what it is missing is exactly the set of files
-    the working tree has changed or added. Restricted to `*.py` because every
-    failure of this kind so far has been an import, and because untracked
-    non-source files in this repository include campaign artifacts large
-    enough to make the copy itself a problem.
+    the working tree has changed or added.
+
+    Defect 4, found the same way -- by the baseline check refusing to report:
+    restricting this to `*.py` was too narrow. `tests/test_consequence_phase3
+    .py` reads the Phase-3 result JSON and compares it against a fresh
+    analysis, so the DATA files are as load-bearing as the source. The scope
+    is now source plus JSON, under a size cap sized to admit them.
+
+    `MAX_SYNC_BYTES` is the cap, and a file that exceeds it is REPORTED in the
+    run's artifact rather than dropped in silence -- a test that fails because
+    its fixture was quietly too big is the same false-green this whole
+    machinery exists to prevent.
     """
     proc = _run(["git", "status", "--porcelain", "--untracked-files=all"],
                 cwd=ROOT)
@@ -104,10 +125,15 @@ def working_tree_delta() -> list:
         if " -> " in rel:            # rename; take the destination
             rel = rel.split(" -> ", 1)[1]
         rel = rel.strip('"')
-        if not rel.endswith(".py") or "__pycache__" in rel:
+        if not rel.endswith((".py", ".json")) or "__pycache__" in rel:
             continue
-        if os.path.isfile(os.path.join(ROOT, rel)):
-            out.append(rel)
+        full = os.path.join(ROOT, rel)
+        if not os.path.isfile(full):
+            continue
+        if os.path.getsize(full) > MAX_SYNC_BYTES:
+            OVERSIZE.append([rel, os.path.getsize(full)])
+            continue
+        out.append(rel)
     return out
 
 
@@ -427,6 +453,31 @@ M("P3-10", "PHASE3",
   "window. The armed-gate result turns on that overlap being zero, and this "
   "would make it non-zero for a reason that means nothing.")
 
+M("P3-11", "PHASE3", "research/consequence/phase3/analyze.py",
+  "    return min(1.0, 2.0 * tail)",
+  "    return tail",
+  "Turns the exact McNemar test one-sided. H2's verdict is decided by this "
+  "number, and halving it is the cheapest possible way to manufacture a "
+  "finding out of 3-versus-1.")
+
+M("P3-12", "PHASE3", "research/consequence/phase3/analyze.py",
+  '        "verdict": ("SUPPORTED" if physical and attributable\n'
+  '                    else "NOT SUPPORTED"),',
+  '        "verdict": ("SUPPORTED" if physical\n'
+  '                    else "NOT SUPPORTED"),',
+  "Declares H2 supported whenever any conflict exists, dropping the "
+  "requirement that a matched control separate it from chance. That is the "
+  "difference between a result and a coincidence.")
+
+M("P3-13", "PHASE3", "research/consequence/phase3/analyze.py",
+  "    physical = [c for c in conflicts\n"
+  "                if not (c[\"gate_group\"] == \"armed_gate_pair\"\n"
+  "                        and c[\"condition\"] == \"F\")]",
+  "    physical = list(conflicts)",
+  "Counts the physically inconsistent control -- a vehicle reporting "
+  "disarmed while its sensors show it flying -- as evidence about real "
+  "flight.")
+
 #: The canary must be killed. If it survives, the sandbox is not live or the
 #: selection is disconnected, and every reported survivor would be false.
 CANARY = {
@@ -539,7 +590,9 @@ def main(argv=None) -> int:
         "targets": sorted({m["path"] for m in MUTANTS}),
         "selection": selection,
         "working_tree_files_synced_into_sandbox": synced,
-        "uncommitted_python_synced": working_tree_delta(),
+        "uncommitted_files_synced": working_tree_delta(),
+        "oversize_working_tree_files_not_synced": list(OVERSIZE),
+        "max_sync_bytes": MAX_SYNC_BYTES,
         "evaluated": len(evaluated),
         "killed": len(killed),
         "survived": len(evaluated) - len(killed),

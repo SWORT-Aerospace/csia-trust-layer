@@ -51,6 +51,12 @@ ALLOWED_MISSING = {
     # Shorthand for the range wp_c1 ... wp_c8, not a path.
     "research/wp_c1..c8":
         "range shorthand in prose, not a filesystem path",
+    # A hash-domain separator string, quoted so a reader can reproduce the
+    # seed derivation. It is shaped like a path because domain separation
+    # conventionally uses slash-delimited namespaces; nothing lives there.
+    "csia/consequence_closed_loop_phase3/2026-09-20":
+        "seed-derivation domain string in csia_consequence/"
+        "phase3_partitions.py, not a filesystem path",
     # Directory placeholders in planning documents.
     "docs/adr/": "planned directory named in an organisational blueprint",
     "docs/external/reading/":

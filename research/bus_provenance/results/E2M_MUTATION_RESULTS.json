@@ -1,7 +1,7 @@
 {
  "baseline_unmutated": {
   "returncode": 0,
-  "seconds": 7.2
+  "seconds": 7.1
  },
  "by_family": {
   "CHANNEL": {
@@ -23,6 +23,11 @@
    "evaluated": 3,
    "killed": 3,
    "score": 1.0
+  },
+  "PHASE3": {
+   "evaluated": 13,
+   "killed": 11,
+   "score": 0.8461538461538461
   },
   "SEQUENCE": {
    "evaluated": 1,
@@ -49,12 +54,14 @@
   "first_failure": "tests/test_e2m_acquisition.py::test_a_wrong_field_count_is_refused",
   "verdict": "KILLED"
  },
- "elapsed_s": 73.8,
- "evaluated": 25,
+ "elapsed_s": 129.9,
+ "evaluated": 38,
  "invalid": 0,
- "killed": 25,
+ "killed": 36,
  "kills_attributed_to_a_bare_file": 0,
- "kills_attributed_to_a_test_node": 25,
+ "kills_attributed_to_a_test_node": 36,
+ "max_sync_bytes": 16000000,
+ "oversize_working_tree_files_not_synced": [],
  "results": [
   {
    "breaks": "Promotes ASSUMED to an established identity. This is the exact defect an earlier draft of the module shipped, and the one its own counterexample refuted. If nothing fails, the central claim is unpinned.",
@@ -118,7 +125,7 @@
    "note": "",
    "old": "CONTRADICTED = frozenset({MISATTRIBUTED, CONFLICTED})",
    "path": "csia_e2m/identity.py",
-   "seconds": 8.6,
+   "seconds": 7.8,
    "verdict": "KILLED"
   },
   {
@@ -131,7 +138,7 @@
    "note": "",
    "old": "        if not 0 <= self.commanded_channel <= 7:",
    "path": "csia_e2m/protocol.py",
-   "seconds": 1.1,
+   "seconds": 1.0,
    "verdict": "KILLED"
   },
   {
@@ -170,7 +177,7 @@
    "note": "",
    "old": "        has_value = status == OK",
    "path": "csia_e2m/replay.py",
-   "seconds": 1.0,
+   "seconds": 1.1,
    "verdict": "KILLED"
   },
   {
@@ -209,7 +216,7 @@
    "note": "",
    "old": "    if \"*\" not in line:",
    "path": "csia_e2m/protocol.py",
-   "seconds": 3.4,
+   "seconds": 3.1,
    "verdict": "KILLED"
   },
   {
@@ -222,7 +229,7 @@
    "note": "",
    "old": "    if len(parts) != FIELD_COUNT:",
    "path": "csia_e2m/protocol.py",
-   "seconds": 1.0,
+   "seconds": 0.9,
    "verdict": "KILLED"
   },
   {
@@ -248,7 +255,7 @@
    "note": "",
    "old": "    if any(c not in \"0123456789ABCDEF\" for c in given):",
    "path": "csia_e2m/protocol.py",
-   "seconds": 8.3,
+   "seconds": 12.4,
    "verdict": "KILLED"
   },
   {
@@ -313,7 +320,7 @@
    "note": "",
    "old": "    return low_sets[a] ^ low_sets[b]",
    "path": "csia_consequence/support.py",
-   "seconds": 4.7,
+   "seconds": 4.4,
    "verdict": "KILLED"
   },
   {
@@ -326,7 +333,7 @@
    "note": "",
    "old": "    if len(hypotheses) == 1:",
    "path": "csia_consequence/support.py",
-   "seconds": 4.6,
+   "seconds": 4.3,
    "verdict": "KILLED"
   },
   {
@@ -339,7 +346,7 @@
    "note": "",
    "old": "    active = tuple(sorted(k for k, w in gates.items() if w > gate_epsilon))",
    "path": "csia_consequence/support.py",
-   "seconds": 4.5,
+   "seconds": 4.3,
    "verdict": "KILLED"
   },
   {
@@ -352,7 +359,7 @@
    "note": "",
    "old": "    if not unseparated:",
    "path": "csia_consequence/support.py",
-   "seconds": 4.6,
+   "seconds": 4.2,
    "verdict": "KILLED"
   },
   {
@@ -365,7 +372,7 @@
    "note": "",
    "old": "        return (self.coupling == FRESHNESS_INDEPENDENT",
    "path": "csia_consequence/gates.py",
-   "seconds": 4.7,
+   "seconds": 3.7,
    "verdict": "KILLED"
   },
   {
@@ -378,12 +385,181 @@
    "note": "",
    "old": "        if self.reason not in REASONS:",
    "path": "csia_consequence/support.py",
-   "seconds": 4.7,
+   "seconds": 4.1,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops P2 withdrawing an attribution when the pair that attribution discriminates is not identifiable. P2 then IS P0, and any H3 result would be an artefact of nothing.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_adapter_withdraws_an_attribution_only_when_unsupported[AMBIGUOUS-ABSTAIN]",
+   "first_failure_is_test_node": true,
+   "id": "P3-01",
+   "new": "    if False:",
+   "note": "",
+   "old": "    if base.response in ATTRIBUTING and \\\n            pair_report.status != _support.IDENTIFIABLE:",
+   "path": "csia_consequence/action_adapter.py",
+   "seconds": 4.2,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Makes P2 withdraw exactly the responses that assert no attribution -- a controlled descent cancelled because attribution is ambiguous. That is a false refusal with a real cost, and the phase claims it does not happen.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_adapter_withdraws_an_attribution_only_when_unsupported[AMBIGUOUS-ABSTAIN]",
+   "first_failure_is_test_node": true,
+   "id": "P3-02",
+   "new": "    if base.response not in ATTRIBUTING and",
+   "note": "",
+   "old": "    if base.response in ATTRIBUTING and",
+   "path": "csia_consequence/action_adapter.py",
+   "seconds": 4.1,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Reports every edge gate as fully open, so no occlusion is ever visible to support and the whole Phase-3 question disappears.",
+   "family": "PHASE3",
+   "first_failure": null,
+   "first_failure_is_test_node": false,
+   "id": "P3-03",
+   "new": "        weights[key] = 1.0",
+   "note": "",
+   "old": "        weights[key] = float(gate)",
+   "path": "csia_consequence/action_adapter.py",
+   "seconds": 4.4,
+   "verdict": "SURVIVED"
+  },
+  {
+   "breaks": "Asks whether ANY two sources are separable instead of whether THIS attribution is supported. The policy would then consult a different question from the one it is about to act on.",
+   "family": "PHASE3",
+   "first_failure": null,
+   "first_failure_is_test_node": false,
+   "id": "P3-04",
+   "new": "    return p2_support(state, provenance=provenance)",
+   "note": "",
+   "old": "    return p2_support(state, sources=DECISION_PAIR, provenance=provenance)",
+   "path": "csia_consequence/action_adapter.py",
+   "seconds": 4.4,
+   "verdict": "SURVIVED"
+  },
+  {
+   "breaks": "Makes selecting the FAULTY inertial unit cost the same as selecting the good one. H2 then cannot be falsified in either direction, because a confident wrong attribution becomes indistinguishable from a right one.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_choosing_the_faulty_unit_is_worse_than_choosing_nothing",
+   "first_failure_is_test_node": true,
+   "id": "P3-05",
+   "new": "        return MITIGATED_FRACTION",
+   "note": "",
+   "old": "        return (WRONG_SOURCE_FACTOR if chosen == faulty_source\n                else MITIGATED_FRACTION)",
+   "path": "csia_consequence/consequence_model.py",
+   "seconds": 4.0,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Accrues position error while the vehicle is on the ground, which would manufacture a consequence out of a pre-flight fault that has none.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_a_grounded_vehicle_accrues_no_position_error",
+   "first_failure_is_test_node": true,
+   "id": "P3-06",
+   "new": "        if True:",
+   "note": "",
+   "old": "        if tick[\"airborne\"]:",
+   "path": "csia_consequence/consequence_model.py",
+   "seconds": 4.1,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Inverts ground truth: the correct response becomes selecting the faulty unit. Every CORRECT_ACTIONABLE and INCORRECT_ACTIONABLE verdict flips.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_correct_response_under_latent_truth_is_ground_truth_not_policy",
+   "first_failure_is_test_node": true,
+   "id": "P3-07",
+   "new": "        return R_SELECT_IMU0 if faulty_source == \"imu0\" else R_SELECT_IMU1",
+   "note": "",
+   "old": "        return R_SELECT_IMU1 if faulty_source == \"imu0\" else R_SELECT_IMU0",
+   "path": "csia_consequence/consequence_model.py",
+   "seconds": 4.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Declares no two responses materially different, so H2's third clause can never be satisfied and the evaluator would report a rejection whatever the traces said.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_evaluator_on_hand_built_controls[positive: the FAULTY unit is selected, with support present]",
+   "first_failure_is_test_node": true,
+   "id": "P3-08",
+   "new": "    return False",
+   "note": "",
+   "old": "    return RESPONSE_CLASS[a] != RESPONSE_CLASS[b]",
+   "path": "research/consequence/phase3/independent_consequence_evaluator.py",
+   "seconds": 4.1,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops counting a confident attribution issued while its separating evidence is gated off -- the one measurement the phase is for.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_evaluator_on_hand_built_controls[positive: an attribution issued while the pair is not identifiable]",
+   "first_failure_is_test_node": true,
+   "id": "P3-09",
+   "new": "            if False:\n                unsupported_s += span",
+   "note": "",
+   "old": "            if response in ATTRIBUTING:\n                unsupported_s += span",
+   "path": "research/consequence/phase3/independent_consequence_evaluator.py",
+   "seconds": 4.5,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Counts occlusion on the ground toward the overlap with the decision window. The armed-gate result turns on that overlap being zero, and this would make it non-zero for a reason that means nothing.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_occlusion_overlap_counts_only_airborne_closed_time",
+   "first_failure_is_test_node": true,
+   "id": "P3-10",
+   "new": "        if not all(seg[\"gates_open\"].values()):",
+   "note": "",
+   "old": "        if not seg[\"airborne\"]:\n            continue\n        if not all(seg[\"gates_open\"].values()):",
+   "path": "research/consequence/phase3/independent_consequence_evaluator.py",
+   "seconds": 4.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Turns the exact McNemar test one-sided. H2's verdict is decided by this number, and halving it is the cheapest possible way to manufacture a finding out of 3-versus-1.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_the_exact_mcnemar_p_value[1-1-1.0]",
+   "first_failure_is_test_node": true,
+   "id": "P3-11",
+   "new": "    return tail",
+   "note": "",
+   "old": "    return min(1.0, 2.0 * tail)",
+   "path": "research/consequence/phase3/analyze.py",
+   "seconds": 4.5,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Declares H2 supported whenever any conflict exists, dropping the requirement that a matched control separate it from chance. That is the difference between a result and a coincidence.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_h2_is_not_supported_without_an_attributable_difference",
+   "first_failure_is_test_node": true,
+   "id": "P3-12",
+   "new": "        \"verdict\": (\"SUPPORTED\" if physical\n                    else \"NOT SUPPORTED\"),",
+   "note": "",
+   "old": "        \"verdict\": (\"SUPPORTED\" if physical and attributable\n                    else \"NOT SUPPORTED\"),",
+   "path": "research/consequence/phase3/analyze.py",
+   "seconds": 4.3,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Counts the physically inconsistent control -- a vehicle reporting disarmed while its sensors show it flying -- as evidence about real flight.",
+   "family": "PHASE3",
+   "first_failure": "tests/test_consequence_phase3.py::test_a_conflict_only_in_the_physically_inconsistent_control_does_not_count",
+   "first_failure_is_test_node": true,
+   "id": "P3-13",
+   "new": "    physical = list(conflicts)",
+   "note": "",
+   "old": "    physical = [c for c in conflicts\n                if not (c[\"gate_group\"] == \"armed_gate_pair\"\n                        and c[\"condition\"] == \"F\")]",
+   "path": "research/consequence/phase3/analyze.py",
+   "seconds": 4.4,
    "verdict": "KILLED"
   }
  ],
  "schema": "csia.e2m.mutation_results/1",
- "score": 1.0,
+ "score": 0.9473684210526315,
  "selection": [
   "tests/test_e2m_acquisition.py",
   "tests/test_bus_provenance.py",
@@ -391,30 +567,30 @@
   "tests/test_e2m_schemas.py",
   "tests/test_e2m_transport.py",
   "tests/test_consequence_gates.py",
-  "tests/test_consequence_support.py"
+  "tests/test_consequence_support.py",
+  "tests/test_consequence_phase3.py"
  ],
- "survived": 0,
+ "survived": 2,
  "targets": [
   "csia_bus_provenance/provenance.py",
+  "csia_consequence/action_adapter.py",
+  "csia_consequence/consequence_model.py",
   "csia_consequence/gates.py",
   "csia_consequence/support.py",
   "csia_e2m/identity.py",
   "csia_e2m/logging.py",
   "csia_e2m/protocol.py",
-  "csia_e2m/replay.py"
+  "csia_e2m/replay.py",
+  "research/consequence/phase3/analyze.py",
+  "research/consequence/phase3/independent_consequence_evaluator.py"
  ],
- "uncommitted_python_synced": [
-  "csia_e2m/protocol.py",
-  "tests/test_ci_env.py",
-  "tests/test_e2m_properties.py",
+ "uncommitted_files_synced": [
+  "tests/test_consequence_phase3.py",
   "tools/mutation/run_e2m_mutations.py",
-  "csia_consequence/__init__.py",
-  "csia_consequence/gates.py",
-  "csia_consequence/partitions.py",
-  "csia_consequence/support.py",
-  "research/consequence/independent_gate_evaluator.py",
-  "tests/test_consequence_gates.py",
-  "tests/test_consequence_support.py"
+  "research/consequence/phase3/analyze.py",
+  "research/consequence/phase3/results/PHASE3_EVALUATION_LOCKED.json",
+  "research/consequence/phase3/results/PHASE3_RESULTS_LOCKED.json",
+  "research/consequence/phase3/results/PHASE3_TRACES_LOCKED.json"
  ],
  "what_this_is_not": "not evidence about hardware. Every mutant and every test here runs against a fake controller and recorded fixtures. A high score means the tests would notice a change in the SOFTWARE.",
  "working_tree_files_synced_into_sandbox": [
@@ -424,8 +600,11 @@
   "csia_bus_provenance/simulator.py",
   "csia_bus_provenance/topology.py",
   "csia_consequence/__init__.py",
+  "csia_consequence/action_adapter.py",
+  "csia_consequence/consequence_model.py",
   "csia_consequence/gates.py",
   "csia_consequence/partitions.py",
+  "csia_consequence/phase3_partitions.py",
   "csia_consequence/support.py",
   "csia_e2m/__init__.py",
   "csia_e2m/ancestry.py",
@@ -436,10 +615,15 @@
   "csia_e2m/protocol.py",
   "csia_e2m/replay.py",
   "csia_e2m/transport.py",
-  "research/consequence/independent_gate_evaluator.py",
+  "research/consequence/phase3/analyze.py",
+  "research/consequence/phase3/campaign.py",
+  "research/consequence/phase3/independent_consequence_evaluator.py",
+  "research/consequence/phase3/results/PHASE3_EVALUATION_LOCKED.json",
+  "research/consequence/phase3/results/PHASE3_RESULTS_LOCKED.json",
+  "research/consequence/phase3/results/PHASE3_TRACES_LOCKED.json",
   "tests/test_bus_provenance.py",
-  "tests/test_ci_env.py",
   "tests/test_consequence_gates.py",
+  "tests/test_consequence_phase3.py",
   "tests/test_consequence_support.py",
   "tests/test_e2m_acquisition.py",
   "tests/test_e2m_properties.py",

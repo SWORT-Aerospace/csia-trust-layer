@@ -4710,3 +4710,149 @@ entries:
       research/active_evidence/realized_current/RESULTS_LOCKED.md;
       research/active_evidence/realized_current/POLARIZATION_BOUND_SCOPE.md;
       tests/test_rcec_repair.py
+
+  - id: FL-020
+    date: 2026-09-20
+    phase: Consequence Phase 3 (closed-loop consequence measurement)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      H2 was not supported. Over 216 locked scenarios, 28 decision conflicts
+      were observed; 24 of them lie in the physically inconsistent
+      armed_gate_pair control (a vehicle reporting disarmed while its own
+      sensors show it flying) and are excluded by the preregistration. The
+      remaining 4 are in heading_course conditions F and G. The seed-paired
+      comparison between the gate-shut and gate-open conditions is 3/24
+      versus 1/24 missed escalations, exact two-sided McNemar p = 0.625
+      against a preregistered alpha of 0.05.
+    found_by: >-
+      research/consequence/phase3/analyze.py, reading the independent
+      evaluator's output. The evaluator imports no CSIA module and was tested
+      against one hand-built trace per outcome class before it ran.
+    honest_limit: >-
+      3 of 8 Phase-2 candidates, one airframe profile, one trajectory family,
+      two fault families, in deterministic simulation at
+      MODEL_BASED_ACTION_CONSEQUENCE. Nothing flew.
+    verdict: RECORDED
+    consequence: >-
+      The occlusion enumerated in Phase 2 for accel_motor_current and
+      accel_esc_rpm is structurally real and operationally unreachable on this
+      airframe: its window has zero overlap with airborne flight, measured at
+      0.00 s of fault-window occlusion over 48 locked scenarios, because
+      armed_gate closes only while the vehicle is disarmed and a disarmed
+      vehicle is not flying. The frozen failsafe abstains under the same
+      condition. Preregistered rejection criteria (a) and (d).
+    artifact: >-
+      research/consequence/phase3/PHASE3_RESULTS.md;
+      research/consequence/phase3/results/PHASE3_RESULTS_LOCKED.json;
+      research/consequence/phase3/results/PHASE3_EVALUATION_LOCKED.json
+
+  - id: FL-021
+    date: 2026-09-20
+    phase: Consequence Phase 3 (policy comparison)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      H3 was not supported, and could not have been tested. P0 made zero
+      incorrect actionable decisions on all 216 locked scenarios, so the
+      support-aware policy had nothing to reduce. P2 is identical to P0 on
+      every scenario: no response withdrawn, no abstention, 0.0 s of
+      abstention time. P1's freshness fallback also never fired, because the
+      injected faults degrade data without stopping it.
+    found_by: >-
+      The locked campaign's policy table, derived from the independent
+      evaluator.
+    honest_limit: >-
+      This is the absence of a test, not a result about either policy. The
+      condition P2 exists for -- a confident attribution issued while the
+      evidence that would separate it is gated off -- occurred 0 times in 216
+      scenarios.
+    verdict: RECORDED
+    consequence: >-
+      The reported costs of the support-aware policy (coverage loss,
+      ambiguity, latency, abstention, false refusals) are all exactly zero,
+      and they are zero because the policy was inert. No claim is made that
+      P2 is safe, unnecessary or beneficial, and none that freshness logic
+      covers the occlusion.
+    artifact: >-
+      research/consequence/phase3/PHASE3_RESULTS.md;
+      research/consequence/phase3/results/PHASE3_RESULTS_LOCKED.json
+
+  - id: FL-022
+    date: 2026-09-20
+    phase: Consequence Phase 3 (mutation)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      Two mutants survived: P3-03 (report every edge gate as fully open) and
+      P3-04 (ask the global support question instead of the decision pair's).
+      No test in the suite objects to either.
+    found_by: tools/mutation/run_e2m_mutations.py, 38 evaluated, 36 killed.
+    honest_limit: >-
+      Re-running the development campaign with each mutation monkeypatched in
+      changed 0 outcome classes. P3-03 moved 36 of 288 recorded support
+      fields; P3-04 moved none at all, because the global and pair support
+      states coincided on every development scenario.
+    verdict: RECORDED
+    consequence: >-
+      Not patched with a test written to catch one mutant. Both survivors are
+      a symptom of FL-021: when the support-aware path never withdraws a
+      response, nothing downstream can distinguish real gate weights from
+      all-open ones. The way to kill them is a scenario in which support
+      changes a decision, which this campaign failed to produce.
+    artifact: >-
+      research/bus_provenance/results/E2M_MUTATION_RESULTS.json;
+      research/consequence/phase3/PHASE3_RESULTS.md
+
+  - id: FL-023
+    date: 2026-09-20
+    phase: Consequence Phase 3 (apparatus)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      Three defects in the measurement apparatus, each found by the check that
+      was supposed to find it rather than by inspection. (1) Conditions A/B/C
+      as first preregistered measured 0.00 s of overlap between the occlusion
+      and airborne flight for armed_gate_pair, so the campaign could not have
+      detected a consequence had one existed -- a test that cannot fail.
+      (2) Condition F, added to force the overlap, confounded fault duration
+      with gate state: F's fault is 4 s and B/C's is 25 s. (3) The occlusion
+      metric summed airborne closed time over a whole flight, which in
+      hover_circle is about half the mission whatever the fault is doing.
+    found_by: >-
+      Looking at development-partition results, which is what the development
+      partition is for. The locked partition was not open.
+    honest_limit: >-
+      All three fixes were made with development results in view. They are
+      recorded as Amendment 1 to the preregistration rather than folded into
+      its body, and none of them changed a threshold, a model constant, a kill
+      criterion or an outcome class.
+    verdict: RECORDED
+    consequence: >-
+      Condition G (the same 4 s fault where the gate is open) and a
+      fault-window occlusion metric. F versus G is the only comparison in the
+      Phase-3 consequence table that isolates the gate, and the results
+      document says so at the table.
+    artifact: >-
+      research/consequence/phase3/PREREGISTRATION_PHASE3.md (Amendment 1);
+      research/consequence/phase3/campaign.py;
+      research/consequence/phase3/independent_consequence_evaluator.py
+
+  - id: FL-024
+    date: 2026-09-20
+    phase: Consequence Phase 3 (mutation sandbox)
+    kind: GUARD_STOPPED_WORK
+    what_happened: >-
+      The mutation runner's unmutated-baseline check refused to report twice
+      in this phase. First, the sandbox lacked
+      research/consequence/phase3/analyze.py and the Phase-3 result JSON,
+      because the working-tree delta was restricted to *.py. Second, after
+      widening it to JSON under a 1 MB cap, the 2.3 MB locked trace file was
+      still excluded and a test that reads it failed.
+    found_by: The baseline check itself, both times.
+    honest_limit: >-
+      The cap now sits at 16 MB and exists to stop an accidental
+      multi-hundred-megabyte artifact, not to shave megabytes. Files skipped
+      by it are recorded in the run's artifact rather than dropped silently.
+    verdict: RECORDED
+    consequence: >-
+      No false score was reported on either occasion. This is the same check
+      that caught the 24/24 collection-error score at commit e5c58fa, firing
+      twice more for the same class of defect.
+    artifact: tools/mutation/run_e2m_mutations.py

@@ -1,7 +1,7 @@
 # Consequence phase — status by phase
 
 **This phase is not complete, and this file says which parts are not.** The
-preregistration defines nine phases; seven have been executed. The rest are
+preregistration defines nine phases; eight have been executed. The rest are
 listed with what they require, not with a partial result standing in for them.
 
 | phase | state | evidence level reached |
@@ -9,7 +9,7 @@ listed with what they require, not with a partial result standing in for them.
 | 0 — repository and lineage audit | **DONE** | measured |
 | 1 — preregistration | **DONE**, committed before any result | n/a |
 | 2 — uncovered-occlusion enumeration | **DONE** | `SOURCE_ANALYSIS` |
-| 3 — closed-loop consequence simulation | **NOT RUN** | — |
+| 3 — closed-loop consequence simulation | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
 | 4 — detector delay/false-alarm curves | **NOT RUN** | — |
 | 5 — explicit support output | **DONE** (classifier + tests) | `DETERMINISTIC_SIMULATION` |
 | 6 — cross-architecture audit | **DONE** | `SOURCE_ANALYSIS` |
@@ -17,14 +17,14 @@ listed with what they require, not with a partial result standing in for them.
 | 8 — artifacts and claim discipline | **DONE** | n/a |
 | 9 — verification | **DONE for what exists** | measured |
 
-## Why phases 3 and 4 are not run rather than partially run
+## Why phase 4 is not run rather than partially run
 
-Each needs a campaign over the preregistered seed partitions, and a campaign
+It needs a campaign over the preregistered seed partitions, and a campaign
 produces numbers. A thin version would produce numbers too, and they would be
 indistinguishable in a table from real ones. The preregistration fixes the
 design; running it is the next work item, not this one.
 
-Phase 4 additionally carries a binding constraint — comparison against CUSUM
+Phase 4 carries a binding constraint — comparison against CUSUM
 only at **matched false-alarm operating points**, over a preregistered
 threshold grid. A single hand-picked threshold against another is forbidden
 there in as many words, so a quick version of phase 4 is not a smaller phase 4;

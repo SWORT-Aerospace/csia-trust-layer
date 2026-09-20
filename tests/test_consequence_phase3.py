@@ -305,3 +305,240 @@ def test_occlusion_during_a_fault_is_not_occlusion_over_a_whole_flight():
     assert ice.occlusion_during_fault_s(segments, [45.0, 50.0]) == 5.0
     assert ice.occlusion_during_fault_s(segments, [10.0, 30.0]) == 10.0
     assert ice.occlusion_during_fault_s(segments, None) == 0.0
+
+
+# --- 4. the analysis, where the p-value decides the verdict ---------------
+
+import analyze as an                                     # noqa: E402
+
+
+@pytest.mark.parametrize("b,c,expected", [
+    (0, 0, 1.0),
+    (1, 1, 1.0),
+    (3, 1, 0.625),        # the locked heading_course F-vs-G pair
+    (5, 0, 0.0625),       # the classic near-miss: NOT significant at 0.05
+    (6, 0, 0.03125),
+    (10, 0, 0.001953125),
+])
+def test_the_exact_mcnemar_p_value(b, c, expected):
+    """Pinned to exact values, because this number decides H2.
+
+    A one-sided version, or an off-by-one in the tail, would move 3-versus-1
+    from p=0.625 to something that could be mistaken for a finding.
+    """
+    assert an.mcnemar_exact(b, c) == pytest.approx(expected)
+
+
+def test_the_mcnemar_p_value_matches_a_direct_enumeration():
+    """Independent of the formula: enumerate the binomial outright."""
+    import itertools
+    for b, c in [(3, 1), (4, 2), (2, 5), (0, 3)]:
+        n = b + c
+        k = min(b, c)
+        outcomes = list(itertools.product([0, 1], repeat=n))
+        extreme = sum(1 for o in outcomes
+                      if min(sum(o), n - sum(o)) <= k)
+        assert an.mcnemar_exact(b, c) == pytest.approx(
+            min(1.0, extreme / len(outcomes)))
+
+
+def test_mcnemar_is_symmetric_in_its_arguments():
+    for b, c in [(3, 1), (7, 2), (0, 5)]:
+        assert an.mcnemar_exact(b, c) == an.mcnemar_exact(c, b)
+
+
+def _fake_evaluation(outcomes_by_condition, *, group="heading_course"):
+    """A minimal evaluation document with hand-chosen outcomes."""
+    rows = []
+    for seed, per_condition in enumerate(zip(*outcomes_by_condition.values())):
+        for condition, outcome in zip(outcomes_by_condition, per_condition):
+            rows.append({
+                "seed": 1000 + seed, "gate_group": group,
+                "condition": condition, "correct_response": "CAUTION_GENERIC",
+                "policies": {p: {
+                    "outcome": outcome, "responses_issued": [],
+                    "first_response_s": None, "correct_response_s": None,
+                    "unsupported_confidence_s": 0.0, "ambiguity_s": 0.0,
+                    "abstention_s": 0.0, "idle_while_fault_s": 0.0,
+                    "airborne_s": 55.0, "coverage_loss_frac": 0.0,
+                    "materially_different_from_correct": [],
+                    "occlusion_overlap_s": 0.0,
+                    "occlusion_during_fault_s": 4.0 if condition == "F" else 0.0,
+                    "fault_window_s": [45.5, 49.5],
+                    "time_to_safe_state_s": None, "position_error_m": 0.0,
+                    "min_geofence_margin_m": 120.0,
+                    "energy_margin_frac": 1.0,
+                } for p in ("P0", "P1", "P2")},
+            })
+    return {"per_scenario": rows, "by_policy": {
+        p: {"scenarios": len(rows), "by_outcome": {},
+            "incorrect_actionable": 0, "correct_actionable": 0,
+            "abstentions": 0, "ambiguous_outputs": 0, "safe_fallbacks": 0,
+            "false_escalations": 0, "missed_escalations": 0,
+            "unsupported_confidence_scenarios": 0, "total_ambiguity_s": 0.0,
+            "total_abstention_s": 0.0, "total_position_error_m": 0.0,
+            "mean_coverage_loss_frac": 0.0, "mean_position_error_m": 0.0,
+            "safe_state_reached": 0}
+        for p in ("P0", "P1", "P2")}}
+
+
+def test_the_paired_test_is_paired_and_not_two_proportions():
+    """Same marginal counts, different pairing, different answer.
+
+    Both cases below have 3 misses under F and 1 under G. In the first the
+    misses are on different seeds; in the second G's miss is on a seed F also
+    missed. An unpaired comparison cannot tell them apart. This one must.
+    """
+    ok = "CORRECT_ACTIONABLE"
+    miss = ice.MISSED_ESCALATION
+    disjoint = _fake_evaluation({
+        "F": [miss, miss, miss, ok, ok, ok],
+        "G": [ok, ok, ok, miss, ok, ok]})
+    nested = _fake_evaluation({
+        "F": [miss, miss, miss, ok, ok, ok],
+        "G": [miss, ok, ok, ok, ok, ok]})
+    a = an.paired_condition_test(disjoint, group="heading_course",
+                                 policy="P0", left="F", right="G")
+    b = an.paired_condition_test(nested, group="heading_course",
+                                 policy="P0", left="F", right="G")
+    assert a["missed_left"] == b["missed_left"] == 3
+    assert a["missed_right"] == b["missed_right"] == 1
+    assert (a["discordant_left_only"], a["discordant_right_only"]) == (3, 1)
+    assert (b["discordant_left_only"], b["discordant_right_only"]) == (2, 0)
+    assert a["mcnemar_exact_two_sided_p"] != b["mcnemar_exact_two_sided_p"]
+
+
+def test_h2_is_not_supported_without_an_attributable_difference():
+    """A conflict that the matched control also produces is not a finding."""
+    ok = "CORRECT_ACTIONABLE"
+    miss = ice.MISSED_ESCALATION
+    evaluation = _fake_evaluation({
+        "F": [miss, ok, ok, ok], "G": [ok, ok, ok, ok]})
+    tests = [an.paired_condition_test(evaluation, group="heading_course",
+                                      policy="P0", left="F", right="G")]
+    verdict = an.verdicts(evaluation, tests, {})["H2"]
+    assert verdict["decision_conflicts_total"] == 1
+    assert verdict["verdict"] == "NOT SUPPORTED"
+    assert "attributable" in verdict["why"].lower()
+
+
+def test_h2_is_supported_when_the_paired_control_separates_them():
+    """The other direction, so the verdict is not a constant."""
+    ok = "CORRECT_ACTIONABLE"
+    miss = ice.MISSED_ESCALATION
+    evaluation = _fake_evaluation({
+        "F": [miss] * 8 + [ok] * 2, "G": [ok] * 10})
+    tests = [an.paired_condition_test(evaluation, group="heading_course",
+                                      policy="P0", left="F", right="G")]
+    assert tests[0]["distinguishable_from_chance"] is True
+    assert an.verdicts(evaluation, tests, {})["H2"]["verdict"] == "SUPPORTED"
+
+
+def test_a_conflict_only_in_the_physically_inconsistent_control_does_not_count():
+    ok = "CORRECT_ACTIONABLE"
+    miss = ice.MISSED_ESCALATION
+    evaluation = _fake_evaluation({"F": [miss] * 6, "G": [ok] * 6},
+                                  group="armed_gate_pair")
+    tests = [an.paired_condition_test(evaluation, group="armed_gate_pair",
+                                      policy="P0", left="F", right="G")]
+    verdict = an.verdicts(evaluation, tests, {})["H2"]
+    assert verdict["decision_conflicts_total"] == 6
+    assert verdict["decision_conflicts_in_physically_consistent_conditions"] == 0
+    assert verdict["verdict"] == "NOT SUPPORTED"
+
+
+def test_the_locked_results_artifact_is_what_the_analyzer_produces():
+    """No number in the write-up may be typed by hand."""
+    results = json.loads(
+        (PHASE3 / "results" / "PHASE3_RESULTS_LOCKED.json").read_text(
+            encoding="utf-8"))
+    evaluation = json.loads(
+        (PHASE3 / "results" / "PHASE3_EVALUATION_LOCKED.json").read_text(
+            encoding="utf-8"))
+    assert an.build(evaluation) == results
+
+
+def test_the_locked_run_declares_it_executed_nothing():
+    traces = json.loads(
+        (PHASE3 / "results" / "PHASE3_TRACES_LOCKED.json").read_text(
+            encoding="utf-8"))
+    assert traces["executed_an_autopilot"] is False
+    assert traces["armed_a_vehicle"] is False
+    assert traces["touched_hardware"] is False
+    assert traces["evidence_level"] == "MODEL_BASED_ACTION_CONSEQUENCE"
+    assert traces["partition"] == "locked"
+    assert len(traces["seeds"]) == 24
+
+
+# --- 5. the write-up may not drift from the artifact ----------------------
+
+RESULTS_MD = PHASE3 / "PHASE3_RESULTS.md"
+MANIFEST = PHASE3 / "SHA256_MANIFEST.json"
+
+
+def test_the_write_up_quotes_the_artifacts_numbers():
+    """Every figure the results document states, re-derived and matched.
+
+    Prose drifts from artifacts silently. This is the only thing that stops
+    it: the document must still be true of the JSON it was written from.
+    """
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    results = json.loads(
+        (PHASE3 / "results" / "PHASE3_RESULTS_LOCKED.json").read_text(
+            encoding="utf-8"))
+    fvg = next(t for t in results["paired_tests"]
+               if t["group"] == "heading_course"
+               and t["left_condition"] == "F")
+    p0 = results["policy_table"]["P0"]
+
+    for quoted in (
+        f"p = {fvg['mcnemar_exact_two_sided_p']}",
+        f"{fvg['missed_left']} / {fvg['pairs']}",
+        f"{fvg['missed_right']} / {fvg['pairs']}",
+        f"{p0['scenarios']} locked scenarios",
+        f"| correct actionable | {p0['correct_actionable']} |",
+        f"| missed escalations | {p0['missed_escalations']} |",
+    ):
+        assert quoted in text, quoted
+
+    assert results["hypotheses"]["H2"]["verdict"] == "NOT SUPPORTED"
+    assert results["hypotheses"]["H3"]["verdict"] == "NOT SUPPORTED"
+    assert "## H2 RESULT — **NOT SUPPORTED**" in text
+    assert "## H3 RESULT — **NOT SUPPORTED**" in text
+
+
+def test_the_write_up_claims_no_level_above_the_one_measured():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    assert "`MODEL_BASED_ACTION_CONSEQUENCE`" in text
+    for forbidden in ("SITL_CLOSED_LOOP_EXECUTION`.", "HIL_EXECUTION`.",
+                      "flight-validated", "hardware-validated"):
+        assert forbidden not in text, forbidden
+    for denial in ("Nothing flew.", "No autopilot executed anything.",
+                   "not a safety guarantee"):
+        assert denial.lower() in text.lower(), denial
+
+
+def test_the_manifest_matches_every_file_it_lists():
+    import hashlib
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    bad = []
+    for rel, want in manifest["files"].items():
+        got = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+        if got != want:
+            bad.append(rel)
+    assert bad == [], bad
+    assert manifest["frozen_core"]["mismatches"] == []
+    assert manifest["frozen_core"]["files_checked"] == 12
+
+
+def test_the_manifest_covers_the_artifacts_the_write_up_depends_on():
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for required in (
+            "research/consequence/phase3/PREREGISTRATION_PHASE3.md",
+            "research/consequence/phase3/PHASE3_RESULTS.md",
+            "research/consequence/phase3/results/PHASE3_RESULTS_LOCKED.json",
+            "research/consequence/phase3/results/PHASE3_TRACES_LOCKED.json",
+            "research/consequence/phase3/analyze.py",
+            "research/consequence/phase3/independent_consequence_evaluator.py",
+            "csia_consequence/consequence_model.py"):
+        assert required in manifest["files"], required
