@@ -283,3 +283,116 @@ def test_phase3s_consequence_model_is_not_mutated_by_the_extension():
         correct="PREPARE_LANDING")
     assert base.FAULT_DRIFT == before
     assert "power_sag" not in base.FAULT_DRIFT
+
+
+# --- the locked artifacts and the write-up --------------------------------
+
+RESULTS_MD = P31 / "PHASE31_RESULTS.md"
+MANIFEST31 = P31 / "SHA256_MANIFEST31.json"
+
+
+def _locked():
+    return json.loads(
+        (P31 / "results" / "PHASE31_RESULTS_LOCKED.json").read_text(
+            encoding="utf-8"))
+
+
+def test_the_locked_results_are_what_the_evaluator_produces():
+    traces = json.loads(
+        (P31 / "results" / "PHASE31_TRACES_LOCKED.json").read_text(
+            encoding="utf-8"))
+    assert ev31.build(traces) == _locked()
+
+
+def test_the_locked_run_declares_it_executed_nothing():
+    traces = json.loads(
+        (P31 / "results" / "PHASE31_TRACES_LOCKED.json").read_text(
+            encoding="utf-8"))
+    assert traces["executed_an_autopilot"] is False
+    assert traces["armed_a_vehicle"] is False
+    assert traces["touched_hardware"] is False
+    assert traces["uses_disarmed_gate_scenarios"] is False
+    assert traces["pooled_with_phase3"] is False
+    assert traces["partition"] == "locked"
+    assert len(traces["seeds"]) == 40
+    for s in traces["scenarios"]:
+        assert s["armed_schedule"] == [[0.0, True]]
+
+
+def test_the_precondition_is_reported_as_reachable_with_its_interval():
+    a = _locked()["actionability_precondition"]
+    assert a["reachable"] is True
+    assert a["p2_activations"] == 40
+    assert a["p2_eligible_scenarios"] == 40
+    assert a["false_refusals"] == 40
+    assert a["prevented_incorrect_actionable"] == 0
+    assert a["unsupported_confident_attribution_scenarios"] == 40
+    assert a["unsupported_but_attribution_was_correct"] == 40
+
+
+def test_no_p_value_is_reported_as_exactly_zero():
+    """An exact p of zero is impossible. Rounding one to six places printed
+    1.8e-12 as 0.0, which would have been a false statement."""
+    for t in _locked()["tests"]:
+        p = t["mcnemar_exact_two_sided_p"]
+        assert p > 0.0, t
+        assert p <= 1.0, t
+
+
+def test_the_write_up_quotes_the_artifacts_numbers():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    d = _locked()
+    struct = next(t for t in d["tests"]
+                  if t["family"] == "structural" and t.get("left") == "EG")
+    assert f"**{struct['count_left']} / {struct['pairs']}**" in text
+    assert "1.82 × 10⁻¹²" in text
+    assert f"{struct['ci95_left'][0]}" in text
+    p0 = d["by_policy"]["P0"]
+    p2 = d["by_policy"]["P2"]
+    assert f"| **action conflicts** | **{p0['action_conflicts']}** |" in text
+    assert f"**{p2['action_conflicts']}** |" in text
+    a = d["actionability_precondition"]
+    assert f"CI [{a['activation_rate_ci95'][0]}, " \
+           f"{a['activation_rate_ci95'][1]}]" in text
+    assert "NO_ACTIONABLE_CONSEQUENCE_REACHABLE_UNDER_CURRENT_MODEL" in text
+
+
+def test_the_write_up_claims_no_level_above_the_one_measured():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    assert "`MODEL_BASED_ACTION_CONSEQUENCE`" in text
+    for denial in ("Nothing flew.", "not a safety conclusion in either",
+                   "Phase 3 is not reopened"):
+        assert denial.lower() in text.lower(), denial
+    for forbidden in ("flight-validated", "hardware-validated",
+                      "proves the system is safe"):
+        assert forbidden not in text.lower(), forbidden
+
+
+def test_the_write_up_does_not_claim_h2_is_supported():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    assert "## H2 STATUS — **unchanged: NOT SUPPORTED, as tested in Phase 3**" \
+        in text
+    assert "That H2 is supported." in text  # in CLAIMS WE CANNOT MAKE
+
+
+def test_the_phase31_mutation_run_is_reported_with_its_survivors():
+    doc = json.loads(
+        (P31 / "results" / "PHASE31_MUTATION_RESULTS.json").read_text(
+            encoding="utf-8"))
+    assert doc["baseline_unmutated"]["returncode"] == 0
+    assert doc["kills_attributed_to_a_bare_file"] == 0
+    assert doc["evaluated"] == 11 and doc["killed"] == 8
+    survivors = sorted(r["id"] for r in doc["results"]
+                       if r["verdict"] == "SURVIVED")
+    assert survivors == ["31-03", "31-07", "31-11"]
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    for s in survivors:
+        assert f"`{s}`" in text, s
+
+
+def test_the_manifest_matches_every_file_it_lists():
+    m = json.loads(MANIFEST31.read_text(encoding="utf-8"))
+    bad = [rel for rel, want in m["files"].items()
+           if hashlib.sha256((ROOT / rel).read_bytes()).hexdigest() != want]
+    assert bad == [], bad
+    assert m["frozen_core"]["mismatches"] == []

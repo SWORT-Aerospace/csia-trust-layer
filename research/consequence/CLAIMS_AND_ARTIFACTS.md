@@ -28,6 +28,13 @@ support it. If a row has no artifact, the claim is not made.
 | C12 | The seed-paired gate-shut versus gate-open difference is 3/24 vs 1/24, exact McNemar p = 0.625, not distinguishable from chance at α = 0.05 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `paired_tests` |
 | C13 | P0, P1 and P2 are identical on all 216 locked scenarios | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `policy_table` |
 | C14 | The campaign replays byte-identically (two full locked runs) | measured | `phase3/REPRODUCE.md`, `SHA256_MANIFEST.json` |
+| C15 | An actionable consequence **is** reachable under the current model, in a physically consistent configuration and with no disarmed-gate scenario | `MODEL_BASED_ACTION_CONSEQUENCE` | `phase31/results/PHASE31_RESULTS_LOCKED.json` |
+| C16 | `structural/EG` gives 40/40 action conflicts against 0/40 in its matched control, exact McNemar p = 1.82 × 10⁻¹² | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `tests` |
+| C17 | A confident attribution is issued while its separating evidence is entirely gated off in 40/360 scenarios, CI [0.0806, 0.1482] — and is correct in all 40 | `MODEL_BASED_ACTION_CONSEQUENCE` | same |
+| C18 | P2's activation precondition is reachable: 40/40 eligible, CI [0.911903, 1.0] | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `actionability_precondition` |
+| C19 | P2 produced 40 false refusals, prevented 0 incorrect actionable decisions, and doubled action conflicts 40 → 80 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `by_policy` |
+| C20 | `SOURCE_INDICATORS` omits the per-IMU doppler edges from the IMU indicator sets | `SOURCE_ANALYSIS` | `phase31/PHASE31_RESULTS.md`, FL-029 |
+| C21 | Stronger-than-`CAUTION` transitions are reachable: `CRITICAL` by two routes, `EMERGENCY` by one | `MODEL_BASED_ACTION_CONSEQUENCE` | `phase31/PREREGISTRATION_PHASE31.md` §4 |
 
 ## Hypotheses
 
@@ -35,7 +42,9 @@ support it. If a row has no artifact, the claim is not made.
 |---|---|---|
 | H1 | **consistent at `SOURCE_ANALYSIS`, not tested** | H1 also requires that no independent freshness path forces an equivalent warning. That clause is established from source structure only, which is not a test of it. |
 | H2 | **NOT SUPPORTED** | 28 conflicts; 24 in a physically inconsistent control and excluded; the remaining 4 are not separated from their matched control (p = 0.625). Rejection criteria (a) and (d). |
-| H3 | **NOT SUPPORTED** | P0 made 0 incorrect actionable decisions, so there was nothing to reduce. P2 was inert. This is the absence of a test, not a result about the policy. |
+| H3 | **NOT SUPPORTED**, and in Phase 3.1 **rejected in the harmful direction** | Phase 3: P0 made 0 incorrect actionable decisions and P2 was inert — the absence of a test. Phase 3.1, separate partition, no pooling: P2 fired in 40/40 eligible scenarios, produced 40 false refusals, prevented 0, and doubled action conflicts. |
+| A1 (Phase 3.1) | **SUPPORTED** | the actionability precondition is reachable; P2 activated in 40/40 eligible scenarios |
+| A2 (Phase 3.1) | **false-refusal direction** | 40 false refusals, 0 prevented incorrect actionable decisions |
 | H4 | **untouched** | needs phase 4, at matched false-alarm operating points |
 | H5 | **not killed** | twelve paths classified; H5 predicts nothing, so classification is the whole test |
 | H6 | **not killed** | both mechanisms reproduce, fresh-interpreter import check clean |
@@ -61,8 +70,14 @@ not about aircraft. H4 is untouched and needs Phase 4.
   operating points over a preregistered threshold grid.
 - **That the occlusion is harmless in general.** Phase 3 tested 3 of 8
   candidates, one airframe profile, one trajectory family, two fault families.
-- **That the support-aware policy is safe, unnecessary or beneficial**, and
-  **that freshness logic covers the occlusion**. Neither P1 nor P2 ever fired.
+- **That the support-aware policy is safe or unsafe.** Phase 3.1 shows it
+  withdrew a correct attribution in 40/40 activations; that is a capability
+  cost, not a hazard, and no safety conclusion follows in either direction.
+- **That freshness logic covers the occlusion.** P1 never fired in either
+  phase; that is untested, not confirmed.
+- **That H2 is supported.** Phase 3.1 did not preregister H2, and its pooling
+  rule forbids combining it with Phase 3. What Phase 3.1 shows is that the
+  precondition H2 needs is reachable — an input to a preregistered retest.
 - **That abstention is a solved safety problem.** `AMBIGUOUS` is a report that
   a question cannot be answered. Reporting it is not the same as handling it,
   and the tradeoff curve phase 3 would produce does not exist yet.

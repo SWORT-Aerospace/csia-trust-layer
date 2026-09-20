@@ -4856,3 +4856,140 @@ entries:
       that caught the 24/24 collection-error score at commit e5c58fa, firing
       twice more for the same class of defect.
     artifact: tools/mutation/run_e2m_mutations.py
+
+  - id: FL-025
+    date: 2026-09-20
+    phase: Consequence Phase 3.1 (actionability precondition)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      Phase 3 measured a run-length segment's duration as t_end - t_start,
+      which is one tick short and exactly zero for a single-tick segment;
+      1212 of its 4200 locked segments are single-tick. The frozen failsafe
+      issues each action once, so every attributing action is a single-tick
+      segment and measured zero. Any duration threshold on a response label
+      would therefore have discarded every attributing action in the study.
+    found_by: >-
+      A Phase-3.1 development run, where P2 abstained while the P0 trace
+      recorded 0.00 s of unsupported confidence -- two statements that
+      cannot both be right.
+    honest_limit: >-
+      Phase 3's headline numbers are unaffected and that was CHECKED, not
+      assumed: across all 4200 locked segments there are zero in which an
+      attributing response coincides with a non-identifiable pair while
+      airborne, so unsupported_confidence_scenarios = 0 holds under either
+      span rule. Phase 3's ambiguity and abstention DURATIONS are
+      under-counted by one tick per segment; its abstention total is 0.0 s
+      either way and its 1152.0 s ambiguity figure is a lower bound.
+    verdict: RECORDED
+    consequence: >-
+      Phase 3.1 measures ticks / TICK_HZ and defines the action-conflict
+      criterion on issued actions rather than on how long a response label
+      persists. The rule was declared in the amendment before the locked run.
+      Phase 3 is not re-run and its artifacts are byte-identical, asserted by
+      test.
+    artifact: >-
+      research/consequence/phase31/PREREGISTRATION_PHASE31.md (section 7.1);
+      research/consequence/phase31/evaluate31.py;
+      tests/test_consequence_phase31.py
+
+  - id: FL-026
+    date: 2026-09-20
+    phase: Consequence Phase 3.1 (definitions)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The false-refusal count was keyed on P0's outcome LABEL
+      (== CORRECT_ACTIONABLE) and reported zero while twelve false refusals
+      were happening on development seeds. In exactly the scenarios where P2
+      fires, P0's label is UNSUPPORTED_CONFIDENCE -- it names the right unit
+      while the pair is not identifiable -- so a definition that could not
+      hold both facts at once was wrong.
+    found_by: >-
+      Reading the per-scenario development output rather than the summary
+      line, after the summary said 12 activations and 0 false refusals.
+    honest_limit: >-
+      Found and fixed on development seeds, before the locked partition was
+      opened. The locked run used the corrected definition throughout.
+    verdict: RECORDED
+    consequence: >-
+      The definition is now on the responses issued: P0 issued the correct
+      response and P2 did not. A test pins it and a mutant (31-10) restores
+      the broken form and is killed.
+    artifact: research/consequence/phase31/evaluate31.py
+
+  - id: FL-027
+    date: 2026-09-20
+    phase: Consequence Phase 3.1 (reporting)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      The exact two-sided McNemar p-value was rounded to six decimal places.
+      With 40 discordant pairs the exact value is 1.819e-12, which printed as
+      0.0 -- a p-value of exactly zero, which is impossible.
+    found_by: Reading the locked output before writing it into the document.
+    honest_limit: >-
+      Found AFTER the locked run. It changes how a number is displayed, not
+      any criterion, and the significance verdict is identical either way.
+      The locked traces were not re-generated; only the analyzer was re-run
+      over them.
+    verdict: RECORDED
+    consequence: >-
+      p-values are stored unrounded. A test asserts no reported p is exactly
+      zero.
+    artifact: >-
+      research/consequence/phase31/evaluate31.py;
+      research/consequence/phase31/results/PHASE31_RESULTS_LOCKED.json
+
+  - id: FL-028
+    date: 2026-09-20
+    phase: Consequence Phase 3.1 (mutation)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      Three Phase-3.1 mutants survived: 31-03 (materially_different always
+      False), 31-07 (the declared correct response for a power sag dropped)
+      and 31-11 (the evidence gating disabled in condition EG). 11 evaluated,
+      8 killed, score 0.7273, unmutated baseline exit 0, canary killed.
+    found_by: tools/mutation/run_phase31_mutations.py
+    honest_limit: >-
+      They are not patched. Writing a test to catch a specific mutant is what
+      this repository's mutation doctrine forbids, and the survivors were
+      seen before the decision was taken -- which is exactly when the rule
+      matters. What they reveal: no Phase-3.1 control produces an
+      INCORRECT_ACTIONABLE outcome, nothing pins correct_response_31 for the
+      new families, and no test runs the campaign end to end.
+    verdict: RECORDED
+    consequence: >-
+      Recorded as named removal actions in the results document rather than
+      closed reactively. A separate runner was used so that Phase 3's
+      38 evaluated / 36 killed / 2 survived is byte-identical and P3-03 and
+      P3-04 could not be killed as a side effect.
+    artifact: >-
+      tools/mutation/run_phase31_mutations.py;
+      research/consequence/phase31/results/PHASE31_MUTATION_RESULTS.json
+
+  - id: FL-029
+    date: 2026-09-20
+    phase: Consequence Phase 3.1 (finding about the frozen core)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      csia.diagnosis.causal.SOURCE_INDICATORS lists imu0 as (redundant_imu,
+      accel_motor_current) and imu1 as (redundant_imu, accel_esc_rpm). It
+      does not list velocity_gps_doppler_0 and velocity_gps_doppler_1, which
+      are also per-IMU-asymmetric and whose gate reads 1.0 in these runs. The
+      trust engine isolates the faulty IMU on evidence the attribution model
+      does not know it has.
+    found_by: >-
+      The Phase-3.1 locked run: the support classifier reported
+      NON_IDENTIFIABLE in 40 of 40 scenarios in which the failsafe
+      nonetheless selected the correct unit.
+    honest_limit: >-
+      SOURCE_ANALYSIS. It is a statement about the attribution model's
+      declared indicator sets, not a measurement of any vehicle.
+    verdict: RECORDED
+    consequence: >-
+      The support-aware policy, which takes its LOW-sets verbatim from
+      SOURCE_INDICATORS, withdrew a correct attribution in every one of 40
+      locked scenarios. NOT FIXED: the core is frozen and editing
+      SOURCE_INDICATORS would invalidate Phase 2's inventory and Phase 3's
+      locked result. Closing it means re-running both phases.
+    artifact: >-
+      research/consequence/phase31/PHASE31_RESULTS.md;
+      research/consequence/phase31/results/PHASE31_RESULTS_LOCKED.json

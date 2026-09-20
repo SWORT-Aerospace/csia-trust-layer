@@ -79,8 +79,11 @@ def clopper_pearson(k: int, n: int, alpha: float = ALPHA):
     Inverted from the binomial CDF by bisection rather than pulled from a
     beta quantile, so this module keeps its no-dependency property.
     """
+    # A LIST, not a tuple: the results artifact is JSON, and a tuple comes
+    # back as a list, so a test that rebuilds the artifact and compares it
+    # would fail on the type alone and say nothing about the numbers.
     if n == 0:
-        return (0.0, 1.0)
+        return [0.0, 1.0]
 
     def cdf_at_least(p, m):        # P(X >= m) for X ~ Bin(n, p)
         return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i)
@@ -103,7 +106,7 @@ def clopper_pearson(k: int, n: int, alpha: float = ALPHA):
     low = 0.0 if k == 0 else bisect(lambda p: cdf_at_least(p, k), alpha / 2.0)
     high = 1.0 if k == n else bisect(
         lambda p: -cdf_at_most(p, k), -(alpha / 2.0))
-    return (round(low, 6), round(high, 6))
+    return [round(low, 6), round(high, 6)]
 
 
 def mcnemar_exact(b: int, c: int) -> float:
@@ -285,7 +288,13 @@ def paired(per_scenario, *, family, policy, left, right, field):
             "ci95_right": clopper_pearson(k_right, n),
             "discordant_left_only": b, "discordant_right_only": c,
             "both": both, "neither": neither,
-            "mcnemar_exact_two_sided_p": round(p, 6), "alpha": ALPHA,
+            # NOT rounded to six places. With 40 discordant pairs the exact
+            # p is 1.8e-12, and `round(p, 6)` prints it as 0.0 -- a p-value
+            # of exactly zero, which is impossible and which would be a
+            # false statement in the write-up. Found after the locked run;
+            # this changes how a number is DISPLAYED, not any criterion, and
+            # the significance verdict is identical either way.
+            "mcnemar_exact_two_sided_p": p, "alpha": ALPHA,
             "distinguishable_from_chance": bool(p < ALPHA)}
 
 
@@ -314,7 +323,7 @@ def cross_policy(per_scenario, *, family, condition, left, right, field):
             "ci95_left": clopper_pearson(b + both, n),
             "ci95_right": clopper_pearson(c + both, n),
             "discordant_left_only": b, "discordant_right_only": c,
-            "mcnemar_exact_two_sided_p": round(p, 6), "alpha": ALPHA,
+            "mcnemar_exact_two_sided_p": p, "alpha": ALPHA,
             "distinguishable_from_chance": bool(p < ALPHA)}
 
 

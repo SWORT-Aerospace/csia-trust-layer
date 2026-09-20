@@ -10,6 +10,7 @@ listed with what they require, not with a partial result standing in for them.
 | 1 — preregistration | **DONE**, committed before any result | n/a |
 | 2 — uncovered-occlusion enumeration | **DONE** | `SOURCE_ANALYSIS` |
 | 3 — closed-loop consequence simulation | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
+| 3.1 — actionability precondition | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
 | 4 — detector delay/false-alarm curves | **NOT RUN** | — |
 | 5 — explicit support output | **DONE** (classifier + tests) | `DETERMINISTIC_SIMULATION` |
 | 6 — cross-architecture audit | **DONE** | `SOURCE_ANALYSIS` |
