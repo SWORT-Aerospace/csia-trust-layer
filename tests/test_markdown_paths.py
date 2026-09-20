@@ -57,6 +57,9 @@ ALLOWED_MISSING = {
     "csia/consequence_closed_loop_phase3/2026-09-20":
         "seed-derivation domain string in csia_consequence/"
         "phase3_partitions.py, not a filesystem path",
+    "csia/actionability_precondition_phase31/2026-09-20":
+        "seed-derivation domain string in csia_consequence/"
+        "phase31_partitions.py, not a filesystem path",
     # Directory placeholders in planning documents.
     "docs/adr/": "planned directory named in an organisational blueprint",
     "docs/external/reading/":
