@@ -4993,3 +4993,100 @@ entries:
     artifact: >-
       research/consequence/phase31/PHASE31_RESULTS.md;
       research/consequence/phase31/results/PHASE31_RESULTS_LOCKED.json
+
+  - id: FL-030
+    date: 2026-09-20
+    phase: Consequence Phase 3.2 (direct preregistered H2 test)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      A POSITIVE result, recorded here because this ledger is where the
+      campaign arithmetic reconciles. H2 is SUPPORTED at Phase 3.2. At the
+      single preregistered confirmatory grid point -- structural, gain 3.0,
+      evidence-gated versus matched evidence-applicable, paired by seed --
+      40 of 40 seeds show an action conflict against 0 of 40 in the control.
+      Exact two-sided McNemar p = 1.82e-12, paired risk difference 1.0, exact
+      conditional 95 percent interval [0.823806, 1.0] conditional on 40
+      discordant pairs, 0 pairs dropped, 0 false escalations in the matched
+      nominal control.
+    found_by: >-
+      research/consequence/phase32/evaluate32.py over the locked traces. The
+      evaluator imports no CSIA module and no policy implementation, asserted
+      in a fresh interpreter, and carries one hand-built control per outcome
+      class.
+    honest_limit: >-
+      MODEL_BASED_ACTION_CONSEQUENCE. One confirmatory fault family, one
+      secondary, one airframe profile, one trajectory, one simulator. It is
+      a statement about an airframe that does NOT report ESC telemetry and
+      does not generalise to one that does. Nothing flew and no autopilot
+      path ran.
+    verdict: RECORDED
+    consequence: >-
+      Phase 3.1's 40/40 versus 0/40 reproduces on a fresh locked partition
+      drawn after that finding, with the design fixed beforehand. Phase 3's
+      own H2 verdict (NOT SUPPORTED, p = 0.625) and Phase 3.1's are unchanged
+      and are not pooled with this; three disjoint partitions, asserted by
+      test.
+    artifact: >-
+      research/consequence/phase32/PHASE32_RESULTS.md;
+      research/consequence/phase32/results/PHASE32_RESULTS_LOCKED.json
+
+  - id: FL-031
+    date: 2026-09-20
+    phase: Consequence Phase 3.2 (non-monotonicity)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      The secondary arm's conflict rate is non-monotone in fault magnitude:
+      40/40 at rate 0.03, 40/40 at 0.05, 31/40 at 0.08, then 0/40 at 0.12 and
+      0/40 at 0.18. Time to CAUTION under the control condition is also
+      non-monotone -- 50.2 s, 35.2 s, 31.4 s, 26.9 s, then back up to 34.8 s.
+    found_by: The declared grid, evaluated in full without sorting or pruning.
+    honest_limit: >-
+      A property of the frozen detector on this trajectory, not a general
+      claim about detectors.
+    verdict: RECORDED
+    consequence: >-
+      A grid that pruned small magnitudes as uninteresting, or stopped at the
+      first sufficient rate, would have reported the opposite of what is
+      there. Phase 4's preregistration must handle non-monotonic crossing
+      time explicitly rather than assume it away.
+    artifact: >-
+      research/consequence/phase32/results/PHASE32_RESULTS_LOCKED.json;
+      research/consequence/phase32/PREREGISTRATION_PHASE32.md
+
+  - id: FL-032
+    date: 2026-09-20
+    phase: Consequence Phase 3.2 (mutation)
+    kind: OUR_OWN_ERROR
+    what_happened: >-
+      Five Phase-3.2 mutants survived: 32-02 (the exclusion cap raised so any
+      number of dropped pairs passes), 32-03 (the confirmatory grid point
+      chosen by maximum effect size instead of the preregistered one), 32-10
+      (false escalation forced False so the nominal control cannot veto),
+      32-11 (the evidence gating disabled in the gated condition) and 32-12
+      (one class of invalid-run detection removed). 12 evaluated, 7 killed,
+      score 0.5833, unmutated baseline exit 0, canary killed.
+    found_by: tools/mutation/run_phase32_mutations.py
+    honest_limit: >-
+      32-03 is the cherry-pick mutant and its survival is the uncomfortable
+      one. It survives because every structural grid point in this campaign
+      gives 40/40 versus 0/40 and the maximum-effect point over all ten has
+      the same risk difference and p-value, so substituting a cherry-pick
+      produces the identical verdict. This study has no cherry to pick --
+      which is not the same as the discipline being verified, and a test
+      asserts that the claim is true of this data rather than leaving it as
+      reassurance.
+    verdict: RECORDED
+    consequence: >-
+      Not patched; writing a test to catch a specific mutant is what this
+      repository's mutation doctrine forbids and the survivors were seen
+      before the decision. What they reveal: the suite tests the statistical
+      primitives thoroughly and does not test the analysis pipeline's USE of
+      them. THIS IS THE SECOND PHASE IN A ROW WITH THAT GAP -- Phase 3.1's
+      31-03, 31-07 and 31-11 survived for the same reason, an end-to-end
+      regression test was named as the removal action, and it was not written
+      before Phase 3.2 ran. That is a finding about the process, not only the
+      tests, and it is recorded as one. A third separate runner was used so
+      the five earlier survivors could not be killed as a side effect.
+    artifact: >-
+      tools/mutation/run_phase32_mutations.py;
+      research/consequence/phase32/results/PHASE32_MUTATION_RESULTS.json

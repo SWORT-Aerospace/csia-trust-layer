@@ -268,3 +268,153 @@ def test_an_unknown_response_is_refused():
     with pytest.raises(ev32.TraceError, match="unknown response"):
         ev32.classify([_seg(0, 1, "ENGAGE_WARP", ticks=25)],
                       correct_response="NONE")
+
+
+# --- the locked artifacts and the write-up --------------------------------
+
+RESULTS_MD = P32 / "PHASE32_RESULTS.md"
+MANIFEST32 = P32 / "SHA256_MANIFEST32.json"
+
+
+def _locked():
+    return json.loads(
+        (P32 / "results" / "PHASE32_RESULTS_LOCKED.json").read_text(
+            encoding="utf-8"))
+
+
+def test_the_locked_results_are_what_the_evaluator_produces():
+    traces = json.loads(
+        (P32 / "results" / "PHASE32_TRACES_LOCKED.json").read_text(
+            encoding="utf-8"))
+    assert ev32.build(traces) == _locked()
+
+
+def test_the_locked_run_declares_it_executed_nothing_and_pooled_nothing():
+    traces = json.loads(
+        (P32 / "results" / "PHASE32_TRACES_LOCKED.json").read_text(
+            encoding="utf-8"))
+    for flag in ("executed_an_autopilot", "armed_a_vehicle",
+                 "touched_hardware", "uses_disarmed_gate_scenarios",
+                 "pooled_with_phase3", "pooled_with_phase31"):
+        assert traces[flag] is False, flag
+    assert traces["partition"] == "locked"
+    assert len(traces["seeds"]) == 40
+    for s in traces["scenarios"]:
+        assert s["armed_schedule"] == [[0.0, True]]
+
+
+def test_the_confirmatory_test_is_the_preregistered_point():
+    d = _locked()
+    t = d["h2_phase32"]["confirmatory_test"]
+    assert (t["family"], t["magnitude"]) == ("structural", 3.0)
+    assert d["confirmatory_point"] == {"structural": 3.0}
+
+
+def test_the_h2_verdict_and_its_three_conditions():
+    d = _locked()
+    t = d["h2_phase32"]["confirmatory_test"]
+    assert d["h2_phase32"]["verdict"] == "SUPPORTED"
+    assert t["significant"] is True
+    assert t["exceeds_effect_size_threshold"] is True
+    assert t["risk_difference"] > 0
+    assert t["underpowered_by_exclusions"] is False
+    nominal = d["summary"]["structural|N|None"]
+    assert nominal["false_escalations"] == 0
+
+
+def test_every_declared_grid_point_is_present_and_unsorted():
+    d = _locked()
+    got = [(t["family"], t["magnitude"]) for t in d["tests"]]
+    assert got == [("imu_isolation", m) for m in
+                   [0.03, 0.05, 0.08, 0.12, 0.18]] + \
+        [("structural", m) for m in [1.5, 2.0, 2.5, 3.0, 4.0]]
+
+
+def test_the_secondary_arm_is_non_monotone_and_is_reported_as_such():
+    """The reason the grid may not be pruned, checked against the artifact."""
+    d = _locked()
+    rates = {t["magnitude"]: t["count_left"] for t in d["tests"]
+             if t["family"] == "imu_isolation"}
+    assert rates[0.03] == 40 and rates[0.05] == 40
+    assert rates[0.08] == 31
+    assert rates[0.12] == 0 and rates[0.18] == 0
+    assert "non-monotone" in RESULTS_MD.read_text(encoding="utf-8").lower()
+
+
+def test_there_were_no_invalid_runs_and_none_are_invented():
+    d = _locked()
+    assert d["invalid_run_count"] == 0
+    assert d["invalid_runs"] == []
+
+
+def test_the_write_up_quotes_the_artifacts_numbers():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    t = _locked()["h2_phase32"]["confirmatory_test"]
+    assert f"**{t['count_left']} / {t['pairs_analysed']}**" in text
+    assert f"**{t['count_right']} / {t['pairs_analysed']}**" in text
+    assert "1.82 × 10⁻¹²" in text
+    assert f"[{t['ci95_conditional'][0]}, {t['ci95_conditional'][1]}]" in text
+    assert f"b = {t['discordant_left_only']}, c = {t['discordant_right_only']}" \
+        in text
+
+
+def test_the_write_up_says_the_interval_is_conditional():
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    assert "conditional on the 40 discordant pairs" in text
+    assert "not finite" in text
+
+
+def test_the_write_up_claims_no_level_above_the_one_measured():
+    text = RESULTS_MD.read_text(encoding="utf-8").lower()
+    assert "`model_based_action_consequence`" in text
+    for denial in ("nothing flew", "no autopilot executed anything",
+                   "not pooled with phase 3", "safe, or unsafe, in general"):
+        assert denial in text, denial
+    for forbidden in ("flight-validated", "hardware-validated",
+                      "proves the system is safe", "certified"):
+        assert forbidden not in text, forbidden
+
+
+def test_the_p2_table_is_labelled_exploratory_and_explains_why():
+    d = _locked()
+    block = d["P2_CURRENT_IMPLEMENTATION_EXPLORATORY"]
+    assert "FL-029" in block["why_excluded_from_the_primary_test"]
+    assert "safe or unsafe in general" in \
+        block["why_excluded_from_the_primary_test"]
+    assert "P2_CURRENT_IMPLEMENTATION_EXPLORATORY" in \
+        RESULTS_MD.read_text(encoding="utf-8")
+
+
+def test_the_mutation_run_is_reported_with_its_five_survivors():
+    doc = json.loads(
+        (P32 / "results" / "PHASE32_MUTATION_RESULTS.json").read_text(
+            encoding="utf-8"))
+    assert doc["baseline_unmutated"]["returncode"] == 0
+    assert doc["kills_attributed_to_a_bare_file"] == 0
+    assert (doc["evaluated"], doc["killed"]) == (12, 7)
+    survivors = sorted(r["id"] for r in doc["results"]
+                       if r["verdict"] == "SURVIVED")
+    assert survivors == ["32-02", "32-03", "32-10", "32-11", "32-12"]
+    text = RESULTS_MD.read_text(encoding="utf-8")
+    for s in survivors:
+        assert f"`{s}`" in text, s
+
+
+def test_the_cherry_pick_claim_is_true_of_this_data():
+    """The write-up says a cherry-pick could not have changed the verdict.
+    That is a checkable statement about the artifact, not a reassurance."""
+    d = _locked()
+    structural = [t for t in d["tests"] if t["family"] == "structural"]
+    assert len({(t["count_left"], t["count_right"], t["risk_difference"])
+                for t in structural}) == 1
+    best = max(d["tests"], key=lambda t: t.get("risk_difference", 0.0))
+    assert best["risk_difference"] == \
+        d["h2_phase32"]["confirmatory_test"]["risk_difference"]
+
+
+def test_the_manifest_matches_every_file_it_lists():
+    m = json.loads(MANIFEST32.read_text(encoding="utf-8"))
+    bad = [rel for rel, want in m["files"].items()
+           if hashlib.sha256((ROOT / rel).read_bytes()).hexdigest() != want]
+    assert bad == [], bad
+    assert m["frozen_core"]["mismatches"] == []

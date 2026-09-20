@@ -35,13 +35,19 @@ support it. If a row has no artifact, the claim is not made.
 | C19 | P2 produced 40 false refusals, prevented 0 incorrect actionable decisions, and doubled action conflicts 40 → 80 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `by_policy` |
 | C20 | `SOURCE_INDICATORS` omits the per-IMU doppler edges from the IMU indicator sets | `SOURCE_ANALYSIS` | `phase31/PHASE31_RESULTS.md`, FL-029 |
 | C21 | Stronger-than-`CAUTION` transitions are reachable: `CRITICAL` by two routes, `EMERGENCY` by one | `MODEL_BASED_ACTION_CONSEQUENCE` | `phase31/PREREGISTRATION_PHASE31.md` §4 |
+| C22 | At the Phase-3.2 preregistered confirmatory point, evidence gating produces an action conflict in 40/40 paired seeds against 0/40 matched controls: exact McNemar p = 1.82 × 10⁻¹², RD = 1.0, exact conditional 95 % CI [0.823806, 1.0], 0 exclusions, 0 false escalations in the nominal control | `MODEL_BASED_ACTION_CONSEQUENCE` | `phase32/results/PHASE32_RESULTS_LOCKED.json` |
+| C23 | With ESC telemetry the fault reaches `CRITICAL` at 34.220 s and safe state at 54.380 s; without it, no failsafe level and no safe state | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `summary` |
+| C24 | The effect holds at every gain in the declared grid, 1.5 through 4.0 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `tests` |
+| C25 | Crossing time and conflict rate are both non-monotone in fault rate on the secondary arm (40, 40, 31, 0, 0) | `MODEL_BASED_ACTION_CONSEQUENCE` | same, FL-031 |
+| C26 | 0 invalid runs over 880 locked scenarios; the campaign replays byte-identically | measured | `phase32/REPRODUCE32.md`, `SHA256_MANIFEST32.json` |
 
 ## Hypotheses
 
 | | status | why |
 |---|---|---|
 | H1 | **consistent at `SOURCE_ANALYSIS`, not tested** | H1 also requires that no independent freshness path forces an equivalent warning. That clause is established from source structure only, which is not a test of it. |
-| H2 | **NOT SUPPORTED** | 28 conflicts; 24 in a physically inconsistent control and excluded; the remaining 4 are not separated from their matched control (p = 0.625). Rejection criteria (a) and (d). |
+| H2 (Phase 3) | **NOT SUPPORTED** | 28 conflicts; 24 in a physically inconsistent control and excluded; the remaining 4 are not separated from their matched control (p = 0.625). Rejection criteria (a) and (d). Unchanged. |
+| H2 (Phase 3.2) | **SUPPORTED** | on its own disjoint locked partition, preregistered before the run: 40/40 vs 0/40 at the confirmatory point, p = 1.82 × 10⁻¹², RD = 1.0, 0 exclusions. **Not pooled with Phase 3.** |
 | H3 | **NOT SUPPORTED**, and in Phase 3.1 **rejected in the harmful direction** | Phase 3: P0 made 0 incorrect actionable decisions and P2 was inert — the absence of a test. Phase 3.1, separate partition, no pooling: P2 fired in 40/40 eligible scenarios, produced 40 false refusals, prevented 0, and doubled action conflicts. |
 | A1 (Phase 3.1) | **SUPPORTED** | the actionability precondition is reachable; P2 activated in 40/40 eligible scenarios |
 | A2 (Phase 3.1) | **false-refusal direction** | 40 false refusals, 0 prevented incorrect actionable decisions |
@@ -75,9 +81,12 @@ not about aircraft. H4 is untouched and needs Phase 4.
   cost, not a hazard, and no safety conclusion follows in either direction.
 - **That freshness logic covers the occlusion.** P1 never fired in either
   phase; that is untested, not confirmed.
-- **That H2 is supported.** Phase 3.1 did not preregister H2, and its pooling
-  rule forbids combining it with Phase 3. What Phase 3.1 shows is that the
-  precondition H2 needs is reachable — an input to a preregistered retest.
+- **That H2 is supported by Phase 3 or Phase 3.1.** It is not. Phase 3
+  rejected it on its own partition and Phase 3.1 did not preregister it.
+  Phase 3.2 preregistered and supported it on a third, disjoint partition,
+  and the three are never pooled.
+- **That the Phase-3.2 result generalises to airframes that do report ESC
+  telemetry.** It is precisely a statement about one that does not.
 - **That abstention is a solved safety problem.** `AMBIGUOUS` is a report that
   a question cannot be answered. Reporting it is not the same as handling it,
   and the tradeoff curve phase 3 would produce does not exist yet.
