@@ -197,16 +197,60 @@ def test_fixture_cases_are_absent_from_every_scored_result():
 
 # ------------------------------------------------------------- reproducibility
 def test_the_mechanical_pieces_are_deterministic():
-    """Same input, same output -- the parts that do not involve a model."""
+    """Same input, same output -- the parts that do not involve a model.
+
+    enumerate_universe.py writes BENCHMARK_SPLIT.json IN PLACE and has no
+    guard on its input: it reads the MAVLink message definitions out of an
+    ArduPilot checkout outside this repository, and if that checkout is
+    absent it resolves no messages, builds an empty universe and writes it
+    over the committed artifact. That artifact is hash-pinned in FREEZE.json,
+    so on any machine without the checkout this test used to destroy the
+    split and void the ordering guarantee -- reporting non-determinism when
+    the real finding was a missing input.
+
+    The script is left alone deliberately. It is frozen, and what the freeze
+    certifies is that the file defining the held-out split existed with those
+    contents before the reference was built; editing it now would damage that
+    evidence even with an amendment recorded. So the guard lives here, and
+    the test restores the artifact whatever happens.
+    """
     import hashlib
-    before = hashlib.sha256(
-        open(os.path.join(PKG, "BENCHMARK_SPLIT.json"), "rb").read()).digest()
-    subprocess.run([sys.executable,
-                    os.path.join(PKG, "enumerate_universe.py")],
-                   capture_output=True, check=True)
-    after = hashlib.sha256(
-        open(os.path.join(PKG, "BENCHMARK_SPLIT.json"), "rb").read()).digest()
+    import shutil
+    if not os.path.isdir(_mavlink_dir()):
+        pytest.skip("MAVLink message definitions not present; "
+                    "determinism of the enumerator is untested here, "
+                    "not assumed")
+    split = os.path.join(PKG, "BENCHMARK_SPLIT.json")
+    before = hashlib.sha256(open(split, "rb").read()).digest()
+    keep = split + ".pre_determinism_check"
+    shutil.copy2(split, keep)
+    try:
+        subprocess.run([sys.executable,
+                        os.path.join(PKG, "enumerate_universe.py")],
+                       capture_output=True, check=True)
+        after = hashlib.sha256(open(split, "rb").read()).digest()
+    finally:
+        # Unconditional: a failure here must not leave a frozen artifact
+        # rewritten, because the next test to read it would be measuring
+        # this test's damage rather than the repository.
+        shutil.move(keep, split)
     assert before == after, "the case universe is not reproducible"
+    assert hashlib.sha256(open(split, "rb").read()).digest() == before, \
+        "the determinism check did not restore the artifact it rewrote"
+
+
+def _mavlink_dir():
+    """The external checkout the enumerator reads, taken FROM the enumerator.
+
+    Read out of the frozen script rather than retyped, so this guard cannot
+    drift away from the path the script actually uses.
+    """
+    import re
+    src = open(os.path.join(PKG, "enumerate_universe.py"),
+               encoding="utf-8").read()
+    m = re.search(r'MAVLINK_DIR = \((.*?)\)\n', src, re.S)
+    assert m, "MAVLINK_DIR not found in enumerate_universe.py"
+    return "".join(re.findall(r'"([^"]*)"', m.group(1)))
 
 
 def test_repeatability_is_reported_as_not_run_rather_than_fabricated():

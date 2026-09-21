@@ -5603,3 +5603,55 @@ entries:
     artifact: >-
       tools/mutation/reverify_e2m_same_size.py (contamination_signature);
       research/bus_provenance/results/E2M_SAME_SIZE_REVERIFY_FL042.json
+
+  - id: FL-045
+    date: 2026-09-21
+    phase: AI contract synthesis (found while re-running the full suite)
+    kind: INSTRUMENT_DEFECT
+    what_happened: >-
+      tests/test_ai_contract_synthesis.py::test_the_mechanical_pieces_are_
+      deterministic checked reproducibility by re-running
+      enumerate_universe.py and comparing hashes -- but the enumerator writes
+      BENCHMARK_SPLIT.json IN PLACE, and it has no guard on its input. It
+      reads the MAVLink message definitions from an ArduPilot checkout
+      OUTSIDE this repository. On a machine without that checkout it resolves
+      no messages, builds an empty universe, and writes it over the committed
+      artifact: 1182 lines deleted, messages_resolved empty, every one of the
+      handled types moved to messages_not_found. The test then reported
+      non-determinism, which is the wrong finding -- the input was missing,
+      not the output unstable -- and left the repository damaged. That
+      artifact is hash-pinned in FREEZE.json, so the damage also voided the
+      ordering guarantee the freeze exists to provide. A run of the full
+      suite on a fresh container was enough to trigger it.
+    found_by: >-
+      git status after a full-suite run, on a container rebuilt without the
+      ArduPilot checkout. The clobber is invisible while the checkout is
+      present, which is why it survived every previous run.
+    honest_limit: >-
+      Only the TEST is fixed. enumerate_universe.py still writes an empty
+      universe over the artifact if it is run by hand without the checkout,
+      and that hazard remains. It was left alone on purpose: the script is
+      pinned in FREEZE.json, and what that freeze certifies is that the file
+      DEFINING THE HELD-OUT SPLIT existed with those contents before the
+      reference was built. Editing it now would damage that ordering evidence
+      even with an amendment recorded in FREEZE_AMENDMENTS.json, and the
+      amendment schema requires asserting the change "amends a verifier not a
+      prediction", which is not true of the split-defining enumerator. A
+      guard inside the script is the better engineering and is deliberately
+      not taken; this is a stated limitation, not an oversight.
+    verdict: FIXED_IN_THE_TEST_ONLY
+    consequence: >-
+      The test now skips when the message definitions are absent, saying so
+      rather than reporting a false non-determinism, and reads the path out
+      of the frozen script rather than retyping it so the guard cannot drift
+      from what the script uses. When it does run, it snapshots the artifact
+      and restores it in a finally block, so a failure cannot leave a frozen
+      artifact rewritten for the next test to measure. The restore was
+      verified by exercising it rather than trusted: with the directory
+      present but empty the test fails as it should, and BENCHMARK_SPLIT.json
+      still hashes 02294c7e5f8d0611 afterwards. No result changes; the
+      artifact was restored to its committed bytes before anything was
+      committed.
+    artifact: >-
+      tests/test_ai_contract_synthesis.py
+      (test_the_mechanical_pieces_are_deterministic, _mavlink_dir)
