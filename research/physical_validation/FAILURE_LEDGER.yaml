@@ -5655,3 +5655,58 @@ entries:
     artifact: >-
       tests/test_ai_contract_synthesis.py
       (test_the_mechanical_pieces_are_deterministic, _mavlink_dir)
+
+  - id: FL-046
+    date: 2026-09-21
+    phase: E2M re-verification (full-suite run on a rebuilt container)
+    kind: ENVIRONMENT_LIMIT
+    what_happened: >-
+      The full suite on this container is 4118 passed, 39 skipped, 4 FAILED
+      out of 4161. None of the four is a defect in the code under test and
+      none touches the E2M re-measurement. Three fail because the container
+      was rebuilt without local state that is deliberately NOT in the
+      repository: tests/test_semantic_authority_conflict.py needs the
+      ArduPilot checkout at /home/user/ardupilot (all 8 failing citations
+      trace to it -- 3 report "missing file" and 5 report "bad schema
+      locator", the latter only because _verify_schema reports a MISSING
+      common.xml with the same message it uses for a malformed locator);
+      tests/test_ardupilot_repeat_reconciliation.py needs
+      logs/shadow-sitl-ardupilot/, and logs/ is gitignored at .gitignore:76;
+      tests/test_markdown_paths.py cites a .ulg under
+      research/v1_1/results/.px4_link_probe/, gitignored at .gitignore:31.
+      The fourth, test_the_build_provenance_describes_this_checkout, is
+      stale: BUILD_PROVENANCE.json names commit 16a8b0b, now four commits
+      back.
+    found_by: >-
+      Re-running the full suite after rebuilding the virtualenv, which was
+      itself forced by a container restart. An earlier run of the same suite
+      showed 16 failures and 5 errors; installing the three declared extras
+      the rebuild had missed -- mavlink, hardware, logs -- accounted for all
+      but these four.
+    honest_limit: >-
+      The stale provenance record CANNOT be refreshed on this container, and
+      that is the guard working rather than failing.
+      tools/research/iv_followup_seal_record.py refuses to write unless the
+      recorded suite exited zero, because the record it writes asserts the
+      seal was opened from a green tree. The suite cannot exit zero here
+      without the three missing inputs, and those inputs cannot be
+      reconstructed: an external source checkout, SITL logs from a campaign
+      that was run elsewhere, and a probe log that no longer exists.
+    verdict: NOT_FIXED_DELIBERATELY
+    consequence: >-
+      No skip guards were added to the three failing tests. Adding them would
+      turn the suite green and would then let the provenance builder write a
+      record attesting a "green tree" whose checks had been skipped rather
+      than passed -- laundering an unverifiable state into an attested one,
+      which is exactly what that refusal exists to prevent. The three tests
+      arguably SHOULD skip rather than fail when their inputs are absent,
+      since as written they can never pass on a fresh clone; that is a real
+      instrument defect of the same family as FL-045 and is recorded here as
+      the right follow-up, to be done on its own merits and NOT as a way of
+      unblocking a provenance refresh. The blocking guards are unaffected:
+      all 8 PASS.
+    artifact: >-
+      tests/test_semantic_authority_conflict.py;
+      tests/test_ardupilot_repeat_reconciliation.py;
+      tests/test_markdown_paths.py;
+      research/physical_validation/results/BUILD_PROVENANCE.json
