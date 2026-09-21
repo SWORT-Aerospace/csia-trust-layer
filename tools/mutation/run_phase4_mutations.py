@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
 
@@ -32,6 +33,25 @@ from run_e2m_mutations import (apply_from, package_files,  # noqa: E402
                                sync_working_tree, working_tree_delta)
 from run_mutations import (classify, drop_sandbox, make_sandbox,  # noqa: E402
                            run_tests)
+
+
+def purge_bytecode(sandbox: str) -> int:
+    """Delete every __pycache__ in the sandbox after each source edit.
+
+    Mutant `4-01` replaces `0.00` with `0.10` -- the SAME LENGTH -- and a
+    restore inside one mtime tick would leave CPython reusing the MUTATED
+    .pyc, silently contaminating every later mutant. Added when FL-042 was
+    found on the Phase-5 runner, so that this phase's 17/17 could be
+    RE-VERIFIED rather than assumed.
+    """
+    removed = 0
+    for dirpath, dirnames, _files in os.walk(sandbox):
+        for d in list(dirnames):
+            if d == "__pycache__":
+                shutil.rmtree(os.path.join(dirpath, d), ignore_errors=True)
+                dirnames.remove(d)
+                removed += 1
+    return removed
 
 MUTANTS = []
 
@@ -214,6 +234,7 @@ def main(argv=None) -> int:
             + working_tree_delta())
         originals = read_originals(sandbox, targets)
 
+        purge_bytecode(sandbox)
         baseline = run_tests(sandbox, selection, timeout=args.timeout)
         if baseline["returncode"] != 0:
             raise SystemExit(
@@ -223,8 +244,10 @@ def main(argv=None) -> int:
 
         if not apply_from(sandbox, originals, CANARY):
             raise SystemExit("ABORT: canary anchor not found")
+        purge_bytecode(sandbox)
         canary = run_tests(sandbox, selection, timeout=args.timeout)
         restore_from(sandbox, originals, CANARY["path"])
+        purge_bytecode(sandbox)
         if canary["returncode"] == 0:
             raise SystemExit("ABORT: the canary SURVIVED.")
 
@@ -235,8 +258,10 @@ def main(argv=None) -> int:
                                 "why": "anchor text not found"})
                 print(f"  {mutant['id']:8s} INVALID_MUTANT", flush=True)
                 continue
+            purge_bytecode(sandbox)
             outcome = run_tests(sandbox, selection, timeout=args.timeout)
             restore_from(sandbox, originals, mutant["path"])
+            purge_bytecode(sandbox)
             verdict = classify(mutant, outcome)
             first = outcome["first_failure"]
             results.append({**mutant, "verdict": verdict,
@@ -263,6 +288,7 @@ def main(argv=None) -> int:
         "targets": sorted({m["path"] for m in MUTANTS}),
         "selection": selection,
         "deselected": DESELECT,
+        "bytecode_purged_after_every_source_edit": True,
         "why_deselected": (
             "a sha256 manifest guard fails for every mutant because mutating "
             "a file changes its hash, and a test that pins this run's own "
