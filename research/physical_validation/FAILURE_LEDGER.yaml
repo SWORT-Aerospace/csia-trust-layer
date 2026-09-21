@@ -5494,3 +5494,112 @@ entries:
     artifact: >-
       tools/mutation/run_phase5_mutations.py (purge_bytecode);
       research/phase5/results/PHASE5_MUTATION_RESULTS.json
+
+  - id: FL-043
+    date: 2026-09-21
+    phase: E2M mutation re-verification (FL-042 follow-up)
+    kind: NEGATIVE_RESULT
+    what_happened: >-
+      E2M's three SAME-SIZE mutants -- SUP-01, SUP-05 and P3-07, the only
+      three across run_e2m_mutations.py whose replacement is the same length
+      as what it replaces, and therefore the only three that can trigger
+      FL-042 -- were re-measured under a hardened procedure. All three come
+      back KILLED, by the SAME named test node each named in the published
+      run. Zero verdicts changed and zero attributed nodes changed.
+      Separately, the PUBLISHED run was checked for the signature
+      contamination leaves, which is what matters for the mutants that ran
+      AFTER a same-size one: consecutive mutants across different target
+      files all killed by one unrelated test. There is none. 36 kills name
+      34 distinct test nodes, no run of three or more consecutive mutants
+      shares a failing node, no kill is attributed to a bare file, and the
+      mutant immediately following each same-size one is killed by its OWN
+      test rather than by the same-size mutant's test.
+    found_by: >-
+      A purpose-built runner that gives each mutant its own FRESH git
+      worktree -- so no restore step exists to get wrong -- with
+      PYTHONDONTWRITEBYTECODE set, __pycache__ purged before every run, the
+      unmutated baseline verified in its own fresh sandbox, a canary
+      verified to die in its own fresh sandbox, and KILLED / SURVIVED /
+      INVALID_MUTANT / COLLECTION_ERROR / TIMEOUT kept as five distinct
+      outcomes rather than collapsed. A kill whose first failure is a bare
+      file is classified COLLECTION_ERROR and is not counted as a kill.
+    honest_limit: >-
+      Two limits, both real. FIRST, re-measuring the three same-size mutants
+      in isolation confirms the three and says nothing directly about the
+      35 others; the signature check is what addresses those, and absence of
+      a signature is STRONG EVIDENCE rather than proof -- a follower whose
+      own failing test happened to be identical to the contaminating one
+      would be invisible to it. With 34 distinct nodes across 36 kills that
+      is implausible at scale but is not excluded. SECOND, the only way to
+      exclude it is to re-run all 38, which was not done and is not claimed.
+      FL-042 recorded that "E2M's three same-size mutants were NOT
+      re-measured"; that was true when written and is superseded here. Per
+      this ledger's own rule a rerun gets a NEW entry and the original
+      stays, so FL-042 is left as written.
+    verdict: ORIGINAL_STANDS
+    consequence: >-
+      The published E2M result of 38 evaluated, 36 killed, 2 survived, with
+      P3-03 and P3-04 as the survivors, REMAINS USABLE. The caveat attached
+      to it in FL-042 narrows from "three mutants could have contaminated
+      the run and were not checked" to "the three were checked and are
+      unchanged, and the run carries no contamination signature". No
+      scientific claim anywhere in the repository changes: the three mutants
+      guard symmetric-difference separability, the uncovered-gate count and
+      ground-truth response polarity, and all three still die to the tests
+      that were written for them. The original artifact is UNMODIFIED; the
+      re-measurement is a separate file, because "it was re-run and agreed"
+      is a different fact from "it was right".
+    artifact: >-
+      research/bus_provenance/results/E2M_SAME_SIZE_REVERIFY_FL042.json;
+      tools/mutation/reverify_e2m_same_size.py
+
+  - id: FL-044
+    date: 2026-09-21
+    phase: E2M mutation re-verification (FL-043 follow-up)
+    kind: PROCESS_DEFECT
+    what_happened: >-
+      Two defects in the contamination-signature analysis that FL-043 rests
+      on, both found while making that analysis reproducible. FIRST, it had
+      been computed by a throwaway script that was never committed. Its
+      numbers were pasted into the result artifact by hand, so the artifact
+      asserted a finding that nothing in the repository could recompute, and
+      the script was gone by the time anyone looked. SECOND, when the
+      analysis was moved into the runner, the rule written for "did the
+      follower die to its own test or to its predecessor's?" matched test
+      FILENAMES against target module paths. That rule reported a mark on
+      P3-08 -- signature_found: true -- because P3-08 targets
+      research/consequence/phase3/independent_consequence_evaluator.py while
+      its test lives in tests/test_consequence_phase3.py, and this repository
+      does not name test files after the modules they exercise. The mark was
+      an artifact of the naming convention, not of contamination.
+    found_by: >-
+      Regenerating the result artifact from the runner rather than by hand.
+      The regenerated file came back without the pasted block, which is what
+      exposed that the block had no source; and once the analysis was written
+      into the runner, its verdict disagreed with the hand analysis, which is
+      what exposed the heuristic.
+    honest_limit: >-
+      The hand analysis had reached the RIGHT conclusion for P3-08 by reading
+      the test node, so the published finding did not change. That is luck
+      about this instance, not a defence of the method: an unreproducible
+      analysis pasted into an artifact is unfalsifiable, and a heuristic
+      linkage rule fails in whichever direction the naming convention
+      happens to push it. Had it failed the other way it would have hidden a
+      real mark instead of inventing a false one.
+    verdict: FIXED
+    consequence: >-
+      The filename heuristic is deleted, not tuned. The signature test is now
+      exact and needs no naming convention: a leaked .pyc keeps the
+      PREDECESSOR'S OWN TEST failing, so the fingerprint is the follower
+      being scored a kill on the very node that killed its predecessor. On
+      the published run no follower repeats its predecessor's node, no kill
+      is attributed to a bare file, and no three consecutive mutants share a
+      failing node -- signature_found: false, on a check any reader can now
+      re-run. FL-043's conclusion is unchanged and its evidence is now
+      reproducible. FL-043's phrase "killed by its OWN test" describes what
+      reading the nodes shows; the automated check asserts the narrower,
+      exactly decidable fact that the follower did not repeat the
+      predecessor's node.
+    artifact: >-
+      tools/mutation/reverify_e2m_same_size.py (contamination_signature);
+      research/bus_provenance/results/E2M_SAME_SIZE_REVERIFY_FL042.json
