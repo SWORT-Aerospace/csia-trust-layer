@@ -17,25 +17,48 @@ of analysis.
 | locked partition | 40 seeds, **840 runs**, manifest `bbcaae73c2eee4a579e90723df8d1ea4…` |
 | node | `vibration` (the one CUSUM-covered node that is also the Phase-3.2 primary arm) |
 | fault | `vibration_anomaly`, gains 1.5–4.0, onsets 20/25/30/35 s, 20 s duration, **exhaustive not sampled** |
-| replay | two independent locked passes, identical on every measured quantity |
+| replay | **three** independent locked passes, identical on every measured quantity |
 | intake | 0 incomplete seeds, 0 empty declared cells, 0 refusals, on both partitions |
 
 ---
 
 ## THE HEADLINE, STATED AGAINST THE MECHANISM
 
-**At the matched zero-false-alarm operating point, CSIA trust persistence is
-about thirty times slower than both comparators on this fault, and all three
-miss nothing.**
+**At the matched operating point — zero false alarms observed for all three —
+CSIA trust persistence is about thirty times slower than both comparators on
+this fault, and all three miss nothing.** This is a **tradeoff** result, not
+a superiority result for any of the three.
 
-| detector | threshold | dev FAR | locked FAR | miss rate | median delay | 95 % CI | p90 | p99 |
+| detector | threshold | dev FAR (obs.) | locked FAR (obs.) | miss rate | median delay | 95 % CI | p90 | p99 |
 |---|---|---|---|---|---|---|---|---|
 | **CSIA** trust-persistence | θ = 0.90 | 0.000 | **0.000** | **0.000** | **2.52 s** | [2.52, 2.52] | 2.76 s | 2.76 s |
 | **CUSUM** (Page 1954) | h = 200 | 0.000 | **0.000** | **0.000** | **0.08 s** | [0.08, 0.08] | 0.12 s | 0.12 s |
 | **BINST** bare threshold | τ = μ₀+10σ₀ | 0.000 | **0.000** | **0.000** | **0.08 s** | [0.08, 0.08] | 0.08 s | 0.08 s |
 
-Locked false-alarm rate 0/40 for all three, Clopper–Pearson 95 % CI
-[0.0, 0.088]. Locked detections 800/800 for all three.
+### Zero **observed** false alarms — and that is not a probability
+
+**Zero false alarms were observed, over a finite horizon, and no claim of
+zero false-alarm probability is made or implied.**
+
+The false-alarm *rate* is measured over the **40 nominal runs**, not over all
+840: a faulted run cannot contribute a false alarm after its onset. All three
+selected thresholds give **0 / 40**, Clopper–Pearson 95 % CI
+**[0.0, 0.0881]** — the upper bound is the honest content of a zero numerator.
+Separately, all three raised **0 pre-onset alarms on the 800 faulted runs**,
+so across the whole locked partition **no false alarm was observed at all**.
+
+The total exposure over which that zero was observed is finite and small:
+
+| source | runs | scored window per run | exposure |
+|---|---|---|---|
+| nominal runs | 40 | `SETTLE_S` → horizon, 50.0 s | 2 000 s |
+| faulted runs, before onset | 800 | `SETTLE_S` → onset (10/15/20/25 s) | 14 000 s |
+| **total** | | | **16 000 s ≈ 4.44 h** |
+
+Four and a half hours of simulated flight with no false alarm is consistent
+with a per-horizon false-alarm probability anywhere up to ~0.09 for each
+detector. **It is not evidence of a zero rate**, and any figure quoted from
+this table must carry its interval. Locked detections: 800/800 for all three.
 
 **The matching handed CSIA its best threshold.** Every θ in the declared grid
 has a development false-alarm rate of exactly 0.000, so the whole CSIA grid
@@ -63,7 +86,11 @@ detectors watch — and it is the easy case for an instantaneous threshold.
 Phase 4 tested no drift, no incipient, no intermittent and no slow-onset
 fault, and nothing here says what happens on one.
 
-## WHERE CSIA IS AHEAD, AND IT IS NOT DELAY
+## WHERE CSIA IS AHEAD: THRESHOLD ROBUSTNESS, AND NOTHING ELSE MEASURED HERE
+
+**CSIA is slower than both comparators at the matched operating point.** Its
+one measured advantage in Phase 4 is that its false-alarm behaviour does not
+depend on getting the threshold right.
 
 **CSIA has a false-alarm rate of 0.000 across its entire declared grid**, from
 θ = 0.90 down to θ = 0.20. Neither comparator does:
@@ -83,9 +110,22 @@ false-alarm on at least half the nominal runs, and only the most extreme
 (μ₀+10σ₀) is clean.
 
 So the measured tradeoff is: **CSIA buys insensitivity to threshold
-misspecification and pays about 2.4 s of delay for it.** Whether that is a
-good trade is a question about a vehicle and a mission, and Phase 4 does not
-answer it.
+misspecification and pays about 2.4 s of delay for it.**
+
+**No claim is made that threshold robustness compensates for the latency
+penalty.** They are different quantities in different units — one is a
+property of the grid, the other of the clock — and nothing measured here
+converts between them. Whether 2.4 s of additional delay is worth tolerating
+a badly chosen threshold is a question about a vehicle, an altitude, a
+mission and a failure mode. Phase 4 does not answer it and no arithmetic in
+this document should be read as answering it.
+
+**And no claim of universal detector superiority is made, in any direction.**
+On this fault, on this node, CSIA is slower than both comparators and the
+bare threshold matches CUSUM. That ranking is a statement about one abrupt
+sustained step in one statistic. A different fault — drift, incipient,
+intermittent, multi-node — could reorder all three, and Phase 4 tested none
+of them.
 
 ## H4 — **SUPPORTED**, direction stated
 
@@ -94,14 +134,18 @@ answer it.
 > **Killed if** no operating point exists at which the two are comparable, or
 > the curves are statistically indistinguishable across the whole grid.
 
-Neither kill condition fires. A matched operating point exists at FAR = 0 for
-both, and the curves are not remotely indistinguishable: 2.52 s against
-0.08 s with non-overlapping bootstrap intervals. **H4 as written is
-direction-neutral and is supported.** The direction is unfavourable to the
-mechanism on delay and favourable on threshold robustness, and the
-preregistration's binding constraint is honoured — **no claim is made that
-CUSUM is inferior.** It is not. On this fault it is thirty times faster at the
-same false-alarm rate, and it is a 1954 method used as the baseline it is.
+Neither kill condition fires. A matched operating point with zero observed
+false alarms exists for both, and the curves are not remotely
+indistinguishable: 2.52 s against 0.08 s with non-overlapping bootstrap
+intervals.
+
+**H4 as written is direction-neutral, and it is supported as a TRADEOFF
+result. It is not a CSIA superiority result and must not be cited as one.**
+The direction is unfavourable to the mechanism on delay and favourable on
+threshold robustness. The preregistration's binding constraint is honoured —
+**no claim is made that CUSUM is inferior.** It is not: on this fault it is
+thirty times faster at the same observed false-alarm rate, and it is a 1954
+method used as the baseline it is.
 
 ---
 
@@ -236,7 +280,88 @@ numbers predicts what that costs.
 
 ---
 
-## EVERY CHANGE MADE AFTER THE LOCKED PARTITION WAS OPENED
+## MUTATION — 17 EVALUATED, 17 KILLED, 0 SURVIVED
+
+**17 evaluated, 17 killed, 0 survived**, in 811 s. A score
+without the conditions that produced it is worthless, so the conditions are
+stated first and a test asserts them:
+
+| integrity condition | required | observed |
+|---|---|---|
+| unmutated baseline passes in the sandbox | exit 0 | **exit 0**, 96 s |
+| canary mutant dies | killed | **KILLED** — `test_a_detector_that_cannot_meet_a_target_is_reported_not_dropped` |
+| kills attributed to a **test node** | all | **17 of 17** |
+| kills attributed to a **bare file** (collection error, missing artifact) | none | **0** |
+| invalid mutants (anchor not found) | reported, not scored | **0** |
+| timeouts scored as kills | never | **0** — no mutant ran past 100 s against a 3600 s limit |
+
+**This is a fourth, separate runner.** `run_e2m_mutations.py` (38/36/2),
+`run_phase31_mutations.py` (11/8/3) and `run_phase32_mutations.py` (12/12/0)
+are untouched, so none of the five survivors in the first two can be killed
+as a side effect of widening this selection. Verified: all three result files
+are byte-identical to their state at `5208624`.
+
+Two tests are **deselected**, and neither deselection is a convenience. A
+sha256 manifest guard fails for every mutant because mutating a file changes
+its hash — including it manufactures a perfect score, which is exactly what
+happened on the first Phase-3.2 attempt (**FL-033**). And a test that pins
+this run's own score cannot sit inside the selection that run measures.
+
+### Every mutant
+
+| id | family | target | what it breaks | first failing test node | result |
+|---|---|---|---|---|---|
+| `4-01` | PREREG | `evaluate4.py` | moves the primary comparison off the zero-false-alarm point | `test_phase4_pipeline.py` ::<br>`test_build_reproduces_the_sealed_result_from_the_committed_…` | **KILLED** |
+| `4-02` | PREREG | `evaluate4.py` | admits thresholds whose development FAR exceeds the target | `test_phase4_pipeline.py` ::<br>`test_build_reproduces_the_sealed_result_from_the_committed_…` | **KILLED** |
+| `4-03` | PREREG | `evaluate4.py` | selects thresholds on the LOCKED partition instead of development | `test_phase4_pipeline.py` ::<br>`test_build_reproduces_the_sealed_result_from_the_committed_…` | **KILLED** |
+| `4-04` | PREREG | `evaluate4.py` | sorts the declared threshold grid | `test_phase4_detectors.py` ::<br>`test_the_grid_is_read_in_declaration_order` | **KILLED** |
+| `4-05` | PREREG | `campaign4.py` | prunes the onset grid to a single onset | `test_phase4_pipeline.py` ::<br>`test_the_campaign_runs_every_onset_for_every_gain_on_a_real…` | **KILLED** |
+| `4-06` | DEFINITION | `evaluate4.py` | scores a latched detector as clean (the FL-035 false-alarm defect) | `test_phase4_detectors.py` ::<br>`test_a_latched_alarm_from_the_settling_window_is_a_false_alarm` | **KILLED** |
+| `4-07` | DEFINITION | `evaluate4.py` | scores a pre-onset alarm as a detection (the FL-035 delay defect) | `test_phase4_detectors.py` ::<br>`test_a_pre_onset_alarm_is_not_a_detection_with_negative_delay` | **KILLED** |
+| `4-08` | DEFINITION | `evaluate4.py` | reports every detector as never missing | `test_phase4_detectors.py` ::<br>`test_a_miss_is_reported_and_never_imputed_as_the_horizon` | **KILLED** |
+| `4-09` | DEFINITION | `evaluate4.py` | hides pre-onset alarms on faulted runs | `test_phase4_detectors.py` ::<br>`test_a_pre_onset_alarm_is_not_a_detection_with_negative_delay` | **KILLED** |
+| `4-10` | STATS | `evaluate4.py` | pins every lower confidence bound at zero | `test_phase4_detectors.py` ::<br>`test_clopper_pearson_matches_the_exact_interval` | **KILLED** |
+| `4-11` | STATS | `evaluate4.py` | changes the declared quantile definition | `test_phase4_detectors.py` ::<br>`test_the_quantile_is_the_declared_interpolation[values1-0.5…` | **KILLED** |
+| `4-12` | STATS | `evaluate4.py` | computes a bootstrap interval from too few detections | `test_phase4_detectors.py` ::<br>`test_no_interval_is_computed_from_too_few_detections` | **KILLED** |
+| `4-13` | STATS | `evaluate4.py` | unpins the bootstrap seed | `test_phase4_pipeline.py` ::<br>`test_build_reproduces_the_sealed_result_from_the_committed_…` | **KILLED** |
+| `4-14` | CAMPAIGN | `campaign4.py` | removes the persistence requirement, which IS the CSIA detector | `test_phase4_pipeline.py` ::<br>`test_the_settling_window_and_dwell_come_from_the_frozen_fai…` | **KILLED** |
+| `4-15` | CAMPAIGN | `campaign4.py` | counts gated-off ticks as evidence for CSIA | `test_phase4_pipeline.py` ::<br>`test_gated_ticks_are_not_evidence_for_the_csia_detector` | **KILLED** |
+| `4-16` | CAMPAIGN | `campaign4.py` | feeds the CUSUM gated-off ticks as live evidence | `test_phase4_pipeline.py` ::<br>`test_gated_ticks_are_not_evidence_for_the_cusum_baseline` | **KILLED** |
+| `4-17` | CAMPAIGN | `campaign4.py` | removes the settling window | `test_phase4_pipeline.py` ::<br>`test_the_settling_window_and_dwell_come_from_the_frozen_fai…` | **KILLED** |
+
+### The four kills that landed on the end-to-end test
+
+`test_build_reproduces_the_sealed_result_from_the_committed_runs` is a
+genuine behavioural test — it re-derives the sealed result from the committed
+runs — but it is also a **catch-all**: it fails for any change to the
+evaluator's output, so it does not by itself show that the specific property
+is tested. Each of those four mutants was therefore re-applied by hand and
+run against its own targeted test alone:
+
+| mutant | targeted test run in isolation | result |
+|---|---|---|
+| `4-01` | `test_the_primary_target_is_the_zero_false_alarm_point` | FAILED |
+| `4-02` | `test_thresholds_selected_on_locked_instead_of_development_change_the_verdict` | FAILED |
+| `4-03` | `test_thresholds_selected_on_locked_instead_of_development_change_the_verdict` | FAILED |
+| `4-13` | `test_the_bootstrap_is_reproducible_from_the_committed_seed` | FAILED |
+
+All four fail their specific test, so the properties are genuinely covered
+and not merely disturbed. `4-03` was additionally verified in both
+directions: the cherry-pick canary fails under it and passes unmutated.
+
+**No mutant survived, so there is no survivor to report.** That is stated
+plainly rather than dressed up: 17 is a small mutant set aimed at the
+scoring rules, the matching rule and the gating, and a clean sweep over 17
+hand-written mutants is weaker evidence than a clean sweep over a generated
+set would be. The three surviving Phase-3.1 mutants and the two surviving
+E2M mutants remain alive and remain reported.
+
+## POST-LOCK ANALYSIS — SEPARATE FROM THE PREREGISTERED VERDICT
+
+**Everything in this section happened after the locked partition was opened.
+None of it is part of the preregistered verdict**, which is the matched
+comparison at `TARGET_FAR = 0.00` reported above, computed under the
+definitions frozen in `PREREGISTRATION_PHASE4.md`.
 
 The preregistration froze the detectors, the grids, the partitions, the fault
 and onset sets, the horizon, every definition, the matching procedure, the
@@ -249,7 +374,7 @@ referee should not have to reconstruct this from a diff.
 |---|---|---|
 | `validate()` extended to classify incomplete seeds and empty declared cells, and to refuse nominal-with-fault, faulted-without-onset and off-grid runs | the FL-032 lesson: an analysis pipeline that never rejects anything has never been tested | **none.** Both partitions pass clean: 0 incomplete seeds, 0 empty cells, 0 refusals |
 | per-detector wall-clock instrumentation in `run_one`, and `environment_specific_fields` declared | the preregistration promised cost *per detector*; the campaign was only recording the shared series build | **none on any measurement.** Verified directly: alarm times, tick counts, `cusum_max`, `trust_min` and `active_ticks` are identical across all 840 runs before and after the instrumentation |
-| `bootstrap_ci` sorts its input before resampling (**FL-037**) | it resampled by index, so the interval depended on the order runs sat in the file rather than on the data | **five numbers**, all lower endpoints of p90 bootstrap intervals, all by ≤ 0.001 s. No point estimate, no matched threshold, no rate, no Clopper–Pearson interval and no verdict moved |
+| `bootstrap_ci` sorts its input before resampling (**FL-037**) — **post-lock correction** | it resampled by index, so the interval depended on the order runs sat in the file rather than on the data | **five numbers**, all lower endpoints of p90 bootstrap intervals, all by ≤ 0.001 s. No point estimate, no matched threshold, no rate, no Clopper–Pearson interval and no verdict moved |
 | per-detector cost block added to the result document | reporting a preregistered quantity that was being computed but not surfaced | purely additive |
 
 **Nothing in that list is a detector, a threshold, a grid, a definition, the
@@ -259,18 +384,35 @@ one that changed published values after the locked open, which is the thing
 preregistration exists to prevent; it is recorded at full weight rather than
 folded into a "minor corrections" sentence.
 
+**The locked campaign was never re-run with changed scoring or changed
+thresholds.** The 840 runs behind every number in this document are the ones
+produced by the first opening of the locked partition; the only regeneration
+was to add the per-detector timing fields, and that was verified inert on
+every alarm time, tick count, `cusum_max`, `trust_min` and `active_ticks`
+across all 840 runs. Had any correction changed a matched threshold or a
+verdict, it would appear here as a **post-lock analysis** alongside the
+preregistered result, not in place of it.
+
 ## WHAT PHASE 4 ESTABLISHES
 
-1. A matched zero-false-alarm operating point exists for all three detectors,
-   and at it **CSIA is ~31× slower than CUSUM and the bare threshold** on this
-   fault, with all three missing nothing (H4 supported, direction stated).
-2. **CSIA's false-alarm rate is 0.000 at every one of its twelve declared
-   thresholds**; CUSUM's at 5 of 10 and the bare threshold's at 1 of 8.
+1. A matched operating point with **zero observed false alarms** exists for
+   all three detectors, and at it **CSIA is ~31× slower than CUSUM and the
+   bare threshold** on this fault, with all three missing nothing.
+   **H4 is supported as a TRADEOFF result. It is not a CSIA superiority
+   result**, and the preregistration's bar on claiming CUSUM inferior stands
+   — the measurement would not have supported that claim in any case.
+2. **CSIA's observed false-alarm rate is 0/40 at every one of its twelve
+   declared thresholds**; CUSUM's at 5 of 10 and the bare threshold's at 1
+   of 8. This is the one measured CSIA advantage in Phase 4, and it is
+   threshold robustness, not detection performance.
 3. CSIA's delay is **non-monotone in fault magnitude** and monotone in onset
    time.
 4. Two of CSIA's twelve grid points cannot detect this fault reliably
    (θ = 0.30 misses 25.4 %, θ = 0.20 misses 99.9 %).
-5. Two independent locked passes agree on every measured quantity.
+5. **Three** independent locked passes agree on every measured quantity —
+   all 840 runs, all three detectors, every declared threshold, all three
+   alarm times — differing only in the wall-clock fields the campaign
+   declares as environment-specific.
 
 ## WHAT PHASE 4 DOES NOT ESTABLISH
 
@@ -295,6 +437,13 @@ folded into a "minor corrections" sentence.
   a large abrupt sustained step — is the easy case for the memoryless
   comparators that won it.
 - **No prevalence**, in either autopilot or anywhere else.
+- **No zero false-alarm PROBABILITY.** Zero was *observed*, over 16 000 s of
+  simulated flight, with a 95 % upper bound of 0.0881 per horizon for each
+  detector. A zero count is not a zero rate.
+- **No claim that threshold robustness compensates for the latency
+  penalty.** Phase 4 measured both and converts between neither.
+- **No universal detector superiority**, for CSIA, CUSUM or the bare
+  threshold. The ranking here belongs to this fault on this node.
 
 ## Provenance
 

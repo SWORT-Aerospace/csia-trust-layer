@@ -469,6 +469,49 @@ def _np(values):
     return np.asarray(values, dtype=float)
 
 
+# ================================================ MANIFEST AND MUTATION SCORE
+#
+# Both tests below are DESELECTED from the mutation selection, and the reason
+# is in `tools/mutation/run_phase4_mutations.py`. A sha256 manifest guard
+# fails for EVERY mutant because mutating a file changes its hash, which
+# manufactures a perfect score (FL-033); and a test that pins this run's own
+# score cannot sit inside the selection that run measures, because changing
+# the code changes the score and the unmutated baseline then fails for a
+# reason unrelated to any mutant. They belong in the suite, not in a mutation
+# selection.
+
+def test_the_manifest_matches_every_file_it_lists():
+    manifest = json.loads((P4 / "SHA256_MANIFEST4.json").read_text("utf-8"))
+    bad = [rel for rel, want in manifest["files"].items()
+           if hashlib.sha256((ROOT / rel).read_bytes()).hexdigest() != want]
+    assert bad == [], bad
+    assert manifest["frozen_core"]["mismatches"] == []
+    assert manifest["pooled_with_consequence_phases"] is False
+
+
+def test_the_mutation_counts_match_the_write_up():
+    """The score, the integrity conditions, and the write-up, pinned together.
+
+    A mutation score means nothing without the conditions under which it was
+    produced, so those are asserted here rather than trusted: the unmutated
+    baseline passed, the canary died, every kill is attributed to a TEST
+    NODE and none to a bare file, and nothing was recorded as invalid.
+    """
+    d = json.loads((P4 / "results" / "PHASE4_MUTATION_RESULTS.json")
+                   .read_text("utf-8"))
+    assert d["baseline_unmutated"]["returncode"] == 0
+    assert d["canary"]["verdict"] == "KILLED"
+    assert d["kills_attributed_to_a_bare_file"] == 0
+    assert d["kills_attributed_to_a_test_node"] == d["killed"]
+    assert d["invalid"] == 0
+    assert (d["evaluated"], d["killed"], d["survived"]) == (17, 17, 0)
+
+    text = (P4 / "PHASE4_RESULTS.md").read_text("utf-8")
+    assert "17 evaluated, 17 killed, 0 survived" in text
+    for mutant in d["results"]:
+        assert mutant["id"] in text, f"{mutant['id']} is not in the write-up"
+
+
 #: Filled in after the locked partition was opened and the result sealed.
 _LOCKED_SHA256 = ("c8f3f94b7eefb1e005ac6fd86c3e624f"
                   "47d083ef18fc48b766351210cdda57f7")

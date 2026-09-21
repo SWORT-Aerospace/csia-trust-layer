@@ -42,13 +42,14 @@ rung of that ladder.
 | C24 | The effect holds at every gain in the declared grid, 1.5 through 4.0 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `tests` |
 | C25 | Crossing time and conflict rate are both non-monotone in fault rate on the secondary arm (40, 40, 31, 0, 0) | `MODEL_BASED_ACTION_CONSEQUENCE` | same, FL-031 |
 | C26 | 0 invalid runs over 880 locked scenarios; the campaign replays byte-identically | measured | `phase32/REPRODUCE32.md`, `SHA256_MANIFEST32.json` |
-| C27 | At the matched zero-false-alarm operating point on the `vibration` node, CSIA trust persistence has median detection delay 2.52 s against 0.08 s for both CUSUM (h = 200) and a bare threshold (μ₀+10σ₀), all three at 0/40 false alarms and 800/800 detections | `DETERMINISTIC_SIMULATION` | `research/phase4/results/PHASE4_RESULTS_LOCKED.json` |
+| C27 | At the matched operating point on the `vibration` node — **zero false alarms observed** for all three — CSIA trust persistence has median detection delay 2.52 s against 0.08 s for both CUSUM (h = 200) and a bare threshold (μ₀+10σ₀); observed FAR 0/40 nominal runs, CI [0.0, 0.0881], 0 pre-onset alarms on 800 faulted runs, 800/800 detections. **A tradeoff result, not a superiority result** | `DETERMINISTIC_SIMULATION` | `research/phase4/results/PHASE4_RESULTS_LOCKED.json` |
 | C28 | The matching selected CSIA's **fastest** grid threshold: all twelve θ have development FAR 0.000, so the comparison is not an artefact of an unfavourable CSIA operating point | `DETERMINISTIC_SIMULATION` | same, `full_grid_development` |
-| C29 | CSIA's locked false-alarm rate is 0.000 at **12 of 12** declared thresholds; CUSUM's at 5 of 10 and the bare threshold's at 1 of 8 | `DETERMINISTIC_SIMULATION` | same, `full_grid_locked` |
+| C29 | CSIA's **observed** locked false-alarm rate is 0/40 at **12 of 12** declared thresholds; CUSUM's at 5 of 10 and the bare threshold's at 1 of 8. This is threshold robustness, not detection performance | `DETERMINISTIC_SIMULATION` | same, `full_grid_locked` |
 | C30 | CSIA's detection delay is **non-monotone in fault magnitude** — fastest at the weakest gain (2.26 s at 1.5, 2.60 s at 4.0) — and monotone in onset time (2.36 s → 2.76 s) | `DETERMINISTIC_SIMULATION` | same, `by_gain`, `by_onset` |
 | C31 | Two of CSIA's twelve thresholds cannot detect this fault reliably: θ = 0.30 misses 25.4 %, θ = 0.20 misses 99.9 % | `DETERMINISTIC_SIMULATION` | same |
 | C32 | At `TARGET_FAR = 0.10` the bare threshold's locked FAR (0.125) exceeds the development FAR it was selected on (0.083); it is reported and **not** re-selected | `DETERMINISTIC_SIMULATION` | same, `operating_points` |
-| C33 | Two independent locked passes agree on every measured quantity over 840 runs | measured | `phase4/REPRODUCE4.md`, `replay_check4.py` |
+| C33 | **Three** independent locked passes agree pairwise on every measured quantity over 840 runs | measured | `phase4/REPRODUCE4.md`, `replay_check4.py` |
+| C34 | Phase-4 mutation: **17 evaluated, 17 killed, 0 survived**, on a green unmutated baseline with a killed canary, every kill attributed to a distinct behavioural test node and none to a bare file | measured | `phase4/results/PHASE4_MUTATION_RESULTS.json` |
 
 ## Hypotheses
 
@@ -94,6 +95,11 @@ against the mechanism on delay.**
   one fault family, and a large abrupt sustained step — the easy case for the
   memoryless comparators. No drift, incipient, intermittent or multi-node
   fault was tested.
+- **That any detector has a zero false-alarm PROBABILITY.** Zero was
+  *observed*, over 16 000 s of simulated flight; the 95 % upper bound is
+  0.0881 per horizon for each of the three. A zero count is not a zero rate.
+- **That threshold robustness compensates for CSIA's latency penalty.**
+  Phase 4 measured both and converts between neither.
 - **That the occlusion is harmless in general.** Phase 3 tested 3 of 8
   candidates, one airframe profile, one trajectory family, two fault families.
 - **That the support-aware policy is safe or unsafe.** Phase 3.1 shows it

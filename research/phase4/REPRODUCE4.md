@@ -63,6 +63,9 @@ failure that was not one, and that is recorded as **FL-036**.
 Expect `P4_REPLAY_IDENTICAL=yes`: all 840 runs, all three detectors, every
 declared threshold, all three alarm times.
 
+**Three** passes were run for the committed result, compared pairwise
+(1 vs 2, 1 vs 3, 2 vs 3). All three agree.
+
 ## 4. Evaluation
 
 The evaluator is standard library only and imports no CSIA module — a test
