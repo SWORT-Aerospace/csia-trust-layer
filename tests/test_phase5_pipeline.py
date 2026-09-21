@@ -379,3 +379,49 @@ def test_reordering_the_runs_changes_no_reported_number():
     assert shuffled["runs"] != locked["runs"]
     text = json.dumps(ev5.build(dev, shuffled), indent=1, sort_keys=True) + "\n"
     assert text == SEALED.read_text(encoding="utf-8")
+
+
+# ============================================ MANIFEST AND MUTATION SCORE
+#
+# Both DESELECTED from the mutation selection, for the reasons in
+# `tools/mutation/run_phase5_mutations.py`: a sha256 manifest guard fails for
+# every mutant (FL-033), and a test pinning this run's own score cannot sit
+# inside the selection that run measures.
+
+MANIFEST = P5 / "SHA256_MANIFEST5.json"
+MUTATION = P5 / "results" / "PHASE5_MUTATION_RESULTS.json"
+
+
+@pytest.mark.skipif(not MANIFEST.exists(), reason="manifest not yet built")
+def test_the_manifest_matches_every_file_it_lists():
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    bad = [rel for rel, want in m["files"].items()
+           if hashlib.sha256((ROOT / rel).read_bytes()).hexdigest() != want]
+    assert bad == [], bad
+    assert m["frozen_core"]["mismatches"] == []
+    assert m["pooled_with_earlier_phases"] is False
+    assert m["is_experimental"] is True
+
+
+@pytest.mark.skipif(not MUTATION.exists(), reason="mutation not yet run")
+def test_the_mutation_counts_match_the_write_up():
+    """The score, its integrity conditions, and the write-up, pinned together.
+
+    A mutation score means nothing without the conditions that produced it,
+    so those are asserted rather than trusted.
+    """
+    d = json.loads(MUTATION.read_text(encoding="utf-8"))
+    assert d["baseline_unmutated"]["returncode"] == 0
+    assert d["canary"]["verdict"] == "KILLED"
+    assert d["kills_attributed_to_a_bare_file"] == 0
+    assert d["kills_attributed_to_a_test_node"] == d["killed"]
+    assert d["invalid"] == 0
+    assert d["evaluated"] == d["killed"] + d["survived"]
+
+    write_up = P5 / "PHASE5_RESULTS.md"
+    if write_up.exists():
+        text = write_up.read_text(encoding="utf-8")
+        assert (f"{d['evaluated']} evaluated, {d['killed']} killed, "
+                f"{d['survived']} survived") in text
+        for mutant in d["results"]:
+            assert mutant["id"] in text, f"{mutant['id']} not in the write-up"
