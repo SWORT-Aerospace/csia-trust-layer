@@ -5396,3 +5396,89 @@ entries:
     artifact: >-
       research/phase5/evaluate5.py (paired_noninferior, paired_risk_difference);
       tests/test_phase5_pipeline.py
+
+  - id: FL-041
+    date: 2026-09-21
+    phase: Phase 5 locked evaluation (numerical, found on first locked run)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      Clopper-Pearson raised OverflowError on the locked partition. The
+      binomial term was computed as math.comb(n, i) * p**i * (1-p)**(n-i),
+      which evaluates an EXACT integer binomial coefficient first and only
+      then multiplies by the tiny probability factors. At n = 1280 that
+      coefficient is around 10^383, and the conversion to float overflows
+      before the factors can bring it back into range. The product is a
+      probability in [0, 1] throughout; only the intermediate blows up. The
+      evaluator could not produce any interval at all, so the locked
+      evaluation aborted rather than reporting a wrong number.
+    found_by: >-
+      Running the locked evaluation. Phase 5's largest denominator is 1360
+      against Phase 4's 840, and the form works at 840 and fails above it,
+      so nothing earlier could have exposed it.
+    honest_limit: >-
+      This is a numerical defect, not a scoring one. It is also the least
+      dangerous kind: it raised rather than returning a plausible wrong
+      interval, so no result was ever computed from it. That is luck, not
+      design -- the same formula silently loses precision well before it
+      overflows.
+    verdict: CORRECTED
+    consequence: >-
+      Each binomial term is now computed in log space via lgamma and
+      exponentiated once. Verified EQUIVALENT on every case where the old
+      form worked, including k=50 n=800 and k=0 n=800, which are Phase 4's
+      largest: all nine probe cases agree to the reported six decimals, and
+      n = 1280 and n = 1360 now evaluate. PHASE 4 IS THEREFORE UNAFFECTED --
+      its maximum denominator is 800, the values are identical, and
+      research/phase4/evaluate4.py was NOT modified because its results are
+      sealed and do not change. The fix is confined to
+      research/phase5/evaluate5.py.
+    artifact: >-
+      research/phase5/evaluate5.py (_binom_pmf, _log_comb, clopper_pearson)
+
+  - id: FL-042
+    date: 2026-09-21
+    phase: Phase 5 mutation (harness defect, affects any runner)
+    kind: VERIFICATION_DEFECT
+    what_happened: >-
+      A full Phase-5 mutation batch reported 23 evaluated, 22 killed, 1
+      survived -- and the score was MANUFACTURED. Mutants 5-12 through 5-23
+      were all recorded as killed by
+      test_the_correction_grows_the_separating_set_for_the_decision_pair, a
+      test that has nothing to do with what any of them mutate. Run in
+      isolation, each is killed by its own test.
+      The mechanism is CPython bytecode caching. A .pyc is validated against
+      the source's (mtime, size). Mutant 5-11 replaces "^" with "|" -- the
+      SAME LENGTH -- and when the restore writes the original back inside the
+      same mtime tick, the interpreter sees an unchanged source and reuses
+      the MUTATED bytecode. The restore silently does nothing, and every
+      later mutant runs against a module that is still broken.
+    found_by: >-
+      Reading the first-failure column instead of the score. Twelve
+      consecutive mutants across four different target files cannot all be
+      killed by one FL-029 test; that pattern is contamination, not killing.
+    honest_limit: >-
+      The failure is FLAKY, which is worse than a consistently wrong one. A
+      four-mutant probe spanning the same boundary (5-10, 5-11, 5-12, 5-13)
+      shows no contamination at all -- each is killed by its own test -- so
+      it reproduces only under the timing of a long batch. A reviewer
+      spot-checking a few mutants would have seen nothing wrong. The
+      unmutated-baseline check cannot catch it either, because the baseline
+      runs before any mutant is applied.
+    verdict: CORRECTED
+    consequence: >-
+      run_phase5_mutations.py now purges every __pycache__ in the sandbox
+      after every source edit -- after apply, after restore, and before the
+      baseline -- and records bytecode_purged_after_every_source_edit in its
+      result document. run_mutations._env is deliberately NOT changed:
+      the published E2M, Phase-3.1, Phase-3.2 and Phase-4 scores were
+      produced under it, and silently altering their environment would make
+      those numbers describe a configuration that no longer exists.
+      BLAST RADIUS, MEASURED rather than assumed: the defect can only bite
+      where a replacement is the same length as what it replaces. Across all
+      five runners that is E2M SUP-01, SUP-05 and P3-07; Phase-4 4-01; and
+      Phase-5 5-03 and 5-11. Phase-3.1 and Phase-3.2 have none and are
+      unaffected. Phase 4's published 17 of 17 is therefore AT RISK and is
+      being re-measured; no claim rests on it until that completes.
+    artifact: >-
+      tools/mutation/run_phase5_mutations.py (purge_bytecode);
+      research/phase5/results/PHASE5_MUTATION_RESULTS.json

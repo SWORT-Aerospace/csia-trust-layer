@@ -68,17 +68,37 @@ class DocumentError(ValueError):
 
 # ----------------------------------------------------------------- exact stats
 
+def _log_comb(n: int, i: int) -> float:
+    return (math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1))
+
+
+def _binom_pmf(p: float, n: int, i: int) -> float:
+    """One binomial term, computed in LOG SPACE.
+
+    The obvious form -- `math.comb(n, i) * p**i * (1-p)**(n-i)` -- evaluates
+    an exact integer binomial coefficient first and only then multiplies by
+    the tiny probability factors. At n = 1280 that coefficient is around
+    10^383 and the multiplication raises OverflowError before the factors
+    can bring it back down. The product is a probability in [0, 1] the whole
+    time; only the intermediate blows up. See FL-041.
+    """
+    if p <= 0.0:
+        return 1.0 if i == 0 else 0.0
+    if p >= 1.0:
+        return 1.0 if i == n else 0.0
+    return math.exp(_log_comb(n, i) + i * math.log(p)
+                    + (n - i) * math.log1p(-p))
+
+
 def clopper_pearson(k: int, n: int, alpha: float = ALPHA) -> List[float]:
     if n == 0:
         return [0.0, 1.0]
 
     def at_least(p, m):
-        return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i)
-                   for i in range(m, n + 1))
+        return sum(_binom_pmf(p, n, i) for i in range(m, n + 1))
 
     def at_most(p, m):
-        return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i)
-                   for i in range(0, m + 1))
+        return sum(_binom_pmf(p, n, i) for i in range(0, m + 1))
 
     def bisect(f, target):
         lo, hi = 0.0, 1.0

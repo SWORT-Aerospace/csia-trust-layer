@@ -102,12 +102,21 @@ def test_a_gated_tick_is_not_evidence_for_the_fast_path():
 
 
 def test_provisional_requires_the_declared_dwell():
+    """The dwell is pinned to a LITERAL, not to the module's own constant.
+
+    The first version of this test compared against `PROVISIONAL_TICKS`
+    imported from the module under test, so a mutant that changed the
+    constant changed the expectation with it and the test could never fail.
+    Mutant `5-03` survived on exactly that. A test that reads the value it is
+    checking is not a test. See FL-042's survivor list.
+    """
+    assert PROVISIONAL_TICKS == 5, (
+        "the declared dwell is five ticks; changing it is a design decision "
+        "that must move this literal too")
     det = FastChangeDetector(node="vibration", h_fast=1.0)
-    seen = []
-    for k in range(PROVISIONAL_TICKS + 3):
-        seen.append(det.update(k * 0.04, 50.0, 1.0).verdict)
-    assert seen.count(SUSPECTED_CHANGE) == PROVISIONAL_TICKS - 1
-    assert seen[PROVISIONAL_TICKS - 1] == PROVISIONAL_DEGRADATION
+    seen = [det.update(k * 0.04, 50.0, 1.0).verdict for k in range(8)]
+    assert seen[:4] == [SUSPECTED_CHANGE] * 4
+    assert seen[4] == PROVISIONAL_DEGRADATION
 
 
 def test_the_fast_path_refuses_an_uncovered_node():
@@ -299,13 +308,49 @@ def test_the_detector_only_baselines_are_flagged_as_having_no_policy():
         assert bl.BY_ID[bid].has_policy is False
 
 
-def test_the_hybrid_downgrades_and_never_abstains():
-    """The whole difference from P2, asserted rather than described."""
-    class _S:
-        t = 30.0
-    out = bl.hybrid_decide(_S(), 2, (), pair_supported=False,
-                           fast_provisional=False)
-    assert out.response != "ABSTAIN"
+def _select_imu_action():
+    """A real SELECT_IMU action, so the downgrade branch is actually entered."""
+    class _Action:
+        name = "SELECT_IMU"
+        params = {"use": "imu1"}
+    return (_Action(),)
+
+
+class _State:
+    t = 30.0
+
+
+def test_the_hybrid_downgrades_an_unsupported_attribution_to_an_action():
+    """The whole difference from P2, and it must actually reach the branch.
+
+    The first version passed no actions, so `p0_decide` returned a generic
+    caution and the ATTRIBUTING branch was never entered -- the test asserted
+    `!= ABSTAIN` about a code path that cannot produce ABSTAIN. Mutant `5-16`,
+    which replaces the downgrade with an abstention, survived it. The test now
+    supplies a real SELECT_IMU action and checks both directions.
+    """
+    unsupported = bl.hybrid_decide(_State(), 2, _select_imu_action(),
+                                   pair_supported=False,
+                                   fast_provisional=False)
+    assert unsupported.response == "CAUTION_GENERIC", (
+        "an unsupported attribution must become a non-attributing ACTION, "
+        "not a refusal")
+    assert unsupported.response != "ABSTAIN"
+
+    supported = bl.hybrid_decide(_State(), 2, _select_imu_action(),
+                                 pair_supported=True, fast_provisional=False)
+    assert supported.response == "SELECT_IMU1", (
+        "a supported attribution must pass through untouched")
+
+
+def test_a_provisional_fast_alarm_adds_a_caution_where_the_policy_is_silent():
+    """Mutant `5-17` deleted this branch and survived: nothing covered it."""
+    quiet = bl.hybrid_decide(_State(), 0, (), pair_supported=True,
+                             fast_provisional=False)
+    assert quiet.response == "NONE"
+    roused = bl.hybrid_decide(_State(), 0, (), pair_supported=True,
+                              fast_provisional=True)
+    assert roused.response == "CAUTION_GENERIC"
 
 
 # --- partitions -----------------------------------------------------------

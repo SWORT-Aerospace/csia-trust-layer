@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
 
@@ -31,6 +32,41 @@ from run_e2m_mutations import (apply_from, package_files,  # noqa: E402
                                sync_working_tree, working_tree_delta)
 from run_mutations import (classify, drop_sandbox, make_sandbox,  # noqa: E402
                            run_tests)
+
+
+def purge_bytecode(sandbox: str) -> int:
+    """Delete every __pycache__ in the sandbox. Call after EVERY source edit.
+
+    WHY THIS IS NOT PARANOIA
+    ------------------------
+    CPython validates a cached .pyc against the source's (mtime, size). A
+    mutation that replaces a string with one of the SAME LENGTH, restored
+    within the same mtime tick, produces a source file the interpreter
+    considers unchanged -- so it reuses the MUTATED bytecode and the restore
+    silently does nothing. Every mutant after that one then runs against a
+    module that is still broken, and is "killed" by damage that is not its
+    own.
+
+    That is not hypothetical here. Mutant `5-11` replaces `^` with `|` --
+    identical length -- and a full batch reported mutants `5-12` through
+    `5-23` all failing on `5-11`'s test, while the same mutants run in a
+    short batch are killed by their own tests. The score was manufactured and
+    the failure was FLAKY, which is worse than a consistently wrong one:
+    it reproduces only under the timing of a long run.
+
+    Recorded as FL-042. `run_mutations._env` is deliberately NOT changed,
+    because the published E2M, Phase-3.1, Phase-3.2 and Phase-4 scores were
+    produced under it and silently altering their environment would make
+    those numbers describe a configuration that no longer exists.
+    """
+    removed = 0
+    for dirpath, dirnames, _files in os.walk(sandbox):
+        for d in list(dirnames):
+            if d == "__pycache__":
+                shutil.rmtree(os.path.join(dirpath, d), ignore_errors=True)
+                dirnames.remove(d)
+                removed += 1
+    return removed
 
 MUTANTS = []
 
@@ -258,6 +294,7 @@ def main(argv=None) -> int:
             + working_tree_delta())
         originals = read_originals(sandbox, targets)
 
+        purge_bytecode(sandbox)
         baseline = run_tests(sandbox, selection, timeout=args.timeout)
         if baseline["returncode"] != 0:
             raise SystemExit(
@@ -267,8 +304,10 @@ def main(argv=None) -> int:
 
         if not apply_from(sandbox, originals, CANARY):
             raise SystemExit("ABORT: canary anchor not found")
+        purge_bytecode(sandbox)
         canary = run_tests(sandbox, selection, timeout=args.timeout)
         restore_from(sandbox, originals, CANARY["path"])
+        purge_bytecode(sandbox)
         if canary["returncode"] == 0:
             raise SystemExit("ABORT: the canary SURVIVED.")
 
@@ -279,8 +318,10 @@ def main(argv=None) -> int:
                                 "why": "anchor text not found"})
                 print(f"  {mutant['id']:8s} INVALID_MUTANT", flush=True)
                 continue
+            purge_bytecode(sandbox)
             outcome = run_tests(sandbox, selection, timeout=args.timeout)
             restore_from(sandbox, originals, mutant["path"])
+            purge_bytecode(sandbox)
             verdict = classify(mutant, outcome)
             first = outcome["first_failure"]
             results.append({**mutant, "verdict": verdict,
@@ -307,6 +348,12 @@ def main(argv=None) -> int:
         "targets": sorted({m["path"] for m in MUTANTS}),
         "selection": selection,
         "deselected": DESELECT,
+        "bytecode_purged_after_every_source_edit": True,
+        "why_bytecode_is_purged": (
+            "a same-length replacement restored within one mtime tick leaves "
+            "CPython reusing the MUTATED .pyc, so the restore silently does "
+            "nothing and every later mutant is killed by damage that is not "
+            "its own. Observed on this runner; see FL-042."),
         "why_deselected": (
             "a sha256 manifest guard fails for every mutant because mutating "
             "a file changes its hash, and a test that pins this run's own "
