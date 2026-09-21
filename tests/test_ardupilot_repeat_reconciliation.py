@@ -202,6 +202,14 @@ def test_the_a2_dwells_match_the_derived_watchdog():
     campaign = os.path.join(ROOT, "campaigns", "physical_validation",
                             "mechanism_a_trust_completion_a2")
     _skip_without(campaign)
+    # The campaign manifests are committed; the SITL logs they point at are
+    # not -- logs/ is gitignored. Guarding only the manifests meant that on
+    # a fresh clone this collected 0 dwells and reported "expected 20 FAULT
+    # logs, found 0", which reads as a broken reconciliation when the real
+    # finding is that the logs are absent. Guard the log directory too. If
+    # it EXISTS the count assertion below still stands at full strength: a
+    # partial set of logs is a genuine failure, not a reason to skip.
+    _skip_without(os.path.join(ROOT, "logs", "shadow-sitl-ardupilot"))
     derived = build_runtime_stale_timeouts("ardupilot")["gps"]
     dwells = []
     for name in sorted(os.listdir(campaign)):

@@ -89,6 +89,41 @@ ALLOWED_MISSING = {
 }
 
 
+# Paths that are GITIGNORED BY DESIGN: measurement output that a machine
+# which ran the campaign has and a fresh clone never does. These belong in
+# neither category above. ALLOWED_MISSING is wrong for them because the
+# staleness test would fire the moment someone runs the campaign and the
+# file appears; treating them as broken is wrong because the citation is
+# correct and the file is deliberately not committed. So they are exempt in
+# BOTH directions, and an entry must name a path git actually ignores --
+# enforced below, so this cannot become a place to park a genuinely broken
+# reference.
+#: Directories that are SELF-CONTAINED DELIVERABLES. A document inside one
+#: cites paths relative to that directory, not to the repository root,
+#: because the whole point of the deliverable is that it works when the
+#: repository is not there. Resolving its citations against ROOT asks the
+#: wrong question and gets a wrong answer: `scripts/reproduce.py` is correct
+#: inside the package and meaningless outside it.
+#:
+#: This is narrow on purpose. It is a list of directories, not a rule that
+#: any document may be read relative to itself -- the repository's
+#: convention is repo-relative citation and that stays enforced everywhere
+#: else. Each entry must exist, so a renamed or deleted deliverable is
+#: reported rather than silently widening the exemption.
+SELF_CONTAINED_ROOTS = (
+    "Gate_Conditioning_v2_2_REPRO_PACKAGE",
+)
+
+
+UNTRACKED_BY_DESIGN = {
+    "research/v1_1/results/.px4_link_probe/passive/log/2026-08-25/"
+    "22_13_43.ulg":
+        "PX4 passive link probe output; research/v1_1/results/"
+        ".px4_link_probe/ is gitignored, so this exists only on the machine "
+        "that ran the probe",
+}
+
+
 def _latex_files():
     r"""LaTeX cites repository paths too, in \code{} and \texttt{}.
 
@@ -136,6 +171,7 @@ def test_every_repository_path_cited_in_latex_exists():
     cited = _latex_cited_paths()
     broken = {p: f for p, f in cited.items()
               if p not in ALLOWED_MISSING
+              and p not in UNTRACKED_BY_DESIGN
               and not os.path.exists(os.path.join(ROOT, p))}
     assert not broken, (
         "the manuscript cites repository paths that do not exist:\n"
@@ -167,12 +203,38 @@ def _cited_paths():
     return {k: sorted(v) for k, v in found.items()}
 
 
+def _resolves(path, citing_files):
+    """Does this citation resolve, from the root or from its own deliverable?
+
+    A path cited only from inside a self-contained deliverable is resolved
+    against that deliverable. A path cited from anywhere else must resolve
+    against ROOT, as the repository's convention requires.
+    """
+    if os.path.exists(os.path.join(ROOT, path)):
+        return True
+    for citing in citing_files:
+        top = citing.replace("\\", "/").split("/")[0]
+        if top in SELF_CONTAINED_ROOTS and \
+                os.path.exists(os.path.join(ROOT, top, path)):
+            return True
+    return False
+
+
+def test_every_self_contained_root_exists():
+    """A stale entry would silently exempt nothing, or worse, something else."""
+    for d in SELF_CONTAINED_ROOTS:
+        assert os.path.isdir(os.path.join(ROOT, d)), (
+            f"{d} is declared a self-contained deliverable but does not "
+            f"exist; drop it from SELF_CONTAINED_ROOTS")
+
+
 def test_every_repository_path_cited_in_markdown_exists():
     cited = _cited_paths()
     assert cited, "found no repo-path citations at all -- the regex is broken"
     broken = {p: f for p, f in cited.items()
               if p not in ALLOWED_MISSING
-              and not os.path.exists(os.path.join(ROOT, p))}
+              and p not in UNTRACKED_BY_DESIGN
+              and not _resolves(p, f)}
     assert not broken, (
         "Markdown cites repository paths that do not exist:\n"
         + "\n".join(f"  {p}\n      cited by {', '.join(f)}"
@@ -235,3 +297,25 @@ def test_the_allowlist_stays_small_enough_to_read():
         "stops being a list of known exceptions and starts being a way to "
         "ignore the guard; fix the paths instead, or raise the cap "
         "deliberately with a reason.")
+
+
+def test_every_untracked_by_design_entry_is_really_gitignored():
+    """The second exemption list must not become a softer allowlist.
+
+    ALLOWED_MISSING is for paths that do not exist anywhere;
+    UNTRACKED_BY_DESIGN is for paths git deliberately does not carry. The
+    difference is checkable, so it is checked: `git check-ignore` must claim
+    every entry. A genuinely broken citation parked here fails this test
+    rather than passing quietly, and each entry still needs a real reason.
+    """
+    import subprocess
+    assert UNTRACKED_BY_DESIGN, "the category is empty; drop it rather than "\
+        "keeping an unused exemption list"
+    for path, why in UNTRACKED_BY_DESIGN.items():
+        assert isinstance(why, str) and len(why.strip()) >= 20, path
+        r = subprocess.run(["git", "check-ignore", "-q", path],
+                           cwd=ROOT, capture_output=True)
+        assert r.returncode == 0, (
+            f"{path} is exempted as untracked-by-design but git does not "
+            f"ignore it; either fix the citation or move the entry to "
+            f"ALLOWED_MISSING with a reason")

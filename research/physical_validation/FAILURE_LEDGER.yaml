@@ -5710,3 +5710,66 @@ entries:
       tests/test_ardupilot_repeat_reconciliation.py;
       tests/test_markdown_paths.py;
       research/physical_validation/results/BUILD_PROVENANCE.json
+
+  - id: FL-047
+    date: 2026-09-21
+    phase: Gate-conditioning paper -- standalone reproduction package
+    kind: METHOD
+    what_happened: >-
+      A self-contained reproduction package was built for the gate-conditioning
+      manuscript and verified by unpacking SOURCE_ARCHIVE.zip into an empty
+      directory and running the whole documented procedure there, with no
+      repository, no external source checkout, no untracked state and no
+      network. The audit script is vendored BYTE-IDENTICAL; the reproduction
+      driver sets exactly two module attributes on it -- the output path, and
+      a revision helper that returns "UNKNOWN" where no version-control tool
+      exists -- and touches no seed, tolerance, number or proposition. The
+      regenerated proof_audit.json matches the committed artifact exactly
+      apart from the git commit field, which is declared environment-specific
+      in the output verifier and compared for presence and type rather than
+      value.
+    found_by: >-
+      Three defects were caught by the package's own checks rather than by
+      inspection. FIRST, expected_outputs had been seeded from a run of the
+      self-containment check with --fast, while the README instructs the full
+      probe; the output verifier rejected the mismatch (4 paths opened versus
+      5) instead of absorbing it. SECOND, the first self-containment check
+      matched test FILENAMES and prose alike, so it failed on the vendored
+      formal sources whose text correctly cites the repository the package
+      came from; the scan is now graded, with the run-time open() probe as the
+      load-bearing check because it does not care how a path was spelled.
+      THIRD, the manifest and the archive were mutually circular -- the
+      archive contains the manifest, so hashing the archive inside it changes
+      it -- resolved by building the manifest first and documenting the
+      exclusion rather than dropping the archive from the reader's reach.
+    honest_limit: >-
+      Several, all real. The vendored wheels are built for CPython 3.12 on
+      x86-64 Linux, so the OFFLINE install works only there; elsewhere a
+      reader must install from an index, which is the one networked step and
+      is labelled as such. Nothing after it touches a network. The package
+      reproduces MATHEMATICS ONLY: it carries no empirical data, no flight
+      validation, no hardware result and no certification claim, and its
+      numerical examples are model-generated from a seeded generator -- they
+      illustrate and check algebra and say nothing about any vehicle. The
+      source-attribution controls check that attribution is PRESENT AND
+      CONSISTENT and that the manuscript asserts no novelty and claims no
+      priority; they verify no citation, and every prior-art row remains
+      unverified against a publisher record. The name "srcattr" has no
+      upstream referent and the reading given to it is stated in the script
+      so it can be disputed.
+    verdict: PASS
+    consequence: >-
+      The clean-directory test passes: hashes check, offline install
+      succeeds, and reproduce, srcattr_controls, check_self_contained,
+      verify_outputs and verify_environment all exit zero from an empty
+      directory. Only on that evidence is the package called reproducible.
+      The manuscript itself is UNCHANGED -- the vendored .tex differs from
+      papers/gate_conditioning/main.tex in exactly one token,
+      \bibliography{refs} to \bibliography{references}, because the package
+      names its bibliography references.bib. No mathematics, equation,
+      number, limitation, claim status or wording was touched, and the
+      paper's own limitations are restated in README_REPRODUCE.md so a reader
+      of the package meets them without going looking.
+    artifact: >-
+      Gate_Conditioning_v2_2_REPRO_PACKAGE/ (README_REPRODUCE.md, SHA256SUMS,
+      SOURCE_ARCHIVE.zip, scripts/, source/, expected_outputs/, vendor/wheels/)

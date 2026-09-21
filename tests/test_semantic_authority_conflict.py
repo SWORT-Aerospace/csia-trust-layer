@@ -78,6 +78,18 @@ def test_the_gnss_split_still_reproduces():
 # ------------------------------------------------ authorities stay distinct
 def test_every_authority_citation_still_resolves():
     A = _load("_authorities", "authorities.py")
+    # Every citation here points into the ArduPilot checkout at A.AP, which
+    # lives OUTSIDE this repository and is absent from a fresh clone. With
+    # no guard this reported 8 unresolved citations, 5 of them as "bad
+    # schema locator" -- _verify_schema uses that message for a missing
+    # common.xml as well as for a malformed locator -- which reads as eight
+    # broken citations when the real finding is one missing checkout. An
+    # absent source tree means the citations are UNTESTED here, which is
+    # said out loud rather than passed over. When the checkout IS present
+    # the check runs at full strength and a single bad citation still fails.
+    if not os.path.isdir(A.AP):
+        pytest.skip(f"ArduPilot checkout not present at {A.AP}; authority "
+                    f"citations are untested here, not assumed to resolve")
     bad = []
     for case in A.CASES:
         for name, a in case["authorities"].items():
