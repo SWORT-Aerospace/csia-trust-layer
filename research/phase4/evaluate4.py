@@ -92,9 +92,21 @@ def quantile(values: List[float], q: float) -> Optional[float]:
 
 
 def bootstrap_ci(values: List[float], q: float) -> Optional[List[float]]:
-    """Percentile bootstrap, fixed seed, or None when there is too little."""
+    """Percentile bootstrap, fixed seed, or None when there is too little.
+
+    THE INPUT IS SORTED FIRST, and that is not cosmetic. Resampling draws by
+    INDEX, so with a fixed seed the interval depends on which permutation of
+    the delays the caller happened to pass -- and that permutation is the
+    order the runs sit in the campaign file, which is arbitrary. Two files
+    holding identical data in different order would then report different
+    intervals. Sorting makes the interval a function of the multiset of
+    delays, which is what it is supposed to be. Found by the test that
+    shuffles the committed locked runs and asserts nothing moves; see
+    FL-037.
+    """
     if len(values) < MIN_DETECTIONS_FOR_CI:
         return None
+    values = sorted(values)
     rng = random.Random(BOOTSTRAP_SEED)
     n = len(values)
     stats = []
@@ -110,16 +122,55 @@ def _thresholds(document: dict, detector: str) -> List[str]:
     return [repr(v) for v in document["grids"][detector]]
 
 
+ALARM_KEYS = ("first", "after_settle", "after_onset")
+REQUIRED_KEYS = ("runs", "grids", "settle_s", "horizon_s", "fault", "seeds")
+
+
 def validate(document: dict) -> dict:
-    for key in ("runs", "grids", "settle_s", "horizon_s", "fault"):
+    """Refuse or explicitly classify a document that is not what it claims.
+
+    REFUSED OUTRIGHT, because no honest number can be computed from them:
+    a missing required key; a duplicate `(seed, gain, onset)`; a run with no
+    alarms for some detector; a run missing a declared threshold; an alarm
+    record missing one of the three alarm times; a nominal run that carries a
+    gain or an onset; a faulted run with no onset; a gain or onset outside
+    the declared grid.
+
+    EXPLICITLY CLASSIFIED, because they are facts a reader must be told
+    rather than errors: a seed that does not carry the full
+    `nominal + gain x onset` cross (`incomplete_seeds`), and a declared grid
+    cell with no run at all (`empty_cells`).
+
+    NOT AN ERROR: the order of `runs`. Every figure here is computed by
+    filtering, so reordering the list changes nothing, and a test asserts
+    that on the real artifact rather than asserting it in prose.
+    """
+    for key in REQUIRED_KEYS:
         if key not in document:
             raise DocumentError(f"document is missing {key!r}")
+    gains = list(document["fault"]["gain_grid"])
+    onsets = list(document["fault"]["onset_grid"])
     seen = set()
     for r in document["runs"]:
         key = (r["seed"], r["gain"], r["onset_s"])
         if key in seen:
             raise DocumentError(f"duplicate run {key}")
         seen.add(key)
+        if r["nominal"]:
+            if r["gain"] is not None or r["onset_s"] is not None:
+                raise DocumentError(
+                    f"run {key} is flagged nominal but carries a fault")
+        else:
+            if r["onset_s"] is None:
+                raise DocumentError(f"faulted run {key} has no onset")
+            if r["gain"] not in gains:
+                raise DocumentError(
+                    f"run {key} has gain {r['gain']!r}, not in the declared "
+                    f"grid {gains}")
+            if r["onset_s"] not in onsets:
+                raise DocumentError(
+                    f"run {key} has onset {r['onset_s']!r}, not in the "
+                    f"declared grid {onsets}")
         for det in DETECTORS:
             if det not in r["alarms"]:
                 raise DocumentError(f"run {key} has no {det} alarms")
@@ -127,13 +178,36 @@ def validate(document: dict) -> dict:
             if missing:
                 raise DocumentError(
                     f"run {key} is missing {det} thresholds {sorted(missing)}")
-    return {"runs_seen": len(seen)}
+            for thr, rec in r["alarms"][det].items():
+                absent = [k for k in ALARM_KEYS if k not in rec]
+                if absent:
+                    raise DocumentError(
+                        f"run {key} {det} {thr} is missing {absent}")
+
+    expected = {(None, None)} | {(g, o) for g in gains for o in onsets}
+    incomplete, empty = [], []
+    for seed in document["seeds"]:
+        have = {(g, o) for (s, g, o) in seen if s == seed}
+        short = sorted(expected - have, key=repr)
+        if short:
+            incomplete.append({"seed": seed, "missing_cells": short})
+    for cell in sorted(expected, key=repr):
+        if not any((g, o) == cell for (_s, g, o) in seen):
+            empty.append(list(cell))
+    return {
+        "runs_seen": len(seen),
+        "seeds_declared": len(document["seeds"]),
+        "cells_per_seed_expected": len(expected),
+        "incomplete_seeds": incomplete,
+        "all_seeds_complete": not incomplete,
+        "empty_declared_cells": empty,
+        "run_order_is_not_an_input": True,
+    }
 
 
 def false_alarms(document: dict, detector: str, threshold: str) -> dict:
     """Over NOMINAL runs only. A run either has a false alarm or it does not,
     so the rate is per horizon."""
-    settle = document["settle_s"]
     nominal = [r for r in document["runs"] if r["nominal"]]
     # `after_settle`, NOT `first`. A latched detector that crossed during
     # the settling window is still alarming inside the horizon, and counting
@@ -148,7 +222,6 @@ def false_alarms(document: dict, detector: str, threshold: str) -> dict:
 
 def detections(document: dict, detector: str, threshold: str,
                *, gain=None, onset=None) -> dict:
-    settle = document["settle_s"]
     faulted = [r for r in document["runs"] if not r["nominal"]
                and (gain is None or r["gain"] == gain)
                and (onset is None or r["onset_s"] == onset)]
@@ -219,8 +292,7 @@ def match_operating_points(dev: dict, targets=TARGET_FAR) -> dict:
 
 
 def build(dev: dict, locked: dict) -> dict:
-    validate(dev)
-    intake = validate(locked)
+    intake = {"development": validate(dev), "locked": validate(locked)}
     chosen = match_operating_points(dev)
 
     matched = {}
@@ -247,8 +319,23 @@ def build(dev: dict, locked: dict) -> dict:
             for o in locked["fault"]["onset_grid"]}
         matched[key] = row
 
-    ns = [r["ns_total"] for r in locked["runs"]]
     ticks = sum(r["ticks"] for r in locked["runs"])
+    cost = {}
+    for field, label in (("ns_series_shared", "series_shared_by_all_three"),
+                         ("ns_csia", "CSIA"), ("ns_cusum", "CUSUM"),
+                         ("ns_binst", "BINST"), ("ns_total", "total")):
+        xs = [r[field] for r in locked["runs"] if field in r]
+        if not xs:
+            continue
+        n_thr = len(locked["grids"].get(label, [])) or None
+        cost[label] = {
+            "mean_ns_per_run": round(sum(xs) / len(xs), 1),
+            "mean_ns_per_tick": round(sum(xs) / ticks, 1),
+            "mean_ns_per_tick_per_threshold":
+                round(sum(xs) / ticks / n_thr, 1) if n_thr else None,
+            "thresholds_in_grid": n_thr,
+        }
+    ns = [r["ns_total"] for r in locked["runs"]]
     return {
         "schema": "csia.phase4.detector_results/1",
         "phase": "4 -- detector performance",
@@ -272,11 +359,15 @@ def build(dev: dict, locked: dict) -> dict:
             "total_runs": len(ns), "total_ticks": ticks,
             "mean_ns_per_run": round(sum(ns) / len(ns), 1) if ns else None,
             "mean_ns_per_tick": round(sum(ns) / ticks, 1) if ticks else None,
-            "note": ("wall clock for the whole series build plus the CUSUM "
-                     "pass, on this container. Environment-specific, not a "
-                     "portable figure, and it covers all three detectors' "
-                     "shared series construction rather than any one "
-                     "detector alone."),
+            "per_detector": cost,
+            "note": ("wall clock on this container: ENVIRONMENT-SPECIFIC and "
+                     "not a portable figure. Each detector's figure covers "
+                     "its FULL declared threshold grid, so the per-threshold "
+                     "column is the one to compare. The series build is "
+                     "shared by all three and is reported on its own line "
+                     "rather than charged to any one of them; it dominates "
+                     "every detector by orders of magnitude, which is the "
+                     "honest headline of this row."),
         },
         "what_this_is_not": (
             "not a consequence measurement, not hardware, not flight, not "

@@ -6,7 +6,9 @@ support it. If a row has no artifact, the claim is not made.
 **The evidence ladder, unchanged from the preregistration:**
 `SOURCE_ANALYSIS` · `DETERMINISTIC_SIMULATION` · `REPLAY` · `SITL` · `HIL` ·
 `BENCH_HARDWARE` · `FLIGHT`. **Nothing in this phase reaches above
-`DETERMINISTIC_SIMULATION`.**
+`DETERMINISTIC_SIMULATION`**, and the consequence rows sit on
+`MODEL_BASED_ACTION_CONSEQUENCE`, which is a model of a response and not a
+rung of that ladder.
 
 ---
 
@@ -40,6 +42,13 @@ support it. If a row has no artifact, the claim is not made.
 | C24 | The effect holds at every gain in the declared grid, 1.5 through 4.0 | `MODEL_BASED_ACTION_CONSEQUENCE` | same, `tests` |
 | C25 | Crossing time and conflict rate are both non-monotone in fault rate on the secondary arm (40, 40, 31, 0, 0) | `MODEL_BASED_ACTION_CONSEQUENCE` | same, FL-031 |
 | C26 | 0 invalid runs over 880 locked scenarios; the campaign replays byte-identically | measured | `phase32/REPRODUCE32.md`, `SHA256_MANIFEST32.json` |
+| C27 | At the matched zero-false-alarm operating point on the `vibration` node, CSIA trust persistence has median detection delay 2.52 s against 0.08 s for both CUSUM (h = 200) and a bare threshold (μ₀+10σ₀), all three at 0/40 false alarms and 800/800 detections | `DETERMINISTIC_SIMULATION` | `research/phase4/results/PHASE4_RESULTS_LOCKED.json` |
+| C28 | The matching selected CSIA's **fastest** grid threshold: all twelve θ have development FAR 0.000, so the comparison is not an artefact of an unfavourable CSIA operating point | `DETERMINISTIC_SIMULATION` | same, `full_grid_development` |
+| C29 | CSIA's locked false-alarm rate is 0.000 at **12 of 12** declared thresholds; CUSUM's at 5 of 10 and the bare threshold's at 1 of 8 | `DETERMINISTIC_SIMULATION` | same, `full_grid_locked` |
+| C30 | CSIA's detection delay is **non-monotone in fault magnitude** — fastest at the weakest gain (2.26 s at 1.5, 2.60 s at 4.0) — and monotone in onset time (2.36 s → 2.76 s) | `DETERMINISTIC_SIMULATION` | same, `by_gain`, `by_onset` |
+| C31 | Two of CSIA's twelve thresholds cannot detect this fault reliably: θ = 0.30 misses 25.4 %, θ = 0.20 misses 99.9 % | `DETERMINISTIC_SIMULATION` | same |
+| C32 | At `TARGET_FAR = 0.10` the bare threshold's locked FAR (0.125) exceeds the development FAR it was selected on (0.083); it is reported and **not** re-selected | `DETERMINISTIC_SIMULATION` | same, `operating_points` |
+| C33 | Two independent locked passes agree on every measured quantity over 840 runs | measured | `phase4/REPRODUCE4.md`, `replay_check4.py` |
 
 ## Hypotheses
 
@@ -51,13 +60,15 @@ support it. If a row has no artifact, the claim is not made.
 | H3 | **NOT SUPPORTED**, and in Phase 3.1 **rejected in the harmful direction** | Phase 3: P0 made 0 incorrect actionable decisions and P2 was inert — the absence of a test. Phase 3.1, separate partition, no pooling: P2 fired in 40/40 eligible scenarios, produced 40 false refusals, prevented 0, and doubled action conflicts. |
 | A1 (Phase 3.1) | **SUPPORTED** | the actionability precondition is reachable; P2 activated in 40/40 eligible scenarios |
 | A2 (Phase 3.1) | **false-refusal direction** | 40 false refusals, 0 prevented incorrect actionable decisions |
-| H4 | **untouched** | needs phase 4, at matched false-alarm operating points |
+| H4 | **SUPPORTED**, direction unfavourable to the mechanism on delay | a matched operating point exists at FAR = 0 for all three detectors and the curves are far from indistinguishable, so neither kill condition fires. CSIA is ~31× slower than both comparators there. **No claim that CUSUM is inferior is made**; on this fault it is not. |
 | H5 | **not killed** | twelve paths classified; H5 predicts nothing, so classification is the whole test |
 | H6 | **not killed** | both mechanisms reproduce, fresh-interpreter import check clean |
 
-**H2 and H3 were tested at `MODEL_BASED_ACTION_CONSEQUENCE` and both were
-rejected.** H1 and H5 remain at `SOURCE_ANALYSIS`; H6's test is about code,
-not about aircraft. H4 is untouched and needs Phase 4.
+**H2 was rejected in Phase 3 and supported in Phase 3.2 on a separate
+partition; H3 was rejected in the harmful direction.** H1 and H5 remain at
+`SOURCE_ANALYSIS`; H6's test is about code, not about aircraft. **H4 has now
+been tested at `DETERMINISTIC_SIMULATION` and is supported, with the direction
+against the mechanism on delay.**
 
 ## Claims this phase does NOT support, listed so they cannot be borrowed
 
@@ -71,9 +82,18 @@ not about aircraft. H4 is untouched and needs Phase 4.
 - **That an autopilot executed anything.** No autopilot path ran. No SITL ran.
   `RUNTIME_REPRODUCED` and `RUNTIME_NOT_REPRODUCED` appear nowhere in the
   results.
-- **That CUSUM is inferior**, or superior, or comparable. Phase 4 has not run,
-  and the preregistration forbids the comparison except at matched false-alarm
-  operating points over a preregistered threshold grid.
+- **That CUSUM is inferior.** Phase 4 has now run at matched false-alarm
+  operating points over the preregistered grid, and CUSUM was **thirty times
+  faster** than CSIA at the same false-alarm rate on this fault. The
+  preregistration forbade claiming CUSUM inferior; the measurement would not
+  have supported it in any case.
+- **That CSIA is a better detector.** It is not, on this fault, on this node,
+  on delay. What it is measurably better at is tolerating a badly chosen
+  threshold, which is a different property.
+- **That any of this generalises to other faults.** Phase 4 tested one node,
+  one fault family, and a large abrupt sustained step — the easy case for the
+  memoryless comparators. No drift, incipient, intermittent or multi-node
+  fault was tested.
 - **That the occlusion is harmless in general.** Phase 3 tested 3 of 8
   candidates, one airframe profile, one trajectory family, two fault families.
 - **That the support-aware policy is safe or unsafe.** Phase 3.1 shows it
@@ -108,8 +128,17 @@ not about aircraft. H4 is untouched and needs Phase 4.
 | The first CSIA-Lite demonstration showed no occlusion, because the two airspeed hypotheses were also separated by a second feature. | `CSIA_LITE.md`, `csia_lite/demo.py` |
 | A mutation run reported 24/24 killed. Every kill was a collection error caused by a module the sandbox never received, so the score was meaningless. A baseline check now refuses to report unless the unmutated selection passes. | `tools/mutation/run_e2m_mutations.py` |
 | `decode()` accepted a frame with one bit flipped in the CRC field, because `int(x, 16)` is case-insensitive. Found by a property test that had been failing about one run in three. | `csia_e2m/protocol.py`, `tests/test_e2m_properties.py` |
+| Phase 4 scored a pre-onset alarm as a detection with negative delay, and scored a latched detector that never stopped alarming as clean. Both were found on development data before the locked partition was opened; the second **changed the matched thresholds**. | FL-035, `phase4/PREREGISTRATION_PHASE4.md` §7 |
+| The Phase-4 reproduction check was a byte-identity comparison of a document that deliberately carries a wall-clock timing field, so it could never pass. The field was kept and the check was fixed, not the other way round. | FL-036, `phase4/replay_check4.py` |
 
 ## What is still missing
 
-Phases 3 and 4. `PHASE_STATUS.md` says what each needs and why a thin version
-of either would be worse than none.
+Every phase the preregistration defines has now run. What is missing is
+everything **above** `DETERMINISTIC_SIMULATION`: no SITL, no HIL, no bench
+hardware, no flight, and no independent party's replication. The E2M hardware
+campaign remains `AUTHORIZED_NOT_RUN`.
+
+The consequence result rests on a model of the response
+(`consequence_model.py`), and the detector result rests on one fault family on
+one node. Neither limit is a detail; they are the reason no row above claims a
+rung it did not reach.

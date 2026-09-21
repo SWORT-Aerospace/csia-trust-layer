@@ -174,23 +174,41 @@ def binst_alarms(s: dict, onset) -> dict:
 
 
 def run_one(seed: int, gain, onset) -> dict:
+    """One flight, all three detectors, every declared threshold.
+
+    TIMING IS PER DETECTOR, because that is what was preregistered. The
+    series build is timed separately and is SHARED: all three detectors read
+    the same `lam`, `gate` and `trust`, so charging it to any one of them
+    would be arbitrary. Each detector's own figure covers its full threshold
+    grid, which is 12 thresholds for CSIA, 10 for CUSUM and 8 for the bare
+    threshold -- so `ns_cusum` is not the cost of one CUSUM, and the write-up
+    divides where a per-threshold figure is meant.
+    """
     faults = ([] if gain is None else
               [Fault("vibration_anomaly", NODE, onset, FAULT_DURATION_S,
                      {"gain": gain})])
-    started = time.perf_counter_ns()
+    t0 = time.perf_counter_ns()
     s = series(seed, faults)
+    t1 = time.perf_counter_ns()
     cusum, S = cusum_alarms(s, onset)
-    elapsed = time.perf_counter_ns() - started
+    t2 = time.perf_counter_ns()
+    csia = csia_alarms(s, onset)
+    t3 = time.perf_counter_ns()
+    binst = binst_alarms(s, onset)
+    t4 = time.perf_counter_ns()
     return {
         "seed": seed, "gain": gain, "onset_s": onset,
         "nominal": gain is None,
         "ticks": int(len(s["t"])),
-        "alarms": {"CSIA": csia_alarms(s, onset), "CUSUM": cusum,
-                   "BINST": binst_alarms(s, onset)},
+        "alarms": {"CSIA": csia, "CUSUM": cusum, "BINST": binst},
         "cusum_max": round(float(S.max()), 4),
         "trust_min": round(float(s["trust"].min()), 6),
         "active_ticks": int((s["gate"] > GATE_EPS).sum()),
-        "ns_total": int(elapsed),
+        "ns_series_shared": int(t1 - t0),
+        "ns_cusum": int(t2 - t1),
+        "ns_csia": int(t3 - t2),
+        "ns_binst": int(t4 - t3),
+        "ns_total": int(t4 - t0),
     }
 
 
@@ -237,6 +255,19 @@ def main(argv=None) -> int:
         "in_control": {"node": NODE, "mu0": MU0, "sigma0": SIGMA0,
                        "source": "csia/v1_1/sequential.py IN_CONTROL"},
         "cusum_k": CUSUM_K,
+        #: Everything else in this document is a deterministic function of
+        #: the seed. `ns_total` is a wall-clock measurement and is not: two
+        #: passes over the same partition agree on every alarm time and
+        #: differ only here. A replay check that demands byte-identity would
+        #: therefore always fail, so the fields that may legitimately differ
+        #: are DECLARED here and `replay_check4.py` excludes exactly these.
+        "environment_specific_fields": [
+            "runs[].ns_total", "runs[].ns_series_shared", "runs[].ns_cusum",
+            "runs[].ns_csia", "runs[].ns_binst"],
+        "timing_note": (
+            "per-detector nanoseconds cover that detector's FULL declared "
+            "threshold grid on one flight; the series build is shared by all "
+            "three and is reported separately rather than charged to one"),
         "fault": {"kind": "vibration_anomaly", "node": NODE,
                   "gain_grid": GAIN_GRID, "onset_grid": ONSET_GRID,
                   "duration_s": FAULT_DURATION_S,

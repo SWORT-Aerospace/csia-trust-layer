@@ -128,9 +128,11 @@ def _alarm(first=None, after_settle=None, after_onset=None):
             "after_onset": after_onset}
 
 
-def _doc(runs, *, partition="fixture"):
+def _doc(runs, *, partition="fixture", seeds=None):
     return {"runs": runs, "settle_s": 10.0, "horizon_s": 60.0,
             "partition": partition,
+            "seeds": sorted({r["seed"] for r in runs}) if seeds is None
+                     else seeds,
             "grids": {"CSIA": [0.9], "CUSUM": [200.0], "BINST": [0.1]},
             "fault": {"gain_grid": [3.0], "onset_grid": [30.0]}}
 

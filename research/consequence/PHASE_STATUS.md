@@ -1,8 +1,9 @@
 # Consequence phase — status by phase
 
 **This phase is not complete, and this file says which parts are not.** The
-preregistration defines nine phases; eight have been executed. The rest are
-listed with what they require, not with a partial result standing in for them.
+preregistration defines nine phases; all nine have now been executed. What
+each one reached is in the `evidence level` column, and no phase's row says
+more than its artifacts support.
 
 | phase | state | evidence level reached |
 |---|---|---|
@@ -12,27 +13,36 @@ listed with what they require, not with a partial result standing in for them.
 | 3 — closed-loop consequence simulation | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
 | 3.1 — actionability precondition | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
 | 3.2 — direct preregistered H2 test | **DONE** | `MODEL_BASED_ACTION_CONSEQUENCE` |
-| 4 — detector delay/false-alarm curves | **NOT RUN** | — |
+| 4 — detector delay/false-alarm curves | **DONE** | `DETERMINISTIC_SIMULATION` |
 | 5 — explicit support output | **DONE** (classifier + tests) | `DETERMINISTIC_SIMULATION` |
 | 6 — cross-architecture audit | **DONE** | `SOURCE_ANALYSIS` |
 | 7 — CSIA-Lite reference implementation | **DONE** | `DETERMINISTIC_SIMULATION` |
 | 8 — artifacts and claim discipline | **DONE** | n/a |
 | 9 — verification | **DONE for what exists** | measured |
 
-## Why phase 4 is not run rather than partially run
+## Phase 4 has now run, and it lives outside this directory
 
-It needs a campaign over the preregistered seed partitions, and a campaign
-produces numbers. A thin version would produce numbers too, and they would be
-indistinguishable in a table from real ones. The preregistration fixes the
-design; running it is the next work item, not this one.
+Phase 4 measures **detector performance**, not consequence, so it is kept in
+`research/phase4/` rather than under `research/consequence/`, with its own
+seed partitions and its own preregistration. **It is not pooled with any
+consequence phase** — different partitions, different question, different
+unit of analysis — and the artifacts assert that rather than leaving it to
+prose.
 
-Phase 4 carries a binding constraint — comparison against CUSUM
-only at **matched false-alarm operating points**, over a preregistered
-threshold grid. A single hand-picked threshold against another is forbidden
-there in as many words, so a quick version of phase 4 is not a smaller phase 4;
-it is a violation of the preregistration.
+The binding constraint this file recorded in advance was honoured: the
+comparison against CUSUM is made **only at matched false-alarm operating
+points** selected on a development partition and applied unchanged to a
+locked one, over the full preregistered threshold grids, with every grid
+point reported. A single hand-picked threshold against another was forbidden
+in as many words, and none was used.
 
-**No hypothesis has been tested at a level above `SOURCE_ANALYSIS`.** H1 has
+What it found is in `research/phase4/PHASE4_RESULTS.md`. The headline is not
+the one the mechanism's author would have chosen, and it is reported as
+measured.
+
+**No hypothesis has been tested at a level above `DETERMINISTIC_SIMULATION`
+or `MODEL_BASED_ACTION_CONSEQUENCE`.** Nothing here is hardware, flight, SITL
+or autopilot execution. H1 has
 an enumeration consistent with it, which is not a test: H1 as written also
 requires that no independent freshness path forces an equivalent warning, and
 that clause is established from source structure only. H5 has been addressed
@@ -41,7 +51,14 @@ what H5 asked for — but H5 was written so that classification is the whole
 test, and it predicts nothing. H6 has been addressed and is **not killed**:
 both mechanisms reproduce in `csia_lite` and a fresh interpreter importing it
 loads no `csia` module, with the author-independence limit stated in
-`CSIA_LITE.md` rather than glossed. **H2, H3 and H4 are untouched.**
+`CSIA_LITE.md` rather than glossed.
+
+**H2 has been tested directly and is SUPPORTED at
+`MODEL_BASED_ACTION_CONSEQUENCE`** — Phase 3.2, 40/40 versus 0/40 on a locked
+partition, p = 1.82 × 10⁻¹², on one physically consistent in-flight gating
+condition (absent ESC telemetry). That is a statement about that condition
+and not about aircraft that do report ESC telemetry. **H3 and H4 are
+untouched.**
 
 ## Phase 6 was recorded as blocked, and that was wrong
 
@@ -77,6 +94,17 @@ describe, that twelve hand-read paths in PX4 and ArduPilot show the same
 structure at `SOURCE_ANALYSIS`, and that a standard-library reimplementation
 reproduces both mechanisms without importing CSIA.
 
-Nothing about consequence. Nothing about detector performance. Nothing about
-prevalence in either autopilot. Nothing about runtime behaviour in either
-autopilot — none of it was executed. Nothing about hardware.
+**About consequence**, one thing and one thing only: under a model of the
+response, on one physically consistent in-flight gating condition, gating the
+evidence produced an action conflict in 40 of 40 paired seeds and applying it
+produced none. The conflict is a real property of the frozen failsafe as
+modelled; the *severity* of it is a property of the model, and the model is
+listed in `consequence_model.py` with its constants and is not a vehicle.
+
+**About detector performance**, what Phase 4 measured at matched
+false-alarm operating points, which is in `research/phase4/PHASE4_RESULTS.md`
+and is not flattering to trust persistence on this fault.
+
+Still nothing about prevalence in either autopilot. Nothing about runtime
+behaviour in either autopilot — none of it was executed. Nothing about
+hardware, SITL, flight or airworthiness.

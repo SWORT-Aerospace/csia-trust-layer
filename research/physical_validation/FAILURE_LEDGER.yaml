@@ -5160,3 +5160,118 @@ entries:
       tests/test_phase32_pipeline.py;
       research/consequence/phase32/evaluate32.py;
       research/consequence/phase32/PHASE32_RESULTS.md
+
+  - id: FL-035
+    date: 2026-09-20
+    phase: Phase 4 development (detector performance, before locked)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      Two scoring defects were found in the Phase-4 campaign on DEVELOPMENT
+      seeds, both before the locked partition was opened. (1) Recording only
+      the first alarm of a run scored a pre-onset alarm as a detection with
+      negative delay: CUSUM at h = 5 fires at 4.92 s on a run whose fault
+      starts at 30 s. The campaign now records three alarm times per
+      threshold -- the first alarm of the run, the first alarm at or after
+      the settling window, and the first alarm at or after onset -- and the
+      detection uses the last of those. (2) Measuring false alarms from the
+      first alarm alone scored a LATCHED detector as clean: the CUSUM
+      statistic is non-decreasing while a drift persists, so a low h crosses
+      during the settling window and stays above it for the remaining 50 s,
+      yet the run was counted as having no false alarm. False alarms are now
+      measured from the first alarm at or after SETTLE_S.
+    found_by: >-
+      A development probe over the full threshold grids, run precisely to
+      look for scoring pathologies before the locked partition was opened.
+    honest_limit: >-
+      These are defects in the MEASUREMENT, not in any detector. Neither
+      changes what CSIA, CUSUM or the bare threshold computes; both change
+      what the campaign would have reported about them. Both were found on
+      development data and neither was found by a test -- the tests written
+      afterwards pin the corrected behaviour but did not discover it.
+    verdict: CORRECTED_BEFORE_LOCKED
+    consequence: >-
+      The second correction MATERIALLY CHANGED the matched thresholds at
+      TARGET_FAR = 0.00: CUSUM moved from h = 5.0 to h = 200.0 and the bare
+      threshold from mu0+1sigma to mu0+6sigma. Had the locked partition been
+      opened under the original scoring, the comparison would have been made
+      at operating points that were not in fact zero-false-alarm, and CSIA
+      would have been compared against detectors credited with alarms they
+      raised before any fault existed. The locked partition was opened only
+      after both corrections were preregistered.
+    artifact: >-
+      research/phase4/PREREGISTRATION_PHASE4.md (sections 7 and 8);
+      research/phase4/campaign4.py;
+      research/phase4/evaluate4.py
+
+  - id: FL-036
+    date: 2026-09-20
+    phase: Phase 4 locked (verification harness, not the measurement)
+    kind: VERIFICATION_DEFECT
+    what_happened: >-
+      The Phase-4 reproduction check was written as a byte-identity
+      comparison of two passes over the locked partition, copying the
+      procedure used in the consequence phases. It reported
+      P4_REPLAY_IDENTICAL=no. The two passes are in fact identical on every
+      measured quantity -- all 840 runs, all three detectors, every declared
+      threshold, all three alarm times -- and differ only in ns_total, the
+      wall-clock nanosecond timing field the preregistration requires
+      because computational cost is a reported quantity. Wall clock is not a
+      function of the seed, so byte-identity is a check this document can
+      never pass.
+    found_by: >-
+      Diffing the two passes field by field after the byte comparison failed,
+      rather than accepting the failure or deleting the timing field.
+    honest_limit: >-
+      This is a defect in the VERIFICATION HARNESS, not in the campaign and
+      not in any detector. It never touched a reported number. It is recorded
+      because a reader who sees a reproduction step that cannot pass is
+      entitled to know it was found by inspection and not by the check.
+    verdict: CORRECTED
+    consequence: >-
+      The campaign document now DECLARES environment_specific_fields, and
+      research/phase4/replay_check4.py strips exactly the declared fields and
+      compares everything else, refusing to run on a document that declares
+      none. Both locked passes were regenerated under the corrected schema
+      and compared with it. The timing field was kept, not deleted: removing
+      real data to make a check pass would have been the dishonest repair.
+    artifact: >-
+      research/phase4/replay_check4.py;
+      research/phase4/campaign4.py;
+      research/phase4/REPRODUCE4.md
+
+  - id: FL-037
+    date: 2026-09-21
+    phase: Phase 4 locked (evaluator, after the locked partition was opened)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      The percentile bootstrap resampled delays BY INDEX from the list in the
+      order the runs happened to sit in the campaign file. With a fixed seed
+      that makes the reported confidence interval a function of the file's
+      ordering, not only of the data: two files holding identical runs in
+      different order would report different intervals. The delays are now
+      sorted before resampling, so the interval is a function of the multiset
+      of delays, which is what a bootstrap interval is supposed to be.
+    found_by: >-
+      tests/test_phase4_pipeline.py::test_reordering_the_runs_changes_no_reported_number,
+      which shuffles the committed locked runs with a fixed seed and asserts
+      that build() returns exactly the same document. It failed, and the
+      failure was the finding.
+    honest_limit: >-
+      This was found AFTER the locked partition was opened, which is worse
+      than FL-035's two defects and is recorded as such. It is a defect in an
+      interval estimator, not in any detector and not in any point estimate.
+      No test would have caught it before the locked run existed, because the
+      fixture documents were built in canonical order.
+    verdict: CORRECTED
+    consequence: >-
+      Five numbers changed across the whole result document, all of them the
+      LOWER endpoint of a bootstrap p90 interval, all by 0.001 s or less:
+      CSIA theta=0.6 development p90 CI 6.560 -> 6.5592, theta=0.75
+      5.160 -> 5.1591, and the CSIA gain-1.5 p90 CI 2.3239 -> 2.3240 at each
+      of the three target levels. No point estimate moved, no matched
+      threshold moved, no miss rate moved, no Clopper-Pearson interval moved
+      and no verdict moved. The primary comparison is unchanged in every
+      digit.
+    artifact: >-
+      research/phase4/evaluate4.py (bootstrap_ci);
+      tests/test_phase4_pipeline.py
