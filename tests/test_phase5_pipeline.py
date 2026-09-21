@@ -314,6 +314,37 @@ def test_the_hybrid_false_refusal_rate_is_flagged_as_true_by_construction():
         assert dm[m]["hybrid_false_refusal_is_zero_by_construction"] is True
 
 
+def test_the_paired_test_certifies_identical_data():
+    """FL-040: an unpaired test refused to certify a difference of zero.
+
+    The design is paired -- the same scenario under two policies -- so the
+    test must be. With no discordant pairs the risk difference is exactly
+    zero and no interval is defined; reporting a tight interval there would
+    invent precision that the data does not contain.
+    """
+    identical = [(True, True)] * 188 + [(False, False)] * 196
+    got = ev5.paired_noninferior(identical)
+    assert got["candidate_bad"] == got["base_bad"] == 188
+    assert got["candidate_worse"] == got["base_worse"] == 0
+    assert got["noninferior"] is True
+    assert got["risk_difference"]["rd"] == 0.0
+    assert got["risk_difference"]["ci95"] is None
+    assert got["risk_difference"]["identical_on_every_pair"] is True
+    assert got["paired"] is True
+
+    # And it still refuses a candidate that is genuinely worse.
+    worse = [(True, False)] * 100 + [(False, False)] * 284
+    assert ev5.paired_noninferior(worse)["noninferior"] is False
+
+
+def test_the_paired_interval_declares_that_it_is_conditional():
+    rd = ev5.paired_risk_difference(b=30, c=2, n=100)
+    assert rd["ci95_is_conditional_on_discordant_pairs"] is True
+    assert rd["discordant"] == 32
+    assert rd["rd"] == pytest.approx(0.28)
+    assert rd["ci95"][0] < rd["rd"] < rd["ci95"][1]
+
+
 def test_noninferiority_uses_the_declared_margin_and_an_exact_bound():
     worse = ev5.noninferior(20, 20, 0, 20)
     assert worse["noninferior"] is False

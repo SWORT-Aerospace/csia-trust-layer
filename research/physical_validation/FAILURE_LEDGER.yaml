@@ -5352,3 +5352,47 @@ entries:
     artifact: >-
       research/phase5/campaign5.py;
       research/phase5/PREREGISTRATION_PHASE5.md section 19
+
+  - id: FL-040
+    date: 2026-09-21
+    phase: Phase 5 development (hybrid study, before the locked evaluation)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      Phase 5's non-inferiority test compared the candidate's EXACT upper
+      confidence bound against the base's POINT rate plus a 0.05 margin,
+      treating the two policies as independent samples. The design is paired
+      by construction -- every scenario is run under both policies on the
+      same seed, the same fault, the same onset and the same horizon -- so
+      the unpaired test throws the pairing away. It throws away enough to
+      matter: with 188 action conflicts out of 384 under BOTH policies, from
+      identical decisions on every single scenario, the unpaired test still
+      refused to certify non-inferiority, because the exact bound on 188/384
+      sits about 0.051 above its own point estimate. H2 was reported KILLED
+      on a difference of exactly zero.
+    found_by: >-
+      Not trusting the H2 KILLED verdict on the development self-check, and
+      printing the two conflict counts instead of the verdict. They were
+      identical, which no honest non-inferiority test should refuse.
+    honest_limit: >-
+      A test that cannot certify IDENTICAL data is measuring its own width
+      rather than the difference. The defect is conservative in direction --
+      it can only refuse a claim, never manufacture one -- which is why it
+      survived review until the numbers were printed side by side. Being
+      conservative is not the same as being correct, and a spurious KILLED
+      is a false negative that would have been reported as a finding.
+    verdict: CORRECTED_BEFORE_LOCKED_EVALUATION
+    consequence: >-
+      A paired non-inferiority test was added: exact McNemar over discordant
+      pairs plus an exact CONDITIONAL paired risk-difference interval, in the
+      same form Phase 3.2 used, with non-inferiority declared when the upper
+      bound of that interval is at or below the margin. Where there are no
+      discordant pairs the two policies made identical decisions on every
+      pair, the risk difference is exactly zero, and that is reported as such
+      rather than as a spuriously tight interval. The unpaired function is
+      RETAINED for genuinely unpaired comparisons and labelled paired=false.
+      On re-evaluation H2 moves from KILLED to SUPPORTED on 0 discordant
+      pairs out of 384. Found and fixed on development, before the locked
+      partition was evaluated.
+    artifact: >-
+      research/phase5/evaluate5.py (paired_noninferior, paired_risk_difference);
+      tests/test_phase5_pipeline.py

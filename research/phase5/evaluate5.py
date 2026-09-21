@@ -133,14 +133,80 @@ def bootstrap_ci(values: List[float], q: float) -> Optional[List[float]]:
     return [quantile(stats, 0.025), quantile(stats, 0.975)]
 
 
+def paired_risk_difference(b: int, c: int, n: int,
+                           alpha: float = ALPHA) -> dict:
+    """Exact CONDITIONAL interval for a paired risk difference.
+
+    `b` is the count of pairs where the candidate is worse and the base is
+    not, `c` the reverse, `n` the number of pairs. The interval is obtained
+    by putting an exact Clopper-Pearson interval on `b / (b + c)` and mapping
+    it through `RD = (2p - 1)(b + c)/n`. It is **conditional on the
+    discordant-pair count**, and the returned flag says so, because an
+    unconditional reading would overstate its precision.
+
+    With no discordant pairs the two policies made identical decisions on
+    every pair. `RD` is then exactly 0 and no interval is defined; that is
+    reported as `rd = 0.0` with `discordant = 0`, not as a tight interval.
+    """
+    d = b + c
+    rd = (b - c) / n if n else None
+    if d == 0:
+        return {"b": b, "c": c, "pairs": n, "rd": 0.0 if n else None,
+                "discordant": 0, "ci95": None,
+                "ci95_is_conditional_on_discordant_pairs": True,
+                "identical_on_every_pair": bool(n)}
+    lo_p, hi_p = clopper_pearson(b, d, alpha)
+    scale = d / n
+    return {"b": b, "c": c, "pairs": n, "rd": round(rd, 6), "discordant": d,
+            "ci95": [round((2 * lo_p - 1) * scale, 6),
+                     round((2 * hi_p - 1) * scale, 6)],
+            "ci95_is_conditional_on_discordant_pairs": True,
+            "identical_on_every_pair": False}
+
+
+def paired_noninferior(pairs, delta: float = NONINFERIORITY_DELTA) -> dict:
+    """Non-inferiority on a PAIRED design, which is what this one is.
+
+    Every scenario is run under both policies on the same seed, the same
+    fault and the same horizon, so the comparison is paired by construction
+    and an UNPAIRED interval throws that away. It throws away enough to
+    matter: with 188 conflicts out of 384 under both policies -- identical
+    decisions on every single scenario -- an unpaired test still refuses to
+    certify non-inferiority, because the exact bound on 188/384 sits 0.051
+    above its own point estimate. A test that cannot certify identical data
+    is measuring its own width, not the difference. Recorded as FL-040.
+
+    `pairs` is a sequence of `(candidate_is_bad, base_is_bad)` booleans.
+    Non-inferior when the UPPER bound of the paired risk-difference interval
+    is at or below `delta`.
+    """
+    pairs = [(bool(x), bool(y)) for x, y in pairs]
+    n = len(pairs)
+    b = sum(1 for x, y in pairs if x and not y)
+    c = sum(1 for x, y in pairs if y and not x)
+    rd = paired_risk_difference(b, c, n)
+    if n == 0:
+        ok = None
+    elif rd["ci95"] is None:
+        ok = bool(rd["rd"] <= delta)
+    else:
+        ok = bool(rd["ci95"][1] <= delta)
+    return {"pairs": n, "candidate_worse": b, "base_worse": c,
+            "candidate_bad": sum(1 for x, _ in pairs if x),
+            "base_bad": sum(1 for _, y in pairs if y),
+            "risk_difference": rd, "delta": delta,
+            "mcnemar_p": mcnemar_exact(b, c),
+            "noninferior": ok, "paired": True}
+
+
 def noninferior(candidate_k: int, candidate_n: int,
                 base_k: int, base_n: int,
                 delta: float = NONINFERIORITY_DELTA) -> dict:
-    """Is the candidate's rate no worse than the base's, within `delta`?
+    """UNPAIRED fallback, kept for genuinely unpaired comparisons.
 
-    Uses the upper bound of the candidate's exact interval against the base's
-    point rate plus the margin. Conservative, and stated rather than
-    approximated with a normal.
+    Retained and still used where no pairing exists. Where the design IS
+    paired, `paired_noninferior` is the correct test and this one is not
+    used; see FL-040.
     """
     c_rate = candidate_k / candidate_n if candidate_n else None
     b_rate = base_k / base_n if base_n else None
@@ -152,7 +218,25 @@ def noninferior(candidate_k: int, candidate_n: int,
             "candidate_rate": None if c_rate is None else round(c_rate, 6),
             "base_rate": None if b_rate is None else round(b_rate, 6),
             "candidate_ci95_upper": hi, "delta": delta,
-            "noninferior": ok}
+            "noninferior": ok, "paired": False}
+
+
+def paired_outcomes(document, key, *, hfast, family=None, condition=None):
+    """`(hybrid_bad, p0_bad)` per scenario, in run order.
+
+    The pairing is the scenario itself: same seed, same fault, same onset,
+    same horizon, two policies.
+    """
+    runs = _select(document["runs"], nominal=False, family=family,
+                   condition=condition)
+    out = []
+    for r in runs:
+        d = r["decisions"]
+        by = d["corrected"]["consequence_hybrid_by_hfast"]
+        if hfast not in by:
+            return []
+        out.append((bool(by[hfast][key]), bool(d["p0"]["consequence"][key])))
+    return out
 
 
 # ------------------------------------------------------------------- intake
@@ -527,27 +611,28 @@ def evaluate_hypotheses(dev, locked, chosen) -> dict:
                        "attribution, incorrect actionable decisions, action "
                        "conflicts or false escalation",
           "delta": NONINFERIORITY_DELTA,
-          "unsupported_confident": noninferior(
-              dm["corrected"]["unsupported_confident_runs"],
-              dm["corrected"]["runs"],
-              dm["current"]["unsupported_confident_runs"],
-              dm["current"]["runs"]),
+          "unsupported_confident": paired_noninferior([
+              (bool(r["decisions"]["corrected"]
+                    ["unsupported_confident_ticks"]),
+               bool(r["decisions"]["current"]
+                    ["unsupported_confident_ticks"]))
+              for r in _select(locked["runs"], nominal=False,
+                               family=IMU_ISOLATION)]),
           "note": ("measured on the imu_isolation arm, the only arm on which "
                    "an attributing response exists at all"),
           }
     _hf = chosen.get(f"{PRIMARY_TARGET:.2f}|B6", {}).get("threshold")
-    _p0 = consequence(locked, "p0")
-    _hy = consequence(locked, "hybrid_corrected", hfast=_hf)
-    h2["action_conflicts"] = noninferior(
-        _hy.get("action_conflict", {}).get("count", 0),
-        _hy.get("action_conflict", {}).get("n", 0),
-        _p0["action_conflict"]["count"], _p0["action_conflict"]["n"])
+    h2["action_conflicts"] = paired_noninferior(
+        paired_outcomes(locked, "action_conflict", hfast=_hf))
+    h2["false_escalation"] = paired_noninferior(
+        paired_outcomes(locked, "false_escalation", hfast=_hf))
     h2["false_escalation_note"] = (
         "the hybrid's only added action is a generic caution on a "
         "provisional fast alarm; nominal runs carry no fault so any caution "
         "there is a false escalation and is counted in the nominal arm")
     ok = (h2["unsupported_confident"]["noninferior"]
-          and h2["action_conflicts"]["noninferior"])
+          and h2["action_conflicts"]["noninferior"]
+          and h2["false_escalation"]["noninferior"])
     h2["verdict"] = ("SUPPORTED" if ok else
                      "KILLED" if ok is False else "INCONCLUSIVE")
     out["H2"] = h2
@@ -638,18 +723,16 @@ def dominance(locked, chosen, hyps) -> dict:
     if base is None or cand is None:
         return {"verdict": "INCONCLUSIVE",
                 "why": "no matched operating point for B0 or B6"}
-    dm = decision_metrics(locked, family=IMU_ISOLATION)
-    uc = noninferior(dm["corrected"]["unsupported_confident_runs"],
-                     dm["corrected"]["runs"],
-                     dm["current"]["unsupported_confident_runs"],
-                     dm["current"]["runs"])
+    uc = paired_noninferior([
+        (bool(r["decisions"]["corrected"]["unsupported_confident_ticks"]),
+         bool(r["decisions"]["current"]["unsupported_confident_ticks"]))
+        for r in _select(locked["runs"], nominal=False,
+                         family=IMU_ISOLATION)])
     hfast = cand["threshold"]
     c_p0 = consequence(locked, "p0")
     c_hy = consequence(locked, "hybrid_corrected", hfast=hfast)
-    conflicts = noninferior(c_hy["action_conflict"]["count"],
-                            c_hy["action_conflict"]["n"],
-                            c_p0["action_conflict"]["count"],
-                            c_p0["action_conflict"]["n"])
+    conflicts = paired_noninferior(
+        paired_outcomes(locked, "action_conflict", hfast=hfast))
     base_safe = c_p0["reached_safe_state"]["rate"]
     cand_safe = c_hy["reached_safe_state"]["rate"]
     clauses = {
