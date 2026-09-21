@@ -43,6 +43,7 @@ from csia.sensors import Fault  # noqa: E402
 from csia.v1_1.sequential import GATE_EPS, IN_CONTROL  # noqa: E402
 
 from csia_consequence import action_adapter as aa  # noqa: E402
+from csia_consequence import consequence_model31 as cm31  # noqa: E402
 from csia_hybrid import baselines as bl  # noqa: E402
 from csia_hybrid import capability as cap  # noqa: E402
 from csia_hybrid import fl029_shadow as shadow  # noqa: E402
@@ -279,7 +280,7 @@ def _attribution_is_correct(response, faulty_source):
     return selected != faulty_source
 
 
-def _decide_all(rows, support_views, family):
+def _decide_all(rows, support_views, family, fast_provisional):
     """Every policy's per-run decision summary, on ONE pass over the ticks.
 
     Four policies are scored, and the pair of P2 arms is the whole H3
@@ -296,9 +297,46 @@ def _decide_all(rows, support_views, family):
     refusal as a defect.
     """
     faulty = IMU_SOURCE if family == IMU_ISOLATION else NODE
-    out = {}
+    fault_family = ("none" if family is None else
+                    "imu_bias" if family == IMU_ISOLATION else
+                    "vibration_anomaly")
+    correct = cm31.correct_response_31(fault_family,
+                                       faulty if family == IMU_ISOLATION
+                                       else None)
+    out = {"fault_family": fault_family, "correct_response": correct}
     airborne = [i for i, r in enumerate(rows) if r["airborne"]]
     n = len(airborne) or 1
+
+    def _outcome(series):
+        """Model-based consequence for one policy's response series.
+
+        MODEL_BASED_ACTION_CONSEQUENCE. `consequence_model31` integrates it;
+        it is a model of a response, not a vehicle, and its constants are
+        listed in that module.
+        """
+        o = cm31.simulate_31(series, fault_family=fault_family,
+                             faulty_source=(faulty if family == IMU_ISOLATION
+                                            else None),
+                             correct=correct)
+        issued = set(o.responses_seen)
+        return {
+            "time_to_first_response_s": o.time_to_first_response_s,
+            "time_to_correct_response_s": o.time_to_correct_response_s,
+            "time_to_safe_state_s": o.time_to_safe_state_s,
+            "reached_safe_state": bool(o.reached_safe_state),
+            "position_error_m": round(float(o.position_error_m), 6),
+            "max_position_error_m": round(float(o.max_position_error_m), 6),
+            "altitude_error_m": round(float(o.altitude_error_m), 6),
+            "min_geofence_margin_m": round(float(o.min_geofence_margin_m), 6),
+            "geofence_breached": bool(o.geofence_breached),
+            "energy_margin_frac": round(float(o.energy_margin_frac), 6),
+            # Phase-3.2's definition: the class required was never issued.
+            "action_conflict": bool(correct != "NONE"
+                                    and correct not in issued),
+            "false_escalation": bool(correct == "NONE"
+                                     and issued - {"NONE"}),
+            "responses_seen": sorted(issued),
+        }
 
     for map_id in ("current", "corrected"):
         views = support_views[map_id]
@@ -306,6 +344,12 @@ def _decide_all(rows, support_views, family):
         hy_downgrades = hy_added = 0
         unsupported_confident = 0
         p2_responses, hy_responses = set(), set()
+        p2_series = []
+        #: The hybrid's extra caution depends on WHEN the fast path went
+        #: provisional, which depends on h_fast. h_fast is selected later,
+        #: on development, so every declared value is carried here and the
+        #: evaluator reads the one its matching rule chose.
+        hy_series_by_h = {h: [] for h in fast_provisional}
         for i in airborne:
             r = rows[i]
             v = views[i]
@@ -318,15 +362,31 @@ def _decide_all(rows, support_views, family):
                 p2_responses.add("ABSTAIN")
                 if _attribution_is_correct(p0r, faulty):
                     p2_false_refusals += 1
+                p2_series.append({"t": r["t"], "airborne": True,
+                                  "response": "ABSTAIN"})
             else:
                 p2_responses.add(p0r)
+                p2_series.append({"t": r["t"], "airborne": True,
+                                  "response": p0r})
 
             # --- HYBRID: downgrade to a generic caution, never abstain --
             if p0r in ATTRIBUTING and not supported:
                 hy_downgrades += 1
                 hy_responses.add("CAUTION_GENERIC")
+                for h in hy_series_by_h:
+                    hy_series_by_h[h].append(
+                        {"t": r["t"], "airborne": True,
+                         "response": "CAUTION_GENERIC"})
             else:
                 hy_responses.add(p0r)
+                for h, prov_t in fast_provisional.items():
+                    early = (p0r == "NONE" and prov_t is not None
+                             and r["t"] >= prov_t)
+                    hy_series_by_h[h].append(
+                        {"t": r["t"], "airborne": True,
+                         "response": "CAUTION_GENERIC" if early else p0r})
+                    if early:
+                        hy_added += 1
 
             # An attributing response issued while the separating evidence
             # is not active is an unsupported confident output.
@@ -334,11 +394,15 @@ def _decide_all(rows, support_views, family):
                 unsupported_confident += 1
 
         out[map_id] = {
+            "consequence_p2": _outcome(p2_series),
+            "consequence_hybrid_by_hfast": {
+                h: _outcome(series) for h, series in hy_series_by_h.items()},
             "p2_refusal_ticks": p2_refusals,
             "p2_false_refusal_ticks": p2_false_refusals,
             "p2_false_refusal_frac": round(p2_false_refusals / n, 6),
             "p2_any_false_refusal": bool(p2_false_refusals),
             "hybrid_downgrade_ticks": hy_downgrades,
+            "hybrid_added_caution_ticks_all_hfast": hy_added,
             "hybrid_any_abstain": False,
             "unsupported_confident_ticks": unsupported_confident,
             "unsupported_confident_frac": round(unsupported_confident / n, 6),
@@ -346,7 +410,10 @@ def _decide_all(rows, support_views, family):
             "hybrid_responses": sorted(hy_responses),
         }
 
+    p0_series = [{"t": rows[i]["t"], "airborne": True,
+                  "response": rows[i]["p0_response"]} for i in airborne]
     out["p0"] = {
+        "consequence": _outcome(p0_series),
         "responses": sorted({rows[i]["p0_response"] for i in airborne}),
         "attributing_ticks": sum(
             rows[i]["p0_response"] in ATTRIBUTING for i in airborne),
@@ -456,7 +523,9 @@ def run_scenario(*, seed, condition, family, shape, magnitude, onset):
             "withdrawn_any": bool(any(v.evidence.withdrawn for v in airborne)),
         }
 
-    decisions = _decide_all(rows, support_views, family)
+    fast_prov = {h: v["provisional"]["after_settle"]
+                 for h, v in detectors["FAST"].items()}
+    decisions = _decide_all(rows, support_views, family, fast_prov)
 
     elapsed = time.perf_counter_ns() - started
     return {
