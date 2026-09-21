@@ -468,3 +468,189 @@ them.
 - No claim that the corrected support map is a production fix. It is a
   shadow module, and the production core is unchanged.
 - No claim that threshold robustness compensates for a latency penalty.
+
+---
+
+## 17. AMENDMENT — the multi-timescale parameter grid
+
+**Committed before the `validation` and `locked` partitions were opened, and
+after the `development` partition had been used for exactly what it is for.**
+Recorded as an amendment rather than edited into §5 above, so the record
+shows what was declared when.
+
+§5 declared threshold grids for `B0`, `B1`, `B2` and the fast path but
+**declared no grid for `B5`**. The first implementation therefore carried
+hand-chosen multi-timescale constants, which is a free parameter wearing the
+costume of a design decision. They are now swept like every other detector's
+grid and selected by the same preregistered rule on development data alone:
+
+| parameter | values | why |
+|---|---|---|
+| `theta_fast` | `[0.99, 0.97, 0.95]` | swept |
+| `dwell_fast` | `5` | fixed: one fifth of the frozen dwell, the shortest run length that is not a single-tick excursion |
+| `theta_medium` | `0.90` | **pinned** to the Phase-4 matched operating point |
+| `dwell_medium` | `25` | **pinned** to `FailsafeConfig.dwell_up` |
+| `theta_slow` | `[0.995, 0.99]` | swept |
+| `dwell_slow` | `[50, 75]` | swept |
+
+**12 configurations**, iterated in declaration order and never sorted. The
+medium scale is pinned so that `B5` differs from `B0` in the scales added
+*around* the frozen operating point and in nothing else; an arm that also
+moved the middle would not be an ablation of timescale.
+
+### A measurement defect found on development, before any locked run
+
+The first `B5` implementation recorded only the **first** alarm per scale.
+An accumulator that fires once during trust convergence and again after the
+fault would then be scored as having alarmed at the convergence time and as
+having **never detected the fault at all** — `after_onset` was structurally
+`None` on every run. Every alarm time per scale is now recorded and the
+`FL-035` three-time rule is applied to the combined series, exactly as it is
+for every other detector. Recorded as **FL-038**.
+
+This is the same class of defect as FL-035 and it was found the same way: by
+looking at what the harness actually recorded on development data rather
+than at what it was supposed to record.
+
+---
+
+## 18. AMENDMENT — the IMU-isolation arm, without which H3 is untestable
+
+**Committed before the `validation` and `locked` partitions were opened.**
+Recorded as an amendment, not edited into §3, so the record shows what was
+declared when and why it changed.
+
+### The gap, and how it was found
+
+§3 declared one fault family: `vibration_anomaly` on the `vibration` node.
+H3 asks whether the FL-029 correction reduces **false refusals**, and a false
+refusal is a withdrawn **attributing** response. On a vibration fault the
+frozen failsafe never issues `SELECT_IMU0` or `SELECT_IMU1`, so no
+attributing response exists, no refusal can occur, and the false-refusal rate
+is **structurally zero for every baseline**.
+
+H3 as declared was therefore untestable on the scenario set as declared. This
+was found by attempting to compute the metric on development data, which is
+what development is for, and not by inspecting a sealed result.
+
+### The addition
+
+A second fault family, taken unchanged from the Phase-3.2 `imu_isolation`
+arm so it is not a new construction:
+
+| axis | declared values |
+|---|---|
+| family | `imu_isolation` — `bias_drift` on `imu0`, accel channel, axis 2 |
+| rate grid | `[0.05, 0.12]` |
+| onset grid | `[20.0, 30.0]` |
+| duration | 20.0 s |
+| shape | `ABRUPT` only — a bias drift is already a ramp, and stacking a staircase on top of one would measure nothing |
+
+The scenario count per seed becomes **34**: 2 nominal + 2 conditions ×
+(2 shapes × 3 gains × 2 onsets `structural` + 2 rates × 2 onsets
+`imu_isolation`). Locked: 40 × 34 = **1360 runs**.
+
+### What this does and does not change
+
+It **adds** an arm. It removes nothing, changes no threshold, no definition,
+no matching rule, no hypothesis and no kill criterion. The `structural` arm
+is unchanged, so every detector-latency figure (H1, H4, H5) rests on exactly
+the scenario set §3 declared.
+
+**H3 is answered on the `imu_isolation` arm and on nothing else**, and the
+write-up must say so rather than quoting a false-refusal rate pooled across
+families where two thirds of the denominator could never have produced a
+refusal.
+
+### The false-refusal measurement, defined here because it has two policies
+
+The hybrid's rule (§8a) downgrades an unsupported attributing response to a
+generic caution and **never abstains**, so the hybrid's false-refusal rate is
+**zero by construction**. That is a property of the design, not a finding,
+and reporting it as a finding would be circular.
+
+So H3 is measured on the **abstaining** policy — P2's rule, which withdraws
+to `ABSTAIN` — under the two maps:
+
+| arm | support map | what it measures |
+|---|---|---|
+| `P2-current` | frozen `SOURCE_INDICATORS` | the false-refusal rate Phase 3.1 measured |
+| `P2-corrected` | FL-029 shadow map | the same policy, the same scenarios, one map changed |
+
+A **false refusal** is a tick at which the abstaining policy withdrew an
+attributing response whose attribution would have been **correct** — the
+fault really is on the source the withdrawn response names. The hybrid's
+downgrade rule is reported alongside, as the separate architectural claim it
+is.
+
+---
+
+## 19. AMENDMENT — H3's primary measure, after a development probe
+
+**Committed before the `validation` and `locked` partitions were opened.**
+The original measure is **retained and still reported**; this adds a primary
+one and states why.
+
+### What the development probe showed
+
+Two development seeds, the `imu_isolation` arm, 16 scenarios:
+
+| condition | P0 attributing ticks | correct | support IDENTIFIABLE (current) | (corrected) | P2 false refusals |
+|---|---|---|---|---|---|
+| `EA` — ESC present | 5 | 5 | 1.000 | 1.000 | 0 under both maps |
+| `EG` — ESC absent | **0** | 0 | **0.000** | **1.000** | 0 under both maps |
+
+Two things follow, and neither is what §18 assumed.
+
+**Under `EA` the correction changes nothing**, because the armed-gated edges
+are already active and the pair is already separable. There is no refusal to
+prevent.
+
+**Under `EG` the frozen failsafe issues no attributing response at all.**
+With the ESC edges gone the diagnosis cannot isolate an IMU, so the policy
+escalates to `PREPARE_LANDING` instead of selecting one. There is therefore
+nothing for a support-aware policy to withdraw, and the false-refusal rate is
+**structurally zero under both maps** — not because the correction works, but
+because the attribution is never offered.
+
+So the false-refusal metric cannot answer H3 on this design. That is a fact
+about the design, found on development data, and the honest response is to
+say so and measure the thing that does move.
+
+### The primary H3 measure, declared here
+
+> **Support availability for the decision pair under `EG`**: the fraction of
+> airborne ticks at which `{imu0, imu1}` is `IDENTIFIABLE`, under the current
+> map against the corrected map, paired by seed.
+
+**Supported if** the corrected map's mean availability exceeds the current
+map's by **≥ 0.20**, with exact two-sided McNemar over seed-paired
+availability (a seed counts as available if the pair is `IDENTIFIABLE` for
+any airborne tick) at `p < 0.05`, **and** unsupported confident outputs and
+action conflicts are non-inferior at δ = 0.05.
+**Killed if** availability does not rise by the margin, or the test is not
+significant, or either guard rate exceeds its margin.
+
+### What is retained, and what is now known to be untestable here
+
+- The **false-refusal rate is still computed and still reported**, under both
+  maps, and is expected to be `0` under both for the structural reason above.
+  Reporting it as evidence *for* the correction would be circular and is
+  forbidden.
+- The hybrid's downgrade-instead-of-abstain rule (§8a) **also never fires on
+  this arm under `EG`**, because there is no attributing response to
+  downgrade. The architectural claim behind it is therefore **untested by
+  this study** and must be reported as untested, not as preserved.
+- This amendment changes H3's measure only. H1, H2, H4, H5 and H6 are
+  untouched, and the `structural` arm that carries every latency figure is
+  unchanged.
+
+### A polarity inversion found and fixed on development
+
+`SELECT_IMU` carries `params["use"]` — the IMU to **use**, i.e. the one the
+policy believes is healthy (`action_adapter._from_actions`). The first
+false-refusal implementation treated the named IMU as the **faulty** one, so
+every correct attribution was scored as incorrect. It would have reported a
+structural zero for H3 while looking like a measurement. Recorded as
+**FL-039**, fixed, and the corrected polarity is what produced the table
+above.

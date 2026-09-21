@@ -108,8 +108,7 @@ class MultiScaleDetector:
     theta_slow: float
     dwell_slow: int
     _acc: Dict[str, Accumulator] = field(default_factory=dict, repr=False)
-    _first: Dict[str, Optional[float]] = field(default_factory=dict,
-                                               repr=False)
+    _times: Dict[str, List[float]] = field(default_factory=dict, repr=False)
 
     def __post_init__(self):
         self._acc = {
@@ -117,27 +116,48 @@ class MultiScaleDetector:
             MEDIUM: Accumulator(MEDIUM, self.theta_medium, self.dwell_medium),
             SLOW: Accumulator(SLOW, self.theta_slow, self.dwell_slow),
         }
-        self._first = {s: None for s in SCALES}
+        self._times = {s: [] for s in SCALES}
 
     def update(self, t: float, trust: float, gate: float) -> List[str]:
         fired = []
         for scale in SCALES:
             if self._acc[scale].update(trust, gate):
                 fired.append(scale)
-                if self._first[scale] is None:
-                    self._first[scale] = float(t)
+                self._times[scale].append(float(t))
         return fired
+
+    def all_times(self) -> Dict[str, List[float]]:
+        """EVERY alarm time per scale, not just the first.
+
+        Recording only the first is a measurement defect, not a shortcut: an
+        accumulator that fires once during convergence and again after the
+        fault would be scored as having alarmed at the convergence time and
+        never detected the fault at all. The combined series below is what a
+        delay may be computed from, and it needs every crossing.
+        """
+        return {s: list(v) for s, v in self._times.items()}
+
+    def combined_times(self) -> List[float]:
+        """All alarms from all three scales, in time order."""
+        return sorted(t for times in self._times.values() for t in times)
 
     def first_alarm(self) -> Tuple[Optional[float], Optional[str]]:
         """Earliest alarm across the three, and which scale produced it."""
-        times = [(v, s) for s, v in self._first.items() if v is not None]
+        times = [(v[0], s) for s, v in self._times.items() if v]
         if not times:
             return None, None
         t, scale = min(times)
         return t, scale
 
+    def scale_of(self, when: float) -> Optional[str]:
+        """Which scale produced the alarm at `when` (earliest scale wins)."""
+        for scale in SCALES:
+            if any(abs(t - when) < 1e-9 for t in self._times[scale]):
+                return scale
+        return None
+
     def per_scale(self) -> Dict[str, Optional[float]]:
-        return dict(self._first)
+        return {s: (v[0] if v else None) for s, v in self._times.items()}
 
     def resets(self) -> Dict[str, int]:
         return {s: self._acc[s].resets for s in SCALES}

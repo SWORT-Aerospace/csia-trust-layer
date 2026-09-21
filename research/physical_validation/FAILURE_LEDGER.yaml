@@ -5275,3 +5275,80 @@ entries:
     artifact: >-
       research/phase4/evaluate4.py (bootstrap_ci);
       tests/test_phase4_pipeline.py
+
+  - id: FL-038
+    date: 2026-09-21
+    phase: Phase 5 development (hybrid study, before validation or locked)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      The first multi-timescale (B5) implementation recorded only the FIRST
+      alarm time per accumulator. Trust converges from above during the
+      settling window, so the fast accumulator fires once at about 0.16 s on
+      essentially every run; the recorded first alarm was therefore that
+      convergence transient, and the first alarm at or after the fault onset
+      -- the only time a detection delay may be computed from -- was
+      structurally None on every run. B5 would have been reported as
+      detecting nothing, on every scenario, for a reason that has nothing to
+      do with the detector.
+    found_by: >-
+      Reading what a two-seed development probe actually recorded, rather
+      than what the harness was supposed to record. The signature was
+      per_scale_first = {FAST 0.16, MEDIUM None, SLOW 2.96} on a run whose
+      fault starts at 30 s.
+    honest_limit: >-
+      This is a defect in the HARNESS, not in any detector, and it is the
+      same class as FL-035's first defect: recording one alarm time where
+      three are needed. That it recurred in a new module, after FL-035 was
+      written up and its rule stated in a preregistration, is the part worth
+      recording. The rule was known; it was not carried into the new code.
+    verdict: CORRECTED_BEFORE_VALIDATION
+    consequence: >-
+      MultiScaleDetector now exposes all_times() and combined_times(), and
+      the campaign applies the FL-035 three-time rule to the combined series
+      exactly as it does for every other detector. On the re-probe, B5
+      detects an abrupt gain-4 fault at 30.68 s against B0's 32.68 s on the
+      same run, and reports no false alarm after the settling window on
+      nominal runs. Found on development; neither the validation nor the
+      locked partition had been opened.
+    artifact: >-
+      csia_hybrid/multiscale.py;
+      research/phase5/campaign5.py;
+      research/phase5/PREREGISTRATION_PHASE5.md section 17
+
+  - id: FL-039
+    date: 2026-09-21
+    phase: Phase 5 development (hybrid study, before validation or locked)
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      The Phase-5 false-refusal metric treated the source named by a
+      SELECT_IMU response as the FAULTY source. It is the opposite: the
+      frozen adapter maps the failsafe action's params["use"] to the
+      response, so SELECT_IMU1 means "use imu1", naming the source the
+      policy believes is HEALTHY. Every correct attribution was therefore
+      scored as incorrect, and a false refusal -- withdrawing a CORRECT
+      attribution -- could never be counted.
+    found_by: >-
+      A development probe on the imu_isolation arm that printed
+      SELECT_IMU1 on a fault injected into imu0 and did not accept the
+      coincidence. Checking action_adapter._from_actions settled it in one
+      read.
+    honest_limit: >-
+      The defect would have produced a clean, plausible, entirely false
+      answer: zero false refusals under both maps, reported as H3 being
+      unsupported. It was caught only because the number looked too tidy to
+      trust, not by any test. The tests written afterwards pin the corrected
+      polarity but did not discover it.
+    verdict: CORRECTED_BEFORE_VALIDATION
+    consequence: >-
+      With the polarity fixed, the development probe shows the REAL
+      structure: under EA the pair is already separable under both maps and
+      there is nothing to refuse; under EG the frozen failsafe issues NO
+      attributing response at all, so there is nothing to withdraw and the
+      false-refusal rate is structurally zero under both maps. H3's primary
+      measure was therefore amended, before validation or locked were
+      opened, to support availability for the decision pair under EG -- the
+      quantity that actually moves (0.000 current, 1.000 corrected). The
+      false-refusal metric is retained and reported.
+    artifact: >-
+      research/phase5/campaign5.py;
+      research/phase5/PREREGISTRATION_PHASE5.md section 19
