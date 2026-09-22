@@ -1,0 +1,484 @@
+%YAML 1.2
+---
+schema: csia.assurance.claim_artifact_register/1
+what_this_is: 'The 21 artifacts the two papers'' artifact maps cite as backing a
+  stated number, with what is KNOWN about each one''s provenance. Read-only: nothing
+  here regenerates, refreshes or modifies any artifact.'
+what_this_is_not: Not a claim that these artifacts are governed. A hash in this
+  file DETECTS later modification; it does not control whether a result may be generated
+  or refreshed. Nothing here is an evidence gate, and an artifact listed with a
+  valid hash is still ungated.
+how_generators_were_established: 'Candidates were taken from the papers'' own artifact
+  maps (`script`, and `inputs` on figure rows, which names the PRODUCING script
+  rather than an artifact). Each candidate was then read to see whether it writes
+  the artifact''s path. generator_evidence records which basis applies: VERIFIED_WRITES_PATH
+  where the source writes it, DECLARED_BY_ARTIFACT_MAP_ONLY where the script writes
+  through a runtime --out and the binding rests on the map''s assertion, MISSING
+  where neither holds. No generator was inferred from a filename match alone.'
+why_input_artifacts_are_all_unknown: Neither the maps nor the scripts declare per-artifact
+  input ARTIFACTS. The maps' figure rows carry an `inputs` field, but it names the
+  producing SCRIPT, not an input artifact, and recording a script there would be
+  a category error that made the register look more complete than it is.
+two_entries_cited_outside_the_artifact_field: campaigns/bench.json and research/math-paper/PRIOR_ART_MATRIX.csv
+  are cited through `benchmark_artifact` and a `formal_sources` path rather than
+  an `artifact:` field. Their claim ids come from those fields.
+entry_count: 21
+entries:
+- artifact_path: campaigns/bench.json
+  paper:
+  - csia_systems
+  claim_id:
+  - benchmark_artifact
+  claim_description: the reproducibility anchor for the frozen layer; CI asserts
+    it regenerates bit-identically
+  artifact_kind: RAW_CAPTURE
+  source_commit: df622fa3afddb253a2a946d4a97b0f1aefa56684
+  sha256: 0ea97a91b5ab297bd15e20a05bbd2951247cce3d48e66d7fe9d6f9094d45b847
+  generator_path: MISSING
+  generator_evidence: MISSING
+  generator_commit: MISSING
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: VERIFIABLE_ONLY
+  freeze_status: NOT_PINNED
+  limitations: No tracked script writes this path and the artifact maps name none.
+    It is READ by research/phase2/build_manifest.py and listed by publication/system_paper_i/build_evidence_export.py.
+    The map's benchmark_gate asserts CI regenerates it bit-identically, but the
+    regenerating command is not named anywhere that was found, so REGENERABLE is
+    not claimed.
+  current_verdict: UNPROVEN_GENERATOR
+- artifact_path: engineering/v1_1/SUPPORT_STATE_RESULTS.csv
+  paper:
+  - gate_conditioning
+  claim_id:
+  - GS01
+  - GS02
+  claim_description: lowest leader posterior at a tick where the support rule fires;
+    a posterior-gated rule would not hav
+  artifact_kind: DERIVED_RESULT
+  source_commit: 95a95e1058e566566e3c5915fc8a43e0b8e55cea
+  sha256: c825500368b3a1ded78d55da73c26ce3a05782eaf36c14d10a24cd7c6a1440bf
+  generator_path: engineering/v1_1/support/run_phase2.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 95a95e1058e566566e3c5915fc8a43e0b8e55cea
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this file.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/math-paper/PRIOR_ART_MATRIX.csv
+  paper:
+  - gate_conditioning
+  claim_id:
+  - M-PRIOR
+  claim_description: prior-art matrix; every row WEB_SEARCH_ONLY, one NOT_FOUND_NEEDS_HUMAN
+  artifact_kind: OTHER
+  source_commit: ea1018175986178fb560be83a820ec1daf337d10
+  sha256: 5c43f99fc2505e7fda0d7a0302a379c55125a3649e6ec0a68813aa8ff1cfcfbb
+  generator_path: MISSING
+  generator_evidence: MISSING
+  generator_commit: MISSING
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: NOT_REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: A literature matrix maintained by hand; no generator exists and none
+    should. Every row is WEB_SEARCH_ONLY or CANDIDATE_UNVERIFIED and one is NOT_FOUND_NEEDS_HUMAN,
+    so its CONTENT is unverified against publisher records whatever any hash says.
+  current_verdict: HAND_MAINTAINED_BY_DESIGN
+- artifact_path: research/math-paper/results/proof_audit.json
+  paper:
+  - gate_conditioning
+  claim_id:
+  - GT02
+  - V-2
+  claim_description: verification
+  artifact_kind: REPRODUCIBLE_GENERATION
+  source_commit: ea1018175986178fb560be83a820ec1daf337d10
+  sha256: ba048bf960bcd0b3477dca41968f37469e891fff68b0fd7a0c9742c068a07dd7
+  generator_path: research/math-paper/proof_audit.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: ea1018175986178fb560be83a820ec1daf337d10
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: The artifact declares its own generation_command and the generator
+    is seeded. Its `commit` field is environment-specific, so a byte comparison
+    of the whole file is the wrong check outside this checkout.
+  current_verdict: SELF_DECLARED_GENERATOR
+- artifact_path: research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json
+  paper:
+  - csia_systems
+  claim_id:
+  - S14
+  - S15
+  claim_description: 'median gps trust delta across confirmed fix loss, ArduPilot
+    Campaign A2, 20 valid fault trials, PRE '
+  artifact_kind: DERIVED_RESULT
+  source_commit: b93624ea950af481f7d992eb60b02d88d4a0a8f5
+  sha256: c251c433116b246d6ea51183a36a5fb74d9e7e130590496e95533fd2c1e52f8b
+  generator_path: tools/csia_experiment/extract_trust_a2.py
+  generator_evidence: DECLARED_BY_ARTIFACT_MAP_ONLY
+  generator_commit: b93624ea950af481f7d992eb60b02d88d4a0a8f5
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: VERIFIABLE_ONLY
+  freeze_status: PINNED_BY:research/physical_validation/E1_FREEZE_MANIFEST.yaml
+  limitations: Derived from a SITL campaign whose raw traces are archived separately,
+    behind a preregistration the artifact names. Re-running needs an autopilot binary
+    this repository does not vendor. The generator writes through a runtime --out
+    argument, so the path binding is the map's assertion rather than a fact readable
+    from the source.
+  current_verdict: LOCKED_CAMPAIGN_DERIVATIVE
+- artifact_path: research/physical_validation/results/mechanism_a_p1_trust_px4.json
+  paper:
+  - csia_systems
+  claim_id:
+  - S16
+  - S17
+  claim_description: 'median gps trust delta across confirmed fix loss, PX4 Campaign
+    P1, 20 valid fault trials, same four '
+  artifact_kind: DERIVED_RESULT
+  source_commit: 77e91f9bc65b32c0c578c300e657a94bc9c9f8f7
+  sha256: c4ace83d8ac389d4b66ac932a74856414e9c23583517cea15d4b83f504a426bc
+  generator_path: tools/csia_experiment/extract_trust_a2.py
+  generator_evidence: DECLARED_BY_ARTIFACT_MAP_ONLY
+  generator_commit: b93624ea950af481f7d992eb60b02d88d4a0a8f5
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: VERIFIABLE_ONLY
+  freeze_status: PINNED_BY:research/physical_validation/E1_FREEZE_MANIFEST.yaml
+  limitations: 'As for the A2 artifact: PX4 platform, same extractor, same preregistration,
+    same unvendored-autopilot limit, same runtime --out binding.'
+  current_verdict: LOCKED_CAMPAIGN_DERIVATIVE
+- artifact_path: research/systems-paper/results/checker_agreement.json
+  paper:
+  - gate_conditioning
+  claim_id:
+  - GT03
+  claim_description: independent checker against production
+  artifact_kind: DERIVED_RESULT
+  source_commit: ab05d637f7f98dea3add937205ef30372e38790c
+  sha256: dedca244ca661ccffb6ef57b0cd3c77e878db22df1c7d8d45105805ee0e2ad92
+  generator_path: research/systems-paper/compare_checker_vs_production.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: ab05d637f7f98dea3add937205ef30372e38790c
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: The artifact declares its own generation_command and the generator
+    was confirmed to write this path.
+  current_verdict: SELF_DECLARED_GENERATOR
+- artifact_path: research/wp_c2/results/repair_experiment.json
+  paper:
+  - csia_systems
+  claim_id:
+  - T12
+  claim_description: sec:limits
+  artifact_kind: DERIVED_RESULT
+  source_commit: cf58075e46cfda421e738cd0a0e1e69aec0a0bbe
+  sha256: f97b201887ebecc854a0c49ae12f28fe2d351eebc76e6533feb2f361d5417c43
+  generator_path: research/wp_c2/repair_experiment.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: cf58075e46cfda421e738cd0a0e1e69aec0a0bbe
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c3/results/effective_signature.json
+  paper:
+  - csia_systems
+  claim_id:
+  - T02
+  - T03
+  claim_description: eq:seff
+  artifact_kind: DERIVED_RESULT
+  source_commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  sha256: 8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667
+  generator_path: research/wp_c3/effective_signature.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c4/results/adversarial_search.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F12
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: d95aab40212879b306eda01ff75f7799de0174de
+  sha256: 9c72b96083f9abd1a68d48ae7cc8629d103e61204cf77743d20e0a28e8a48dde
+  generator_path: research/wp_c4/adversarial_search.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: d95aab40212879b306eda01ff75f7799de0174de
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c4/results/self_occlusion.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F01
+  - S01
+  - S02
+  - S03
+  - T04
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  generator_path: research/wp_c4/self_occlusion_experiment.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c4/results/sparsity_probe.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F02
+  - T05
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+  sha256: cb5e8469c8583354294f80389c50a128f395a6a8510d6412f804700cec8117e8
+  generator_path: research/wp_c4/sparsity_probe.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c6/results/field_set_universe.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F04
+  - T06
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  sha256: 61a7b544829410920f1fa6f0c19eac3b4d9b1c340b50075b13e6f3613160497c
+  generator_path: research/wp_c6/field_set_universe.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c6/results/partial_containment_sweep.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F03
+  - S09
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  sha256: 5b65708542a175c8fe21b841ffa6f319cd09e10302842c2056ef31ac47e629d3
+  generator_path: research/wp_c6/partial_containment_sweep.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c6/results/q_gvalid_campaign.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F05
+  - S06
+  - S07
+  - S08
+  - S11
+  - T07
+  claim_description: ''
+  artifact_kind: RAW_CAPTURE
+  source_commit: 7409fa51def3757d3ad2b25844fc136017139f67
+  sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  generator_path: research/wp_c6/q_gvalid_campaign.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 700e898b603b20d5c4b9aab244be768fadd3e949
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: VERIFIABLE_ONLY
+  freeze_status: NOT_PINNED
+  limitations: The artifact's own `generator` field names a SITL harness -- ArduCopter
+    SITL over MAVLink through the production adapter -- not a pure function of committed
+    inputs. The writing script is confirmed, but re-running it needs that autopilot,
+    which this repository does not vendor.
+  current_verdict: SITL_CAPTURE_NOT_REGENERABLE_HERE
+- artifact_path: research/wp_c7/results/campaign_expanded.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F06
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 192057c0e146d41aa31aeaa1bb0e73d10c5fbc53
+  sha256: ca57edb0cc109a67a3d74a0fb228b16ee84e999bb1c72297253e406f9a57b01c
+  generator_path: research/wp_c7/campaign_expanded.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 192057c0e146d41aa31aeaa1bb0e73d10c5fbc53
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c7/results/false_healthy.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F11
+  - S05
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+  sha256: 74b0dd344ad85c49e73325efaf270e3c98194372c6295b6dc6a6f56553bc3d47
+  generator_path: research/wp_c7/false_healthy.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c7/results/glitch_mechanism.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F09
+  - T08
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+  sha256: 69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3
+  generator_path: research/wp_c7/glitch_mechanism.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c8/results/escalation_algebra.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F07
+  - S13
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  sha256: 89c0324517c0cbd26e80bccdcb56350aeeef5b19b82a5f355b8239457e22b1de
+  generator_path: research/wp_c8/escalation_algebra.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c8/results/four_quantity_metrics.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F10
+  - S04
+  - T11
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 3597f18c953e52111978f09af17c9432c6b794c9
+  sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  generator_path: research/wp_c8/four_quantity_metrics.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 3597f18c953e52111978f09af17c9432c6b794c9
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN
+- artifact_path: research/wp_c8/results/response_surface.json
+  paper:
+  - csia_systems
+  claim_id:
+  - F08
+  - S10
+  - T09
+  claim_description: ''
+  artifact_kind: DERIVED_RESULT
+  source_commit: 1ad2513d071830a906555193829cf2b8dbcf5980
+  sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  generator_path: research/wp_c8/response_surface.py
+  generator_evidence: VERIFIED_WRITES_PATH
+  generator_commit: 1ad2513d071830a906555193829cf2b8dbcf5980
+  input_artifacts:
+  - UNKNOWN
+  environment_requirements: UNKNOWN
+  regeneration_status: REGENERABLE
+  freeze_status: NOT_PINNED
+  limitations: Generator confirmed by reading the script, which names and writes
+    this path.
+  current_verdict: GENERATOR_PROVEN_INPUTS_UNKNOWN

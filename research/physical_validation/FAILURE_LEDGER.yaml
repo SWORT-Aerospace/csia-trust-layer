@@ -5980,3 +5980,58 @@ entries:
     artifact: >-
       tools/assurance/evidence_gate_audit.py;
       tests/test_evidence_gate_audit.py
+
+  - id: FL-052
+    date: 2026-09-22
+    phase: Claim-artifact provenance remediation (read-only)
+    kind: METHOD
+    what_happened: >-
+      A read-only provenance register was built for the 21 artifacts the two
+      papers cite as backing a stated number, with a verifier that checks
+      existence, SHA-256, generator presence and declared inputs without
+      running or modifying anything. On this checkout: 21/21 exist, 21/21
+      hashes match, zero drift, zero missing provenance. Verdicts are VALID
+      16, UNREGENERABLE 3, UNKNOWN 2.
+    found_by: >-
+      Building it. Three things surfaced that inspection alone had missed.
+      FIRST, the first register named research/wp_c6/figures.py as the
+      generator of q_gvalid_campaign.json -- figures.py CONSUMES that file.
+      The artifact maps put the renderer in `script` and the producing script
+      in `inputs` on figure rows, and taking `script` blindly produced a
+      confidently wrong generator, which is exactly the guessing the brief
+      forbade. Generators are now selected by reading each candidate for a
+      write of the artifact's path. SECOND, that rule then reported no
+      generator for the two mechanism_a artifacts, whose extractor writes
+      through a runtime --out and never names either path in source; that is
+      a different evidence basis, not an absence, so the register records
+      generator_evidence per entry. THIRD, the verifier initially reported
+      campaigns/bench.json and PRIOR_ART_MATRIX.csv as UNREGENERABLE, which
+      buried their missing-generator gap behind the milder fact; UNKNOWN now
+      outranks UNREGENERABLE.
+    honest_limit: >-
+      The register DETECTS modification; it does not GATE generation, and the
+      two are not degrees of one thing. After this work all 21 artifacts
+      remain ungated and the repository still has exactly one evidence-gated
+      artifact. Input artifacts are UNKNOWN for all 21 because nothing
+      declares them; the dependency graph behind the papers' numbers is not
+      written down anywhere. Two artifacts have no locatable generator, two
+      rest on the map's assertion rather than readable source, and three
+      cannot be regenerated here at all because the autopilot is not
+      vendored. The claim-backing tier is regex-derived, so 21 is a floor
+      rather than a proven ceiling.
+    verdict: MEASURED_NOT_GATED
+    consequence: >-
+      Drift in any of the 21 is now detectable by a committed check that
+      cannot repair what it inspects -- it has no --fix, --regenerate or
+      --update-hashes, and a test asserts no such option exists. Nothing was
+      gated, nothing was regenerated and no manifest, preregistration, locked
+      result or paper was touched. CLAIM_ARTIFACT_REMEDIATION.md separates
+      what is COMPLETED, VALIDATED, UNPROVEN, BLOCKED and NOT ATTEMPTED, and
+      lists the remediation in the order worth doing: declare per-artifact
+      inputs first, since the authors know those answers and no tool can
+      infer them honestly.
+    artifact: >-
+      research/assurance/CLAIM_ARTIFACT_REGISTER.yaml;
+      research/assurance/CLAIM_ARTIFACT_REMEDIATION.md;
+      tools/assurance/claim_artifact_verify.py;
+      tests/test_claim_artifact_verify.py
