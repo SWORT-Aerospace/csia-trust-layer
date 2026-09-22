@@ -5923,3 +5923,60 @@ entries:
       tools/assurance/build_provenance.py;
       tests/test_provenance_workflow.py
       (test_the_first_dirty_path_is_not_truncated)
+
+  - id: FL-051
+    date: 2026-09-22
+    phase: Evidence-gate audit across every committed artifact
+    kind: SYSTEMIC_FINDING
+    what_happened: >-
+      FL-049 found BUILD_PROVENANCE.json had no evidence gate. That gap was
+      never specific to one artifact, so the same question was asked of all
+      693 committed .json/.csv artifacts mechanically. Result: ONE is
+      evidence-gated -- the provenance record, by the workflow written for
+      it. 10 carry an accident guard (protected_write, which refuses to
+      clobber a committed file without --regenerate and asks nothing about
+      the tree). 218 are written by a script that simply opens the path. 464
+      are named by no tracked script at all. 80 are pinned by some integrity
+      file, which makes an ungated rewrite DETECTED rather than PREVENTED --
+      a different property, reported in its own column so the two are not
+      added together. 612 are neither gated nor pinned.
+      The sharpest cut is the claim-backing tier: of the 21 artifacts cited
+      by the two papers' artifact maps as backing a stated number, ZERO are
+      evidence-gated and 19 are not pinned either.
+    found_by: >-
+      tools/assurance/evidence_gate_audit.py, written for this and committed
+      so the numbers can be recomputed rather than remembered. Its classifier
+      got the answer wrong in BOTH directions while being built, and each
+      error is now a test. It first counted any mention as a write, which
+      classified three SHA256 manifests as EVIDENCE_GATED because
+      provenance_workflow.py READS them as a precondition -- an error that
+      inflates the gated count, the one direction an audit of missing gates
+      must never err in quietly. Fixing that by proximity alone then missed
+      writes through a module constant, which is the ordinary good pattern,
+      and made the single genuinely gated artifact look ungated.
+    honest_limit: >-
+      NO_GENERATOR is not by itself a finding. Much of that set is raw
+      captured data -- per-run SITL campaign records and the like -- which
+      legitimately has no generating script because it was recorded, not
+      computed. What the classification says is that those artifacts cannot
+      be REGENERATED or checked by re-running anything, which is a different
+      and weaker concern than a derived result being rewritable. The audit
+      also reports two attributions, strict and directory-based, because they
+      bias in opposite directions; the headline uses the strict one.
+      Generator discovery is textual, so a script that assembles even its
+      directory from pieces is missed and its artifact over-reported as
+      ungoverned.
+    verdict: MEASURED_NOT_FIXED
+    consequence: >-
+      Nothing is claimed to be wrong. Every artifact here was written by its
+      author on purpose, and the audit measures what COULD be rewritten from
+      a tree nobody checked -- a statement about process, not about numbers.
+      No gate was added to any artifact in this pass, deliberately: gating
+      the claim-backing tier changes how locked results and preregistered
+      campaigns are regenerated, and that is a decision with consequences for
+      work already frozen, not a change to make while nobody is looking. The
+      measurement is the deliverable; the 21 claim-backing artifacts are the
+      list to start from if it is taken further.
+    artifact: >-
+      tools/assurance/evidence_gate_audit.py;
+      tests/test_evidence_gate_audit.py
