@@ -204,8 +204,19 @@ def provenance() -> dict:
             "branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
             "describe": _git("describe", "--tags", "--always", "--dirty"),
             "working_tree_dirty": bool(dirty),
+            # `_git` strips the whole output, which eats the leading space
+            # of `git status --porcelain`'s FIRST line only -- " M Makefile"
+            # arrives as "M Makefile", and a fixed line[3:] then truncated it
+            # to "akefile". Only the first dirty path was ever affected,
+            # which is why it survived: the list looked right apart from one
+            # entry nobody cross-checked. Split on the first space run
+            # instead of slicing at a fixed offset, so the status column's
+            # width stops mattering.
             "dirty_paths": sorted(
-                line[3:] for line in (dirty or "").splitlines()) or [],
+                line.strip().split(None, 1)[1]
+                for line in (dirty or "").splitlines()
+                if line.strip() and len(line.strip().split(None, 1)) > 1
+            ) or [],
         },
         "interpreter": {
             "version": platform.python_version(),

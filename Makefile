@@ -32,6 +32,7 @@ help:
 	@echo "  make bib-guard       fail on unresolved citation markers"
 	@echo "  make artifact-map    validate every paper's artifact map"
 	@echo "  make proof-audit-check  math paper's proof audit still reproduces"
+	@echo "  make provenance-validate  is BUILD_PROVENANCE.json current?"
 	@echo "  make figure-sync     check paper figure bundles match figures/"
 	@echo "  make phase-guard     Phase-I papers must not cite Phase-II results"
 	@echo "  make manuscript-rules  csia_systems hard style rules"
@@ -155,6 +156,14 @@ verify-math-paper-public:
 
 verify-papers-public:
 	$(PY) tools/publication/verify_paper_public.py --paper both
+
+.PHONY: provenance-validate
+# Read-only. Exit 0 VALID, 1 STALE, 2 ABSENT, 3 DELETED. Writes nothing.
+# Creating or refreshing the record is deliberately NOT a make target: both
+# need a recorded full-suite run passed by path, and a one-word target would
+# invite running them without looking at what they are attesting.
+provenance-validate:
+	$(PY) tools/assurance/provenance_workflow.py validate
 
 .PHONY: phase-guard
 phase-guard:

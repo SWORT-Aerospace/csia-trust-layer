@@ -5817,3 +5817,109 @@ entries:
       research/physical_validation/results/BUILD_PROVENANCE.json;
       tools/research/iv_followup_seal_record.py;
       tests/test_post_e1_hardening_round2.py
+
+  - id: FL-049
+    date: 2026-09-21
+    phase: Build provenance (FL-048 corrected; first-write path implemented)
+    kind: CORRECTION
+    what_happened: >-
+      FL-048 IS WRONG ON THE MECHANISM AND IS LEFT STANDING AS WRITTEN,
+      because this ledger is append-only and a corrected entry that hides
+      what was believed at the time is worth less than a wrong one next to
+      its correction. FL-048 said refreshing BUILD_PROVENANCE.json was
+      circular: that
+      tools/research/iv_followup_seal_record.py refuses to write unless the
+      suite is green, and the suite was red because the record was stale.
+      That script does refuse on a red suite, but it writes
+      FOLLOWUP_SEAL_OPENING_RECORD.md -- a DIFFERENT artifact.
+      BUILD_PROVENANCE.json is written by tools/assurance/build_provenance.py,
+      which contains no reference to the suite at all (grep: zero matches for
+      suite, pytest or PYTEST_EXIT). Its only guard is protected_write, which
+      requires --regenerate to overwrite a committed file. So there was NO
+      circularity: the record could have been refreshed at any point by the
+      repository's own documented route, which is exactly what IV-12 in
+      COUNTEREXAMPLE_LOG.md did when this same test went red before.
+    found_by: >-
+      Reading tools/assurance/build_provenance.py before building a fix for
+      the problem FL-048 described. The two artifacts had been conflated on
+      the strength of a grep for "BUILD_PROVENANCE" that matched a DOCSTRING
+      in the seal-record script -- the script mentions the provenance record
+      in prose while writing something else -- and the conflation was then
+      carried into a ledger entry, a commit message and a report to the user
+      without anyone opening the generator.
+    honest_limit: >-
+      The refusal that blocked the FL-048 bootstrap was still correct, and
+      for its own reason: patching a gate that protects an audit record is
+      structurally identical to tampering with it. But the bootstrap should
+      never have been attempted, because the gate being patched did not
+      govern the artifact in question. Guessing a mechanism from a grep and
+      then designing around the guess cost a wrong ledger entry and a wrong
+      report; only opening the file settled it.
+    verdict: FIXED
+    consequence: >-
+      The record was stale for a mundane reason and is refreshed through the
+      ordinary path. Separately, inspecting the generator surfaced a REAL
+      weakness that FL-048's fiction had been standing in front of:
+      BUILD_PROVENANCE.json had no evidence gate whatsoever. --regenerate
+      protects against ACCIDENT, not against attesting a bad tree, so the
+      record could be rewritten from a red suite, failing blocking guards or
+      a drifted frozen core and would look exactly as authoritative.
+      tools/assurance/provenance_workflow.py now separates validate (read
+      only), create (only where no record exists and the path is untracked at
+      HEAD) and refresh (only where one does), and requires all four of a
+      recorded full-suite run, passing blocking guards, an unchanged
+      frozen-core digest and verifying manifests before any write. A stale
+      record may be replaced but never silently: the new record carries the
+      superseded commit and digest. The one deadlock the new gate could
+      itself create -- requiring the provenance test to pass before the write
+      that makes it pass -- is resolved structurally: that single node is a
+      hard-coded allowance, any second or different failure is refused, and
+      the node is re-run after the write with rollback if it still fails.
+      There is no --force, no --skip, no environment variable; tests plant an
+      env-var override, a --force flag and a widened allowance and confirm
+      each is rejected.
+    artifact: >-
+      tools/assurance/provenance_workflow.py;
+      tests/test_provenance_workflow.py;
+      research/physical_validation/results/BUILD_PROVENANCE.json
+
+  - id: FL-050
+    date: 2026-09-21
+    phase: Build provenance (defect found by reading the gated record)
+    kind: DEFECT
+    what_happened: >-
+      BUILD_PROVENANCE.json recorded its FIRST dirty path with the leading
+      character missing: "Makefile" was written as "akefile". The cause is a
+      seam between two functions that are each correct alone. `_git` returns
+      `r.stdout.strip()`, which removes the leading space of `git status
+      --porcelain`'s first line and only its first line; the caller then took
+      `line[3:]` on every line, assuming the two-character status column plus
+      a space. Every line except the first still had that shape, so exactly
+      one entry in the list was ever wrong.
+    found_by: >-
+      Reading the refreshed record after the new evidence-gated write, rather
+      than trusting that it had been written correctly because the gate said
+      PASS. The gate checks the state of the tree; it does not check that the
+      artifact describing that tree is well-formed, and nothing else did
+      either.
+    honest_limit: >-
+      The list of dirty paths is informational -- no test asserts on it, no
+      claim cites it, and the corruption never affected the commit,
+      frozen-core digests or dependency records that the file exists for. The
+      defect matters because a provenance record with one silently wrong
+      field invites the reader to trust the rest of it exactly as much, and
+      because this one had been wrong in every record written from a dirty
+      tree for as long as the code has existed.
+    verdict: FIXED
+    consequence: >-
+      The fixed-offset slice is replaced by splitting on the first run of
+      whitespace, so the status column's width stops mattering and a future
+      change to `_git`'s stripping cannot reintroduce it. A regression test
+      feeds a porcelain listing whose first line has already been stripped
+      and asserts the first path survives intact. The record was regenerated
+      through the gated refresh path afterwards, so the committed artifact
+      carries the corrected list.
+    artifact: >-
+      tools/assurance/build_provenance.py;
+      tests/test_provenance_workflow.py
+      (test_the_first_dirty_path_is_not_truncated)
