@@ -76,6 +76,82 @@ NOT_COMPARED = {
 }
 
 
+# ---------------------------------------------------------------- residuals
+#
+# WHY THIS RULE EXISTS, AND WHY IT IS NOT A TOLERANCE
+#
+# `worst_deviation` and two of the three `bound_max_slack` entries record the
+# largest observed value of a quantity that is MATHEMATICALLY ZERO. What they
+# actually measure is accumulated floating-point roundoff, and roundoff is a
+# property of the machine, not of the proposition.
+#
+# The concrete failure: P5b_KL_p_q_identity is the max over 20000 trials of
+# |kl_pq - (p @ log(w) - log(E_q[w]))|. The `p @ log(w)` term is a dot
+# product. Reducing it in BLAS order gives 1.5334955527634975e-15; reducing
+# the SAME product pairwise gives exactly 1.7763568394002505e-15 -- the value
+# an independent run reported. Nothing mathematical differs between those two
+# numbers; only the order the five terms were added in, which numpy chooses
+# from the build's SIMD width and BLAS.
+#
+# THIS IS NOT A BROAD TOLERANCE. A tolerance would relax every comparison by
+# some epsilon and quietly absorb real changes. This rule instead:
+#
+#   * applies ONLY at the paths listed below, which are the residual
+#     diagnostics and nothing else;
+#   * within those paths, applies only to values at or below a declared
+#     ceiling. A value ABOVE the ceiling is compared EXACTLY, so a residual
+#     that grows into significance fails rather than passing quietly;
+#   * replaces a qualifying value with a SYMBOL, not with a rounded number,
+#     so the output cannot be mistaken for a measurement;
+#   * leaves every count, seed, trial number, violation count, verdict
+#     boolean and substantive float compared exactly, untouched.
+#
+# The ceiling is chosen from measured margins, not picked for convenience:
+#
+#   largest residual observed anywhere in the artifact   3.552714e-15
+#   RESIDUAL_CEILING                                     1e-12
+#   the audit's own numerical tolerance                  1e-09
+#   smallest SUBSTANTIVE float in the artifact           8.381251e-05
+#                                                        (bound_max_slack/
+#                                                         P6b_TV_bound)
+#
+# 1e-12 sits ~281x above the largest roundoff value and ~1000x below the
+# tolerance the audit itself applies, with the nearest substantive number a
+# further eight orders of magnitude away. Note that P6b_TV_bound lives INSIDE
+# an allowlisted container and is NOT canonicalized: the magnitude test, not
+# the container, decides, which is why a real slack cannot be swallowed by
+# being adjacent to two roundoff values.
+RESIDUAL_CEILING = 1e-12
+
+RESIDUAL_DIAGNOSTIC_PREFIXES = (
+    "/numeric/worst_deviation/",
+    "/numeric/bound_max_slack/",
+)
+
+#: What a qualifying value becomes. A string, deliberately: it can never be
+#: read back as a quantity, plotted, or cited as a measured residual.
+ROUNDOFF_SYMBOL = f"ROUNDOFF<={RESIDUAL_CEILING:.0e}"
+
+
+def is_residual_path(path: str) -> bool:
+    return path.startswith(RESIDUAL_DIAGNOSTIC_PREFIXES)
+
+
+def canonicalize_residual(path, value):
+    """(canonical_value, was_canonicalized).
+
+    Applied identically to the expected and the generated side, so the rule
+    can never make them agree by treating them differently.
+    """
+    if not is_residual_path(path):
+        return value, False
+    if not isinstance(value, float):
+        return value, False
+    if abs(value) <= RESIDUAL_CEILING:
+        return ROUNDOFF_SYMBOL, True
+    return value, False
+
+
 def canonical(obj) -> str:
     """Canonical JSON: sorted keys, fixed separators, no ambiguity.
 
@@ -103,9 +179,13 @@ def flatten(obj, prefix="") -> dict:
 
 
 def compare(expected, got) -> tuple:
-    """(ok, problems, exempted). Exact everywhere except declared paths."""
+    """(ok, problems, exempted, canonicalized). Exact except declared paths.
+
+    The residual rule is applied to BOTH sides through the same function, so
+    it cannot make two values agree by treating them differently.
+    """
     fe, fg = flatten(expected), flatten(got)
-    problems, exempted = [], []
+    problems, exempted, canonicalized = [], [], []
 
     for path in sorted(set(fe) | set(fg)):
         declared = ENVIRONMENT_SPECIFIC.get(path)
@@ -128,10 +208,18 @@ def compare(expected, got) -> tuple:
                             f"from expected -- an UNDECLARED addition")
         elif path not in fg:
             problems.append(f"{path}: expected but NOT generated")
-        elif canonical(fe[path]) != canonical(fg[path]):
-            problems.append(f"{path}: expected {canonical(fe[path])}, got "
-                            f"{canonical(fg[path])}")
-    return (not problems), problems, exempted
+        else:
+            want, want_c = canonicalize_residual(path, fe[path])
+            have, have_c = canonicalize_residual(path, fg[path])
+            if want_c or have_c:
+                canonicalized.append({
+                    "path": path, "expected_raw": fe[path],
+                    "generated_raw": fg[path], "canonical": ROUNDOFF_SYMBOL,
+                    "both_sides_qualified": bool(want_c and have_c)})
+            if canonical(want) != canonical(have):
+                problems.append(f"{path}: expected {canonical(fe[path])}, got "
+                                f"{canonical(fg[path])}")
+    return (not problems), problems, exempted, canonicalized
 
 
 def main() -> int:
@@ -159,6 +247,7 @@ def main() -> int:
         return 2
 
     failures = 0
+    all_canonicalized = []
     print("OUTPUT VERIFICATION -- canonical JSON, exact except where declared")
     print("=" * 70)
 
@@ -177,7 +266,8 @@ def main() -> int:
             failures += 1
             continue
 
-        ok, problems, exempted = compare(expected, got)
+        ok, problems, exempted, canon = compare(expected, got)
+        all_canonicalized.extend(canon)
         print(f"[{'PASS' if ok else 'FAIL'}] {name}")
         if exempted and not args.quiet:
             for path, reason, value in exempted:
@@ -188,6 +278,12 @@ def main() -> int:
             failures += 1
             for p in problems:
                 print(f"         {p}")
+        for c in (canon if not args.quiet else []):
+            print(f"         residual canonicalized: {c['path']}")
+            print(f"           expected  {c['expected_raw']!r}")
+            print(f"           generated {c['generated_raw']!r}")
+            print(f"           both <= {RESIDUAL_CEILING:.0e}, compared as "
+                  f"{c['canonical']}")
 
     declared_uncompared = [f for f in have if f in NOT_COMPARED]
     if declared_uncompared and not args.quiet:
@@ -206,6 +302,11 @@ def main() -> int:
         failures += len(extra)
 
     print("=" * 70)
+    if all_canonicalized:
+        print(f"  {len(all_canonicalized)} residual diagnostic(s) compared as "
+              f"{ROUNDOFF_SYMBOL}")
+        print(f"  every other field, including all counts, seeds, violation "
+              f"counts and verdicts, compared EXACTLY")
     if failures:
         print(f"FAIL: {failures} file(s) did not match", file=sys.stderr)
         return 1

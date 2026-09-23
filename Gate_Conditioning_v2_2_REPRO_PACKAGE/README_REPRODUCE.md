@@ -153,6 +153,76 @@ One generated file, `environment_record.json`, is declared not-compared,
 because every field in it describes the machine that produced it. It is
 checked by step 6 instead.
 
+### The residual-diagnostic canonicalization rule
+
+**11 fields are compared as a symbol rather than as a number, and you should
+know exactly which and why.**
+
+`numeric/worst_deviation/*` and two of the three `numeric/bound_max_slack/*`
+entries record the largest observed value of a quantity that is
+*mathematically zero*. What they measure is accumulated floating-point
+roundoff, which is a property of the machine rather than of the proposition.
+
+This was not hypothetical. An independent run of this package reported
+`P5b_KL_p_q_identity` as `1.7763568394002505e-15` where the package expected
+`1.5334955527634975e-15`. The cause is reproducible on demand: that residual
+is the maximum over 20000 trials of
+
+    |kl_pq - (p @ log(w) - log(E_q[w]))|
+
+and `p @ log(w)` is a five-term dot product. Reduced in BLAS order it gives
+the first value; reduced pairwise it gives the second, *exactly*. numpy picks
+the order from the build's SIMD width and BLAS. Nothing mathematical
+separates the two numbers.
+
+**The rule.** At the two paths above, and nowhere else, a value whose
+magnitude is at or below `RESIDUAL_CEILING = 1e-12` is replaced — on both the
+expected and the generated side, by the same function — with the literal
+string `ROUNDOFF<=1e-12` before comparison. A value **above** the ceiling is
+compared exactly, as is every other field in the artifact.
+
+**This is not a tolerance, and the difference is not cosmetic.** A tolerance
+relaxes every comparison by some epsilon and absorbs real changes with it.
+This rule is scoped to eleven named fields; it yields a *symbol* rather than a
+rounded number, so a canonicalized value cannot be read back as a
+measurement; and it stops at a declared ceiling, above which there is no rule
+at all.
+
+**Where the ceiling came from.** Measured margins in this artifact:
+
+| quantity | value |
+|---|---|
+| largest residual anywhere in the artifact | `3.552714e-15` |
+| **RESIDUAL_CEILING** | **`1e-12`** |
+| the audit's own numerical tolerance | `1e-09` |
+| smallest substantive float (`bound_max_slack/P6b_TV_bound`) | `8.381251e-05` |
+
+The ceiling sits about 281x above the largest roundoff value and about 1000x
+below the tolerance the audit already applies to itself, with the nearest
+substantive number eight further orders of magnitude away.
+
+**`P6b_TV_bound` is not canonicalized**, even though it lives inside an
+allowlisted container, because at `-8.38e-05` it is four hundred million
+times the ceiling. The magnitude decides, not the container. A test plants a
+change to exactly this field and requires it to fail.
+
+**Compared exactly, always:** seeds, trial counts, hypothesis counts, every
+`bound_violations_beyond_1e-9` count, every `verdict` boolean, the tolerance
+itself, every symbolic truth value, and every substantive numeric result.
+
+**What the rule cannot do.** It cannot convert a true bound violation into a
+pass: a violation changes an integer count and a verdict boolean, both
+compared exactly. `tests/test_repro_package_canonicalization.py` in the
+originating repository plants a violation, a verdict flip, a changed seed, a
+changed trial count, a residual grown past the ceiling and a changed
+substantive slack, and requires every one of them to fail.
+
+**What it does not fix.** It makes the *comparison* portable. It does not
+make the residuals themselves reproducible across platforms — they are not,
+and the stored `expected_outputs/proof_audit.json` still contains this
+machine's raw values rather than canonicalized ones, so that what the
+generator actually emitted stays on the record.
+
 ## 6. Verify environment versions
 
 ```sh
