@@ -279,11 +279,24 @@ def main() -> int:
             for p in problems:
                 print(f"         {p}")
         for c in (canon if not args.quiet else []):
-            print(f"         residual canonicalized: {c['path']}")
+            both = c["both_sides_qualified"]
+            label = ("residual canonicalized" if both else
+                     "residual canonicalized on ONE SIDE ONLY")
+            print(f"         {label}: {c['path']}")
             print(f"           expected  {c['expected_raw']!r}")
             print(f"           generated {c['generated_raw']!r}")
-            print(f"           both <= {RESIDUAL_CEILING:.0e}, compared as "
-                  f"{c['canonical']}")
+            if both:
+                print(f"           both <= {RESIDUAL_CEILING:.0e}, compared as "
+                      f"{c['canonical']}")
+            else:
+                # Saying "both <= ceiling" here would be a false statement
+                # about the comparison that was actually performed: exactly
+                # one side was at or below the ceiling, so the two sides did
+                # NOT compare equal and this path is reported as a failure
+                # above. The rule did not absorb the difference.
+                print(f"           exactly one side is <= "
+                      f"{RESIDUAL_CEILING:.0e}; the other is above it, so "
+                      f"these did NOT compare equal")
 
     declared_uncompared = [f for f in have if f in NOT_COMPARED]
     if declared_uncompared and not args.quiet:

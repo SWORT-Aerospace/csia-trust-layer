@@ -248,3 +248,85 @@ def test_a_non_float_at_a_residual_path_is_left_alone():
         out, changed = v.canonicalize_residual(
             "/numeric/worst_deviation/X", value)
         assert out is value and changed is False
+
+
+# ------------------------------- the REPORT must not misdescribe itself
+
+def _run_verifier(tmp_path, mutate):
+    """Run the real script against a mutated copy of expected_outputs/."""
+    import copy as _copy
+    import shutil
+    import subprocess
+
+    outputs = tmp_path / "outputs"
+    outputs.mkdir()
+    expected_dir = os.path.join(PKG, "expected_outputs")
+    for name in os.listdir(expected_dir):
+        if name.endswith(".json"):
+            shutil.copy(os.path.join(expected_dir, name), outputs / name)
+
+    target = outputs / "proof_audit.json"
+    doc = json.loads(target.read_text(encoding="utf-8"))
+    mutate(doc)
+    target.write_text(json.dumps(doc, indent=2, sort_keys=True),
+                      encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, VERIFY, "--outputs", str(outputs)],
+                          capture_output=True, text=True)
+    return proc
+
+
+def _block_for(stdout, path_suffix):
+    """The lines the report printed about one canonicalized path."""
+    lines = stdout.splitlines()
+    start = None
+    for i, ln in enumerate(lines):
+        if "residual canonicalized" in ln and ln.rstrip().endswith(
+                path_suffix):
+            start = i
+            break
+    if start is None:
+        return []
+    block = [lines[start]]
+    for ln in lines[start + 1:]:
+        if "residual canonicalized" in ln:
+            break
+        block.append(ln)
+    return block
+
+
+def test_the_report_does_not_claim_both_sides_when_only_one_qualified(
+        tmp_path):
+    """A verifier that misdescribes its own comparison is worse than a noisy
+    one. With expected 1.53e-15 and generated 1e-11, exactly ONE side is at or
+    below the ceiling; the comparison correctly fails, and the report must not
+    print 'both <= 1e-12' about it.
+    """
+    proc = _run_verifier(tmp_path, lambda d: d["numeric"]["worst_deviation"]
+                         .__setitem__("P5b_KL_p_q_identity", 1e-11))
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    block = _block_for(proc.stdout, "worst_deviation/P5b_KL_p_q_identity")
+    assert block, proc.stdout
+    assert "ONE SIDE ONLY" in block[0], block
+    assert not any("both <= 1e-12" in ln for ln in block), (
+        "the report claimed both sides were at or below the ceiling when only "
+        "the expected side was; that is a false statement about the "
+        "comparison the verifier actually performed:\n" + "\n".join(block))
+    # the other residuals, which genuinely do qualify on both sides, must be
+    # unaffected -- the fix must not simply delete the honest message
+    assert "both <= 1e-12" in proc.stdout
+
+
+def test_the_report_does_say_both_sides_when_both_qualified(tmp_path):
+    """The honest counterpart: the reported platform divergence really does
+    have both sides at or below the ceiling, and the report says so."""
+    proc = _run_verifier(
+        tmp_path,
+        lambda d: d["numeric"]["worst_deviation"].__setitem__(
+            "P5b_KL_p_q_identity", 1.7763568394002505e-15))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    block = _block_for(proc.stdout, "worst_deviation/P5b_KL_p_q_identity")
+    assert block, proc.stdout
+    assert "ONE SIDE ONLY" not in block[0], block
+    assert any("both <= 1e-12" in ln for ln in block), block
+    assert "ONE SIDE ONLY" not in proc.stdout
