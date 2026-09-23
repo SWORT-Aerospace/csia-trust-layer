@@ -330,3 +330,54 @@ def test_the_report_does_say_both_sides_when_both_qualified(tmp_path):
     assert "ONE SIDE ONLY" not in block[0], block
     assert any("both <= 1e-12" in ln for ln in block), block
     assert "ONE SIDE ONLY" not in proc.stdout
+
+
+# ------------------- the README's numbers must match the artifact
+
+README = os.path.join(PKG, "README_REPRODUCE.md")
+
+
+def test_the_readme_margin_table_matches_the_artifact(expected):
+    """Every number the README states about the rule is checked against the
+    artifact it describes.
+
+    The README is the only place a reader learns why the ceiling sits where it
+    does. A stale figure there is a dishonest justification even when the code
+    is correct, and this guard exists because one was found: the P6b margin
+    was written as "four hundred million" when it is about eighty-four
+    million.
+    """
+    text = open(README, encoding="utf-8").read()
+
+    flat = v.flatten(expected)
+    residuals = [abs(x) for p, x in flat.items()
+                 if isinstance(x, float) and v.is_residual_path(p)
+                 and abs(x) <= v.RESIDUAL_CEILING]
+    substantive = [abs(x) for p, x in flat.items()
+                   if isinstance(x, float) and v.is_residual_path(p)
+                   and abs(x) > v.RESIDUAL_CEILING]
+    tolerance = expected["verdict"]["tolerance"]
+
+    assert f"{max(residuals):e}" in text, (
+        f"the README does not state the largest residual "
+        f"{max(residuals):e}")
+    assert f"{min(substantive):e}" in text, (
+        f"the README does not state the smallest substantive float "
+        f"{min(substantive):e}")
+
+    # the count of canonicalized fields
+    n = len(residuals)
+    assert f"{n} fields" in text or f"**{n} fields" in text, (
+        f"the README does not say {n} fields are canonicalized")
+
+    # the three ratios, each to the nearest figure the README rounds to
+    assert f"{round(v.RESIDUAL_CEILING / max(residuals))}x" in text, (
+        "the README's ceiling-to-largest-residual ratio is stale")
+    assert f"{round(tolerance / v.RESIDUAL_CEILING)}x" in text, (
+        "the README's tolerance-to-ceiling ratio is stale")
+
+    ratio = min(substantive) / v.RESIDUAL_CEILING
+    assert 8.0e7 < ratio < 9.0e7, ratio
+    assert "eighty-four million" in text, (
+        f"the README misstates the P6b margin; it is {ratio:.3g}x the "
+        f"ceiling, about eighty-four million")

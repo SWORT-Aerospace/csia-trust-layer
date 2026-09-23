@@ -202,7 +202,7 @@ below the tolerance the audit already applies to itself, with the nearest
 substantive number eight further orders of magnitude away.
 
 **`P6b_TV_bound` is not canonicalized**, even though it lives inside an
-allowlisted container, because at `-8.38e-05` it is four hundred million
+allowlisted container, because at `-8.38e-05` it is about eighty-four million
 times the ceiling. The magnitude decides, not the container. A test plants a
 change to exactly this field and requires it to fail.
 
