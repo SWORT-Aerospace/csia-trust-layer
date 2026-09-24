@@ -11,6 +11,13 @@
 `--fake` and `--port` are mutually exclusive and the manifest records which was
 used. A fake run writes ``device: "FAKE"`` and can never be reported as a bench
 run; `tools/hardware/e2m_report.py` refuses to describe it as one.
+
+`--port` additionally passes through the hardware configuration gate
+(`csia_hardware_gate`) BEFORE the port is opened. If any governed constant is
+UNVERIFIED or MISSING the command exits 3 with a typed
+HardwareConfigurationBlocked report and opens nothing. It never falls back to
+`--fake`: choosing a different run on the operator's behalf is how a synthetic
+result comes to be filed as a bench result.
 """
 from __future__ import annotations
 
@@ -27,6 +34,8 @@ from csia_e2m.fake_controller import (FAKE_DEVICE, FakeController,  # noqa: E402
 from csia_e2m.logging import RunLogger                              # noqa: E402
 from csia_e2m.transport import (FakeTransport, SerialTransport,     # noqa: E402
                                 available_ports)
+from csia_hardware_gate import (HardwareConfigurationBlocked,  # noqa: E402
+                                require_live_hardware_permitted)
 
 
 def main(argv=None) -> int:
@@ -63,6 +72,19 @@ def main(argv=None) -> int:
             verify_readback=not args.no_verify_readback)
         transport = FakeTransport(list(controller.frames(args.sweeps)))
     else:
+        # THE GATE. Before the port is opened, before any byte is written:
+        # every governed hardware constant must be VERIFIED against a hashed
+        # primary document. If one is not, this raises and the run ends. It
+        # does NOT fall back to --fake; a live request that quietly became a
+        # synthetic run would produce a manifest indistinguishable from a
+        # bench run, which is the failure the whole policy exists to prevent.
+        try:
+            require_live_hardware_permitted(
+                f"open {args.port} and drive the E2M bench")
+        except HardwareConfigurationBlocked as blocked:
+            print(json.dumps(blocked.as_dict(), indent=1, sort_keys=True))
+            print(f"\n{blocked}", file=sys.stderr)
+            return 3
         transport = SerialTransport(args.port, args.baud)
         transport.open()
 
