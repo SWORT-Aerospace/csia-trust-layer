@@ -79,10 +79,16 @@ def test_the_cached_validator_is_behaviourally_identical():
 
 
 def test_validation_is_still_actually_performed():
-    """A cached validator that validated nothing would also be fast."""
-    with pytest.raises(Exception):
+    """A cached validator that validated nothing would also be fast.
+
+    The exception is named, not ``Exception``: a validator that had been
+    renamed or broken raises AttributeError or TypeError, and a bare
+    ``Exception`` would accept that as proof validation still happens.
+    """
+    import jsonschema
+    with pytest.raises(jsonschema.ValidationError):
         API.validate({})
-    with pytest.raises(Exception):
+    with pytest.raises(jsonschema.ValidationError):
         API.validate(dict(load_v1_1_example("clean"), timestamp="soon"))
 
 
@@ -151,7 +157,11 @@ def test_the_typed_input_cannot_be_mutated_by_a_domain():
         load_v1_1_example("clean"))
     with pytest.raises(TypeError):
         inp.trust["gps"] = 0.0
-    with pytest.raises(Exception):
+    # FrozenInstanceError, not Exception: if the factory ever returned None,
+    # assigning to None.timestamp raises a plain AttributeError, which a bare
+    # Exception would accept as "the input is frozen".
+    import dataclasses
+    with pytest.raises(dataclasses.FrozenInstanceError):
         inp.timestamp = 99.0
 
 

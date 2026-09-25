@@ -318,7 +318,10 @@ def test_an_adapted_channel_is_never_usable_while_gated():
 def test_the_datasheet_gate_still_raises():
     from csia_bus_provenance import datasheet as ds
     assert ds.DATASHEET_STATUS == "NOT_RETRIEVED"
-    with pytest.raises(Exception):
+    # The named exception, not Exception: with the gate function deleted, the
+    # call raises AttributeError, and a bare Exception accepted that as the
+    # gate still raising -- the test stayed green with the gate gone.
+    with pytest.raises(ds.DatasheetNotVerified):
         ds.require_verified_datasheet("wire the bus")
 
 
