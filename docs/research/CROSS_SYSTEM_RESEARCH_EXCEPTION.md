@@ -1,8 +1,9 @@
 # Owner authorization — cross-system research exception
 
-**State: IN FORCE for documents and post-hoc analysis. SITL execution is NOT
-yet authorized** — it waits on the owner's review of
-`docs/research/FIRST_CROSS_SYSTEM_EXPERIMENT.md`.
+**State: IN FORCE for documents and post-hoc analysis, and — since the owner's
+second grant (§7) — for the PX4 research build, the minimal SIH
+actuator-effectiveness patch and experimental apparatus validation. The final
+CSIA experimental campaign is NOT authorized.**
 
 | | |
 |---|---|
@@ -132,3 +133,46 @@ evidence**. It is not a validated result, not a paper claim, and not a
 replication of any sealed campaign. Documents written under it label each
 statement HISTORICAL/SEALED, CURRENT VALIDATED, EXPERIMENTAL, PROPOSED or
 UNPROVEN, and do not mix them.
+
+---
+
+## 7. Second grant: experimental apparatus validation
+
+Granted by the program owner in the same session, after reviewing
+`docs/research/PX4_SET_B_DYNAMICS_PREFLIGHT.md`. The operative lines,
+verbatim:
+
+> I approve the PX4 research build and the minimal SIH actuator-
+> effectiveness patch.
+>
+> I also approve revising W1 before preregistration.
+>
+> We are NOT yet authorizing the final CSIA experimental campaign.
+>
+> This phase is:
+>
+>     EXPERIMENTAL APPARATUS VALIDATION
+>
+> [...]
+>
+> Do not:
+>
+> - tune CSIA
+> - change v1
+> - change v2
+> - modify frozen thresholds
+> - generate final CSIA claims
+> - preregister final thresholds
+> - compare algorithms for superiority
+
+What this adds to §4, and nothing more:
+
+| now permitted | still not permitted |
+|---|---|
+| building PX4 at `547e2ca`, unmodified and with the SIH effectiveness patch | running any CSIA version on the trials |
+| flying SIH trials to validate the apparatus | preregistering thresholds or running the final campaign |
+| revising witness W1 in the experiment design | any change to CSIA v1, v2, thresholds or sealed artifacts |
+
+The PX4 patch lives in the PX4 tree and in
+`research/px4_actuator_effectiveness/patch/`; nothing under `csia/` changes.
+The results are in `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`.

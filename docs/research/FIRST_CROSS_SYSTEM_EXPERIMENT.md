@@ -1,9 +1,12 @@
 # First cross-system experiment — Set B plus dynamics
 
-**Status: PROPOSED design. Not preregistered, not built, not run.** Written
-under `docs/research/CROSS_SYSTEM_RESEARCH_EXCEPTION.md`. SITL execution waits
-on the owner's review of this document and on the gating source read in
-`docs/research/SITL_FEASIBILITY_MATRIX.md` §4.
+**Status: PROPOSED design, witnesses revised (§6). Not preregistered, not
+run.** Written under `docs/research/CROSS_SYSTEM_RESEARCH_EXCEPTION.md`. The
+gating source read is done
+(`docs/research/PX4_SET_B_DYNAMICS_PREFLIGHT.md`), and the apparatus has been
+validated without any CSIA run
+(`docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`). The final
+campaign waits on the owner's review of the apparatus.
 
 ---
 
@@ -109,14 +112,16 @@ packages. Grades are from the feasibility matrix.
 
 | observable | source on PX4 SIH | grade |
 |---|---|---|
-| per-motor command | ULog `actuator_motors` / `actuator_outputs` | LIKELY |
-| RPM telemetry | `esc_status` (MAVLink ~0.97 Hz; ULog rate G3) | UNKNOWN whether it measures the rotor (G1) |
-| body accel and rates | ULog `sensor_combined` / `vehicle_imu` | CONFIRMED |
-| attitude | ULog `vehicle_attitude` | CONFIRMED |
-| allocation achievement | ULog `control_allocator_status.torque_setpoint_achieved` | LIKELY |
-| estimator innovations | ULog `estimator_innovations`, test ratios | LIKELY |
+| per-motor command | ULog `actuator_motors`, `actuator_outputs_sim`, 250 Hz | CONFIRMED (apparatus) |
+| RPM telemetry | ULog `esc_status`, 250 Hz. It reports the **physical rotor state**, not the command (preflight G1). MAVLink ESC_STATUS (~1 Hz) is not used | CONFIRMED (apparatus) |
+| body accel and rates | ULog `sensor_combined`, ground truth, 250 Hz | CONFIRMED |
+| attitude | ULog `vehicle_attitude`, ground truth | CONFIRMED |
+| allocator saturation | ULog `control_allocator_status`, 125 Hz. **Demand evidence only**: the allocator's "torque achieved" is computed from its own model and never observes physical effectiveness (§6 revision) | CONFIRMED (apparatus) |
+| estimator innovations | ULog `estimator_innovations`, test ratios, 125 Hz, stamped at the EKF's delayed horizon | CONFIRMED logged. The EKF aiding innovations show no fault-attributable response (apparatus) |
 | ground truth | SIH truth, as compared in `docs/simulation/PX4_CURRENT.md` §2 | CONFIRMED |
-| injected fault state and onset | the injection command and its log record | UNKNOWN (never done for motors) |
+| injected fault state and onset | `SIH_MOT_EFF1` change: `parameter_update` timestamp, applied at the next 4 ms SIH step | CONFIRMED (apparatus) |
+
+Apparatus results: `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`.
 
 ---
 
@@ -131,18 +136,47 @@ packages. Grades are from the feasibility matrix.
   and it is not placed inside CSIA. `research/phase5/PHASE5_RESULTS.md` records
   that λ-based fast paths lose threshold robustness (H5 killed).
 
-### Cross-system witnesses (PROPOSED)
+### Cross-system witnesses (REVISED before preregistration)
 
-Each witness is a **three-valued predicate** — true, false, or **not
-measurable** — which is the contract `csia/v2/localization.py` already uses.
-"Not measurable" eliminates nothing.
+**Revision, approved by the owner before any preregistration.** The original
+W1 ("the allocator reports the demanded torque not achieved") is **withdrawn
+as a physical witness**. The allocator computes "achieved" from its own
+effectiveness model, which never observes the physical actuator
+effectiveness (`docs/research/PX4_SET_B_DYNAMICS_PREFLIGHT.md` §10, item 4).
+On the apparatus it reports the torque achieved in every in-flight step while
+motor 1 produces only 60% of its commanded thrust. Allocator saturation survives only as one W_CTRL
+variable, as evidence of demand, never as evidence of physical torque. The
+old W2, W3 and W4 are absorbed into the categories below.
 
-| id | predicate | confirms | refutes | not measurable when |
-|---|---|---|---|---|
-| W1 | the allocator reports the demanded torque **not** achieved, sustained | A | B | topic absent, or before onset has settled |
-| W2 | one motor's command is persistently elevated against the symmetric hover expectation | A (compensating lost thrust) | B | during manoeuvres that break symmetry |
-| W3 | an angular-acceleration or attitude transient at onset outside the nominal envelope | A | B | the envelope is not yet characterised on the control arm |
-| W4 | RPM telemetry disagrees with command | B; A only if RPM measures the rotor (G1) | — | RPM channel stale (~1 Hz) |
+Witnesses are grouped by **evidence category**, one per data category the
+apparatus keeps apart. Each category holds evidence **variables**. The
+three-valued predicates built from them (true, false, or **not measurable**,
+the contract `csia/v2/localization.py` already uses) and every threshold are
+fixed in the preregistration, **not here**. "Not measurable" eliminates
+nothing. It is not assumed that all four categories will be needed.
+
+| category | data category | evidence variables (ULog) | member A on the apparatus | member B on the apparatus | not measurable when |
+|---|---|---|---|---|---|
+| **W_CTRL** controller / allocator demand and compensation | COMMAND | motor-i command against the symmetric hover expectation, κ_i = c_i / mean(c_j, j≠i); rate-loop torque-setpoint offset; allocator saturation flag (demand only) | present 12–32 ms after onset and **persistent** in steady state while compensation is feasible: κ → 1/η | absent | manoeuvres that break hover symmetry; motor at its limit (κ saturates) |
+| **W_RPM** rotor response against command | TELEMETRY (equal to PHYSICAL rotor state in SIH unless corrupted) | reported RPM against a healthy-rotor expectation from the command history (first-order lag τ); cross-motor RPM symmetry in steady hover | present | present, **matched by construction** | RPM channel absent or stale (the ~1 Hz MAVLink path) |
+| **W_DYN** rigid-body consequence | VEHICLE RESPONSE | angular acceleration, body rates, tilt, specific-force change, altitude deviation, against the nominal envelope of the control arm | strong in the **onset transient** (peak 0.15–0.2 s after onset), weak during compensation, **absent in steady state** | absent | nominal envelope not characterised; manoeuvres |
+| **W_EST** estimator consequence | ESTIMATED STATE | EKF aiding innovations and test ratios; hover-thrust estimator innovation and estimate | EKF aiding innovations: **no fault-attributable response**. Hover-thrust innovation: only at η ≤ 0.6. Hover-thrust estimate: slow steady offset at η ≤ 0.7 | absent | before the estimators converge |
+
+**What each category can and cannot do.**
+
+- **W_RPM defines the symptom** (COMMAND_NO_RESPONSE) that A and B share. It is
+  how the matched set is built, not how it is resolved. The cross-motor
+  symmetry variable is the exception: in A's steady hover every rotor reads
+  the same, while in B the reported RPM sits below the others. That variable
+  depends on a rotor-to-thrust model (T ∝ RPM² in SIH), which a preregistration
+  must declare.
+- **W_CTRL's persistent evidence is a command-side observation.** It shows the
+  closed loop working harder on one motor, which confirms a loss of
+  effectiveness somewhere downstream of the command. It does not separate A
+  from C, where the command is lost before the motor, so the H2 boundary is
+  unchanged.
+- **W_DYN is transient.** Its evidence exists mainly before the controller has
+  compensated. That is a timing requirement on any architecture that uses it.
 
 **Localization rule: v2's, unchanged.** A hypothesis is `SUPPORTED` only when
 it is the last one standing **and** something affirmatively confirms it
@@ -152,20 +186,30 @@ elimination semantics and the certificate semantics are not touched. They are
 applied by a research adapter that reads v2's hypothesis and predicate
 definitions and never modifies `csia/v2/`.
 
-### Expected signatures (PREDICTED — the thing the experiment checks)
+### Expected signatures
 
-| member | W1 allocation | W2 command asymmetry | W3 dynamics transient | W4 RPM vs command | predicted v2 result |
+The witness columns are MEASURED on the apparatus, as evidence magnitudes
+without thresholds. The v2 column is PREDICTED; no CSIA version has been run.
+
+| member | W_CTRL | W_RPM | W_DYN | W_EST | predicted v2 result |
 |---|---|---|---|---|---|
-| A | true | true | true | depends on G1 | `ACTUATION/mechanical` SUPPORTED |
-| B | false | false | false | true | `SENSOR/response_sensor` SUPPORTED |
-| C | true | true | true | depends on G1 | AMBIGUOUS {A-like, C} (H2 boundary) |
-| N | false | false | false | false | no fault SUPPORTED |
+| A, compensated (η ≥ 0.5) | present, all phases | present | onset transient only | hover-thrust only at η ≤ 0.6; EKF aiding absent | `ACTUATION/mechanical` SUPPORTED |
+| A, authority lost (η ≤ 0.4) | present, saturated | present | present until ground contact | hover-thrust present | `ACTUATION/mechanical` SUPPORTED |
+| B | absent | present | absent | absent | `SENSOR/response_sensor` SUPPORTED |
+| C | PREDICTED as A | PREDICTED as A | PREDICTED as A | PREDICTED as A | AMBIGUOUS {A-like, C} (H2 boundary) |
+| N | absent | absent | absent | absent | no fault SUPPORTED |
 
-**If A and B produce the same W1–W3 values, H1 is falsified.**
+**If A and B produce the same W_CTRL, W_DYN and W_EST values, H1 is
+falsified.**
 
 ---
 
 ## 7. If G1 shows PX4's RPM echoes the command
+
+**Resolved: it does not.** The preflight showed that SIH's RPM reports the
+lagged rotor state. With the effectiveness patch it reports the physically
+reduced rotor. The contingency below is kept for the record and does not apply
+to PX4 SIH at `547e2ca`.
 
 Then the RPM channel on PX4 SIH, like ArduPilot's, never reports the rotor. In
 member A it keeps agreeing with the command while the rotor makes no thrust, a
@@ -192,7 +236,7 @@ treatment against any of them.
 | BL-2 | CUSUM on L-RPM and L-IMU | the same, sooner; no cause |
 | BL-3 | frozen v1, run on the same streams through an adapter | its eight hypotheses; `power_fault` is its only propulsion hypothesis |
 | BL-4 | **v2 Set B as it is**: localization without the dynamics witnesses | the SEALED expectation, a floor of two |
-| **T** | v2 localization **plus** W1–W4 | the treatment |
+| **T** | v2 localization **plus** the revised witnesses W_CTRL, W_RPM, W_DYN, W_EST (§6) | the treatment |
 
 BL-4 against T is the comparison that answers the question. The others show
 what each simpler architecture already provides, and are reported whether or
@@ -225,8 +269,8 @@ here, and they must not be tuned after any result is seen.
 
 | id | observation | meaning |
 |---|---|---|
-| F1 | W1–W3 take the same values in A and B | dynamics carry no discriminating information here |
-| F2 | W1–W3 fire in nominal trials | the witness is a noise detector, and any "resolution" is spurious |
+| F1 | W_CTRL, W_DYN and W_EST take the same values in A and B | cross-domain evidence carries no discriminating information here |
+| F2 | W_CTRL, W_DYN or W_EST fire in nominal trials | the witness is a noise detector, and any "resolution" is spurious |
 | F3 | A's dynamics signature settles back to nominal before any witness decides | the observability window closes under compensation; resolution is not available in time |
 | F4 | T resolves A and B only when BL-4 already does | the witnesses add nothing |
 | F5 | a confident wrong isolation occurs in any trial | the rule is unsafe as proposed, regardless of the average |
@@ -271,6 +315,16 @@ per-member count is fixed in the preregistration; this repository's
 current-stack campaigns used 20. A development partition is read freely; a
 locked partition is opened once.
 
+**Apparatus finding that constrains this section.** PX4 SIH is not
+bit-deterministic, but it is **not independently random either**. SIH seeds
+one process-wide `rand()` stream with a fixed seed, so repeats of an identical
+protocol replay one of a few noise realizations. For example, three repeats of
+a sweep level agreed to the step. Repeats are therefore **not independent
+samples** of sensor noise. The preregistration must vary a declared nuisance
+between repeats (for example onset time, arm time or wind) to obtain
+independent realizations, and must not treat N identical repeats as N
+samples. See `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md` §E and §L.
+
 ---
 
 ## 12. What this experiment cannot show
@@ -289,10 +343,13 @@ locked partition is opened once.
 2. **The gating source read, G1–G4**, at `547e2ca`
    (`docs/research/SITL_FEASIBILITY_MATRIX.md` §4). Its outcome may narrow
    this design (§7) or stop it (G2: no motor injection means no member A).
+   *Done:* `docs/research/PX4_SET_B_DYNAMICS_PREFLIGHT.md`.
 3. A **preregistration** fixing members, counts, thresholds and falsifiers,
-   frozen before the first trial.
+   frozen before the first trial. *Not started; waits on the owner's review
+   of the apparatus.*
 4. Build PX4 SIH pinned at `547e2ca`, with the dependencies in the
-   feasibility matrix §5.
+   feasibility matrix §5. *Done for apparatus validation, with the SIH
+   effectiveness patch:* `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`.
 5. The adapter and witnesses, outside `csia/` and `csia/v2/`, with tests
    proving they cannot change any frozen output.
 6. Development partition; then the locked partition, once.
