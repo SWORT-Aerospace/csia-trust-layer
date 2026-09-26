@@ -162,7 +162,8 @@ the capability certificates are research-side seeds. FORGE production code is
 | sealed pipelines | `tests/test_phase4_pipeline.py`, `tests/test_phase5_pipeline.py` |
 
 **No test covers `research/systems-paper/mechanism_b.py`.** That is how the
-dwell error recorded as FL-053 stayed in place.
+dwell error recorded in `docs/research/MECHANISM_B_DWELL_DISCREPANCY.md`
+stayed in place.
 
 ---
 
@@ -177,9 +178,15 @@ dwell error recorded as FL-053 stayed in place.
 - **6** SHA-256 manifests: `docs/v1/FROZEN_BASELINE.json` and the per-phase
   manifests.
 
-None was modified by this work. FL-053 and
-`docs/research/SC09_PROPOSED_CORRECTION.md` record the preserved hashes of the
-Mechanism B artifacts.
+None was modified by this work. `docs/research/MECHANISM_B_DWELL_DISCREPANCY.md`
+and `docs/research/SC09_PROPOSED_CORRECTION.md` record the preserved hashes of
+the Mechanism B artifacts.
+
+**The failure ledger is itself hash-pinned.**
+`research/physical_validation/FAILURE_LEDGER.yaml` is listed in the Phase 3.2,
+Phase 4 and Phase 5 SHA-256 manifests, so any append changes a sealed-manifest
+hash record. That is why the Mechanism B discrepancy is held in a separate
+record and not appended.
 
 ---
 

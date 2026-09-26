@@ -2,7 +2,9 @@
 
 **Status: PROPOSED.** Nothing sealed has been modified. This note specifies a
 correction for the owner to accept or reject. The discrepancy is recorded in
-`research/physical_validation/FAILURE_LEDGER.yaml` as **FL-053**.
+`docs/research/MECHANISM_B_DWELL_DISCREPANCY.md` as proposed ledger entry
+**FL-053**. It is not yet appended to the failure ledger, because the ledger is
+pinned by three sealed-phase manifests (that record, §1).
 
 ---
 
@@ -129,7 +131,7 @@ asks, and answering it would need new runs.
 ## 6. Hashes, preserved
 
 SHA-256 of every file this note concerns, as they stand at the time of writing.
-All are unchanged by this note and by FL-053.
+All are unchanged by this note and by the discrepancy record.
 
 | file | SHA-256 | last commit |
 |---|---|---|

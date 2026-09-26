@@ -178,9 +178,11 @@ The Mechanism B comparison (`research/systems-paper/MECHANISM_B.md`) set the
 CUSUM's first crossing against the **raw** trust crossing. That is detector
 against detector: neither includes a policy dwell. The committed "correction"
 subtracted a 1.0 s dwell from the trust figure that was never in it, and so
-favoured the trust path by one second. **Recorded as FL-053; the correction is
-proposed in `docs/research/SC09_PROPOSED_CORRECTION.md`; no sealed artifact
-was modified.** The CUSUM's lead survives and grows: 5.76 / 2.20 / 2.52 s,
+favoured the trust path by one second. **Recorded in
+`docs/research/MECHANISM_B_DWELL_DISCREPANCY.md` (proposed ledger entry
+FL-053); the correction is proposed in
+`docs/research/SC09_PROPOSED_CORRECTION.md`; no sealed artifact was
+modified.** The CUSUM's lead survives and grows: 5.76 / 2.20 / 2.52 s,
 not 4.76 / 1.20 / 1.52 s.
 
 ### 5.2 The deeper mismatch: both are detection endpoints

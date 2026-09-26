@@ -86,6 +86,7 @@ than a promise.
 | R5 | Certificate semantics unchanged | a diff in `csia_assurance/witness.py` or `csia/v2/attribution.py` | review; both are read-only to this work |
 | R6 | New code consumes frozen outputs and never feeds back into a decision | new code imported by `csia/runtime/` or `csia/v2/` | review; the research code lives outside both packages |
 | R7 | No FORGE production code | any `.py` under `forge/` | `tests/test_program_state.py::test_forge_contains_no_code` |
+| R8 | No append to the failure ledger without the owner's decision | a change to `research/physical_validation/FAILURE_LEDGER.yaml`, which the Phase 3.2, 4 and 5 SHA-256 manifests pin | each phase's `test_the_manifest_matches_every_file_it_lists` |
 
 **Where new code may live.** Post-hoc analysis extends the existing latency
 owner `csia/metrics/latency.py` only by adding functions that read an emitted
