@@ -1,0 +1,58 @@
+{
+ "label": "POST-FREEZE VALIDATION - NO CONFIRMATORY FLIGHT",
+ "checks": {
+  "1_freeze_verify": {
+   "pass": true,
+   "output": {
+    "manifest_sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+    "frozen_files": 31,
+    "violations": []
+   }
+  },
+  "2_executor_dry_run": {
+   "pass": true,
+   "summary": {
+    "flights_in_order": 66,
+    "manifest_sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+    "px4_sha256": "4073466f1b3e42ed073b88d45bda4e4d1168a35730eb23f470ae5a0744dfc085",
+    "source_verified": true,
+    "dry_run": true,
+    "binary_equals_reference_build": true
+   },
+   "flights_listed": 66,
+   "listed_equals_frozen_order": true,
+   "campaign_json_written": false,
+   "first_three": [
+    "<repo>/research/xsys_confirmatory_001/execution/xsys_run_trial.py --build <build> XS1-C00-A-E085 0.000 SIH_MOT_EFF1 0.85 31.500",
+    "<repo>/research/xsys_confirmatory_001/execution/xsys_run_trial.py --build <build> XS1-C10-A-E055 327.273 SIH_MOT_EFF1 0.55 34.500",
+    "<repo>/research/xsys_confirmatory_001/execution/xsys_run_trial.py --build <build> XS1-C01-A-E065 32.727 SIH_MOT_EFF1 0.65 31.000"
+   ],
+   "stderr": ""
+  },
+  "3_executor_refuses_unpatched_tree": {
+   "pass": true,
+   "message": " HEAD^ failed: fatal: ambiguous argument 'HEAD^': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]'"
+  },
+  "4_stage0_refuses_incomplete_campaign": {
+   "pass": true,
+   "message": "campaign incomplete: 66 flights not yet attempted twice (first: XS1-C00-NB); no interim analysis"
+  },
+  "5_stage0_refuses_altered_matrix": {
+   "pass": true,
+   "message": "anifest: ['<scratch>/FLIGHT_MATRIX_altered.csv (as research/xsys_confirmatory_001/prereg/FLIGHT_MATRIX.csv)']"
+  },
+  "6_frozen_pipeline_reproduces_dry_run": {
+   "pass": true,
+   "differences": [],
+   "stderr": ""
+  },
+  "7_guard_test": {
+   "pass": true,
+   "clean_run": "..........                                                               [100%]",
+   "tampered_run_failed": true,
+   "tampered_run": "ation.py:172: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_xsys_001_preregistration.py::test_every_frozen_file_matches_the_manifest\nFAILED tests/test_xsys_001_preregistration.py::test_code_constants_match_the_declared_configuration",
+   "restored_and_verified": true
+  }
+ },
+ "all_pass": true
+}

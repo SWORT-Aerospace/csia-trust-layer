@@ -2,8 +2,10 @@
 
 **State: IN FORCE for documents and post-hoc analysis, and — since the owner's
 second grant (§7) — for the PX4 research build, the minimal SIH
-actuator-effectiveness patch and experimental apparatus validation. The final
-CSIA experimental campaign is NOT authorized.**
+actuator-effectiveness patch and experimental apparatus validation. Since the
+third grant (§8) it also covers designing, freezing and validating the
+XSYS-001 preregistration. The confirmatory experiment itself is NOT
+authorized.**
 
 | | |
 |---|---|
@@ -176,3 +178,51 @@ What this adds to §4, and nothing more:
 The PX4 patch lives in the PX4 tree and in
 `research/px4_actuator_effectiveness/patch/`; nothing under `csia/` changes.
 The results are in `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`.
+
+## 8. Third grant: preregistration of the first confirmatory experiment
+
+Granted by the program owner in the same session, after reviewing
+`docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md`. The operative lines,
+verbatim:
+
+> I accept the apparatus; draft the preregistration
+>
+> We are now moving from EXPLORATORY APPARATUS CHARACTERIZATION to a
+> PREREGISTERED CSIA CROSS-SYSTEM ASSURANCE EXPERIMENT.
+>
+> [...]
+>
+> Design, freeze, hash, and validate the preregistration for the first
+> confirmatory CSIA cross-system experiment.
+>
+> DO NOT RUN THE CONFIRMATORY EXPERIMENT IN THIS SESSION.
+>
+> DO NOT generate new confirmatory flight data.
+>
+> DO NOT tune thresholds against new data.
+>
+> DO NOT modify frozen CSIA v1 or v2 behavior.
+>
+> DO NOT alter historical/sealed experimental artifacts.
+>
+> DO NOT change the PX4 apparatus based on desired CSIA results.
+
+What this adds, and nothing more:
+
+| now permitted | still not permitted |
+|---|---|
+| designing XSYS-001 and freezing it by SHA-256 (`docs/research/XSYS_001_PREREGISTRATION.md`, `research/xsys_confirmatory_001/prereg/FREEZE_MANIFEST.json`) | flying any confirmatory trial, or generating confirmatory data of any kind |
+| setting thresholds by a fixed rule from **apparatus** data only | tuning any threshold, window or rule against new data |
+| a nominal-only nuisance pilot (8 flights, no fault) to choose the nuisance mechanism and the benign onset event | a pilot with a fault, or any flight at a confirmatory condition |
+| running CSIA v2's `localize()`, unchanged and by import, on apparatus data, in a pipeline dry run labelled IN-SAMPLE, NOT CONFIRMATORY | any change to CSIA v1, v2, thresholds, certificate semantics or sealed artifacts |
+| research-only code under `research/xsys_confirmatory_001/` | code under `csia/` |
+
+Two records from this grant:
+
+- **The failure ledger** (R8) is untouched.
+- **The freeze manifest's SHA-256** is in
+  `research/xsys_confirmatory_001/prereg/FREEZE_MANIFEST.sha256`.
+  `tests/test_xsys_001_preregistration.py` fails if the manifest or any file
+  it lists changes.
+
+Running the confirmatory experiment needs a further grant.

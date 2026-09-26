@@ -1,0 +1,223 @@
+{
+ "experiment_id": "XSYS-001",
+ "status": "PREREGISTERED - NOT RUN. No confirmatory flight exists at freeze time.",
+ "document": "docs/research/XSYS_001_PREREGISTRATION.md",
+ "question": "Can temporally conditioned cross-domain evidence increase the ability to distinguish PHYSICAL ACTUATOR DEGRADATION from RPM/ESC TELEMETRY CORRUPTION when both cases produce matched local RPM symptoms?",
+ "root_cause_labels": {
+  "A": "PHYSICAL_ACTUATOR_DEGRADATION",
+  "B": "RPM_TELEMETRY_CORRUPTION",
+  "N": "NOMINAL"
+ },
+ "v2_hypotheses": {
+  "A": "ACTUATION/mechanical",
+  "B": "SENSOR/response_sensor"
+ },
+ "design": {
+  "motor": {
+   "sih_parameter": "SIH_MOT_EFF1",
+   "sih_motor": "Motor1",
+   "csia_subject": "motor_0"
+  },
+  "fault_levels_eta": [
+   0.95,
+   0.85,
+   0.75,
+   0.65,
+   0.55
+  ],
+  "nominal_eta": 1.0,
+  "n_conditions": 11,
+  "heading_rule_deg": "round(360 j / 11, 3), j = 0..10, via SIH_LOC_YAW0",
+  "onset_rule_s": "30.0 + 0.5 * rank_j, rank from sorting j on SHA-256(SEED/offset/j)",
+  "seed": "XSYS-001/2026-09-26",
+  "t_arm_s": 10.0,
+  "t_end_after_onset_s": 16.0,
+  "benign_onset_event": {
+   "parameter": "SDLOG_DIRS_MAX",
+   "value": 8
+  },
+  "wind": "none",
+  "flights": 66,
+  "analysis_trials": 121,
+  "pairs": 55,
+  "order_rule": "sort flight_id on SHA-256(SEED/order/flight_id)",
+  "files": {
+   "flight_matrix": "prereg/FLIGHT_MATRIX.csv",
+   "analysis_matrix": "prereg/ANALYSIS_MATRIX.csv",
+   "execution_order": "prereg/EXECUTION_ORDER.csv"
+  }
+ },
+ "case_b_construction": {
+  "source": "NB flight of the same nuisance condition (benign event, physics untouched)",
+  "channel": "esc_status motor 0 esc_rpm (SIH Motor1), analysis copy only",
+  "rule": "rpm_B(k) = round(rpm_expB(k) * rho_A(k)) for t_rel >= 0; unchanged before t0",
+  "alignment": "step index from each flight's own t0 on the 4 ms grid",
+  "interpolation": "none; zero-order hold on a step missing from A",
+  "truth_retained": "NB's original RPM stays in the stage-0 QC record"
+ },
+ "time_zero": {
+  "definition": "first esc_status step strictly after the parameter_update stamp of the onset parameter",
+  "apparatus_evidence": "physical onset exactly one step after the parameter_update stamp in 24/24 sweep trials",
+  "max_onset_uncertainty_us": 8000
+ },
+ "windows_s": {
+  "T0": [
+   -5.0,
+   0.0
+  ],
+  "T1": [
+   0.0,
+   0.2
+  ],
+  "T2": [
+   0.2,
+   2.0
+  ],
+  "T3": [
+   10.0,
+   15.0
+  ]
+ },
+ "analysis_span_s": [
+  -5.0,
+  15.0
+ ],
+ "evidence": {
+  "W_RPM": {
+   "statistic": "L_W = mean_W(1 - rho^2), rho = rpm_obs / rpm_healthy(cmd_sim)",
+   "windows": {
+    "C1": "T1",
+    "C3": "T3"
+   },
+   "role": "shared local symptom (confirms both causes)"
+  },
+  "W_DYN": {
+   "statistic": "D_T1 = mean_T1((gyro_xy - mean_T0 gyro_xy) . e_loss)",
+   "windows": [
+    "T1"
+   ],
+   "role": "refutes A when nominal; refutes B when present"
+  },
+  "W_CTRL": {
+   "statistic": "C_T3 = mean_T3 kappa - mean_T0 kappa, kappa = c_0 / mean(c_1..c_3) (actuator_motors)",
+   "windows": [
+    "T3"
+   ],
+   "role": "refutes A when nominal; refutes B when present"
+  },
+  "W_EST": {
+   "statistic": "max |EKF aiding test ratio| and max |hover-thrust test ratio| in T1, T2",
+   "role": "EXPLORATORY ONLY; in no decision rule"
+  },
+  "outside_valid_window": "record NOT_APPLICABLE, predicate None (never False)"
+ },
+ "calibration": {
+  "delta_rpm": 0.00047134887288379,
+  "theta_dyn": 0.0245640458408477,
+  "theta_ctrl": 0.0021944678776761872,
+  "s_dyn": 1.3234568061142415,
+  "rule": "threshold = 2 x max |null| over apparatus hover pseudo-onsets; s_dyn = LS slope through origin of D_T1 on L_T1 (apparatus eta 0.9..0.5)",
+  "file": "calibration/CALIBRATION.json"
+ },
+ "witness_gates": {
+  "DYN_nominal_requires": "s_dyn * L_T1 >= 2 theta_dyn",
+  "CTRL_nominal_requires": "1/(1 - L_T3) - 1 >= 2 theta_ctrl"
+ },
+ "checkpoints": {
+  "C1": 0.2,
+  "C3": 15.0,
+  "primary": "C3"
+ },
+ "variants": [
+  "V0_LOCAL_ONLY",
+  "V1_DYN_ONLY",
+  "V2_CTRL_ONLY",
+  "V3_TEMPORAL",
+  "V4_INVALID_WINDOW"
+ ],
+ "primary_variant": "V3_TEMPORAL",
+ "outcome_taxonomy": {
+  "symptomatic": [
+   "UNIQUE_CORRECT",
+   "AMBIGUOUS_CORRECT",
+   "UNSUPPORTED",
+   "NO_EVIDENCE",
+   "WRONG"
+  ],
+  "nominal": [
+   "CORRECT_NO_EVIDENCE",
+   "FALSE_ALARM",
+   "WRONG"
+  ],
+  "v2_mapping": {
+   "SUPPORTED, supported == (true cause,)": "UNIQUE_CORRECT",
+   "SUPPORTED, other cause": "WRONG",
+   "AMBIGUOUS, true cause not rejected": "AMBIGUOUS_CORRECT",
+   "UNSUPPORTED, true cause not rejected": "UNSUPPORTED (unreachable in this spec)",
+   "any verdict with the true cause rejected": "WRONG",
+   "no localization of motor_0": "NO_EVIDENCE"
+  }
+ },
+ "primary_endpoint": {
+  "name": "pair resolution rate (PRR) at C3 under V3_TEMPORAL",
+  "definition": "fraction of eligible matched pairs whose A AND B trial are both UNIQUE_CORRECT",
+  "denominator": "every eligible pair (both trials pass stage-0 checks)",
+  "interval": "cluster-conservative one-sided 95% Clopper-Pearson, n_eff = nuisance conditions",
+  "null_rate": 0.5,
+  "alpha_one_sided": 0.05,
+  "decision": "H_PRIMARY SUPPORTED iff lower95 > 0.5 AND zero WRONG among A and B at C3/V3"
+ },
+ "secondary": {
+  "family": [
+   "H1",
+   "H2",
+   "H3b",
+   "H4@0.95",
+   "H4@0.85",
+   "H4@0.75",
+   "H4@0.65",
+   "H4@0.55"
+  ],
+  "multiplicity": "one Holm family at 0.05; confirmatory only if H_PRIMARY SUPPORTED (gatekeeping)",
+  "H1": "pairs with DYN_T1 witness False in A and True in B: cluster lower bound, Holm p < 0.05",
+  "H2": "pairs with CTRL_T3 witness False in A and True in B: cluster lower bound, Holm p < 0.05",
+  "H3": "(a) PRR V3 >= max(PRR V1, PRR V2) AND (b) V4 WRONG rate among A > 0.5, Holm p < 0.05 AND (c) zero WRONG under V3",
+  "H4": "at least 3 of the 5 levels: per-level PRR at C3/V3 > 0.5 with Holm p < 0.05",
+  "H5": "under V0 every symptomatic trial is AMBIGUOUS_CORRECT at C1 and C3 AND no valid configuration (V0..V3 at C1 and C3; V4 excluded) yields WRONG for A or B AND no N trial receives a SUPPORTED cause in any valid configuration",
+  "H6": "zero WRONG among A and B under V3 at C1 and at C3 (V0 WRONG is the reference)"
+ },
+ "latency": {
+  "detection": "secondary: first step after t0 with 1 - rho^2 >= delta_rpm",
+  "isolation": "equal to certification in this spec, at checkpoint resolution",
+  "certification": "secondary: 0.2 s if UNIQUE_CORRECT at C1/V3, 15 s if first at C3/V3, else none",
+  "action": "not measurable: no downstream action in this experiment",
+  "computational": "secondary: stage-1 wall time per trial, offline; not an onboard figure"
+ },
+ "execution": {
+  "retries_per_flight": 1,
+  "stop_after_consecutive_technical_failures": 3,
+  "interim_analysis": "none: stage 0 refuses an incomplete campaign"
+ },
+ "px4": {
+  "commit": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+  "patch_file": "research/px4_actuator_effectiveness/patch/0001-sih-actuator-effectiveness.patch",
+  "logger_config": "research/px4_actuator_effectiveness/config/logger_topics.txt",
+  "speed_factor": 1
+ },
+ "check_tolerances": {
+  "max_dropouts": 0,
+  "max_gap_steps": 2,
+  "max_missing_frac": 0.005,
+  "max_onset_uncertainty_us": 8000,
+  "eta_abs_tol": 0.01,
+  "eta_nominal_tol": 0.002,
+  "rotor_eq_rms_max": 0.001,
+  "min_alt_m": 5.0,
+  "max_tilt_deg_A": 30.0,
+  "max_tilt_deg_N": 5.0,
+  "max_alt_dev_m_N": 1.0,
+  "max_mean_abs_yaw_rate_T3": 0.5,
+  "b_ratio_match_max": 0.0005,
+  "max_heading_error_deg": 5.0
+ }
+}
