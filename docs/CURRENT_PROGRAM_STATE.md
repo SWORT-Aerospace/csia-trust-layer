@@ -136,6 +136,7 @@ branch, not a lifting of the freeze.
 |---|---|---|---|
 | energy-domain Active Evidence Acquisition | **simulator only**; no hardware operation | in force | `research/active_evidence/realized_current/OWNER_AUTHORIZATION.md` |
 | E2M sensor-bus bench | unarmed, non-flight, low-voltage I²C bench: TCA9548A, low-power sensors, Arduino-class controller, USB host | **`AUTHORIZED_NOT_RUN`** — permission granted 2026-09-16, all four gates still open | `research/bus_provenance/OWNER_DECISION_E2M_2026-09-16.md`, gates in `E2M_GATE_STATUS.md` |
+| cross-system research on v2 | research-only work **outside** the frozen v1/v2 implementation: post-hoc latency analysis, twin-run analysis, SITL experiment **design**, adapters that read frozen outputs. No frozen behaviour, threshold, certificate semantics or sealed artifact may change | **in force for documents and post-hoc analysis** — granted 2026-09-26; SITL execution held for owner review | `docs/research/CROSS_SYSTEM_RESEARCH_EXCEPTION.md` |
 
 The E2M exception moves exactly one boundary — sensor-bus preparation and
 narrowly scoped bench operation. It does not authorize motors, propellers,
