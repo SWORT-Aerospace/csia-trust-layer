@@ -309,3 +309,9 @@ forbids changing C1, so C1 stays unchanged (§1 of
 
 If C4-A2 fails, the program stops and reports. No A3 is created
 automatically.
+
+**Outcome** (`docs/research/XSYS_001_A2_RESULTS.md`). Ten fresh nominal-only
+pilots were flown under the specification committed at `4f3378f`. Every gate
+passed: C1, C2, C3 and C5 as carried from A1, fresh C1, fresh C5, C4-A2 and
+EV-A2. No confirmatory flight was flown. Running the confirmatory campaign
+still needs a further grant.
