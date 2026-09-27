@@ -1,8 +1,8 @@
 # Document index
 
-491 markdown files exist in this repository. Most are the frozen research
+499 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 491 individually would
+once, cite a commit, and are never revised. Indexing all 499 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -160,6 +160,7 @@ is usually two arms of one experiment, not duplication.
 | `research/phase2/` | 13 | Phase-II candidate registry, problem definition, baseline manifest |
 | `publication/system_paper_i/evidence_export/` | 13 | the 16-file evidence export, allowlisted for release |
 | `research/frontier_selection/` | 11 | literature frontier search protocol and selection |
+| `research/csia_novelty_audit/` | 9 | the pre-result CSIA novelty and prior-art audit (2026-09-27): claim matrix, closest systems, terminology crosswalk, XSYS-001 question audit, red team, candidate contributions, bibliography, search log. Snippet-level evidence throughout; no status above POSSIBLY_DISTINCT except one APPARENTLY_NOVEL at LOW confidence |
 | `research/semantic_authority_conflict/` | 11 | authority-conflict experiments |
 | `research/ai_contract_synthesis/` | 10 | contract-synthesis experiments and freeze |
 | `research/evidence_semantics/` | 10 | evidence-semantics feasibility work |
