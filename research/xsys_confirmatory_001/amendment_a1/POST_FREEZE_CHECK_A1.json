@@ -1,0 +1,127 @@
+{
+ "label": "XSYS-001-A1 POST-FREEZE VALIDATION - NO CONFIRMATORY FLIGHT",
+ "amendment_manifest_sha256": "55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b",
+ "parent_manifest_sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+ "checks": {
+  "01_original_preregistration_byte_identical": {
+   "pass": true,
+   "freeze_py_verify": "{\"manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 31, \"violations\": []}",
+   "test": ".                                                                        [100%]"
+  },
+  "02_original_manifest_byte_identical": {
+   "pass": true,
+   "sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b"
+  },
+  "03_amendment_exists_and_frozen": {
+   "pass": true,
+   "freeze_a1_verify": "{\"amendment_manifest_sha256\": \"55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b\", \"parent_manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 59, \"violations\": []}",
+   "test": "...                                                                      [100%]"
+  },
+  "04_revised_matrix_regenerates": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "05_revised_order_regenerates": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "06_hypotheses_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "07_eta_set_unchanged": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "08_thresholds_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "09_temporal_windows_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "10_primary_endpoint_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "11_zero_wrong_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "12_statistical_decision_rule_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "13_v2_files_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "14_px4_apparatus_unchanged": {
+   "pass": true,
+   "test": "..                                                                       [100%]"
+  },
+  "15_no_confirmatory_data": {
+   "pass": true,
+   "campaign_files": [],
+   "confirmatory_logs": [],
+   "test": ".                                                                        [100%]"
+  },
+  "16_executor_points_to_amended_matrix": {
+   "pass": true,
+   "listed_equals_A1_order": true,
+   "test": ".                                                                        [100%]",
+   "summary": {
+    "flights_in_order": 66,
+    "manifest_sha256": "55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b",
+    "px4_sha256": "4073466f1b3e42ed073b88d45bda4e4d1168a35730eb23f470ae5a0744dfc085",
+    "source_verified": true,
+    "dry_run": true,
+    "accepted_for_execution": false,
+    "binary_equals_reference_build": true
+   }
+  },
+  "17_dry_run_lists_66_flights": {
+   "pass": true,
+   "listed": 66
+  },
+  "18_executor_does_not_fly": {
+   "pass": true,
+   "dry_run_files_written": [],
+   "real_run_refused_by_acceptance_gate": true,
+   "refusal": "XSYS-001-A1 is frozen but NOT ACCEPTED for execution (XSYS_001_REQUIRES_FURTHER_DESIGN_WORK); flying requires a further amendment"
+  },
+  "19_stage1_remains_blind": {
+   "pass": true,
+   "a1_chain_dry_run_exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "blinded_inputs": 33,
+   "npz_holds_only_onboard_signals": true,
+   "time_is_relative_to_t0": true,
+   "file_names_are_opaque_ids": true,
+   "stage1_verified_A1_manifest": true,
+   "stage0_a1_accepts_A1_matrix_then_refuses_incomplete_campaign": true,
+   "stage0_a1_refuses_original_matrix": true,
+   "tests": [
+    "..                                                                       [100%]",
+    ".                                                                        [100%]"
+   ]
+  },
+  "20_tamper_detected": {
+   "pass": true,
+   "guard_test_failed": true,
+   "freeze_a1_verify_failed": true,
+   "executor_refused": true,
+   "restored_and_verified": true,
+   "guard_test_summary": "FAILED tests/test_xsys_001_a1_amendment.py::test_matched_pairs_and_levels_are_unchanged"
+  }
+ },
+ "guard_tests": {
+  "pass": true,
+  "summary": ".........................                                                [100%]"
+ },
+ "all_pass": true
+}

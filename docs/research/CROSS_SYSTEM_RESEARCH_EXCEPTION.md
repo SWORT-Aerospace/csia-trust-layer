@@ -4,8 +4,9 @@
 second grant (§7) — for the PX4 research build, the minimal SIH
 actuator-effectiveness patch and experimental apparatus validation. Since the
 third grant (§8) it also covers designing, freezing and validating the
-XSYS-001 preregistration. The confirmatory experiment itself is NOT
-authorized.**
+XSYS-001 preregistration, and since the fourth (§9) a pre-data amendment of
+its nuisance design with nominal-only pilots. The confirmatory experiment
+itself is NOT authorized.**
 
 | | |
 |---|---|
@@ -226,3 +227,43 @@ Two records from this grant:
   it lists changes.
 
 Running the confirmatory experiment needs a further grant.
+
+## 9. Fourth grant: pre-data amendment of the nuisance design (XSYS-001-A1)
+
+Granted by the program owner in the same session, after reviewing the
+frozen XSYS-001 preregistration. The operative lines, verbatim:
+
+> I accept the scientific structure of XSYS-001 and the frozen
+> preregistration.
+>
+> DO NOT run the confirmatory campaign yet.
+>
+> There is one final design issue that must be resolved before any
+> confirmatory data exist:
+>
+>     INDEPENDENCE OF THE NUISANCE CONDITIONS.
+>
+> [...]
+>
+> If existing data cannot answer the independence question, you are
+> authorized to run the MINIMUM number of additional NOMINAL-ONLY flights.
+>
+> [...]
+>
+> This authorization does NOT include running XSYS-001.
+>
+> Do not execute a single confirmatory fault flight.
+
+What this adds, and nothing more:
+
+| now permitted | still not permitted |
+|---|---|
+| a pre-data amendment of the nuisance-generation mechanism only (`docs/research/XSYS_001_A1_NUISANCE_INDEPENDENCE.md`) | any change to hypotheses, levels, evidence definitions, thresholds, windows, endpoints, decision rules, attribution semantics, v2 or the PX4 apparatus |
+| nominal-only pilots (η = 1.00, no fault, no corruption, no CSIA scoring), ids `A1P-…`: five were flown | any fault flight, case-B construction or confirmatory scoring |
+| freezing the amendment by a manifest that binds the XSYS-001 manifest | changing the XSYS-001 preregistration, manifest or any file it froze |
+
+**The outcome is recorded here too.** The amendment's own acceptance rule,
+frozen before use, failed criterion C4. XSYS-001-A1 is therefore frozen but
+**not accepted for execution**, and its executor refuses to fly. Any run
+needs a further amendment and a further grant. The failure ledger (R8) is
+untouched.
