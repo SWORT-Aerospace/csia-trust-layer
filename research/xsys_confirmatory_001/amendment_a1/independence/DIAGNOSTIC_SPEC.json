@@ -1,0 +1,43 @@
+{
+ "id": "XSYS-001-A1 nuisance-independence diagnostics",
+ "status": "FROZEN BEFORE USE: written and committed before any new nominal pilot flight was flown and before any of these diagnostics was computed on existing data",
+ "question": "May the nuisance condition be treated as the independent experimental unit of XSYS-001?",
+ "source_facts_used": {
+  "noise_generator": "glibc rand(), one process-global stream, seeded by srand(1234) in Sih::Sih() (sih.cpp:61) and again in SensorBaroSim::SensorBaroSim() (SensorBaroSim.cpp:46) at 547e2ca",
+  "consumers": "SIH task thread: accel + gyro Gaussian noise every 4 ms step (Marsaglia polar, rejection), ranging-beacon noise every 500 ms; hp_default work-queue thread: sensor_baro_sim (20 Hz), sensor_mag_sim (50 Hz), sensor_gps_sim (8 Hz)",
+  "gyro_noise_std_rad_s": 0.01,
+  "earth_spin_rate_rad_s": 7.292e-05
+ },
+ "definitions": {
+  "span": "the simulated-time interval a condition's frozen statistics read: [t0 - 5 s, t0 + 15 s)",
+  "gyro_noise_residual": "r(k) = sensor_combined.gyro_rad(k) - vehicle_angular_velocity_groundtruth.xyz(k), matched at the same timestamp (3-vector)",
+  "coincident_draw": "|r_a(k) - r_b(k + tau)| < 3e-4 rad/s on all three axes (tolerance > 2 x earth spin rate + float32 rounding; chance coincidence for independent draws 4.9e-6 per step pair)",
+  "frozen_statistics": "L_T1, D_T1, L_T3, C_T3 computed ONLY with research/xsys_confirmatory_001/pipeline/xsys_features.py, for every motor m = 0..3, at pseudo-onsets",
+  "memory_signals": "the per-step signals the frozen statistics are functions of: rho_m (RPM ratio, every motor), gyro roll and pitch rate, kappa_m (allocator command ratio, every motor)"
+ },
+ "diagnostics": {
+  "DX1_noise_draw_identity": "I(a,b) = max over ALL lags tau of (number of coincident draws at lag tau) / (steps in span a). Computed by exact global matching, not a limited lag window.",
+  "DX5_family_membership": "zero-lag coincident-draw fraction per 1 s simulated-time bin for every pair of flights; same family in a bin if >= 0.99, different if <= 0.01; the branch time of a pair is the first bin after which it stays <= 0.01",
+  "DX2_DX3_statistic_lag_correlation": "rho_{s,s',m}(Delta) = Pearson correlation between statistic s at pseudo-onset t and statistic s' at pseudo-onset t + Delta in ONE flight (one stochastic stream), pseudo-onsets every 0.2 s, for s, s' in {L_T1, D_T1, L_T3, C_T3} and every motor m; D is W_DYN, C is W_CTRL",
+  "DX6_memory": "tau_mem = max over memory_signals of the smallest lag L such that |autocorrelation(lag)| <= 0.1 for every lag in [L, L + 60 s], from a long nominal hover (after removing each signal's mean over the hover)",
+  "DX4_trajectory_dependence": "Pearson correlation between two conditions' span signals aligned on relative time t - t0 (gyro projected on motor 0's loss axis, kappa_0, rho_0, true roll and pitch rate)"
+ },
+ "rules": {
+  "required_onset_separation": "S_min = 20 s (span length) + tau_mem; the design uses S = S_min rounded UP to the next multiple of 5 s",
+  "evaluation_of_original_design": "descriptive: family rates among identically configured launches (DX5), zero-lag identity inside original-design spans, and rho(Delta) at the original onset separations 0.5 to 5 s"
+ },
+ "acceptance_criteria": {
+  "C1_no_shared_draws": "DX1 I(a,b) <= 0.001 for every pair of distinct pilot design conditions (spans extended backwards by tau_mem)",
+  "C2_separation_exceeds_memory": "design separation S >= 20 s + tau_mem",
+  "C3_statistics_uncorrelated_at_S": "|mean of rho_{s,s',m}(Delta) over Delta in [S, S + 10 s]| <= 0.1 for every s, s', m, in the long nominal hover",
+  "C4_trajectories_uncorrelated": "|DX4 correlation| <= 0.1 for every signal and every pair of distinct pilot design conditions",
+  "C5_threshold_validity": "in every pilot design condition span and in the long hover, every frozen null statistic at hover pseudo-onsets stays below its frozen threshold (|L_T1| < delta_rpm, |D_T1| < theta_dyn, |C_T3| < theta_ctrl), and the true heading over T0 is within 5 deg of the commanded heading",
+  "decision": "the nuisance condition is accepted as the independent unit iff C1..C5 all hold; otherwise XSYS_001_REQUIRES_FURTHER_DESIGN_WORK"
+ },
+ "pilot_plan": {
+  "authorization": "nominal only: eta = 1.00, no actuator degradation, no telemetry corruption, no CSIA scoring; ids prefixed A1P-, never part of any confirmatory matrix",
+  "Q1": "one long nominal hover, heading 16.364 deg (not a confirmatory heading), arm 10 s, benign SDLOG_DIRS_MAX event at 30 s, end 400 s: gives DX2/DX3/DX6 and long-hover threshold validity",
+  "Q2_to_Q5": "four nominal flights flown exactly as the candidate design schedules a condition (pre-arm dwell so that arm = 10 s + S x slot, onset = arm + 20 s, end = onset + 16 s, benign event at onset) at slots 0, 1, 2 and 10 and headings 49.091, 81.818, 114.545, 147.273 deg (half-steps between confirmatory headings): gives C1, C4, C5 for adjacent slots and for the longest dwell",
+  "S": "fixed by the rule above from Q1 BEFORE Q2 to Q5 are flown"
+ }
+}
