@@ -5,8 +5,9 @@ second grant (§7) — for the PX4 research build, the minimal SIH
 actuator-effectiveness patch and experimental apparatus validation. Since the
 third grant (§8) it also covers designing, freezing and validating the
 XSYS-001 preregistration, and since the fourth (§9) a pre-data amendment of
-its nuisance design with nominal-only pilots. The confirmatory experiment
-itself is NOT authorized.**
+its nuisance design with nominal-only pilots. The fifth (§10) adds a second
+pre-data amendment that corrects criterion C4 only. The confirmatory
+experiment itself is NOT authorized.**
 
 | | |
 |---|---|
@@ -267,3 +268,44 @@ frozen before use, failed criterion C4. XSYS-001-A1 is therefore frozen but
 **not accepted for execution**, and its executor refuses to fly. Any run
 needs a further amendment and a further grant. The failure ledger (R8) is
 untouched.
+
+## 10. Fifth grant: second pre-data amendment, C4 only (XSYS-001-A2)
+
+Granted by the program owner in the same session, after reviewing
+XSYS-001-A1. The operative lines, verbatim:
+
+> A1 correctly remains NOT ACCEPTED because C4 failed under its
+> preregistered criterion.
+>
+> Do NOT retroactively change A1.
+>
+> Do NOT change its verdict.
+>
+> Do NOT alter its manifest.
+>
+> Do NOT run confirmatory flights.
+>
+> [...]
+>
+> We will therefore create a SECOND PRE-DATA AMENDMENT:
+>
+>     XSYS-001-A2
+>
+> This amendment is limited to correcting the definition of C4.
+>
+> [...]
+>
+> DO NOT loosen C1.
+
+The instruction's title reads "I approve the corrected C4 and C1". Its body
+forbids changing C1, so C1 stays unchanged (§1 of
+`docs/research/XSYS_001_A2_C4_CORRECTION.md`).
+
+| now permitted | still not permitted |
+|---|---|
+| defining C4-A2 prospectively and freezing it before fresh data | changing A1, its verdict, its manifest, or any XSYS-001 file |
+| fresh nominal-only validation pilots (η = 1.00, no fault, no corruption, no CSIA scoring), ids `A2P-…` | any confirmatory flight, case-B construction, confirmatory stage 1 or 2, or inspection of confirmatory outcomes |
+| a manifest binding XSYS-001, A1 and A2 | changing C1, C2, C3 or C5, or any other frozen element |
+
+If C4-A2 fails, the program stops and reports. No A3 is created
+automatically.
