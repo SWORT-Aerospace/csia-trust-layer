@@ -50,7 +50,7 @@ concern:
 | Qantas 72 (M50) | UNCLEAR at V0 | UNCLEAR | UNCLEAR | UNCLEAR |
 | Ariane 501 (M51) | both SRIs failed on the same software exception, which is inconsistent with independent random unit failures. Queued (Q11) | common-mode reasoning at design time; the inquiry's recommendations are queued | yes, as design practice | the failure was in the fault response (processor shutdown), not in any missing verdict (V0) |
 | structural fault read as multiple component faults (M37) | yes, if structural-fault hypotheses exist | structural or unknown-mode hypotheses (M03, M37) | yes | real; delivered by established MBD extensions |
-| fielded estimator selection (M60, M61; V4) | yes, as per-instance test-ratio warnings | not normalizing inadequacy away at selection | the principle, yes (M02, M07, M24) | **a deployment question**: whether vehicle-level logic uses the warnings was not traced (UNCLEAR) |
+| fielded estimator selection (M60, M61; V4) | yes, as per-instance combined test ratios (the PX4 selector publishes them, line 890) | not normalizing inadequacy away at selection | the principle, yes (M02, M07, M24) | **a deployment question**: whether vehicle-level logic uses these ratios was not traced (UNCLEAR) |
 
 **Reading.** The useful work in these cases is done by two things:
 
