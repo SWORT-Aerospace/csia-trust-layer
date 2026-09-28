@@ -283,7 +283,7 @@ record above is unchanged. This section is appended.
 | `curl` to crossref, doi.org, NTRS, arXiv, Google Patents, the USPTO PDF host, freepatentsonline, Justia, ardupilot.org, docs.px4.io, NASA DASHlink, LMCS, HAL, IRISA, AAAI, PHM Society, MDPI, Wiley, Springer, MIT, UT Austin, Linköping, FBK, York, DTIC, DLR, CSIC, PMC, USENIX, NSF PAR, ROSA P, FAA, NTNU, Vanderbilt ISIS | **blocked** (HTTP 000/403; policy denial) |
 | `curl` to `github.com`, `codeload.github.com`, `api.github.com`, `*.github.io` | **blocked** (403 / 000) |
 | `curl` to `raw.githubusercontent.com` | **reachable (200)**: the only route to primary text |
-| local PX4 source clone at commit `547e2caa9883bc1609325f02b4914b4e2482fe62`, including `docs/en/` (the XSYS-001 apparatus tree; its one added commit, the SIH effectiveness patch, leaves every inspected file unchanged) | **available**. Primary source for PX4. Source code only; no campaign artifact was opened |
+| local PX4 source clone at commit `547e2caa9883bc1609325f02b4914b4e2482fe62`, including `PX4-Autopilot/docs/en/` (the XSYS-001 apparatus tree; its one added commit, the SIH effectiveness patch, leaves every inspected file unchanged) | **available**. Primary source for PX4. Source code only; no campaign artifact was opened |
 | `pdftotext` | installed, but no primary PDF was reachable |
 
 ## S2.2 Primary sources inspected
@@ -292,7 +292,7 @@ record above is unchanged. This section is appended.
 |---|---|---|---|
 | B130 | ArduPilot `libraries/AP_Motors/AP_MotorsMatrix.cpp` (`check_for_failed_motor`), `ArduCopter/crash_check.cpp` (`thrust_loss_check`, `yaw_imbalance_check`) | raw.githubusercontent.com, branch `master`, fetched 2026-09-27 | **V4** (function level, line ranges recorded) |
 | B130 | ArduPilot wiki `copter/source/docs/thrust_loss_yaw_imbalance.rst` | raw.githubusercontent.com, `master` | **V3** |
-| B131 | PX4 `src/modules/commander/HealthAndArmingChecks/checks/escCheck.cpp` L314–328; `src/modules/commander/failure_detector/FailureDetector.cpp`; `docs/en/config/motor_failure_recovery.md` L91–92 | local tree at `547e2ca` | **V4** |
+| B131 | PX4 `src/modules/commander/HealthAndArmingChecks/checks/escCheck.cpp` L314–328; `src/modules/commander/failure_detector/FailureDetector.cpp`; `PX4-Autopilot/docs/en/config/motor_failure_recovery.md` L91–92 | local tree at `547e2ca` | **V4** |
 | B132 | R2U2 repository `README.md` | raw.githubusercontent.com, `main` | V2 (the tool, not the 2013/2015 health-management paper) |
 | B133 | CPS_Invariant repository `README.md` (Choi et al.'s artifact) | raw.githubusercontent.com, `master` | V2 (the artifact, not the paper) |
 | B134 | pyfaultdiagnosistoolbox `README.md` | raw.githubusercontent.com, `master` | V2 |
