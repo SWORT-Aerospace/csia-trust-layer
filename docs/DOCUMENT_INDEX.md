@@ -1,8 +1,8 @@
 # Document index
 
-514 markdown files exist in this repository. Most are the frozen research
+521 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 514 individually would
+once, cite a commit, and are never revised. Indexing all 521 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -164,6 +164,7 @@ is usually two arms of one experiment, not duplication.
 | `research/xsys_001_confirmatory_campaign/` | 226 | the frozen XSYS-001 confirmatory campaign record (2026-09-28): phase-0 verification, completion seal, raw-data manifest (raw ULogs outside git; DURABLE_STORAGE_PENDING), stage-0 custody report, blinded stage-1 inputs, sealed stage 1 with its strace blindness audit, unblinding gate, frozen stage-2 RESULTS.json, descriptive summary, independence audit, environment record, and CONFIRMATORY_RESULT_MANIFEST.json. Verdict XSYS_001_PRIMARY_SUPPORTED; report `docs/research/XSYS_001_CONFIRMATORY_RESULT.md` |
 | `research/xsys_001_raw_data_custody/` | 2 | durable custody of the XSYS-001 raw data after the result freeze: DURABLE_STORAGE_COMPLETE on the orphan branch `claude/xsys-001-raw-data` (commit 3f2ccae7), with per-flight raw and xz hashes bound to the sealed completion record |
 | `research/csia_dx/` | 7 | CSIA-DX (conditional diagnosability) review, 2026-09-28: problem formalization, adversarial prior-art review (35 queries; papers and patents at V0), atomic claims DX-C1..C13 (six N0, six N1, one N2 LOW), usefulness scorecard, toy example and embedded feasibility, first experiment (design only, not run). Decision CSIA_DX_PIVOT; nothing implemented |
+| `research/csia_model_inadequacy/` | 7 | assurance under model incompleteness, 2026-09-28: problem definition, adversarial prior-art attack (52 queries across 35 fields; papers, patents and incident reports at V0; PX4, ArduPilot and CSIA code at V4), ambiguity-versus-inadequacy analysis with an established-vocabulary map, closest systems, claims MI-C1..C15 (all N0 or N1), usefulness, full-text verification queue, search log. Decision MODEL_INADEQUACY_KILL; nothing implemented |
 | `research/semantic_authority_conflict/` | 11 | authority-conflict experiments |
 | `research/ai_contract_synthesis/` | 10 | contract-synthesis experiments and freeze |
 | `research/evidence_semantics/` | 10 | evidence-semantics feasibility work |
