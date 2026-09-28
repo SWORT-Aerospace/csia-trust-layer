@@ -1,8 +1,8 @@
 # Document index
 
-529 markdown files exist in this repository. Most are the frozen research
+538 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 529 individually would
+once, cite a commit, and are never revised. Indexing all 538 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -166,6 +166,7 @@ is usually two arms of one experiment, not duplication.
 | `research/csia_dx/` | 7 | CSIA-DX (conditional diagnosability) review, 2026-09-28: problem formalization, adversarial prior-art review (35 queries; papers and patents at V0), atomic claims DX-C1..C13 (six N0, six N1, one N2 LOW), usefulness scorecard, toy example and embedded feasibility, first experiment (design only, not run). Decision CSIA_DX_PIVOT; nothing implemented |
 | `research/csia_model_inadequacy/` | 7 | assurance under model incompleteness, 2026-09-28: problem definition, adversarial prior-art attack (52 queries across 35 fields; papers, patents and incident reports at V0; PX4, ArduPilot and CSIA code at V4), ambiguity-versus-inadequacy analysis with an established-vocabulary map, closest systems, claims MI-C1..C15 (all N0 or N1), usefulness, full-text verification queue, search log. Decision MODEL_INADEQUACY_KILL; nothing implemented |
 | `research/autonomous_assurance_gap_search/` | 8 | problem-first gap analysis of autonomous aerospace assurance, 2026-09-28: gap landscape with source register (papers, standards, patents and incident reports at V0; PX4 and ArduPilot failsafe code at V4), 17 candidate gaps (13 killed, 4 surviving), prior-art kill matrix, real-world failure evidence, assurance-assumption, health-to-capability and compound-degradation audits, top three gaps (G02 compound degradation to runtime capability margin 35/50; G08 navigation integrity without GNSS 34/50; G07 runtime-assurance recovery assumption 31/50), full-text queue, search log (67 queries). Decision MULTIPLE_HIGH_VALUE_GAPS_FOUND; nothing designed or implemented |
+| `research/g02_capability_margin/` | 9 | focused prior-art kill test of gap G02 (combined degradation to runtime capability margin), 2026-09-28: deep audit with source register (papers, patents, standards and reports at V0 because full text was unreachable; ArduPilot, PX4, Paparazzi and NASA ProgPy code at V4), P0 source analysis (battery-aware multirotor planning incl. flight-tested BC-NMPC; NASA and MDP contingency management; degraded-authority reachability, ACAI, control performance index), 15 atomic claims (11 N0, 3 N1, 1 N2 LOW), usefulness matrix, power-available-versus-required, control-authority and trajectory-feasibility prior art, eVTOL certification relevance, real-world evidence, full-text queue, search log (49 queries). Decision G02_ENGINEERING_ONLY; nothing designed or implemented |
 | `research/semantic_authority_conflict/` | 11 | authority-conflict experiments |
 | `research/ai_contract_synthesis/` | 10 | contract-synthesis experiments and freeze |
 | `research/evidence_semantics/` | 10 | evidence-semantics feasibility work |
