@@ -233,3 +233,132 @@ CPS is cyber-physical systems.
 | P21 | US 7,191,041 B2, "Method for diagnosing as to signal plausibility with a speed sensor of a motor vehicle" | not shown | C1, C3 | SS |
 | P22 | US 11,204,838, "Runtime model validation for partially-observable hybrid systems" | not shown | C10, C13 | SS |
 | P23 | US 6,427,102 B1, "Method and device for sensor monitoring, especially for ESP system for motor vehicles" | not shown (believed Bosch; unconfirmed) | C1, C3 | SS |
+
+# Stage 2 additions: source verification (2026-09-27)
+
+This section is appended for the second-stage verification layer. The rows
+above are unchanged.
+
+**The statement "no full text was read for any entry" still holds for
+B01–B116 and P01–P23, with two exceptions.** The fielded-autopilot sources
+behind B55 and B56 were read in primary form in stage 2, as B130 and B131.
+
+Stage 2 retested access. Only `raw.githubusercontent.com` answers; see
+`research/csia_novelty_audit/NOVELTY_SEARCH_LOG.md` §S2.1. Primary text was
+therefore reachable only for open-source code and documentation hosted there,
+plus the local PX4 source tree at commit `547e2ca`. Every paper and patent
+remains at V0.
+
+Verification levels, as defined in the stage-2 brief:
+
+| level | meaning |
+|---|---|
+| V0 | search result or snippet only |
+| V1 | abstract verified |
+| V2 | substantial primary-source text inspected |
+| V3 | complete relevant primary source inspected |
+| V4 | claim traced to an exact section, page, claim, equation or source line |
+
+A source that could not be obtained is marked
+**REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION**. That applies to every V0 entry
+below. No entry reached V1, because no abstract page was reachable. The "bears
+on" column cites the frozen stage-2 features `F01`–`F27`, which are defined in
+`research/csia_novelty_audit/CSIA_NOVELTY_VERIFICATION.md` §3.
+
+## L. Stage-2 sources
+
+| id | reference | ids / URL | bears on | status |
+|---|---|---|---|---|
+| B117 | Alavi, Izadi-Zamanabadi, Hayes (initials not shown), "Robust fault detection and isolation technique for single-input/single-output closed-loop control systems that exhibit actuator and sensor faults", *IET Control Theory & Applications*, c. 2008. Per the search summary: frequency-shaped residuals; in closed loop a sensor fault is suppressed in the measured signal after a short time, and a residual built from **controller-demanded signals** reveals it | doi 10.1049/iet-cta:20070382; https://www.researchgate.net/publication/224347339 | F06, F07, F09; XSYS | SC; V0 |
+| B118 | "Steady-state fault propagation characteristics and fault isolation in cascade electro-hydraulic control system", *Machines* 12(9):600, 2024. Authors not shown. Per the summary: feedback transfers, attenuates or mitigates the steady-state effect of **actuator** faults but not of **feedback-sensor** faults; final value theorem; a fault influence distribution matrix used for isolation | doi 10.3390/machines12090600 | F06, F07, F24; XSYS | SS; V0 |
+| B119 | Hofbaur, Travé-Massuyès, Rienmüller, Bayoudh (initials not shown), "Overcoming non-discernibility through mode-sequence analytic redundancy relations in hybrid diagnosis and estimation", Annual Conference of the PHM Society, 2010. Per the summary: analytic redundancy relation (ARR) sets are valid per mode; mode-sequence ARRs discriminate modes that single-mode ARRs cannot | PHM Society conference archive, article 1938 (URL form unconfirmed); https://www.researchgate.net/publication/407252194 | F09, F12, F25 | SC; V0 |
+| B120 | Stojcsics, Boursinos, Mahadevan, Koutsoukos, Karsai (initials not shown), "Fault-adaptive autonomy in systems with learning-enabled components", *Sensors* 21(18):6089, 2021. BlueROV2 underwater vehicle; an FDI learning-enabled component, an assurance monitor using inductive conformal prediction, and contingency management | doi 10.3390/s21186089; https://pmc.ncbi.nlm.nih.gov/articles/PMC8470782/ | F13, F15, F16, F19 | SC; V0 |
+| B121 | T. L. Lai, "Sequential multiple hypothesis testing and efficient fault detection-isolation in stochastic systems", *IEEE Trans. Information Theory* 46(2):595–608, 2000 | IEEE Xplore document 825826 | F13, F22 | SC; V0 |
+| B122 | I. V. Nikiforov, "A generalized change detection problem", *IEEE Trans. Information Theory* 41(1):171–187, 1995. Detection and isolation under a false-alarm constraint and a **probability-of-false-isolation** constraint; an asymptotically optimal CUSUM-type procedure | — | F13, F14, F22 | SC; V0 |
+| B123 | "Actuator and sensor fault detection and diagnosis for unmanned quadrotor helicopters", *IFAC-PapersOnLine*, 2018. Authors not shown. Interacting multiple model (IMM); actuator loss of effectiveness against **IMU** sensor bias | https://www.sciencedirect.com/science/article/pii/S2405896318324285 | F06, F24; XSYS | SS; V0 |
+| B124 | Waitman et al., "Flight evaluation of simultaneous actuator/sensor fault reconstruction on a quadrotor minidrone", *IET Control Theory & Applications*, 2021 | doi 10.1049/cth2.12180 | F06, F21, F24; XSYS | SS; V0 |
+| B125 | "Fast fault detection on a quadrotor using onboard sensors and a Kalman filter approach", 2021. RPM, gyro and accelerometer with a control-effectiveness model; a loss-of-effectiveness factor per actuator | arXiv 2102.06439 | F05, F06; XSYS | SS; V0 |
+| B126 | "Integrated vehicle health and fault contingency management for UAVs", in *Handbook of Unmanned Aerial Vehicles*, Springer. Authors not shown. On-board health-state assessment and automated contingency management | doi 10.1007/978-90-481-9707-1_46 | F03, F19 | SS; V0 |
+| B127 | "Integration of fault diagnosis and control based on a trade-off between fault detectability and closed loop performance", *Journal of Process Control*, 2016 | https://www.sciencedirect.com/science/article/pii/S0959152415002413 | F07, F09 | SS; V0 |
+| B128 | "Diagnosis in cyber-physical systems with fault protection assemblies", Springer, 2018. Protective actions interact with diagnosis | doi 10.1007/978-3-319-74962-4_8 | F09, F16 | SS; V0 |
+| B129 | "Multiple fault diagnosis in complex physical systems". Authors not shown (possibly Daigle, Koutsoukos and Biswas; unconfirmed). Per the summary: fault masking and compensation, together with the relative time of occurrence, produce many observable signature sequences and lower diagnosability | academia.edu document 2832502 | F08, F09, F21 | SS; V0 |
+| B130 | ArduPilot, branch `master` as served on 2026-09-27 (commit hash not returned by the raw host): `libraries/AP_Motors/AP_MotorsMatrix.cpp`, `check_for_failed_motor` (L405–461); `ArduCopter/crash_check.cpp`, `thrust_loss_check` (L100–181) and `yaw_imbalance_check` (L183–232); wiki `copter/source/docs/thrust_loss_yaw_imbalance.rst` (L19, L31). Primary source for B55 | https://raw.githubusercontent.com/ArduPilot/ardupilot/master/libraries/AP_Motors/AP_MotorsMatrix.cpp; https://raw.githubusercontent.com/ArduPilot/ardupilot/master/ArduCopter/crash_check.cpp; https://raw.githubusercontent.com/ArduPilot/ardupilot_wiki/master/copter/source/docs/thrust_loss_yaw_imbalance.rst | F05, F07, F09, F13, F19 | primary; **V4** (code), V3 (wiki) |
+| B131 | PX4 Autopilot at commit `547e2caa9883bc1609325f02b4914b4e2482fe62`: `src/modules/commander/HealthAndArmingChecks/checks/escCheck.cpp` L310–330 (the comment at L318 and L323); `src/modules/commander/failure_detector/FailureDetector.cpp` (imbalanced-propeller metric, L75–93); `docs/en/config/motor_failure_recovery.md` L91–92. The files are byte-identical in the local tree used for the XSYS-001 apparatus, whose only added commit is the SIH effectiveness patch (`git diff` against `547e2ca` is empty for these files). Primary source for B56 | local clone at `547e2ca` | F06, F09, F13 | primary; **V4** |
+| B132 | R2U2 runtime-verification engine, repository `README.md`: a Mission-time LTL (MLTL) stream engine that emits verdict streams. The Bayesian-network health-management layer of B68 is not in this repository | https://raw.githubusercontent.com/R2U2/r2u2/main/README.md | F08, F09 | primary (tool); V2. B67 and B68 themselves stay V0 |
+| B133 | CPS_Invariant repository `README.md`, the artifact of B92: control invariants identified as state-space models by system identification and checked at run time, with ArduCopter SITL | https://raw.githubusercontent.com/hongjun9/CPS_Invariant/master/README.md | F04, F05, F07 | primary (artifact); V2. B92 itself stays V0 |
+| B134 | Fault Diagnosis Toolbox (Python), repository `README.md`: "analysis and design of fault diagnosis systems for dynamic systems", structural analysis of large-scale models, fault isolability analysis, sensor placement and code generation. The user manual is on github.io, which is blocked | https://raw.githubusercontent.com/faultdiagnosistoolbox/pyfaultdiagnosistoolbox/master/README.md | F10, F11 | primary (tool); V2 |
+| B135 | "An FDR-oriented approach to multiple sequential fault detection and isolation" (title as shown). Per the summary: sequential FDI whose probability of false isolation is bounded, exponentially in the thresholds | NSF Public Access Repository 10054666 | F13, F22 | SS; V0 |
+| B136 | "Certified decisions", 2025. Probabilistic certificates attached to actions | arXiv 2502.17830 | F13, F15 | SS; V0 |
+| B137 | An 802.11 packet-capture diagnosis system with the verdicts CONFIRMED, PLAUSIBLE, INSUFFICIENT_EVIDENCE and NO_ISSUE_FOUND, 2026 | arXiv 2606.06871 | F12, F13 | SS; V0 |
+| B138 | Sensitivity-based fault detection and isolation for road-vehicle chassis sensors. Per the summary: the expected residual magnitude for each fault sets the detection sensitivity | https://pmc.ncbi.nlm.nih.gov/articles/PMC6111285/ | F13; the XSYS-001 witness gate | SS; V0 |
+| B139 | "Conformal recovery-deadline certificates for runtime assurance of adapting controllers", 2026 | arXiv 2606.25371 | F15, F19, F20 | SS; V0 |
+| B140 | PX4 issue #23734, "[Bug] False motor failure detected with Dshot telemetry", and a PX4 forum thread on missing ESC-telemetry current triggering motor-failure warnings. Field evidence that telemetry defects trip local motor-failure logic | https://github.com/PX4/PX4-Autopilot/issues/23734 (not reachable from this environment) | F06, F24; XSYS motivation | SS; V0 |
+| B141 | "Actuator fault detection and isolation system for multirotor unmanned aerial vehicles" (title as shown). The S2Q30 summary describes an IMU-based nonlinear observer for motor failures and a second module that uses ESC motor speeds and currents to separate **motor failure from propeller damage**. Attribution of that description to this paper is unconfirmed | https://www.researchgate.net/publication/363399424 | F01, F06; XSYS | SS; V0 |
+| B142 | "Consistency-based diagnosis using data-driven residuals and limited training data", *Control Engineering Practice*, 2025. Grey-box RNN residuals each carry a modelled **validity region**, and the consistency-based decision logic uses a residual only inside it (an out-of-distribution guard over the operating region, not a time window) | https://www.sciencedirect.com/science/article/pii/S0967066125000462; http://www.diva-portal.org/smash/get/diva2:1945175/FULLTEXT01.pdf (blocked, HTTP 403) | F09, F10 | SS; V0 |
+| B143 | "A consistency-based robust diagnosis approach for temporal causal systems". Authors not shown | academia.edu document 115311414 | F10, F25 | SS; V0 |
+| B144 | "Actuator fault diagnosis and severity identification of turbofan engines for steady-state and dynamic conditions", *Chinese Journal of Aeronautics*, 2024. Dynamic-effect compensation lets the method separate steady-state from transient conditions | https://www.sciencedirect.com/science/article/pii/S1000936124003856 | F08, F18 | SS; V0 |
+| B145 | J. Marzat, H. Piet-Lahanier, F. Damongeot, E. Walter, "Control-based fault detection and isolation for autonomous aircraft", *Proc. IMechE Part G*, 2012. The closed-loop control objectives are used to generate residuals; a structural sensitivity analysis is reported | doi 10.1177/0954410011413834 | F07 | SC; V0 |
+| B146 | Field reports that ESC RPM telemetry is unreliable: AM32 ESC firmware issue #155 (reported RPM values far out of range during spool-up), ArduPilot issue #31763 ("ESC to RPM sensor processing") and Rotorflight documentation (an external frequency sensor takes precedence over telemetry RPM) | https://github.com/AlkaMotors/AM32-MultiRotor-ESC-firmware/issues/155; https://github.com/ArduPilot/ardupilot/issues/31763; https://rotorflight.org/docs/setup/rpm-measurement | F24; XSYS motivation | SS; V0 |
+| B147 | "Limits of residual-based detection for physically consistent false data injection", 2026. Constructs physically consistent, manifold-constrained perturbations that bypass residual-based bad-data detection in AC power-system state estimation. It is a constructive "matched by design" corruption from the security literature | arXiv 2602.10162 | F23; XSYS case B | SS; V0 |
+
+## M. Stage-2 patent additions and updates (technical prior-art screen only)
+
+| id | patent | assignee / inventors (as shown) | bears on | status |
+|---|---|---|---|---|
+| P24 | US 9,725,187 B2, "Vehicle health management systems and methods"; pre-grant publication US 2010/0017049 A1, published 2010-01-21. Per the summary: a mission-critical module computes risk, confidence and benefit values; a flight-critical module compares a health score with a threshold before reconfiguration; vehicle information is filtered for internal and external consistency and for stability over time. A related family member, US 8,942,882, appeared in one result (unconfirmed) | The Boeing Company (as shown in the S2Q28 result); K. Swearingen, J. M. Keller | F13, F16, F19 | SS; V0 |
+| P25 | US 11,905,891, "On-board estimator effector drift detection in engine control". Detects and accommodates in-range drift of effector parameters with an EPOS model that takes sensed effector measurements as an external input vector. A member of the EPOS family (P03–P05) | Raytheon Technologies Corp. (now RTX); inventor R. P. Meisner; a filing date of 2018-01-25 is shown (S2Q39). freepatentsonline shows US 2019/0226354 (P05) as assigned to United Technologies Corporation | F05, F06, F24 | SS; V0 |
+
+**Update to P03–P05** (the EPOS family). S2Q35 surfaced search-rendered
+patent text stating that actuator-sensor faults and actuator-hardware faults
+share a minor-loop tracking error and are distinguished by the engine
+response. It is quoted in `research/csia_novelty_audit/NOVELTY_SEARCH_LOG.md`
+§S2.4. The family assignee is shown as United Technologies Corporation /
+Raytheon Technologies (now RTX) (see P25). It is still V0.
+
+**Update to P15** (US 11,691,747; publication US 2021/0380266 A1). The S2Q36
+summary: shaft speed is compared with rotor speed; if shaft speed is higher, a
+speed-sensing fault is declared; if lower, fuel flow is used to decide whether
+the engine is still coupled to the rotor. This separates a speed-**sensor**
+fault from a physical decoupling with a second physical channel. It is V0.
+
+**Update to P07** (US 12,134,484). S2Q26 showed the assignee as The Boeing
+Company and the inventors as Jason M. Keller, Lee Wang and James M. Ethington.
+The stage-1 row above is left as written.
+
+**No patent claim was read in either stage.** The patent screen in
+`research/csia_novelty_audit/CSIA_PATENT_PRIOR_ART_SCREEN.md` is technical
+triage. It is not a legal opinion on validity, infringement or freedom to
+operate.
+
+## N. Verification level of the 25 top threats
+
+The threats `T01`–`T25` are the columns of
+`research/csia_novelty_audit/CSIA_CLOSEST_PRIOR_ART_CLAIM_CHART.csv`.
+
+| threat | sources | level | note |
+|---|---|---|---|
+| T01 | B130 (B55) | **V4** code; V3 wiki | functions read in full; line ranges recorded |
+| T02 | B131 (B56) | **V4** | local tree at `547e2ca` |
+| T03 | B37 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T04 | B38, B39 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T05 | B119 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T06 | B40 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T07 | B28, B29 | V0 | textbook material, not re-read in this session |
+| T08 | B31 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T09 | B117 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T10 | B118 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION (open access, but the host is blocked) |
+| T11 | P03, P04, P05 | V0 | claims not read; REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T12 | P01 | V0 | claims not read |
+| T13 | B43, B44 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T14 | B123, B124 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T15 | B46, B47 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T16 | B67, B68; B132 | V0 paper; V2 tool | the tool README says nothing about the diagnosis layer |
+| T17 | B59, B60 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T18 | P06 | V0 | claims not read |
+| T19 | P07 | V0 | claims not read |
+| T20 | P24 | V0 | claims not read |
+| T21 | B121, B122 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T22 | B87 (B88) | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |
+| T23 | B120 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION (open access, but the host is blocked) |
+| T24 | B92; B133 | V0 paper; V2 artifact | |
+| T25 | B76 | V0 | REQUIRES_EXTERNAL_FULL_TEXT_VERIFICATION |

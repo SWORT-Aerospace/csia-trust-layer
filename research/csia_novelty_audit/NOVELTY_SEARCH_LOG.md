@@ -267,3 +267,151 @@ These are listed so that no absence below can be read as evidence:
 - The registered-reports literature in robotics.
 - European patents beyond EP equivalents surfaced incidentally.
 - Chinese-language literature and CN patents, except one incidental hit.
+
+---
+
+# Stage 2: source verification and novelty-boundary searches
+
+This stage was run on 2026-09-27, the same session as stage 1, and is still
+independent of XSYS-001. No campaign artifact was opened. The broad-audit
+record above is unchanged. This section is appended.
+
+## S2.1 Access retest
+
+| route | result |
+|---|---|
+| `curl` to crossref, doi.org, NTRS, arXiv, Google Patents, the USPTO PDF host, freepatentsonline, Justia, ardupilot.org, docs.px4.io, NASA DASHlink, LMCS, HAL, IRISA, AAAI, PHM Society, MDPI, Wiley, Springer, MIT, UT Austin, Linköping, FBK, York, DTIC, DLR, CSIC, PMC, USENIX, NSF PAR, ROSA P, FAA, NTNU, Vanderbilt ISIS | **blocked** (HTTP 000/403; policy denial) |
+| `curl` to `github.com`, `codeload.github.com`, `api.github.com`, `*.github.io` | **blocked** (403 / 000) |
+| `curl` to `raw.githubusercontent.com` | **reachable (200)**: the only route to primary text |
+| local PX4 source clone at commit `547e2caa9883bc1609325f02b4914b4e2482fe62`, including `docs/en/` (the XSYS-001 apparatus tree; its one added commit, the SIH effectiveness patch, leaves every inspected file unchanged) | **available**. Primary source for PX4. Source code only; no campaign artifact was opened |
+| `pdftotext` | installed, but no primary PDF was reachable |
+
+## S2.2 Primary sources inspected
+
+| id | file | route | verification level |
+|---|---|---|---|
+| B130 | ArduPilot `libraries/AP_Motors/AP_MotorsMatrix.cpp` (`check_for_failed_motor`), `ArduCopter/crash_check.cpp` (`thrust_loss_check`, `yaw_imbalance_check`) | raw.githubusercontent.com, branch `master`, fetched 2026-09-27 | **V4** (function level, line ranges recorded) |
+| B130 | ArduPilot wiki `copter/source/docs/thrust_loss_yaw_imbalance.rst` | raw.githubusercontent.com, `master` | **V3** |
+| B131 | PX4 `src/modules/commander/HealthAndArmingChecks/checks/escCheck.cpp` L314–328; `src/modules/commander/failure_detector/FailureDetector.cpp`; `docs/en/config/motor_failure_recovery.md` L91–92 | local tree at `547e2ca` | **V4** |
+| B132 | R2U2 repository `README.md` | raw.githubusercontent.com, `main` | V2 (the tool, not the 2013/2015 health-management paper) |
+| B133 | CPS_Invariant repository `README.md` (Choi et al.'s artifact) | raw.githubusercontent.com, `master` | V2 (the artifact, not the paper) |
+| B134 | pyfaultdiagnosistoolbox `README.md` | raw.githubusercontent.com, `master` | V2 |
+
+## S2.3 Stage-2 queries (web search), in order
+
+| # | exact query | kept | notes |
+|---|---|---|---|
+| S2Q0a | `github "Diagnosis of continuous valued systems in transient operating regions" pdf` (restricted to GitHub domains) | — | no GitHub-hosted copy |
+| S2Q0b | `github pdf "A theory of diagnosis from first principles" Reiter` (restricted to GitHub domains) | — | no GitHub-hosted copy |
+| S2Q0c | `github fault diagnosis toolbox structural analysis Frisk Krysander isolability documentation` (restricted to GitHub domains) | B134 | the manual is on github.io, which is blocked |
+| S2Q1 | `temporal structural fault diagnosis aircraft transient steady state fault signature candidate elimination` | — | ML-dominated. Notes engine faults that show no steady-state symptom |
+| S2Q2 | `controller compensation used as evidence fault isolation actuator loss of effectiveness versus sensor fault "control effort" diagnosis` | — | FTC compensation literature; LOE from desired against actual rate |
+| S2Q3 | `motor fault versus RPM sensor fault discrimination multirotor UAV IMU body rates isolation` | — | **no discrimination study found** |
+| S2Q4 | `actuator fault versus actuator feedback sensor fault isolation closed-loop "control signal" residual distinguishes` | B117 | closed-loop masking of sensor faults; residual from controller-demanded signals |
+| S2Q5 | `"Robust fault detection and isolation technique for single-input/single-output closed-loop control systems that exhibit actuator and sensor faults" authors journal` | B117 | metadata |
+| S2Q6 | `quadrotor rotor speed measurement fault versus propeller damage isolation using commanded thrust and angular acceleration residual "rotor speed" sensor fault` | B53 | commanded thrust against measured acceleration; per-rotor thrust from IMU |
+| S2Q7 | `"simultaneous actuator and sensor fault" diagnosis quadrotor UAV loss of effectiveness sensor bias isolation experimental` | B123, B124 | actuator LOE against **IMU** sensor bias; flight tests |
+| S2Q8 | `fault signature matrix transient and steady-state phases closed-loop controller compensation diagnosis dynamic fault signature` | B118, B127 | **key**: compensation redistributes steady-state actuator-fault effects but not feedback-sensor faults |
+| S2Q9 | `"Steady-State Fault Propagation Characteristics and Fault Isolation in Cascade Electro-Hydraulic Control System" feedback sensor fault actuator fault isolation` | B118 | no further detail |
+| S2Q10 | `mode-dependent analytical redundancy relations validity residual only valid in operating mode hybrid system diagnosis "valid" residual activation` | B119 | **key**: ARRs valid per mode; mode-sequence ARRs |
+| S2Q11 | `temporal diagnosability fault isolation time window "detectable only" transient closed loop fault masking diagnosis timing phase-dependent residual` | B128, B129 | fault masking and compensation create signature sequences |
+| S2Q12 | `exoneration fault diagnosis "fault would have been detected" residual sensitivity threshold exoneration condition structured residuals isolation logic` | B138 | expected residual magnitude sets sensitivity |
+| S2Q13 | `"Overcoming Non-Discernibility through Mode-Sequence Analytic Redundancy Relations" authors year PHM` | B119 | metadata |
+| S2Q14 | `health-aware control authority degraded mode diagnosis confidence reconfiguration only when fault isolated with confidence aircraft "health state" permitted maneuvers envelope` | P24 | **key patent**: health score from risk, confidence and benefit before reconfiguration |
+| S2Q15 | `runtime assurance integrated with health management diagnosis switching recovery controller based on diagnosed fault UAV "health management" "runtime assurance"` | B139 | — |
+| S2Q16 | `diagnosis under uncertainty decision making autonomous aircraft ambiguous fault candidate set contingency action selection robust to all candidates` | B120 | a maneuver to prune ambiguous sensor suspects is described; **source not attributable** (UNCLEAR) |
+| S2Q17 | `"Fault-Adaptive Autonomy in Systems with Learning-Enabled Components" authors Sensors 2021 diagnosis contingency management UAV` | B120 | an AUV, not a UAV |
+| S2Q18 | `"Vehicle health management systems and methods" patent 9725187 health score risk confidence benefit reconfiguration actuator assignee` | P24 | — |
+| S2Q19 | `fault isolation integrity bound probability of wrong isolation "misdiagnosis" risk bound certified diagnosis protection level analogy hypothesis testing isolation guarantee` | B135, B136 | probability-of-false-isolation bounds |
+| S2Q20 | `diagnosis output "insufficient evidence" versus "ambiguous" versus "no fault" verdict categories health monitoring explicit unknown state reasoner abstain` | B137 | an explicit INSUFFICIENT_EVIDENCE verdict in another domain |
+| S2Q21 | `Lai 2000 "Sequential multiple hypothesis testing and efficient fault detection-isolation in stochastic systems" false isolation probability Nikiforov change detection isolation` | B121, B122 | **key** for zero-WRONG |
+| S2Q22 | `UAV propulsion health monitoring ESC telemetry fault injection DShot telemetry spoofing or corrupted RPM feedback detection` | — | **no ESC-telemetry corruption literature found** |
+| S2Q23 | `"actuator effectiveness" estimation multirotor distinguished from "rotor speed sensor" fault rpm feedback loss of effectiveness vs sensor failure incremental nonlinear dynamic inversion` | B125 | an INDI split between actuator dynamics and actuator effectiveness using RPM (source not attributable in the summary) |
+| S2Q24 | `integrated vehicle health management ambiguity diagnosis temporal evidence cross subsystem UAV architecture "health management" reasoner candidate set temporal` | B126 | the VLRS chapter's temporal latching and trend windows |
+| S2Q25 | `"On-board estimator actuator system fault accommodation in engine control" priority date assignee United Technologies OR "General Electric" OR "Pratt" inventors` | — | assignee and priority **not shown** |
+| S2Q26 | `US12134484 "contextually-informed fault diagnostics" assignee Boeing OR Honeywell OR "GE Aviation" filed` | P07 | Boeing; Keller, Wang, Ethington |
+| S2Q27 | `US12087171 "Assurance module" run-time assurance aerospace assignee BAE OR Airbus OR Thales OR Boeing` | P08 | assignee not shown; an input manager, safety manager and switch |
+| S2Q28 | `US20100017049 "Vehicle Health Management Systems and Methods" Boeing Swearingen risk value confidence value benefit value health score` | P24 | Boeing; Swearingen, Keller; published 2010-01-21 |
+
+**Field evidence surfaced in stage 1 (Q24) and re-examined here.** A PX4
+issue, "[Bug] False motor failure detected with Dshot telemetry" (#23734),
+and a PX4 forum thread on missing ESC-telemetry current triggering motor-
+failure warnings show that telemetry defects trip local motor-failure logic in
+practice (B140, V0; GitHub issues are not reachable through
+raw.githubusercontent.com).
+
+## S2.4 Late combination and exact-instance queries
+
+The brief's own example queries for the combination search (its Step 5) were
+checked against S2Q1–S2Q28. Five had no close counterpart, so they were run
+nearly verbatim (S2Q29, S2Q30, S2Q31, S2Q34, S2Q37). Eight follow-up queries
+came out of their results.
+
+| # | exact query | kept | notes |
+|---|---|---|---|
+| S2Q29 | `physical response telemetry validation actuator fault versus feedback sensor fault vehicle dynamics` | — | steer-by-wire and drive-by-wire FDI (IMM; simultaneous actuator and sensor faults); EPOS patents resurfaced |
+| S2Q30 | `control allocation residual actuator fault isolation multirotor controller command imbalance diagnosis motor` | B141 | an FDI module that uses ESC motor speeds and currents to separate **motor failure from propeller damage**, next to an IMU observer (attribution to one paper unconfirmed) |
+| S2Q31 | `consistency based diagnosis dynamic systems temporal validity of observations transient fault candidate set` | B142, B143 | "a fault is detected only if the residual detects a fault **and is in its validity region**" |
+| S2Q32 | `"Actuator fault detection and isolation system for multirotor unmanned aerial vehicles" electronic speed controller motor speeds currents distinguish motor failure propeller damage` | B141 | the attribution is still not confirmed |
+| S2Q33 | `"validity region" residual consistency-based diagnosis data-driven residuals fault detected only if residual in its validity region` | B142 | validity region = the operating region covered by the residual's training data (out-of-distribution guard), not a time window |
+| S2Q34 | `closed-loop compensation signature actuator fault masked steady state transient response used to distinguish sensor fault from actuator fault diagnosis` | B118, B144 | B118 summary restated: feedback removes the steady-state effect of actuator faults "except for the feedback sensor fault" |
+| S2Q35 | `"actuator sensor failure" "actuator hardware failure" engine response pressure differential feedback actuator response signal drifts below requested control signal on-board estimator` | P03, P04, P05, P25 | **key**: the search engine rendered EPOS patent text (quoted below) |
+| S2Q36 | `multirotor RPM sensor fault ESC telemetry fault detection IMU cross-check rotor speed measurement faulty versus motor degradation` | B146, P15 | field reports of unreliable ESC RPM telemetry; the P15 speed-sensing logic |
+| S2Q37 | `diagnosis action authority uncertainty autonomous aircraft fault isolation confidence permitted maneuvers contingency ambiguous diagnosis` | B145 | control-based FDI for autonomous aircraft (control objectives used to build residuals) |
+| S2Q38 | `sensor fault that mimics actuator fault identical local residual signature indistinguishable distinguished using closed-loop plant response experiment` | — | no matched-by-construction experiment found; EPOS resurfaced; sensor faults can be recast as actuator faults |
+| S2Q39 | `"On-board estimator effector drift detection in engine control" patent assignee filed` | P25 | assignee and filing date shown for the EPOS family (see P25) |
+| S2Q40 | `fault diagnosis evaluation ablation using transient residual outside its valid time window after compensation causes misdiagnosis negative control experiment` | — | no directly matching work identified; ablation with omitted components is routine, which makes the XSYS-001 invalid-window control a specific form of a common practice |
+| S2Q41 | `"Limits of Residual-Based Detection for Physically Consistent False Data Injection"` (the title surfaced in S2Q33) | B147 | security work that **constructs** corrupted measurements consistent with the physics so that residual detectors miss them. It is the security analogue of building case B to match case A's local symptom |
+
+**EPOS patent text as rendered by the search engine (S2Q35; V0: the PDF host
+`image-ppubs.uspto.gov` is still blocked, retested 2026-09-27).** The engine
+text reads:
+
+> "Both actuator sensor faults and actuator hardware faults experience an
+> inability of the minor loop of the control law module to keep an error
+> between the feedback actuator response signal and the requested control
+> signal within required tolerance. However, the engine response during an
+> actuator sensor failure is very different and distinguishable from the
+> engine response during an actuator hardware failure."
+
+It goes on to say that when the measured pressure differential is detected
+during an actuator **sensor** failure, the feedback signal drifts **below** the
+request; during an actuator **hardware** failure, it drifts **above** the
+request and tracks the actual actuator response. The rendering does not say
+which family member (P03, P04 or P05) the text comes from.
+
+This is the strongest threat found to the XSYS-001 **question**. The shared
+local symptom and the physical-response discriminator are both stated,
+although on a different plant. See
+`research/csia_novelty_audit/XSYS_001_EXACT_PRIOR_ART.md`.
+
+**Mapping of the brief's example queries.**
+
+| brief example | run as |
+|---|---|
+| temporal structural fault diagnosis aircraft | S2Q1 |
+| temporal fault signature structural diagnosis | S2Q1, S2Q10, S2Q13 |
+| controller compensation fault isolation actuator sensor | S2Q2, S2Q4 |
+| physical response telemetry validation actuator | S2Q29 |
+| actuator sensor fault discrimination vehicle dynamics | S2Q6, S2Q7, S2Q29 |
+| cross subsystem diagnosis temporal evidence | S2Q24 |
+| integrated vehicle health management ambiguity diagnosis | S2Q24 |
+| fault isolation candidate set temporal | S2Q16, S2Q31 |
+| consistency based diagnosis dynamic systems temporal | S2Q31 |
+| fault signature matrix transient steady state | S2Q8 |
+| runtime assurance health management diagnosis | S2Q15 |
+| diagnosis action authority uncertainty autonomous aircraft | S2Q14, S2Q37 |
+| fault isolation control response as residual | S2Q4, S2Q37 |
+| control effort actuator fault diagnosis | S2Q2, S2Q30 |
+| closed loop actuator sensor fault isolation | S2Q4, S2Q8, S2Q34 |
+
+**Citation chains followed.** The chains were:
+
+- B118 → its steady-state propagation premise (S2Q34);
+- EPOS title → patent text → the effector-drift family member (S2Q35, S2Q39);
+- B119 → the mode-sequence ARR title (S2Q13);
+- B117 → metadata (S2Q5);
+- the P24 family (S2Q18, S2Q28).
+
+Forward citation of any source was impossible, because every citation index
+is blocked.
