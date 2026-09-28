@@ -8,6 +8,11 @@ every raw file, verifies the xz archive copy of every ULog by decompression
 seals the completion record. It contains no CSIA outcome and
 computes none.
 
+Per flight it also records the position in the frozen execution order, the
+exit and retry status, and the xz copy's SHA-256 and size; the completion
+record also carries the logger-configuration hash. These operational fields
+were added before any seal existed and before stage 0 (still no outcome).
+
 Usage: seal_campaign.py --raw <raw-artifact dir> --records <this directory>
 """
 import argparse
@@ -54,15 +59,22 @@ def main():
     flights, raw_files = [], []
     xz_dir = raw / "flights_xz"
     xz_dir.mkdir(exist_ok=True)
-    for fid in order:
+    logged_pos = {e["flight_id"]: e.get("position") for e in log}
+    for pos, fid in enumerate(order, 1):
         ulg, js, con = fl / f"{fid}.ulg", fl / f"{fid}.json", fl / f"{fid}.console.txt"
-        entry = {"flight_id": fid, "attempts": attempts.get(fid, []), "ulog_present": ulg.exists()}
+        tries = attempts.get(fid, [])
+        entry = {"flight_id": fid, "position": pos, "logged_position": logged_pos.get(fid),
+                 "attempts": tries, "ulog_present": ulg.exists(),
+                 "final_returncode": tries[-1]["returncode"] if tries else None,
+                 "final_attempt_ok": tries[-1]["ok"] if tries else None,
+                 "retried": len(tries) > 1, "ulog_location": str(ulg)}
         if ulg.exists():
             rec = json.loads(js.read_text())
             u_sha = sha256(ulg)
             entry.update({"ulog_sha256": u_sha, "ulog_bytes": ulg.stat().st_size,
                           "record_ulog_sha256_matches": rec.get("ulog_sha256") == u_sha,
                           "record_manifest_sha256": rec["extra"].get("freeze_manifest_sha256"),
+                          "record_logger_topics_sha256": rec.get("logger_topics_sha256"),
                           "px4_sha256": rec.get("px4_sha256")})
             xz = xz_dir / f"{fid}.ulg.xz"
             if not xz.exists():
@@ -72,6 +84,7 @@ def main():
                 for c in iter(lambda: z.read(1 << 20), b""):
                     h.update(c)
             entry["xz_roundtrip_ok"] = h.hexdigest() == u_sha
+            entry.update({"ulog_xz_location": str(xz), "ulog_xz_sha256": sha256(xz), "ulog_xz_bytes": xz.stat().st_size})
             for p, kind in ((ulg, "ulog"), (xz, "ulog.xz"), (js, "trial_record"), (con, "console")):
                 if p.exists():
                     raw_files.append({"campaign_id": CAMPAIGN_ID, "trial_id": fid, "kind": kind,
@@ -105,6 +118,12 @@ def main():
         "all_records_carry_A2_manifest": all(f.get("record_manifest_sha256") == camp["freeze_manifest_sha256"] for f in ok),
         "all_record_ulog_hashes_match": all(f.get("record_ulog_sha256_matches") for f in ok),
         "all_xz_roundtrips_ok": all(f.get("xz_roundtrip_ok") for f in ok),
+        "logger_config_file": a2m["logger_config_file"],
+        "logger_config_sha256": sha256(REPO / a2m["logger_config_file"]),
+        "logger_config_matches_A2_manifest": sha256(REPO / a2m["logger_config_file"]) == a2m["frozen_files"][a2m["logger_config_file"]],
+        "all_records_carry_frozen_logger_config": all(
+            f.get("record_logger_topics_sha256") == a2m["frozen_files"][a2m["logger_config_file"]] for f in ok),
+        "executed_in_frozen_order": all(f["logged_position"] == f["position"] for f in flights if f["attempts"]),
         "flight_matrix_sha256": sha256(A1 / "FLIGHT_MATRIX_A1.csv"),
         "analysis_matrix_sha256": sha256(A1 / "ANALYSIS_MATRIX_A1.csv"),
         "execution_order_sha256": sha256(A1 / "EXECUTION_ORDER_A1.csv"),
@@ -136,7 +155,9 @@ def main():
     print(json.dumps({k: completion[k] for k in ("expected_flights", "attempted_flights", "successful_operational_runs",
                                                  "failed_operational_runs", "never_attempted", "retries",
                                                  "all_flights_used_campaign_binary", "all_records_carry_A2_manifest",
-                                                 "all_record_ulog_hashes_match", "all_xz_roundtrips_ok")}
+                                                 "all_record_ulog_hashes_match", "all_xz_roundtrips_ok",
+                                                 "logger_config_matches_A2_manifest",
+                                                 "all_records_carry_frozen_logger_config", "executed_in_frozen_order")}
                      | {"completion_sha256": digest, "ulog_GB": round(manifest["ulog_bytes"] / 1e9, 2),
                         "xz_GB": round(manifest["ulog_xz_bytes"] / 1e9, 2)}, indent=1))
 
