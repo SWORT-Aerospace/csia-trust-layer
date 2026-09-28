@@ -1,8 +1,8 @@
 # Document index
 
-507 markdown files exist in this repository. Most are the frozen research
+508 markdown files exist in this repository. Most are the frozen research
 record: preregistrations, work-package reports and audits that were written
-once, cite a commit, and are never revised. Indexing all 507 individually would
+once, cite a commit, and are never revised. Indexing all 508 individually would
 produce a table nobody maintains, so this index works at two granularities.
 
 <!-- The two numbers above are checked against `git ls-files '*.md'` by
@@ -162,6 +162,7 @@ is usually two arms of one experiment, not duplication.
 | `research/frontier_selection/` | 11 | literature frontier search protocol and selection |
 | `research/csia_novelty_audit/` | 17 | the pre-result CSIA novelty and prior-art audit (2026-09-27): claim matrix, closest systems, terminology crosswalk, XSYS-001 question audit, red team, candidate contributions, bibliography, search log. Plus its stage-2 verification layer (2026-09-28): verification report with verdict, closest-prior-art claim chart, patent screen, minimum core, publication claim boundary, IP candidate map, full-text verification queue, XSYS-001 exact prior art. Papers and patents at V0; only ArduPilot/PX4 code at V4; remaining candidate at N2 (LOW) |
 | `research/xsys_001_confirmatory_campaign/` | 226 | the frozen XSYS-001 confirmatory campaign record (2026-09-28): phase-0 verification, completion seal, raw-data manifest (raw ULogs outside git; DURABLE_STORAGE_PENDING), stage-0 custody report, blinded stage-1 inputs, sealed stage 1 with its strace blindness audit, unblinding gate, frozen stage-2 RESULTS.json, descriptive summary, independence audit, environment record, and CONFIRMATORY_RESULT_MANIFEST.json. Verdict XSYS_001_PRIMARY_SUPPORTED; report `docs/research/XSYS_001_CONFIRMATORY_RESULT.md` |
+| `research/xsys_001_raw_data_custody/` | 2 | durable custody of the XSYS-001 raw data after the result freeze: DURABLE_STORAGE_COMPLETE on the orphan branch `claude/xsys-001-raw-data` (commit 3f2ccae7), with per-flight raw and xz hashes bound to the sealed completion record |
 | `research/semantic_authority_conflict/` | 11 | authority-conflict experiments |
 | `research/ai_contract_synthesis/` | 10 | contract-synthesis experiments and freeze |
 | `research/evidence_semantics/` | 10 | evidence-semantics feasibility work |
