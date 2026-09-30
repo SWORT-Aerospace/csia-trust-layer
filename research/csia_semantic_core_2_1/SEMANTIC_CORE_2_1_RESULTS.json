@@ -1689,10 +1689,10 @@
     "transition": "SUPPORTED->AMBIGUOUS",
     "units": 120
    },
-   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED|CONSISTENT_WITH_FUNCTION_GRAPH|SUPPORTED->None": {
-    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT|DECIDED_BY_PROFILE_GAP|SUPPORTED->None": {
+    "assessment": "DECIDED_BY_PROFILE_GAP",
     "expected": true,
-    "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+    "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
     "rule": "C3",
     "scenarios": {
      "CPU_OVERLOAD": {
@@ -1714,11 +1714,6 @@
       "first": 18,
       "last": 59,
       "ticks": 42
-     },
-     "MS_B1_COMMAND_LOST": {
-      "first": 18,
-      "last": 59,
-      "ticks": 126
      },
      "MS_C3_LINKS_DOWN_NOT_SHARED": {
       "first": 18,
@@ -1754,12 +1749,12 @@
     "stage": "LOCALIZATION",
     "symptom": "POSITION_UNAVAILABLE",
     "transition": "SUPPORTED->None",
-    "units": 523
+    "units": 397
    },
-   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED|CONSISTENT_WITH_FUNCTION_GRAPH|UNSUPPORTED->None": {
-    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT|DECIDED_BY_PROFILE_GAP|UNSUPPORTED->None": {
+    "assessment": "DECIDED_BY_PROFILE_GAP",
     "expected": true,
-    "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+    "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
     "rule": "C3",
     "scenarios": {
      "MS_A1_SENSOR_DELAY": {
@@ -1771,7 +1766,36 @@
       "first": 18,
       "last": 59,
       "ticks": 42
-     },
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "POSITION_UNAVAILABLE",
+    "transition": "UNSUPPORTED->None",
+    "units": 84
+   },
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM|CONSISTENT_WITH_FUNCTION_GRAPH|SUPPORTED->None": {
+    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+    "expected": true,
+    "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
+    "rule": "C3",
+    "scenarios": {
+     "MS_B1_COMMAND_LOST": {
+      "first": 18,
+      "last": 59,
+      "ticks": 126
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "POSITION_UNAVAILABLE",
+    "transition": "SUPPORTED->None",
+    "units": 126
+   },
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM|CONSISTENT_WITH_FUNCTION_GRAPH|UNSUPPORTED->None": {
+    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+    "expected": true,
+    "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
+    "rule": "C3",
+    "scenarios": {
      "NETWORK_LATENCY": {
       "first": 39,
       "last": 59,
@@ -1781,7 +1805,7 @@
     "stage": "LOCALIZATION",
     "symptom": "POSITION_UNAVAILABLE",
     "transition": "UNSUPPORTED->None",
-    "units": 147
+    "units": 63
    },
    "F2|ATTRIBUTION|ATTRIBUTION|UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN|RIGHT_UNIQUE_WEAKENED|UNIQUE->AMBIGUOUS": {
     "assessment": "RIGHT_UNIQUE_WEAKENED",
@@ -1897,7 +1921,7 @@
    ],
    "CPU_OVERLOAD": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -1912,14 +1936,14 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "ESTIMATOR_LATE": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -1934,14 +1958,14 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "MS_A1_SENSOR_DELAY": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -1955,14 +1979,14 @@
       "unresolved": [],
       "verdict": "UNSUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "MS_A2_COMMUNICATION_DELAY": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -1976,14 +2000,14 @@
       "unresolved": [],
       "verdict": "UNSUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "MS_A3_COMPUTE_DELAY": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -1998,7 +2022,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
@@ -2032,7 +2056,7 @@
      "unit": "OUTPUT_MISSING|state_estimator"
     },
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2047,7 +2071,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
@@ -2069,7 +2093,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     },
@@ -2089,7 +2113,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|POSITION_HOLD"
     },
@@ -2109,7 +2133,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
     }
@@ -2185,7 +2209,7 @@
    ],
    "MS_C3_LINKS_DOWN_NOT_SHARED": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2200,14 +2224,14 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "MS_C4_CPU_SATURATED_NOT_SHARED": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2222,7 +2246,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
@@ -2289,7 +2313,7 @@
      "unit": "OUTPUT_MISSING|state_estimator"
     },
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2304,7 +2328,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     },
@@ -2332,7 +2356,7 @@
    ],
    "MS_D3_COMM_STARVATION": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2347,14 +2371,14 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
    ],
    "MS_D4_COMPUTE_DEADLINE": [
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2369,7 +2393,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     }
@@ -2413,7 +2437,7 @@
       "unresolved": [],
       "verdict": "UNSUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     },
@@ -2432,7 +2456,7 @@
       "unresolved": [],
       "verdict": "UNSUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|POSITION_HOLD"
     },
@@ -2451,7 +2475,7 @@
       "unresolved": [],
       "verdict": "UNSUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
     }
@@ -2485,7 +2509,7 @@
      "unit": "OUTPUT_MISSING|state_estimator"
     },
     {
-     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "assessment": "DECIDED_BY_PROFILE_GAP",
      "expected": true,
      "new": null,
      "old": {
@@ -2500,7 +2524,7 @@
       "unresolved": [],
       "verdict": "SUPPORTED"
      },
-     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "reason": "SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
      "rule": "C3",
      "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
     },
@@ -2594,7 +2618,8 @@
    "units_changed": 1275
   },
   "units_by_assessment": {
-   "CONSISTENT_WITH_FUNCTION_GRAPH": 670,
+   "CONSISTENT_WITH_FUNCTION_GRAPH": 189,
+   "DECIDED_BY_PROFILE_GAP": 481,
    "RIGHT_UNIQUE_WEAKENED": 278,
    "WEAKENED_BY_PROFILE_GAP": 243,
    "WRONG_UNIQUE_CORRECTED": 84
@@ -2652,6 +2677,17 @@
    "WRONG": 0
   },
   "primary_under_2_1_matches_record": true,
+  "sealed_manifests": {
+   "all_valid": true,
+   "files_differing": [],
+   "files_listed": 225,
+   "protocol_chain_manifests_unchanged": {
+    "XSYS-001": true,
+    "XSYS-001-A1": true,
+    "XSYS-001-A2": true
+   },
+   "result_manifest_matches_its_seal": true
+  },
   "slots": 3872,
   "stage1_matches_seal": true,
   "stage1_sha256": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3"
@@ -3426,6 +3462,777 @@
    "MS_B5_RESPONSE_SENSOR",
    "MS_TS_B5_RESPONSE_SENSOR"
   ]
+ },
+ "J": {
+  "document_bytes_per_tick": {
+   "frozen_2_0_localization_and_attribution": {
+    "max": 10933,
+    "mean": 3963.9,
+    "median": 4157
+   },
+   "semantic_core_2_1_no_trace": {
+    "max": 8486,
+    "mean": 3942.8,
+    "median": 4228
+   },
+   "semantic_core_2_1_trace": {
+    "max": 23067,
+    "mean": 7655.4,
+    "median": 6277
+   }
+  },
+  "examples": {
+   "conflict_R6": {
+    "attribution": {
+     "candidates": [
+      "TIMING/nav_solution"
+     ],
+     "common_cause": null,
+     "components_not_observed": [
+      "ACTUATION/motor_0",
+      "COMPUTE/cpu",
+      "POWER/battery",
+      "POWER/rail_5v"
+     ],
+     "implicated_nominal": [
+      "COMPUTE/state_estimator"
+     ],
+     "implicated_other": [],
+     "implicated_unavailable": [],
+     "implicated_unobserved": [
+      "COMPUTE/cpu"
+     ],
+     "trace": {
+      "candidates": [
+       "TIMING/nav_solution"
+      ],
+      "declared_alternatives": [
+       "COMMUNICATION/gnss_serial",
+       "COMPUTE/cpu",
+       "COMPUTE/state_estimator"
+      ],
+      "non_attributable_ignored": [],
+      "other_nominal": {},
+      "relevant_discriminators": [
+       "COMMUNICATION/gnss_serial:comm.link_state",
+       "COMPUTE/state_estimator:compute.process_alive",
+       "COMPUTE/state_estimator:compute.process_producing"
+      ],
+      "unexcluded_alternatives": [
+       "COMPUTE/cpu"
+      ],
+      "why": "UNIQUE_WITHHELD"
+     },
+     "verdict": "AMBIGUOUS",
+     "withheld_unique_because": [
+      "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL"
+     ]
+    },
+    "corrections": [
+     "C1",
+     "F2",
+     "C2",
+     "C3",
+     "C4",
+     "C6"
+    ],
+    "evidence_handling": {
+     "conflicting_keys_not_read": [
+      "nav_solution:timing.clock_consistency"
+     ],
+     "duplicates_collapsed": {
+      "TIMING/nav_solution:timing.clock_consistency": 1
+     }
+    },
+    "localization": [
+     {
+      "common_cause": null,
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence": [
+       "CHANNEL_LINK_NOMINAL",
+       "PROCESSING_WITHIN_BUDGET",
+       "PRODUCER_PROCESS_HEALTHY",
+       "SOURCE_INTERVAL_NOMINAL",
+       "TRANSPORT_WITHIN_BUDGET"
+      ],
+      "evidence_unavailable": [
+       "CLOCK_CONSISTENT",
+       "CLOCK_CONSISTENT_FALSE"
+      ],
+      "initial_candidates": [
+       "SENSOR/source_slow",
+       "COMMUNICATION/transport_delay",
+       "COMPUTE/processing_delay",
+       "COMPUTE/process_stall",
+       "TIMING/clock_inconsistent"
+      ],
+      "outcome": "INSUFFICIENT_EVIDENCE",
+      "outcome_reason": "UNCONFIRMED_SURVIVOR",
+      "predicate_errors": [],
+      "refuting_evidence": [
+       "PROCESSING_WITHIN_BUDGET",
+       "PRODUCER_PROCESS_HEALTHY",
+       "SOURCE_INTERVAL_NOMINAL",
+       "TRANSPORT_WITHIN_BUDGET"
+      ],
+      "rejected": [
+       {
+        "by": "TRANSPORT_WITHIN_BUDGET",
+        "hypothesis": "COMMUNICATION/transport_delay"
+       },
+       {
+        "by": "PRODUCER_PROCESS_HEALTHY",
+        "hypothesis": "COMPUTE/process_stall"
+       },
+       {
+        "by": "PROCESSING_WITHIN_BUDGET",
+        "hypothesis": "COMPUTE/processing_delay"
+       },
+       {
+        "by": "SOURCE_INTERVAL_NOMINAL",
+        "hypothesis": "SENSOR/source_slow"
+       }
+      ],
+      "subject": "nav_solution",
+      "supported": [],
+      "symptom": "OUTPUT_STALE",
+      "trace": {
+       "confirmed_and_refuted": [],
+       "conflicts_not_read": [
+        "nav_solution:timing.clock_consistency"
+       ],
+       "evidence_used": [
+        "COMMUNICATION/gnss_serial:comm.link_state",
+        "COMPUTE/state_estimator:compute.process_alive",
+        "COMPUTE/state_estimator:compute.process_producing",
+        "TIMING/nav_solution.processing_delay:timing.segment_budget",
+        "TIMING/nav_solution.sensor_slow:timing.rate",
+        "TIMING/nav_solution.transport_delay:timing.segment_budget"
+       ],
+       "ignored": {},
+       "predicates": {
+        "CHANNEL_LINK_NOMINAL": {
+         "read": {
+          "COMMUNICATION/gnss_serial:comm.link_state": "NOMINAL"
+         },
+         "value": true
+        },
+        "CLOCK_CONSISTENT": {
+         "conflicts": [
+          "nav_solution:timing.clock_consistency"
+         ],
+         "value": null
+        },
+        "CLOCK_CONSISTENT_FALSE": {
+         "conflicts": [
+          "nav_solution:timing.clock_consistency"
+         ],
+         "value": null
+        },
+        "PROCESSING_WITHIN_BUDGET": {
+         "read": {
+          "TIMING/nav_solution.processing_delay:timing.segment_budget": "NOMINAL"
+         },
+         "value": true
+        },
+        "PROCESSING_WITHIN_BUDGET_FALSE": {
+         "read": {
+          "TIMING/nav_solution.processing_delay:timing.segment_budget": "NOMINAL"
+         },
+         "value": false
+        },
+        "PRODUCER_PROCESS_HEALTHY": {
+         "read": {
+          "COMPUTE/state_estimator:compute.process_alive": "NOMINAL",
+          "COMPUTE/state_estimator:compute.process_producing": "NOMINAL"
+         },
+         "value": true
+        },
+        "PRODUCER_PROCESS_HEALTHY_FALSE": {
+         "read": {
+          "COMPUTE/state_estimator:compute.process_alive": "NOMINAL",
+          "COMPUTE/state_estimator:compute.process_producing": "NOMINAL"
+         },
+         "value": false
+        },
+        "SOURCE_INTERVAL_NOMINAL": {
+         "read": {
+          "TIMING/nav_solution.sensor_slow:timing.rate": "NOMINAL"
+         },
+         "value": true
+        },
+        "SOURCE_INTERVAL_NOMINAL_FALSE": {
+         "read": {
+          "TIMING/nav_solution.sensor_slow:timing.rate": "NOMINAL"
+         },
+         "value": false
+        },
+        "TRANSPORT_WITHIN_BUDGET": {
+         "read": {
+          "TIMING/nav_solution.transport_delay:timing.segment_budget": "NOMINAL"
+         },
+         "value": true
+        },
+        "TRANSPORT_WITHIN_BUDGET_FALSE": {
+         "read": {
+          "TIMING/nav_solution.transport_delay:timing.segment_budget": "NOMINAL"
+         },
+         "value": false
+        }
+       },
+       "scope_gaps": [],
+       "supported_with_unmeasured_refuters": [],
+       "unknown_inputs": [],
+       "why": "ONE_SURVIVOR_NOTHING_CONFIRMS"
+      },
+      "unmodelled": [],
+      "unresolved": [
+       "TIMING/clock_inconsistent"
+      ]
+     }
+    ],
+    "schema": "csia.semantic_core/2.1.0",
+    "semantics_version": "2.1.0"
+   },
+   "predicate_fault_R9B": {
+    "common_cause": null,
+    "evaluation": "PREDICATE_FAULT",
+    "evidence": [
+     "P",
+     "R"
+    ],
+    "evidence_unavailable": [],
+    "initial_candidates": [
+     "D1/h1",
+     "D2/h2"
+    ],
+    "outcome": "SUPPORTED",
+    "outcome_reason": null,
+    "predicate_errors": [
+     {
+      "context": {
+       "hypotheses": [
+        "D1/h1"
+       ],
+       "symptom": "S"
+      },
+      "error_class": "RAISED:KeyError",
+      "evaluated_as": [
+       "Q"
+      ],
+      "predicate": "Q",
+      "subject": "x"
+     }
+    ],
+    "refuting_evidence": [
+     "R"
+    ],
+    "rejected": [
+     {
+      "by": "R",
+      "hypothesis": "D2/h2"
+     }
+    ],
+    "subject": "x",
+    "supported": [
+     "D1/h1"
+    ],
+    "symptom": "S",
+    "trace": {
+     "confirmed_and_refuted": [
+      {
+       "hypothesis": "D2/h2",
+       "refuted_by": "R",
+       "shared_confirmers": [
+        "P"
+       ],
+       "specific_confirmers": []
+      }
+     ],
+     "conflicts_not_read": [],
+     "evidence_used": [],
+     "ignored": {},
+     "predicates": {
+      "P": {
+       "value": true
+      },
+      "Q": {
+       "value": null
+      },
+      "R": {
+       "value": true
+      }
+     },
+     "scope_gaps": [],
+     "supported_with_unmeasured_refuters": [
+      {
+       "hypothesis": "D1/h1",
+       "unmeasured_refuters": [
+        "Q"
+       ]
+      }
+     ],
+     "unknown_inputs": [],
+     "why": "ONE_CONFIRMED_SURVIVOR"
+    },
+    "unmodelled": [],
+    "unresolved": []
+   },
+   "why_AMBIGUOUS_MS_B5_final_tick": {
+    "attribution": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "components_not_observed": [],
+     "implicated_nominal": [
+      "POWER/battery"
+     ],
+     "implicated_other": [],
+     "implicated_unavailable": [],
+     "implicated_unobserved": [],
+     "trace": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "declared_alternatives": [
+       "COMMUNICATION/esc_can",
+       "POWER/battery"
+      ],
+      "localization_disagreement": [
+       {
+        "retains": [
+         "SENSOR/response_sensor"
+        ],
+        "symptom": "COMMAND_NO_RESPONSE"
+       },
+       {
+        "retains": [
+         "SENSOR/response_sensor"
+        ],
+        "symptom": "HIGH_CURRENT_LOW_RPM"
+       }
+      ],
+      "non_attributable_ignored": [
+       "SENSOR/sensor.aggregate:sensor.aggregate",
+       "SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility",
+       "SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility",
+       "SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility",
+       "SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility",
+       "SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility",
+       "SENSOR/v1_1.diagnosis:v1_1.support"
+      ],
+      "other_nominal": {
+       "COMMUNICATION/gnss_serial:comm.integrity": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/gnss_serial:comm.link_state": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/gnss_serial:comm.loss": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/gnss_serial:comm.ordering": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/gnss_serial:comm.queue": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/gnss_serial:comm.rate": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.integrity": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.link_state": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.loss": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.ordering": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.queue": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMMUNICATION/telemetry_radio:comm.rate": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/cpu:compute.resource_headroom": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/csia:compute.deadline_met": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/csia:compute.process_alive": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/csia:compute.process_producing": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/csia:compute.stability": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/logger:compute.deadline_met": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/logger:compute.process_alive": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/logger:compute.process_producing": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/logger:compute.stability": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/state_estimator:compute.deadline_met": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/state_estimator:compute.process_alive": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/state_estimator:compute.process_producing": "NOT_A_DECLARED_ALTERNATIVE",
+       "COMPUTE/state_estimator:compute.stability": "NOT_A_DECLARED_ALTERNATIVE",
+       "POWER/rail_3v3:power.rail_tolerance": "NOT_A_DECLARED_ALTERNATIVE",
+       "POWER/rail_5v:power.rail_tolerance": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.baro:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.battery:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.gps:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.imu0:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.imu1:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.mag:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.motor_esc:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "SENSOR/source.vibration:v1_1.source_health": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution.decision_delay:timing.segment_budget": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution.processing_delay:timing.segment_budget": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution.sensor_slow:timing.rate": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution.transport_delay:timing.segment_budget": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution:timing.clock_consistency": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution:timing.end_to_end": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/nav_solution:timing.jitter": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink.processing_delay:timing.segment_budget": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink.sensor_slow:timing.rate": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink.transport_delay:timing.segment_budget": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink:timing.clock_consistency": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink:timing.end_to_end": "NOT_A_DECLARED_ALTERNATIVE",
+       "TIMING/telemetry_downlink:timing.jitter": "NOT_A_DECLARED_ALTERNATIVE"
+      },
+      "relevant_discriminators": [
+       "COMMUNICATION/esc_can:comm.integrity",
+       "COMMUNICATION/esc_can:comm.link_state",
+       "COMMUNICATION/esc_can:comm.loss",
+       "COMMUNICATION/esc_can:comm.ordering",
+       "COMMUNICATION/esc_can:comm.rate",
+       "POWER/battery:power.cell_balance",
+       "POWER/battery:power.droop_vs_current",
+       "POWER/battery:power.p_equals_vi",
+       "POWER/battery:power.source_health"
+      ],
+      "unexcluded_alternatives": [],
+      "why": "UNIQUE_WITHHELD"
+     },
+     "verdict": "AMBIGUOUS",
+     "withheld_unique_because": [
+      "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+     ]
+    },
+    "localization": [
+     {
+      "common_cause": null,
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence": [
+       "ACTUATOR_POWER_NOMINAL",
+       "COMMAND_DELIVERED",
+       "CURRENT_PRESENT",
+       "STALL_SIGNATURE"
+      ],
+      "evidence_unavailable": [
+       "PHYSICAL_RESPONSE_NOMINAL",
+       "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+      ],
+      "initial_candidates": [
+       "COMMUNICATION/command_not_delivered",
+       "POWER/path_unavailable",
+       "ACTUATION/drive_no_current",
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_errors": [],
+      "refuting_evidence": [
+       "ACTUATOR_POWER_NOMINAL",
+       "COMMAND_DELIVERED",
+       "CURRENT_PRESENT"
+      ],
+      "rejected": [
+       {
+        "by": "CURRENT_PRESENT",
+        "hypothesis": "ACTUATION/drive_no_current"
+       },
+       {
+        "by": "COMMAND_DELIVERED",
+        "hypothesis": "COMMUNICATION/command_not_delivered"
+       },
+       {
+        "by": "ACTUATOR_POWER_NOMINAL",
+        "hypothesis": "POWER/path_unavailable"
+       }
+      ],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "symptom": "COMMAND_NO_RESPONSE",
+      "trace": {
+       "confirmed_and_refuted": [],
+       "conflicts_not_read": [],
+       "evidence_used": [
+        "ACTUATION/motor_0:actuation.command_path",
+        "ACTUATION/motor_0:actuation.electrical_response",
+        "ACTUATION/motor_0:actuation.mechanical_response",
+        "COMMUNICATION/esc_can:comm.integrity",
+        "COMMUNICATION/esc_can:comm.link_state",
+        "COMMUNICATION/esc_can:comm.loss",
+        "COMMUNICATION/esc_can:comm.ordering",
+        "COMMUNICATION/esc_can:comm.rate",
+        "POWER/battery:power.cell_balance",
+        "POWER/battery:power.droop_vs_current",
+        "POWER/battery:power.p_equals_vi",
+        "POWER/battery:power.source_health"
+       ],
+       "ignored": {},
+       "predicates": {
+        "ACTUATOR_LINK_NOMINAL_FALSE": {
+         "read": {
+          "COMMUNICATION/esc_can:comm.integrity": "NOMINAL",
+          "COMMUNICATION/esc_can:comm.link_state": "NOMINAL",
+          "COMMUNICATION/esc_can:comm.loss": "NOMINAL",
+          "COMMUNICATION/esc_can:comm.ordering": "NOMINAL",
+          "COMMUNICATION/esc_can:comm.rate": "NOMINAL"
+         },
+         "value": false
+        },
+        "ACTUATOR_POWER_NOMINAL": {
+         "read": {
+          "POWER/battery:power.cell_balance": "NOMINAL",
+          "POWER/battery:power.droop_vs_current": "NOMINAL",
+          "POWER/battery:power.p_equals_vi": "NOMINAL",
+          "POWER/battery:power.source_health": "NOMINAL"
+         },
+         "value": true
+        },
+        "ACTUATOR_POWER_NOMINAL_FALSE": {
+         "read": {
+          "POWER/battery:power.cell_balance": "NOMINAL",
+          "POWER/battery:power.droop_vs_current": "NOMINAL",
+          "POWER/battery:power.p_equals_vi": "NOMINAL",
+          "POWER/battery:power.source_health": "NOMINAL"
+         },
+         "value": false
+        },
+        "COMMAND_DELIVERED": {
+         "read": {
+          "ACTUATION/motor_0:actuation.command_path": "NOMINAL"
+         },
+         "value": true
+        },
+        "COMMAND_DELIVERED_FALSE": {
+         "read": {
+          "ACTUATION/motor_0:actuation.command_path": "NOMINAL"
+         },
+         "value": false
+        },
+        "CURRENT_PRESENT": {
+         "read": {
+          "ACTUATION/motor_0:actuation.electrical_response": "NOMINAL"
+         },
+         "value": true
+        },
+        "CURRENT_PRESENT_FALSE": {
+         "read": {
+          "ACTUATION/motor_0:actuation.electrical_response": "NOMINAL"
+         },
+         "value": false
+        },
+        "PHYSICAL_RESPONSE_NOMINAL": {
+         "value": null
+        },
+        "PHYSICAL_RESPONSE_NOMINAL_FALSE": {
+         "value": null
+        },
+        "STALL_SIGNATURE": {
+         "read": {
+          "ACTUATION/motor_0:actuation.mechanical_response": "VIOLATED"
+         },
+         "value": true
+        },
+        "STALL_SIGNATURE_FALSE": {
+         "read": {
+          "ACTUATION/motor_0:actuation.mechanical_response": "VIOLATED"
+         },
+         "value": false
+        }
+       },
+       "scope_gaps": [],
+       "supported_with_unmeasured_refuters": [
+        {
+         "hypothesis": "ACTUATION/mechanical",
+         "unmeasured_refuters": [
+          "PHYSICAL_RESPONSE_NOMINAL"
+         ]
+        },
+        {
+         "hypothesis": "SENSOR/response_sensor",
+         "unmeasured_refuters": [
+          "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+         ]
+        }
+       ],
+       "unknown_inputs": [],
+       "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+      },
+      "unmodelled": [],
+      "unresolved": []
+     },
+     {
+      "common_cause": null,
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence": [
+       "STALL_SIGNATURE"
+      ],
+      "evidence_unavailable": [
+       "PHYSICAL_RESPONSE_NOMINAL",
+       "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+      ],
+      "initial_candidates": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_errors": [],
+      "refuting_evidence": [],
+      "rejected": [],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical"
+      ],
+      "symptom": "HIGH_CURRENT_LOW_RPM",
+      "trace": {
+       "confirmed_and_refuted": [],
+       "conflicts_not_read": [],
+       "evidence_used": [
+        "ACTUATION/motor_0:actuation.mechanical_response"
+       ],
+       "ignored": {},
+       "predicates": {
+        "PHYSICAL_RESPONSE_NOMINAL": {
+         "value": null
+        },
+        "PHYSICAL_RESPONSE_NOMINAL_FALSE": {
+         "value": null
+        },
+        "STALL_SIGNATURE": {
+         "read": {
+          "ACTUATION/motor_0:actuation.mechanical_response": "VIOLATED"
+         },
+         "value": true
+        }
+       },
+       "scope_gaps": [],
+       "supported_with_unmeasured_refuters": [
+        {
+         "hypothesis": "ACTUATION/mechanical",
+         "unmeasured_refuters": [
+          "PHYSICAL_RESPONSE_NOMINAL"
+         ]
+        }
+       ],
+       "unknown_inputs": [],
+       "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+      },
+      "unmodelled": [],
+      "unresolved": [
+       "SENSOR/response_sensor"
+      ]
+     }
+    ]
+   },
+   "why_NO_CONSISTENT_HYPOTHESIS": {
+    "common_cause": null,
+    "evaluation": "COMPLETE",
+    "evidence": [
+     "CPU_HEADROOM_NOMINAL",
+     "PROCESS_ALIVE_AND_PRODUCING"
+    ],
+    "evidence_unavailable": [],
+    "initial_candidates": [
+     "COMPUTE/resource_exhaustion",
+     "COMPUTE/process_stall"
+    ],
+    "outcome": "NO_CONSISTENT_HYPOTHESIS",
+    "outcome_reason": null,
+    "predicate_errors": [],
+    "refuting_evidence": [
+     "CPU_HEADROOM_NOMINAL",
+     "PROCESS_ALIVE_AND_PRODUCING"
+    ],
+    "rejected": [
+     {
+      "by": "PROCESS_ALIVE_AND_PRODUCING",
+      "hypothesis": "COMPUTE/process_stall"
+     },
+     {
+      "by": "CPU_HEADROOM_NOMINAL",
+      "hypothesis": "COMPUTE/resource_exhaustion"
+     }
+    ],
+    "scenario": "ESTIMATOR_LATE",
+    "subject": "state_estimator",
+    "supported": [],
+    "symptom": "PROCESS_OUTPUT_LATE",
+    "trace": {
+     "confirmed_and_refuted": [],
+     "conflicts_not_read": [],
+     "evidence_used": [
+      "COMPUTE/cpu:compute.resource_headroom",
+      "COMPUTE/state_estimator:compute.process_alive",
+      "COMPUTE/state_estimator:compute.process_producing"
+     ],
+     "ignored": {},
+     "predicates": {
+      "CPU_HEADROOM_NOMINAL": {
+       "read": {
+        "COMPUTE/cpu:compute.resource_headroom": "NOMINAL"
+       },
+       "value": true
+      },
+      "CPU_HEADROOM_NOMINAL_FALSE": {
+       "read": {
+        "COMPUTE/cpu:compute.resource_headroom": "NOMINAL"
+       },
+       "value": false
+      },
+      "PROCESS_ALIVE_AND_PRODUCING": {
+       "read": {
+        "COMPUTE/state_estimator:compute.process_alive": "NOMINAL",
+        "COMPUTE/state_estimator:compute.process_producing": "NOMINAL"
+       },
+       "value": true
+      },
+      "PROCESS_ALIVE_AND_PRODUCING_FALSE": {
+       "read": {
+        "COMPUTE/state_estimator:compute.process_alive": "NOMINAL",
+        "COMPUTE/state_estimator:compute.process_producing": "NOMINAL"
+       },
+       "value": false
+      }
+     },
+     "scope_gaps": [],
+     "supported_with_unmeasured_refuters": [],
+     "unknown_inputs": [],
+     "why": "EVERY_DECLARED_HYPOTHESIS_REJECTED"
+    },
+    "unmodelled": [],
+    "unresolved": []
+   },
+   "why_UNIQUE_R4": {
+    "candidates": [
+     "SENSOR/source.gps"
+    ],
+    "common_cause": null,
+    "components_not_observed": [
+     "ACTUATION/motor_0",
+     "COMPUTE/state_estimator",
+     "POWER/battery"
+    ],
+    "implicated_nominal": [
+     "COMMUNICATION/gnss_serial",
+     "POWER/rail_5v"
+    ],
+    "implicated_other": [],
+    "implicated_unavailable": [],
+    "implicated_unobserved": [],
+    "trace": {
+     "candidates": [
+      "SENSOR/source.gps"
+     ],
+     "declared_alternatives": [
+      "COMMUNICATION/gnss_serial",
+      "POWER/rail_5v"
+     ],
+     "non_attributable_ignored": [],
+     "other_nominal": {
+      "COMPUTE/cpu:compute.resource_headroom": "NOT_A_DECLARED_ALTERNATIVE"
+     },
+     "relevant_discriminators": [
+      "COMMUNICATION/gnss_serial:comm.link_state",
+      "POWER/rail_5v:power.rail_tolerance"
+     ],
+     "unexcluded_alternatives": [],
+     "why": "EVERY_DECLARED_ALTERNATIVE_AFFIRMATIVELY_NOMINAL"
+    },
+    "verdict": "UNIQUE",
+    "withheld_unique_because": []
+   }
+  }
  },
  "PROTECTED_FILES": {
   "sha256": {

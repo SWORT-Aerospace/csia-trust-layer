@@ -40,15 +40,33 @@ def record_id(record) -> str:
     return f"{record.domain}/{record.component}:{record.relation}"
 
 
+_HASHED = ("domain", "component", "relation", "source", "observation_state",
+           "applicability", "affected_functions", "reason_codes",
+           "timestamp_validity", "timestamp_arrival", "timestamp_processed",
+           "measured_value", "expected_value", "expected_relation",
+           "residual", "dependencies", "attributable")
+
+
+def _bucket(r):
+    """Every hashable field. Records in different buckets cannot be equal,
+    so dataclass equality only runs inside a bucket. A malformed record
+    (a list where a tuple belongs) falls back to its coarse key."""
+    key = tuple(getattr(r, f) for f in _HASHED)
+    try:
+        hash(key)
+        return key
+    except TypeError:
+        return (r.domain, r.component, r.relation)
+
+
 def _dedupe(records):
     """Exact duplicates removed, first occurrence kept, order otherwise
-    unchanged. Records are compared inside a (domain, component, relation)
-    bucket, because they hold dicts and cannot be hashed."""
+    unchanged. Equality is dataclass equality (every field, dicts included);
+    the bucket only avoids comparing records that cannot be equal."""
     buckets: dict = {}
     kept, collapsed = [], {}
     for r in records:
-        key = (r.domain, r.component, r.relation)
-        seen = buckets.setdefault(key, [])
+        seen = buckets.setdefault(_bucket(r), [])
         if any(r == k for k in seen):
             rid = record_id(r)
             collapsed[rid] = collapsed.get(rid, 0) + 1

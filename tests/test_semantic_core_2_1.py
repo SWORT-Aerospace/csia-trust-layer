@@ -779,3 +779,83 @@ def test_a_relation_alone_still_never_promotes_a_component():
     a = attribute_2_1([adverse, _frec(domain="COMPUTE", component="cpu")], (rel,))
     assert "ACTUATION/motor_0" not in a.candidates
     assert a.implicated["implicated_unobserved"] == ["ACTUATION/motor_0"]
+
+
+# ================================================== Phases G, K and L records
+LEDGER = os.path.join(ROOT, "research", "physical_validation", "FAILURE_LEDGER.yaml")
+#: The hash the Phase 3.2, 4 and 5 sealed manifests pin for the ledger.
+#: Rule R8: no append without the owner's decision.
+LEDGER_PINNED = "6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f"
+
+
+def test_phase_e_the_changes_are_assessed_not_just_counted():
+    e = _json("SEMANTIC_CORE_2_1_RESULTS.json")["E"]
+    assert e["units_by_assessment"] == {
+        "CONSISTENT_WITH_FUNCTION_GRAPH": 189, "DECIDED_BY_PROFILE_GAP": 481,
+        "RIGHT_UNIQUE_WEAKENED": 278, "WEAKENED_BY_PROFILE_GAP": 243,
+        "WRONG_UNIQUE_CORRECTED": 84}
+
+
+def test_the_failure_ledger_is_untouched_and_the_entries_are_proposed():
+    """Phase K. The seven entries are held out of the hash-pinned ledger,
+    as commit b75ad0c held FL-053, and are complete and parse."""
+    with open(LEDGER, "rb") as fh:
+        assert hashlib.sha256(fh.read()).hexdigest() == LEDGER_PINNED, (
+            "the failure ledger changed; it is pinned by three sealed-phase "
+            "manifests and rule R8 reserves appends to the owner")
+    import yaml
+    with open(os.path.join(PKG, "PROPOSED_LEDGER_ENTRIES.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    block = text.split("```yaml\n", 1)[1].split("\n```", 1)[0]
+    entries = yaml.safe_load("entries:\n" + block)["entries"]
+    assert [e["id"] for e in entries] == [f"FL-0{k}" for k in range(54, 61)]
+    for e in entries:
+        assert e["verdict"] == "RECORDED", "not to be marked resolved"
+        for key in ("affected_version", "found_by", "successor_correction",
+                    "historical_impact", "xsys_impact", "consequence"):
+            assert e.get(key), (e["id"], key)
+
+
+def test_the_decision_is_exactly_one_token_and_shadow_mode_is_not_executed():
+    tokens = ("SEMANTIC_2_1_READY_FOR_SHADOW", "SEMANTIC_2_1_REQUIRES_FIXES",
+              "SEMANTIC_2_1_XSYS_GOVERNANCE_BLOCK",
+              "SEMANTIC_2_1_PHASE_C_GOVERNANCE_BLOCK")
+    with open(os.path.join(PKG, "PROMOTION_DECISION.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    decision = text.split("## Decision", 1)[1]
+    assert [t for t in tokens if t in decision] == ["SEMANTIC_2_1_READY_FOR_SHADOW"]
+    with open(os.path.join(PKG, "SHADOW_MODE_PLAN.md"), encoding="utf-8") as fh:
+        assert "PREPARED, NOT EXECUTED" in fh.read()
+
+
+BANNED = ("no prior work exists", "we are the first", "is the first to",
+          "first ever", "no one has", "never been studied", "has never been",
+          "no prior art exists")
+
+
+def test_the_package_documents_exist_and_keep_the_repositorys_wording_rules():
+    import re
+    want = {"README.md", "OWNER_AUTHORIZATION.md", "SEMANTIC_CORE_2_1.md",
+            "VALIDATION_REPORT.md", "PHASE_C_GOVERNANCE_REPORT.md",
+            "TEST_MIGRATION.md", "PERFORMANCE.md", "DECISION_TRACE.md",
+            "SHADOW_MODE_PLAN.md", "PROMOTION_DECISION.md",
+            "PROPOSED_LEDGER_ENTRIES.md"}
+    have = {n for n in os.listdir(PKG) if n.endswith(".md")}
+    assert have == want
+    for name in sorted(want):
+        with open(os.path.join(PKG, name), encoding="utf-8") as fh:
+            text = fh.read().lower()
+        assert not re.search(r"\bnovel\b", text), name
+        for phrase in BANNED:
+            assert phrase not in text, (name, phrase)
+
+
+def test_the_performance_record_does_not_claim_an_embedded_result():
+    b = _json("PHASE_I_BENCHMARK.json")
+    assert "not an embedded measurement" in b["WARNING"]
+    assert "does not implement 2.1" in b["WARNING"]
+    assert b["retained_memory"]["retained_bytes_after_all_ticks"] == 0
+    for stage, slope in b["scaling_padded_tick"]["loglog_slope"].items():
+        assert slope < 1.3, (stage, slope)
+    for case, v in b["worst_cases"].items():
+        assert v["loglog_slope"] < 1.3, (case, v["loglog_slope"])

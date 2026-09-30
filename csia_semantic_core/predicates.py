@@ -188,7 +188,8 @@ def successor_tests(c2: bool, c3: bool) -> dict:
         else:
             keep = [r for r in rows
                     if r.applicability is Applicability.APPLICABLE]
-        _ignore(index, [r for r in rows if r not in keep], NOT_JUDGED)
+        kept = {id(r) for r in keep}
+        _ignore(index, [r for r in rows if id(r) not in kept], NOT_JUDGED)
         return keep
 
     def agg(index, rows):
@@ -264,7 +265,8 @@ def successor_tests(c2: bool, c3: bool) -> dict:
             chans = ({r.component for r in index.by_relation("timing.end_to_end")}
                      & declared_scope(index, s))
             inside = [r for r in rows if r.component.split(".", 1)[0] in chans]
-            _ignore(index, [r for r in rows if r not in inside],
+            _ignore(index, [r for r in rows
+                            if r.component.split(".", 1)[0] not in chans],
                     OUT_OF_DECLARED_SCOPE)
             if not inside:
                 _gap(index, "NO_DECLARED_TIMING_CHANNEL")

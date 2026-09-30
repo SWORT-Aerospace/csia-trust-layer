@@ -424,9 +424,15 @@ def _loc_change(unit, old, new, loc_old, loc_new, records, functions):
       CONSISTENT_WITH_FUNCTION_GRAPH
                                     a symptom on a function the same tick's
                                     frozen function graph calls ELIGIBLE,
-                                    raised only by evidence outside its
-                                    declared scope, is no longer raised
-                                    (SC-05, P16)
+                                    raised only by components that serve no
+                                    navigation or position function at all,
+                                    is no longer raised (SC-05, P16)
+      DECIDED_BY_PROFILE_GAP        the same, except that some responsible
+                                    component is declared to serve a SIBLING
+                                    navigation function and nothing is
+                                    declared for this one (G-1). The result
+                                    agrees with the function graph, but it
+                                    is the missing declaration that decides
       WEAKENED_BY_PROFILE_GAP       the profile declares nothing serving the
                                     subject, so a scoped predicate cannot
                                     look (SC-18); the frozen answer may have
@@ -449,8 +455,24 @@ def _loc_change(unit, old, new, loc_old, loc_new, records, functions):
         if not ok:
             rec.update(reason="UNCLASSIFIED_REMOVAL", assessment="REVIEW")
         elif state == "ELIGIBLE":
-            rec.update(reason="SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
-                       assessment="CONSISTENT_WITH_FUNCTION_GRAPH")
+            nav = sorted({r.component.partition(".")[2] for r in records
+                          if r.relation == "v1_1.function_eligibility"
+                          and ("NAVIGATION" in r.component
+                               or "POSITION" in r.component)} - {subject, ""})
+            comps = {rid.split(":", 1)[0].split("/", 1)[1]
+                     for e in ev for rid in e["adverse_out_of_scope"]}
+            sibling = sorted(c for c in comps
+                             if any(c in declared_scope(six, g) for g in nav))
+            rec["responsible_components_serving_a_sibling_function"] = sibling
+            if sibling and not serving:
+                rec.update(reason="SYMPTOM_LOST:SIBLING_EVIDENCE_UNDECLARED_FOR_SUBJECT",
+                           assessment="DECIDED_BY_PROFILE_GAP")
+            elif sibling:
+                rec.update(reason="SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+                           assessment="REVIEW")
+            else:
+                rec.update(reason="UNRELATED_EVIDENCE_NO_LONGER_RAISES_SYMPTOM",
+                           assessment="CONSISTENT_WITH_FUNCTION_GRAPH")
         elif not serving:
             rec.update(reason="SYMPTOM_LOST:PROFILE_DECLARES_NOTHING_SERVING_SUBJECT",
                        assessment="WEAKENED_BY_PROFILE_GAP")
@@ -615,6 +637,32 @@ def section_E(runs):
 
 
 # ====================================================================== F
+def sealed_manifests():
+    """Every hash the XSYS-001 result manifest records, re-checked: the 225
+    campaign files, the manifest against its own .sha256, and the XSYS-001,
+    A1 and A2 freeze manifests of the protocol chain."""
+    camp = REPO / "research/xsys_001_confirmatory_campaign"
+    man_path = camp / "CONFIRMATORY_RESULT_MANIFEST.json"
+    man = json.loads(man_path.read_text())
+    seal = (camp / "CONFIRMATORY_RESULT_MANIFEST.sha256").read_text().split()[0]
+    bad = []
+    for path, want in sorted(man["files"].items()):
+        f = REPO / path
+        if not f.exists():
+            bad.append(f"{path}: MISSING")
+        elif sha(f) != want:
+            bad.append(f"{path}: differs")
+    chain = {}
+    for name, entry in sorted(man["protocol_chain"].items()):
+        f = REPO / entry["file"]
+        chain[name] = f.exists() and sha(f) == entry["sha256"]
+    return {"result_manifest_matches_its_seal": sha(man_path) == seal,
+            "files_listed": len(man["files"]), "files_differing": bad,
+            "protocol_chain_manifests_unchanged": chain,
+            "all_valid": (sha(man_path) == seal and not bad
+                          and all(chain.values()))}
+
+
 def section_F():
     pipe = REPO / "research/xsys_confirmatory_001/pipeline"
     if str(pipe) not in sys.path:
@@ -729,9 +777,11 @@ def section_F():
         and p_new["wrong_A_B"] == primary_record["WRONG"]
         and (p_new["H_PRIMARY"] == "SUPPORTED")
         == (primary_record["PRIMARY_SUPPORTED"] == "YES"))
+    manifests = sealed_manifests()
     gate = ("PASS" if (dec_diff == 0 and outcome_diff == 0 and recorded_diff == 0
                        and matches_record and p_new == p_sealed
-                       and s1_sha == seal["stage1_output_sha256"])
+                       and s1_sha == seal["stage1_output_sha256"]
+                       and manifests["all_valid"])
             else "SEMANTIC_2_1_XSYS_GOVERNANCE_BLOCK")
     return {"stage1_sha256": s1_sha,
             "stage1_matches_seal": s1_sha == seal["stage1_output_sha256"],
@@ -751,6 +801,7 @@ def section_F():
                 "ONE_SIDED_95_LB", "N_EFF_CONDITIONS", "WRONG",
                 "PRIMARY_SUPPORTED")},
             "primary_under_2_1_matches_record": matches_record,
+            "sealed_manifests": manifests,
             "XSYS_HARD_GATE": gate}
 
 
@@ -1077,6 +1128,71 @@ def section_R21():
     return out
 
 
+# ====================================================================== J
+def section_J(runs):
+    """Worked decision traces, and how large the trace is."""
+    ex = {}
+    engine, res = runs["MS_B5_RESPONSE_SENSOR"][1:]
+    tr = SemanticCore21.from_engine(engine).reason(res[-1].records)
+    ex["why_AMBIGUOUS_MS_B5_final_tick"] = {
+        "attribution": tr.attribution.to_dict(),
+        "localization": [x.to_dict() for x in tr.localizations]}
+    gps = P.rec("SENSOR", "source.gps", "v1_1.source_health", OS.VIOLATED,
+                deps=("POWER/rail_5v", "COMMUNICATION/gnss_serial"))
+    r4 = core_for(P.AIR, trace=True).reason(
+        [gps, P.rec("COMMUNICATION", "gnss_serial", "comm.link_state"),
+         P.rec("POWER", "rail_5v", "power.rail_tolerance"),
+         P.rec("COMPUTE", "cpu", "compute.resource_headroom")])
+    ex["why_UNIQUE_R4"] = r4.attribution.to_dict()
+    nch = None
+    for name, (_sc, e, rr) in sorted(runs.items()):
+        for x in SemanticCore21.from_engine(e).reason(rr[-1].records).localizations:
+            if x.outcome == NO_CONSISTENT_HYPOTHESIS and nch is None:
+                nch = {"scenario": name, **x.to_dict()}
+    ex["why_NO_CONSISTENT_HYPOTHESIS"] = nch
+    spec = P.SymptomSpec("S", "synthetic", detect=lambda ix: ("x",), hypotheses=(
+        P.Hypothesis("D1/h1", "D1", "m", confirmed_by=("P",), refuted_by=("Q",)),
+        P.Hypothesis("D2/h2", "D2", "m", confirmed_by=("P",), refuted_by=("R",))))
+
+    def boom(i, s):
+        raise KeyError("defect")
+    table = {"P": P.Predicate("P", "", "D", lambda i, s: True),
+             "Q": P.Predicate("Q", "", "D", boom),
+             "R": P.Predicate("R", "", "D", lambda i, s: True)}
+    ex["predicate_fault_R9B"] = SemanticCore21((spec,), table).reason(
+        []).localizations[0].to_dict()
+    ok = P.rec("TIMING", "nav_solution", "timing.clock_consistency")
+    bad = P.rec("TIMING", "nav_solution", "timing.clock_consistency", OS.VIOLATED)
+    base6 = [P.rec("TIMING", "nav_solution", "timing.end_to_end", OS.VIOLATED,
+                   deps=("COMPUTE/state_estimator", "COMMUNICATION/gnss_serial")),
+             P.rec("TIMING", "nav_solution.sensor_slow", "timing.rate"),
+             P.rec("TIMING", "nav_solution.transport_delay", "timing.segment_budget"),
+             P.rec("TIMING", "nav_solution.processing_delay", "timing.segment_budget"),
+             P.rec("COMMUNICATION", "gnss_serial", "comm.link_state"),
+             P.rec("COMPUTE", "state_estimator", "compute.process_alive"),
+             P.rec("COMPUTE", "state_estimator", "compute.process_producing")]
+    ex["conflict_R6"] = core_for(P.AIR, trace=True).reason(base6 + [ok, bad, ok]).to_dict()
+    sizes_f, sizes_full, sizes_lean = [], [], []
+    for name, (_sc, e, rr) in sorted(runs.items()):
+        full = SemanticCore21.from_engine(e, trace=True)
+        lean = SemanticCore21.from_engine(e, trace=False)
+        for t in rr:
+            d = t.to_dict()
+            sizes_f.append(len(json.dumps({"attribution": d["attribution"],
+                                           "localization": d["localization"]})))
+            sizes_full.append(len(json.dumps(norm(full.reason(t.records).to_dict()))))
+            sizes_lean.append(len(json.dumps(norm(lean.reason(t.records).to_dict()))))
+    def st(xs):
+        xs = sorted(xs)
+        return {"mean": round(sum(xs) / len(xs), 1), "median": xs[len(xs) // 2],
+                "max": xs[-1]}
+    return {"examples": norm(ex),
+            "document_bytes_per_tick": {
+                "frozen_2_0_localization_and_attribution": st(sizes_f),
+                "semantic_core_2_1_trace": st(sizes_full),
+                "semantic_core_2_1_no_trace": st(sizes_lean)}}
+
+
 # ================================================================== main
 def main():
     lock = json.loads(LOCK.read_text())
@@ -1101,6 +1217,7 @@ def main():
     results["E"] = E
     results["F"] = section_F()
     results["G"] = section_G(runs, E)
+    results["J"] = section_J(runs)
     after = hashes()
     results["PROTECTED_FILES"] = {
         "sha256": before, "unchanged_by_this_run": before == after}

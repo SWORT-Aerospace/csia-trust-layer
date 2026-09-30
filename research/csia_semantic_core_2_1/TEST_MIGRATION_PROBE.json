@@ -1,0 +1,64 @@
+{
+ "files": [
+  "tests/test_v2_framework.py",
+  "tests/test_v2_localization.py",
+  "tests/test_v2_scenarios.py",
+  "tests/test_v2_api_ledger.py",
+  "tests/test_v2_domains.py",
+  "tests/test_v2_internal_interface.py",
+  "tests/test_v2_navigation_baseline.py",
+  "tests/test_phase_c_freeze.py",
+  "tests/test_program_state.py",
+  "tests/test_xsys_001_preregistration.py",
+  "tests/test_xsys_001_a1_amendment.py",
+  "tests/test_xsys_001_a2_amendment.py",
+  "tests/test_csia_semantic_correctness.py"
+ ],
+ "frozen_run": {
+  "failed": [],
+  "returncode": 0
+ },
+ "semantic_2_1_run": {
+  "failed": 4,
+  "returncode": 1
+ },
+ "tests": 362,
+ "tests_whose_outcome_changes_under_2_1": {
+  "tests.test_csia_semantic_correctness::test_record_level_reproductions_still_characterize_frozen_v2": {
+   "frozen": {
+    "outcome": "passed"
+   },
+   "semantic_2_1": {
+    "message": "AssertionError: assert {'R11A': {'fr...RANCE']}, ...} == {'R11A': {'fr...RANCE']}, ...}",
+    "outcome": "failure"
+   }
+  },
+  "tests.test_v2_framework::test_both_verdicts_report_what_was_ruled_out_the_same_way": {
+   "frozen": {
+    "outcome": "passed"
+   },
+   "semantic_2_1": {
+    "message": "AssertionError: assert 'AMBIGUOUS' == 'UNIQUE'",
+    "outcome": "failure"
+   }
+  },
+  "tests.test_v2_framework::test_unique_requires_an_affirmative_exclusion_and_names_it": {
+   "frozen": {
+    "outcome": "passed"
+   },
+   "semantic_2_1": {
+    "message": "AssertionError: assert 'AMBIGUOUS' == 'UNIQUE'",
+    "outcome": "failure"
+   }
+  },
+  "tests.test_v2_scenarios::test_a_stalled_process_is_attributed_to_the_process": {
+   "frozen": {
+    "outcome": "passed"
+   },
+   "semantic_2_1": {
+    "message": "AssertionError: assert 'AMBIGUOUS' == 'UNIQUE'",
+    "outcome": "failure"
+   }
+  }
+ }
+}
