@@ -1,40 +1,111 @@
 {
- "note": "CANDIDATE declarations for the aircraft successor profile, each evaluated separately in shadow before any decision (PROFILE_REPAIR_PROPOSAL.md). R-BAD is NOT a proposal: it is the deliberately wrong over-connection used to show what an unacceptable repair looks like.",
+ "note": "CANDIDATE declarations for the aircraft successor profile, each evaluated separately in shadow before any decision (PROFILE_REPAIR_PROPOSAL.md). R-BAD is NOT a proposal: it is the deliberately wrong over-connection used to show what an unacceptable repair looks like. R5a and R5b were added after the first counterfactual run: they split R5 into its source half and its link half, because the IMU pacing-loss counterfactual showed that only the link half restores a wrong answer.",
  "candidates": {
-  "R1": {"domain": "COMMUNICATION", "component": "gnss_serial",
-         "add_affected_functions": ["COARSE_NAVIGATION"], "add_dependencies": [],
-         "kind": "DIRECT",
-         "justification": "v1.1 defines COARSE_NAVIGATION as requiring the gps source; the profile declares gps rides gnss_serial. A position that cannot arrive cannot serve the function.",
-         "source": "engineering/v1_1/FUNCTION_REQUIREMENTS.yaml COARSE_NAVIGATION.required_sources; csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"},
-  "R2": {"domain": "COMPUTE", "component": "state_estimator",
-         "add_affected_functions": ["COARSE_NAVIGATION"], "add_dependencies": [],
-         "kind": "CONDITIONAL",
-         "justification": "the v2 function table declares COMPUTE a SUPPORTING domain of COARSE_NAVIGATION (degrade, not remove), but no compute component names it, so the declaration is dead. On a PX4-class multirotor every position output is the estimator's output.",
-         "source": "engineering/v2/FUNCTION_DEPENDENCY_SPEC.md section 6; csia/v2/profiles/aircraft.py COARSE_NAVIGATION acceptable_degradation; PX4 EKF2 architecture (V0)"},
-  "R3": {"domain": "TIMING", "component": "nav_solution",
-         "add_affected_functions": ["COARSE_NAVIGATION"], "add_dependencies": [],
-         "kind": "CONDITIONAL",
-         "justification": "TIMING is likewise a declared SUPPORTING domain of COARSE_NAVIGATION with no timing component naming it. nav_solution is the channel that carries the position (aircraft.py comment on nav_solution).",
-         "source": "engineering/v2/FUNCTION_DEPENDENCY_SPEC.md section 6; csia/v2/profiles/aircraft.py ChannelSpec nav_solution"},
-  "R4": {"domain": "COMMUNICATION", "component": "gnss_serial",
-         "add_affected_functions": ["POSITION_HOLD", "PRECISION_NAVIGATION", "GEOFENCE_SUPPORT"], "add_dependencies": [],
-         "kind": "DIRECT",
-         "justification": "G-3: every v1.1 GNSS-requiring function (required_sources gps) depends on the link gps rides; the link names only SENSING.",
-         "source": "engineering/v1_1/FUNCTION_REQUIREMENTS.yaml required_sources; csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"},
-  "R5": {"domain": "COMPUTE", "component": "state_estimator",
-         "add_affected_functions": [], "add_dependencies": ["COMMUNICATION/gnss_serial", "SENSOR/source.gps"],
-         "kind": "DIRECT",
-         "justification": "G-2: the estimator fuses GNSS; the GNSS measurement reaches it over gnss_serial. The profile declares only cpu and imu0 as inputs, so OUTPUT_MISSING can never test 'the estimator's input link is down'.",
-         "source": "csia/v2/profiles/aircraft.py ProcessSpec state_estimator and ChannelSpec nav_solution comment; PX4 EKF2 input set (V0)"},
-  "R6": {"domain": "COMPUTE", "component": "state_estimator",
-         "add_affected_functions": [], "add_dependencies": ["SENSOR/source.imu1", "SENSOR/source.baro", "SENSOR/source.mag"],
-         "kind": "DIRECT",
-         "justification": "the other estimator inputs. Physically real; no current predicate or relation consumes them for the estimator.",
-         "source": "PX4 EKF2 input set (V0)"},
-  "R-BAD": {"domain": "COMMUNICATION", "component": "esc_can",
-         "add_affected_functions": ["COARSE_NAVIGATION", "POSITION_HOLD", "PRECISION_NAVIGATION"], "add_dependencies": [],
-         "kind": "DIRECT",
-         "justification": "NOT A PROPOSAL. The ESC CAN bus carries motor telemetry and commands only; it serves no navigation function. Used to demonstrate an over-connection that restores frozen v2's false symptom.",
-         "source": "csia/v2/profiles/aircraft.py LinkSpec esc_can carries=(motor_esc,)"}
+  "R1": {
+   "domain": "COMMUNICATION",
+   "component": "gnss_serial",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "DIRECT",
+   "justification": "v1.1 defines COARSE_NAVIGATION as requiring the gps source; the profile declares gps rides gnss_serial. A position that cannot arrive cannot serve the function.",
+   "source": "engineering/v1_1/FUNCTION_REQUIREMENTS.yaml COARSE_NAVIGATION.required_sources; csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"
+  },
+  "R2": {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "CONDITIONAL",
+   "justification": "the v2 function table declares COMPUTE a SUPPORTING domain of COARSE_NAVIGATION (degrade, not remove), but no compute component names it, so the declaration is dead. On a PX4-class multirotor every position output is the estimator's output.",
+   "source": "engineering/v2/FUNCTION_DEPENDENCY_SPEC.md section 6; csia/v2/profiles/aircraft.py COARSE_NAVIGATION acceptable_degradation; PX4 EKF2 architecture (V0)"
+  },
+  "R3": {
+   "domain": "TIMING",
+   "component": "nav_solution",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "CONDITIONAL",
+   "justification": "TIMING is likewise a declared SUPPORTING domain of COARSE_NAVIGATION with no timing component naming it. nav_solution is the channel that carries the position (aircraft.py comment on nav_solution).",
+   "source": "engineering/v2/FUNCTION_DEPENDENCY_SPEC.md section 6; csia/v2/profiles/aircraft.py ChannelSpec nav_solution"
+  },
+  "R4": {
+   "domain": "COMMUNICATION",
+   "component": "gnss_serial",
+   "add_affected_functions": [
+    "POSITION_HOLD",
+    "PRECISION_NAVIGATION",
+    "GEOFENCE_SUPPORT"
+   ],
+   "add_dependencies": [],
+   "kind": "DIRECT",
+   "justification": "G-3: every v1.1 GNSS-requiring function (required_sources gps) depends on the link gps rides; the link names only SENSING.",
+   "source": "engineering/v1_1/FUNCTION_REQUIREMENTS.yaml required_sources; csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"
+  },
+  "R5": {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [],
+   "add_dependencies": [
+    "COMMUNICATION/gnss_serial",
+    "SENSOR/source.gps"
+   ],
+   "kind": "DIRECT",
+   "justification": "G-2: the estimator fuses GNSS; the GNSS measurement reaches it over gnss_serial. The profile declares only cpu and imu0 as inputs, so OUTPUT_MISSING can never test 'the estimator's input link is down'.",
+   "source": "csia/v2/profiles/aircraft.py ProcessSpec state_estimator and ChannelSpec nav_solution comment; PX4 EKF2 input set (V0)"
+  },
+  "R6": {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [],
+   "add_dependencies": [
+    "SENSOR/source.imu1",
+    "SENSOR/source.baro",
+    "SENSOR/source.mag"
+   ],
+   "kind": "DIRECT",
+   "justification": "the other estimator inputs. Physically real; no current predicate or relation consumes them for the estimator.",
+   "source": "PX4 EKF2 input set (V0)"
+  },
+  "R-BAD": {
+   "domain": "COMMUNICATION",
+   "component": "esc_can",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION",
+    "POSITION_HOLD",
+    "PRECISION_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "DIRECT",
+   "justification": "NOT A PROPOSAL. The ESC CAN bus carries motor telemetry and commands only; it serves no navigation function. Used to demonstrate an over-connection that restores frozen v2's false symptom.",
+   "source": "csia/v2/profiles/aircraft.py LinkSpec esc_can carries=(motor_esc,)"
+  },
+  "R5a": {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [],
+   "add_dependencies": [
+    "SENSOR/source.gps"
+   ],
+   "kind": "DIRECT",
+   "justification": "G-2, split out of R5 after the IMU pacing-loss counterfactual: the estimator fuses the GNSS measurement (EKF2 subscribes vehicle_gps_position). Declaring the SOURCE as an input puts GPS source health inside the estimator's and the navigation functions' declared scope and makes it a declared alternative of the estimator, without giving any link predicate something to read.",
+   "source": "PX4 547e2ca src/modules/ekf2/EKF2.hpp _vehicle_gps_position_sub; csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"
+  },
+  "R5b": {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [],
+   "add_dependencies": [
+    "COMMUNICATION/gnss_serial"
+   ],
+   "kind": "DIRECT",
+   "justification": "G-2, the other half of R5: the link the GNSS measurement rides. This is the declaration that lets FUNCTION_LINKS_NOMINAL refute COMMUNICATION/input_starvation for OUTPUT_MISSING on the estimator, although on PX4 the estimator's output is paced by the IMU (EKF2::Run publishes only when imu_updated), so GNSS link health says nothing about whether the output can be starved.",
+   "source": "PX4 547e2ca src/modules/ekf2/EKF2.cpp Run() (imu_updated gates every publication); csia/v2/profiles/aircraft.py SOURCE_DEPENDENCIES[gps]"
+  }
  }
 }

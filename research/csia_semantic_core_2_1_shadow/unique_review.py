@@ -61,6 +61,9 @@ def variants():
             "successor_r1_plus_R5": ProfileOverlay(
                 succ.name, "r1+R5", succ.base_profile,
                 succ.declarations + r5.declarations),
+            "successor_r1_plus_R5a": ProfileOverlay(
+                succ.name, "r1+R5a", succ.base_profile,
+                succ.declarations + S.overlay("R5a").declarations),
             "all_candidates_R1_R5": S.overlay("R1", "R2", "R3", "R4", "R5"),
             "with_R_BAD": S.overlay("R1", "R2", "R3", "R4", "R5", "R-BAD")}
 

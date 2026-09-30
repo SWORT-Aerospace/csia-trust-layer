@@ -199,14 +199,18 @@ def imu_pacing_loss(runs):
                    for x in l0 if x.subject == "state_estimator"]
     for label, ov in (("2_1", None), ("2_1_successor_r1", succ),
                       ("2_1_plus_R5", S.overlay("R5")),
+                      ("2_1_plus_R5a_source_only", S.overlay("R5a")),
+                      ("2_1_plus_R5b_link_only", S.overlay("R5b")),
                       ("2_1_successor_r1_plus_R5", S.overlay("R2", "R3", "R5"))):
         tr = core.reason(ov.apply(recs) if ov else recs)
         out[label] = [(x.symptom, x.v2.verdict, list(x.supported), list(x.unresolved))
                       for x in tr.localizations if x.subject == "state_estimator"]
     out["reading"] = ("OUTPUT_MISSING on the estimator: SUPPORTED COMPUTE/process_stall is "
-                      "wrong here (the process is starved of its pacing input). v2.0 and any "
-                      "profile with R5 refute input_starvation with the GNSS link, which cannot "
-                      "starve EKF2's output; 2.1 without R5 keeps it open.")
+                      "wrong here (the process is starved of its pacing input). v2.0, and 2.1 "
+                      "under any profile that puts the GNSS link in the estimator's scope (R5, "
+                      "R5b, or R5a through source.gps's own dependency on the link), refute "
+                      "input_starvation with the GNSS link, which cannot starve EKF2's output; "
+                      "2.1 without those declarations keeps it open.")
     return out
 
 
