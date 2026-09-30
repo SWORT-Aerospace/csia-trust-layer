@@ -441,10 +441,13 @@ class SuccessorPredicate(Predicate):
                                   else repr(value))
 
 
-def _is_rebuildable_negation(pid, pred, table):
-    base = table.get(pid[:-len("_FALSE")]) if pid.endswith("_FALSE") else None
-    return (base is not None
-            and pred.description == "NOT (" + base.description + ")")
+def _is_rebuildable_negation(pid, table):
+    """The repository's naming convention: `X_FALSE` is the negation of `X`
+    whenever both are in one table (`csia/v2/signatures.py` `_negate`, and
+    the XSYS-001 adapter's `_negate`). The successor relies on it, as the
+    audit's measuring instrument did. A table that breaks the convention is
+    not supported."""
+    return pid.endswith("_FALSE") and pid[:-len("_FALSE")] in table
 
 
 def successor_predicate_table(predicates: dict, c2=True, c3=True,
@@ -453,7 +456,7 @@ def successor_predicate_table(predicates: dict, c2=True, c3=True,
     repl = successor_tests(c2, c3)
     out: dict = {}
     for pid, p in predicates.items():
-        if _is_rebuildable_negation(pid, p, predicates):
+        if _is_rebuildable_negation(pid, predicates):
             continue
         test = p.test
         if pid in repl and SIG.PREDICATES.get(pid) is p:

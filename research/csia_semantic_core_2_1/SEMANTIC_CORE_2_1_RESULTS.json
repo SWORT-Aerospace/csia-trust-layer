@@ -1,0 +1,3643 @@
+{
+ "AUDIT": {
+  "R11A_values": {
+   "audit_shadow": [
+    [
+     "CURRENT_PRESENT",
+     "motor_0",
+     "RAISED:TypeError"
+    ],
+    [
+     "CURRENT_PRESENT",
+     "motor_0",
+     "RAISED:TypeError"
+    ]
+   ],
+   "note": "2.1 records (predicate, evaluated_as, subject, error_class); the audit's shadow recorded (predicate, subject, error_class). Same faults",
+   "semantic_core_2_1": [
+    [
+     "CURRENT_PRESENT",
+     "CURRENT_PRESENT_FALSE",
+     "motor_0",
+     "RAISED:TypeError"
+    ],
+    [
+     "CURRENT_PRESENT",
+     "CURRENT_PRESENT",
+     "motor_0",
+     "RAISED:TypeError"
+    ]
+   ]
+  },
+  "SH_2_1": {
+   "ALL": {
+    "changes": {
+     "ACTUATOR_NO_RESPONSE": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "CLOCK_DRIFT": {
+      "ATTR": [
+       {
+        "candidates": [
+         "TIMING/nav_solution"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "TIMING/nav_solution"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "CPU_OVERLOAD": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "ESTIMATOR_LATE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A1_SENSOR_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A2_COMMUNICATION_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A3_COMPUTE_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A4_PROCESS_STALL": {
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_B1_COMMAND_LOST": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|POSITION_HOLD": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|PRECISION_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_B3_DRIVE_NO_CURRENT": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_B4_MECHANICAL": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_B5_RESPONSE_SENSOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_C3_LINKS_DOWN_NOT_SHARED": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_C4_CPU_SATURATED_NOT_SHARED": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D1_NAV_SOURCE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_D2_ESTIMATOR_STALE": {
+      "ATTR": [
+       {
+        "candidates": [
+         "COMPUTE/state_estimator"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "COMPUTE/state_estimator"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D3_COMM_STARVATION": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D4_COMPUTE_DEADLINE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_TS_B5_RESPONSE_SENSOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/dyno_motor"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/dyno_motor"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "NETWORK_LATENCY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|POSITION_HOLD": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|PRECISION_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "PROCESS_STALL": {
+      "ATTR": [
+       {
+        "candidates": [
+         "COMPUTE/state_estimator"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "COMPUTE/state_estimator"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "SHARED_RAIL": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "STALLED_ACTUATOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     }
+    },
+    "scenarios_changed": 23
+   },
+   "ALL_TICKS": {
+    "by_fix": {
+     "ALL": {
+      "ticks_with_attribution_change": 362,
+      "ticks_with_localization_change": 664,
+      "ticks_with_trace_only_change": 0
+     },
+     "C1": {
+      "ticks_with_attribution_change": 0,
+      "ticks_with_localization_change": 0,
+      "ticks_with_trace_only_change": 0
+     },
+     "C2": {
+      "ticks_with_attribution_change": 0,
+      "ticks_with_localization_change": 0,
+      "ticks_with_trace_only_change": 0
+     },
+     "C3": {
+      "ticks_with_attribution_change": 0,
+      "ticks_with_localization_change": 664,
+      "ticks_with_trace_only_change": 0
+     },
+     "C4": {
+      "ticks_with_attribution_change": 0,
+      "ticks_with_localization_change": 0,
+      "ticks_with_trace_only_change": 0
+     },
+     "C6": {
+      "ticks_with_attribution_change": 0,
+      "ticks_with_localization_change": 0,
+      "ticks_with_trace_only_change": 0
+     },
+     "F2": {
+      "ticks_with_attribution_change": 281,
+      "ticks_with_localization_change": 0,
+      "ticks_with_trace_only_change": 0
+     }
+    },
+    "ticks": 2640
+   },
+   "C1": {
+    "changes": {},
+    "scenarios_changed": 0
+   },
+   "C2": {
+    "changes": {},
+    "scenarios_changed": 0
+   },
+   "C3": {
+    "changes": {
+     "CPU_OVERLOAD": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "ESTIMATOR_LATE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A1_SENSOR_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A2_COMMUNICATION_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A3_COMPUTE_DELAY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_A4_PROCESS_STALL": {
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_B1_COMMAND_LOST": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|POSITION_HOLD": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|PRECISION_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_C3_LINKS_DOWN_NOT_SHARED": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_C4_CPU_SATURATED_NOT_SHARED": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D1_NAV_SOURCE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_D2_ESTIMATOR_STALE": {
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D3_COMM_STARVATION": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMMUNICATION/starvation"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "MS_D4_COMPUTE_DEADLINE": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "NETWORK_LATENCY": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|POSITION_HOLD": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ],
+      "POSITION_UNAVAILABLE|PRECISION_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [],
+        "unresolved": [],
+        "verdict": "UNSUPPORTED"
+       },
+       null
+      ]
+     },
+     "PROCESS_STALL": {
+      "OUTPUT_MISSING|state_estimator": [
+       {
+        "rejected": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "COMPUTE/process_stall"
+        ],
+        "unresolved": [
+         "COMMUNICATION/input_starvation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ],
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "SENSOR/navigation_source_invalid",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "COMPUTE/estimator_stale"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       null
+      ]
+     },
+     "SHARED_RAIL": {
+      "POSITION_UNAVAILABLE|COARSE_NAVIGATION": [
+       {
+        "rejected": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [],
+        "verdict": "SUPPORTED"
+       },
+       {
+        "rejected": [],
+        "supported": [
+         "SENSOR/navigation_source_invalid"
+        ],
+        "unresolved": [
+         "COMMUNICATION/starvation",
+         "COMPUTE/estimator_stale",
+         "TIMING/deadline_violation"
+        ],
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     }
+    },
+    "scenarios_changed": 16
+   },
+   "C4": {
+    "changes": {},
+    "scenarios_changed": 0
+   },
+   "C6": {
+    "changes": {},
+    "scenarios_changed": 0
+   },
+   "F2": {
+    "changes": {
+     "ACTUATOR_NO_RESPONSE": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "CLOCK_DRIFT": {
+      "ATTR": [
+       {
+        "candidates": [
+         "TIMING/nav_solution"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "TIMING/nav_solution"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_B3_DRIVE_NO_CURRENT": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_B4_MECHANICAL": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_B5_RESPONSE_SENSOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "MS_TS_B5_RESPONSE_SENSOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/dyno_motor"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/dyno_motor"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     },
+     "STALLED_ACTUATOR": {
+      "ATTR": [
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "UNIQUE"
+       },
+       {
+        "candidates": [
+         "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "verdict": "AMBIGUOUS"
+       }
+      ]
+     }
+    },
+    "scenarios_changed": 7
+   },
+   "IDENTITY_CHECK": {
+    "mismatches_with_no_fix": 0,
+    "ticks": 2640
+   }
+  },
+  "X_2_1": {
+   "confirm_and_refute_all_slots": {
+    "shared_confirmer_only": 660,
+    "specific_confirmer": 0
+   },
+   "confirm_and_refute_primary_cell_motor0": {
+    "shared_confirmer_only": 110,
+    "specific_confirmer": 0
+   },
+   "counterfactual_disagreement_preserving_successor": {
+    "primary_cell_slots_changed": 0,
+    "primary_outcomes_changed": 0,
+    "slots_changed": 0
+   },
+   "frozen_replay_identical_to_sealed": 3872,
+   "predicate_non_bool_returns": 0,
+   "predicate_raises": 0,
+   "primary_record": {
+    "AMBIGUOUS": 0,
+    "NO_EVIDENCE": 0,
+    "N_EFF_CONDITIONS": 11,
+    "ONE_SIDED_95_LB": 0.7615958096191473,
+    "PRIMARY_RESOLVING_RATE": 1.0,
+    "PRIMARY_SUPPORTED": "YES",
+    "RESOLVED_MATCHED_PAIRS": 55,
+    "UNIQUE_CORRECT_A_plus_B": 110,
+    "UNSUPPORTED": 0,
+    "VALID_MATCHED_PAIRS": 55,
+    "WRONG": 0,
+    "decision_rule": "SUPPORTED iff lower95 > 0.5 AND wrong_A_B == 0",
+    "freeze_manifest_sha256": "d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f",
+    "mode": "confirmatory",
+    "p_vs_0.5": 0.00048828125,
+    "pair_level_cp_lower95_ASSUMES_INDEPENDENCE": 0.9589990607457142,
+    "pairs_ambiguous_under_V0": 55,
+    "raw_v2_verdicts_motor0_C3_V3": {
+     "A": {
+      "SUPPORTED": 55
+     },
+     "B": {
+      "SUPPORTED": 55
+     },
+     "N": {
+      "None": 11
+     }
+    },
+    "results_sha256": "b7d4f91494e4c83d465028f8f3b844021db80d9d8d6f7ca34d785d809cc06ccc",
+    "stage1_output_sha256": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3"
+   },
+   "record_states_seen": {
+    "NOMINAL": 3432,
+    "NOT_APPLICABLE": 6974,
+    "VIOLATED": 1210
+   },
+   "shadow_decision_diffs_by_fix": {
+    "ALL_LOCALIZATION_FIXES": 0,
+    "C2": 0,
+    "C4": 0,
+    "C6": 0
+   },
+   "shadow_motor0_outcome_diffs_by_fix": {
+    "ALL_LOCALIZATION_FIXES": 0,
+    "C2": 0,
+    "C4": 0,
+    "C6": 0
+   },
+   "slots": 3872,
+   "stage1_sha256": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3",
+   "stage1_sha256_matches_seal": true
+  },
+  "comparison_with_audit_shadow": {
+   "E": {
+    "differing_paths": [],
+    "identical_to_audit": true
+   },
+   "N": {
+    "differing_paths": [],
+    "identical_to_audit": true
+   },
+   "P": {
+    "differing_paths": [],
+    "identical_to_audit": true
+   },
+   "R": {
+    "differing_paths": [
+     "/R11A/shadow_predicate_errors[0]",
+     "/R11A/shadow_predicate_errors[1]"
+    ],
+    "identical_to_audit": false
+   },
+   "SH": {
+    "differing_paths": [],
+    "identical_to_audit": true
+   },
+   "X": {
+    "differing_paths": [],
+    "identical_to_audit": true
+   }
+  }
+ },
+ "D": {
+  "classification_counts": {
+   "FIXED": 18,
+   "INTENTIONALLY_DEFERRED": 5,
+   "NOT_APPLICABLE": 10
+  },
+  "measures": [
+   {
+    "classification": "FIXED",
+    "correction": "C1",
+    "frozen_v2": 6,
+    "id": "N2.irrelevant",
+    "measure": "P1/P19 irrelevant NOMINAL creates UNIQUE (N2)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C1",
+    "frozen_v2": 21,
+    "id": "N2.unique",
+    "measure": "P19 UNIQUE configurations of 125 (N2); 4 remain, each with its declared alternative NOMINAL",
+    "note": "the remaining UNIQUE configurations are the legitimate form: A adverse, its declared alternative B NOMINAL",
+    "semantic_core_2_1": 4
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C1",
+    "frozen_v2": 0,
+    "id": "N2.unavailable",
+    "measure": "UNAVAILABLE creates UNIQUE (N2)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N2.duplicate",
+    "measure": "P15 duplicate changes an attribution decision (N2)",
+    "note": "no violation in frozen v2; the successor leaves this path unchanged",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N2.order",
+    "measure": "P3 order changes anything (N2)",
+    "note": "no violation in frozen v2; the successor leaves this path unchanged",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 1208,
+    "id": "N3.unknown_refutes",
+    "measure": "P6 unknown record refutes (N3 COMMAND_NO_RESPONSE)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 211,
+    "id": "N3.unknown_supported",
+    "measure": "P6 SUPPORTED resting on an unknown (N3)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N3.order",
+    "measure": "P3 order (N3)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N3.duplicate",
+    "measure": "P4 duplicate (N3)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 486,
+    "id": "N4.unknown_refutes",
+    "measure": "P6 unknown record refutes (N4 OUTPUT_STALE)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 38,
+    "id": "N4.unknown_supported",
+    "measure": "P6 SUPPORTED resting on an unknown (N4)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N4.order",
+    "measure": "P3 order (N4)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "N4.duplicate",
+    "measure": "P4 duplicate (N4)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C3",
+    "frozen_v2": 94,
+    "id": "N5.irrelevant",
+    "measure": "P1 irrelevant evidence changes a POSITION result (N5)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 224,
+    "id": "N6.unknown_refutes",
+    "measure": "P6 unreported shared node refutes (N6)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 80,
+    "id": "N6.unknown_confirms",
+    "measure": "P6 unreported shared node confirms (N6)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 176,
+    "id": "N6.unknown_supported",
+    "measure": "P6 SUPPORTED resting on an unreported node (N6)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "none",
+    "frozen_v2": 0,
+    "id": "N1.monotone",
+    "measure": "P14 monotone information (N1, both shapes)",
+    "note": "no violation in frozen v2; the successor leaves this path unchanged",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C3",
+    "frozen_v2": 142,
+    "id": "P1",
+    "measure": "P1 irrelevant addition changes another subject's localization (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C3",
+    "frozen_v2": 6,
+    "id": "P2",
+    "measure": "P2 irrelevant removal changes a decision (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C3",
+    "frozen_v2": 17,
+    "id": "P2.unknown",
+    "measure": "P2 removal whose relevance the declared scope cannot settle",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "C6",
+    "frozen_v2": 0,
+    "id": "P3",
+    "measure": "P3 order (corpus)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C6",
+    "frozen_v2": 3,
+    "id": "P4",
+    "measure": "P4 duplicate changes a decision (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C4",
+    "frozen_v2": 259,
+    "id": "P5",
+    "measure": "P5 injected predicate faults NOT visible (corpus evaluations)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 382,
+    "id": "P6",
+    "measure": "P6 Kleene violations under UNAVAILABLE (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "NOT_APPLICABLE",
+    "correction": "none",
+    "frozen_v2": 0,
+    "id": "P7",
+    "measure": "P7 attribution candidates lost (corpus)",
+    "note": "no violation under either",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "F2",
+    "frozen_v2": 281,
+    "id": "P9",
+    "measure": "P9 UNIQUE contradicting its own tick's localization (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "FIXED",
+    "correction": "C2",
+    "frozen_v2": 15,
+    "id": "P12",
+    "measure": "P12 predicates inconsistent under UNAVAILABLE (corpus)",
+    "note": "",
+    "semantic_core_2_1": 0
+   },
+   {
+    "classification": "INTENTIONALLY_DEFERRED",
+    "correction": "C3",
+    "frozen_v2": 838,
+    "id": "P16",
+    "measure": "P16 POSITION_UNAVAILABLE on a function the graph calls ELIGIBLE",
+    "note": "residual is profile gap G-3 (SC-18), owner decision",
+    "semantic_core_2_1": 168
+   }
+  ],
+  "not_measured_here": [
+   {
+    "classification": "INTENTIONALLY_DEFERRED",
+    "id": "P17",
+    "measure": "uniform exception handling across stages",
+    "note": "predicate faults are reported (C4). Attribution, detectors and a missing table id still raise, as in 2.0.0; intake validation (G5) is not approved"
+   },
+   {
+    "classification": "INTENTIONALLY_DEFERRED",
+    "id": "P18",
+    "measure": "source-identity awareness (SC-14)",
+    "note": "correlated evidence is outside the approved scope"
+   },
+   {
+    "classification": "INTENTIONALLY_DEFERRED",
+    "id": "P20",
+    "measure": "predicate subject correctness (SC-15, C8)",
+    "note": "rail source lookup (C8) is not approved"
+   },
+   {
+    "classification": "INTENTIONALLY_DEFERRED",
+    "id": "R9B",
+    "measure": "a raising refuter creates SUPPORTED",
+    "note": "the fault is now reported (evaluation PREDICATE_FAULT); withholding the SUPPORTED verdict is governance option G5, not approved"
+   }
+  ]
+ },
+ "E": {
+  "clusters": {
+   "C3+F2|ATTRIBUTION|ATTRIBUTION|UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN|RIGHT_UNIQUE_WEAKENED|UNIQUE->AMBIGUOUS": {
+    "assessment": "RIGHT_UNIQUE_WEAKENED",
+    "expected": true,
+    "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+    "rule": "C3+F2",
+    "scenarios": {
+     "MS_D2_ESTIMATOR_STALE": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "PROCESS_STALL": {
+      "first": 21,
+      "last": 59,
+      "ticks": 39
+     }
+    },
+    "stage": "ATTRIBUTION",
+    "symptom": "ATTRIBUTION",
+    "transition": "UNIQUE->AMBIGUOUS",
+    "units": 81
+   },
+   "C3|LOCALIZATION|OUTPUT_MISSING|PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK|WEAKENED_BY_PROFILE_GAP|SUPPORTED->AMBIGUOUS": {
+    "assessment": "WEAKENED_BY_PROFILE_GAP",
+    "expected": true,
+    "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK",
+    "rule": "C3",
+    "scenarios": {
+     "MS_A4_PROCESS_STALL": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_D2_ESTIMATOR_STALE": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "PROCESS_STALL": {
+      "first": 21,
+      "last": 59,
+      "ticks": 39
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "OUTPUT_MISSING",
+    "transition": "SUPPORTED->AMBIGUOUS",
+    "units": 123
+   },
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK|NO_DECLARED_PROCESS|NO_DECLARED_TIMING_CHANNEL|WEAKENED_BY_PROFILE_GAP|SUPPORTED->AMBIGUOUS": {
+    "assessment": "WEAKENED_BY_PROFILE_GAP",
+    "expected": true,
+    "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK|NO_DECLARED_PROCESS|NO_DECLARED_TIMING_CHANNEL",
+    "rule": "C3",
+    "scenarios": {
+     "MS_D1_NAV_SOURCE": {
+      "first": 0,
+      "last": 59,
+      "ticks": 60
+     },
+     "SHARED_RAIL": {
+      "first": 0,
+      "last": 59,
+      "ticks": 60
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "POSITION_UNAVAILABLE",
+    "transition": "SUPPORTED->AMBIGUOUS",
+    "units": 120
+   },
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED|CONSISTENT_WITH_FUNCTION_GRAPH|SUPPORTED->None": {
+    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+    "expected": true,
+    "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+    "rule": "C3",
+    "scenarios": {
+     "CPU_OVERLOAD": {
+      "first": 29,
+      "last": 59,
+      "ticks": 31
+     },
+     "ESTIMATOR_LATE": {
+      "first": 27,
+      "last": 59,
+      "ticks": 33
+     },
+     "MS_A3_COMPUTE_DELAY": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_A4_PROCESS_STALL": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_B1_COMMAND_LOST": {
+      "first": 18,
+      "last": 59,
+      "ticks": 126
+     },
+     "MS_C3_LINKS_DOWN_NOT_SHARED": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_C4_CPU_SATURATED_NOT_SHARED": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_D2_ESTIMATOR_STALE": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_D3_COMM_STARVATION": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_D4_COMPUTE_DEADLINE": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "PROCESS_STALL": {
+      "first": 21,
+      "last": 59,
+      "ticks": 39
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "POSITION_UNAVAILABLE",
+    "transition": "SUPPORTED->None",
+    "units": 523
+   },
+   "C3|LOCALIZATION|POSITION_UNAVAILABLE|SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED|CONSISTENT_WITH_FUNCTION_GRAPH|UNSUPPORTED->None": {
+    "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+    "expected": true,
+    "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+    "rule": "C3",
+    "scenarios": {
+     "MS_A1_SENSOR_DELAY": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_A2_COMMUNICATION_DELAY": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "NETWORK_LATENCY": {
+      "first": 39,
+      "last": 59,
+      "ticks": 63
+     }
+    },
+    "stage": "LOCALIZATION",
+    "symptom": "POSITION_UNAVAILABLE",
+    "transition": "UNSUPPORTED->None",
+    "units": 147
+   },
+   "F2|ATTRIBUTION|ATTRIBUTION|UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN|RIGHT_UNIQUE_WEAKENED|UNIQUE->AMBIGUOUS": {
+    "assessment": "RIGHT_UNIQUE_WEAKENED",
+    "expected": true,
+    "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+    "rule": "F2",
+    "scenarios": {
+     "ACTUATOR_NO_RESPONSE": {
+      "first": 26,
+      "last": 59,
+      "ticks": 34
+     },
+     "CLOCK_DRIFT": {
+      "first": 21,
+      "last": 59,
+      "ticks": 39
+     },
+     "MS_B3_DRIVE_NO_CURRENT": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_B4_MECHANICAL": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "STALLED_ACTUATOR": {
+      "first": 27,
+      "last": 59,
+      "ticks": 33
+     },
+     "TS_STALLED": {
+      "first": 27,
+      "last": 33,
+      "ticks": 7
+     }
+    },
+    "stage": "ATTRIBUTION",
+    "symptom": "ATTRIBUTION",
+    "transition": "UNIQUE->AMBIGUOUS",
+    "units": 197
+   },
+   "F2|ATTRIBUTION|ATTRIBUTION|UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN|WRONG_UNIQUE_CORRECTED|UNIQUE->AMBIGUOUS": {
+    "assessment": "WRONG_UNIQUE_CORRECTED",
+    "expected": true,
+    "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+    "rule": "F2",
+    "scenarios": {
+     "MS_B5_RESPONSE_SENSOR": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     },
+     "MS_TS_B5_RESPONSE_SENSOR": {
+      "first": 18,
+      "last": 59,
+      "ticks": 42
+     }
+    },
+    "stage": "ATTRIBUTION",
+    "symptom": "ATTRIBUTION",
+    "transition": "UNIQUE->AMBIGUOUS",
+    "units": 84
+   }
+  },
+  "final_tick_changes": {
+   "ACTUATOR_NO_RESPONSE": [
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "CLOCK_DRIFT": [
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "TIMING/nav_solution"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "TIMING/nav_solution"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "CPU_OVERLOAD": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "ESTIMATOR_LATE": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_A1_SENSOR_DELAY": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [],
+      "unresolved": [],
+      "verdict": "UNSUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_A2_COMMUNICATION_DELAY": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [],
+      "unresolved": [],
+      "verdict": "UNSUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_A3_COMPUTE_DELAY": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_A4_PROCESS_STALL": [
+    {
+     "assessment": "WEAKENED_BY_PROFILE_GAP",
+     "expected": true,
+     "new": {
+      "rejected": [],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "rejected": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK",
+     "rule": "C3",
+     "unit": "OUTPUT_MISSING|state_estimator"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_B1_COMMAND_LOST": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMMUNICATION/starvation"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMMUNICATION/starvation"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|POSITION_HOLD"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMMUNICATION/starvation"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
+    }
+   ],
+   "MS_B3_DRIVE_NO_CURRENT": [
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "MS_B4_MECHANICAL": [
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "MS_B5_RESPONSE_SENSOR": [
+    {
+     "assessment": "WRONG_UNIQUE_CORRECTED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "MS_C3_LINKS_DOWN_NOT_SHARED": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMMUNICATION/starvation"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_C4_CPU_SATURATED_NOT_SHARED": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_D1_NAV_SOURCE": [
+    {
+     "assessment": "WEAKENED_BY_PROFILE_GAP",
+     "expected": true,
+     "new": {
+      "rejected": [],
+      "supported": [
+       "SENSOR/navigation_source_invalid"
+      ],
+      "unresolved": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "TIMING/deadline_violation"
+      ],
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "SENSOR/navigation_source_invalid"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK|NO_DECLARED_PROCESS|NO_DECLARED_TIMING_CHANNEL",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_D2_ESTIMATOR_STALE": [
+    {
+     "assessment": "WEAKENED_BY_PROFILE_GAP",
+     "expected": true,
+     "new": {
+      "rejected": [],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "rejected": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK",
+     "rule": "C3",
+     "unit": "OUTPUT_MISSING|state_estimator"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    },
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "COMPUTE/state_estimator"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "COMPUTE/state_estimator"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "C3+F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "MS_D3_COMM_STARVATION": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMMUNICATION/starvation"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_D4_COMPUTE_DEADLINE": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "MS_TS_B5_RESPONSE_SENSOR": [
+    {
+     "assessment": "WRONG_UNIQUE_CORRECTED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/dyno_motor"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/dyno_motor"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "NETWORK_LATENCY": [
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [],
+      "unresolved": [],
+      "verdict": "UNSUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [],
+      "unresolved": [],
+      "verdict": "UNSUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|POSITION_HOLD"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [],
+      "unresolved": [],
+      "verdict": "UNSUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
+    }
+   ],
+   "PROCESS_STALL": [
+    {
+     "assessment": "WEAKENED_BY_PROFILE_GAP",
+     "expected": true,
+     "new": {
+      "rejected": [],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "rejected": [
+       "COMMUNICATION/input_starvation"
+      ],
+      "supported": [
+       "COMPUTE/process_stall"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK",
+     "rule": "C3",
+     "unit": "OUTPUT_MISSING|state_estimator"
+    },
+    {
+     "assessment": "CONSISTENT_WITH_FUNCTION_GRAPH",
+     "expected": true,
+     "new": null,
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "SENSOR/navigation_source_invalid",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "COMPUTE/estimator_stale"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "SYMPTOM_ON_A_FUNCTION_THE_GRAPH_CALLS_ELIGIBLE_REMOVED",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    },
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "COMPUTE/state_estimator"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "COMPUTE/state_estimator"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "C3+F2",
+     "unit": "ATTRIBUTION"
+    }
+   ],
+   "SHARED_RAIL": [
+    {
+     "assessment": "WEAKENED_BY_PROFILE_GAP",
+     "expected": true,
+     "new": {
+      "rejected": [],
+      "supported": [
+       "SENSOR/navigation_source_invalid"
+      ],
+      "unresolved": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "TIMING/deadline_violation"
+      ],
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "rejected": [
+       "COMMUNICATION/starvation",
+       "COMPUTE/estimator_stale",
+       "TIMING/deadline_violation"
+      ],
+      "supported": [
+       "SENSOR/navigation_source_invalid"
+      ],
+      "unresolved": [],
+      "verdict": "SUPPORTED"
+     },
+     "reason": "PROFILE_DECLARES_NOTHING_SERVING_SUBJECT:NO_DECLARED_LINK|NO_DECLARED_PROCESS|NO_DECLARED_TIMING_CHANNEL",
+     "rule": "C3",
+     "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION"
+    }
+   ],
+   "STALLED_ACTUATOR": [
+    {
+     "assessment": "RIGHT_UNIQUE_WEAKENED",
+     "expected": true,
+     "new": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "AMBIGUOUS"
+     },
+     "old": {
+      "candidates": [
+       "ACTUATION/motor_0"
+      ],
+      "common_cause": null,
+      "verdict": "UNIQUE"
+     },
+     "reason": "UNIQUE_WITHHELD:SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN",
+     "rule": "F2",
+     "unit": "ATTRIBUTION"
+    }
+   ]
+  },
+  "final_tick_scenarios_changed": 23,
+  "totals": {
+   "more_certain_units": 0,
+   "ticks": 2640,
+   "ticks_attribution_changed": 362,
+   "ticks_changed": 945,
+   "ticks_localization_changed": 664,
+   "unexpected_units": 0,
+   "units_changed": 1275
+  },
+  "units_by_assessment": {
+   "CONSISTENT_WITH_FUNCTION_GRAPH": 670,
+   "RIGHT_UNIQUE_WEAKENED": 278,
+   "WEAKENED_BY_PROFILE_GAP": 243,
+   "WRONG_UNIQUE_CORRECTED": 84
+  },
+  "units_by_rule": {
+   "C3": 913,
+   "C3+F2": 81,
+   "F2": 281
+  }
+ },
+ "F": {
+  "XSYS_HARD_GATE": "PASS",
+  "conflicting_keys": 0,
+  "decision_differences_2_1_vs_sealed": 0,
+  "duplicates_collapsed": 0,
+  "evaluation_status_2_1": {
+   "COMPLETE": 110,
+   "EVIDENCE_UNAVAILABLE": 770
+  },
+  "frozen_replay_differs_from_sealed": 0,
+  "full_v2_0_view_differences_2_1_vs_sealed": 0,
+  "outcome_differences_2_1_vs_recorded_results": 0,
+  "outcome_differences_2_1_vs_sealed_verdicts": 0,
+  "outcome_labels_2_1": {
+   "AMBIGUOUS": 220,
+   "SUPPORTED": 660
+  },
+  "predicate_errors": 0,
+  "primary_recomputed_from_sealed_verdicts": {
+   "H_PRIMARY": "SUPPORTED",
+   "lower95": 0.7615958096191473,
+   "n_eff": 11,
+   "n_pairs": 55,
+   "n_success": 55,
+   "p_vs_0.5": 0.00048828125,
+   "rate": 1.0,
+   "wrong_A_B": 0
+  },
+  "primary_recomputed_under_2_1": {
+   "H_PRIMARY": "SUPPORTED",
+   "lower95": 0.7615958096191473,
+   "n_eff": 11,
+   "n_pairs": 55,
+   "n_success": 55,
+   "p_vs_0.5": 0.00048828125,
+   "rate": 1.0,
+   "wrong_A_B": 0
+  },
+  "primary_record": {
+   "N_EFF_CONDITIONS": 11,
+   "ONE_SIDED_95_LB": 0.7615958096191473,
+   "PRIMARY_SUPPORTED": "YES",
+   "RESOLVED_MATCHED_PAIRS": 55,
+   "VALID_MATCHED_PAIRS": 55,
+   "WRONG": 0
+  },
+  "primary_under_2_1_matches_record": true,
+  "slots": 3872,
+  "stage1_matches_seal": true,
+  "stage1_sha256": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3"
+ },
+ "G": {
+  "evidence_subset_rows": 27,
+  "evidence_subset_rows_changed": [
+   {
+    "recorded": {
+     "minimum_size": 4,
+     "minimum_subset": "ESTIMATOR_PROCESS_HEALTHY|FUNCTION_LINKS_NOMINAL|FUNCTION_TIMING_WITHIN_DEADLINE|V1_1_FUNCTION_ELIGIBLE_FALSE",
+     "scenario": "MS_D1_NAV_SOURCE",
+     "subject": "COARSE_NAVIGATION",
+     "uniquely_resolved": true,
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D1_NAV_SOURCE",
+    "semantic_core_2_1": {
+     "minimum_size": 1,
+     "minimum_subset": "V1_1_FUNCTION_ELIGIBLE_FALSE",
+     "scenario": "MS_D1_NAV_SOURCE",
+     "subject": "COARSE_NAVIGATION",
+     "uniquely_resolved": false,
+     "verdict": "AMBIGUOUS"
+    },
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "minimum_size": 4,
+     "minimum_subset": "ESTIMATOR_PROCESS_HEALTHY_FALSE|FUNCTION_LINKS_NOMINAL|FUNCTION_TIMING_WITHIN_DEADLINE|V1_1_FUNCTION_ELIGIBLE",
+     "scenario": "MS_D2_ESTIMATOR_STALE",
+     "subject": "COARSE_NAVIGATION",
+     "uniquely_resolved": true,
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D2_ESTIMATOR_STALE",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "minimum_size": 4,
+     "minimum_subset": "ESTIMATOR_PROCESS_HEALTHY|FUNCTION_LINKS_NOMINAL_FALSE|FUNCTION_TIMING_WITHIN_DEADLINE|V1_1_FUNCTION_ELIGIBLE",
+     "scenario": "MS_D3_COMM_STARVATION",
+     "subject": "COARSE_NAVIGATION",
+     "uniquely_resolved": true,
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D3_COMM_STARVATION",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "minimum_size": 4,
+     "minimum_subset": "ESTIMATOR_PROCESS_HEALTHY_FALSE|FUNCTION_LINKS_NOMINAL|NO_TIMING_SEGMENT_OVER_BUDGET_FALSE|V1_1_FUNCTION_ELIGIBLE",
+     "scenario": "MS_D4_COMPUTE_DEADLINE",
+     "subject": "COARSE_NAVIGATION",
+     "uniquely_resolved": true,
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D4_COMPUTE_DEADLINE",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   }
+  ],
+  "evidence_subsets_frozen_replay_matches_record": true,
+  "final_attribution_changes_without_truth": [],
+  "final_tick_attribution_changes_60": {
+   "ACTUATOR_NO_RESPONSE": {
+    "new": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": true,
+    "rule": "F2",
+    "true_domain_from_description": "ACTUATION"
+   },
+   "CLOCK_DRIFT": {
+    "new": {
+     "candidates": [
+      "TIMING/nav_solution"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "TIMING/nav_solution"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": true,
+    "rule": "F2",
+    "true_domain_from_description": "TIMING"
+   },
+   "MS_B3_DRIVE_NO_CURRENT": {
+    "new": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": false,
+    "rule": "F2",
+    "true_domain_from_description": "ACTUATION"
+   },
+   "MS_B4_MECHANICAL": {
+    "new": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": false,
+    "rule": "F2",
+    "true_domain_from_description": "ACTUATION"
+   },
+   "MS_B5_RESPONSE_SENSOR": {
+    "new": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": false,
+    "recorded_in_V2_SCENARIO_RESULTS": false,
+    "rule": "F2",
+    "true_domain_from_description": "SENSOR"
+   },
+   "MS_D2_ESTIMATOR_STALE": {
+    "new": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": false,
+    "rule": "C3+F2",
+    "true_domain_from_description": "COMPUTE"
+   },
+   "MS_TS_B5_RESPONSE_SENSOR": {
+    "new": {
+     "candidates": [
+      "ACTUATION/dyno_motor"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/dyno_motor"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": false,
+    "recorded_in_V2_SCENARIO_RESULTS": false,
+    "rule": "F2",
+    "true_domain_from_description": "SENSOR"
+   },
+   "PROCESS_STALL": {
+    "new": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": true,
+    "rule": "C3+F2",
+    "true_domain_from_description": "COMPUTE"
+   },
+   "STALLED_ACTUATOR": {
+    "new": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS"
+    },
+    "old": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE"
+    },
+    "old_unique_named_true_domain": true,
+    "recorded_in_V2_SCENARIO_RESULTS": true,
+    "rule": "F2",
+    "true_domain_from_description": "ACTUATION"
+   }
+  },
+  "gate_2_1": {
+   "criterion": "at least two matched sets where multiple domains could explain the symptom initially and evidence reduced each member to a DIFFERENT supported hypothesis, with no ground-truth access. 'Each' is read strictly: the member -> hypothesis map must be injective over the whole set.",
+   "non_qualifying_sets": [
+    {
+     "answers": {},
+     "distinct_answers": 0,
+     "members": 5,
+     "reduced": 0,
+     "set": "B_ACTUATOR_RESPONSE",
+     "why": "not every member reduced to a supported hypothesis"
+    },
+    {
+     "answers": {},
+     "distinct_answers": 0,
+     "members": 4,
+     "reduced": 0,
+     "set": "C_MULTI_SENSOR",
+     "why": "not every member reduced to a supported hypothesis"
+    },
+    {
+     "answers": {
+      "MS_D2_ESTIMATOR_STALE": "COMPUTE/estimator_stale",
+      "MS_D3_COMM_STARVATION": "COMMUNICATION/starvation",
+      "MS_D4_COMPUTE_DEADLINE": "COMPUTE/estimator_stale"
+     },
+     "distinct_answers": 2,
+     "members": 4,
+     "reduced": 3,
+     "set": "D_POSITION_FUNCTION",
+     "why": "not every member reduced to a supported hypothesis"
+    }
+   ],
+   "qualifying_sets": [
+    {
+     "answers": {
+      "MS_A1_SENSOR_DELAY": "SENSOR/source_slow",
+      "MS_A2_COMMUNICATION_DELAY": "COMMUNICATION/transport_delay",
+      "MS_A3_COMPUTE_DELAY": "COMPUTE/processing_delay",
+      "MS_A4_PROCESS_STALL": "COMPUTE/process_stall"
+     },
+     "distinct_answers": 4,
+     "members": 4,
+     "reduced": 4,
+     "set": "A_STALE_OUTPUT"
+    },
+    {
+     "answers": {
+      "MS_TS_B4_MECHANICAL": "ACTUATION/mechanical",
+      "MS_TS_B5_RESPONSE_SENSOR": "SENSOR/response_sensor"
+     },
+     "distinct_answers": 2,
+     "members": 2,
+     "reduced": 2,
+     "set": "B_ACTUATOR_RESPONSE_BENCH"
+    }
+   ],
+   "verdict": "CROSS_DOMAIN_ASSURANCE_FUNCTIONAL"
+  },
+  "gate_frozen_recomputed_matches_record": true,
+  "gate_non_qualifying_changed": [
+   {
+    "recorded": {
+     "answers": {
+      "MS_D1_NAV_SOURCE": "SENSOR/navigation_source_invalid",
+      "MS_D2_ESTIMATOR_STALE": "COMPUTE/estimator_stale",
+      "MS_D3_COMM_STARVATION": "COMMUNICATION/starvation",
+      "MS_D4_COMPUTE_DEADLINE": "COMPUTE/estimator_stale"
+     },
+     "distinct_answers": 3,
+     "members": 4,
+     "reduced": 4,
+     "set": "D_POSITION_FUNCTION",
+     "why": "two members reduced to the SAME hypothesis, so those two were not discriminated"
+    },
+    "semantic_core_2_1": {
+     "answers": {
+      "MS_D2_ESTIMATOR_STALE": "COMPUTE/estimator_stale",
+      "MS_D3_COMM_STARVATION": "COMMUNICATION/starvation",
+      "MS_D4_COMPUTE_DEADLINE": "COMPUTE/estimator_stale"
+     },
+     "distinct_answers": 2,
+     "members": 4,
+     "reduced": 3,
+     "set": "D_POSITION_FUNCTION",
+     "why": "not every member reduced to a supported hypothesis"
+    },
+    "set": "D_POSITION_FUNCTION"
+   }
+  ],
+  "gate_qualifying_answers_unchanged": true,
+  "gate_qualifying_sets": {
+   "recorded": [
+    "A_STALE_OUTPUT",
+    "B_ACTUATOR_RESPONSE_BENCH"
+   ],
+   "semantic_core_2_1": [
+    "A_STALE_OUTPUT",
+    "B_ACTUATOR_RESPONSE_BENCH"
+   ]
+  },
+  "gate_verdict": {
+   "recorded": "CROSS_DOMAIN_ASSURANCE_FUNCTIONAL",
+   "semantic_core_2_1": "CROSS_DOMAIN_ASSURANCE_FUNCTIONAL"
+  },
+  "localization_results_frozen_replay_matches_record": true,
+  "localization_results_rows": 27,
+  "localization_results_rows_changed": [
+   {
+    "recorded": {
+     "supported": "SENSOR/navigation_source_invalid",
+     "unresolved": "",
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D1_NAV_SOURCE",
+    "semantic_core_2_1": {
+     "supported": "SENSOR/navigation_source_invalid",
+     "unresolved": "COMMUNICATION/starvation|COMPUTE/estimator_stale|TIMING/deadline_violation",
+     "verdict": "AMBIGUOUS"
+    },
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "supported": "COMPUTE/estimator_stale",
+     "unresolved": "",
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D2_ESTIMATOR_STALE",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "supported": "COMMUNICATION/starvation",
+     "unresolved": "",
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D3_COMM_STARVATION",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   },
+   {
+    "recorded": {
+     "supported": "COMPUTE/estimator_stale",
+     "unresolved": "",
+     "verdict": "SUPPORTED"
+    },
+    "scenario": "MS_D4_COMPUTE_DEADLINE",
+    "semantic_core_2_1": null,
+    "subject": "COARSE_NAVIGATION"
+   }
+  ],
+  "right_unique_weakened": [
+   "ACTUATOR_NO_RESPONSE",
+   "CLOCK_DRIFT",
+   "MS_B3_DRIVE_NO_CURRENT",
+   "MS_B4_MECHANICAL",
+   "MS_D2_ESTIMATOR_STALE",
+   "PROCESS_STALL",
+   "STALLED_ACTUATOR"
+  ],
+  "scenario_results": {
+   "ACTUATOR_NO_RESPONSE": {
+    "recorded_candidates": [
+     "ACTUATION/motor_0"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 88,
+     "UNIQUE": 112
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 112,
+     "NO_EVIDENCE": 88
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": [
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "CLOCK_DRIFT": {
+    "recorded_candidates": [
+     "TIMING/nav_solution"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 71,
+     "UNIQUE": 129
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 129,
+     "NO_EVIDENCE": 71
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": [
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "CPU_OVERLOAD": {
+    "recorded_candidates": [
+     "COMPUTE/cpu",
+     "COMPUTE/state_estimator",
+     "TIMING/nav_solution",
+     "TIMING/nav_solution.processing_delay"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 93,
+     "NO_EVIDENCE": 95,
+     "UNIQUE": 12
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 93,
+     "NO_EVIDENCE": 95,
+     "UNIQUE": 12
+    },
+    "ticks_with_localization_change": 105,
+    "withheld_unique_because": []
+   },
+   "ESTIMATOR_LATE": {
+    "recorded_candidates": [
+     "COMPUTE/state_estimator",
+     "TIMING/nav_solution",
+     "TIMING/nav_solution.processing_delay"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 110,
+     "NO_EVIDENCE": 90
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 110,
+     "NO_EVIDENCE": 90
+    },
+    "ticks_with_localization_change": 110,
+    "withheld_unique_because": []
+   },
+   "NETWORK_LATENCY": {
+    "recorded_candidates": [
+     "COMMUNICATION/telemetry_radio",
+     "TIMING/telemetry_downlink",
+     "TIMING/telemetry_downlink.transport_delay"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 109,
+     "NO_EVIDENCE": 86,
+     "UNIQUE": 5
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 109,
+     "NO_EVIDENCE": 86,
+     "UNIQUE": 5
+    },
+    "ticks_with_localization_change": 68,
+    "withheld_unique_because": []
+   },
+   "NOMINAL": {
+    "recorded_candidates": [],
+    "recorded_final": "NO_EVIDENCE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 200
+    },
+    "semantic_core_2_1_final": "NO_EVIDENCE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 200
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "PACKET_LOSS": {
+    "recorded_candidates": [
+     "COMMUNICATION/gnss_serial"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 68,
+     "UNIQUE": 132
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 68,
+     "UNIQUE": 132
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "POWER_SAG": {
+    "recorded_candidates": [
+     "POWER/battery",
+     "POWER/rail_3v3",
+     "POWER/rail_5v"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 50,
+     "NO_EVIDENCE": 79,
+     "UNIQUE": 71
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 50,
+     "NO_EVIDENCE": 79,
+     "UNIQUE": 71
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "PROCESS_STALL": {
+    "recorded_candidates": [
+     "COMPUTE/state_estimator"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 71,
+     "UNIQUE": 129
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 129,
+     "NO_EVIDENCE": 71
+    },
+    "ticks_with_localization_change": 129,
+    "withheld_unique_because": [
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "REGULATOR_FAILURE": {
+    "recorded_candidates": [
+     "POWER/rail_5v"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 83,
+     "UNIQUE": 117
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 83,
+     "UNIQUE": 117
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "SHARED_RAIL": {
+    "recorded_candidates": [
+     "COMMUNICATION/gnss_serial",
+     "COMMUNICATION/telemetry_radio",
+     "POWER/rail_3v3",
+     "POWER/rail_5v",
+     "SENSOR/source.gps"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 104,
+     "UNIQUE": 96
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 104,
+     "UNIQUE": 96
+    },
+    "ticks_with_localization_change": 200,
+    "withheld_unique_because": []
+   },
+   "SHARED_SOURCE": {
+    "recorded_candidates": [
+     "POWER/battery",
+     "SENSOR/source.battery",
+     "SENSOR/source.motor_esc"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 200
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 200
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "STALLED_ACTUATOR": {
+    "recorded_candidates": [
+     "ACTUATION/motor_0"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 90,
+     "UNIQUE": 110
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 110,
+     "NO_EVIDENCE": 90
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": [
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "TS_CPU_OVERLOAD": {
+    "recorded_candidates": [
+     "COMPUTE/controller",
+     "COMPUTE/cpu",
+     "TIMING/encoder",
+     "TIMING/encoder.processing_delay"
+    ],
+    "recorded_final": "AMBIGUOUS",
+    "recorded_tally": {
+     "AMBIGUOUS": 105,
+     "NO_EVIDENCE": 87,
+     "UNIQUE": 8
+    },
+    "semantic_core_2_1_final": "AMBIGUOUS",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 105,
+     "NO_EVIDENCE": 87,
+     "UNIQUE": 8
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "TS_ENCODER_LOSS": {
+    "recorded_candidates": [
+     "COMMUNICATION/encoder_bus"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 62,
+     "UNIQUE": 138
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 62,
+     "UNIQUE": 138
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "TS_NOMINAL": {
+    "recorded_candidates": [],
+    "recorded_final": "NO_EVIDENCE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 200
+    },
+    "semantic_core_2_1_final": "NO_EVIDENCE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 200
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "TS_REGULATOR_FAILURE": {
+    "recorded_candidates": [
+     "POWER/rail_5v"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 79,
+     "UNIQUE": 121
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 79,
+     "UNIQUE": 121
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "TS_STALLED": {
+    "recorded_candidates": [
+     "ACTUATION/dyno_motor"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 90,
+     "UNIQUE": 110
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "AMBIGUOUS": 23,
+     "NO_EVIDENCE": 90,
+     "UNIQUE": 87
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   },
+   "TS_SUPPLY_SAG": {
+    "recorded_candidates": [
+     "POWER/dc_supply"
+    ],
+    "recorded_final": "UNIQUE",
+    "recorded_tally": {
+     "NO_EVIDENCE": 88,
+     "UNIQUE": 112
+    },
+    "semantic_core_2_1_final": "UNIQUE",
+    "semantic_core_2_1_tally": {
+     "NO_EVIDENCE": 88,
+     "UNIQUE": 112
+    },
+    "ticks_with_localization_change": 0,
+    "withheld_unique_because": []
+   }
+  },
+  "scenario_results_final_changed": [
+   "ACTUATOR_NO_RESPONSE",
+   "CLOCK_DRIFT",
+   "PROCESS_STALL",
+   "STALLED_ACTUATOR"
+  ],
+  "scenario_results_frozen_replay_matches_record": true,
+  "scenario_results_ticks": 200,
+  "wrong_unique_corrected": [
+   "MS_B5_RESPONSE_SENSOR",
+   "MS_TS_B5_RESPONSE_SENSOR"
+  ]
+ },
+ "PROTECTED_FILES": {
+  "sha256": {
+   "csia/v2/attribution.py": "de6da70727c042f23ec715911719271fbf0bfd89f9573ffdb70508eddccc3d59",
+   "csia/v2/engine.py": "fa7fef3c39573b61e820b34caefc192da791d9199f5de143fea221b023516f89",
+   "csia/v2/evidence.py": "0c3828de37501b29c14f52a982fef3d09a05e3d082abc8f45a44326c1db31384",
+   "csia/v2/localization.py": "ffe2f79eae36dd910a51fecb2e4d4b19ce23d508f8238f6d5022a5ac6f497352",
+   "csia/v2/signatures.py": "6ae2d576a69e6e6d46dd1bf759ee1cee8fc08e9ce8711b30e29a4dfbcb37a7ce",
+   "engineering/v2/EVIDENCE_SUBSET_RESULTS.csv": "ab8fa92fefb8f3698dc1881f1e143a806228ada931e791b5a0a440857c179c5f",
+   "engineering/v2/LOCALIZATION_LEDGER.json": "5788cf38ef1cb814dd729d394e4d5df23cc26e990357a74b27f4144beb147f13",
+   "engineering/v2/LOCALIZATION_RESULTS.csv": "5bd441f49f3fe02b73ef0fd47c4ed116da858b847c9861e8a0fd5e164eb5c062",
+   "engineering/v2/V2_CHATGPT_REVIEW_REPORT.md": "0ad93624d070e80ba03440c67f100d2e6c1ac455a4cbcf6104aee5c25ac274c3",
+   "engineering/v2/V2_PHASEC_FREEZE.md": "3730f228edec5175fa9850b90e115a9d46229310273c3b5bb22ae1607c2f305f",
+   "engineering/v2/V2_PHASEC_GATE.json": "ebc0154ef6ca59bc2549a06353d62740366d563e55ff7d40eb5821b99773812f",
+   "engineering/v2/V2_SCENARIO_RESULTS.json": "de725ed2765f5d0310622f7509ec0bcaa53b0b5d5491239e841ff39cbec8fd4a",
+   "engineering/v2/run_phase_c.py": "369ff0c0a0756d9ca8651b7de7d97c05ca7585f854e4103118e08223fac0a93b",
+   "research/csia_semantic_correctness/semantic_probe.py": "db379803d2757b52fff6a10aa95bd7c34acc946c3a255d8afad91affb9a2f533",
+   "research/csia_semantic_correctness/semantic_probe_results.json": "aa85657795011fe9ed31db1777e84f38fd48b2cdec7115935e24f6b561a6a9b0",
+   "research/xsys_001_confirmatory_campaign/CONFIRMATORY_RESULT_MANIFEST.json": "03f4fbfce57215d03efa47072ef1b5abcca40eb5818a445b8f19f9b76197984d",
+   "research/xsys_001_confirmatory_campaign/stage1/STAGE1.json": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3",
+   "research/xsys_001_confirmatory_campaign/stage1/STAGE1.seal.json": "85ac2619511ce3bc3dbb8747ccf758b12931c23a28398810e0eb51a4fcef5b93",
+   "research/xsys_001_confirmatory_campaign/stage2/PRIMARY_RESULT_RECORD.json": "18846b738866bcbfd41e8a8be1a3a5edb5f00e2616693862badfff0022afe6d5",
+   "research/xsys_001_confirmatory_campaign/stage2/RESULTS.json": "b7d4f91494e4c83d465028f8f3b844021db80d9d8d6f7ca34d785d809cc06ccc",
+   "research/xsys_confirmatory_001/pipeline/stage2_score.py": "c7b2ea6f79ce7c3fa8fa8d34814ba548b75a2c27b23333055245bbde655349e2",
+   "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py": "b8b2041b3afcf4992038754f1509143da0fff63c9d4b71280f674fb775fd44e0"
+  },
+  "unchanged_by_this_run": true
+ },
+ "R21": {
+  "R17_unreported_shared_nodes_support_independent_faults": {
+   "2_1": {
+    "rejected": [],
+    "supported": [],
+    "unresolved": [
+     "COMMUNICATION/shared_link",
+     "COMPUTE/shared_process",
+     "POWER/shared_node",
+     "SENSOR/independent_faults"
+    ],
+    "verdict": "AMBIGUOUS"
+   },
+   "fixed": true,
+   "outcome": "AMBIGUOUS"
+  },
+  "R1_unrelated_nominal_creates_UNIQUE": {
+   "2_1": "AMBIGUOUS",
+   "fixed": true,
+   "frozen": "UNIQUE",
+   "reason": [
+    "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL"
+   ]
+  },
+  "R6_order_dependence": {
+   "2_1_A": [
+    {
+     "rejected": [
+      "COMMUNICATION/transport_delay",
+      "COMPUTE/process_stall",
+      "COMPUTE/processing_delay",
+      "SENSOR/source_slow"
+     ],
+     "supported": [],
+     "unresolved": [
+      "TIMING/clock_inconsistent"
+     ],
+     "verdict": "UNSUPPORTED"
+    }
+   ],
+   "2_1_B": [
+    {
+     "rejected": [
+      "COMMUNICATION/transport_delay",
+      "COMPUTE/process_stall",
+      "COMPUTE/processing_delay",
+      "SENSOR/source_slow"
+     ],
+     "supported": [],
+     "unresolved": [
+      "TIMING/clock_inconsistent"
+     ],
+     "verdict": "UNSUPPORTED"
+    }
+   ],
+   "conflicts": [
+    "nav_solution:timing.clock_consistency"
+   ],
+   "fixed": true
+  },
+  "R7_duplicate_induced_symptom": {
+   "2_1_duplicated": [
+    "VOLTAGE_RAIL_LOW|rail_5v"
+   ],
+   "2_1_single": [
+    "VOLTAGE_RAIL_LOW|rail_5v"
+   ],
+   "duplicates_collapsed": {
+    "SENSOR/source.gps:v1_1.source_health": 1
+   },
+   "fixed": true
+  },
+  "R8B_unavailable_link_refutes_true_cause": {
+   "2_1": {
+    "rejected": [
+     "COMPUTE/process_stall",
+     "COMPUTE/processing_delay",
+     "SENSOR/source_slow",
+     "TIMING/clock_inconsistent"
+    ],
+    "supported": [
+     "COMMUNICATION/transport_delay"
+    ],
+    "unresolved": [],
+    "verdict": "SUPPORTED"
+   },
+   "fixed": true,
+   "outcome": "SUPPORTED"
+  },
+  "R8E_unavailable_process_gives_wrong_SUPPORTED": {
+   "2_1": {
+    "rejected": [
+     "COMMUNICATION/transport_delay",
+     "SENSOR/source_slow",
+     "TIMING/clock_inconsistent"
+    ],
+    "supported": [
+     "COMPUTE/processing_delay"
+    ],
+    "unresolved": [
+     "COMPUTE/process_stall"
+    ],
+    "verdict": "AMBIGUOUS"
+   },
+   "fixed": true,
+   "outcome": "AMBIGUOUS"
+  },
+  "R8G_unavailable_battery_gives_UNIQUE": {
+   "2_1": "AMBIGUOUS",
+   "fixed": true,
+   "reason": [
+    "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL",
+    "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+   ]
+  },
+  "R9B_raising_refuter_creates_SUPPORTED": {
+   "2_1": {
+    "rejected": [
+     "D2/h2"
+    ],
+    "supported": [
+     "D1/h1"
+    ],
+    "unresolved": [],
+    "verdict": "SUPPORTED"
+   },
+   "evaluation": "PREDICATE_FAULT",
+   "fault_now_observable": true,
+   "fixed": "PARTLY: the fault is observable; withholding SUPPORTED is governance option G5, not approved",
+   "predicate_errors": [
+    {
+     "context": {
+      "hypotheses": [
+       "D1/h1"
+      ],
+      "symptom": "S"
+     },
+     "error_class": "RAISED:KeyError",
+     "evaluated_as": [
+      "Q"
+     ],
+     "predicate": "Q",
+     "subject": "x"
+    }
+   ],
+   "verdict_still_SUPPORTED": true
+  },
+  "R9_exception_silently_unmeasurable": {
+   "2_1": {
+    "rejected": [],
+    "supported": [
+     "D1/h1",
+     "D2/h2"
+    ],
+    "unresolved": [],
+    "verdict": "AMBIGUOUS"
+   },
+   "evaluation": "PREDICATE_FAULT",
+   "evidence_unavailable": [],
+   "fixed": true,
+   "predicate_errors": [
+    {
+     "context": {
+      "hypotheses": [
+       "D1/h1"
+      ],
+      "symptom": "S"
+     },
+     "error_class": "RAISED:KeyError",
+     "evaluated_as": [
+      "Q"
+     ],
+     "predicate": "Q",
+     "subject": "x"
+    }
+   ]
+  },
+  "all_fixed_or_made_observable": true
+ },
+ "harness": "semantic_core_2_1_differential",
+ "phase_a_head_commit": "d87834c7188cf2857d7f406ed0e4bac242bc55a5",
+ "phase_a_lock_sha256": "d1c6c012eb32cfceb07e5bcdf4f6c41ca985eaaee420d7a22a20ce38dafd88ed",
+ "semantics": {
+  "historical": "2.0.0",
+  "successor": "2.1.0"
+ }
+}
