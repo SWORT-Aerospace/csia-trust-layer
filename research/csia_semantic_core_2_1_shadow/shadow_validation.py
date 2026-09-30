@@ -44,10 +44,11 @@ from csia.v2.localization import EvidenceIndex  # noqa: E402
 from csia.v2.profiles import SCENARIOS  # noqa: E402
 from csia.v2.profiles.matched_scenarios import (MATCHED_SETS,  # noqa: E402
                                                 SET_SYMPTOM)
-from csia_semantic_core import (Corrections, SemanticCore21,  # noqa: E402
-                                SuccessorIndex, declared_scope)
+from csia_semantic_core import (SemanticCore21, SuccessorIndex,  # noqa: E402
+                                declared_scope)
 from csia_semantic_core.profile_overlay import (Declaration,  # noqa: E402
-                                                ProfileOverlay)
+                                                ProfileOverlay,
+                                                load_successor)
 from csia_semantic_core.shadow import ShadowRunner  # noqa: E402
 
 OUT = HERE / "SHADOW_RESULTS.json"
@@ -98,9 +99,13 @@ def _grade_attr(a, truth_dom):
 
 
 def classify(scenario, d, gaps_new, rec21):
-    """One difference -> (category, grade_old, grade_new, basis)."""
+    """One difference -> (category, grade_old, grade_new, basis).
+
+    `rec21` carries, besides the shadow record, `truth_domain` (this tick's
+    attribution truth, `GT.attribution_domain`) and `scope` (each navigation
+    function's declared C3 scope under the profile in use)."""
     if d["stage"] == "ATTRIBUTION":
-        dom = GT.truth(scenario)["domain"]
+        dom = rec21.get("truth_domain", GT.truth(scenario)["domain"])
         go, gn = _grade_attr(d["old"], dom), _grade_attr(d["new"], dom)
         if gn == "WRONG" and go != "WRONG":
             return "POSSIBLE_REGRESSION", go, gn, "new attribution names a wrong domain uniquely"
@@ -128,11 +133,17 @@ def classify(scenario, d, gaps_new, rec21):
             return "CORRECTNESS_FIX", go, "ABSENT", "false symptom on an unaffected function removed"
         if should is True:
             undeclared = not rec21.get("declared_serving", {}).get(subject, True)
-            return (("PROFILE_GAP", go, "ABSENT",
-                     "real symptom not raised: nothing is declared to serve the subject")
-                    if undeclared else
-                    ("POSSIBLE_REGRESSION", go, "ABSENT",
-                     "real symptom not raised although the subject has declared serving components"))
+            if undeclared:
+                return ("PROFILE_GAP", go, "ABSENT",
+                        "real symptom not raised: nothing is declared to serve the subject")
+            if not cause_in_scope(scenario, subject, rec21):
+                return ("PROFILE_GAP", go, "ABSENT",
+                        "real symptom not raised: the subject has declared serving "
+                        "components, but the injected cause is outside its declared scope "
+                        "(partial declaration)")
+            return ("POSSIBLE_REGRESSION", go, "ABSENT",
+                    "real symptom not raised although the injected cause is inside "
+                    "the subject's declared scope")
         return "UNKNOWN", go, "ABSENT", "presence not graded for this subject"
     if d["old"] is None:
         if should is True:
@@ -161,6 +172,18 @@ def classify(scenario, d, gaps_new, rec21):
     return "SEMANTIC_CLARIFICATION", go, gn, "same survivors, different verdict wording"
 
 
+def cause_in_scope(scenario, subject, rec21):
+    """Is the injected cause inside the subject's declared C3 scope? With no
+    single injected component, any adverse record of the injected domain
+    inside the scope counts."""
+    scope = set(rec21.get("scope", {}).get(subject, ()))
+    t = GT.truth(scenario)
+    comp = t.get("component")
+    if comp not in (None, GT.UNSPECIFIED):
+        return comp in scope
+    return any(c in scope for c in rec21.get("adverse_in_truth_domain", ()))
+
+
 # ================================================================ dataset A
 def runs_A():
     out = {}
@@ -175,13 +198,23 @@ def declared_serving(records, funcs=NAV_FUNCS):
     return {f: bool(declared_scope(ix, f) - {f}) for f in funcs}
 
 
-def shadow_A(runs, ov=None, keep_rows=True):
+def scopes(records, funcs=NAV_FUNCS):
+    ix = SuccessorIndex(records, tracing=False)
+    return {f: sorted(declared_scope(ix, f) - {f}) for f in funcs}
+
+
+def _verdicts(loc_map):
+    return {k: v["verdict"] for k, v in loc_map.items()}
+
+
+def shadow_A(runs, ov=None, keep_rows=True, time_v2=False):
     rows, log, per_cat = [], [], {}
     wrong_unique, stats = [], {"ticks": 0, "ticks_differing": 0,
                                "ticks_label_change_only": 0, "ticks_trace_only": 0,
                                "units": 0, "shadow_faults": 0}
     for name, (engine, res) in runs.items():
-        runner = ShadowRunner(engine, overlay=ov, trace=True, time_v2=False)
+        runner = ShadowRunner(engine, overlay=ov, trace=True, time_v2=time_v2)
+        t = GT.truth(name)
         for tick, sa in enumerate(res):
             rec = runner.observe(sa)
             stats["ticks"] += 1
@@ -190,11 +223,20 @@ def shadow_A(runs, ov=None, keep_rows=True):
                 continue
             recs21 = ov.apply(sa.records) if ov else sa.records
             rec["declared_serving"] = declared_serving(recs21)
+            rec["scope"] = scopes(recs21)
+            rec["truth_domain"] = GT.attribution_domain(name, sa.records)
+            rec["adverse_in_truth_domain"] = sorted(
+                {r.component for r in sa.records
+                 if r.domain == t["domain"] and r.is_adverse})
             a21 = rec["v2_1"]["attribution"]
-            if a21["verdict"] == UNIQUE:
-                dom = GT.truth(name)["domain"]
-                if dom not in (None, GT.UNSPECIFIED) and a21["candidates"][0].split("/", 1)[0] != dom:
-                    wrong_unique.append([name, tick, a21["candidates"][0]])
+            dom = rec["truth_domain"]
+            if a21["verdict"] == UNIQUE and dom not in (None, GT.UNSPECIFIED) \
+                    and a21["candidates"][0].split("/", 1)[0] != dom:
+                a20 = rec["v2_0"]["attribution"]
+                wrong_unique.append({
+                    "scenario": name, "tick": tick, "candidate": a21["candidates"][0],
+                    "v2_0_same": a20 == {k: a21[k] for k in ("verdict", "candidates")},
+                    "label": GT.onset_label(name, sa.records, a21["candidates"][0])})
             cats = []
             for d in rec["differences"]:
                 cat, go, gn, basis = classify(name, d, rec["profile_gap_effects"], rec)
@@ -227,7 +269,12 @@ def shadow_A(runs, ov=None, keep_rows=True):
                             "unknown_evidence_effects": len(rec["unknown_evidence_effects"]),
                             "profile_gap_units": sorted(rec["profile_gap_effects"]),
                             "label_changes": len(rec["label_changes"]),
-                            "runtime_ns_v2_1": rec["runtime_ns"]["v2_1"],
+                            "v2_0": {"attribution": rec["v2_0"]["attribution"],
+                                     "localization": _verdicts(rec["v2_0"]["localization"])},
+                            "v2_1": {"attribution": {k: rec["v2_1"]["attribution"][k]
+                                                     for k in ("verdict", "candidates")},
+                                     "localization": _verdicts(rec["v2_1"]["localization"])},
+                            "runtime_ns": rec["runtime_ns"],
                             "overlay": rec["overlay"]})
     return {"stats": stats, "categories": dict(sorted(per_cat.items())),
             "wrong_unique_under_2_1": wrong_unique}, rows, log
@@ -326,13 +373,23 @@ def p16_under(runs, ov):
             "on_a_function_the_graph_calls_ELIGIBLE": contra}
 
 
+def wrong_unique_summary(entries):
+    out: dict = {}
+    for e in entries:
+        k = f'{e["scenario"]}|{e["candidate"]}|{e["label"]}|v2_0_same={e["v2_0_same"]}'
+        out.setdefault(k, []).append(e["tick"])
+    return {k: [min(v), max(v), len(v)] for k, v in sorted(out.items())}
+
+
 def main():
     runs = runs_A()
     results = {"harness": "semantic_core_2_1_shadow_validation",
                "candidates_sha256": hashlib.sha256(
                    (HERE / "profile_candidates.json").read_bytes()).hexdigest()}
-    base, rows, log = shadow_A(runs)
+    base, rows, log = shadow_A(runs, time_v2=True)
     results["A_base_profile"] = base
+    results["A_base_wrong_unique_summary"] = wrong_unique_summary(
+        base["wrong_unique_under_2_1"])
     results["A_base_p16"] = p16_under(runs, None)
     import semantic_core_2_1_differential as D
     F = D.section_F()
@@ -345,14 +402,25 @@ def main():
     configs = {"ALL_ACCEPT_CANDIDATES": ("R1", "R2", "R3", "R4", "R5"),
                "G1_ONLY": ("R1", "R2", "R3"), "G2_ONLY": ("R5",),
                "G3_ONLY": ("R4",), "R1": ("R1",), "R2": ("R2",), "R3": ("R3",),
+               "R2_R3_R5": ("R2", "R3", "R5"),
+               "R1_R2_R3_R5": ("R1", "R2", "R3", "R5"),
                "PLUS_R6": ("R1", "R2", "R3", "R4", "R5", "R6"),
                "WITH_R_BAD": ("R1", "R2", "R3", "R4", "R5", "R-BAD")}
+    succ = load_successor("aircraft_successor_r1")
+    configs["SUCCESSOR_R1"] = succ
+    configs["SUCCESSOR_R1_PLUS_R5"] = ProfileOverlay(
+        succ.name, "r1+R5", succ.base_profile,
+        succ.declarations + overlay("R5").declarations)
     cf = {}
     for label, ids in configs.items():
-        ov = overlay(*ids, version=label)
+        ov = ids if isinstance(ids, ProfileOverlay) else overlay(*ids, version=label)
         summ, orows, _ = shadow_A(runs, ov)
-        cf[label] = {"declarations": list(ids), "overlay_sha256": ov.digest(),
+        cf[label] = {"declarations": ([f"{d.domain}/{d.component}" for d in ov.declarations]
+                                      if isinstance(ids, ProfileOverlay) else list(ids)),
+                     "overlay_sha256": ov.digest(),
                      "vs_v2_0": summ,
+                     "wrong_unique_summary": wrong_unique_summary(
+                         summ["wrong_unique_under_2_1"]),
                      "vs_2_1_base": compare(rows, orows),
                      "candidate_sets": candidate_set_changes(runs, ov),
                      "p16": p16_under(runs, ov),
@@ -367,9 +435,9 @@ def main():
         for r in log:
             fh.write(json.dumps(r, sort_keys=True) + "\n")
     print(json.dumps({"A": base["stats"], "categories": base["categories"],
-                      "wrong_unique": base["wrong_unique_under_2_1"],
+                      "wrong_unique": wrong_unique_summary(base["wrong_unique_under_2_1"]),
                       "cf": {k: {"cats": v["vs_v2_0"]["categories"],
-                                 "wrong_unique": v["vs_v2_0"]["wrong_unique_under_2_1"][:3],
+                                 "wrong_unique": len(v["vs_v2_0"]["wrong_unique_under_2_1"]),
                                  "restored": v["vs_2_1_base"]["restored_to_v2_0"],
                                  "new": v["vs_2_1_base"]["newly_different_from_v2_0"],
                                  "sets": v["candidate_sets"], "p16": v["p16"],

@@ -15,6 +15,13 @@ reasons over them.
 - **The overlay has an identity.** `digest()` is the SHA-256 of its
   canonical JSON. A result produced under an overlay records the digest, so
   "which dependency model was this reasoned against?" always has an answer.
+
+Accepted successor profiles live in `successor_profiles/`, one file per
+version, and are never edited once written: a correction is a new version.
+`aircraft_successor_r1.json` holds the two declarations the shadow study
+accepted (`research/csia_semantic_core_2_1_shadow/PROFILE_REPAIR_PROPOSAL.md`).
+No successor profile is applied by default, and the frozen v2.0 engine never
+sees one.
 """
 
 from __future__ import annotations
@@ -25,6 +32,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 KINDS = ("DIRECT", "DERIVED", "CONDITIONAL")
+SUCCESSOR_DIR = Path(__file__).resolve().parent / "successor_profiles"
 
 
 @dataclass(frozen=True)
@@ -99,3 +107,8 @@ class ProfileOverlay:
                 deps += tuple(d for d in x.add_dependencies if d not in deps)
             out.append(replace(r, affected_functions=fns, dependencies=deps))
         return tuple(out)
+
+
+def load_successor(name: str = "aircraft_successor_r1") -> ProfileOverlay:
+    """A versioned successor profile from `successor_profiles/`."""
+    return ProfileOverlay.from_json(SUCCESSOR_DIR / f"{name}.json")

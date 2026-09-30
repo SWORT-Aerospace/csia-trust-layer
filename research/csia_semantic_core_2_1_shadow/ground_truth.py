@@ -47,15 +47,21 @@ T = {
                     "OUTPUT_STALE": "COMPUTE/processing_delay",
                     "FUNCTION_DEADLINE_MISS": "COMPUTE/processing_delay"},
         navigation_affected=NAV),
+    # POSITION_UNAVAILABLE in MS_A1 / MS_A2: None, from the hypothesis
+    # definitions, not from any result. The injected cause (a slow source,
+    # a transport delay) is not among POSITION_UNAVAILABLE's hypotheses, and
+    # TIMING/deadline_violation is by definition refuted when a timing
+    # segment is over budget (NO_TIMING_SEGMENT_OVER_BUDGET_FALSE), which
+    # the injected segment is. NO_CONSISTENT_HYPOTHESIS is the right answer.
     "MS_A1_SENSOR_DELAY": dict(domain="SENSOR", component="source.gps",
         hypotheses={"OUTPUT_STALE": "SENSOR/source_slow",
                     "FUNCTION_DEADLINE_MISS": "SENSOR/source_slow",
-                    "POSITION_UNAVAILABLE": UNSPECIFIED},
+                    "POSITION_UNAVAILABLE": None},
         navigation_affected=NAV),
     "MS_A2_COMMUNICATION_DELAY": dict(domain="COMMUNICATION", component="gnss_serial",
         hypotheses={"OUTPUT_STALE": "COMMUNICATION/transport_delay",
                     "FUNCTION_DEADLINE_MISS": "COMMUNICATION/transport_delay",
-                    "POSITION_UNAVAILABLE": UNSPECIFIED},
+                    "POSITION_UNAVAILABLE": None},
         navigation_affected=NAV),
     "MS_A3_COMPUTE_DELAY": dict(domain="COMPUTE", component="state_estimator",
         hypotheses={"OUTPUT_STALE": "COMPUTE/processing_delay",
@@ -151,7 +157,11 @@ T = {
     "SHARED_RAIL": dict(domain="POWER", component=UNSPECIFIED,
         hypotheses={"MULTIPLE_SENSORS_DEGRADED": "POWER/shared_node",
                     "POSITION_UNAVAILABLE": "SENSOR/navigation_source_invalid"},
-        navigation_affected=NAV),
+        navigation_affected=NAV,
+        # The scenario pairs the rail with the REAL v1.1 "fixloss" payload,
+        # whose GPS fix is lost from tick 0. Until the rail leaves
+        # tolerance, that payload fault is the only cause present.
+        payload_cause=dict(domain="SENSOR", component="source.gps")),
     "SHARED_SOURCE": dict(domain="POWER", component="battery",
         hypotheses={"MULTIPLE_SENSORS_DEGRADED": "POWER/shared_node"}),
     "STALLED_ACTUATOR": dict(domain="ACTUATION", component="motor_0",
@@ -172,6 +182,34 @@ T = {
 
 def truth(scenario):
     return T[scenario]
+
+
+def attribution_domain(scenario, records):
+    """The domain a UNIQUE attribution should name at THIS tick.
+
+    Time-resolved for one case only: a scenario whose real v1.1 payload
+    carries its own fault (`payload_cause`) has that fault as the only cause
+    present until the injected domain shows any adverse record. Everywhere
+    else the scenario-level domain applies from tick 0, so an attribution
+    made before the injected cause is visible is graded against the
+    injected cause (see `onset_label`)."""
+    t = T[scenario]
+    pc = t.get("payload_cause")
+    if pc and not any(r.domain == t["domain"] and r.is_adverse
+                      for r in records):
+        return pc["domain"]
+    return t["domain"]
+
+
+def onset_label(scenario, records, candidate):
+    """Why a UNIQUE names a domain other than the injected one."""
+    t = T[scenario]
+    if t.get("payload_cause") and attribution_domain(scenario, records) \
+            == candidate.split("/", 1)[0]:
+        return "PAYLOAD_CAUSE_BEFORE_INJECTION"
+    if not any(r.domain == t["domain"] and r.is_adverse for r in records):
+        return "EFFECT_VISIBLE_BEFORE_CAUSE"
+    return "WRONG_DOMAIN"
 
 
 def true_hypothesis(scenario, symptom):
