@@ -20,15 +20,17 @@ frozen v2 reasoning semantics.
 | F2 localization-agreement gate | implement; do not merge localization and attribution |
 | C5 labels, C7 trace | **behaviour-neutral only**. A C5 or C7 change that turns out to alter a decision must be stopped and reported, not widened |
 
-The owner's decisions on the audit's open governance questions:
+How this package reads the brief on the audit's open governance questions
+(`IMPLEMENTATION_GATE.md` §4). The brief does not answer G1 to G5 one by one.
+Each row gives the reading and the words it rests on.
 
-| question | decision |
-|---|---|
-| G1 | a post-freeze successor, outside frozen v2, with 2.0.0 kept as the historical semantics and the default |
-| G2 | C1 with no declared alternative gives AMBIGUOUS |
-| G3 | the successor may disagree with recorded Phase C UNIQUE verdicts; the records are not edited |
-| G4 | C3 as designed; profile gaps are surfaced, not corrected |
-| G5 | **not** approved. Withholding SUPPORTED over a faulted refuter, and intake validation, stay out |
+| question | reading | basis in the brief |
+|---|---|---|
+| G1 | a post-freeze successor outside frozen v2, with 2.0.0 kept as the historical semantics and the default | "Prefer an additive successor layer outside the frozen v2 implementation"; "Do NOT make 2.1 the default runtime automatically" |
+| G2 | C1 with no declared alternative gives AMBIGUOUS, the audit's recommendation | the owner approved "the governance change recommended by the CSIA semantic correctness audit", and asked for exactly the audit's C1 |
+| G3 | the successor may disagree with recorded Phase C UNIQUE verdicts; the records are preserved and a differential is produced | "F2 disagrees with: 7 recorded Phase C UNIQUE verdicts … Preserve those historical records. Generate a successor differential report." (The count is corrected in `PHASE_C_GOVERNANCE_REPORT.md` §2) |
+| G4 | C3 as designed; profile gaps are surfaced, not corrected | "Do not silently redesign the function graph. If profile declarations are incomplete: surface that as a profile/configuration problem" |
+| G5 | **not** implemented. Withholding SUPPORTED over a faulted refuter, and intake validation, stay out | only C1, C2, C3, C4, C6 and F2 are approved, "exactly the following conceptual corrections" |
 
 ## 2. What must not change
 
