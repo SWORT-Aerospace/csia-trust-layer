@@ -1,0 +1,106 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1
+
+INPUTS
+  kind: px4_ulog_extract
+  selector: SELECTOR
+  tick_s: 0.1
+  ulog: {'file': 'S1.ulg', 'sha256': '561a4ef088bc26a5784c24b410178b50b75838d20e9bb7bd71782de139cf8d62', 'extract': 'S1_estimator_extract.npz'}
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  1006 ticks in 13 intervals
+  0.000s: no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: start
+  0.100s .. 0.400s (4 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: epochs
+  0.500s: no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 0 -> 1 (hgt aiding fused: none -> GNSS height (control_mode_flags))
+      configuration: ekf2.reset.reset_count_pod_d 0 -> 1 (EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1))
+      configuration: ekf2.reset.reset_count_pos_ne 0 -> 1 (EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1))
+  0.600s: no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: admissibility, epochs, producer_health
+  0.700s .. 0.800s (2 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+      configuration: ekf2.reset.reset_count_pos_ne 1 -> 2 (EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2))
+      configuration: ekf2.reset.reset_count_vel_ne 0 -> 1 (EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1))
+  0.900s .. 1.300s (5 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 1 -> 2 (hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags))
+  1.400s .. 1.600s (3 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+      configuration: ekf2.reset.reset_count_pos_ne 2 -> 3 (EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3))
+      configuration: ekf2.reset.reset_count_vel_ne 1 -> 2 (EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2))
+  1.700s .. 2.600s (10 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 2 -> 3 (hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags))
+  2.700s: no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: admissibility, epochs, producer_health
+      configuration: ekf2.aiding.pos 0 -> 1 (pos aiding fused: none -> GNSS position (control_mode_flags))
+      configuration: ekf2.aiding.vel 0 -> 1 (vel aiding fused: none -> GNSS velocity (control_mode_flags))
+      configuration: ekf2.reset.reset_count_pos_ne 3 -> 4 (EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4))
+      configuration: ekf2.reset.reset_count_quat 0 -> 1 (EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1))
+      configuration: ekf2.reset.reset_count_vel_d 0 -> 1 (EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1))
+      configuration: ekf2.reset.reset_count_vel_ne 2 -> 3 (EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3))
+  2.800s .. 50.600s (479 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hdg 0 -> 1 (hdg aiding fused: none -> magnetic heading (control_mode_flags))
+  50.700s .. 53.200s (26 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hdg 1 -> 2 (hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags))
+  53.300s .. 75.400s (222 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 3 -> 4 (hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags))
+  75.500s .. 100.500s (251 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hdg 2 -> 3 (hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags))
+
+KEY MOMENTS (in time order)
+  nothing abnormal observed at any tick (see PROFILE COVERAGE for what was observed)
+  0.500s  configuration: hgt aiding fused: none -> GNSS height (control_mode_flags)
+  0.500s  configuration: EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)
+  0.500s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1)
+  0.600s  producer px4:ekf2.estimator_status health None -> ['UNAVAILABLE']
+  0.700s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2)
+  0.700s  configuration: EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1)
+  0.900s  configuration: hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags)
+  1.400s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)
+  1.400s  configuration: EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)
+  1.700s  configuration: hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)
+  2.700s  producer px4:ekf2.estimator_status health ['UNAVAILABLE'] -> ['VALID']
+  2.700s  configuration: pos aiding fused: none -> GNSS position (control_mode_flags)
+  2.700s  configuration: vel aiding fused: none -> GNSS velocity (control_mode_flags)
+  2.700s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4)
+  2.700s  configuration: EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)
+  2.700s  configuration: EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1)
+  2.700s  configuration: EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3)
+  2.800s  configuration: hdg aiding fused: none -> magnetic heading (control_mode_flags)
+  50.700s  configuration: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  53.300s  configuration: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+  75.500s  configuration: hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags)
+
+FINAL STATE at 100.500s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  scope: the run observed 0 of the profile's 68 records; nothing is concluded about the other 68 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:ekf2.estimator_status: health VALID; 4 of 4 admitted
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hdg [INNOVATION_HDG]: NOMINAL 727, NOT_APPLICABLE 252, UNAVAILABLE 21
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hgt [INNOVATION_HGT]: NOMINAL 979, UNAVAILABLE 21
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.pos [INNOVATION_POS]: NOMINAL 979, UNAVAILABLE 21
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.vel [INNOVATION_VEL]: NOMINAL 979, UNAVAILABLE 21
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 0 of 68
+  NO PRODUCER in this run: 68: ACTUATION/motor_0 (3), COMMUNICATION/esc_can (5), COMMUNICATION/gnss_serial (6), COMMUNICATION/telemetry_radio (6), COMPUTE/cpu (1), COMPUTE/csia (4), COMPUTE/logger (4), COMPUTE/state_estimator (4), POWER/battery (4), POWER/rail_3v3 (1), POWER/rail_5v (1), SENSOR/sensor.aggregate (1), SENSOR/source.baro (1), SENSOR/source.battery (1), SENSOR/source.gps (1), SENSOR/source.imu0 (1), SENSOR/source.imu1 (1), SENSOR/source.mag (1), SENSOR/source.motor_esc (1), SENSOR/source.vibration (1), SENSOR/v1_1.COARSE_NAVIGATION (1), SENSOR/v1_1.GEOFENCE_SUPPORT (1), SENSOR/v1_1.INERTIAL_CONTINUATION (1), SENSOR/v1_1.POSITION_HOLD (1), SENSOR/v1_1.PRECISION_NAVIGATION (1), SENSOR/v1_1.diagnosis (1), TIMING/nav_solution (3), TIMING/nav_solution.decision_delay (1), TIMING/nav_solution.processing_delay (1), TIMING/nav_solution.sensor_slow (1), TIMING/nav_solution.transport_delay (1), TIMING/telemetry_downlink (3), TIMING/telemetry_downlink.decision_delay (1), TIMING/telemetry_downlink.processing_delay (1), TIMING/telemetry_downlink.sensor_slow (1), TIMING/telemetry_downlink.transport_delay (1)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 4: COMPUTE/state_estimator (4)
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: ekf2.aiding.hdg=3, ekf2.aiding.hgt=4, ekf2.aiding.pos=1, ekf2.aiding.vel=1, ekf2.imu.change_count=0, ekf2.reset.reset_count_pod_d=1, ekf2.reset.reset_count_pos_ne=4, ekf2.reset.reset_count_quat=1, ekf2.reset.reset_count_vel_d=1, ekf2.reset.reset_count_vel_ne=3, ekf2.selector.instance_changed_count=1
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

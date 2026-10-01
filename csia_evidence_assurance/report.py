@@ -46,6 +46,15 @@ The answers to the WHEN questions, computed once over the whole run:
 - **configuration changes:** key, from, to, event;
 - **predicate faults:** the first time each predicate failed.
 
+PROFILE COVERAGE (pilot, schema 3)
+----------------------------------
+Pilot finding WA-3: a flight log analysed alone reported "no symptom
+detected" for a flight whose motor lost thrust, and nothing in the report
+said that no producer observed the motors. `profile_coverage` lists every
+record the profile defines as observed, held but never admitted, or with no
+producer output at all. The human report's final state names the scope of
+its verdict whenever any record went unobserved.
+
 MANIFEST
 --------
 `manifest(run, report_bytes)` records what is needed to reproduce a report:
@@ -75,7 +84,7 @@ from pathlib import Path
 
 from .analyzer import ANALYZER_VERSION
 
-SCHEMA = "csia.flight_assurance_report/2"
+SCHEMA = "csia.flight_assurance_report/3"
 MANIFEST_SCHEMA = "csia.analysis_manifest/1"
 INVALIDATING = ("STALE", "CONFIGURATION_MISMATCH", "REGIME_INVALID", "DUPLICATE",
                 "CONTRACT_INVALID", "PROFILE_MISMATCH")
@@ -248,10 +257,35 @@ def coverage_summary(rs) -> list:
             for (p, c, rec), v in sorted(out.items())]
 
 
+ADMITTED_STATES = ("NOMINAL", "NO_ANOMALY", "ANOMALY", "NOT_APPLICABLE")
+
+
+def profile_coverage(coverage: list, profile_records) -> dict:
+    """Which of the records the profile defines anything observed over the
+    run (pilot finding WA-3). `observed`: admitted at least once.
+    `never_admitted`: outputs held but never admitted. `no_output`: no
+    producer output at any tick. `outside_profile`: records the run carried
+    that the profile does not define (non-attributable context, such as the
+    estimator's innovation claims; a coverage notice is not a record). A profile with no record list (NOT
+    APPLICABLE) is not enumerable, and every list is relative to the run."""
+    states: dict = {}
+    for c in coverage:
+        states.setdefault(c["record"], set()).update(c["ticks_by_state"])
+    prof = sorted(set(profile_records))
+    seen = {r for r, st in states.items() if st & set(ADMITTED_STATES)}
+    return {"enumerable": bool(prof), "profile_records": len(prof),
+            "observed": [r for r in prof if r in seen],
+            "never_admitted": [r for r in prof if r in states and r not in seen],
+            "no_output": [r for r in prof if r not in states],
+            "outside_profile": sorted(r for r, st in states.items()
+                                      if prof and r not in set(prof) and st - {"NO_COVERAGE"})}
+
+
 def machine_report(results, inputs: dict, gate, contracts: dict) -> dict:
     rs = [_canon(x.to_dict()) for x in results]
     tl = timeline(rs)
     final = rs[-1] if rs else None
+    cov = coverage_summary(rs)
     return {
         "schema": SCHEMA,
         "analyzer_version": ANALYZER_VERSION,
@@ -264,7 +298,8 @@ def machine_report(results, inputs: dict, gate, contracts: dict) -> dict:
         "ticks": len(rs),
         "intervals": len(tl),
         "key_moments": key_moments(rs),
-        "coverage": coverage_summary(rs),
+        "coverage": cov,
+        "profile_coverage": profile_coverage(cov, getattr(gate, "records", ())),
         "timeline": tl,
         "final": final,
     }
@@ -427,9 +462,37 @@ def _key_moment_lines(k: dict) -> list:
                                  f"in {f['localization']}"))
     L = ["", "KEY MOMENTS (in time order)"]
     if not fa:
-        L.append("  nothing abnormal at any tick")
+        L.append("  nothing abnormal observed at any tick (see PROFILE COVERAGE for what was observed)")
     for t, _o, text in sorted(items, key=lambda x: (x[0], x[1])):
         L.append(f"  {_fmt_t(t)}  {text}")
+    return L
+
+
+def _by_subject(keys) -> str:
+    n: dict = {}
+    for k in keys:
+        subj = k.split(":", 1)[0]
+        n[subj] = n.get(subj, 0) + 1
+    return ", ".join(f"{s} ({c})" for s, c in sorted(n.items()))
+
+
+def _profile_coverage_lines(pc: dict) -> list:
+    L = ["", "PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)"]
+    if not pc.get("enumerable"):
+        L.append("  not enumerable: the profile has no record list (not validated)")
+        return L
+    L.append(f"  observed (admitted at least once): {len(pc['observed'])} of "
+             f"{pc['profile_records']}")
+    if pc["observed"]:
+        L.append(f"    {_by_subject(pc['observed'])}")
+    if pc["never_admitted"]:
+        L.append(f"  outputs held, never admitted: {len(pc['never_admitted'])}: "
+                 f"{_by_subject(pc['never_admitted'])}")
+    if pc["no_output"]:
+        L.append(f"  NO PRODUCER in this run: {len(pc['no_output'])}: {_by_subject(pc['no_output'])}")
+    if pc["outside_profile"]:
+        L.append(f"  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): "
+                 f"{len(pc['outside_profile'])}: {_by_subject(pc['outside_profile'])}")
     return L
 
 
@@ -466,6 +529,11 @@ def human_report(m: dict) -> str:
              + (", ".join(ab.get("symptoms", [])) or "no symptom detected"))
     if ab.get("adverse_evidence"):
         L.append(f"  adverse evidence: {_ids(ab['adverse_evidence'])}")
+    pc = m.get("profile_coverage") or {}
+    if pc.get("enumerable") and len(pc["observed"]) < pc["profile_records"]:
+        L.append(f"  scope: the run observed {len(pc['observed'])} of the profile's "
+                 f"{pc['profile_records']} records; nothing is concluded about the other "
+                 f"{pc['profile_records'] - len(pc['observed'])} (PROFILE COVERAGE)")
     for loc in f["localizations"]:
         L += _loc_lines(loc)
     a = f.get("attribution") or {}
@@ -503,6 +571,7 @@ def human_report(m: dict) -> str:
         states = ", ".join(f"{k} {v}" for k, v in c["ticks_by_state"].items())
         what = f"{c['record']}" + (f" [{c['claim']}]" if c["claim"] else "")
         L.append(f"  {c['producer_id']}: {what}: {states}")
+    L += _profile_coverage_lines(m.get("profile_coverage") or {})
     L += ["", "DEPENDENCE (adverse evidence, by lineage)"]
     comp = f["corroboration"]["by_component"]
     ov = f["corroboration"]["overall"]

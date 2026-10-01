@@ -1,14 +1,53 @@
 {
- "analyzer_version": "2.2.0",
+ "analyzer_version": "2.2.1",
  "contracts": {
   "px4:ekf2.estimator_status": {
    "contract_version": "px4-ekf2-status-1",
-   "digest": "935533c566651994518ebedd0260b3869df9e253d29c42645032988adffed759",
+   "digest": "0d26289422aa33bb7b3f8a155e76a348be6ba4fd97e586a51262c3b7d670a77c",
    "producer_version": "547e2ca"
   }
  },
+ "coverage": [
+  {
+   "claim": "INNOVATION_HDG",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+   "ticks_by_state": {
+    "NOMINAL": 727,
+    "NOT_APPLICABLE": 252,
+    "UNAVAILABLE": 21
+   }
+  },
+  {
+   "claim": "INNOVATION_HGT",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+   "ticks_by_state": {
+    "NOMINAL": 979,
+    "UNAVAILABLE": 21
+   }
+  },
+  {
+   "claim": "INNOVATION_POS",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+   "ticks_by_state": {
+    "NOMINAL": 979,
+    "UNAVAILABLE": 21
+   }
+  },
+  {
+   "claim": "INNOVATION_VEL",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+   "ticks_by_state": {
+    "NOMINAL": 979,
+    "UNAVAILABLE": 21
+   }
+  }
+ ],
  "final": {
-  "analyzer_version": "2.2.0",
+  "analyzer_version": "2.2.1",
   "attribution": {
    "candidates": [],
    "relevant_discriminators": [],
@@ -20,12 +59,13 @@
    "withheld_unique_because": []
   },
   "configuration": {
+   "changes": [],
    "epochs": {
     "ekf2.aiding.hdg": [
      3
     ],
     "ekf2.aiding.hgt": [
-     3
+     4
     ],
     "ekf2.aiding.pos": [
      1
@@ -37,10 +77,10 @@
      0
     ],
     "ekf2.reset.reset_count_pod_d": [
-     0
+     1
     ],
     "ekf2.reset.reset_count_pos_ne": [
-     3
+     4
     ],
     "ekf2.reset.reset_count_quat": [
      1
@@ -63,6 +103,7 @@
    "by_component": [],
    "overall": {
     "adverse_evidence": 0,
+    "group_shared_roots": [],
     "independent_lines": 0,
     "independent_lines_exact": true,
     "lineage_groups": []
@@ -92,6 +133,32 @@
      "rejected": {}
     }
    },
+   "coverage": [
+    {
+     "claim": "INNOVATION_HDG",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+     "state": "NOT_APPLICABLE"
+    },
+    {
+     "claim": "INNOVATION_HGT",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "INNOVATION_POS",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "INNOVATION_VEL",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+     "state": "NOMINAL"
+    }
+   ],
    "coverage_gaps": []
   },
   "profile": {
@@ -133,7 +200,329 @@
    "sha256": "561a4ef088bc26a5784c24b410178b50b75838d20e9bb7bd71782de139cf8d62"
   }
  },
- "intervals": 11,
+ "intervals": 13,
+ "key_moments": {
+  "adverse_evidence_changes": [],
+  "candidate_changes": [],
+  "certainty": [],
+  "configuration_changes": [
+   {
+    "event": "hgt aiding fused: none -> GNSS height (control_mode_flags)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.aiding.hgt",
+    "t": 0.5,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.reset.reset_count_pod_d",
+    "t": 0.5,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.reset.reset_count_pos_ne",
+    "t": 0.5,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2)",
+    "from": [
+     1
+    ],
+    "key": "ekf2.reset.reset_count_pos_ne",
+    "t": 0.7,
+    "to": [
+     2
+    ]
+   },
+   {
+    "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.reset.reset_count_vel_ne",
+    "t": 0.7,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags)",
+    "from": [
+     1
+    ],
+    "key": "ekf2.aiding.hgt",
+    "t": 0.9,
+    "to": [
+     2
+    ]
+   },
+   {
+    "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)",
+    "from": [
+     2
+    ],
+    "key": "ekf2.reset.reset_count_pos_ne",
+    "t": 1.4,
+    "to": [
+     3
+    ]
+   },
+   {
+    "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)",
+    "from": [
+     1
+    ],
+    "key": "ekf2.reset.reset_count_vel_ne",
+    "t": 1.4,
+    "to": [
+     2
+    ]
+   },
+   {
+    "event": "hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)",
+    "from": [
+     2
+    ],
+    "key": "ekf2.aiding.hgt",
+    "t": 1.7,
+    "to": [
+     3
+    ]
+   },
+   {
+    "event": "pos aiding fused: none -> GNSS position (control_mode_flags)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.aiding.pos",
+    "t": 2.7,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "vel aiding fused: none -> GNSS velocity (control_mode_flags)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.aiding.vel",
+    "t": 2.7,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4)",
+    "from": [
+     3
+    ],
+    "key": "ekf2.reset.reset_count_pos_ne",
+    "t": 2.7,
+    "to": [
+     4
+    ]
+   },
+   {
+    "event": "EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.reset.reset_count_quat",
+    "t": 2.7,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.reset.reset_count_vel_d",
+    "t": 2.7,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3)",
+    "from": [
+     2
+    ],
+    "key": "ekf2.reset.reset_count_vel_ne",
+    "t": 2.7,
+    "to": [
+     3
+    ]
+   },
+   {
+    "event": "hdg aiding fused: none -> magnetic heading (control_mode_flags)",
+    "from": [
+     0
+    ],
+    "key": "ekf2.aiding.hdg",
+    "t": 2.8,
+    "to": [
+     1
+    ]
+   },
+   {
+    "event": "hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)",
+    "from": [
+     1
+    ],
+    "key": "ekf2.aiding.hdg",
+    "t": 50.7,
+    "to": [
+     2
+    ]
+   },
+   {
+    "event": "hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)",
+    "from": [
+     3
+    ],
+    "key": "ekf2.aiding.hgt",
+    "t": 53.3,
+    "to": [
+     4
+    ]
+   },
+   {
+    "event": "hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags)",
+    "from": [
+     2
+    ],
+    "key": "ekf2.aiding.hdg",
+    "t": 75.5,
+    "to": [
+     3
+    ]
+   }
+  ],
+  "evidence_invalidated": [],
+  "first_abnormal": null,
+  "first_observation_by_producer": {},
+  "predicate_faults": [],
+  "producer_health_changes": [
+   {
+    "from": null,
+    "producer": "px4:ekf2.estimator_status",
+    "t": 0.6,
+    "to": [
+     "UNAVAILABLE"
+    ]
+   },
+   {
+    "from": [
+     "UNAVAILABLE"
+    ],
+    "producer": "px4:ekf2.estimator_status",
+    "t": 2.7,
+    "to": [
+     "VALID"
+    ]
+   }
+  ]
+ },
+ "profile_coverage": {
+  "enumerable": true,
+  "never_admitted": [],
+  "no_output": [
+   "ACTUATION/motor_0:actuation.command_path",
+   "ACTUATION/motor_0:actuation.electrical_response",
+   "ACTUATION/motor_0:actuation.mechanical_response",
+   "COMMUNICATION/esc_can:comm.integrity",
+   "COMMUNICATION/esc_can:comm.link_state",
+   "COMMUNICATION/esc_can:comm.loss",
+   "COMMUNICATION/esc_can:comm.ordering",
+   "COMMUNICATION/esc_can:comm.rate",
+   "COMMUNICATION/gnss_serial:comm.integrity",
+   "COMMUNICATION/gnss_serial:comm.link_state",
+   "COMMUNICATION/gnss_serial:comm.loss",
+   "COMMUNICATION/gnss_serial:comm.ordering",
+   "COMMUNICATION/gnss_serial:comm.queue",
+   "COMMUNICATION/gnss_serial:comm.rate",
+   "COMMUNICATION/telemetry_radio:comm.integrity",
+   "COMMUNICATION/telemetry_radio:comm.link_state",
+   "COMMUNICATION/telemetry_radio:comm.loss",
+   "COMMUNICATION/telemetry_radio:comm.ordering",
+   "COMMUNICATION/telemetry_radio:comm.queue",
+   "COMMUNICATION/telemetry_radio:comm.rate",
+   "COMPUTE/cpu:compute.resource_headroom",
+   "COMPUTE/csia:compute.deadline_met",
+   "COMPUTE/csia:compute.process_alive",
+   "COMPUTE/csia:compute.process_producing",
+   "COMPUTE/csia:compute.stability",
+   "COMPUTE/logger:compute.deadline_met",
+   "COMPUTE/logger:compute.process_alive",
+   "COMPUTE/logger:compute.process_producing",
+   "COMPUTE/logger:compute.stability",
+   "COMPUTE/state_estimator:compute.deadline_met",
+   "COMPUTE/state_estimator:compute.process_alive",
+   "COMPUTE/state_estimator:compute.process_producing",
+   "COMPUTE/state_estimator:compute.stability",
+   "POWER/battery:power.cell_balance",
+   "POWER/battery:power.droop_vs_current",
+   "POWER/battery:power.p_equals_vi",
+   "POWER/battery:power.source_health",
+   "POWER/rail_3v3:power.rail_tolerance",
+   "POWER/rail_5v:power.rail_tolerance",
+   "SENSOR/sensor.aggregate:sensor.aggregate",
+   "SENSOR/source.baro:v1_1.source_health",
+   "SENSOR/source.battery:v1_1.source_health",
+   "SENSOR/source.gps:v1_1.source_health",
+   "SENSOR/source.imu0:v1_1.source_health",
+   "SENSOR/source.imu1:v1_1.source_health",
+   "SENSOR/source.mag:v1_1.source_health",
+   "SENSOR/source.motor_esc:v1_1.source_health",
+   "SENSOR/source.vibration:v1_1.source_health",
+   "SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility",
+   "SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility",
+   "SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility",
+   "SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility",
+   "SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility",
+   "SENSOR/v1_1.diagnosis:v1_1.support",
+   "TIMING/nav_solution.decision_delay:timing.segment_budget",
+   "TIMING/nav_solution.processing_delay:timing.segment_budget",
+   "TIMING/nav_solution.sensor_slow:timing.rate",
+   "TIMING/nav_solution.transport_delay:timing.segment_budget",
+   "TIMING/nav_solution:timing.clock_consistency",
+   "TIMING/nav_solution:timing.end_to_end",
+   "TIMING/nav_solution:timing.jitter",
+   "TIMING/telemetry_downlink.decision_delay:timing.segment_budget",
+   "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+   "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+   "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+   "TIMING/telemetry_downlink:timing.clock_consistency",
+   "TIMING/telemetry_downlink:timing.end_to_end",
+   "TIMING/telemetry_downlink:timing.jitter"
+  ],
+  "observed": [],
+  "outside_profile": [
+   "COMPUTE/state_estimator:estimator.innovation.hdg",
+   "COMPUTE/state_estimator:estimator.innovation.hgt",
+   "COMPUTE/state_estimator:estimator.innovation.pos",
+   "COMPUTE/state_estimator:estimator.innovation.vel"
+  ],
+  "profile_records": 68
+ },
  "profile_gate": {
   "findings": [
    {
@@ -169,7 +558,7 @@
   },
   "status": "ACCEPTED"
  },
- "schema": "csia.flight_assurance_report/1",
+ "schema": "csia.flight_assurance_report/3",
  "semantic_version": "2.1.1",
  "ticks": 1006,
  "timeline": [
@@ -177,9 +566,10 @@
    "changed": [
     "start"
    ],
+   "configuration_changes": [],
    "from": 0.0,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -191,6 +581,7 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [],
      "epochs": {},
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
@@ -200,6 +591,7 @@
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -214,6 +606,7 @@
     "localizations": [],
     "producers": {
      "by_producer": {},
+     "coverage": [],
      "coverage_gaps": []
     },
     "profile": {
@@ -245,18 +638,17 @@
      "localization_outcomes": {}
     }
    },
-   "ticks": 6,
-   "to": 0.5
+   "ticks": 1,
+   "to": 0.0
   },
   {
    "changed": [
-    "admissibility",
-    "epochs",
-    "producer_health"
+    "epochs"
    ],
-   "from": 0.6,
+   "configuration_changes": [],
+   "from": 0.1,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -268,6 +660,7 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
@@ -298,6 +691,294 @@
       ],
       "ekf2.reset.reset_count_vel_ne": [
        0
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "group_shared_roots": [],
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.1,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {},
+     "coverage": [],
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 4,
+   "to": 0.4
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "configuration_changes": [
+    {
+     "event": "hgt aiding fused: none -> GNSS height (control_mode_flags)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.aiding.hgt",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.reset.reset_count_pod_d",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.reset.reset_count_pos_ne",
+     "to": [
+      1
+     ]
+    }
+   ],
+   "from": 0.5,
+   "result": {
+    "analyzer_version": "2.2.1",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "changes": [
+      {
+       "event": "hgt aiding fused: none -> GNSS height (control_mode_flags)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.aiding.hgt",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.reset.reset_count_pod_d",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.reset.reset_count_pos_ne",
+       "to": [
+        1
+       ]
+      }
+     ],
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       1
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       1
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       0
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hgt": "hgt aiding fused: none -> GNSS height (control_mode_flags)",
+      "ekf2.reset.reset_count_pod_d": "EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)",
+      "ekf2.reset.reset_count_pos_ne": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 1)"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "group_shared_roots": [],
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.5,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {},
+     "coverage": [],
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 1,
+   "to": 0.5
+  },
+  {
+   "changed": [
+    "admissibility",
+    "epochs",
+    "producer_health"
+   ],
+   "configuration_changes": [],
+   "from": 0.6,
+   "result": {
+    "analyzer_version": "2.2.1",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "changes": [],
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       1
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       1
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       0
       ],
       "ekf2.selector.instance_changed_count": [
        1
@@ -311,6 +992,7 @@
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -374,6 +1056,32 @@
        }
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "UNAVAILABLE"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -412,9 +1120,31 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2)",
+     "from": [
+      1
+     ],
+     "key": "ekf2.reset.reset_count_pos_ne",
+     "to": [
+      2
+     ]
+    },
+    {
+     "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.reset.reset_count_vel_ne",
+     "to": [
+      1
+     ]
+    }
+   ],
    "from": 0.7,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -426,12 +1156,34 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2)",
+       "from": [
+        1
+       ],
+       "key": "ekf2.reset.reset_count_pos_ne",
+       "to": [
+        2
+       ]
+      },
+      {
+       "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.reset.reset_count_vel_ne",
+       "to": [
+        1
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
       ],
       "ekf2.aiding.hgt": [
-       0
+       1
       ],
       "ekf2.aiding.pos": [
        0
@@ -443,10 +1195,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       1
+       2
       ],
       "ekf2.reset.reset_count_quat": [
        0
@@ -464,14 +1216,15 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 0 -> 1 by t=0.700s",
-      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 0 -> 1 by t=0.700s"
+      "ekf2.reset.reset_count_pos_ne": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 2)",
+      "ekf2.reset.reset_count_vel_ne": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 1)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -535,6 +1288,32 @@
        }
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "UNAVAILABLE"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -573,9 +1352,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags)",
+     "from": [
+      1
+     ],
+     "key": "ekf2.aiding.hgt",
+     "to": [
+      2
+     ]
+    }
+   ],
    "from": 0.9,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -587,12 +1378,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags)",
+       "from": [
+        1
+       ],
+       "key": "ekf2.aiding.hgt",
+       "to": [
+        2
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
       ],
       "ekf2.aiding.hgt": [
-       1
+       2
       ],
       "ekf2.aiding.pos": [
        0
@@ -604,10 +1407,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       1
+       2
       ],
       "ekf2.reset.reset_count_quat": [
        0
@@ -625,13 +1428,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hgt": "ekf2.aiding.hgt 0 -> 1 by t=0.900s"
+      "ekf2.aiding.hgt": "hgt aiding fused: GNSS height -> barometer height, GNSS height (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -695,6 +1499,32 @@
        }
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "UNAVAILABLE"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -733,9 +1563,31 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)",
+     "from": [
+      2
+     ],
+     "key": "ekf2.reset.reset_count_pos_ne",
+     "to": [
+      3
+     ]
+    },
+    {
+     "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)",
+     "from": [
+      1
+     ],
+     "key": "ekf2.reset.reset_count_vel_ne",
+     "to": [
+      2
+     ]
+    }
+   ],
    "from": 1.4,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -747,12 +1599,34 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)",
+       "from": [
+        2
+       ],
+       "key": "ekf2.reset.reset_count_pos_ne",
+       "to": [
+        3
+       ]
+      },
+      {
+       "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)",
+       "from": [
+        1
+       ],
+       "key": "ekf2.reset.reset_count_vel_ne",
+       "to": [
+        2
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
       ],
       "ekf2.aiding.hgt": [
-       1
+       2
       ],
       "ekf2.aiding.pos": [
        0
@@ -764,10 +1638,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       2
+       3
       ],
       "ekf2.reset.reset_count_quat": [
        0
@@ -785,14 +1659,15 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 1 -> 2 by t=1.400s",
-      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 1 -> 2 by t=1.400s"
+      "ekf2.reset.reset_count_pos_ne": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)",
+      "ekf2.reset.reset_count_vel_ne": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -856,6 +1731,32 @@
        }
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "UNAVAILABLE"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -894,9 +1795,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)",
+     "from": [
+      2
+     ],
+     "key": "ekf2.aiding.hgt",
+     "to": [
+      3
+     ]
+    }
+   ],
    "from": 1.7,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -908,12 +1821,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)",
+       "from": [
+        2
+       ],
+       "key": "ekf2.aiding.hgt",
+       "to": [
+        3
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
       ],
       "ekf2.aiding.hgt": [
-       2
+       3
       ],
       "ekf2.aiding.pos": [
        0
@@ -925,10 +1850,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       2
+       3
       ],
       "ekf2.reset.reset_count_quat": [
        0
@@ -946,13 +1871,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hgt": "ekf2.aiding.hgt 1 -> 2 by t=1.700s"
+      "ekf2.aiding.hgt": "hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1016,6 +1942,32 @@
        }
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "UNAVAILABLE"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "UNAVAILABLE"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -1056,9 +2008,71 @@
     "epochs",
     "producer_health"
    ],
+   "configuration_changes": [
+    {
+     "event": "pos aiding fused: none -> GNSS position (control_mode_flags)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.aiding.pos",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "vel aiding fused: none -> GNSS velocity (control_mode_flags)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.aiding.vel",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4)",
+     "from": [
+      3
+     ],
+     "key": "ekf2.reset.reset_count_pos_ne",
+     "to": [
+      4
+     ]
+    },
+    {
+     "event": "EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.reset.reset_count_quat",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.reset.reset_count_vel_d",
+     "to": [
+      1
+     ]
+    },
+    {
+     "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3)",
+     "from": [
+      2
+     ],
+     "key": "ekf2.reset.reset_count_vel_ne",
+     "to": [
+      3
+     ]
+    }
+   ],
    "from": 2.7,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -1070,12 +2084,74 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "pos aiding fused: none -> GNSS position (control_mode_flags)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.aiding.pos",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "vel aiding fused: none -> GNSS velocity (control_mode_flags)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.aiding.vel",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4)",
+       "from": [
+        3
+       ],
+       "key": "ekf2.reset.reset_count_pos_ne",
+       "to": [
+        4
+       ]
+      },
+      {
+       "event": "EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.reset.reset_count_quat",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.reset.reset_count_vel_d",
+       "to": [
+        1
+       ]
+      },
+      {
+       "event": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3)",
+       "from": [
+        2
+       ],
+       "key": "ekf2.reset.reset_count_vel_ne",
+       "to": [
+        3
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        0
       ],
       "ekf2.aiding.hgt": [
-       2
+       3
       ],
       "ekf2.aiding.pos": [
        1
@@ -1087,10 +2163,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       3
+       4
       ],
       "ekf2.reset.reset_count_quat": [
        1
@@ -1108,18 +2184,19 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.pos": "ekf2.aiding.pos 0 -> 1 by t=2.700s",
-      "ekf2.aiding.vel": "ekf2.aiding.vel 0 -> 1 by t=2.700s",
-      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 2 -> 3 by t=2.700s",
-      "ekf2.reset.reset_count_quat": "ekf2.reset.reset_count_quat 0 -> 1 by t=2.700s",
-      "ekf2.reset.reset_count_vel_d": "ekf2.reset.reset_count_vel_d 0 -> 1 by t=2.700s",
-      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 2 -> 3 by t=2.700s"
+      "ekf2.aiding.pos": "pos aiding fused: none -> GNSS position (control_mode_flags)",
+      "ekf2.aiding.vel": "vel aiding fused: none -> GNSS velocity (control_mode_flags)",
+      "ekf2.reset.reset_count_pos_ne": "EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 4)",
+      "ekf2.reset.reset_count_quat": "EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)",
+      "ekf2.reset.reset_count_vel_d": "EKF2 vertical velocity reset (reset_count_vel_d +1, unwrapped total 1)",
+      "ekf2.reset.reset_count_vel_ne": "EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 3)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1149,6 +2226,32 @@
        "rejected": {}
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOT_APPLICABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -1187,9 +2290,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hdg aiding fused: none -> magnetic heading (control_mode_flags)",
+     "from": [
+      0
+     ],
+     "key": "ekf2.aiding.hdg",
+     "to": [
+      1
+     ]
+    }
+   ],
    "from": 2.8,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -1201,12 +2316,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hdg aiding fused: none -> magnetic heading (control_mode_flags)",
+       "from": [
+        0
+       ],
+       "key": "ekf2.aiding.hdg",
+       "to": [
+        1
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        1
       ],
       "ekf2.aiding.hgt": [
-       2
+       3
       ],
       "ekf2.aiding.pos": [
        1
@@ -1218,10 +2345,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       3
+       4
       ],
       "ekf2.reset.reset_count_quat": [
        1
@@ -1239,13 +2366,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hdg": "ekf2.aiding.hdg 0 -> 1 by t=2.800s"
+      "ekf2.aiding.hdg": "hdg aiding fused: none -> magnetic heading (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1275,6 +2403,32 @@
        "rejected": {}
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -1313,9 +2467,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)",
+     "from": [
+      1
+     ],
+     "key": "ekf2.aiding.hdg",
+     "to": [
+      2
+     ]
+    }
+   ],
    "from": 50.7,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -1327,12 +2493,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)",
+       "from": [
+        1
+       ],
+       "key": "ekf2.aiding.hdg",
+       "to": [
+        2
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        2
       ],
       "ekf2.aiding.hgt": [
-       2
+       3
       ],
       "ekf2.aiding.pos": [
        1
@@ -1344,10 +2522,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       3
+       4
       ],
       "ekf2.reset.reset_count_quat": [
        1
@@ -1365,13 +2543,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hdg": "ekf2.aiding.hdg 1 -> 2 by t=50.700s"
+      "ekf2.aiding.hdg": "hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1401,6 +2580,32 @@
        "rejected": {}
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -1439,9 +2644,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)",
+     "from": [
+      3
+     ],
+     "key": "ekf2.aiding.hgt",
+     "to": [
+      4
+     ]
+    }
+   ],
    "from": 53.3,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -1453,12 +2670,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)",
+       "from": [
+        3
+       ],
+       "key": "ekf2.aiding.hgt",
+       "to": [
+        4
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        2
       ],
       "ekf2.aiding.hgt": [
-       3
+       4
       ],
       "ekf2.aiding.pos": [
        1
@@ -1470,10 +2699,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       3
+       4
       ],
       "ekf2.reset.reset_count_quat": [
        1
@@ -1491,13 +2720,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hgt": "ekf2.aiding.hgt 2 -> 3 by t=53.300s"
+      "ekf2.aiding.hgt": "hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1527,6 +2757,32 @@
        "rejected": {}
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {
@@ -1565,9 +2821,21 @@
    "changed": [
     "epochs"
    ],
+   "configuration_changes": [
+    {
+     "event": "hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags)",
+     "from": [
+      2
+     ],
+     "key": "ekf2.aiding.hdg",
+     "to": [
+      3
+     ]
+    }
+   ],
    "from": 75.5,
    "result": {
-    "analyzer_version": "2.2.0",
+    "analyzer_version": "2.2.1",
     "attribution": {
      "candidates": [],
      "relevant_discriminators": [],
@@ -1579,12 +2847,24 @@
      "withheld_unique_because": []
     },
     "configuration": {
+     "changes": [
+      {
+       "event": "hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags)",
+       "from": [
+        2
+       ],
+       "key": "ekf2.aiding.hdg",
+       "to": [
+        3
+       ]
+      }
+     ],
      "epochs": {
       "ekf2.aiding.hdg": [
        3
       ],
       "ekf2.aiding.hgt": [
-       3
+       4
       ],
       "ekf2.aiding.pos": [
        1
@@ -1596,10 +2876,10 @@
        0
       ],
       "ekf2.reset.reset_count_pod_d": [
-       0
+       1
       ],
       "ekf2.reset.reset_count_pos_ne": [
-       3
+       4
       ],
       "ekf2.reset.reset_count_quat": [
        1
@@ -1617,13 +2897,14 @@
      "keys_with_context_behind": [],
      "not_admitted_by_epoch": [],
      "transition_events": {
-      "ekf2.aiding.hdg": "ekf2.aiding.hdg 2 -> 3 by t=75.500s"
+      "ekf2.aiding.hdg": "hdg aiding fused: 3-axis magnetometer -> none (control_mode_flags)"
      }
     },
     "corroboration": {
      "by_component": [],
      "overall": {
       "adverse_evidence": 0,
+      "group_shared_roots": [],
       "independent_lines": 0,
       "independent_lines_exact": true,
       "lineage_groups": []
@@ -1653,6 +2934,32 @@
        "rejected": {}
       }
      },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOT_APPLICABLE"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
      "coverage_gaps": []
     },
     "profile": {

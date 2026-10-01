@@ -1,0 +1,63 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1
+
+INPUTS
+  kind: cusum_v1_scenario
+  scenario: imu0_bias_drift
+  ticks: 1500
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  1500 ticks in 2 intervals
+  0.000s .. 3.000s (76 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 1 rejected; changed: start
+  3.040s .. 59.960s (1424 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: admissibility, producer_health
+
+KEY MOMENTS (in time order)
+  nothing abnormal observed at any tick (see PROFILE COVERAGE for what was observed)
+  0.000s  producer cusum:v1_1_sequential health None -> ['UNAVAILABLE', 'VALID']
+  3.040s  producer cusum:v1_1_sequential health ['UNAVAILABLE', 'VALID'] -> ['VALID']
+
+FINAL STATE at 59.960s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  scope: the run observed 0 of the profile's 68 records; nothing is concluded about the other 68 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  cusum:v1_1_sequential: health VALID; 5 of 5 admitted
+  coverage: cusum:v1_1_sequential has no evidence for source.baro: clean-arm sigma0 is degenerate (0.0 over 1500 ticks)
+  coverage: cusum:v1_1_sequential has no evidence for source.imu0: no per-IMU physics chi-square exists in this construction
+  coverage: cusum:v1_1_sequential has no evidence for source.imu1: no per-IMU physics chi-square exists in this construction
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  cusum:v1_1_sequential: source.baro: NO_COVERAGE 1500
+  cusum:v1_1_sequential: source.imu0: NO_COVERAGE 1500
+  cusum:v1_1_sequential: source.imu1: NO_COVERAGE 1500
+  cusum:v1_1_sequential: SENSOR/source.battery:cusum.sustained_shift [SUSTAINED_SHIFT]: NO_ANOMALY 1500
+  cusum:v1_1_sequential: SENSOR/source.gps:cusum.sustained_shift [SUSTAINED_SHIFT]: NO_ANOMALY 1424, UNAVAILABLE 76
+  cusum:v1_1_sequential: SENSOR/source.mag:cusum.sustained_shift [SUSTAINED_SHIFT]: NO_ANOMALY 1500
+  cusum:v1_1_sequential: SENSOR/source.motor_esc:cusum.sustained_shift [SUSTAINED_SHIFT]: NO_ANOMALY 1500
+  cusum:v1_1_sequential: SENSOR/source.vibration:cusum.sustained_shift [SUSTAINED_SHIFT]: NO_ANOMALY 1500
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 0 of 68
+  NO PRODUCER in this run: 68: ACTUATION/motor_0 (3), COMMUNICATION/esc_can (5), COMMUNICATION/gnss_serial (6), COMMUNICATION/telemetry_radio (6), COMPUTE/cpu (1), COMPUTE/csia (4), COMPUTE/logger (4), COMPUTE/state_estimator (4), POWER/battery (4), POWER/rail_3v3 (1), POWER/rail_5v (1), SENSOR/sensor.aggregate (1), SENSOR/source.baro (1), SENSOR/source.battery (1), SENSOR/source.gps (1), SENSOR/source.imu0 (1), SENSOR/source.imu1 (1), SENSOR/source.mag (1), SENSOR/source.motor_esc (1), SENSOR/source.vibration (1), SENSOR/v1_1.COARSE_NAVIGATION (1), SENSOR/v1_1.GEOFENCE_SUPPORT (1), SENSOR/v1_1.INERTIAL_CONTINUATION (1), SENSOR/v1_1.POSITION_HOLD (1), SENSOR/v1_1.PRECISION_NAVIGATION (1), SENSOR/v1_1.diagnosis (1), TIMING/nav_solution (3), TIMING/nav_solution.decision_delay (1), TIMING/nav_solution.processing_delay (1), TIMING/nav_solution.sensor_slow (1), TIMING/nav_solution.transport_delay (1), TIMING/telemetry_downlink (3), TIMING/telemetry_downlink.decision_delay (1), TIMING/telemetry_downlink.processing_delay (1), TIMING/telemetry_downlink.sensor_slow (1), TIMING/telemetry_downlink.transport_delay (1)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 5: SENSOR/source.battery (1), SENSOR/source.gps (1), SENSOR/source.mag (1), SENSOR/source.motor_esc (1), SENSOR/source.vibration (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

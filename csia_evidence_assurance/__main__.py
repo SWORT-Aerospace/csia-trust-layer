@@ -61,6 +61,9 @@ def cmd_analyze(a) -> int:
     print(f"  {w['m']['ticks']} ticks, {w['m']['intervals']} intervals; final: "
           f"{w['m']['final']['state']['headline'] if w['m']['final'] else 'no result'}")
     print(f"  first abnormal: {fa['t'] if fa else 'never'}")
+    pc = w["m"]["profile_coverage"]
+    if pc["enumerable"]:
+        print(f"  profile records observed: {len(pc['observed'])} of {pc['profile_records']}")
     return 0
 
 
@@ -90,6 +93,8 @@ def _row(name, out: Path) -> dict:
             "configuration_changes": len(k["configuration_changes"]),
             "predicate_faults": len(k["predicate_faults"]),
             "coverage_ticks_by_state": dict(sorted(states.items())),
+            "profile_records": m["profile_coverage"]["profile_records"],
+            "profile_records_observed": len(m["profile_coverage"]["observed"]),
             "coverage": m["coverage"]}
 
 
@@ -136,6 +141,9 @@ def cmd_analyze_many(a) -> int:
                      f" certain: {', '.join(c['became_certain'] + '@' + str(c['t']) for c in r['became_certain']) or 'never'};"
                      f" invalidated outputs: {r['evidence_invalidated']}; configuration changes: "
                      f"{r['configuration_changes']}; predicate faults: {r['predicate_faults']}")
+        if r["profile_records"]:
+            lines.append(f"    profile records observed: {r['profile_records_observed']} of "
+                         f"{r['profile_records']}")
     for n, why in sorted(failures.items()):
         lines.append(f"{n}: FAILED: {why}")
     (out / "batch_summary.txt").write_text("\n".join(lines) + "\n")

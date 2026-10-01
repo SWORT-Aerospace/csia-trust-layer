@@ -54,7 +54,10 @@ analysis reproduces without the raw log.
 
 **Rejections:** 84, all PRODUCER_UNAVAILABLE before alignment (0.6-2.6 s).
 
-**Timeline:** 1,006 ticks in 11 intervals.
+**Timeline:** 1,006 ticks in 13 intervals.
+- 11 at first.
+- 13 after finding WA-2 (`WRONG_ANSWER_SEARCH.md`): the resets at 0.428 s,
+  before the selector's first message, now open their own intervals.
 
 ## 5. Metrics
 
@@ -79,4 +82,5 @@ That rule is still pinned only on the synthetic log.
 **A finding for the report (Phase 14).** The timeline line at 75.5 s said
 "changed: epochs" without naming the key or its values. An engineer needs
 "ekf2.aiding.hdg 1 → 2 (heading aiding lost)". This is addressed in the
-Analyzer MVP (`ANALYZER_MVP.md`).
+Analyzer MVP (`ANALYZER_MVP.md`). The report now reads "hdg aiding fused:
+3-axis magnetometer -> none".

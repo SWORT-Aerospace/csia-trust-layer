@@ -99,6 +99,32 @@ def test_a_silent_detector_is_no_anomaly_and_an_unseen_source_is_no_coverage():
     assert not any("NOMINAL" in v for v in by.values())
 
 
+def test_wa3_a_verdict_names_the_profile_records_nothing_observed(s1_report):
+    """A PX4 log alone: the estimator's claims are outside the profile, so no
+    profile record is observed and "no symptom" must say so."""
+    pc = s1_report["profile_coverage"]
+    assert pc["enumerable"] and pc["profile_records"] == 68
+    assert pc["observed"] == [] and pc["never_admitted"] == []
+    assert len(pc["no_output"]) == 68 and "ACTUATION/motor_0:actuation.mechanical_response" in pc["no_output"]
+    assert pc["outside_profile"] == [f"COMPUTE/state_estimator:estimator.innovation.{k}"
+                                     for k in ("hdg", "hgt", "pos", "vel")]
+    txt = R.human_report(s1_report)
+    assert "scope: the run observed 0 of the profile's 68 records" in txt
+    assert "NO PRODUCER in this run: 68: ACTUATION/motor_0 (3)" in txt
+    # a run that observes every record carries no scope line
+    v2 = runs.v2_scenario("NOMINAL")
+    m = R.machine_report(v2.results, v2.inputs, v2.gate, v2.contracts)
+    assert len(m["profile_coverage"]["observed"]) == m["profile_coverage"]["profile_records"] == 68
+    assert "scope:" not in R.human_report(m)
+    # a profile with no record list is reported as not enumerable
+    cu = runs.cusum_scenario("imu0_bias_drift")
+    mc = R.machine_report(cu.results, cu.inputs, cu.gate, cu.contracts)
+    pc = mc["profile_coverage"]
+    assert "SENSOR/source.imu0:v1_1.source_health" in pc["no_output"] and pc["observed"] == []
+    assert pc["outside_profile"] == [f"SENSOR/source.{n}:cusum.sustained_shift" for n in
+                                     ("battery", "gps", "mag", "motor_esc", "vibration")]
+
+
 def test_estimator_checks_report_nominal_and_unavailable(s1_report):
     pos = [c for c in s1_report["coverage"] if c["claim"] == "INNOVATION_POS"][0]["ticks_by_state"]
     assert set(pos) == {"NOMINAL", "UNAVAILABLE"}
@@ -209,3 +235,32 @@ def test_report_bytes_do_not_depend_on_process_or_directory(tmp_path):
         assert p.returncode == 0, p.stderr.decode()[-500:]
         outs.append(p.stdout)
     assert outs[0] == outs[1]
+
+
+# ------------------------------------------------------------------ pinned reports (Phase 20)
+PINNED = {
+    "U4_s1_selector": "80035ab1256b72887ad5593f6eb99729c6ecd541ea607f091844baf201562566",
+    "U5_cusum_power_sag": "92d88ae17f149cfdc385831c05abd215e2dff83cdf260e67ebce4a14176d825e",
+    "U6_cusum_imu0_drift": "c8ca0bf203ec400885e5b8c1cb524257aae492bc1fda01e1e69abe5ca0a30927",
+    "U8_predicate_fault": "9c86f295ce89b79ae602069692e28220cea8a072651fd97e653b0e5629ee780b",
+}
+
+
+@pytest.mark.parametrize("case", sorted(PINNED))
+def test_pinned_reports_regenerate_byte_for_byte(case):
+    """The reports needing no raw data: regenerated now, against the pinned
+    hash and the committed file. U7 (E1) is pinned through the 2.2 replay."""
+    if case == "U4_s1_selector":
+        run = runs.estimator_log(PX.EstimatorLog.from_npz(S1), tick_s=0.1)
+    elif case == "U8_predicate_fault":
+        sys.path.insert(0, str(REPO / "research/csia_2_2_evidence_assurance"))
+        import datasets_2_2 as D
+        run, _extra = D.predicate_fault_run()
+    else:
+        run = runs.cusum_scenario({"U5_cusum_power_sag": "power_sag",
+                                   "U6_cusum_imu0_drift": "imu0_bias_drift"}[case])
+    body = R.dumps(R.machine_report(run.results, run.inputs, run.gate, run.contracts))
+    assert hashlib.sha256(body).hexdigest() == PINNED[case]
+    assert (PILOT / "reports" / case / "report.json").read_bytes() == body
+    hashes = json.loads((PILOT / "REPORT_HASHES.json").read_text())
+    assert hashes[case] == PINNED[case]

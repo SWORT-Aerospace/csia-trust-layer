@@ -28,6 +28,11 @@ A research specification with no function table (the XSYS-001 symptom
 specification) or a runtime with no profile (the v1.1 CUSUM-only analysis)
 has nothing for them to check. Such a profile is reasoned with, and every
 result carries an INFO finding saying it was not validated.
+
+**`records` (pilot, 2.2.1).** The gate keeps the key of every record the
+profile defines, `DOMAIN/component:relation`, so a report can say which of
+them no producer observed (`report.profile_coverage`). The keys are not
+part of `to_dict()`; a NOT_APPLICABLE profile has none.
 """
 
 from __future__ import annotations
@@ -38,6 +43,8 @@ from pathlib import Path
 
 from csia_semantic_core.profile_validator import ERROR, GAP, WARNING, validate_profile
 
+from .envelope import record_key
+
 CITATIONS = Path(__file__).resolve().parent / "pacing_citations.json"
 OK, REFUSED, NOT_APPLICABLE = "ACCEPTED", "REFUSED", "NOT_APPLICABLE"
 
@@ -47,6 +54,7 @@ class GateResult:
     status: str
     profile: dict
     findings: tuple       # (severity, rule, subject, detail)
+    records: tuple = ()   # every record key the profile defines
 
     @property
     def accepted(self) -> bool:
@@ -108,7 +116,7 @@ def gate(overlay, sample_records, functions, citations=CITATIONS) -> GateResult:
                if overlay is not None else {"name": "frozen", "version": None,
                                             "base_profile": None, "digest": None})
     status = REFUSED if any(f[0] == "ERROR" for f in found) else OK
-    return GateResult(status, profile, found)
+    return GateResult(status, profile, found, tuple(sorted({record_key(r) for r in recs})))
 
 
 def not_applicable(name: str, base_profile: str, why: str) -> GateResult:

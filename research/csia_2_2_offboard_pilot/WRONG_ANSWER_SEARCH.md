@@ -17,7 +17,7 @@
 | P3 | valid evidence rejected | witnesses: every slot (only V4's out-of-window W_DYN is refused, correctly); estimator: 121 trials with their flight logs | 0 |
 | P4 | invalid evidence admitted | 14 single mutations of real envelopes: producer version, contract version, unknown claim, claim on another record, attributability, missing lineage, NaN content time, content after production, content in the future, stale content, missing epoch, another lane's epoch, profile mismatch, witness outside its window | 0 missed (each refused with the expected status) |
 | P5 | dependent evidence treated as independent | 121 trials, 2.2's independent lines against the ground-truth source analysis | 0 mismatches |
-| P6 | no coverage treated as nominal | CUSUM on imu0_bias_drift; run S1 | 0 |
+| P6 | no coverage treated as nominal | CUSUM on imu0_bias_drift; run S1; the 66 flight logs analysed alone | 0 at the record level; **one at the report level (WA-3)** |
 | P7 | producer fault treated as vehicle fault | 242 injections: every witness output of every trial duplicated by a FAULTED or UNAVAILABLE producer saying the opposite | 0 decisions changed; 0 faulted outputs among the adverse evidence |
 | P8 | configuration reset mishandled | run S1: every raw reset increment in the log against the reported changes; refusals for resets | reported = real for all five counters (after WA-2); 0 refusals |
 | P9 | timeline order wrong; content-time error | run S1 report; every admitted output | monotonic; 0 admitted outputs with content after their tick |
@@ -46,6 +46,18 @@
 | **fix** | before the selector's first message the lowest instance is kept as PROVISIONAL context: it carries resets and aiding changes into the context, and is never emitted as evidence |
 | **pinned** | `test_wa2_every_real_reset_is_reported_even_before_the_first_selection` |
 
+### WA-3: "no symptom" without its scope (fixed)
+
+| | |
+|---|---|
+| **found by** | reading the batch reports of the 66 flight logs (`SCALE.md`), after the probes above had passed |
+| **defect** | a flight log analysed alone gives one producer, EKF2, whose claims are outside the profile. For XS1A1-C00-A-E055 (motor 0 at 55 % thrust) the report said "no symptom detected" and "nothing abnormal at any tick", and nothing in it said that no producer observed the motors. Every record-level state was right; the report omitted what had no record at all |
+| **observed on the campaign?** | yes: all 66 flight-level reports, including the 55 with a degraded motor |
+| **reproduction** | `python -m csia_evidence_assurance analyze XS1A1-C00-A-E055.ulg` at commit a44202f |
+| **fix** | report schema 3: `profile_coverage`, the PROFILE COVERAGE section, and a "scope" line beside the final state (`ANALYZER_MVP.md` §5) |
+| **pinned** | `test_wa3_a_verdict_names_the_profile_records_nothing_observed` |
+| **why the probes missed it** | P6 checked the states of records that exist. A record that no producer emits has no state to check |
+
 ## 3. Report-quality defects found while reading the reports (fixed)
 
 These are not wrong answers. They are places where a correct answer was not
@@ -62,5 +74,8 @@ visible to an engineer (`ENGINEER_USEFULNESS.md`).
 ## 4. Semantic Core
 
 **No 2.1.1 defect was found.** Every wrong answer looked for was absent at
-the semantic level. Both findings were in 2.2's adapters. The stop rule for
-a semantic-core defect was not triggered.
+the semantic level:
+- WA-1 and WA-2 were in 2.2's adapters;
+- WA-3 was in 2.2's report.
+
+The stop rule for a semantic-core defect was not triggered.
