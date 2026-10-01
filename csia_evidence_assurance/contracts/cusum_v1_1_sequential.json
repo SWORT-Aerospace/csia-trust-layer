@@ -1,0 +1,50 @@
+{
+ "claims": {
+  "SUSTAINED_SHIFT": {
+   "attributable": false,
+   "domain": "SENSOR",
+   "meaning": "the one-sided CUSUM (Page) of the node's standardised pre-transform chi-square is above h (DEGRADED), or advanced this tick and is at or below h (NOMINAL): a sustained upward shift in the residuals of the physical relations the node takes part in. It does not say which sensor or component failed.",
+   "relation": "cusum.sustained_shift"
+  }
+ },
+ "contract_version": "cusum-1",
+ "coverage": {
+  "covered": [
+   "battery",
+   "gps",
+   "mag",
+   "motor_esc",
+   "vibration"
+  ],
+  "not_covered": {
+   "baro": "clean-arm sigma0 is degenerate (0.0 over 1500 ticks)",
+   "imu0": "no per-IMU physics chi-square exists in this construction",
+   "imu1": "no per-IMU physics chi-square exists in this construction"
+  }
+ },
+ "expected_inputs": [
+  "per node (lam, gate) from the frozen v1.1 comparator",
+  "per node freshness"
+ ],
+ "fault_behavior": "an alarm persists while S stays above h; the statistic is neither advanced nor reset on an inactive tick",
+ "frozen_constants": {
+  "h": 500.0,
+  "k": 0.5
+ },
+ "health_reporting": "REPORTED",
+ "health_rule": "VALID when the statistic advanced this tick; UNAVAILABLE when the node's input was gated out or not fresh (the frozen bank does not advance it); FAULTED if the statistic is not a finite non-negative number",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": "the node, every partner it shares a v1 relation with, and each relation's model (csia/trust_graph/graph.py EDGES)",
+ "producer_id": "cusum:v1_1_sequential",
+ "producer_version": "k0.5-h500.0-ic7da2915bf734",
+ "profile_compatibility": [
+  "csia/v2/profiles/aircraft.py",
+  "csia/v1_1 runtime"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SNAPSHOT",
+  "period_s": null
+ },
+ "validity": {}
+}

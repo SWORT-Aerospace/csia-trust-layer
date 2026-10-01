@@ -42,3 +42,12 @@ from .envelope import EvidenceEnvelope  # noqa: F401
 from .health import ProducerHealth  # noqa: F401
 from .lineage import Lineage, LineageError, independence_groups  # noqa: F401
 from .profile_gate import GateResult, gate  # noqa: F401
+
+__all__ = [
+    "ADMISSIBLE", "CONFIGURATION_MISMATCH", "CONTRACT_INVALID", "DUPLICATE",
+    "PRODUCER_INVALID", "PROFILE_MISMATCH", "REGIME_INVALID", "STALE", "STATUSES",
+    "AnalysisContext", "assess", "ANALYZER_VERSION", "AssuranceResult",
+    "FlightAssuranceAnalyzer", "ContractError", "ProducerContract", "load_contracts",
+    "EvidenceEnvelope", "ProducerHealth", "Lineage", "LineageError",
+    "independence_groups", "GateResult", "gate",
+]
