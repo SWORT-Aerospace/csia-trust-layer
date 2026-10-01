@@ -27,7 +27,7 @@ Source: `RUNTIME_REVISION.json`, dataset A, 2,640 ticks, three passes.
 | record-scaling slope (trace off) | 1.12 | 1.09 | none |
 | fault-policy cost (one predicate failed) | — | 0.99× | none |
 | epoch check, 68 stamped records, all current | — | 158 µs | linear (slope 1.03) |
-| epoch invalidation, 68 records all stale | — | 754 µs | linear (slope 1.06); about 11 µs per invalidated record, a dataclass copy |
+| epoch invalidation, 68 records all stale | — | 754 µs | linear (slope 1.06); about 9 µs more per invalidated record (a dataclass copy) than the 2.3 µs check |
 | state retained between ticks | none | none | — |
 
 **What the 13 % is.** It is the cost of CPython objects: the per-record

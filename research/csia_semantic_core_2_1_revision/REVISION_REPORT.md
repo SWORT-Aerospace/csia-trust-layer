@@ -276,7 +276,7 @@ passes, per-tick medians. Source: `RUNTIME_REVISION.json`.
 |---|---|
 | retained state | **none**: the core's attributes are identical before and after 3 × 2,640 ticks; admission keeps no history |
 | record scaling (largest tick padded to 2,176 records) | log-log slope 1.09 (2.1.1, trace off), 1.19 (trace on), 1.12 (2.1.0), 1.37 (v2.0). No new superlinear term |
-| epoch admission cost against stamped records | linear: slope 1.03 (all current) and 1.06 (all stale). About 2.3 µs per stamped record to check, and about 11 µs per record made UNAVAILABLE (a dataclass copy). No per-transition scan, because there is no history to scan |
+| epoch admission cost against stamped records | linear: slope 1.03 (all current) and 1.06 (all stale). About 2.3 µs per stamped record to check, and about 9 µs more per record made UNAVAILABLE (a dataclass copy). No per-transition scan, because there is no history to scan |
 | fault-policy cost | median 0.99× with R-1 on against off, on dataset A with one predicate failed |
 | large allocations | the only new allocation is the copied UNAVAILABLE record, one per inadmissible record |
 
