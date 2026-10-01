@@ -68,6 +68,22 @@ def test_s1_magnetometer_loss_is_a_named_configuration_change(s1_report):
     assert hdg["ticks_by_state"]["NOT_APPLICABLE"] >= 250
 
 
+def test_wa2_every_real_reset_is_reported_even_before_the_first_selection(s1_report):
+    """Pilot finding WA-2: EKF2 reset at 0.428 s, before the selector's first
+    message (0.516 s). The resets must still appear as configuration
+    changes; no evidence is emitted before a lane is primary."""
+    log = PX.EstimatorLog.from_npz(S1)
+    d = log.status[0]
+    for f in PX.RESET_NAMES:
+        real = int(np.sum((np.diff(d[f].astype(int)) % 256) > 0))
+        reported = sum(1 for c in s1_report["key_moments"]["configuration_changes"]
+                       if c["key"] == f"ekf2.reset.{f}")
+        assert reported == real, f
+    est = PX.EstimatorProducer(log)
+    first_sel_s = (int(log.selector["timestamp"][0]) - log.t0_us) * 1e-6
+    assert est.step(first_sel_s - 0.01) == []
+
+
 # ------------------------------------------------------------------ coverage states
 def test_a_silent_detector_is_no_anomaly_and_an_unseen_source_is_no_coverage():
     run = runs.cusum_scenario("imu0_bias_drift")

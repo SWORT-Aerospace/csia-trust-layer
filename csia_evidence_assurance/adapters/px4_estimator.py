@@ -266,7 +266,14 @@ class EstimatorProducer:
 
     def _primary_stream(self) -> list:
         """Every output of the lane that was primary when it was published,
-        in publication order, with its epochs and health."""
+        in publication order, with its epochs and health.
+
+        Before the selector names a primary lane, the lowest instance's
+        outputs are kept as PROVISIONAL rows: they carry the configuration
+        history (resets, aiding changes) into the context, but are never
+        emitted as evidence, because no lane was the vehicle's estimate yet
+        (pilot finding WA-2: resets before the first selection were missing
+        from the timeline)."""
         rows = []
         for inst, d in self.log.status.items():
             for j in range(len(d["timestamp"])):
@@ -276,9 +283,11 @@ class EstimatorProducer:
         aid_prev, aid_n = {}, {k: 0 for k in ("pos", "vel", "hgt", "hdg")}
         reset_prev, reset_n = {}, {}
         slip_prev = {}
+        first = min(self.log.status)
         for ts, inst, j in rows:
             lane, count = self._lane_at(ts)
-            if lane != inst:
+            provisional = lane is None and self._lane_mode == "SELECTOR" and inst == first
+            if lane != inst and not provisional:
                 continue
             d = self.log.status[inst]
             row = {k: d[k][j] for k in STATUS_FIELDS}
@@ -315,7 +324,8 @@ class EstimatorProducer:
                 health, why = ProducerHealth.DEGRADED, "TIME_SLIP_INCREASED"
             slip_prev[inst] = slip
             out.append({"ts": ts, "inst": inst, "row": row, "epochs": epochs,
-                        "aiding": dict(aid_prev), "health": health, "health_why": why})
+                        "aiding": dict(aid_prev), "health": health, "health_why": why,
+                        "provisional": provisional})
         return out
 
     def _sec(self, us) -> float:
@@ -377,6 +387,8 @@ class EstimatorProducer:
 
     def step(self, t) -> list:
         i = self._index_at(t)
+        while i >= 0 and self._stream[i].get("provisional"):
+            i -= 1
         if i < 0 or i == self._last:
             return []
         self._last = i

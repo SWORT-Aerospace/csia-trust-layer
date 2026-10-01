@@ -1,0 +1,323 @@
+{
+ "consistency": {
+  "SENS_IMU_MODE": [
+   "1"
+  ],
+  "alignment_s_range": [
+   2.204,
+   2.964
+  ],
+  "device_ids": [
+   "{\"accel_device_id\": [1310988], \"baro_device_id\": [0, 6620172], \"gyro_device_id\": [1310988], \"mag_device_id\": [0, 197388]}",
+   "{\"accel_device_id\": [1310988], \"baro_device_id\": [6620172], \"gyro_device_id\": [1310988], \"mag_device_id\": [0, 197388]}",
+   "{\"accel_device_id\": [1310988], \"baro_device_id\": [6620172], \"gyro_device_id\": [1310988], \"mag_device_id\": [197388]}"
+  ],
+  "epoch_keys": [
+   "[\"ekf2.aiding.hdg\", \"ekf2.aiding.hgt\", \"ekf2.aiding.pos\", \"ekf2.aiding.vel\", \"ekf2.imu.change_count\", \"ekf2.reset.reset_count_pod_d\", \"ekf2.reset.reset_count_pos_ne\", \"ekf2.reset.reset_count_quat\", \"ekf2.reset.reset_count_vel_d\", \"ekf2.reset.reset_count_vel_ne\", \"ekf2.selector.instance_changed_count\"]"
+  ],
+  "filter_fault_outputs_total": 0,
+  "lag_max_s": [
+   "0.152",
+   "0.156",
+   "0.16",
+   "0.164",
+   "0.172"
+  ],
+  "lag_p50_s": [
+   "0.152",
+   "0.156"
+  ],
+  "lane_mode": [
+   "\"STRUCTURAL_0\""
+  ],
+  "lineage_roots": [
+   "[\"model:ekf2\", \"sensor:baro.6620172\", \"sensor:gnss\", \"sensor:imu.1310988\", \"sensor:mag.197388\"]",
+   "[\"model:ekf2\", \"sensor:baro.6620172\", \"sensor:gnss\", \"sensor:imu.1310988\"]"
+  ],
+  "period_median_s": [
+   "0.008"
+  ],
+  "time_slip_increments": {
+   "0": 22,
+   "1": 20,
+   "2": 16,
+   "3": 5,
+   "4": 2,
+   "5": 1
+  },
+  "transitions_per_flight": {
+   "{\"aiding\": 7, \"reset\": 6}": 5,
+   "{\"aiding\": 8, \"reset\": 5}": 1,
+   "{\"aiding\": 8, \"reset\": 6}": 2,
+   "{\"aiding\": 8, \"reset\": 7}": 5,
+   "{\"aiding\": 8, \"reset\": 8}": 53
+  },
+  "ver_sw": [
+   "\"547e2ca\""
+  ]
+ },
+ "corroboration": {
+  "by_kind_naive_2_2_ground_truth": [
+   {
+    "ground_truth": 2,
+    "independent_lines_2_2": 2,
+    "kind": "A",
+    "naive_count": 3,
+    "trials": 55
+   },
+   {
+    "ground_truth": 1,
+    "independent_lines_2_2": 1,
+    "kind": "B",
+    "naive_count": 1,
+    "trials": 55
+   },
+   {
+    "ground_truth": 0,
+    "independent_lines_2_2": 0,
+    "kind": "N",
+    "naive_count": 0,
+    "trials": 11
+   }
+  ],
+  "duplicate_counting": "none: no republished output in the campaign (DUPLICATE status never raised)",
+  "false_corroboration_trials": [],
+  "faulted_producer_corroboration": "none: no producer FAULTED in any trial",
+  "missed_independent_trials": [],
+  "stale_corroboration": "none STALE; W_DYN's T1 output is held to C3 by its validated window, not by age (ADMISSIBLE, content 14.8 s old)"
+ },
+ "estimator_coverage_states_all_trials": {
+  "NOMINAL": 76797,
+  "NOT_APPLICABLE": 1127
+ },
+ "estimator_informativeness": {
+  "INNOVATION_HDG": {
+   "T1": {
+    "A_flights": 54,
+    "A_flights_with_rise": 0,
+    "A_median_delta": -0.047916,
+    "NB_median_delta": -0.031346,
+    "auc_A_vs_NB": 0.4315
+   },
+   "T2": {
+    "A_flights": 54,
+    "A_flights_with_rise": 22,
+    "A_median_delta": -0.010873,
+    "NB_median_delta": -0.007462,
+    "auc_A_vs_NB": 0.5111
+   },
+   "T3": {
+    "A_flights": 54,
+    "A_flights_with_rise": 26,
+    "A_median_delta": -0.007277,
+    "NB_median_delta": 0.008832,
+    "auc_A_vs_NB": 0.4463
+   },
+   "over_gate_outputs_all_flights": 0
+  },
+  "INNOVATION_HGT": {
+   "T1": {
+    "A_flights": 55,
+    "A_flights_with_rise": 5,
+    "A_median_delta": -0.002641,
+    "NB_median_delta": -0.002763,
+    "auc_A_vs_NB": 0.5207
+   },
+   "T2": {
+    "A_flights": 55,
+    "A_flights_with_rise": 14,
+    "A_median_delta": -0.001413,
+    "NB_median_delta": -0.001554,
+    "auc_A_vs_NB": 0.5281
+   },
+   "T3": {
+    "A_flights": 55,
+    "A_flights_with_rise": 22,
+    "A_median_delta": -0.000132,
+    "NB_median_delta": -0.000365,
+    "auc_A_vs_NB": 0.5471
+   },
+   "over_gate_outputs_all_flights": 0
+  },
+  "INNOVATION_POS": {
+   "T1": {
+    "A_flights": 55,
+    "A_flights_with_rise": 1,
+    "A_median_delta": -0.00315,
+    "NB_median_delta": -0.003369,
+    "auc_A_vs_NB": 0.5256
+   },
+   "T2": {
+    "A_flights": 55,
+    "A_flights_with_rise": 11,
+    "A_median_delta": -0.00126,
+    "NB_median_delta": -0.001411,
+    "auc_A_vs_NB": 0.4727
+   },
+   "T3": {
+    "A_flights": 55,
+    "A_flights_with_rise": 25,
+    "A_median_delta": -0.000204,
+    "NB_median_delta": -0.000408,
+    "auc_A_vs_NB": 0.5223
+   },
+   "over_gate_outputs_all_flights": 0
+  },
+  "INNOVATION_VEL": {
+   "T1": {
+    "A_flights": 55,
+    "A_flights_with_rise": 6,
+    "A_median_delta": -0.008927,
+    "NB_median_delta": -0.008872,
+    "auc_A_vs_NB": 0.5207
+   },
+   "T2": {
+    "A_flights": 55,
+    "A_flights_with_rise": 34,
+    "A_median_delta": 0.002307,
+    "NB_median_delta": 0.000509,
+    "auc_A_vs_NB": 0.5413
+   },
+   "T3": {
+    "A_flights": 55,
+    "A_flights_with_rise": 36,
+    "A_median_delta": 0.001861,
+    "NB_median_delta": 0.00147,
+    "auc_A_vs_NB": 0.5537
+   },
+   "over_gate_outputs_all_flights": 0
+  }
+ },
+ "flights": 66,
+ "flights_missing": [],
+ "label": "NON-CONFIRMATORY; estimator statements EXPLORATORY",
+ "lane_switches": "none possible: SENS_IMU_MODE = 1 in every flight (EKF2 selector not running)",
+ "real_transitions": [
+  {
+   "example": "XS1A1-C00-A-E055 at 0.7 s",
+   "kind": "reset",
+   "occurrences": 190,
+   "transition": "EKF2 horizontal position reset"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 0.9 s",
+   "kind": "reset",
+   "occurrences": 184,
+   "transition": "EKF2 horizontal velocity reset"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 2.6 s",
+   "kind": "aiding",
+   "occurrences": 66,
+   "transition": "hdg aiding fused: none -> magnetic heading"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 2.6 s",
+   "kind": "aiding",
+   "occurrences": 66,
+   "transition": "pos aiding fused: none -> GNSS position"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 2.6 s",
+   "kind": "aiding",
+   "occurrences": 66,
+   "transition": "vel aiding fused: none -> GNSS velocity"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 143.6 s",
+   "kind": "aiding",
+   "occurrences": 66,
+   "transition": "hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 0.7 s",
+   "kind": "reset",
+   "occurrences": 66,
+   "transition": "EKF2 vertical position reset"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 2.5 s",
+   "kind": "reset",
+   "occurrences": 66,
+   "transition": "EKF2 attitude"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 0.7 s",
+   "kind": "aiding",
+   "occurrences": 65,
+   "transition": "hgt aiding fused: none -> GNSS height"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 141.0 s",
+   "kind": "aiding",
+   "occurrences": 64,
+   "transition": "hdg aiding fused: magnetic heading -> 3-axis magnetometer"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 1.1 s",
+   "kind": "aiding",
+   "occurrences": 60,
+   "transition": "hgt aiding fused: GNSS height -> barometer height, GNSS height"
+  },
+  {
+   "example": "XS1A1-C00-A-E055 at 1.4 s",
+   "kind": "aiding",
+   "occurrences": 60,
+   "transition": "hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height"
+  },
+  {
+   "example": "XS1A1-C01-A-E075 at 1.2 s",
+   "kind": "aiding",
+   "occurrences": 5,
+   "transition": "hgt aiding fused: GNSS height -> barometer height, range-finder height, GNSS height"
+  },
+  {
+   "example": "XS1A1-C00-NB at 10.8 s",
+   "kind": "aiding",
+   "occurrences": 2,
+   "transition": "hdg aiding fused: magnetic heading -> none"
+  },
+  {
+   "example": "XS1A1-C04-A-E055 at 1.4 s",
+   "kind": "aiding",
+   "occurrences": 1,
+   "transition": "hgt aiding fused: none -> range-finder height"
+  },
+  {
+   "example": "XS1A1-C04-A-E055 at 1.6 s",
+   "kind": "aiding",
+   "occurrences": 1,
+   "transition": "hgt aiding fused: range-finder height -> range-finder height, GNSS height"
+  },
+  {
+   "example": "XS1A1-C04-A-E055 at 2.2 s",
+   "kind": "aiding",
+   "occurrences": 1,
+   "transition": "hgt aiding fused: range-finder height, GNSS height -> barometer height, range-finder height, GNSS height"
+  }
+ ],
+ "rejections_all_trials": {},
+ "verdicts_C3_V3_with_estimator": [
+  {
+   "candidates": "ACTUATION/mechanical",
+   "kind": "A",
+   "outcome": "SUPPORTED",
+   "trials": 55,
+   "truth": "PHYSICAL_ACTUATOR_DEGRADATION"
+  },
+  {
+   "candidates": "SENSOR/response_sensor",
+   "kind": "B",
+   "outcome": "SUPPORTED",
+   "trials": 55,
+   "truth": "RPM_TELEMETRY_CORRUPTION"
+  },
+  {
+   "candidates": "",
+   "kind": "N",
+   "outcome": "NO_SYMPTOM",
+   "trials": 11,
+   "truth": "NOMINAL"
+  }
+ ]
+}
