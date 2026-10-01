@@ -57,7 +57,42 @@ corrupts. It does not mean independent physics.
 
 ## 2. The corroboration policy on the real case (Phase 8)
 
-<!-- CORROBORATION -->
+**Per trial at C3** (`CAMPAIGN_ANALYSIS.json`):
+- **naive count:** adverse admitted outputs;
+- **2.2:** independent lines;
+- **ground truth:** the largest set of the adverse producers with no
+  shared raw source (§1).
+
+| trials | naive count | 2.2 lineage-aware | ground-truth independent sources |
+|---|---|---|---|
+| 55 A (motor degraded) | 3 | 2 | 2 |
+| 55 B (RPM telemetry corrupted) | 1 | 1 | 1 |
+| 11 N (nominal) | 0 | 0 | 0 |
+
+| measure | result |
+|---|---|
+| false corroboration (2.2 > ground truth) | 0 trials |
+| missed independent corroboration (2.2 < ground truth) | 0 trials |
+| duplicate counting | none possible: no republished output in the campaign. The DUPLICATE status is pinned on synthetic relays (2.2 dataset G, the three-monitor regression) |
+| stale corroboration | none. W_DYN's T1 output is held to C3 by its validated window, not by age (ADMISSIBLE, 14.8 s old) |
+| faulted-producer corroboration | none in the campaign (no producer FAULTED). In injected tests, 242 faulted or unavailable producers saying the opposite changed 0 decisions and were never adverse (`WRONG_ANSWER_SEARCH.json`, P7) |
+
+**Verdicts with the estimator present (C3, V3_TEMPORAL):**
+- 55/55 A: SUPPORTED ACTUATION/mechanical;
+- 55/55 B: SUPPORTED SENSOR/response_sensor;
+- 11/11 N: no symptom.
+
+**Rejections:** 0.
+
+**The naive count is wrong by one in every A trial;** the lineage-aware
+count is right in every trial. This is the policy's first test on real
+monitors. It survives.
+
+**Limits of the test:**
+- the ground truth is a code-path analysis done by the same team that wrote
+  the lineage;
+- the case has one dependence structure, repeated 55 times.
+
 
 ## 3. What the Analyzer adds here that the monitors alone do not
 

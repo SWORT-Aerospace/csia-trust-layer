@@ -61,7 +61,46 @@ output as context only. That is acceptable").
 **Status.** EXPLORATORY, as XSYS-001's preregistration (§7.4) made every
 statement about W_EST. **Source:** `CAMPAIGN_XSYS.json`.
 
-<!-- CAMPAIGN_NUMBERS -->
+**Over all 66 flights:** no innovation output of any kind exceeded its
+gate.
+
+**Method.** At the motor-degradation onset, the maximum of each claim in
+T1 (0-0.2 s), T2 (0.2-2 s) and T3 (10-15 s), minus its maximum in the 5 s
+before onset. Then the 55 A flights (degraded) against the 11 NB flights
+(nominal), as an AUC: 0.5 means indistinguishable.
+
+| claim | over-gate outputs | AUC A vs NB (T1, T2, T3) | T1 median change, A / NB |
+|---|---|---|---|
+| INNOVATION_HDG | 0 | T1 0.4315, T2 0.5111, T3 0.4463 | -0.0479 / -0.0313 |
+| INNOVATION_HGT | 0 | T1 0.5207, T2 0.5281, T3 0.5471 | -0.0026 / -0.0028 |
+| INNOVATION_POS | 0 | T1 0.5256, T2 0.4727, T3 0.5223 | -0.0032 / -0.0034 |
+| INNOVATION_VEL | 0 | T1 0.5207, T2 0.5413, T3 0.5537 | -0.0089 / -0.0089 |
+
+**Reading:**
+- Every AUC lies between 0.43 and 0.55.
+- The median change at onset is negative or near zero in both groups.
+- The estimator's aiding innovations do not respond to this fault class.
+  This agrees with the apparatus characterization ("EKF aiding innovations
+  (non-informative for this fault class)",
+  `docs/research/PX4_ACTUATOR_EFFECTIVENESS_VALIDATION.md` line 414) and
+  with XSYS-001 keeping W_EST exploratory.
+
+**Classification for this fault class:**
+
+| claim | here |
+|---|---|
+| INNOVATION_POS, VEL, HGT | **context**: uninformative. Shows the navigation solution stayed consistent while the motor degraded |
+| INNOVATION_HDG | **context** |
+| all four, as lineage | **redundant** for dependence: they share the IMU with W_DYN and W_CTRL. They add a fourth output of that IMU, which 2.2 counts as no new line |
+
+**Real transitions seen** (66 flights): horizontal position resets (190),
+horizontal velocity resets (184), and aiding-set changes. Examples: heading
+from magnetic-heading to 3-axis-magnetometer fusion (64 flights); height
+sources changing (most flights).
+
+**No transition invalidated any estimator output.** They are context, and
+every one is in the timeline (`CAMPAIGN_ANALYSIS.json`).
+
 
 ## 4. Two mappings that might be legitimate later (not implemented)
 
