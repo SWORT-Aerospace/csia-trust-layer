@@ -3,10 +3,7 @@
   "INNOVATION_HDG": {
    "attributable": false,
    "config_dependency": [
-    "ekf2.selector.instance_changed_count",
-    "ekf2.imu.change_count",
-    "ekf2.aiding.hdg",
-    "ekf2.reset.reset_count_quat"
+    "ekf2.selector.instance_changed_count"
    ],
    "domain": "COMPUTE",
    "meaning": "EKF2's published hdg_test_ratio for heading (magnetometer, GNSS yaw or external vision yaw): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
@@ -15,10 +12,7 @@
   "INNOVATION_HGT": {
    "attributable": false,
    "config_dependency": [
-    "ekf2.selector.instance_changed_count",
-    "ekf2.imu.change_count",
-    "ekf2.aiding.hgt",
-    "ekf2.reset.reset_count_pod_d"
+    "ekf2.selector.instance_changed_count"
    ],
    "domain": "COMPUTE",
    "meaning": "EKF2's published hgt_test_ratio for vertical position (barometer, GNSS height, range finder or external vision; EKF2 averages the fused sources): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
@@ -27,10 +21,7 @@
   "INNOVATION_POS": {
    "attributable": false,
    "config_dependency": [
-    "ekf2.selector.instance_changed_count",
-    "ekf2.imu.change_count",
-    "ekf2.aiding.pos",
-    "ekf2.reset.reset_count_pos_ne"
+    "ekf2.selector.instance_changed_count"
    ],
    "domain": "COMPUTE",
    "meaning": "EKF2's published pos_test_ratio for horizontal position (GNSS, external vision or auxiliary global position, whichever is fused): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
@@ -39,16 +30,20 @@
   "INNOVATION_VEL": {
    "attributable": false,
    "config_dependency": [
-    "ekf2.selector.instance_changed_count",
-    "ekf2.imu.change_count",
-    "ekf2.aiding.vel",
-    "ekf2.reset.reset_count_vel_ne",
-    "ekf2.reset.reset_count_vel_d"
+    "ekf2.selector.instance_changed_count"
    ],
    "domain": "COMPUTE",
    "meaning": "EKF2's published vel_test_ratio for velocity (GNSS, external vision or optical flow, whichever is fused): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
    "relation": "estimator.innovation.vel"
   }
+ },
+ "config_context": {
+  "published": [
+   "ekf2.imu.change_count",
+   "ekf2.aiding.<pos|vel|hgt|hdg>",
+   "ekf2.reset.<counter>"
+  ],
+  "why_not_a_dependency": "they arrive in the same estimator_status message as the claims, so evidence and context always agree; only the lane counter can lead the evidence (the selector publishes the switch before the new lane's status)"
  },
  "contract_version": "px4-ekf2-status-1",
  "expected_inputs": [
@@ -80,7 +75,7 @@
     "2995-3060 multi mode and selector start"
    ],
    "src/modules/ekf2/EKF2Selector.cpp": [
-    "111-140 SelectInstance, _instance_changed_count++"
+    "110-140 SelectInstance, _instance_changed_count++ (line 132)"
    ]
   },
   "repository": "PX4/PX4-Autopilot",

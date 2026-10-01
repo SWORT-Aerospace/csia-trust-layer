@@ -7,11 +7,11 @@ EKF2 already publishes (PX4 547e2ca, `src/modules/ekf2/EKF2.cpp`
 | field | used for |
 |---|---|
 | `pos_test_ratio`, `vel_test_ratio`, `hgt_test_ratio`, `hdg_test_ratio` | the four claims. EKF2 publishes the square root of the low-pass filtered innovation test ratio, NaN when no aiding of that kind is fused (`ekf_helper.cpp` lines 412-558). Above 1.0 the filtered innovation is outside EKF2's own gate |
-| `control_mode_flags` | which aiding sources are fused (the claim's lineage, and its aiding epoch); tilt and yaw alignment (producer health) |
+| `control_mode_flags` | which aiding sources are fused (the claim's lineage, and its aiding context epoch); tilt and yaw alignment (producer health) |
 | `filter_fault_flags` | producer health: bits 0-15 (numerical fusion errors, bad delta-velocity bias) are faults of the estimator itself |
 | `time_slip` | producer health: an increase means the EKF's inertial update fell behind system time |
-| `reset_count_*` (uint8) | the reset epoch of each claim, unwrapped |
-| `gyro_device_id`, `accel_device_id`, `baro_device_id`, `mag_device_id` | the IMU epoch, and the lineage roots |
+| `reset_count_*` (uint8) | context epochs, unwrapped |
+| `gyro_device_id`, `accel_device_id`, `baro_device_id`, `mag_device_id` | the lineage roots, and the IMU context epoch |
 | `estimator_selector_status.instance_changed_count` | the lane epoch, when the selector runs |
 | `timestamp_sample` / `timestamp` | content time (EKF2's delayed fusion horizon) / produced time |
 
@@ -43,20 +43,40 @@ PRODUCER HEALTH
 
 CONFIGURATION EPOCHS (2.1.1's R-3, reused)
 -------------------------------------------
-Every claim is stamped with four kinds of key, all monotonic counters (R-3:
-a counter, never an id, so a switch back does not re-admit old evidence):
+The adapter publishes five kinds of epoch, all monotonic counters (R-3: a
+counter, never an id, so a switch back does not re-admit old evidence):
 
-| key | advances when |
-|---|---|
-| `ekf2.selector.instance_changed_count` | the selector switches lane. When the selector does not run (`SENS_IMU_MODE` != 0: `EKF2.cpp` lines 2995-3060 start it only in multi mode), the lane cannot change and the epoch is 0 by construction. When it should run but its topic is not logged, the key is left out of the stamp, and the evidence is refused (MISSING_EPOCH) with a coverage notice |
-| `ekf2.imu.change_count` | the primary lane's gyro or accel device id changes |
-| `ekf2.aiding.<pos|vel|hgt|hdg>` | the set of fused sources for that claim changes (for example magnetic heading to 3-axis magnetometer fusion) |
-| `ekf2.reset.<counter>` | the matching uint8 reset counter increments |
+| key | advances when | a dependency of the claims? |
+|---|---|---|
+| `ekf2.selector.instance_changed_count` | the selector switches lane | **yes** |
+| `ekf2.imu.change_count` | the primary lane's gyro or accel device id changes | no: context only |
+| `ekf2.aiding.<pos|vel|hgt|hdg>` | the set of fused sources for that claim changes (for example magnetic heading to 3-axis magnetometer fusion) | no: context only |
+| `ekf2.reset.<counter>` | the matching uint8 reset counter increments (unwrapped) | no: context only |
+
+**Why only the lane is a dependency.** A dependency protects evidence only
+if the configuration can change before the evidence is replaced.
+- The lane counter can: the selector publishes the switch at once
+  (`EKF2Selector.cpp` lines 110-140), and the new lane's status follows. Every
+  held output of the old lane is then stale for that interval.
+- The other counters cannot: they arrive in the same `estimator_status`
+  message as the claims they would guard, so evidence and context always
+  agree. As dependencies they would protect nothing.
+
+They are still published as context. The timeline shows them as
+configuration changes, and a producer whose output depends on the
+estimator's state can declare them.
+
+**The lane epoch.**
+- When the selector does not run (`SENS_IMU_MODE` != 0: `EKF2.cpp` lines
+  2995-3060 start it only in multi mode), the lane cannot change and the
+  epoch is 0 by construction.
+- When the selector should run but its topic is not logged, the key is left
+  out of the stamp. The evidence is refused (MISSING_EPOCH), with a coverage
+  notice.
 
 So a lane switch makes every held output of the old lane stale, the new
 lane's outputs are admitted, and evidence that does not depend on the
-estimator is untouched. A position reset makes held position evidence stale
-and leaves heading evidence alone.
+estimator is untouched.
 
 Only outputs of the lane that is primary when they are published are
 emitted; another lane's outputs are not the vehicle's estimate.
@@ -118,6 +138,12 @@ def relation(claim: str) -> str:
 
 
 def claim_keys(claim: str) -> tuple:
+    """The configuration epochs a claim depends on (see the module docstring)."""
+    return (LANE_KEY,)
+
+
+def context_keys(claim: str) -> tuple:
+    """Every epoch the adapter publishes about a claim's configuration."""
     _f, kind, _bits, resets = CLAIMS[claim]
     return (LANE_KEY, IMU_KEY, f"ekf2.aiding.{kind}") + tuple(f"ekf2.reset.{r}" for r in resets)
 

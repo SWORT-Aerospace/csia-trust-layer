@@ -47,12 +47,20 @@ def _sha(path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def aircraft_core(overlay=None):
+def aircraft_setup(successor: str | None = "aircraft_successor_r2"):
+    """(engine, core, gate, overlay) for the aircraft profile: 2.1.1 with the
+    successor profile, gated once on one NOMINAL tick's declarations."""
+    from csia.v2 import scenarios as SC
+    from csia.v2.profiles import SCENARIOS
     from csia.v2.profiles.aircraft import build_aircraft_engine
+    from csia.v2.profiles.aircraft_scenarios import example_payload_feed
+    ov = load_successor(successor) if successor else None
     engine = build_aircraft_engine()
     core = SemanticCore21.from_engine(engine, Corrections.revised(), trace=True,
-                                      pacing=overlay.pacing_map() if overlay else None)
-    return engine, core
+                                      pacing=ov.pacing_map() if ov else None)
+    sample = SC.run(engine, SCENARIOS["NOMINAL"], ticks=1,
+                    payload_for=example_payload_feed("clean"))[0].records
+    return engine, core, PG.gate(ov, sample, engine.functions), ov
 
 
 # ------------------------------------------------------------------ v2 corpus
@@ -86,14 +94,7 @@ def cusum_scenario(name: str) -> Run:
 
     from csia.scenarios import run_scenario
     _title, _faults, td, _hist, _diag = run_scenario(name)
-    ov = load_successor("aircraft_successor_r2")
-    engine, core = aircraft_core(ov)
-    from csia.v2 import scenarios as SC
-    from csia.v2.profiles import SCENARIOS
-    from csia.v2.profiles.aircraft_scenarios import example_payload_feed
-    sample = SC.run(engine, SCENARIOS["NOMINAL"], ticks=1,
-                    payload_for=example_payload_feed("clean"))[0].records
-    gate = PG.gate(ov, sample, engine.functions)
+    _engine, core, gate, _ov = aircraft_setup()
     contracts = load_contracts("cusum_v1_1_sequential")
     an = FlightAssuranceAnalyzer(core, contracts, gate, V2.AIRCRAFT_BASE)
     prod = CU.CusumProducer()
@@ -189,14 +190,7 @@ def _xsys_onset_s(ulog_path, trial_key) -> float:
 def ulog(path, tick_s: float = 0.1, t_end=None) -> Run:
     log = PX.EstimatorLog.from_ulog(path)
     est = PX.EstimatorProducer(log)
-    ov = load_successor("aircraft_successor_r2")
-    engine, core = aircraft_core(ov)
-    from csia.v2 import scenarios as SC
-    from csia.v2.profiles import SCENARIOS
-    from csia.v2.profiles.aircraft_scenarios import example_payload_feed
-    sample = SC.run(engine, SCENARIOS["NOMINAL"], ticks=1,
-                    payload_for=example_payload_feed("clean"))[0].records
-    gate = PG.gate(ov, sample, engine.functions)
+    _engine, core, gate, _ov = aircraft_setup()
     contracts = load_contracts("px4_ekf2_estimator_status")
     an = FlightAssuranceAnalyzer(core, contracts, gate, V2.AIRCRAFT_BASE)
     last = est._stream[-1]["ts"] if est._stream else log.t0_us
