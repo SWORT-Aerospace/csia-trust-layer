@@ -206,20 +206,28 @@ class FlightAssuranceAnalyzer:
         preds = x.trace.get("predicates", {})
         vals = x.v2.detail.get("predicate_values", {})
         supporting, refuting = set(), set()
+        refuters = {}
         if spec is not None:
+            hyps = {h.hypothesis_id: h for h in spec.hypotheses}
             for h in spec.hypotheses:
                 if h.hypothesis_id in x.supported:
                     for p in h.confirmed_by:
                         if vals.get(p) is True:
                             supporting.update(self._evidence_of(preds.get(p), by_record))
             for hid, by in x.v2.rejected:
-                refuting.update(self._evidence_of(preds.get(by), by_record))
+                # every refuter that held, not only the one 2.1.1 names first
+                h = hyps.get(hid)
+                true = [p for p in (h.refuted_by if h else (by,)) if vals.get(p) is True] or [by]
+                refuters[hid] = true
+                for p in true:
+                    refuting.update(self._evidence_of(preds.get(p), by_record))
         return {"key": x.key, "symptom": x.symptom, "subject": x.subject,
                 "outcome": x.outcome, "outcome_reason": x.outcome_reason,
                 "evaluation": x.evaluation,
                 "candidates": sorted(set(x.supported) | set(x.unresolved)),
                 "supported": list(x.supported), "unresolved": list(x.unresolved),
-                "eliminated": [{"hypothesis": h, "by": p} for h, p in x.v2.rejected],
+                "eliminated": [{"hypothesis": h, "by": p, "all_refuters": refuters.get(h, [p])}
+                               for h, p in x.v2.rejected],
                 "supporting_evidence": sorted(supporting),
                 "refuting_evidence": sorted(refuting),
                 "evidence_unavailable": list(x.evidence_unavailable),

@@ -341,7 +341,8 @@ def _loc_lines(loc) -> list:
     if loc["candidates"]:
         lines.append(f"    remaining explanations: {', '.join(loc['candidates'])}")
     for e in loc["eliminated"]:
-        lines.append(f"    eliminated: {e['hypothesis']} by {e['by']}")
+        refs = e.get("all_refuters") or [e["by"]]
+        lines.append(f"    eliminated: {e['hypothesis']} by {', '.join(refs)}")
     basis = loc.get("evidence_basis", {})
     if loc["supporting_evidence"]:
         lines.append(f"    supporting evidence: {_ids(loc['supporting_evidence'])}")
@@ -351,6 +352,13 @@ def _loc_lines(loc) -> list:
         lines.append(f"    refuting evidence: {_ids(loc['refuting_evidence'])}")
         lines += [f"      rests on: {', '.join(basis.get(e, []))}" for e in loc["refuting_evidence"]
                   if basis.get(e)]
+    for kind in ("supporting_evidence", "refuting_evidence"):
+        ev = [e for e in loc[kind] if basis.get(e)]
+        if len(ev) > 1:
+            shared = set(basis[ev[0]]).intersection(*(set(basis[e]) for e in ev[1:]))
+            if shared:
+                lines.append(f"    the {kind.split('_')[0]} evidence shares {', '.join(sorted(shared))}: "
+                             f"it is not independent corroboration")
     for d in loc.get("would_discriminate", []):
         lines.append(f"    would discriminate, but could not be evaluated: {d['predicate']}"
                      + (f" ({d['description']})" if d.get("description") else ""))
@@ -446,7 +454,11 @@ def human_report(m: dict) -> str:
     if a:
         L.append(f"  attribution: {a.get('verdict')}"
                  + (f" -> {a['unique']}" if a.get("unique") else "")
-                 + (f"; candidates {', '.join(a['candidates'])}" if a.get("candidates") else ""))
+                 + (f"; candidates {', '.join(a['candidates'])}" if a.get("candidates") else "")
+                 + (f" ({a['why']})" if a.get("why") else ""))
+        if a.get("verdict") == "NO_EVIDENCE" and f["localizations"]:
+            L.append("    (cross-domain attribution reads only attributable evidence; the "
+                     "localizations above are the diagnosis)")
         for w in a.get("withheld_unique_because", []):
             L.append(f"    UNIQUE withheld: {w}")
         for n in a.get("exclusion_shares_lineage_with_candidate", []):
