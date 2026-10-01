@@ -20,16 +20,16 @@ The 66 per-flight report directories stay outside git (about 5 MB).
 
 ## 1. Results
 
-**Batch:** 66 analysed, 0 failed, 3 min 10 s wall.
+**Batch:** 66 analysed, 0 failed, 3 min 6 s wall.
 
 | measure, per flight | min | median | max | total over 66 |
 |---|---|---|---|---|
 | flight log size (MB) | 19.2 | 69.7 | 120.3 | 4,601 |
-| analysis wall time, process start to exit (s) | 1.06 | 2.63 | 5.20 | 189.9 |
+| analysis wall time, process start to exit (s) | 1.04 | 2.79 | 4.77 | 185.9 |
 | peak memory, RSS (MB) | 72.0 | 118.1 | 168.1 | — |
-| `report.json` (bytes) | 58,950 | 67,058 | 81,069 | 4.53 MB |
-| of which the timeline (bytes) | 34,876 | 40,471 | 51,157 | — |
-| `report.txt` (bytes) | 8,402 | 9,299 | 9,774 | — |
+| `report.json` (bytes) | 59,198 | 67,331 | 81,417 | 4.55 MB |
+| of which the timeline (bytes) | 35,047 | 40,661 | 51,404 | — |
+| `report.txt` (bytes) | 8,404 | 9,299 | 9,774 | — |
 | ticks (0.1 s) | 468 | 1,718 | 2,968 | 113,385 |
 | timeline intervals | 9 | 10 | 13 | 695 |
 | evidence evaluations admitted (outputs × ticks) | 1,752 | 6,772 | 11,772 | 446,696 |

@@ -78,7 +78,9 @@ PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
 DEPENDENCE (adverse evidence, by lineage)
   all adverse evidence: 3 outputs in 1 lineage group(s), 2 independent line(s)
     one group: CONTROL/motor_0:xsys.compensation_T3@15s [xsys:w_ctrl], NAVIGATION/motor_0:xsys.dynamics_T1@0.2s [xsys:w_dyn], ACTUATION/motor_0:xsys.rpm_response@15s [xsys:w_rpm]
-      not independent because they share: channel:motor_command.motor_0, sensor:imu.1310988
+      linked through shared sources (a group is transitive: two members may share nothing):
+        channel:motor_command.motor_0: CONTROL/motor_0 [xsys:w_ctrl], ACTUATION/motor_0 [xsys:w_rpm]
+        sensor:imu.1310988: CONTROL/motor_0 [xsys:w_ctrl], NAVIGATION/motor_0 [xsys:w_dyn]
   ACTUATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
   CONTROL/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
   NAVIGATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)

@@ -13,6 +13,7 @@ tests pin:
 from __future__ import annotations
 
 import hashlib
+import re
 import json
 import subprocess
 import sys
@@ -188,6 +189,19 @@ def test_wa1_one_imu_chip_is_one_root():
     assert independent_lines([("dyn", XW.lineage("dyn", "motor_0")), ("est", env.lineage)]) == (1, True)
 
 
+def test_fv1_a_lineage_group_names_who_shares_each_source():
+    """Pilot finding FV-1: a lineage group is transitive. The XSYS-001 group
+    W_RPM - W_CTRL - W_DYN was reported as "they share: motor command, IMU",
+    although W_RPM and W_DYN share nothing."""
+    from csia_evidence_assurance import dependence as D
+    from csia_evidence_assurance.adapters import xsys_witness as XW
+    lins = {w: XW.lineage(w, "motor_0") for w in ("rpm", "dyn", "ctrl")}
+    assert not lins["rpm"].overlaps(lins["dyn"])
+    links = {x["root"]: x["evidence"] for x in D.shared_by(sorted(lins), lins)}
+    assert links == {"channel:motor_command.motor_0": ["ctrl", "rpm"],
+                     "sensor:imu.1310988": ["ctrl", "dyn"]}
+
+
 # ------------------------------------------------------------------ manifest and workflow
 def test_manifest_is_reproducible_and_path_free(s1_run, s1_report):
     body = R.dumps(s1_report)
@@ -239,10 +253,10 @@ def test_report_bytes_do_not_depend_on_process_or_directory(tmp_path):
 
 # ------------------------------------------------------------------ pinned reports (Phase 20)
 PINNED = {
-    "U4_s1_selector": "80035ab1256b72887ad5593f6eb99729c6ecd541ea607f091844baf201562566",
-    "U5_cusum_power_sag": "92d88ae17f149cfdc385831c05abd215e2dff83cdf260e67ebce4a14176d825e",
-    "U6_cusum_imu0_drift": "c8ca0bf203ec400885e5b8c1cb524257aae492bc1fda01e1e69abe5ca0a30927",
-    "U8_predicate_fault": "9c86f295ce89b79ae602069692e28220cea8a072651fd97e653b0e5629ee780b",
+    "U4_s1_selector": "4f9518ee36449fbc1e9d66f72e0a18d7f12708f9af395ae8ffedeff02fd800e2",
+    "U5_cusum_power_sag": "e96c3fa1951d366fad95d210c18d9c407d3510f12d85eb1f479979e1d2bfd495",
+    "U6_cusum_imu0_drift": "c14bf35aa3d09ec25f23bdf5b763494e86459f436a99047c8ca9b1ae30e096b3",
+    "U8_predicate_fault": "acc5ec20f115dca881c2e0ee04124ca58b9cd460bff01310e0f2ef9de34b3575",
 }
 
 
@@ -264,3 +278,43 @@ def test_pinned_reports_regenerate_byte_for_byte(case):
     assert (PILOT / "reports" / case / "report.json").read_bytes() == body
     hashes = json.loads((PILOT / "REPORT_HASHES.json").read_text())
     assert hashes[case] == PINNED[case]
+
+
+# ------------------------------------------------------------------ the package
+DOCS = {"README.md", "REVIEW_AND_DECISION.md", "PRODUCT_QUESTION.md",
+        "MULTI_PRODUCER_EVENT_MATRIX.md", "INDEPENDENCE_AND_CORROBORATION.md",
+        "BASELINE_COMPARISON.md", "FALSE_VALUE_SEARCH.md", "WRONG_ANSWER_SEARCH.md",
+        "ENGINEER_USEFULNESS.md", "CAMPAIGN_REPLAY.md", "ESTIMATOR_CLAIM_MAPPING.md",
+        "COVERAGE.md", "SITL_SELECTOR_RUN_DESIGN.md", "SITL_SELECTOR_RUN.md",
+        "LANE_SWITCH_EXPERIMENT_DESIGN.md", "ANALYZER_MVP.md", "SCALE.md",
+        "PRODUCT_GAP_ANALYSIS.md", "PRODUCT_BOUNDARY.md", "EXTERNAL_USER_TEST_PLAN.md",
+        "ONBOARD_READINESS_AUDIT.md", "RESEARCH_STATUS.md", "NOVELTY_DISCIPLINE.md"}
+BANNED = ("no prior work exists", "we are the first", "is the first to",
+          "first ever", "no one has", "never been studied", "has never been",
+          "no prior art exists")
+TOKENS = ("CSIA_2_2_PILOT_VALUE_DEMONSTRATED_NARROW", "CSIA_2_2_PILOT_READY_FOR_EXTERNAL_PRODUCT",
+          "CSIA_2_2_PILOT_NO_VALUE_OVER_MONITORS", "CSIA_2_2_PILOT_SEMANTIC_CORE_DEFECT_STOP",
+          "CSIA_2_2_PILOT_GOVERNANCE_BLOCK")
+
+
+def test_the_pilot_documents_exist_and_keep_the_repositorys_wording_rules():
+    have = {p.name for p in PILOT.glob("*.md")}
+    assert have == DOCS
+    for name in sorted(DOCS):
+        text = (PILOT / name).read_text(encoding="utf-8").lower()
+        assert len(text) > 1500, name
+        assert not re.search(r"\bnovel\b", text), name
+        for phrase in BANNED:
+            assert phrase not in text, (name, phrase)
+
+
+def test_the_pilot_decision_chooses_one_token_and_keeps_the_authority_boundary():
+    text = (PILOT / "REVIEW_AND_DECISION.md").read_text(encoding="utf-8")
+    decision = text.split("## 1. Decision", 1)[1].split("**Alternatives considered:**", 1)[0]
+    assert [t for t in TOKENS if t in decision] == ["CSIA_2_2_PILOT_VALUE_DEMONSTRATED_NARROW"]
+    assert "OFFBOARD, OBSERVATIONAL, ZERO CONTROL AUTHORITY" in decision
+    rows = re.findall(r"^\| (\d+)(?:-(\d+))? [a-z]", text, re.M)
+    assert {p for a, b in rows for p in range(int(a), int(b or a) + 1)} == set(range(30))
+    final = json.loads((PILOT / "PILOT_FINAL_STATE.json").read_text())
+    assert final["PILOT_FINAL_STATE_OK"] is True
+    assert final["semantic_core_changed_since_2_1_1"] == "none"

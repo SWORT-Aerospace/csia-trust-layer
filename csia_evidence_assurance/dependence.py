@@ -62,6 +62,14 @@ def shared_roots(group, lineages) -> list:
     return sorted(r for r, n in count.items() if n >= 2)
 
 
+def shared_by(group, lineages) -> list:
+    """For each root in `shared_roots`, the members that hold it. A group is
+    formed transitively, so two members of one group may share nothing
+    (pilot finding FV-1)."""
+    return [{"root": r, "evidence": sorted(k for k in group if r in lineages[k].roots)}
+            for r in shared_roots(group, lineages)]
+
+
 def overall(envelopes) -> dict:
     """Every adverse admitted envelope of the tick, grouped by lineage."""
     adverse = sorted((e for e in envelopes if e.record.is_adverse),
@@ -73,7 +81,8 @@ def overall(envelopes) -> dict:
     return {"adverse_evidence": len(adverse), "independent_lines": n,
             "independent_lines_exact": exact,
             "lineage_groups": groups,
-            "group_shared_roots": [shared_roots(g, lins) for g in groups]}
+            "group_shared_roots": [shared_roots(g, lins) for g in groups],
+            "group_links": [shared_by(g, lins) for g in groups]}
 
 
 def exclusion_independence(candidate_ids, discriminator_records, envelopes_by_record) -> list:

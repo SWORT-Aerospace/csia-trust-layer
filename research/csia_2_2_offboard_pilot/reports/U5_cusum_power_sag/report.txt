@@ -63,7 +63,10 @@ PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
 DEPENDENCE (adverse evidence, by lineage)
   all adverse evidence: 2 outputs in 1 lineage group(s), 1 independent line(s)
     one group: SENSOR/source.battery:cusum.sustained_shift@59.96s [cusum:v1_1_sequential], SENSOR/source.motor_esc:cusum.sustained_shift@59.96s [cusum:v1_1_sequential]
-      not independent because they share: model:v1.power_thrust, sensor:battery, sensor:motor_esc
+      linked through shared sources (a group is transitive: two members may share nothing):
+        model:v1.power_thrust: SENSOR/source.battery [cusum:v1_1_sequential], SENSOR/source.motor_esc [cusum:v1_1_sequential]
+        sensor:battery: SENSOR/source.battery [cusum:v1_1_sequential], SENSOR/source.motor_esc [cusum:v1_1_sequential]
+        sensor:motor_esc: SENSOR/source.battery [cusum:v1_1_sequential], SENSOR/source.motor_esc [cusum:v1_1_sequential]
   SENSOR/source.battery: 1 adverse outputs from 1 producer(s), 1 independent line(s)
   SENSOR/source.motor_esc: 1 adverse outputs from 1 producer(s), 1 independent line(s)
 

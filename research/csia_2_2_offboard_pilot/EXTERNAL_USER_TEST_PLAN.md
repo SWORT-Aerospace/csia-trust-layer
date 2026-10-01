@@ -36,6 +36,7 @@ primary measure.
 | 6 | v1 power_sag (CUSUM) | shared power sag | correlated alarms |
 | 7 | v1 imu0_bias_drift (CUSUM) | IMU drift outside CUSUM coverage | a monitor blind to the fault |
 | 8 | E1 transition | lane change after IMU failure | stale evidence across a configuration change |
+| 9 | XSYS-001 A flight log analysed alone (no witnesses) | actuator degradation, unobserved by the only producer | a clean-looking report whose scope is the point (finding WA-3) |
 
 **Truth is held by the experimenter.**
 
@@ -49,7 +50,7 @@ primary measure.
 `manifest.json` from `python -m csia_evidence_assurance analyze`, and a
 two-page guide.
 
-## 4. Questions per case (the pilot's 10, `ENGINEER_USEFULNESS.md`)
+## 4. Questions per case (from `ENGINEER_USEFULNESS.md`, questions 1-11 and 13 there)
 
 1. What first became abnormal, and when?
 2. Which explanations remain, and which are excluded, and by what evidence?
@@ -68,7 +69,7 @@ two-page guide.
 | measure | how | primary |
 |---|---|---|
 | correctness | each answer scored against truth by two blind raters (rubric fixed before the study; disagreements resolved by a third) | yes |
-| unsupported certainty | answers that name a single cause where truth is not separable (cases 3, 6, 7), or that call a monitor's silence "nominal" | yes |
+| unsupported certainty | answers that name a single cause where truth is not separable (cases 3, 6, 7), that call a monitor's silence "nominal", or that call case 9 clean | yes |
 | dependence recognised | case 6, and cases 1-2 (shared sources) | secondary |
 | invalid evidence caught | cases 3 and 8 | secondary |
 | time to answer | recorded | secondary, not a claim |

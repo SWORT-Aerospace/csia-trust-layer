@@ -585,9 +585,14 @@ def human_report(m: dict) -> str:
         for i, g in enumerate(ov["lineage_groups"]):
             if len(g) > 1:
                 L.append(f"    one group: {_ids(g)}")
-                shared = (ov.get("group_shared_roots") or [[]] * len(ov["lineage_groups"]))[i]
-                if shared:
-                    L.append(f"      not independent because they share: {', '.join(shared)}")
+                links = (ov.get("group_links") or [[]] * len(ov["lineage_groups"]))[i]
+                if links:
+                    L.append("      linked through shared sources (a group is transitive: two "
+                             "members may share nothing):")
+                    for x in links:
+                        who = ", ".join(f"{e.split('|')[2].split(':', 1)[0]} [{e.split('|', 1)[0]}]"
+                                        for e in x["evidence"])
+                        L.append(f"        {x['root']}: {who}")
     for c in comp:
         L.append(f"  {c['component']}: {len(c['adverse_evidence'])} adverse outputs from "
                  f"{len(c['producers'])} producer(s), {c['independent_lines']} independent "

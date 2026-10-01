@@ -63,7 +63,7 @@ There are no fleet analytics: no trends, no ranking, no aggregate score.
 | every producer's version and contract digest | `px4:ekf2.estimator_status` 547e2ca, `px4-ekf2-status-1`, 0d262894… |
 | analysis configuration | variant V3_TEMPORAL, onset in the log 154.752 s, tick |
 | code digests | `csia_evidence_assurance` and `csia_semantic_core`, over every `.py` and `.json` |
-| the report's own SHA-256 | b417b645… |
+| the report's own SHA-256 | cf5ff72f… |
 
 **The manifest has no absolute path, no host name and no time.**
 `test_manifest_is_reproducible_and_path_free` pins this.
@@ -100,7 +100,9 @@ order:
 3. truncated key-moment lines;
 4. one refuter shown where two held;
 5. no flag when the refuters share a source;
-6. no statement of what a run did not observe (WA-3, §5).
+6. no statement of what a run did not observe (WA-3, §5);
+7. a lineage group described as if every member shared every source
+   (FV-1, `FALSE_VALUE_SEARCH.md`).
 
 Details are in `WRONG_ANSWER_SEARCH.md` §3 and §2.
 
@@ -119,10 +121,10 @@ Details are in `WRONG_ANSWER_SEARCH.md` §3 and §2.
 
 | case | SHA-256 |
 |---|---|
-| U4_s1_selector | 80035ab1256b72887ad5593f6eb99729c6ecd541ea607f091844baf201562566 |
-| U5_cusum_power_sag | 92d88ae17f149cfdc385831c05abd215e2dff83cdf260e67ebce4a14176d825e |
-| U6_cusum_imu0_drift | c8ca0bf203ec400885e5b8c1cb524257aae492bc1fda01e1e69abe5ca0a30927 |
-| U8_predicate_fault | 9c86f295ce89b79ae602069692e28220cea8a072651fd97e653b0e5629ee780b |
+| U4_s1_selector | 4f9518ee36449fbc1e9d66f72e0a18d7f12708f9af395ae8ffedeff02fd800e2 |
+| U5_cusum_power_sag | e96c3fa1951d366fad95d210c18d9c407d3510f12d85eb1f479979e1d2bfd495 |
+| U6_cusum_imu0_drift | c14bf35aa3d09ec25f23bdf5b763494e86459f436a99047c8ca9b1ae30e096b3 |
+| U8_predicate_fault | acc5ec20f115dca881c2e0ee04124ca58b9cd460bff01310e0f2ef9de34b3575 |
 
 **What makes the bytes stable:**
 - sorted keys;
