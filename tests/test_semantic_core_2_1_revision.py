@@ -620,3 +620,90 @@ def test_p5_prime_a_fault_is_reported_and_never_more_certain_than_none():
     assert got["P5_prime_holds"], got
     assert got["evaluated"] == got["reported"] > 0
     assert got["more_certain_than_none"] == 0 and got["attribution_differs"] == 0
+
+
+# ============================================================ governance
+import hashlib  # noqa: E402
+import json  # noqa: E402
+import re  # noqa: E402
+
+LEDGER_SHA256 = "6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f"
+DOCS = {"README.md", "PROMOTION_REVIEW.md", "REVISION_REPORT.md", "R1_FAULT_POLICY_B.md",
+        "R2_PACING_STARVATION.md", "R3_CONFIGURATION_EPOCH.md", "WORSE_ANSWER_SEARCH.md",
+        "H743_UPDATE.md", "C_RUNTIME_DELTA_UPDATE.md", "FAILURE_LEDGER_RECOMMENDATIONS.md"}
+DATA = {"REVISION_DIFFERENCES.csv", "FAULT_REPLAY_RESULTS.csv", "LOOPHOLE_REGISTER_UPDATE.csv"}
+BANNED = ("no prior work exists", "we are the first", "is the first to", "first ever",
+          "no one has", "never been studied", "has never been", "no prior art exists")
+TOKENS = ("SEMANTIC_2_1_KEEP_SHADOW", "SEMANTIC_2_1_READY_AS_BASELINE",
+          "SEMANTIC_2_1_REQUIRES_REVISION", "SEMANTIC_2_1_GOVERNANCE_BLOCK")
+
+
+def _rev_json(name):
+    with open(os.path.join(REV, name), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def test_the_package_documents_exist_and_keep_the_repositorys_wording_rules():
+    have = set(os.listdir(REV))
+    assert DOCS <= have and DATA <= have
+    assert {n for n in have if n.endswith(".md")} == DOCS
+    for name in sorted(DOCS):
+        with open(os.path.join(REV, name), encoding="utf-8") as fh:
+            text = fh.read().lower()
+        assert len(text) > 1500, name
+        assert not re.search(r"\bnovel\b", text), name
+        for phrase in BANNED:
+            assert phrase not in text, (name, phrase)
+
+
+def test_the_promotion_review_chooses_exactly_one_level_and_keeps_v2_authoritative():
+    with open(os.path.join(REV, "PROMOTION_REVIEW.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    decision = text.split("## Decision", 1)[1].split("\n## ", 1)[0]
+    assert len([t for t in TOKENS if t in decision.split("**What was not chosen", 1)[0]]) == 1
+    assert "Frozen v2.0 remains the authoritative runtime default" in decision
+    assert "zero control authority" in decision
+    assert len(re.findall(r"^\| *\d+ *\|", text, re.M)) >= 16
+
+
+def test_the_baseline_was_locked_before_the_revision_and_still_holds_at_the_end():
+    for name in ("BASELINE_LOCK.json", "FINAL_STATE_CHECK.json"):
+        got = _rev_json(name)
+        assert got["BASELINE_AS_EXPECTED"] and got["governance_ok"], name
+        assert all(got["blockers_reproduced"].values()), name
+
+
+def test_the_shadow_package_is_byte_identical_to_the_locked_state():
+    locked = _rev_json("BASELINE_LOCK.json")["governance"]["shadow_package_file_sha256"]
+    for name, want in locked.items():
+        with open(os.path.join(SHADOW, name), "rb") as fh:
+            assert hashlib.sha256(fh.read()).hexdigest() == want, name
+
+
+def test_the_failure_ledger_is_untouched_and_the_new_entries_are_only_drafted():
+    path = os.path.join(ROOT, "research", "physical_validation", "FAILURE_LEDGER.yaml")
+    with open(path, "rb") as fh:
+        raw = fh.read()
+    assert hashlib.sha256(raw).hexdigest() == LEDGER_SHA256
+    assert b"FL-061" not in raw and b"FL-062" not in raw
+    import yaml
+    with open(os.path.join(REV, "FAILURE_LEDGER_RECOMMENDATIONS.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    block = text.split("```yaml\n", 1)[1].split("\n```", 1)[0]
+    ents = yaml.safe_load("entries:\n" + block)["entries"]
+    assert [e["id"] for e in ents] == ["FL-061", "FL-062"]
+
+
+def test_the_hard_gates_and_the_headline_measures_are_what_the_review_states():
+    g = _rev_json("GOVERNANCE_GATES.json")
+    assert g["phase9_xsys_gate_pass"] == {"2_1_0": True, "2_1_1": True}
+    assert all(g["phase10_unchanged"].values())
+    f = _rev_json("FAULT_REPLAY_RESULTS.json")
+    assert f["PRE"]["per_policy"]["A"]["fault_created_supported"] == 168
+    assert f["R1_ONLY"]["per_policy"]["B_IMPLEMENTED"]["fault_created_supported"] == 0
+    d = _rev_json("DATASET_A_THREE_WAY.json")
+    assert d["phase4_revision_differences"]["categories"] == {"REV_R2_vs_PRE_R1": {"EXPECTED_R2": 204}}
+    cats = d["phase4_rev_r2_vs_v2_0_shadow_classifier"]["categories"]
+    assert cats == {"CONSERVATIVE_WITHHOLD": 197, "CORRECTNESS_FIX": 273}
+    assert all(v == 0 for s in d["phase6_wrong_unique_ticks"].values() for v in s.values())
+    assert _rev_json("PROPERTY_RERUN.json")["NO_PROPERTY_WEAKENED"]
