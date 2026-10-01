@@ -96,7 +96,7 @@ monitors. It survives.
 
 ## 3. What the Analyzer adds here that the monitors alone do not
 
-**From the U1 report (`reports/U1_xsys_A_multi`):**
+**From the U1 report (`research/csia_2_2_offboard_pilot/reports/U1_xsys_A_multi/`):**
 - the exclusion of the telemetry hypothesis rests on two refuters, W_DYN and
   W_CTRL, which share the IMU. The report now says so ("the refuting
   evidence shares sensor:imu.1310988: it is not independent

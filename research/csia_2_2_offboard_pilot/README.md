@@ -65,7 +65,7 @@
 | file | what |
 |---|---|
 | `PILOT_BASELINE.json`, `PILOT_FINAL_STATE.json` | Phase 0 lock and the end-of-pilot re-verification (`verify_pilot_baseline.py [--final]`) |
-| `S1_RESULTS.json`, `data/S1_estimator_extract.npz`, `reports/S1/` | run S1: EKF2 selector on, magnetometer failed (`sitl_selector_run.py`, `analyze_s1.py`; `config/logger_topics_s1.txt`) |
+| `S1_RESULTS.json`, `data/S1_estimator_extract.npz`, `research/csia_2_2_offboard_pilot/reports/S1/` | run S1: EKF2 selector on, magnetometer failed (`sitl_selector_run.py`, `analyze_s1.py`; `config/logger_topics_s1.txt`) |
 | `CAMPAIGN_XSYS.json`, `CAMPAIGN_ANALYSIS.json` | the 66 flights and 121 trials through 2.2 (`campaign_xsys.py`, `analyze_campaign.py`) |
 | `WRONG_ANSWER_SEARCH.json` | probes P1-P9 (`wrong_answer_search.py`) |
 | `reports/U1…U8/`, `REPORT_HASHES.json` | the usefulness reports and their hashes (`usefulness_reports.py`) |

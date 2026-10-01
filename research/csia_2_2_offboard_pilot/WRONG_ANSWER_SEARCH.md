@@ -67,7 +67,7 @@ visible to an engineer (`ENGINEER_USEFULNESS.md`).
 |---|---|
 | an eliminated hypothesis named only the first refuter 2.1.1 lists; the second refuter's evidence was invisible | every refuter that held, and its evidence |
 | two refutations resting on the same IMU were not flagged | "the refuting evidence shares sensor:imu.1310988: it is not independent corroboration" |
-| a lineage group did not say what ties it together | "not independent because they share: …" |
+| a lineage group did not say what ties it together | first "not independent because they share: …"; then, after FV-1 (`FALSE_VALUE_SEARCH.md`), each shared source with the members that hold it |
 | configuration changes read as counters ("ekf2.aiding.hdg 2 -> 3") | PX4 terms ("hdg aiding fused: 3-axis magnetometer -> none") |
 | attribution NO_EVIDENCE beside a SUPPORTED localization, unexplained | 2.1.1's reason, and a note that the localization is the diagnosis |
 
