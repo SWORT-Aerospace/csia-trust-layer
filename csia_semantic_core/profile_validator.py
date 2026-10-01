@@ -25,6 +25,7 @@ gives the same findings.
 | PV6 DEPENDENCY_CYCLE | ERROR | a dependency cycle; common-cause reasoning assumes the depends-on graph is acyclic |
 | PV7 UNKNOWN_FUNCTION | ERROR | a record naming a function the function table does not define (a typo) |
 | PV8 INCONSISTENT_COMPONENT_DEPENDENCIES | ERROR | records of one component declaring different dependency sets |
+| PV9 PACING_INPUT_NOT_A_DEPENDENCY | ERROR | (2.1.1, R-2) a pacing input that is not a declared dependency of its component, or a pacing mode other than ALL or ANY. A pacing declaration says which EXISTING edge paces the output; it may not add an edge |
 
 `severity` says how a deployment should treat a finding:
 - ERROR: refuse the profile;
@@ -105,10 +106,10 @@ def _cycles(graph) -> list:
     return out
 
 
-def validate_profile(records, functions, subjects=None) -> list:
+def validate_profile(records, functions, subjects=None, pacing=None) -> list:
     """-> a sorted list of `Finding`. `functions` is a frozen
     `FunctionGraph` (or anything with a `.functions` name -> SystemFunction
-    mapping)."""
+    mapping). `pacing` is a successor profile's `pacing_map()` (PV9)."""
     table = getattr(functions, "functions", functions)
     records = tuple(records)
     found: set = set()
@@ -194,4 +195,20 @@ def validate_profile(records, functions, subjects=None) -> list:
     for cyc in _cycles(graph):
         found.add(Finding("PV6_DEPENDENCY_CYCLE", ERROR, " -> ".join(cyc),
                           "dependency cycle"))
+
+    # PV9 -- pacing inputs must be existing edges
+    deps_of: dict = {}
+    for r in records:
+        deps_of.setdefault(r.component, set()).update(r.dependencies or ())
+    for comp, (mode, inputs) in sorted((pacing or {}).items()):
+        if mode not in ("ALL", "ANY"):
+            found.add(Finding("PV9_PACING_INPUT_NOT_A_DEPENDENCY", ERROR, comp,
+                              f"pacing mode {mode!r} is not ALL or ANY"))
+        for i in inputs:
+            if i not in deps_of.get(comp, set()):
+                found.add(Finding(
+                    "PV9_PACING_INPUT_NOT_A_DEPENDENCY", ERROR, f"{comp} <- {i}",
+                    f"{i} is declared to pace {comp}, but it is not a declared "
+                    f"dependency of {comp}"
+                    + ("" if comp in deps_of else "; no record describes " + comp)))
     return sorted(found, key=lambda f: (f.rule, f.subject))

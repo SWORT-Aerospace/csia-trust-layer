@@ -24,6 +24,13 @@ WHAT ONE TICK RECORD HOLDS
 - `runtime_ns`: v2.0 reasoning (re-run) and 2.1 reasoning, measured
   separately.
 - `overlay`: the successor-profile digest, when one is applied.
+- 2.1.1 only: `withheld_predicate_fault` (R-1), and
+  `config_epoch_inadmissible` (R-3), the records the epoch rule did not
+  admit, with their epochs.
+
+2.1.1. The runner takes the overlay's pacing declarations to the core when
+R-2 is on, and passes `evaluate(snapshot, epochs=...)` through to the core
+when R-3 is on. The frozen engine never sees either.
 """
 
 from __future__ import annotations
@@ -62,25 +69,28 @@ class ShadowRunner:
         self.engine = engine
         self.overlay = overlay
         self.time_v2 = time_v2
-        self.core = SemanticCore21.from_engine(engine, corrections, trace=trace)
+        self.core = SemanticCore21.from_engine(
+            engine, corrections, trace=trace,
+            pacing=(overlay.pacing_map() if overlay is not None
+                    and hasattr(overlay, "pacing_map") else None))
         self.log: list = []
 
-    def evaluate(self, snapshot):
+    def evaluate(self, snapshot, epochs=None):
         """The authoritative path. Returns the frozen engine's own output."""
         sa = self.engine.evaluate(snapshot)
-        self.observe(sa)
+        self.observe(sa, epochs)
         return sa
 
-    def observe(self, sa) -> dict:
+    def observe(self, sa, epochs=None) -> dict:
         try:
-            rec = self._compare(sa)
+            rec = self._compare(sa, epochs)
         except Exception as exc:  # noqa: BLE001 -- never reaches the default path
             rec = {"t": round(float(sa.t), 6),
                    "shadow_fault": type(exc).__name__}
         self.log.append(rec)
         return rec
 
-    def _compare(self, sa) -> dict:
+    def _compare(self, sa, epochs=None) -> dict:
         records = tuple(sa.records)
         v2_ns = None
         if self.time_v2:
@@ -93,7 +103,8 @@ class ShadowRunner:
             assert [_lp(x) for x in locs] == [_lp(x) for x in sa.localizations]
         recs21 = self.overlay.apply(records) if self.overlay else records
         t0 = time.perf_counter_ns()
-        tr = self.core.reason(recs21)
+        tr = (self.core.reason(recs21) if epochs is None
+              else self.core.reason(recs21, epochs))
         v21_ns = time.perf_counter_ns() - t0
 
         old = {f"{x.symptom}|{x.subject}": x for x in sa.localizations}
@@ -151,7 +162,15 @@ class ShadowRunner:
                               a1.trace.get("localization_disagreement", []),
                           "unexcluded_alternatives":
                               a1.trace.get("unexcluded_alternatives", [])})
-        return {"t": round(float(sa.t), 6), "input_hash": input_hash(records),
+        extra = {}
+        if self.core.corrections.is_revised:
+            extra["semantics_version"] = tr.semantics_version
+            extra["withheld_predicate_fault"] = sorted(
+                x.key for x in tr.localizations
+                if x.outcome == "WITHHELD_PREDICATE_FAULT")
+            if tr.admission is not None:
+                extra["config_epoch_inadmissible"] = tr.admission["inadmissible"]
+        return {**extra, "t": round(float(sa.t), 6), "input_hash": input_hash(records),
                 "identical": not diffs,
                 "v2_0": {"localization": {k: _lp(v) for k, v in old.items()},
                          "attribution": ao},

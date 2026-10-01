@@ -151,6 +151,11 @@ class SuccessorIndex(EvidenceIndex):
         if self._frames:
             self._frames[-1].gaps.add(code)
 
+    def note_conflict(self, key):
+        """A conflicting key a scan set aside (R-2's pacing scan)."""
+        if self._frames:
+            self._frames[-1].conflicts.add(key)
+
     def open_frame(self):
         self._frames.append(_Frame())
 

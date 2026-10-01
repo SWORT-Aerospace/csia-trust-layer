@@ -20,8 +20,20 @@ Accepted successor profiles live in `successor_profiles/`, one file per
 version, and are never edited once written: a correction is a new version.
 `aircraft_successor_r1.json` holds the two declarations the shadow study
 accepted (`research/csia_semantic_core_2_1_shadow/PROFILE_REPAIR_PROPOSAL.md`).
-No successor profile is applied by default, and the frozen v2.0 engine never
-sees one.
+`aircraft_successor_r2.json` is r1 plus one pacing declaration (revision
+R-2, `research/csia_semantic_core_2_1_revision/`). No successor profile is
+applied by default, and the frozen v2.0 engine never sees one.
+
+PACING DECLARATIONS (2.1.1, R-2)
+--------------------------------
+A declaration may also name the inputs that pace a component's output
+(`add_pacing_inputs`) and how they combine (`pacing_mode`: ALL or ANY).
+That is architecture, so it lives in the profile; what starvation means
+lives in the predicate. Pacing is not a record field: `apply()` leaves it
+out, and `pacing_map()` hands it to the core (`SemanticCore21(pacing=...)`).
+A pacing input must also be a declared dependency (validator rule PV9).
+Empty pacing fields are left out of `to_dict()`, so a profile without them
+keeps the digest it had before pacing existed.
 """
 
 from __future__ import annotations
@@ -32,6 +44,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 KINDS = ("DIRECT", "DERIVED", "CONDITIONAL")
+PACING_MODES = ("ALL", "ANY")
 SUCCESSOR_DIR = Path(__file__).resolve().parent / "successor_profiles"
 
 
@@ -44,12 +57,19 @@ class Declaration:
     kind: str = "DIRECT"
     justification: str = ""
     source: str = ""
+    add_pacing_inputs: tuple = ()
+    pacing_mode: str | None = None
 
     def __post_init__(self):
         if self.kind not in KINDS:
             raise ValueError(f"kind must be one of {KINDS}")
-        if not (self.add_affected_functions or self.add_dependencies):
+        if not (self.add_affected_functions or self.add_dependencies
+                or self.add_pacing_inputs):
             raise ValueError("a declaration must add something")
+        if self.add_pacing_inputs and self.pacing_mode not in PACING_MODES:
+            raise ValueError(f"pacing_mode must be one of {PACING_MODES}")
+        if self.pacing_mode is not None and not self.add_pacing_inputs:
+            raise ValueError("pacing_mode without pacing inputs")
 
 
 @dataclass(frozen=True)
@@ -73,16 +93,25 @@ class ProfileOverlay:
     def to_dict(self) -> dict:
         return {"name": self.name, "version": self.version,
                 "base_profile": self.base_profile,
-                "declarations": [
-                    {"domain": x.domain, "component": x.component,
-                     "add_affected_functions": list(x.add_affected_functions),
-                     "add_dependencies": list(x.add_dependencies),
-                     "kind": x.kind, "justification": x.justification,
-                     "source": x.source} for x in self.declarations]}
+                "declarations": [_decl_dict(x) for x in self.declarations]}
 
     def digest(self) -> str:
         return hashlib.sha256(json.dumps(self.to_dict(), sort_keys=True)
                               .encode()).hexdigest()
+
+    def pacing_map(self) -> dict:
+        """`{component: (mode, (node id, ...))}` for `SemanticCore21`. Two
+        declarations for one component must agree on the mode."""
+        out: dict = {}
+        for x in self.declarations:
+            if not x.add_pacing_inputs:
+                continue
+            mode, inputs = out.get(x.component, (x.pacing_mode, ()))
+            if mode != x.pacing_mode:
+                raise ValueError(f"conflicting pacing modes for {x.component}")
+            out[x.component] = (mode, inputs + tuple(
+                i for i in x.add_pacing_inputs if i not in inputs))
+        return out
 
     def without(self, *components) -> "ProfileOverlay":
         """The same overlay minus some declarations, for counterfactuals."""
@@ -107,6 +136,18 @@ class ProfileOverlay:
                 deps += tuple(d for d in x.add_dependencies if d not in deps)
             out.append(replace(r, affected_functions=fns, dependencies=deps))
         return tuple(out)
+
+
+def _decl_dict(x) -> dict:
+    d = {"domain": x.domain, "component": x.component,
+         "add_affected_functions": list(x.add_affected_functions),
+         "add_dependencies": list(x.add_dependencies),
+         "kind": x.kind, "justification": x.justification,
+         "source": x.source}
+    if x.add_pacing_inputs:
+        d["add_pacing_inputs"] = list(x.add_pacing_inputs)
+        d["pacing_mode"] = x.pacing_mode
+    return d
 
 
 def load_successor(name: str = "aircraft_successor_r1") -> ProfileOverlay:

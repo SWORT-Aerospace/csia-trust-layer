@@ -48,6 +48,36 @@ cannot reappear in `X_FALSE` as a measured False.
 
 A predicate id that a hypothesis names and the table lacks is a
 configuration error, raised before any tick (`validate_table`).
+
+R-2: STARVATION FROM PACING INPUTS (2.1.1, PACING_INPUTS)
+--------------------------------------------------------
+Off by default. In 2.1.0, OUTPUT_MISSING's COMMUNICATION/input_starvation
+is refuted by FUNCTION_LINKS_NOMINAL: every link in the subject's declared
+closure is up. That reads links that cannot starve the output. On PX4, EKF2
+publishes only when new IMU data arrived (`EKF2::Run`, `if (imu_updated)`),
+so a healthy GNSS link says nothing about whether the estimator can be
+starved (shadow loophole L17).
+
+With PACING_INPUTS on, that one hypothesis, on that one symptom, is decided
+by PACING_INPUTS_NOMINAL instead:
+
+- **The profile says which inputs pace a component's output** (a versioned
+  successor-profile declaration, `pacing_inputs`), and how they combine:
+  ALL (every one is needed; any one stopping stops the output) or ANY
+  (failover or voting; the output continues while one arrives).
+- **The predicate says what starvation means.** Each pacing input's own
+  records are read in Kleene form (adverse makes it False; UNAVAILABLE, or
+  no record, makes it None; a C6 conflict on one of its keys makes it
+  unknown). ALL is Kleene AND over the inputs, ANY is Kleene OR.
+- **A declared dependency that is not a pacing input is never read.** It is
+  listed in the trace as DECLARED_DEPENDENCY_NOT_PACING. Nothing in the
+  closure is read.
+- **No pacing declaration means no answer** (None, scope gap
+  NO_DECLARED_PACING_INPUT). There is no fallback to links.
+
+POSITION_UNAVAILABLE's function-level COMMUNICATION/starvation hypothesis is
+not touched: it is about the links serving a function, which is what
+FUNCTION_LINKS_NOMINAL reads.
 """
 
 from __future__ import annotations
@@ -56,7 +86,7 @@ from dataclasses import dataclass, replace
 
 from csia.v2 import signatures as SIG
 from csia.v2.evidence import Applicability, ObservationState
-from csia.v2.localization import Predicate
+from csia.v2.localization import EvidenceIndex, Predicate
 
 # Frozen structural helpers, used read-only. They find declared structure
 # (dependencies, adverse sources, coverage); none of them is a defect the
@@ -90,6 +120,15 @@ C3_PREDICATES = (
 OUT_OF_DECLARED_SCOPE = "OUT_OF_DECLARED_SCOPE"
 NOT_JUDGED = "DECLARED_NOT_APPLICABLE"
 
+#: R-2 (2.1.1).
+PACING_PREDICATE = "PACING_INPUTS_NOMINAL"
+PACING_MODES = ("ALL", "ANY")
+STARVATION_SYMPTOM = "OUTPUT_MISSING"
+STARVATION_HYPOTHESIS = "COMMUNICATION/input_starvation"
+NO_DECLARED_PACING_INPUT = "NO_DECLARED_PACING_INPUT"
+PACING_INPUT_NOT_OBSERVED = "PACING_INPUT_NOT_OBSERVED"
+NOT_A_PACING_INPUT = "DECLARED_DEPENDENCY_NOT_PACING"
+
 
 class PredicateTableError(ValueError):
     """A hypothesis names a predicate the table does not have."""
@@ -112,6 +151,12 @@ def _gap(index, code):
     note = getattr(index, "note_gap", None)
     if note is not None:
         note(code)
+
+
+def _conflict(index, key):
+    note = getattr(index, "note_conflict", None)
+    if note is not None:
+        note(key)
 
 
 def all_fine(rows, k3):
@@ -391,6 +436,69 @@ def position_detector(c2: bool):
     return detect
 
 
+# ================================================================== R-2
+def validate_pacing(pacing) -> dict:
+    """`{component: (mode, (node id, ...))}`, checked. A malformed pacing
+    declaration is a configuration error, raised before any tick."""
+    out = {}
+    for comp, decl in dict(pacing or {}).items():
+        try:
+            mode, inputs = decl
+        except (TypeError, ValueError):
+            raise ValueError(f"pacing for {comp!r} must be (mode, inputs)")
+        inputs = tuple(inputs)
+        if mode not in PACING_MODES:
+            raise ValueError(f"pacing mode for {comp!r} must be one of "
+                             f"{PACING_MODES}")
+        if not inputs or not all(isinstance(i, str) and "/" in i
+                                 and i.split("/", 1)[1] for i in inputs):
+            raise ValueError(f"pacing inputs for {comp!r} must be "
+                             "DOMAIN/component ids")
+        out[comp] = (mode, inputs)
+    return out
+
+
+def pacing_test(pacing: dict):
+    """PACING_INPUTS_NOMINAL for a table configured with `pacing`."""
+
+    def node_rows(index, node):
+        return EvidenceIndex.find_id(index, node)
+
+    def test(index, subject):
+        decl = pacing.get(subject)
+        if decl is None:
+            _gap(index, NO_DECLARED_PACING_INPUT)
+            return None
+        mode, inputs = decl
+        for dep in index.dependencies_of(subject):
+            if dep not in inputs:
+                _ignore(index, node_rows(index, dep), NOT_A_PACING_INPUT)
+        conflicts = getattr(index, "conflicts", frozenset())
+        values = []
+        for node in inputs:
+            rows = node_rows(index, node)
+            clash = [r for r in rows if (r.relation, r.component) in conflicts]
+            rows = [r for r in rows if (r.relation, r.component) not in conflicts]
+            for r in clash:
+                _conflict(index, f"{r.component}:{r.relation}")
+            _note(index, rows)
+            if not rows and not clash:
+                _gap(index, PACING_INPUT_NOT_OBSERVED)
+                values.append(None)
+                continue
+            v = all_fine(rows, True)
+            values.append(None if clash and v is not False else v)
+        if mode == "ALL":
+            if any(v is False for v in values):
+                return False
+            return None if any(v is None for v in values) else True
+        if any(v is True for v in values):
+            return True
+        return None if any(v is None for v in values) else False
+
+    return test
+
+
 # ================================================================== C4
 @dataclass(frozen=True)
 class SuccessorPredicate(Predicate):
@@ -453,9 +561,22 @@ def _is_rebuildable_negation(pid, table):
 
 
 def successor_predicate_table(predicates: dict, c2=True, c3=True,
-                              c4=True) -> dict:
-    """The successor's predicate table, built from a frozen one."""
+                              c4=True, pacing=None) -> dict:
+    """The successor's predicate table, built from a frozen one. `pacing`
+    (R-2) adds PACING_INPUTS_NOMINAL and its negation; None leaves the
+    2.1.0 table."""
     repl = successor_tests(c2, c3)
+    predicates = dict(predicates)
+    if pacing is not None:
+        pacing = validate_pacing(pacing)
+        predicates[PACING_PREDICATE] = Predicate(
+            PACING_PREDICATE,
+            "every input declared to pace the subject's output is arriving",
+            "COMMUNICATION", pacing_test(pacing))
+        predicates[PACING_PREDICATE + "_FALSE"] = Predicate(
+            PACING_PREDICATE + "_FALSE",
+            "an input declared to pace the subject's output is not arriving",
+            "COMMUNICATION", None)
     out: dict = {}
     for pid, p in predicates.items():
         if _is_rebuildable_negation(pid, predicates):
@@ -474,14 +595,27 @@ def successor_predicate_table(predicates: dict, c2=True, c3=True,
     return out
 
 
-def successor_symptoms(symptoms, c2=True, c3=True) -> tuple:
+def successor_symptoms(symptoms, c2=True, c3=True,
+                       pacing_inputs=False) -> tuple:
     """The frozen symptom table; under C3 the frozen POSITION_UNAVAILABLE
-    spec gets the scoped detector. Hypotheses are not changed."""
-    if not c3:
-        return tuple(symptoms)
-    frozen = SIG.SYMPTOMS_BY_ID.get("POSITION_UNAVAILABLE")
-    return tuple(replace(s, detect=position_detector(c2)) if s is frozen else s
-                 for s in symptoms)
+    spec gets the scoped detector. Under R-2 (`pacing_inputs`) the frozen
+    OUTPUT_MISSING spec's input_starvation hypothesis reads
+    PACING_INPUTS_NOMINAL. No other hypothesis is changed."""
+    out = tuple(symptoms)
+    if c3:
+        frozen = SIG.SYMPTOMS_BY_ID.get("POSITION_UNAVAILABLE")
+        out = tuple(replace(s, detect=position_detector(c2)) if s is frozen
+                    else s for s in out)
+    if pacing_inputs:
+        frozen = SIG.SYMPTOMS_BY_ID.get(STARVATION_SYMPTOM)
+        out = tuple(replace(s, hypotheses=tuple(
+            replace(h, mechanism="the process has nothing to work on because "
+                    "an input that paces its output is not arriving",
+                    confirmed_by=(PACING_PREDICATE + "_FALSE",),
+                    refuted_by=(PACING_PREDICATE,))
+            if h.hypothesis_id == STARVATION_HYPOTHESIS else h
+            for h in s.hypotheses)) if s is frozen else s for s in out)
+    return out
 
 
 def validate_table(symptoms, predicates) -> None:
