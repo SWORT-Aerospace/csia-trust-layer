@@ -53,7 +53,7 @@ each declared pacing input's own records in Kleene form:
 |---|---|
 | any adverse record | False |
 | UNAVAILABLE, or no record at all | None (gap PACING_INPUT_NOT_OBSERVED) |
-| a C6 conflict on one of its keys | unknown |
+| a C6 conflict on one of its keys | unknown, unless another of its records is adverse (then False) |
 
 The inputs then combine: **ALL** is Kleene AND, **ANY** is Kleene OR.
 
