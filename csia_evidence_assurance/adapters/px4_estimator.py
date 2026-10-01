@@ -184,6 +184,34 @@ class EstimatorLog:
                    str(u.msg_info_dict.get("ver_sw", "")), int(u.start_timestamp),
                    {"file": path.name, "sha256": h})
 
+    def to_npz(self, path) -> None:
+        """A compressed extract of exactly what the adapter reads, so an
+        analysis is reproducible without the raw ULog."""
+        import json as _json
+        arrays = {f"status__{i}__{k}": v for i, d in self.status.items() for k, v in d.items()}
+        if self.selector is not None:
+            arrays.update({f"selector__{k}": v for k, v in self.selector.items()})
+        meta = {"params": {k: self.params[k] for k in sorted(self.params)
+                           if k.startswith(("SENS_", "EKF2_", "SYS_"))},
+                "ver_sw": self.ver_sw, "t0_us": self.t0_us, "origin": self.origin}
+        np.savez_compressed(path, __meta__=np.array(_json.dumps(meta, sort_keys=True)), **arrays)
+
+    @classmethod
+    def from_npz(cls, path) -> "EstimatorLog":
+        import json as _json
+        z = np.load(path, allow_pickle=False)
+        meta = _json.loads(str(z["__meta__"]))
+        status, selector = {}, None
+        for k in z.files:
+            if k.startswith("status__"):
+                _, inst, field_ = k.split("__", 2)
+                status.setdefault(int(inst), {})[field_] = z[k]
+            elif k.startswith("selector__"):
+                selector = selector or {}
+                selector[k.split("__", 1)[1]] = z[k]
+        origin = dict(meta["origin"], extract=Path(path).name)
+        return cls(status, selector, meta["params"], meta["ver_sw"], meta["t0_us"], origin)
+
     def multi_mode(self) -> bool:
         return int(self.params.get("SENS_IMU_MODE", 1)) == 0
 
