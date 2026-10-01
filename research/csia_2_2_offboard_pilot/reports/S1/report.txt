@@ -1,0 +1,49 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  kind: px4_ulog_extract
+  selector: SELECTOR
+  tick_s: 0.1
+  ulog: {'file': 'S1.ulg', 'sha256': '561a4ef088bc26a5784c24b410178b50b75838d20e9bb7bd71782de139cf8d62', 'extract': 'S1_estimator_extract.npz'}
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  1006 ticks in 11 intervals
+  0.000s .. 0.500s (6 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: start
+  0.600s: no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: admissibility, epochs, producer_health
+  0.700s .. 0.800s (2 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+  0.900s .. 1.300s (5 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+  1.400s .. 1.600s (3 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+  1.700s .. 2.600s (10 ticks): no symptom; attribution NO_EVIDENCE; 0 used, 4 rejected; changed: epochs
+  2.700s: no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: admissibility, epochs, producer_health
+  2.800s .. 50.600s (479 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+  50.700s .. 53.200s (26 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+  53.300s .. 75.400s (222 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+  75.500s .. 100.500s (251 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: epochs
+
+FINAL STATE at 100.500s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  attribution: NO_EVIDENCE
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:ekf2.estimator_status: health VALID; 4 of 4 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: ekf2.aiding.hdg=3, ekf2.aiding.hgt=3, ekf2.aiding.pos=1, ekf2.aiding.vel=1, ekf2.imu.change_count=0, ekf2.reset.reset_count_pod_d=0, ekf2.reset.reset_count_pos_ne=3, ekf2.reset.reset_count_quat=1, ekf2.reset.reset_count_vel_d=1, ekf2.reset.reset_count_vel_ne=3, ekf2.selector.instance_changed_count=1
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

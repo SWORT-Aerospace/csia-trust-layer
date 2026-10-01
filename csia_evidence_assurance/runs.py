@@ -188,7 +188,12 @@ def _xsys_onset_s(ulog_path, trial_key) -> float:
 
 # ------------------------------------------------------------------ PX4 ULog
 def ulog(path, tick_s: float = 0.1, t_end=None) -> Run:
-    log = PX.EstimatorLog.from_ulog(path)
+    return estimator_log(PX.EstimatorLog.from_ulog(path), tick_s, t_end)
+
+
+def estimator_log(log, tick_s: float = 0.1, t_end=None) -> Run:
+    """The PX4 estimator producer over a loaded log (`EstimatorLog.from_ulog`
+    or `from_npz`)."""
     est = PX.EstimatorProducer(log)
     _engine, core, gate, _ov = aircraft_setup()
     contracts = load_contracts("px4_ekf2_estimator_status")
@@ -202,5 +207,6 @@ def ulog(path, tick_s: float = 0.1, t_end=None) -> Run:
         cur, ev = est.context(t)
         out.append(an.step(t, envs, epochs=EpochContext(cur, ev),
                            coverage=est.coverage_notices()))
-    return Run(out, {"kind": "px4_ulog", "ulog": log.origin, "tick_s": tick_s,
+    kind = "px4_ulog" if "extract" not in log.origin else "px4_ulog_extract"
+    return Run(out, {"kind": kind, "ulog": log.origin, "tick_s": tick_s,
                      "selector": est._lane_mode}, gate, contracts, an)

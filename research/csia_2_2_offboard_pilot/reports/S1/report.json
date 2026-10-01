@@ -1,0 +1,1691 @@
+{
+ "analyzer_version": "2.2.0",
+ "contracts": {
+  "px4:ekf2.estimator_status": {
+   "contract_version": "px4-ekf2-status-1",
+   "digest": "935533c566651994518ebedd0260b3869df9e253d29c42645032988adffed759",
+   "producer_version": "547e2ca"
+  }
+ },
+ "final": {
+  "analyzer_version": "2.2.0",
+  "attribution": {
+   "candidates": [],
+   "relevant_discriminators": [],
+   "retained_by_localization": [],
+   "unexcluded_alternatives": [],
+   "unique": null,
+   "verdict": "NO_EVIDENCE",
+   "why": "NOTHING_ADVERSE",
+   "withheld_unique_because": []
+  },
+  "configuration": {
+   "epochs": {
+    "ekf2.aiding.hdg": [
+     3
+    ],
+    "ekf2.aiding.hgt": [
+     3
+    ],
+    "ekf2.aiding.pos": [
+     1
+    ],
+    "ekf2.aiding.vel": [
+     1
+    ],
+    "ekf2.imu.change_count": [
+     0
+    ],
+    "ekf2.reset.reset_count_pod_d": [
+     0
+    ],
+    "ekf2.reset.reset_count_pos_ne": [
+     3
+    ],
+    "ekf2.reset.reset_count_quat": [
+     1
+    ],
+    "ekf2.reset.reset_count_vel_d": [
+     1
+    ],
+    "ekf2.reset.reset_count_vel_ne": [
+     3
+    ],
+    "ekf2.selector.instance_changed_count": [
+     1
+    ]
+   },
+   "keys_with_context_behind": [],
+   "not_admitted_by_epoch": [],
+   "transition_events": {}
+  },
+  "corroboration": {
+   "by_component": [],
+   "overall": {
+    "adverse_evidence": 0,
+    "independent_lines": 0,
+    "independent_lines_exact": true,
+    "lineage_groups": []
+   }
+  },
+  "event_time": 100.5,
+  "evidence": {
+   "admitted_with_warnings": [],
+   "rejected": [],
+   "used": [
+    "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|100.340000",
+    "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|100.340000",
+    "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|100.340000",
+    "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|100.340000"
+   ]
+  },
+  "localizations": [],
+  "producers": {
+   "by_producer": {
+    "px4:ekf2.estimator_status": {
+     "admitted": 4,
+     "evidence": 4,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    }
+   },
+   "coverage_gaps": []
+  },
+  "profile": {
+   "base_profile": "csia/v2/profiles/aircraft.py",
+   "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+   "gate": "ACCEPTED",
+   "name": "aircraft-successor",
+   "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+   "version": "r2"
+  },
+  "profile_warnings": [
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+   "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+  ],
+  "reason_trace": {
+   "attribution": "NOTHING_ADVERSE",
+   "localizations": {}
+  },
+  "semantic_version": "2.1.1",
+  "state": {
+   "abnormal": {
+    "adverse_evidence": [],
+    "symptoms": []
+   },
+   "attribution": "NO_EVIDENCE",
+   "headline": "no symptom; attribution NO_EVIDENCE",
+   "localization_outcomes": {}
+  }
+ },
+ "inputs": {
+  "kind": "px4_ulog_extract",
+  "selector": "SELECTOR",
+  "tick_s": 0.1,
+  "ulog": {
+   "extract": "S1_estimator_extract.npz",
+   "file": "S1.ulg",
+   "sha256": "561a4ef088bc26a5784c24b410178b50b75838d20e9bb7bd71782de139cf8d62"
+  }
+ },
+ "intervals": 11,
+ "profile_gate": {
+  "findings": [
+   {
+    "detail": "GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "GEOFENCE_SUPPORT:COMPUTE"
+   },
+   {
+    "detail": "PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "PROPULSION:COMPUTE"
+   },
+   {
+    "detail": "TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "TELEMETRY:COMPUTE"
+   },
+   {
+    "detail": "COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+    "rule": "PV3_UNWATCHED_DECLARATION",
+    "severity": "WARNING",
+    "subject": "COMMUNICATION/esc_can -> PROPULSION"
+   }
+  ],
+  "profile": {
+   "base_profile": "csia/v2/profiles/aircraft.py",
+   "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+   "name": "aircraft-successor",
+   "version": "r2"
+  },
+  "status": "ACCEPTED"
+ },
+ "schema": "csia.flight_assurance_report/1",
+ "semantic_version": "2.1.1",
+ "ticks": 1006,
+ "timeline": [
+  {
+   "changed": [
+    "start"
+   ],
+   "from": 0.0,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {},
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.0,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {},
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 6,
+   "to": 0.5
+  },
+  {
+   "changed": [
+    "admissibility",
+    "epochs",
+    "producer_health"
+   ],
+   "from": 0.6,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       0
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       0
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       0
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.6,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|0.444000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|0.444000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|0.444000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|0.444000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "UNAVAILABLE"
+       ],
+       "rejected": {
+        "PRODUCER_INVALID": 4
+       }
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 1,
+   "to": 0.6
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 0.7,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       0
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       1
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       1
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 0 -> 1 by t=0.700s",
+      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 0 -> 1 by t=0.700s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.7,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|0.548000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|0.548000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|0.548000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|0.548000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "UNAVAILABLE"
+       ],
+       "rejected": {
+        "PRODUCER_INVALID": 4
+       }
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 2,
+   "to": 0.8
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 0.9,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       1
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       1
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       1
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hgt": "ekf2.aiding.hgt 0 -> 1 by t=0.900s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.9,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|0.740000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|0.740000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|0.740000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|0.740000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "UNAVAILABLE"
+       ],
+       "rejected": {
+        "PRODUCER_INVALID": 4
+       }
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 5,
+   "to": 1.3
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 1.4,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       1
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       2
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       2
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 1 -> 2 by t=1.400s",
+      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 1 -> 2 by t=1.400s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 1.4,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|1.244000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|1.244000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|1.244000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|1.244000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "UNAVAILABLE"
+       ],
+       "rejected": {
+        "PRODUCER_INVALID": 4
+       }
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 3,
+   "to": 1.6
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 1.7,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       2
+      ],
+      "ekf2.aiding.pos": [
+       0
+      ],
+      "ekf2.aiding.vel": [
+       0
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       2
+      ],
+      "ekf2.reset.reset_count_quat": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       2
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hgt": "ekf2.aiding.hgt 1 -> 2 by t=1.700s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 1.7,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|1.540000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|1.540000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|1.540000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|1.540000",
+       "producer_id": "px4:ekf2.estimator_status",
+       "reasons": [
+        "PRODUCER_UNAVAILABLE"
+       ],
+       "status": "PRODUCER_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": []
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "UNAVAILABLE"
+       ],
+       "rejected": {
+        "PRODUCER_INVALID": 4
+       }
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 10,
+   "to": 2.6
+  },
+  {
+   "changed": [
+    "admissibility",
+    "epochs",
+    "producer_health"
+   ],
+   "from": 2.7,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       0
+      ],
+      "ekf2.aiding.hgt": [
+       2
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       3
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.pos": "ekf2.aiding.pos 0 -> 1 by t=2.700s",
+      "ekf2.aiding.vel": "ekf2.aiding.vel 0 -> 1 by t=2.700s",
+      "ekf2.reset.reset_count_pos_ne": "ekf2.reset.reset_count_pos_ne 2 -> 3 by t=2.700s",
+      "ekf2.reset.reset_count_quat": "ekf2.reset.reset_count_quat 0 -> 1 by t=2.700s",
+      "ekf2.reset.reset_count_vel_d": "ekf2.reset.reset_count_vel_d 0 -> 1 by t=2.700s",
+      "ekf2.reset.reset_count_vel_ne": "ekf2.reset.reset_count_vel_ne 2 -> 3 by t=2.700s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 2.7,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|2.540000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|2.540000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|2.540000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|2.540000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 1,
+   "to": 2.7
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 2.8,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       1
+      ],
+      "ekf2.aiding.hgt": [
+       2
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       3
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hdg": "ekf2.aiding.hdg 0 -> 1 by t=2.800s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 2.8,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|2.644000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|2.644000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|2.644000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|2.644000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 479,
+   "to": 50.6
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 50.7,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       2
+      ],
+      "ekf2.aiding.hgt": [
+       2
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       3
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hdg": "ekf2.aiding.hdg 1 -> 2 by t=50.700s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 50.7,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|50.540000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|50.540000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|50.540000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|50.540000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 26,
+   "to": 53.2
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 53.3,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       2
+      ],
+      "ekf2.aiding.hgt": [
+       3
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       3
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hgt": "ekf2.aiding.hgt 2 -> 3 by t=53.300s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 53.3,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|53.140000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|53.140000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|53.140000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|53.140000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 222,
+   "to": 75.4
+  },
+  {
+   "changed": [
+    "epochs"
+   ],
+   "from": 75.5,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       3
+      ],
+      "ekf2.aiding.hgt": [
+       3
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       3
+      ],
+      "ekf2.selector.instance_changed_count": [
+       1
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {
+      "ekf2.aiding.hdg": "ekf2.aiding.hdg 2 -> 3 by t=75.500s"
+     }
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 75.5,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|75.340000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|75.340000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|75.340000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|75.340000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 251,
+   "to": 100.5
+  }
+ ]
+}
