@@ -13,8 +13,8 @@ the content time and the validated window.
 | witness | producer | record | lineage | validated window (relative to onset) |
 |---|---|---|---|---|
 | W_RPM | `xsys:w_rpm` | ACTUATION/motor_m `xsys.rpm_response` | `channel:esc_rpm.motor_m`, `channel:motor_command.motor_m` | T1 and T3: [0, 15] s |
-| W_DYN | `xsys:w_dyn` | NAVIGATION/motor_m `xsys.dynamics_T1` | `sensor:gyro.<id>`, `calibration:rotor_geometry` | T1 only: [0, 0.2] s |
-| W_CTRL | `xsys:w_ctrl` | CONTROL/motor_m `xsys.compensation_T3` | `channel:motor_command.motor_m`, `model:px4_rate_controller`, `model:ekf2`, `sensor:gyro.<id>` | T3 only: [10, 15] s |
+| W_DYN | `xsys:w_dyn` | NAVIGATION/motor_m `xsys.dynamics_T1` | `sensor:imu.<id>`, `calibration:rotor_geometry` | T1 only: [0, 0.2] s |
+| W_CTRL | `xsys:w_ctrl` | CONTROL/motor_m `xsys.compensation_T3` | `channel:motor_command.motor_m`, `model:px4_rate_controller`, `model:ekf2`, `sensor:imu.<id>` | T3 only: [10, 15] s |
 
 **Where the lineage comes from** (`xsys_extract.load_full`):
 - W_RPM compares `esc_status` RPM with `actuator_outputs_sim`, the motor
@@ -87,7 +87,7 @@ def frozen_version() -> str:
 
 
 def lineage(witness: str, subject: str, gyro_id=XSYS_GYRO_DEVICE_ID) -> Lineage:
-    gyro = f"sensor:gyro.{int(gyro_id)}"
+    gyro = f"sensor:imu.{int(gyro_id)}"     # the IMU device (pilot finding WA-1)
     if witness == "rpm":
         return Lineage.of(f"channel:esc_rpm.{subject}", f"channel:motor_command.{subject}")
     if witness == "dyn":
@@ -146,12 +146,12 @@ def contracts_dict(version: str | None = None) -> dict:
         "dyn": ("in T1 the body rates show no response along the motor's thrust-loss axis "
                 "(NOMINAL) or show one (VIOLATED), when the local symptom implies a genuine loss "
                 "would be detectable", "NAVIGATION", XA.REL_DYN, list(t1),
-                ["sensor:gyro.<id>", "calibration:rotor_geometry"]),
+                ["sensor:imu.<gyro device id>", "calibration:rotor_geometry"]),
         "ctrl": ("in T3 the controller shows no compensation on the motor (NOMINAL) or shows "
                  "it (VIOLATED), when the local symptom implies a genuine loss would be "
                  "detectable", "CONTROL", XA.REL_CTRL, list(t3),
                  ["channel:motor_command.<motor>", "model:px4_rate_controller", "model:ekf2",
-                  "sensor:gyro.<id>"]),
+                  "sensor:imu.<gyro device id>"]),
     }
     out = {}
     for name, (pid, claim, _dom, _rel) in WITNESSES.items():

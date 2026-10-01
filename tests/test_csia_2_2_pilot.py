@@ -115,7 +115,7 @@ def test_a_diagnosis_shows_what_its_evidence_rests_on():
     rpm = [v for k, v in basis.items() if k.startswith("xsys:w_rpm")][0]
     dyn = [v for k, v in basis.items() if k.startswith("xsys:w_dyn")][0]
     assert "channel:esc_rpm.motor_0" in rpm            # telemetry
-    assert "sensor:gyro.1310988" in dyn                # physical
+    assert "sensor:imu.1310988" in dyn                 # physical
 
 
 def test_key_moments_answer_when():
@@ -129,6 +129,21 @@ def test_key_moments_answer_when():
     k4 = R.machine_report(v4.results, v4.inputs, v4.gate, v4.contracts)["key_moments"]
     assert k4["certainty"] == []
     assert {e["status"] for e in k4["evidence_invalidated"]} == {"REGIME_INVALID"}
+
+
+def test_wa1_one_imu_chip_is_one_root():
+    """Pilot finding WA-1: gyro and accelerometer of one IMU device were two
+    roots, so a gyro monitor and an accelerometer monitor of the same chip
+    counted as independent lines."""
+    from csia_evidence_assurance.lineage import independent_lines
+    est = PX.EstimatorProducer(PX.EstimatorLog.from_npz(S1))
+    env = est.step(60.0)[0]
+    imu = [r for r in env.lineage.roots if r.startswith("sensor:imu.")]
+    assert imu == ["sensor:imu.1310988"]
+    assert not any(r.startswith(("sensor:gyro.", "sensor:accel.")) for r in env.lineage.roots)
+    from csia_evidence_assurance.adapters import xsys_witness as XW
+    assert XW.lineage("dyn", "motor_0").overlaps(env.lineage)
+    assert independent_lines([("dyn", XW.lineage("dyn", "motor_0")), ("est", env.lineage)]) == (1, True)
 
 
 # ------------------------------------------------------------------ manifest and workflow

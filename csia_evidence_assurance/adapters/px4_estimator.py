@@ -335,8 +335,11 @@ class EstimatorProducer:
     # ------------------------------------------------------------- outputs
     def envelopes_of(self, item) -> list:
         row, flags = item["row"], int(item["row"]["control_mode_flags"])
-        base = {f"sensor:gyro.{int(row['gyro_device_id'])}",
-                f"sensor:accel.{int(row['accel_device_id'])}", "model:ekf2"}
+        # One root per IMU device: a gyro and an accelerometer with one device
+        # id are one chip, and a fault of the chip corrupts both (pilot
+        # finding WA-1: separate gyro/accel roots made them look independent).
+        base = {f"sensor:imu.{int(row['gyro_device_id'])}",
+                f"sensor:imu.{int(row['accel_device_id'])}", "model:ekf2"}
         out = []
         for claim, (fld, kind, bits, _resets) in sorted(CLAIMS.items()):
             ratio = float(row[fld])

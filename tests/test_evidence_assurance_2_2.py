@@ -487,7 +487,7 @@ def test_estimator_lane_switch_epoch_pin(aircraft):
     assert len(used) == 4 and not after.evidence["rejected"]
     held = an.store[(PX.PRODUCER_ID, "INNOVATION_POS",
                      "COMPUTE/state_estimator:estimator.innovation.pos")]
-    assert held.record.detail["instance"] == 1 and "sensor:gyro.222" in held.lineage.roots
+    assert held.record.detail["instance"] == 1 and "sensor:imu.222" in held.lineage.roots
 
 
 def test_estimator_claims_health_and_missing_selector():
