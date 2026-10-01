@@ -10,7 +10,10 @@ WHAT THE CLAIM SAYS, AND DOES NOT
 - **DEGRADED:** the CUSUM of n's standardised pre-transform chi-square is
   above h. A sustained upward shift has accumulated in the residuals of the
   physical relations n takes part in.
-- **NOMINAL:** the statistic advanced this tick and is at or below h.
+- **NOMINAL:** the statistic advanced this tick and is at or below h. The
+  contract declares `nominal_means: NO_ANOMALY`: the detector has seen
+  nothing, which is not an observation that the node is healthy, and the
+  coverage report says so.
 - **UNAVAILABLE** (producer health): the statistic did not advance this
   tick, because n's input was gated out or not fresh. The frozen bank's own
   rule is that absence of evidence is not evidence of change.
@@ -61,7 +64,7 @@ from ..health import ProducerHealth
 from ..lineage import Lineage
 
 PRODUCER_ID = "cusum:v1_1_sequential"
-CONTRACT_VERSION = "cusum-1"
+CONTRACT_VERSION = "cusum-2"
 CLAIM = "SUSTAINED_SHIFT"
 RELATION = "cusum.sustained_shift"
 

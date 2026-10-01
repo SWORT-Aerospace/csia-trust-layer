@@ -210,3 +210,32 @@ def estimator_log(log, tick_s: float = 0.1, t_end=None) -> Run:
     kind = "px4_ulog" if "extract" not in log.origin else "px4_ulog_extract"
     return Run(out, {"kind": kind, "ulog": log.origin, "tick_s": tick_s,
                      "selector": est._lane_mode}, gate, contracts, an)
+
+
+# ------------------------------------------------------------------ one input
+def resolve(spec: str, variant: str = "V3_TEMPORAL", ulog_path=None, tick_s: float = 0.1) -> Run:
+    """Any input the Analyzer accepts, by what it is:
+
+    | input | analysis |
+    |---|---|
+    | a `.ulg` file | the PX4 estimator over the flight (`ulog`) |
+    | a `.npz` extract written by `EstimatorLog.to_npz` | the same, from the extract |
+    | a frozen v2 scenario name (`NOMINAL`, `PROCESS_STALL`, ...) | `v2_scenario` |
+    | a frozen v1 scenario name (`power_sag`, ...) | the frozen CUSUM (`cusum_scenario`) |
+    | an XSYS-001 analysis id (`XS1A1-C00-A-E055`) | `xsys_trial`, with `ulog_path` if given |
+    """
+    from csia.scenarios import SCENARIOS as V1
+    from csia.v2.profiles import SCENARIOS as V2S
+    p = Path(spec)
+    if p.suffix.lower() == ".ulg" and p.exists():
+        return ulog(p, tick_s)
+    if p.suffix.lower() == ".npz" and p.exists():
+        return estimator_log(PX.EstimatorLog.from_npz(p), tick_s)
+    if spec in V2S:
+        return v2_scenario(spec)
+    if spec in V1:
+        return cusum_scenario(spec)
+    if any(k["analysis_id"] == spec for k in xsys_key()["trials"].values()):
+        return xsys_trial(spec, variant, ulog_path, tick_s)
+    raise ValueError(f"not an Analyzer input: {spec!r} (expected a .ulg or .npz file, a v2 or "
+                     f"v1 scenario name, or an XSYS-001 analysis id)")

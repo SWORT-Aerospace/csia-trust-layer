@@ -8,6 +8,7 @@ only what admissibility and the report need.
 |---|---|
 | `producer_id`, `producer_version`, `contract_version` | refusing output of another version (L9) |
 | `claims` | the claims the producer may make, each with its meaning and the 2.1.1 record it maps to (domain, relation, attributable). An undeclared claim is refused (L6) |
+| `nominal_means` (per claim, optional) | what a NOMINAL output of this claim tells the engineer: `NOMINAL` (a check with the power to see the condition passed; the default) or `NO_ANOMALY` (a detector stayed silent, which is not an observation of health). Read only by the coverage report; 2.1.1 is not affected |
 | `lineage` | the declared root sources, or `PER_OUTPUT` when each output names its own |
 | `update` | `SNAPSHOT` (valid only for the tick it was produced) or `SAMPLE_AND_HOLD` (the latest output stands until replaced), and the period |
 | `validity` | how long or where its content is valid: `max_content_age_s`, or an `event_window_s` relative to a named event. Only the rule actually validated for this producer is declared (XSYS: the fixed T1 window, not a compensation-state rule) |
@@ -35,6 +36,7 @@ from .lineage import Lineage
 CONTRACT_DIR = Path(__file__).resolve().parent / "contracts"
 SCHEMA = "csia.evidence_contract/1"
 UPDATE_MODES = ("SNAPSHOT", "SAMPLE_AND_HOLD")
+NOMINAL_MEANS = ("NOMINAL", "NO_ANOMALY")
 HEALTH_REPORTING = ("REPORTED", "IN_PROCESS")
 
 
@@ -50,6 +52,7 @@ class ClaimSpec:
     relation: str
     attributable: bool
     config_dependency: tuple = ()
+    nominal_means: str = "NOMINAL"
 
 
 @dataclass(frozen=True)
@@ -75,9 +78,12 @@ class ProducerContract:
             default_dep = tuple(d.get("config_dependency", ()))
             claims = {}
             for name, c in d["claims"].items():
+                nm = c.get("nominal_means", "NOMINAL")
+                if nm not in NOMINAL_MEANS:
+                    raise ContractError(f"claim {name}: nominal_means must be one of {NOMINAL_MEANS}")
                 claims[name] = ClaimSpec(name, c["meaning"], c["domain"], c["relation"],
                                          bool(c.get("attributable", True)),
-                                         tuple(c.get("config_dependency", default_dep)))
+                                         tuple(c.get("config_dependency", default_dep)), nm)
             if not claims:
                 raise ContractError("a contract must declare at least one claim")
             lin = d["lineage"]

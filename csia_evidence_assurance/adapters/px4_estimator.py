@@ -126,6 +126,15 @@ CLAIMS = {
                         13: "sensor:vision"},
                        ("reset_count_quat",)),
 }
+#: `control_mode_flags` bit names (EstimatorStatus.msg, PX4 547e2ca), for transition text.
+FUSION_NAMES = {2: "GNSS position", 3: "optical flow", 4: "magnetic heading",
+                5: "3-axis magnetometer", 9: "barometer height", 10: "range-finder height",
+                11: "GNSS height", 12: "vision position", 13: "vision yaw", 14: "vision height",
+                22: "GNSS yaw", 24: "vision velocity", 38: "auxiliary global position",
+                44: "GNSS velocity"}
+RESET_NAMES = {"reset_count_pos_ne": "horizontal position", "reset_count_vel_ne": "horizontal velocity",
+               "reset_count_vel_d": "vertical velocity", "reset_count_pod_d": "vertical position",
+               "reset_count_quat": "attitude (quaternion)"}
 STATUS_FIELDS = sorted({"timestamp", "timestamp_sample", "control_mode_flags",
                         "filter_fault_flags", "time_slip", "gyro_device_id",
                         "accel_device_id", "baro_device_id", "mag_device_id"}
@@ -306,7 +315,7 @@ class EstimatorProducer:
                 health, why = ProducerHealth.DEGRADED, "TIME_SLIP_INCREASED"
             slip_prev[inst] = slip
             out.append({"ts": ts, "inst": inst, "row": row, "epochs": epochs,
-                        "health": health, "health_why": why})
+                        "aiding": dict(aid_prev), "health": health, "health_why": why})
         return out
 
     def _sec(self, us) -> float:
@@ -378,11 +387,32 @@ class EstimatorProducer:
             _lane, count = self._lane_at(self.log.t0_us + int(round(t * 1e6)))
             if count is not None:
                 cur[LANE_KEY] = count
-        events = {k: f"{k} {self._ctx_prev[k]} -> {v} by t={t:.3f}s"
+        aiding = self._stream[i]["aiding"] if i >= 0 else {}
+        events = {k: self._describe(k, self._ctx_prev[k], v, aiding)
                   for k, v in sorted(cur.items())
                   if k in self._ctx_prev and self._ctx_prev[k] != v}
         self._ctx_prev = dict(cur)
+        self._aiding_prev = aiding
         return cur, events
+
+    def _describe(self, key, old, new, aiding) -> str:
+        """A transition in PX4's own terms."""
+        if key.startswith("ekf2.aiding."):
+            kind = key.rsplit(".", 1)[1]
+            names = lambda bits: (", ".join(FUSION_NAMES.get(b, f"bit {b}") for b in bits)  # noqa: E731
+                                  or "none")
+            before = getattr(self, "_aiding_prev", {}).get(kind, ())
+            return (f"{kind} aiding fused: {names(before)} -> {names(aiding.get(kind, ()))} "
+                    f"(control_mode_flags)")
+        if key.startswith("ekf2.reset."):
+            f = key.rsplit(".", 1)[1]
+            n = new - old if isinstance(new, int) and isinstance(old, int) else "?"
+            return f"EKF2 {RESET_NAMES.get(f, f)} reset ({f} +{n}, unwrapped total {new})"
+        if key == IMU_KEY:
+            return f"primary IMU device changed (change {new})"
+        if key == LANE_KEY:
+            return f"EKF2 selector changed primary lane (instance_changed_count {old} -> {new})"
+        return f"{key} {old} -> {new}"
 
     def coverage_notices(self) -> list:
         return list(self.notices)

@@ -27,6 +27,21 @@ ONE TICK
 
 The semantic verdicts are 2.1.1's. The Analyzer never changes one; it can
 only decide what evidence reaches the core, and say so.
+
+COVERAGE STATES (pilot, 2.2.1)
+------------------------------
+`producers.coverage` gives every held output one state, never collapsed:
+
+| state | meaning |
+|---|---|
+| NOMINAL | admitted; a check with the power to see the condition passed |
+| NO_ANOMALY | admitted; a detector stayed silent (the contract's `nominal_means`), which is not an observation of health |
+| ANOMALY | admitted and adverse |
+| NOT_APPLICABLE | admitted; nothing to look at in this configuration |
+| UNAVAILABLE | the producer or the record could not look |
+| FAULTED | the producer failed |
+| REJECTED:<status> | not admitted for another reason |
+| NO_COVERAGE | (from the producers' coverage notices) the producer cannot observe this source at all |
 """
 
 from __future__ import annotations
@@ -38,7 +53,7 @@ from .admissibility import ADMISSIBLE, AnalysisContext, assess
 from .envelope import record_key
 from .health import ProducerHealth
 
-ANALYZER_VERSION = "2.2.0"
+ANALYZER_VERSION = "2.2.1"
 PROFILE_REFUSED = "PROFILE_REFUSED"
 
 
@@ -99,6 +114,7 @@ class FlightAssuranceAnalyzer:
         #: The raw 2.1.1 TickResult of the latest step, for harnesses that
         #: grade it with the historical graders.
         self.last_tick = None
+        self._last_epochs: dict = {}
         self.specs = {s.symptom_id: s for s in core.symptoms}
 
     # ------------------------------------------------------------- hold
@@ -134,12 +150,14 @@ class FlightAssuranceAnalyzer:
         by_record: dict = {}
         for e in admitted:
             by_record.setdefault(record_key(e.record), []).append(e.evidence_id)
-        locs = tuple(self._loc(x, by_record) for x in tr.localizations)
+        lineage = {e.evidence_id: e.lineage.to_list() for e in admitted}
+        locs = tuple(self._loc(x, by_record, lineage) for x in tr.localizations)
         attr = self._attr(tr.attribution, admitted)
         rejected = [x.to_dict() for x in a.admissions if x.status != ADMISSIBLE]
         warned = [x.to_dict() for x in a.admissions
                   if x.status == ADMISSIBLE and x.warnings]
         producers = self._producers(held, a, coverage)
+        producers["coverage"] = self._coverage(held, a, coverage)
         outcomes: dict = {}
         for x in locs:
             outcomes[x["outcome"]] = outcomes.get(x["outcome"], 0) + 1
@@ -150,7 +168,15 @@ class FlightAssuranceAnalyzer:
                               "adverse_evidence": adverse},
                  "localization_outcomes": dict(sorted(outcomes.items()))}
         adm = tr.admission or {}
+        now = {k: list(v) if isinstance(v, (list, tuple)) else v
+               for k, v in (adm.get("context_epochs") or {}).items()}
+        changes = [{"key": k, "from": self._last_epochs.get(k), "to": v,
+                    "event": (adm.get("transition_events") or {}).get(k)}
+                   for k, v in sorted(now.items())
+                   if k in self._last_epochs and self._last_epochs[k] != v]
+        self._last_epochs = now
         configuration = {"epochs": adm.get("context_epochs", {}),
+                         "changes": changes,
                          "transition_events": adm.get("transition_events", {}),
                          "keys_with_context_behind": adm.get("keys_with_context_behind", []),
                          "not_admitted_by_epoch": [
@@ -175,7 +201,7 @@ class FlightAssuranceAnalyzer:
             ids.extend(by_record.get(rid, []))
         return sorted(set(ids))
 
-    def _loc(self, x, by_record):
+    def _loc(self, x, by_record, lineage):
         spec = self.specs.get(x.symptom)
         preds = x.trace.get("predicates", {})
         vals = x.v2.detail.get("predicate_values", {})
@@ -197,12 +223,55 @@ class FlightAssuranceAnalyzer:
                 "supporting_evidence": sorted(supporting),
                 "refuting_evidence": sorted(refuting),
                 "evidence_unavailable": list(x.evidence_unavailable),
+                "evidence_basis": {eid: lineage.get(eid, []) for eid in sorted(supporting | refuting)},
+                "would_discriminate": self._discriminators(x),
                 "scope_gaps": list(x.trace.get("scope_gaps", [])),
                 "predicate_faults": [{"predicate": e.predicate, "error_class": e.error_class}
                                      for e in x.predicate_errors],
                 "fault_impact": [e for e in x.fault_impact if e["dependency"] == "MATERIAL"],
                 "withheld_because": list(x.trace.get("withheld_because", [])),
                 "why": x.trace.get("why")}
+
+    def _discriminators(self, x):
+        """For a localization with more than one explanation left: the
+        predicates that could not be evaluated, i.e. the evidence that would
+        have discriminated, with 2.1.1's own description of each."""
+        if len(set(x.supported) | set(x.unresolved)) < 2:
+            return []
+        table = self.core.predicates
+        ids = set(x.evidence_unavailable)
+        base = sorted(p for p in ids if not (p.endswith("_FALSE") and p[:-6] in ids))
+        return [{"predicate": p, "description": getattr(table.get(p), "description", "")}
+                for p in base]
+
+    def _coverage(self, held, a, notices):
+        stat = {x.evidence_id: x for x in a.admissions}
+        out = []
+        for e in sorted(held, key=lambda e: e.evidence_id):
+            x = stat[e.evidence_id]
+            st = e.record.observation_state.value
+            if x.status == ADMISSIBLE:
+                if e.record.is_adverse:
+                    state = "ANOMALY"
+                elif st == "NOMINAL":
+                    c = self.contracts.get(e.producer_id)
+                    spec = c.claims.get(e.claim) if c else None
+                    state = spec.nominal_means if spec else "NOMINAL"
+                else:
+                    state = st            # NOT_APPLICABLE or UNAVAILABLE
+            elif e.producer_health in (ProducerHealth.FAULTED,) or any(
+                    "FAULTED" in r for r in x.reasons):
+                state = "FAULTED"
+            elif e.producer_health is ProducerHealth.UNAVAILABLE:
+                state = "UNAVAILABLE"
+            else:
+                state = f"REJECTED:{x.status}"
+            out.append({"producer_id": e.producer_id, "claim": e.claim,
+                        "record": record_key(e.record), "state": state})
+        for c in sorted(notices, key=lambda c: (c["producer_id"], c["source"])):
+            out.append({"producer_id": c["producer_id"], "claim": None,
+                        "record": c["source"], "state": "NO_COVERAGE"})
+        return out
 
     def _attr(self, at, admitted):
         t = at.trace
