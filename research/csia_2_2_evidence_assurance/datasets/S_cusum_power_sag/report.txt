@@ -1,0 +1,50 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  kind: cusum_v1_scenario
+  scenario: power_sag
+  ticks: 1500
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  1500 ticks in 6 intervals
+  0.000s .. 3.000s (76 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 1 rejected; changed: start
+  3.040s .. 30.080s (677 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: admissibility, producer_health
+  30.120s .. 30.160s (2 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: abnormal
+  30.200s .. 35.320s (129 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: abnormal
+  35.360s .. 39.600s (107 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: abnormal
+  39.640s .. 59.960s (509 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: abnormal
+
+FINAL STATE at 59.960s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  adverse evidence: SENSOR/source.battery:cusum.sustained_shift@59.96s [cusum:v1_1_sequential], SENSOR/source.motor_esc:cusum.sustained_shift@59.96s [cusum:v1_1_sequential]
+  attribution: NO_EVIDENCE
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  cusum:v1_1_sequential: health VALID; 5 of 5 admitted
+  coverage: cusum:v1_1_sequential has no evidence for source.baro: clean-arm sigma0 is degenerate (0.0 over 1500 ticks)
+  coverage: cusum:v1_1_sequential has no evidence for source.imu0: no per-IMU physics chi-square exists in this construction
+  coverage: cusum:v1_1_sequential has no evidence for source.imu1: no per-IMU physics chi-square exists in this construction
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 2 outputs in 1 lineage group(s), 1 independent line(s)
+    one group: SENSOR/source.battery:cusum.sustained_shift@59.96s [cusum:v1_1_sequential], SENSOR/source.motor_esc:cusum.sustained_shift@59.96s [cusum:v1_1_sequential]
+  SENSOR/source.battery: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+  SENSOR/source.motor_esc: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

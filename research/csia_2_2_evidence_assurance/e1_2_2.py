@@ -48,7 +48,9 @@ DT = 0.05          # the v2 scenario runner's tick period
 REVISION_RESULTS = C.REVISION / "TRANSITION_REPLAY_RESULTS.json"
 
 
-def run():
+def run(collect=None):
+    """`collect`: a list that receives every AssuranceResult, and the
+    analyzer's gate and contracts, for the dataset reports."""
     design = T.load_design()
     ticks = T.stream(design)
     switch = design["schedule"]["lane_switch_at"]
@@ -56,8 +58,8 @@ def run():
     r2 = load_successor("aircraft_successor_r2")
     core = SemanticCore21.from_engine(engine, Corrections.revised(), trace=True,
                                       pacing=r2.pacing_map())
-    epoch_claims = {("compute", "compute.deadline_met"): (KEY,),
-                    ("compute", "compute.stability"): (KEY,)}
+    epoch_claims = {("compute", "compute.deadline_met", T.EST): (KEY,),
+                    ("compute", "compute.stability", T.EST): (KEY,)}
     contracts = V2.legacy_contracts(engine, V2.AIRCRAFT_BASE, epoch_claims)
     gate = PG.gate(r2, ticks[0][2], engine.functions)
     an = FlightAssuranceAnalyzer(core, contracts, gate, V2.AIRCRAFT_BASE)
@@ -72,18 +74,24 @@ def run():
         res = an.step(t * DT, V2.envelopes(r2.apply(recs), t * DT, contracts, epoch_of),
                       epochs=ctx)
         tr = an.last_tick
+        if collect is not None:
+            collect.append(res)
         ag, pos, should = T.grade(design, t, tr)
         row["attribution"][ag] = row["attribution"].get(ag, 0) + 1
         row["stale_position_symptom_ticks"] += int(bool(pos) and not should)
         row["missed_position_symptom_ticks"] += int(should and not pos)
         mism = [x for x in res.evidence["rejected"] if x["status"] == "CONFIGURATION_MISMATCH"]
         row["config_mismatch_ticks"] += int(bool(mism))
+        row["other_rejections"] = row.get("other_rejections", 0) + sum(
+            x["status"] != "CONFIGURATION_MISMATCH" for x in res.evidence["rejected"])
         row["per_tick"].append({
             "t": t, "lane": lane, "attribution": tr.attribution.verdict,
             "candidates": list(tr.attribution.candidates), "grade": ag,
             "position_unavailable_on": pos,
             "configuration_mismatch": [{"evidence_id": x["evidence_id"],
                                         "reasons": x["reasons"]} for x in mism]})
+    if collect is not None:
+        collect.insert(0, (gate, contracts))
     after = [x for x in row["per_tick"] if x["t"] >= switch]
     row["recovery_tick"] = next((x["t"] for i, x in enumerate(after)
                                  if all(y["grade"] == "CORRECT_UNIQUE" for y in after[i:])),
@@ -105,6 +113,7 @@ def main():
     r = out["result"]
     print({k: r[k] for k in ("attribution", "stale_position_symptom_ticks",
                              "missed_position_symptom_ticks", "config_mismatch_ticks",
+                             "other_rejections",
                              "recovery_tick", "per_tick_equal_to_revision_REVISED_2_1_1_R2",
                              "pre_2_1_0_stale_position_symptom_ticks")})
     C.write_json(OUT, out)

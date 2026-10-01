@@ -145,12 +145,12 @@ def _fmt_t(x):
 
 
 def _short(evidence_id: str) -> str:
-    """For the human report: `record@content time`. The producer is listed
-    under PRODUCERS; the machine report keeps the full id."""
+    """For the human report: `record@content time [producer]`. The machine
+    report keeps the full id."""
     parts = evidence_id.split("|")
     if len(parts) != 4:
         return evidence_id
-    return f"{parts[2]}@{parts[3].rstrip('0').rstrip('.')}s"
+    return f"{parts[2]}@{parts[3].rstrip('0').rstrip('.')}s [{parts[0]}]"
 
 
 def _ids(ids) -> str:
@@ -176,6 +176,9 @@ def _loc_lines(loc) -> list:
         lines.append(f"    refuting evidence: {_ids(loc['refuting_evidence'])}")
     for f in loc["predicate_faults"]:
         lines.append(f"    predicate fault: {f['predicate']} ({f['error_class']})")
+    for e in loc["fault_impact"]:
+        lines.append(f"    fault impact: {e['hypothesis']} may rest on the failed "
+                     f"{e['role'].lower()} {e['predicate']}")
     for w in loc["withheld_because"]:
         lines.append(f"    withheld: {w}")
     return lines

@@ -409,6 +409,7 @@ def test_e1_through_2_2_is_a_permanent_regression():
     assert r["per_tick_equal_to_revision_REVISED_2_1_1_R2"] is True
     assert r["pre_2_1_0_stale_position_symptom_ticks"] == 9
     assert r["config_mismatch_ticks"] == 9
+    assert r["other_rejections"] == 0      # nothing valid is refused
 
 
 # ------------------------------------------------------------------ CUSUM

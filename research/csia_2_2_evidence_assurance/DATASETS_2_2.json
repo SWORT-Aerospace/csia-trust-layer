@@ -1,0 +1,347 @@
+{
+ "A_nominal": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "no symptom; attribution NO_EVIDENCE",
+  "final_localizations": [],
+  "ground_truth_domain": null,
+  "ground_truth_hypotheses": {},
+  "intervals": 1,
+  "rejected_over_run": {},
+  "report_sha256": "88159024f93c2a37901286bc82738c8edd09bfc31a27ed726daf3c9b551c82ba",
+  "scenario": "NOMINAL",
+  "ticks": 60
+ },
+ "B_correct_unique": {
+  "final_attribution": "UNIQUE",
+  "final_candidates": [
+   "COMPUTE/state_estimator"
+  ],
+  "final_headline": "POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; OUTPUT_MISSING|state_estimator SUPPORTED: COMPUTE/process_stall; attribution UNIQUE",
+  "final_localizations": [
+   [
+    "POSITION_UNAVAILABLE|COARSE_NAVIGATION",
+    "SUPPORTED",
+    [
+     "COMPUTE/estimator_stale"
+    ]
+   ],
+   [
+    "POSITION_UNAVAILABLE|POSITION_HOLD",
+    "SUPPORTED",
+    [
+     "COMPUTE/estimator_stale"
+    ]
+   ],
+   [
+    "POSITION_UNAVAILABLE|PRECISION_NAVIGATION",
+    "SUPPORTED",
+    [
+     "COMPUTE/estimator_stale"
+    ]
+   ],
+   [
+    "OUTPUT_MISSING|state_estimator",
+    "SUPPORTED",
+    [
+     "COMPUTE/process_stall"
+    ]
+   ]
+  ],
+  "ground_truth_domain": "COMPUTE",
+  "ground_truth_hypotheses": {
+   "OUTPUT_MISSING": "COMPUTE/process_stall",
+   "OUTPUT_STALE": "COMPUTE/process_stall",
+   "POSITION_UNAVAILABLE": "COMPUTE/estimator_stale",
+   "PROCESS_OUTPUT_LATE": "COMPUTE/process_stall"
+  },
+  "intervals": 3,
+  "rejected_over_run": {},
+  "report_sha256": "c241a2f9a1ec904bdb91ca31a952c58aa9033f52362dfa0c2508ac9566d77426",
+  "scenario": "PROCESS_STALL",
+  "ticks": 60
+ },
+ "C_genuine_ambiguous": {
+  "final_attribution": "AMBIGUOUS",
+  "final_candidates": [
+   "ACTUATION/motor_0"
+  ],
+  "final_headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS",
+  "final_localizations": [
+   [
+    "COMMAND_NO_RESPONSE|motor_0",
+    "AMBIGUOUS",
+    [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ]
+   ],
+   [
+    "HIGH_CURRENT_LOW_RPM|motor_0",
+    "AMBIGUOUS",
+    [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ]
+   ]
+  ],
+  "ground_truth_domain": "ACTUATION",
+  "ground_truth_hypotheses": {
+   "COMMAND_NO_RESPONSE": "ACTUATION/mechanical",
+   "HIGH_CURRENT_LOW_RPM": "ACTUATION/mechanical"
+  },
+  "intervals": 2,
+  "rejected_over_run": {},
+  "report_sha256": "226d928e3029eecbbfb5fd7acae55f43aec6061e041a931a6e8ab3de04d397ac",
+  "scenario": "MS_B4_MECHANICAL",
+  "ticks": 60
+ },
+ "D_ms_b5": {
+  "final_attribution": "AMBIGUOUS",
+  "final_candidates": [
+   "ACTUATION/motor_0"
+  ],
+  "final_headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS",
+  "final_localizations": [
+   [
+    "COMMAND_NO_RESPONSE|motor_0",
+    "AMBIGUOUS",
+    [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ]
+   ],
+   [
+    "HIGH_CURRENT_LOW_RPM|motor_0",
+    "AMBIGUOUS",
+    [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ]
+   ]
+  ],
+  "ground_truth_domain": "SENSOR",
+  "ground_truth_hypotheses": {
+   "COMMAND_NO_RESPONSE": "SENSOR/response_sensor",
+   "HIGH_CURRENT_LOW_RPM": "SENSOR/response_sensor"
+  },
+  "intervals": 2,
+  "rejected_over_run": {},
+  "report_sha256": "2e06c562f0a6f04f011051b6112f3471893ae2332542d6fa3df45af7e3cb8206",
+  "scenario": "MS_B5_RESPONSE_SENSOR",
+  "ticks": 60
+ },
+ "E_e1": {
+  "config_mismatch_ticks": 9,
+  "final_attribution": "UNIQUE",
+  "final_candidates": [
+   "SENSOR/source.imu0"
+  ],
+  "final_headline": "no symptom; attribution UNIQUE",
+  "final_localizations": [],
+  "intervals": 4,
+  "recovery_tick": 25,
+  "rejected_over_run": {
+   "CONFIGURATION_MISMATCH:R3": 9
+  },
+  "report_sha256": "e517f18dba5b4a9755246162c00bace7f2150d53a7fb6fb95b0b41b6a14be208",
+  "stale_position_symptom_ticks": 0,
+  "ticks": 60
+ },
+ "F_predicate_fault": {
+  "clean_outcomes": [
+   [
+    "FUNCTION_DEADLINE_MISS|nav_solution",
+    "AMBIGUOUS"
+   ],
+   [
+    "OUTPUT_STALE|nav_solution",
+    "SUPPORTED"
+   ],
+   [
+    "POSITION_UNAVAILABLE|COARSE_NAVIGATION",
+    "NO_CONSISTENT_HYPOTHESIS"
+   ],
+   [
+    "POSITION_UNAVAILABLE|POSITION_HOLD",
+    "NO_CONSISTENT_HYPOTHESIS"
+   ],
+   [
+    "POSITION_UNAVAILABLE|PRECISION_NAVIGATION",
+    "NO_CONSISTENT_HYPOTHESIS"
+   ]
+  ],
+  "final_attribution": "AMBIGUOUS",
+  "final_candidates": [
+   "TIMING/nav_solution",
+   "TIMING/nav_solution.sensor_slow",
+   "TIMING/nav_solution.transport_delay"
+  ],
+  "final_headline": "OUTPUT_STALE|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; POSITION_UNAVAILABLE|COARSE_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|POSITION_HOLD NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|PRECISION_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; FUNCTION_DEADLINE_MISS|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; attribution AMBIGUOUS",
+  "final_localizations": [
+   [
+    "OUTPUT_STALE|nav_solution",
+    "AMBIGUOUS",
+    [
+     "COMMUNICATION/transport_delay",
+     "SENSOR/source_slow"
+    ]
+   ],
+   [
+    "POSITION_UNAVAILABLE|COARSE_NAVIGATION",
+    "NO_CONSISTENT_HYPOTHESIS",
+    []
+   ],
+   [
+    "POSITION_UNAVAILABLE|POSITION_HOLD",
+    "NO_CONSISTENT_HYPOTHESIS",
+    []
+   ],
+   [
+    "POSITION_UNAVAILABLE|PRECISION_NAVIGATION",
+    "NO_CONSISTENT_HYPOTHESIS",
+    []
+   ],
+   [
+    "FUNCTION_DEADLINE_MISS|nav_solution",
+    "AMBIGUOUS",
+    [
+     "COMMUNICATION/transport_delay",
+     "SENSOR/source_slow"
+    ]
+   ]
+  ],
+  "injected_predicate": "CHANNEL_LINK_NOMINAL",
+  "intervals": 2,
+  "rejected_over_run": {},
+  "report_sha256": "8a6de33335e7628840980cea976a9d5c99c1ea91e0063d2434bd04c77d984c71",
+  "ticks": 60
+ },
+ "G_correlated_monitors": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "no symptom; attribution NO_EVIDENCE",
+  "final_localizations": [],
+  "imu1_adverse_outputs": 3,
+  "imu1_independent_lines": 1,
+  "imu1_producers": [
+   "imu1:cusum",
+   "imu1:ekf_residual",
+   "imu1:threshold"
+  ],
+  "intervals": 3,
+  "rejected_over_run": {
+   "DUPLICATE:DUPLICATE_OF": 60,
+   "PRODUCER_INVALID:PRODUCER_FAULTED": 60,
+   "STALE:CONTENT_AGE_OVER": 30
+  },
+  "report_sha256": "af7d51c00784948592153c31a46d6269cd58bd192902c6530ad77bf0972d3588",
+  "ticks": 60
+ },
+ "H_XS1A1-C00-A-E055": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "COMMAND_NO_RESPONSE|motor_0 SUPPORTED: ACTUATION/mechanical; attribution NO_EVIDENCE",
+  "final_localizations": [
+   [
+    "COMMAND_NO_RESPONSE|motor_0",
+    "SUPPORTED",
+    [
+     "ACTUATION/mechanical"
+    ]
+   ]
+  ],
+  "flight": "XS1A1-C00-A-E055.ulg",
+  "intervals": 3,
+  "rejected_over_run": {},
+  "report_sha256": "a02ae0dc69ee760c431eb1d01d6f206824debb05c1b8c12b6080931262293d94",
+  "ticks": 161,
+  "truth": "PHYSICAL_ACTUATOR_DEGRADATION"
+ },
+ "H_XS1A1-C00-A-E055_V4": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution NO_EVIDENCE",
+  "final_localizations": [
+   [
+    "COMMAND_NO_RESPONSE|motor_0",
+    "AMBIGUOUS",
+    [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ]
+   ]
+  ],
+  "intervals": 3,
+  "rejected_over_run": {
+   "REGIME_INVALID:CONTENT_OUTSIDE_VALIDATED_WINDOW": 4
+  },
+  "report_sha256": "decc11c3b711b58ecab022b04059ffb0f86e1ce1776beb8a38acd2294e2e7d0e",
+  "ticks": 161,
+  "truth": "PHYSICAL_ACTUATOR_DEGRADATION"
+ },
+ "H_XS1A1-C00-B-E055": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "COMMAND_NO_RESPONSE|motor_0 SUPPORTED: SENSOR/response_sensor; attribution NO_EVIDENCE",
+  "final_localizations": [
+   [
+    "COMMAND_NO_RESPONSE|motor_0",
+    "SUPPORTED",
+    [
+     "SENSOR/response_sensor"
+    ]
+   ]
+  ],
+  "flight": "XS1A1-C00-NB.ulg",
+  "intervals": 3,
+  "rejected_over_run": {},
+  "report_sha256": "fbd06999a34fe13256288021f8e3469d1750c4f2f3c78b833f4c1ed001572847",
+  "ticks": 161,
+  "truth": "RPM_TELEMETRY_CORRUPTION"
+ },
+ "H_full_flight_estimator": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "no symptom; attribution NO_EVIDENCE",
+  "final_localizations": [],
+  "intervals": 10,
+  "rejected_over_run": {
+   "PRODUCER_INVALID:PRODUCER_UNAVAILABLE": 96
+  },
+  "report_sha256": "d7c5425ca7dcf45a81194502032d2a9752a50d5898cdb29f591feff530eb28c0",
+  "ticks": 1718
+ },
+ "H_gyro_device_ids": {
+  "distinct": [
+   1310988
+  ],
+  "flights": 66,
+  "xsys_witness_constant": 1310988
+ },
+ "S_cusum_imu0_bias_drift": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "no symptom; attribution NO_EVIDENCE",
+  "final_localizations": [],
+  "intervals": 2,
+  "rejected_over_run": {
+   "PRODUCER_INVALID:PRODUCER_UNAVAILABLE": 76
+  },
+  "report_sha256": "e6f2f06cb730ebfcc09c8e8698b9e3366aa39352906a60932dbf5700a201e3ae",
+  "ticks": 1500
+ },
+ "S_cusum_power_sag": {
+  "final_attribution": "NO_EVIDENCE",
+  "final_candidates": [],
+  "final_headline": "no symptom; attribution NO_EVIDENCE",
+  "final_localizations": [],
+  "intervals": 6,
+  "rejected_over_run": {
+   "PRODUCER_INVALID:PRODUCER_UNAVAILABLE": 76
+  },
+  "report_sha256": "96bddc3e3e04d7d89a97622afbfb6ba568b5c3676c5df609a914d09d1ef9852d",
+  "ticks": 1500
+ },
+ "label": "NON-CONFIRMATORY; datasets chosen by the rules in DATASETS.md"
+}

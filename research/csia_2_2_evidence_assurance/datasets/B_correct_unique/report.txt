@@ -1,0 +1,75 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  kind: v2_scenario
+  scenario: PROCESS_STALL
+  system: aircraft
+  ticks: 60
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  60 ticks in 3 intervals
+  0.000s .. 1.000s (21 ticks): no symptom; attribution NO_EVIDENCE; 68 used, 0 rejected; changed: start
+  1.050s .. 1.300s (6 ticks): POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; OUTPUT_MISSING|state_estimator SUPPORTED: COMPUTE/process_stall; attribution UNIQUE; 68 used, 0 rejected; changed: abnormal, candidates, localizations, verdict
+  1.350s .. 2.950s (33 ticks): POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; OUTPUT_MISSING|state_estimator SUPPORTED: COMPUTE/process_stall; attribution UNIQUE; 68 used, 0 rejected; changed: abnormal
+
+FINAL STATE at 2.950s: POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; OUTPUT_MISSING|state_estimator SUPPORTED: COMPUTE/process_stall; attribution UNIQUE
+  what appears abnormal: POSITION_UNAVAILABLE|COARSE_NAVIGATION, POSITION_UNAVAILABLE|POSITION_HOLD, POSITION_UNAVAILABLE|PRECISION_NAVIGATION, OUTPUT_MISSING|state_estimator
+  adverse evidence: COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.stability@2.95s [v2-domain:compute]
+  POSITION_UNAVAILABLE on COARSE_NAVIGATION: SUPPORTED
+    remaining explanations: COMPUTE/estimator_stale
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by FUNCTION_TIMING_WITHIN_DEADLINE
+    supporting evidence: COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute]
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution:timing.end_to_end@2.93s [v2-domain:timing]
+  POSITION_UNAVAILABLE on POSITION_HOLD: SUPPORTED
+    remaining explanations: COMPUTE/estimator_stale
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by FUNCTION_TIMING_WITHIN_DEADLINE
+    supporting evidence: COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute]
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution:timing.end_to_end@2.93s [v2-domain:timing]
+  POSITION_UNAVAILABLE on PRECISION_NAVIGATION: SUPPORTED
+    remaining explanations: COMPUTE/estimator_stale
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by FUNCTION_TIMING_WITHIN_DEADLINE
+    supporting evidence: COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute]
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution:timing.end_to_end@2.93s [v2-domain:timing]
+  OUTPUT_MISSING on state_estimator: SUPPORTED
+    remaining explanations: COMPUTE/process_stall
+    eliminated: COMMUNICATION/input_starvation by PACING_INPUTS_NOMINAL
+    supporting evidence: COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute]
+    refuting evidence: SENSOR/source.imu0:v1_1.source_health@2.95s [v2-domain:sensor]
+  attribution: UNIQUE -> COMPUTE/state_estimator; candidates COMPUTE/state_estimator
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  v2-domain:actuation: health VALID; 3 of 3 admitted
+  v2-domain:communication: health VALID; 17 of 17 admitted
+  v2-domain:compute: health VALID; 13 of 13 admitted
+  v2-domain:power: health VALID; 6 of 6 admitted
+  v2-domain:sensor: health VALID; 15 of 15 admitted
+  v2-domain:timing: health VALID; 14 of 14 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 3 outputs in 1 lineage group(s), 1 independent line(s)
+    one group: COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.stability@2.95s [v2-domain:compute]
+  COMPUTE/state_estimator: 3 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

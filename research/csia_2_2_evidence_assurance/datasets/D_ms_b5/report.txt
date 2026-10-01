@@ -1,0 +1,58 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  kind: v2_scenario
+  scenario: MS_B5_RESPONSE_SENSOR
+  system: aircraft
+  ticks: 60
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  60 ticks in 2 intervals
+  0.000s .. 0.850s (18 ticks): no symptom; attribution NO_EVIDENCE; 68 used, 0 rejected; changed: start
+  0.900s .. 2.950s (42 ticks): COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS; 68 used, 0 rejected; changed: abnormal, candidates, localizations, verdict
+
+FINAL STATE at 2.950s: COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS
+  what appears abnormal: COMMAND_NO_RESPONSE|motor_0, HIGH_CURRENT_LOW_RPM|motor_0
+  adverse evidence: ACTUATION/motor_0:actuation.mechanical_response@2.95s [v2-domain:actuation]
+  COMMAND_NO_RESPONSE on motor_0: AMBIGUOUS
+    remaining explanations: ACTUATION/mechanical, SENSOR/response_sensor
+    eliminated: ACTUATION/drive_no_current by CURRENT_PRESENT
+    eliminated: COMMUNICATION/command_not_delivered by COMMAND_DELIVERED
+    eliminated: POWER/path_unavailable by ACTUATOR_POWER_NOMINAL
+    supporting evidence: ACTUATION/motor_0:actuation.mechanical_response@2.95s [v2-domain:actuation]
+    refuting evidence: ACTUATION/motor_0:actuation.command_path@2.95s [v2-domain:actuation], ACTUATION/motor_0:actuation.electrical_response@2.95s [v2-domain:actuation], POWER/battery:power.cell_balance@2.95s [v2-domain:power], POWER/battery:power.droop_vs_current@2.95s [v2-domain:power], POWER/battery:power.p_equals_vi@2.95s [v2-domain:power], POWER/battery:power.source_health@2.95s [v2-domain:power]
+  HIGH_CURRENT_LOW_RPM on motor_0: AMBIGUOUS
+    remaining explanations: ACTUATION/mechanical, SENSOR/response_sensor
+    supporting evidence: ACTUATION/motor_0:actuation.mechanical_response@2.95s [v2-domain:actuation]
+  attribution: AMBIGUOUS; candidates ACTUATION/motor_0
+    UNIQUE withheld: SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  v2-domain:actuation: health VALID; 3 of 3 admitted
+  v2-domain:communication: health VALID; 17 of 17 admitted
+  v2-domain:compute: health VALID; 13 of 13 admitted
+  v2-domain:power: health VALID; 6 of 6 admitted
+  v2-domain:sensor: health VALID; 15 of 15 admitted
+  v2-domain:timing: health VALID; 14 of 14 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 1 outputs in 1 lineage group(s), 1 independent line(s)
+  ACTUATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

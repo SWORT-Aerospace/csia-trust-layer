@@ -1,0 +1,48 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  design_sha256: f84f8e5acbf9d581632286469ef32d038081000a36001e2b9d6d510edbc77c75
+  kind: e1_transition
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  60 ticks in 4 intervals
+  0.000s .. 0.950s (20 ticks): no symptom; attribution NO_EVIDENCE; 68 used, 0 rejected; changed: start
+  1.000s .. 1.200s (5 ticks): POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; PROCESS_OUTPUT_LATE|state_estimator NO_CONSISTENT_HYPOTHESIS: no explanation remains; attribution AMBIGUOUS; 68 used, 0 rejected; changed: abnormal, candidates, localizations, verdict
+  1.250s .. 1.650s (9 ticks): no symptom; attribution UNIQUE; 67 used, 1 rejected; changed: abnormal, admissibility, candidates, epochs, localizations, verdict
+  1.700s .. 2.950s (26 ticks): no symptom; attribution UNIQUE; 68 used, 0 rejected; changed: admissibility
+
+FINAL STATE at 2.950s: no symptom; attribution UNIQUE
+  what appears abnormal: no symptom detected
+  adverse evidence: SENSOR/source.imu0:v1_1.source_health@2.95s [v2-domain:sensor]
+  attribution: UNIQUE -> SENSOR/source.imu0; candidates SENSOR/source.imu0
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  v2-domain:actuation: health VALID; 3 of 3 admitted
+  v2-domain:communication: health VALID; 17 of 17 admitted
+  v2-domain:compute: health VALID; 13 of 13 admitted
+  v2-domain:power: health VALID; 6 of 6 admitted
+  v2-domain:sensor: health VALID; 15 of 15 admitted
+  v2-domain:timing: health VALID; 14 of 14 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 1 outputs in 1 lineage group(s), 1 independent line(s)
+  SENSOR/source.imu0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: ekf2.selector.instance_changed_count=1
+  transition: estimator_selector_status.instance_changed_count 0 -> 1 at tick 25: primary EKF instance changed after SENSOR/source.imu0 failed
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

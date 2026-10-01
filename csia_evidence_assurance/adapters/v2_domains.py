@@ -16,7 +16,7 @@ silently accepted.
 | update | SNAPSHOT: the plugin re-derives every record each tick |
 | validity | none. A TIMING record's age IS its claim (a slow source is the fault), so a freshness rule on it would reject exactly the evidence the TIMING hypotheses need |
 | health_reporting | IN_PROCESS: the plugin runs in the analyzer's process, and the frozen plugin runtime already turns a plugin failure into UNAVAILABLE records |
-| config_dependency | none in the frozen profile. `legacy_contracts(epoch_claims=...)` adds it for the records a transition makes configuration-dependent (E1) |
+| config_dependency | none in the frozen profile. `legacy_contracts(epoch_claims=...)` adds it for the records a transition makes configuration-dependent (E1), per component: `{(source, relation, component): keys}` becomes its own claim `relation@component`, so the same relation on another component (the `csia` and `logger` processes' deadlines) is not made to carry an epoch it does not depend on |
 
 **Times.** The envelope's `content_time` is the record's
 `timestamp_validity`: when the observed information was valid. The
@@ -56,8 +56,9 @@ def producer_id(source: str) -> str:
 
 def legacy_contracts(engine, profile_base=AIRCRAFT_BASE, epoch_claims=None) -> dict:
     """One contract per v2 domain plugin, from its declaration.
-    `epoch_claims`: {(source, relation): (epoch keys)} for configuration-
-    dependent records (E1)."""
+    `epoch_claims`: {(source, relation, component): (epoch keys)} for
+    configuration-dependent records (E1); each becomes the claim
+    `relation@component`."""
     decl = engine.declarations()
     out = {}
     for d in decl["domains"]:
@@ -73,10 +74,10 @@ def legacy_contracts(engine, profile_base=AIRCRAFT_BASE, epoch_claims=None) -> d
                  "domain": dom, "relation": rel,
                  "attributable": rel not in ("v1_1.function_eligibility", "v1_1.support",
                                              "sensor.aggregate")}
-            dep = (epoch_claims or {}).get((src, rel))
-            if dep:
-                c["config_dependency"] = list(dep)
             claims[rel] = c
+            for (esrc, erel, comp), dep in sorted((epoch_claims or {}).items()):
+                if (esrc, erel) == (src, rel):
+                    claims[claim_of(rel, comp)] = dict(c, config_dependency=list(dep))
         raw = {"schema": SCHEMA, "producer_id": producer_id(src),
                "producer_version": version, "contract_version": "v2-legacy-1",
                "claims": claims, "lineage": "PER_OUTPUT",
@@ -87,6 +88,11 @@ def legacy_contracts(engine, profile_base=AIRCRAFT_BASE, epoch_claims=None) -> d
                "fault_behavior": "a plugin failure becomes UNAVAILABLE records via the frozen plugin runtime"}
         out[producer_id(src)] = ProducerContract.from_dict(raw)
     return out
+
+
+def claim_of(relation: str, component: str) -> str:
+    """The claim of a configuration-dependent record (see `legacy_contracts`)."""
+    return f"{relation}@{component}"
 
 
 def lineage_of(record) -> Lineage:
@@ -112,7 +118,9 @@ def envelopes(records, t, contracts, epoch_of=None) -> list:
             producer_id=pid,
             producer_version=c.producer_version if c else "unknown",
             contract_version=c.contract_version if c else "unknown",
-            claim=r.relation, record=r, lineage=lineage_of(r),
+            claim=(claim_of(r.relation, r.component)
+                   if c and claim_of(r.relation, r.component) in c.claims else r.relation),
+            record=r, lineage=lineage_of(r),
             content_time=float(r.timestamp_validity if r.timestamp_validity is not None else t),
             producer_health=ProducerHealth.VALID,
             produced_time=float(t),

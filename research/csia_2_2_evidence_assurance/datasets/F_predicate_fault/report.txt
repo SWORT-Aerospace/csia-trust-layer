@@ -1,0 +1,84 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  injected_predicate_fault: CHANNEL_LINK_NOMINAL
+  kind: v2_scenario
+  scenario: MS_A1_SENSOR_DELAY
+  selection_rule: first base predicate (sorted) whose fault 2.1.1 reports as MATERIAL on the last tick
+  system: aircraft
+  ticks: 60
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  60 ticks in 2 intervals
+  0.000s .. 0.850s (18 ticks): no symptom; attribution NO_EVIDENCE; 68 used, 0 rejected; changed: start
+  0.900s .. 2.950s (42 ticks): OUTPUT_STALE|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; POSITION_UNAVAILABLE|COARSE_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|POSITION_HOLD NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|PRECISION_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; FUNCTION_DEADLINE_MISS|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; attribution AMBIGUOUS; 68 used, 0 rejected; changed: abnormal, candidates, localizations, predicate_faults, verdict
+
+FINAL STATE at 2.950s: OUTPUT_STALE|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; POSITION_UNAVAILABLE|COARSE_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|POSITION_HOLD NO_CONSISTENT_HYPOTHESIS: no explanation remains; POSITION_UNAVAILABLE|PRECISION_NAVIGATION NO_CONSISTENT_HYPOTHESIS: no explanation remains; FUNCTION_DEADLINE_MISS|nav_solution AMBIGUOUS: COMMUNICATION/transport_delay, SENSOR/source_slow; attribution AMBIGUOUS
+  what appears abnormal: OUTPUT_STALE|nav_solution, POSITION_UNAVAILABLE|COARSE_NAVIGATION, POSITION_UNAVAILABLE|POSITION_HOLD, POSITION_UNAVAILABLE|PRECISION_NAVIGATION, FUNCTION_DEADLINE_MISS|nav_solution
+  adverse evidence: TIMING/nav_solution:timing.end_to_end@2.86s [v2-domain:timing], TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+  OUTPUT_STALE on nav_solution: AMBIGUOUS
+    remaining explanations: COMMUNICATION/transport_delay, SENSOR/source_slow
+    eliminated: COMPUTE/process_stall by PRODUCER_PROCESS_HEALTHY
+    eliminated: COMPUTE/processing_delay by PROCESSING_WITHIN_BUDGET
+    eliminated: TIMING/clock_inconsistent by CLOCK_CONSISTENT
+    supporting evidence: TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+    refuting evidence: COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], TIMING/nav_solution:timing.clock_consistency@2.86s [v2-domain:timing], TIMING/nav_solution.processing_delay:timing.segment_budget@2.86s [v2-domain:timing]
+    predicate fault: CHANNEL_LINK_NOMINAL (RAISED:InjectedFault)
+    fault impact: COMMUNICATION/transport_delay may rest on the failed refuter CHANNEL_LINK_NOMINAL
+  POSITION_UNAVAILABLE on COARSE_NAVIGATION: NO_CONSISTENT_HYPOTHESIS
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: COMPUTE/estimator_stale by ESTIMATOR_PROCESS_HEALTHY
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by NO_TIMING_SEGMENT_OVER_BUDGET_FALSE
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.decision_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.processing_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+  POSITION_UNAVAILABLE on POSITION_HOLD: NO_CONSISTENT_HYPOTHESIS
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: COMPUTE/estimator_stale by ESTIMATOR_PROCESS_HEALTHY
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by NO_TIMING_SEGMENT_OVER_BUDGET_FALSE
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.decision_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.processing_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+  POSITION_UNAVAILABLE on PRECISION_NAVIGATION: NO_CONSISTENT_HYPOTHESIS
+    eliminated: COMMUNICATION/starvation by FUNCTION_LINKS_NOMINAL
+    eliminated: COMPUTE/estimator_stale by ESTIMATOR_PROCESS_HEALTHY
+    eliminated: SENSOR/navigation_source_invalid by V1_1_FUNCTION_ELIGIBLE
+    eliminated: TIMING/deadline_violation by NO_TIMING_SEGMENT_OVER_BUDGET_FALSE
+    refuting evidence: COMMUNICATION/gnss_serial:comm.link_state@2.95s [v2-domain:communication], COMPUTE/state_estimator:compute.deadline_met@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_alive@2.95s [v2-domain:compute], COMPUTE/state_estimator:compute.process_producing@2.95s [v2-domain:compute], SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility@2.95s [v2-domain:sensor], TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.decision_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.processing_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+  FUNCTION_DEADLINE_MISS on nav_solution: AMBIGUOUS
+    remaining explanations: COMMUNICATION/transport_delay, SENSOR/source_slow
+    eliminated: COMPUTE/processing_delay by PROCESSING_WITHIN_BUDGET
+    eliminated: TIMING/budget_exceeded_without_segment by TRANSPORT_WITHIN_BUDGET_FALSE
+    supporting evidence: TIMING/nav_solution.sensor_slow:timing.rate@2.95s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+    refuting evidence: TIMING/nav_solution.processing_delay:timing.segment_budget@2.86s [v2-domain:timing], TIMING/nav_solution.transport_delay:timing.segment_budget@2.86s [v2-domain:timing]
+  attribution: AMBIGUOUS; candidates TIMING/nav_solution, TIMING/nav_solution.sensor_slow, TIMING/nav_solution.transport_delay
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  v2-domain:actuation: health VALID; 3 of 3 admitted
+  v2-domain:communication: health VALID; 17 of 17 admitted
+  v2-domain:compute: health VALID; 13 of 13 admitted
+  v2-domain:power: health VALID; 6 of 6 admitted
+  v2-domain:sensor: health VALID; 15 of 15 admitted
+  v2-domain:timing: health VALID; 14 of 14 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 3 outputs in 3 lineage group(s), 3 independent line(s)
+  TIMING/nav_solution: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+  TIMING/nav_solution.sensor_slow: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+  TIMING/nav_solution.transport_delay: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION
