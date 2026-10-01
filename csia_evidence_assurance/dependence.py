@@ -51,15 +51,29 @@ def corroboration(envelopes) -> list:
     return out
 
 
+def shared_roots(group, lineages) -> list:
+    """The roots that tie a lineage group together: those held by at least
+    two of its members. This is what an engineer needs to see to know why
+    the members are not independent."""
+    count: dict = {}
+    for k in group:
+        for r in lineages[k].roots:
+            count[r] = count.get(r, 0) + 1
+    return sorted(r for r, n in count.items() if n >= 2)
+
+
 def overall(envelopes) -> dict:
     """Every adverse admitted envelope of the tick, grouped by lineage."""
     adverse = sorted((e for e in envelopes if e.record.is_adverse),
                      key=lambda e: e.evidence_id)
     items = [(e.evidence_id, e.lineage) for e in adverse]
     n, exact = independent_lines(items)
+    groups = independence_groups(items)
+    lins = dict(items)
     return {"adverse_evidence": len(adverse), "independent_lines": n,
             "independent_lines_exact": exact,
-            "lineage_groups": independence_groups(items)}
+            "lineage_groups": groups,
+            "group_shared_roots": [shared_roots(g, lins) for g in groups]}
 
 
 def exclusion_independence(candidate_ids, discriminator_records, envelopes_by_record) -> list:

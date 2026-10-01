@@ -173,6 +173,7 @@ def _certain(r):
 def key_moments(rs) -> dict:
     """`rs`: canonical result dicts, in order. See the module docstring."""
     first_abnormal, first_by_producer = None, {}
+    adverse_changes, prev_adv = [], set()
     cand_changes, certainty, invalidated, health, config, faults = [], [], {}, [], [], {}
     prev_loc, prev_attr, prev_cert, prev_health = {}, None, [], {}
     for r in rs:
@@ -181,6 +182,11 @@ def key_moments(rs) -> dict:
         adverse = ab.get("adverse_evidence", [])
         for e in adverse:
             first_by_producer.setdefault(e.split("|", 1)[0], t)
+        adv = {_ekey(e) for e in adverse}
+        if adv != prev_adv:
+            adverse_changes.append({"t": t, "appeared": sorted(adv - prev_adv),
+                                    "cleared": sorted(prev_adv - adv)})
+        prev_adv = adv
         if first_abnormal is None and (ab.get("symptoms") or adverse):
             first_abnormal = {"t": t, "symptoms": ab.get("symptoms", []),
                               "adverse_evidence": adverse,
@@ -222,6 +228,7 @@ def key_moments(rs) -> dict:
         prev_loc, prev_attr, prev_cert, prev_health = locs, attr, cert, hp
     return {"first_abnormal": first_abnormal,
             "first_observation_by_producer": dict(sorted(first_by_producer.items())),
+            "adverse_evidence_changes": adverse_changes,
             "candidate_changes": cand_changes, "certainty": certainty,
             "evidence_invalidated": sorted(invalidated.values(), key=lambda d: (d["t"], d["evidence"])),
             "producer_health_changes": health, "configuration_changes": config,
@@ -325,6 +332,12 @@ def _short(evidence_id: str) -> str:
     return f"{parts[2]}@{parts[3].rstrip('0').rstrip('.')}s [{parts[0]}]"
 
 
+def _kshort(key: str) -> str:
+    """An evidence key without content time (producer|claim|record)."""
+    parts = key.split("|")
+    return f"{parts[2]} [{parts[0]}]" if len(parts) == 3 else key
+
+
 def _ids(ids) -> str:
     return ", ".join(_short(i) for i in ids)
 
@@ -390,6 +403,11 @@ def _key_moment_lines(k: dict) -> list:
                       + (f"; observed by {', '.join(fa['observed_by'])}" if fa["observed_by"] else "")))
     for p, t in k.get("first_observation_by_producer", {}).items():
         items.append((t, 1, f"first adverse output from {p}"))
+    for c in k.get("adverse_evidence_changes", []):
+        for e in c["appeared"]:
+            items.append((c["t"], 1, f"adverse: {_kshort(e)}"))
+        for e in c["cleared"]:
+            items.append((c["t"], 1, f"no longer adverse: {_kshort(e)}"))
     for c in k.get("certainty", []):
         if "became_certain" in c:
             items.append((c["t"], 2, f"CERTAIN: {c['became_certain']}"))
@@ -398,7 +416,7 @@ def _key_moment_lines(k: dict) -> list:
     for c in k.get("candidate_changes", []):
         items.append((c["t"], 3, f"{c['what']}: {_state_words(c['from'])} -> {_state_words(c['to'])}"))
     for e in k.get("evidence_invalidated", []):
-        items.append((e["t"], 4, f"first {e['status']}: {e['evidence']} ({e['reason']})"))
+        items.append((e["t"], 4, f"first {e['status']}: {_kshort(e['evidence'])} ({e['reason']})"))
     for h in k.get("producer_health_changes", []):
         items.append((h["t"], 5, f"producer {h['producer']} health {h['from']} -> {h['to']}"))
     for c in k.get("configuration_changes", []):
@@ -495,9 +513,12 @@ def human_report(m: dict) -> str:
                  f"{len(ov['lineage_groups'])} lineage group(s), {ov['independent_lines']} "
                  f"independent line(s)" + ("" if ov["independent_lines_exact"]
                                            else " (lower bound)"))
-        for g in ov["lineage_groups"]:
+        for i, g in enumerate(ov["lineage_groups"]):
             if len(g) > 1:
                 L.append(f"    one group: {_ids(g)}")
+                shared = (ov.get("group_shared_roots") or [[]] * len(ov["lineage_groups"]))[i]
+                if shared:
+                    L.append(f"      not independent because they share: {', '.join(shared)}")
     for c in comp:
         L.append(f"  {c['component']}: {len(c['adverse_evidence'])} adverse outputs from "
                  f"{len(c['producers'])} producer(s), {c['independent_lines']} independent "
