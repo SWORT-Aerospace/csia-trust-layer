@@ -21,9 +21,16 @@ A lineage is a small, sorted, hashable tuple of root ids, each
 
 Nothing else is represented: no transformation chain, no parent ids, no
 graph database. Two outputs are DEPENDENT when their lineages share a root.
-Independence groups are the connected components of "shares a root", which
-can only under-count independent lines (two outputs that share nothing may
-still be joined through a third), never over-count.
+
+Two numbers come out of a set of lineages:
+- **independence groups**, the connected components of "shares a root",
+  for display: everything that is tied together, directly or through a
+  third output;
+- **independent lines**, the largest number of outputs no two of which
+  share a root: the shadow preview's `max_disjoint`, the definition that
+  removed every false corroboration there and kept the genuine one. It is
+  exact up to `EXACT_LIMIT` outputs; above that the group count, which can
+  only under-count, is returned and marked as a lower bound.
 """
 
 from __future__ import annotations
@@ -35,6 +42,8 @@ KINDS = ("sensor", "channel", "model", "calibration")
 #: Bounded on purpose: lineage is a coarse dependence statement, not a
 #: provenance record.
 MAX_ROOTS = 16
+#: Outputs above which `independent_lines` stops being exact.
+EXACT_LIMIT = 16
 
 
 class LineageError(ValueError):
@@ -103,3 +112,28 @@ def independence_groups(items) -> list:
     for k, _ in items:
         groups.setdefault(find(k), []).append(k)
     return sorted((sorted(g) for g in groups.values()), key=lambda g: g[0])
+
+
+def independent_lines(items) -> tuple:
+    """`items`: iterable of (key, Lineage). -> (n, exact): the largest number
+    of outputs no two of which share a root, and whether n is exact.
+
+    Outputs with an identical lineage count once; the rest is a maximum
+    independent set of the overlap graph, by branching on the output with
+    the most overlaps (small inputs only, hence `EXACT_LIMIT`)."""
+    lins = sorted({lin.roots for _k, lin in items})
+    if len(lins) > EXACT_LIMIT:
+        return len(independence_groups((i, Lineage(r)) for i, r in enumerate(lins))), False
+    sets = [set(r) for r in lins]
+    adj = {i: {j for j in range(len(sets)) if j != i and not sets[i].isdisjoint(sets[j])}
+           for i in range(len(sets))}
+
+    def mis(nodes: frozenset) -> int:
+        if not nodes:
+            return 0
+        v = max(sorted(nodes), key=lambda i: len(adj[i] & nodes))
+        if not adj[v] & nodes:
+            return len(nodes)
+        return max(mis(nodes - {v}), 1 + mis(nodes - {v} - adj[v]))
+
+    return mis(frozenset(adj)), True

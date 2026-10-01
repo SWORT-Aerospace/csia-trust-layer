@@ -46,6 +46,15 @@ def _r6(x):
     return None if x is None else round(float(x), 6)
 
 
+def _headline(locs, verdict) -> str:
+    """One line: each localization's outcome and remaining explanations,
+    then the cross-domain attribution verdict."""
+    parts = [f"{x['symptom']}|{x['subject']} {x['outcome']}: "
+             f"{', '.join(x['candidates']) or 'no explanation remains'}" for x in locs]
+    return "; ".join(parts + [f"attribution {verdict}"]) if parts else (
+        f"no symptom; attribution {verdict}")
+
+
 @dataclass(frozen=True)
 class AssuranceResult:
     """One tick's product-level result. `to_dict()` is the machine form."""
@@ -87,6 +96,9 @@ class FlightAssuranceAnalyzer:
         self.gate = gate_result
         self.profile_base = profile_base
         self.store: dict = {}
+        #: The raw 2.1.1 TickResult of the latest step, for harnesses that
+        #: grade it with the historical graders.
+        self.last_tick = None
         self.specs = {s.symptom_id: s for s in core.symptoms}
 
     # ------------------------------------------------------------- hold
@@ -109,12 +121,14 @@ class FlightAssuranceAnalyzer:
         warnings = tuple(f"{s}:{r}:{sub}" for s, r, sub, _d in self.gate.warnings())
         if not self.gate.accepted:
             return AssuranceResult(
-                t, "none", ANALYZER_VERSION, profile, {"assurance": PROFILE_REFUSED},
+                t, "none", ANALYZER_VERSION, profile,
+                {"headline": PROFILE_REFUSED, "attribution": PROFILE_REFUSED},
                 (), {}, {"used": [], "rejected": []}, {}, {}, {}, warnings,
                 {"why": "the profile failed its load gate; nothing was reasoned"})
         ctx = AnalysisContext(t, self.profile_base, epochs, dict(events or {}))
         a = assess(held, self.contracts, ctx)
         tr = self.core.reason(a.records, a.epochs)
+        self.last_tick = tr
         envs = {e.evidence_id: e for e in held}
         admitted = [envs[x.evidence_id] for x in a.admissions if x.status == ADMISSIBLE]
         by_record: dict = {}
@@ -130,7 +144,8 @@ class FlightAssuranceAnalyzer:
         for x in locs:
             outcomes[x["outcome"]] = outcomes.get(x["outcome"], 0) + 1
         adverse = sorted(e.evidence_id for e in admitted if e.record.is_adverse)
-        state = {"assurance": attr["verdict"],
+        state = {"headline": _headline(locs, attr["verdict"]),
+                 "attribution": attr["verdict"],
                  "abnormal": {"symptoms": [f"{x['symptom']}|{x['subject']}" for x in locs],
                               "adverse_evidence": adverse},
                  "localization_outcomes": dict(sorted(outcomes.items()))}

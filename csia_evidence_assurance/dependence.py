@@ -13,11 +13,12 @@ one line, and the use of that knowledge wherever CSIA states corroboration.
 1. **Logical use is unchanged.** Every admitted record reaches the core.
 2. **Republished duplicates are collapsed before the core.** That is the
    DUPLICATE status in `admissibility.py`.
-3. **Corroboration is stated by lineage group, never by count.** For every
+3. **Corroboration is stated by lineage, never by count.** For every
    component with adverse admitted evidence, the result lists that evidence,
    its independence groups (the connected components of "shares a root"),
-   and the number of independent lines. A report never says "three monitors
-   agree" when the three share a source.
+   and the number of independent lines (the largest set of that evidence no
+   two of which share a root). A report never says "three monitors agree"
+   when the three share a source.
 4. **Independence-based strengthening is not introduced.** When a UNIQUE
    rests on cross-domain exclusion evidence that shares a root with the
    candidate's own adverse evidence, the result says so (INFO). The verdict
@@ -26,7 +27,7 @@ one line, and the use of that knowledge wherever CSIA states corroboration.
 
 from __future__ import annotations
 
-from .lineage import independence_groups
+from .lineage import independence_groups, independent_lines
 
 
 def corroboration(envelopes) -> list:
@@ -40,12 +41,13 @@ def corroboration(envelopes) -> list:
     out = []
     for cid in sorted(by_comp):
         es = sorted(by_comp[cid], key=lambda e: e.evidence_id)
-        groups = independence_groups((e.evidence_id, e.lineage) for e in es)
+        items = [(e.evidence_id, e.lineage) for e in es]
+        n, exact = independent_lines(items)
         out.append({"component": cid,
                     "adverse_evidence": [e.evidence_id for e in es],
                     "producers": sorted({e.producer_id for e in es}),
-                    "lineage_groups": groups,
-                    "independent_lines": len(groups)})
+                    "lineage_groups": independence_groups(items),
+                    "independent_lines": n, "independent_lines_exact": exact})
     return out
 
 
@@ -53,9 +55,11 @@ def overall(envelopes) -> dict:
     """Every adverse admitted envelope of the tick, grouped by lineage."""
     adverse = sorted((e for e in envelopes if e.record.is_adverse),
                      key=lambda e: e.evidence_id)
-    groups = independence_groups((e.evidence_id, e.lineage) for e in adverse)
-    return {"adverse_evidence": len(adverse), "independent_lines": len(groups),
-            "lineage_groups": groups}
+    items = [(e.evidence_id, e.lineage) for e in adverse]
+    n, exact = independent_lines(items)
+    return {"adverse_evidence": len(adverse), "independent_lines": n,
+            "independent_lines_exact": exact,
+            "lineage_groups": independence_groups(items)}
 
 
 def exclusion_independence(candidate_ids, discriminator_records, envelopes_by_record) -> list:

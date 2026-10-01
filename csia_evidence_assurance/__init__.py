@@ -26,7 +26,10 @@ verdicts are 2.1.1's.
 | `profile_gate` | PV1-PV9 and pacing citations as the profile load gate |
 | `analyzer` | the Flight Assurance Analyzer: hold, admit, reason, explain |
 | `report` | the deterministic JSON report, the event timeline and the human report |
+| `runs` | each input kind wired once: v2 scenario, CUSUM v1 scenario, XSYS-001 trial, PX4 ULog |
 | `adapters/` | the producers: v2 domains, CUSUM, PX4 estimator, XSYS witnesses |
+
+Command line: `python -m csia_evidence_assurance --help`.
 
 Package documentation and evidence: `research/csia_2_2_evidence_assurance/`.
 """
@@ -40,7 +43,8 @@ from .analyzer import (ANALYZER_VERSION, AssuranceResult,  # noqa: F401
 from .contract import ContractError, ProducerContract, load_contracts  # noqa: F401
 from .envelope import EvidenceEnvelope  # noqa: F401
 from .health import ProducerHealth  # noqa: F401
-from .lineage import Lineage, LineageError, independence_groups  # noqa: F401
+from .lineage import (Lineage, LineageError, independence_groups,  # noqa: F401
+                      independent_lines)
 from .profile_gate import GateResult, gate  # noqa: F401
 
 __all__ = [
@@ -49,5 +53,5 @@ __all__ = [
     "AnalysisContext", "assess", "ANALYZER_VERSION", "AssuranceResult",
     "FlightAssuranceAnalyzer", "ContractError", "ProducerContract", "load_contracts",
     "EvidenceEnvelope", "ProducerHealth", "Lineage", "LineageError",
-    "independence_groups", "GateResult", "gate",
+    "independence_groups", "independent_lines", "GateResult", "gate",
 ]

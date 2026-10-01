@@ -1,0 +1,40 @@
+{
+ "claims": {
+  "RPM_DEFICIT": {
+   "attributable": false,
+   "domain": "ACTUATION",
+   "meaning": "the RPM telemetry implies less thrust than the command (VIOLATED), or not (NOMINAL): the local ESC-monitor symptom. It does not say whether the rotor or the RPM channel is at fault",
+   "relation": "xsys.rpm_response"
+  }
+ },
+ "contract_version": "xsys-witness-1",
+ "expected_inputs": [
+  "the sealed stage-1 features (STAGE1.json)",
+  "stage1_evidence.plan for the variant and checkpoint"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is NOT_APPLICABLE (xsys_v2_adapter._state_from)",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "channel:esc_rpm.<motor>",
+  "channel:motor_command.<motor>"
+ ],
+ "producer_id": "xsys:w_rpm",
+ "producer_version": "xsys001-a2-d86e857d000d",
+ "profile_compatibility": [
+  "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   0.0,
+   15.0
+  ],
+  "relative_to": "xsys.onset"
+ },
+ "validity_rule": "the window XSYS-001 validated this witness in (xsys_features.WINDOWS); content time is the window's end"
+}

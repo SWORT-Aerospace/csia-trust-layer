@@ -1,0 +1,97 @@
+{
+ "claims": {
+  "INNOVATION_HDG": {
+   "attributable": false,
+   "config_dependency": [
+    "ekf2.selector.instance_changed_count",
+    "ekf2.imu.change_count",
+    "ekf2.aiding.hdg",
+    "ekf2.reset.reset_count_quat"
+   ],
+   "domain": "COMPUTE",
+   "meaning": "EKF2's published hdg_test_ratio for heading (magnetometer, GNSS yaw or external vision yaw): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
+   "relation": "estimator.innovation.hdg"
+  },
+  "INNOVATION_HGT": {
+   "attributable": false,
+   "config_dependency": [
+    "ekf2.selector.instance_changed_count",
+    "ekf2.imu.change_count",
+    "ekf2.aiding.hgt",
+    "ekf2.reset.reset_count_pod_d"
+   ],
+   "domain": "COMPUTE",
+   "meaning": "EKF2's published hgt_test_ratio for vertical position (barometer, GNSS height, range finder or external vision; EKF2 averages the fused sources): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
+   "relation": "estimator.innovation.hgt"
+  },
+  "INNOVATION_POS": {
+   "attributable": false,
+   "config_dependency": [
+    "ekf2.selector.instance_changed_count",
+    "ekf2.imu.change_count",
+    "ekf2.aiding.pos",
+    "ekf2.reset.reset_count_pos_ne"
+   ],
+   "domain": "COMPUTE",
+   "meaning": "EKF2's published pos_test_ratio for horizontal position (GNSS, external vision or auxiliary global position, whichever is fused): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
+   "relation": "estimator.innovation.pos"
+  },
+  "INNOVATION_VEL": {
+   "attributable": false,
+   "config_dependency": [
+    "ekf2.selector.instance_changed_count",
+    "ekf2.imu.change_count",
+    "ekf2.aiding.vel",
+    "ekf2.reset.reset_count_vel_ne",
+    "ekf2.reset.reset_count_vel_d"
+   ],
+   "domain": "COMPUTE",
+   "meaning": "EKF2's published vel_test_ratio for velocity (GNSS, external vision or optical flow, whichever is fused): NOMINAL at or below the gate (1.0), VIOLATED above it, NOT_APPLICABLE when no aiding of this kind is fused. The estimator and an aiding sensor disagree; it does not say which is wrong.",
+   "relation": "estimator.innovation.vel"
+  }
+ },
+ "contract_version": "px4-ekf2-status-1",
+ "expected_inputs": [
+  "estimator_status (every instance)",
+  "estimator_selector_status when SENS_IMU_MODE = 0",
+  "the initial parameter SENS_IMU_MODE"
+ ],
+ "fault_behavior": "EKF2 keeps publishing while faulted; the fault flags, not silence, mark it",
+ "health_reporting": "REPORTED",
+ "health_rule": "UNAVAILABLE before tilt and yaw alignment (control_mode_flags bits 0, 1); FAULTED on filter_fault_flags bits 0-15; DEGRADED when time_slip increased since the lane's previous output; otherwise VALID",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": "model:ekf2, sensor:gyro.<gyro_device_id>, sensor:accel.<accel_device_id>, and the aiding sources fused for the claim (control_mode_flags), with baro and mag named by device id",
+ "producer_id": "px4:ekf2.estimator_status",
+ "producer_version": "547e2ca",
+ "profile_compatibility": [
+  "csia/v2/profiles/aircraft.py",
+  "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py"
+ ],
+ "profile_note": "the XSYS-001 vehicle is a PX4 SIH quadrotor running EKF2 at 547e2ca; its research specification has no predicate that reads these records, so there they are carried for the report only",
+ "schema": "csia.evidence_contract/1",
+ "source_reference": {
+  "commit": "547e2ca",
+  "lines": {
+   "src/modules/ekf2/EKF/ekf_helper.cpp": [
+    "412-558 test-ratio getters"
+   ],
+   "src/modules/ekf2/EKF2.cpp": [
+    "1943-2017 PublishStatus",
+    "2995-3060 multi mode and selector start"
+   ],
+   "src/modules/ekf2/EKF2Selector.cpp": [
+    "111-140 SelectInstance, _instance_changed_count++"
+   ]
+  },
+  "repository": "PX4/PX4-Autopilot",
+  "verification": "V4"
+ },
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": 0.01
+ },
+ "validity": {
+  "max_content_age_s": 0.4
+ },
+ "validity_rule": "content time is timestamp_sample, EKF2's delayed fusion horizon (measured 0.152-0.156 s behind publication in XSYS-001 flights, bounded by EKF2_DELAY_MAX = 0.2 s). 0.4 s = that bound + a 0.1 s analysis tick + 0.1 s (ten publication periods at 100 Hz). An output older than that means the estimator stopped publishing"
+}

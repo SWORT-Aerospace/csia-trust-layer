@@ -1,0 +1,40 @@
+{
+ "claims": {
+  "DYN_RESPONSE": {
+   "attributable": false,
+   "domain": "NAVIGATION",
+   "meaning": "in T1 the body rates show no response along the motor's thrust-loss axis (NOMINAL) or show one (VIOLATED), when the local symptom implies a genuine loss would be detectable",
+   "relation": "xsys.dynamics_T1"
+  }
+ },
+ "contract_version": "xsys-witness-1",
+ "expected_inputs": [
+  "the sealed stage-1 features (STAGE1.json)",
+  "stage1_evidence.plan for the variant and checkpoint"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is NOT_APPLICABLE (xsys_v2_adapter._state_from)",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "sensor:gyro.<id>",
+  "calibration:rotor_geometry"
+ ],
+ "producer_id": "xsys:w_dyn",
+ "producer_version": "xsys001-a2-d86e857d000d",
+ "profile_compatibility": [
+  "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   0.0,
+   0.2
+  ],
+  "relative_to": "xsys.onset"
+ },
+ "validity_rule": "the window XSYS-001 validated this witness in (xsys_features.WINDOWS); content time is the window's end"
+}

@@ -22,6 +22,12 @@ The citations live beside 2.2, not in the successor-profile file, so the
 | ERROR | the profile is refused; the Analyzer reports PROFILE_REFUSED and reasons with nothing |
 | WARNING | kept on every result |
 | INFO | the validator's GAP findings: a subject with nothing declared to serve it, so 2.1.1 will report scope gaps there |
+
+**NOT_APPLICABLE.** PV1-PV9 check a profile against its function table.
+A research specification with no function table (the XSYS-001 symptom
+specification) or a runtime with no profile (the v1.1 CUSUM-only analysis)
+has nothing for them to check. Such a profile is reasoned with, and every
+result carries an INFO finding saying it was not validated.
 """
 
 from __future__ import annotations
@@ -33,7 +39,7 @@ from pathlib import Path
 from csia_semantic_core.profile_validator import ERROR, GAP, WARNING, validate_profile
 
 CITATIONS = Path(__file__).resolve().parent / "pacing_citations.json"
-OK, REFUSED = "ACCEPTED", "REFUSED"
+OK, REFUSED, NOT_APPLICABLE = "ACCEPTED", "REFUSED", "NOT_APPLICABLE"
 
 
 @dataclass(frozen=True)
@@ -44,7 +50,7 @@ class GateResult:
 
     @property
     def accepted(self) -> bool:
-        return self.status == OK
+        return self.status in (OK, NOT_APPLICABLE)
 
     def warnings(self) -> list:
         return [f for f in self.findings if f[0] != "ERROR"]
@@ -103,3 +109,11 @@ def gate(overlay, sample_records, functions, citations=CITATIONS) -> GateResult:
                                             "base_profile": None, "digest": None})
     status = REFUSED if any(f[0] == "ERROR" for f in found) else OK
     return GateResult(status, profile, found)
+
+
+def not_applicable(name: str, base_profile: str, why: str) -> GateResult:
+    """A profile the validator cannot check (no function table)."""
+    return GateResult(NOT_APPLICABLE,
+                      {"name": name, "version": None, "base_profile": base_profile,
+                       "digest": None},
+                      (("INFO", "PG0_NOT_VALIDATED", name, why),))
