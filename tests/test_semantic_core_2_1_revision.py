@@ -605,3 +605,18 @@ def test_r3_the_frozen_e1_design_replays_with_no_stale_tick():
     assert rev["missed_position_symptom_ticks"] == 0
     for cfg in ("V2_0", "PRE_2_1_0"):
         assert got["configurations"][cfg]["stale_position_symptom_ticks"] == 9
+
+
+# ======================================================= properties (Phase 1)
+def test_p5_prime_a_fault_is_reported_and_never_more_certain_than_none():
+    """P5 of the 2.1 suite says a fault decides exactly what a None return
+    decides. R-1 deliberately separates them (a faulted refuter withholds; an
+    unmeasured one does not), so P5's decision clause is replaced by P5': the
+    fault is reported wherever it is evaluated, and it never decides anything
+    more certain than None. Same injection as P5: every base predicate raises
+    on the final tick of every shipped scenario."""
+    import property_rerun as PR
+    got = PR.p5_prime()
+    assert got["P5_prime_holds"], got
+    assert got["evaluated"] == got["reported"] > 0
+    assert got["more_certain_than_none"] == 0 and got["attribution_differs"] == 0
