@@ -1,0 +1,58 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: V12.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: SUPPORTED
+
+WHAT HAPPENED?
+  - COMMAND_NO_RESPONSE on motor_2: AMBIGUOUS
+  - UNCONFIRMED: ACTUATION/motor_1:vehicle.rate_transient DEGRADED 0.09515 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)
+  - UNCONFIRMED: ACTUATION/motor_0:vehicle.rate_transient DEGRADED 0.08721 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)
+  - UNCONFIRMED: ACTUATION/motor_0:esc.telemetry_response DEGRADED -0.008472 fraction of commanded thrust (threshold 0.00688; EARLY); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)
+  - attribution: AMBIGUOUS (not justified: SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN)
+WHEN DID IT START?
+  - E1: onset estimate 39.800 s, first alarm 40.300 s, change complete 48.700 s
+  - E2: onset estimate 54.700 s, first alarm 55.200 s, change complete 63.200 s
+  - E3: onset estimate 69.700 s, first alarm 70.300 s, change complete 75.100 s
+  - E4: onset estimate 99.600 s, first alarm 99.800 s, change complete 129.700 s
+WHICH SUBSYSTEM IS AFFECTED?
+  - ACTUATION/motor_2
+WHAT CAUSES REMAIN POSSIBLE?
+  - COMMAND_NO_RESPONSE|motor_2: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable
+WHAT WAS ELIMINATED, AND WHY?
+  - COMMAND_NO_RESPONSE|motor_2: SENSOR/response_sensor by PHYSICAL_RESPONSE_NOMINAL_FALSE (ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation] = 0.664 compensation ratio change (1/eta - 1 for a compensated loss))
+WHAT EVIDENCE SUPPORTS THIS?
+  - ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation]: VIOLATED 0.664 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER)
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3992 fraction of commanded thrust (threshold 0.00688; AFTER)
+  - ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.1117 rad/s (threshold 0.02882; event + [0, 0.2] s)
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - ACTUATION/motor_0:actuation.physical_response: UNAVAILABLE (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight) x9
+  - ACTUATION/motor_0:actuation.physical_response: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[10.0,15.0]s: outside the time window this evidence is valid for (e.g. held from an earlier event)) x3
+  - ACTUATION/motor_0:esc.telemetry_response: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s: outside the time window this evidence is valid for (e.g. held from an earlier event)) x3
+  - ACTUATION/motor_1:actuation.physical_response: UNAVAILABLE (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight) x3
+  - ACTUATION/motor_2:actuation.physical_response: UNAVAILABLE (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight) x3
+  - ACTUATION/motor_1:actuation.physical_response: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[10.0,15.0]s: outside the time window this evidence is valid for (e.g. held from an earlier event))
+  - (+3 more: receipts.json)
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 3 adverse output(s) in 1 lineage group(s): 2 independent line(s)
+  - ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation] and ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response] and ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient] share channel:motor_command.motor_0, channel:motor_command.motor_1, channel:motor_command.motor_2, channel:motor_command.motor_3 (+1 more)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: OBSERVED 6, NO_ANOMALY 8, NOT_APPLICABLE 4, UNAVAILABLE 1, NO_COVERAGE 26
+  - 4 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 39.88 s)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - COMMAND_NO_RESPONSE|motor_2: COMMUNICATION/command_not_delivered could be eliminated with ACTUATION/motor_2:actuation.command_path
+  - COMMAND_NO_RESPONSE|motor_2: POWER/path_unavailable could be eliminated with POWER/battery:power.cell_balance or POWER/battery:power.droop_vs_current or POWER/battery:power.p_equals_vi or POWER/battery:power.source_health
+  - COMMAND_NO_RESPONSE|motor_2: ACTUATION/drive_no_current could be eliminated with ACTUATION/motor_2:actuation.command_path or ACTUATION/motor_2:actuation.electrical_response or POWER/battery:power.cell_balance or POWER/battery:power.droop_vs_current or POWER/battery:power.p_equals_vi or POWER/battery:power.source_health
+  - COMMAND_NO_RESPONSE|motor_2: ACTUATION/mechanical could be eliminated with ACTUATION/motor_2:actuation.mechanical_response
+  - COMMAND_NO_RESPONSE|motor_2: ACTUATOR_LINK_NOMINAL_FALSE would discriminate but could not be evaluated
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - start-up (2-12 s): 5 aiding/reset changes, as in every flight (context, not a finding)
+  - 26.0 s: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  - 29.0 s: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - 39.80-39.80 s propulsion.compensation_change (raised 1x; E1)
+  - 54.70-54.70 s propulsion.compensation_change (raised 1x; E2)
+  - 69.70-69.70 s propulsion.compensation_change (raised 1x; E3)
+  - 99.60-99.60 s propulsion.compensation_change+propulsion.telemetry_change (raised 1x; E4)

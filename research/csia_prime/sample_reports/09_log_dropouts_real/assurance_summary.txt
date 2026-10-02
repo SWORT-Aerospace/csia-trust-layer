@@ -1,0 +1,34 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: sample.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: PARTIAL: no CA_ROTOR_COUNT: PX4 before control allocation; no propulsion evidence; missing for propulsion evidence: actuator_motors, esc_status, control_allocator_status, vehicle_angular_velocity, vehicle_land_detected; 4 logger dropout(s): evidence over them is refused; estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+
+WHAT HAPPENED?
+  - nothing adverse was observed
+  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)
+WHEN DID IT START?
+  - no event
+WHICH SUBSYSTEM IS AFFECTED?
+  - none confirmed
+WHAT CAUSES REMAIN POSSIBLE?
+  - none (no symptom)
+WHAT WAS ELIMINATED, AND WHY?
+  - nothing
+WHAT EVIDENCE SUPPORTS THIS?
+  - no confirmed conclusion
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - none
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 0 adverse output(s) in 0 lineage group(s): 0 independent line(s)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: NO_COVERAGE 34
+  - 0 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - ULog: the logger recorded 4 dropout(s), 0.119 s in all; outputs whose windows overlap one are UNAVAILABLE
+  - ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - nothing is ambiguous
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - none recorded (or no estimator evidence in this log)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - none

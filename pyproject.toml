@@ -40,6 +40,7 @@ data = ["duckdb>=1.0", "huggingface_hub>=0.34", "polars>=1.0", "pyarrow>=25",
 csia = "csia.cli:main"
 csia-shadow = "csia.deploy.cli:main"
 csia-edge = "csia.deploy.edge:main"
+csia-assure = "csia_evidence_assurance.assure_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["csia*"]
@@ -48,7 +49,7 @@ include = ["csia*"]
 "csia.dashboard" = ["web/*"]
 "csia.contracts" = ["*.json"]
 "csia_semantic_core" = ["successor_profiles/*.json"]
-"csia_evidence_assurance" = ["contracts/*.json", "pacing_citations.json"]
+"csia_evidence_assurance" = ["contracts/*.json", "pacing_citations.json", "support_matrix.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

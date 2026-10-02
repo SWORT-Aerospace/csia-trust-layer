@@ -2,6 +2,7 @@
 
     python -m csia_evidence_assurance analyze INPUT [--out DIR] [--estimator-only]
     python -m csia_evidence_assurance analyze-many DIR_OR_LIST --out DIR
+    python -m csia_evidence_assurance assure INPUT.ulg [--out DIR]
 
 INPUT is a PX4 `.ulg`, an estimator extract `.npz`, a frozen v2 scenario
 name, a frozen v1 scenario name (CUSUM), or an XSYS-001 analysis id
@@ -29,6 +30,21 @@ plus:
 - `coverage_matrix.{json,txt}`;
 - `batch_metrics.json`: time and peak memory, the only non-deterministic
   file.
+
+`assure` (CSIA PRIME, the commercial path) writes everything `analyze`
+writes, byte for byte, plus the assurance view (`assurance_view.py`,
+`support.py`):
+- `assurance_summary.txt`: the first page, answering the engineer's
+  questions in order, with no confidence figures;
+- `receipts.json`: one receipt per conclusion (supporting, refuting and
+  rejected evidence, lineage, producer health, content time, configuration,
+  versions);
+- `coverage_states.json`: every profile record in one of OBSERVED,
+  NO_ANOMALY, NO_COVERAGE, UNAVAILABLE, STALE, FAULTED, NOT_APPLICABLE,
+  UNKNOWN;
+- `support.json`: whether this log is inside the support matrix, and why not;
+- `alerts.json`: events grouped, a re-raised identical PX4 condition as one
+  alert.
 
 Earlier sub-commands (`scenario`, `cusum`, `xsys`, `ulog`) still work.
 """
@@ -125,6 +141,26 @@ def _row(name, out: Path) -> dict:
             "coverage": m["coverage"]}
 
 
+def cmd_assure(a) -> int:
+    from . import assurance_view as AV
+    from . import support as SP
+    tick = a.tick if a.tick is not None else runs.STOCK_TICK_S
+    run = runs.resolve(a.input, "V3_TEMPORAL", None, tick, stock=True)
+    out = Path(a.out or f"csia_assurance_{Path(a.input).stem}")
+    w = _write(run, out, {"tick_s": tick, "path": "stock", "input": Path(a.input).name})
+    m = w["m"]
+    sup = SP.check(SP.inspect(a.input), m)
+    view = AV.build(m, sup)
+    (out / "assurance_summary.txt").write_text(view["summary_text"])
+    for name, key in (("receipts.json", "receipts"), ("coverage_states.json", "coverage_states"),
+                      ("support.json", "support"), ("alerts.json", "alerts")):
+        (out / name).write_bytes(R.dumps({"view_version": AV.VIEW_VERSION, key: view[key]}))
+    sys.stdout.write(view["summary_text"])
+    print(f"\nwrote {out}/: report.json, report.txt, manifest.json, assurance_summary.txt, "
+          "receipts.json, coverage_states.json, support.json, alerts.json")
+    return 0
+
+
 def cmd_analyze_many(a) -> int:
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -199,6 +235,11 @@ def main(argv=None) -> int:
                    help="seconds between ticks (default: 1.0 on the stock path, else 0.1)")
     s.add_argument("--estimator-only", action="store_true",
                    help="a .ulg through the 2.2 path: the PX4 estimator producer alone")
+    s = sub.add_parser("assure", help="a PX4 .ulg: the analysis plus the assurance view (summary, "
+                                      "receipts, coverage states, support check, alerts)")
+    s.add_argument("input")
+    s.add_argument("--out")
+    s.add_argument("--tick", type=float, default=None)
     s = sub.add_parser("analyze-many", help="a directory of logs, or a file of inputs")
     s.add_argument("inputs")
     s.add_argument("--out", required=True)
@@ -224,6 +265,8 @@ def main(argv=None) -> int:
         return cmd_analyze(a)
     if a.kind == "analyze-many":
         return cmd_analyze_many(a)
+    if a.kind == "assure":
+        return cmd_assure(a)
     if a.kind == "scenario":
         run = runs.v2_scenario(a.name)
     elif a.kind == "cusum":

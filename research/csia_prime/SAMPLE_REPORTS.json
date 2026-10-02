@@ -1,0 +1,155 @@
+{
+ "cases": {
+  "01_nominal_hover": {
+   "case": "nominal hover",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "CAL1.ulg",
+   "input_sha256": "d76e1563e7729fc06a8bc34c71b977aee2fe8c48dcd00cf1dd4982dadecb8178",
+   "summary_lines": 35,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "02_motor_degradation_hover": {
+   "case": "motor_1 at 60 % effect, hover",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V1.ulg",
+   "input_sha256": "010a2a861d4d71d108347609b53c64beca26cdcd8de2b02252065ae0621a5511",
+   "summary_lines": 45,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- COMMAND_NO_RESPONSE on motor_1: AMBIGUOUS",
+    "  - UNCONFIRMED: ACTUATION/motor_2:esc.telemetry_response DEGRADED -0.007241 fraction of commanded thrust (threshold 0.00688; EARLY); context only: no symptom reads this output",
+    "  - attribution: AMBIGUOUS (not justified: SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN)"
+   ]
+  },
+  "03_telemetry_corruption": {
+   "case": "ESC 3 reports RPM x 10; motor healthy",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V10.ulg",
+   "input_sha256": "1b50c82997083af5f5701344ce2ba0f6c3ecef51d2ddf4f5c4a330867e1fb165",
+   "summary_lines": 43,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- UNCONFIRMED: ACTUATION/motor_2:esc.telemetry_response DEGRADED -98.68 fraction of commanded thrust (threshold 0.00688; AFTER); context only: no symptom reads this output",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "04_sensor_loss_esc_telemetry_offline": {
+   "case": "ESC 2 telemetry offline; motor healthy",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V9.ulg",
+   "input_sha256": "20ab1c8b001a37c2a363241463361a73aef70d312245cfe67e941abc01b0ffda",
+   "summary_lines": 36,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "05_gps_loss": {
+   "case": "GPS off in flight",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V7.ulg",
+   "input_sha256": "61c22d7dd387ba2f0e9ac37874091b06c00971046c1824cfe98c9f8b3cd47685",
+   "summary_lines": 45,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "06_configuration_change_magnetometer_loss": {
+   "case": "EKF2 selector on; magnetometer lost at 75 s",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "S1.ulg",
+   "input_sha256": "561a4ef088bc26a5784c24b410178b50b75838d20e9bb7bd71782de139cf8d62",
+   "summary_lines": 39,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "07_ambiguous_propulsion_event_hold": {
+   "case": "motor_2 at 60 % in a hold after maneuvers",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V12.ulg",
+   "input_sha256": "fe6eea0b0b3c826bd2c53219753dab523859827bdf03ea13d93ef304c7b6c3d6",
+   "summary_lines": 58,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- COMMAND_NO_RESPONSE on motor_2: AMBIGUOUS",
+    "  - UNCONFIRMED: ACTUATION/motor_1:vehicle.rate_transient DEGRADED 0.09515 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - UNCONFIRMED: ACTUATION/motor_0:vehicle.rate_transient DEGRADED 0.08721 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - UNCONFIRMED: ACTUATION/motor_0:esc.telemetry_response DEGRADED -0.008472 fraction of commanded thrust (threshold 0.00688; EARLY); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - attribution: AMBIGUOUS (not justified: SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN)"
+   ]
+  },
+  "08_missing_telemetry_real": {
+   "case": "real CubeOrange (VTOL airframe): no actuator_motors, no ESC telemetry",
+   "data": "REAL",
+   "exit_code": 0,
+   "input": "sample_log_small.ulg",
+   "input_sha256": "68d1020f688109f027dba08d2950247cc0ae34aaefdcf37e4a7d60838f3e1aa3",
+   "summary_lines": 34,
+   "support": "UNSUPPORTED",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "09_log_dropouts_real": {
+   "case": "real AUAV X2.1: 4 logger dropouts (119 ms)",
+   "data": "REAL",
+   "exit_code": 0,
+   "input": "sample.ulg",
+   "input_sha256": "81952e6059bc095717e7911c010e07f85749d6b04d332a5ffc51575a3fd0a558",
+   "summary_lines": 34,
+   "support": "PARTIAL",
+   "what_happened": [
+    "- nothing adverse was observed",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "10_maneuvering_loss": {
+   "case": "motor_2 at 60 % mid-maneuver",
+   "data": "SITL",
+   "exit_code": 0,
+   "input": "V13.ulg",
+   "input_sha256": "d471d3026e2b6d8ef58ee98e8a9d25a4a055a9e87232ee1afa469072d97e579e",
+   "summary_lines": 55,
+   "support": "SUPPORTED",
+   "what_happened": [
+    "- UNCONFIRMED: ACTUATION/motor_2:esc.telemetry_response DEGRADED 0.3989 fraction of commanded thrust (threshold 0.00688; AFTER); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - UNCONFIRMED: ACTUATION/motor_1:vehicle.rate_transient DEGRADED 0.5094 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - UNCONFIRMED: ACTUATION/motor_3:vehicle.rate_transient DEGRADED 0.4706 rad/s (threshold 0.02882; event + [0, 0.2] s); its physical confirmation was refused (NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight)",
+    "  - (+4 smaller unconfirmed context outputs: receipts.json)",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  },
+  "11_unsupported_vehicle_real": {
+   "case": "real FMUv5 boat (PX4 docs sample log)",
+   "data": "REAL",
+   "exit_code": 0,
+   "input": "sample_log_boat_testing_2022-7-28-13-31-16.ulg",
+   "input_sha256": "304d21d591f3bf78c002eede98ae307a4674bbad76493b68ebc0639375bc9749",
+   "summary_lines": 42,
+   "support": "UNSUPPORTED",
+   "what_happened": [
+    "- UNCONFIRMED: POWER/battery:power.battery_warning DEGRADED 14.17 V (threshold n/a; ); context only: no symptom reads this output",
+    "  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)"
+   ]
+  }
+ },
+ "label": "PRIME A6: the product's assure output on one log per case; REAL or SITL as labelled"
+}

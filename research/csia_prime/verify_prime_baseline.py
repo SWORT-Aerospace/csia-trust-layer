@@ -32,7 +32,13 @@ import verify_pilot_baseline as VP
 OUT = C.HERE / "BASELINE_PRIME.json"
 FINAL = C.HERE / "FINAL_STATE_PRIME.json"
 #: Product files PRIME may change, each with the measured gap or workflow it answers.
-PRIME_CHANGES: dict = {}
+PRIME_CHANGES: dict = {
+    "csia_evidence_assurance/__main__.py": "Track A: the `assure` sub-command (analyze's outputs unchanged)",
+    "csia_evidence_assurance/assurance_view.py": "Track A: summary, receipts, coverage states, alerts (view only)",
+    "csia_evidence_assurance/support.py": "Track A: support check (RR-09, a real boat log)",
+    "csia_evidence_assurance/support_matrix.json": "Track A: the machine-readable support matrix (A5)",
+    "csia_evidence_assurance/assure_cli.py": "Track A: the csia-assure console script",
+}
 HISTORICAL = ("research/csia_2_3_stock_bridge", "research/csia_2_2_offboard_pilot",
               "research/csia_2_2_evidence_assurance", "research/rb001_reality_bridge",
               "tests/test_evidence_assurance_2_2.py", "tests/test_csia_2_2_pilot.py",

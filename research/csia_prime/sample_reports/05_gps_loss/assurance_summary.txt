@@ -1,0 +1,45 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: V7.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: SUPPORTED
+
+WHAT HAPPENED?
+  - nothing adverse was observed
+  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)
+WHEN DID IT START?
+  - E1: onset estimate 49.676 s, first alarm 49.676 s
+  - E2: onset estimate 54.712 s, first alarm 54.712 s
+WHICH SUBSYSTEM IS AFFECTED?
+  - none confirmed
+WHAT CAUSES REMAIN POSSIBLE?
+  - none (no symptom)
+WHAT WAS ELIMINATED, AND WHY?
+  - nothing
+WHAT EVIDENCE SUPPORTS THIS?
+  - no confirmed conclusion
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - none
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 0 adverse output(s) in 0 lineage group(s): 0 independent line(s)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: NO_ANOMALY 14, NOT_APPLICABLE 4, UNAVAILABLE 1, NO_COVERAGE 26
+  - 4 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 49.87 s)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - nothing is ambiguous
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - start-up (2-12 s): 5 aiding/reset changes, as in every flight (context, not a finding)
+  - 26.0 s: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  - 29.0 s: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+  - 51.0 s: hgt aiding fused: barometer height, GNSS height -> barometer height (control_mode_flags) (event at 49.7 s)
+  - 56.7 s: pos aiding fused: GNSS position -> none (control_mode_flags)
+  - 56.7 s: vel aiding fused: GNSS velocity -> none (control_mode_flags)
+  - 64.7 s: hgt aiding fused: barometer height -> barometer height, range-finder height (control_mode_flags)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - 49.68-49.68 s px4.log_message: [failure_injection_manager] Injected: gps off, all instances (raised 1x; E1)
+  - 54.71-54.71 s px4.log_message: [mc_pos_control] invalid setpoints (raised 1x; E2)
+  - 54.71-54.71 s px4.log_message: [mc_pos_control] Failsafe: blind land (raised 1x; E2)
+  - 54.82-54.82 s px4.failsafe (raised 1x; E2)
+  - 54.82-54.82 s px4.log_message: [failsafe] Failsafe activated (raised 1x; E2)

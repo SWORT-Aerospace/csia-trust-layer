@@ -1,0 +1,492 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1
+input: sample_log_boat_testing_2022-7-28-13-31-16.ulg (stock producers and PX4 monitors; PX4 547e2ca default logging intervals)
+
+WHAT HAPPENED?
+  - E1 at 236.49 s: px4.battery_warning, px4.log_message
+  - E2 at 248.71 s: px4.battery_warning
+  - E3 at 265.44 s: px4.log_message
+  - E4 at 312.55 s: px4.log_message
+  - E5 at 386.75 s: px4.battery_warning, px4.log_message
+  - E6 at 392.90 s: px4.battery_warning
+  - E7 at 401.10 s: px4.battery_warning
+  - E8 at 410.90 s: px4.battery_warning
+  - E9 at 420.11 s: px4.battery_warning
+  - E10 at 432.91 s: px4.battery_warning
+  - E11 at 439.91 s: px4.battery_warning
+  - E12 at 447.11 s: px4.log_message
+
+WHEN?
+  - E1: onset estimate 236.492 s, first alarm 236.492 s
+  - E2: onset estimate 248.712 s, first alarm 248.712 s
+  - E3: onset estimate 265.435 s, first alarm 265.435 s
+  - E4: onset estimate 312.546 s, first alarm 312.546 s
+  - E5: onset estimate 386.752 s, first alarm 386.752 s
+  - E6: onset estimate 392.901 s, first alarm 392.901 s
+  - E7: onset estimate 401.101 s, first alarm 401.101 s
+  - E8: onset estimate 410.901 s, first alarm 410.901 s
+  - E9: onset estimate 420.111 s, first alarm 420.111 s
+  - E10: onset estimate 432.911 s, first alarm 432.911 s
+  - E11: onset estimate 439.911 s, first alarm 439.911 s
+  - E12: onset estimate 447.114 s, first alarm 447.114 s
+  - first abnormal output: 114.0 s (px4:battery.status)
+
+WHAT DID CSIA OBSERVE? (adverse outputs, with their magnitudes)
+  - E2 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.84 V (threshold n/a; window ; at 250.71 s, no longer held at the end)
+  - E1 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.74 V (threshold n/a; window ; at 251.31 s, no longer held at the end)
+  - E4 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.33 V (threshold n/a; window ; at 327.51 s, no longer held at the end)
+  - E6 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 15.53 V (threshold n/a; window ; at 394.71 s, no longer held at the end)
+  - E7 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.98 V (threshold n/a; window ; at 415.91 s, no longer held at the end)
+  - E8 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.29 V (threshold n/a; window ; at 425.71 s, no longer held at the end)
+  - E10 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.93 V (threshold n/a; window ; at 434.51 s, no longer held at the end)
+  - E9 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.8 V (threshold n/a; window ; at 434.91 s, no longer held at the end)
+  - E11 POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.61 V (threshold n/a; window ; at 439.91 s, no longer held at the end)
+
+WHAT COULD CSIA NOT OBSERVE?
+  - 1 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  - estimator_status: estimator_status lacks the field 'hdg_test_ratio' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+WHAT EXPLANATIONS REMAIN?
+  nothing
+
+WHAT WAS ELIMINATED, AND WHY?
+  nothing
+
+WHICH MONITORS AGREED?
+  nothing
+
+WERE THEY INDEPENDENT?
+  nothing
+
+WHAT WOULD RESOLVE THE REMAINING AMBIGUITY?
+  nothing
+
+IS ATTRIBUTION JUSTIFIED?
+  - no: NO_EVIDENCE; NOTHING_ADVERSE
+
+========================================================================
+DETAIL
+
+EVENTS (discovered; a trigger says something may have started, not what failed)
+  E1: t0 236.492 s, first alarm 236.492 s
+    px4.log_message: onset 236.492 s, alarm 236.492 s
+    px4.battery_warning: onset 236.511 s, alarm 236.511 s
+    px4.battery_warning: onset 238.111 s, alarm 238.111 s
+    px4.battery_warning: onset 240.511 s, alarm 240.511 s
+    px4.battery_warning: onset 242.712 s, alarm 242.712 s
+    px4.battery_warning: onset 243.311 s, alarm 243.311 s
+    px4.battery_warning: onset 244.301 s, alarm 244.301 s
+  E2: t0 248.712 s, first alarm 248.712 s
+    px4.battery_warning: onset 248.712 s, alarm 248.712 s
+    px4.battery_warning: onset 249.311 s, alarm 249.311 s
+  E3: t0 265.435 s, first alarm 265.435 s
+    px4.log_message: onset 265.435 s, alarm 265.435 s
+  E4: t0 312.546 s, first alarm 312.546 s
+    px4.log_message: onset 312.546 s, alarm 312.546 s
+    px4.log_message: onset 315.199 s, alarm 315.199 s
+  E5: t0 386.752 s, first alarm 386.752 s
+    px4.log_message: onset 386.752 s, alarm 386.752 s
+    px4.battery_warning: onset 387.301 s, alarm 387.301 s
+    px4.battery_warning: onset 389.311 s, alarm 389.311 s
+  E6: t0 392.901 s, first alarm 392.901 s
+    px4.battery_warning: onset 392.901 s, alarm 392.901 s
+  E7: t0 401.101 s, first alarm 401.101 s
+    px4.battery_warning: onset 401.101 s, alarm 401.101 s
+    px4.battery_warning: onset 402.711 s, alarm 402.711 s
+  E8: t0 410.901 s, first alarm 410.901 s
+    px4.battery_warning: onset 410.901 s, alarm 410.901 s
+    px4.battery_warning: onset 412.112 s, alarm 412.112 s
+    px4.battery_warning: onset 413.701 s, alarm 413.701 s
+  E9: t0 420.111 s, first alarm 420.111 s
+    px4.battery_warning: onset 420.111 s, alarm 420.111 s
+    px4.battery_warning: onset 421.901 s, alarm 421.901 s
+    px4.battery_warning: onset 423.501 s, alarm 423.501 s
+    px4.battery_warning: onset 426.101 s, alarm 426.101 s
+    px4.battery_warning: onset 426.711 s, alarm 426.711 s
+  E10: t0 432.911 s, first alarm 432.911 s
+    px4.battery_warning: onset 432.911 s, alarm 432.911 s
+    px4.battery_warning: onset 434.312 s, alarm 434.312 s
+    px4.battery_warning: onset 435.711 s, alarm 435.711 s
+  E11: t0 439.911 s, first alarm 439.911 s
+    px4.battery_warning: onset 439.911 s, alarm 439.911 s
+  E12: t0 447.114 s, first alarm 447.114 s
+    px4.log_message: onset 447.114 s, alarm 447.114 s
+
+EVIDENCE VALUES (every stock output)
+  236.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.17 V (threshold n/a; )
+  236.511s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.17 V (threshold n/a; ) BATTERY_WARNING
+  238.311s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.8 V (threshold n/a; )
+  238.311s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.8 V (threshold n/a; ) BATTERY_WARNING
+  248.712s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.06 V (threshold n/a; )
+  248.712s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.06 V (threshold n/a; ) BATTERY_WARNING
+  250.711s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.84 V (threshold n/a; )
+  250.711s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.84 V (threshold n/a; ) BATTERY_WARNING
+  251.312s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.74 V (threshold n/a; )
+  251.312s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.74 V (threshold n/a; ) BATTERY_WARNING
+  263.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.89 V (threshold n/a; )
+  263.511s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.89 V (threshold n/a; )
+  265.512s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.85 V (threshold n/a; )
+  265.512s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.85 V (threshold n/a; )
+  267.311s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.98 V (threshold n/a; )
+  267.311s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.98 V (threshold n/a; )
+  280.311s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.92 V (threshold n/a; )
+  280.311s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.92 V (threshold n/a; )
+  312.701s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 15.03 V (threshold n/a; )
+  312.701s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.03 V (threshold n/a; )
+  314.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.99 V (threshold n/a; )
+  314.511s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.99 V (threshold n/a; )
+  327.512s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.33 V (threshold n/a; )
+  327.512s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.33 V (threshold n/a; ) BATTERY_WARNING
+  386.711s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.45 V (threshold n/a; )
+  386.711s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.45 V (threshold n/a; )
+  388.711s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 15.06 V (threshold n/a; )
+  388.711s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.06 V (threshold n/a; )
+  392.901s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.47 V (threshold n/a; )
+  392.901s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.47 V (threshold n/a; ) BATTERY_WARNING
+  394.713s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 15.53 V (threshold n/a; )
+  394.713s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 15.53 V (threshold n/a; ) BATTERY_WARNING
+  401.101s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.68 V (threshold n/a; )
+  401.101s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.68 V (threshold n/a; ) BATTERY_WARNING
+  401.711s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.58 V (threshold n/a; )
+  401.711s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.58 V (threshold n/a; )
+  402.912s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.82 V (threshold n/a; )
+  402.912s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.82 V (threshold n/a; )
+  407.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.61 V (threshold n/a; )
+  407.511s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.61 V (threshold n/a; )
+  410.901s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.23 V (threshold n/a; )
+  410.901s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.23 V (threshold n/a; ) BATTERY_WARNING
+  412.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.9 V (threshold n/a; )
+  412.511s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.9 V (threshold n/a; ) BATTERY_WARNING
+  415.911s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.98 V (threshold n/a; )
+  415.911s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.98 V (threshold n/a; ) BATTERY_WARNING
+  420.111s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.13 V (threshold n/a; )
+  420.111s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.13 V (threshold n/a; ) BATTERY_WARNING
+  421.901s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.93 V (threshold n/a; )
+  421.901s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.93 V (threshold n/a; ) BATTERY_WARNING
+  425.712s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.29 V (threshold n/a; )
+  425.712s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.29 V (threshold n/a; ) BATTERY_WARNING
+  432.911s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.25 V (threshold n/a; )
+  432.911s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.25 V (threshold n/a; ) BATTERY_WARNING
+  434.512s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.93 V (threshold n/a; )
+  434.512s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.93 V (threshold n/a; ) BATTERY_WARNING
+  434.913s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 13.8 V (threshold n/a; )
+  434.913s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 13.8 V (threshold n/a; ) BATTERY_WARNING
+  439.911s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.61 V (threshold n/a; )
+  439.911s POWER/battery:power.battery_warning [px4:battery.status]: DEGRADED 14.61 V (threshold n/a; ) BATTERY_WARNING
+  441.701s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.74 V (threshold n/a; )
+  441.701s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.74 V (threshold n/a; )
+  447.301s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.74 V (threshold n/a; )
+  447.301s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.74 V (threshold n/a; )
+  447.511s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.8 V (threshold n/a; )
+  447.511s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.8 V (threshold n/a; )
+  449.111s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.77 V (threshold n/a; )
+  449.111s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.77 V (threshold n/a; )
+  454.711s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.71 V (threshold n/a; )
+  454.711s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.71 V (threshold n/a; )
+  461.911s POWER/battery:power.source_health [px4:battery.status]: NOMINAL 14.89 V (threshold n/a; )
+  461.911s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 14.89 V (threshold n/a; )
+
+COVERAGE (1 of 29 profile records observed; unobserved is not healthy)
+  NOT OBSERVED ACTUATION/motor_0:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_0:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_0:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_0:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_1:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_1:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_1:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_1:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_2:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_2:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_2:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_2:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_3:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_3:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_3:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_3:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED COMPUTE/control_allocator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED COMPUTE/cpu:compute.resource_headroom: CPU headroom (cpuload exists, but nothing pairs it with a deadline; in SITL it measures the host)
+  NOT OBSERVED COMPUTE/state_estimator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED POWER/battery:power.cell_balance: cell balance (needs cell voltages)
+  NOT OBSERVED POWER/battery:power.droop_vs_current: voltage sag under load (needs measured current)
+  NOT OBSERVED POWER/battery:power.p_equals_vi: power balance P = V I (needs an independent power measurement)
+  topic battery_status: fields that never vary: connected (constant), faults (all_zero)
+  topic control_allocator_status: fields that never vary: handled_motor_failure_mask (all_zero), thrust_setpoint_achieved (constant), torque_setpoint_achieved (constant), unallocated_thrust[0] (all_zero), unallocated_thrust[1] (all_zero), unallocated_thrust[2] (all_zero), unallocated_torque[0] (all_zero), unallocated_torque[1] (all_zero), unallocated_torque[2] (all_zero)
+  topic failure_detector_status: fields that never vary: fd_alt (all_zero), fd_arm_escs (all_zero), fd_battery (all_zero), fd_ext (all_zero), fd_imbalanced_prop (all_zero), fd_motor (all_zero), fd_pitch (all_zero), fd_roll (all_zero), motor_failure_mask (all_zero)
+  topic vehicle_status: fields that never vary: failsafe (all_zero)
+  topics absent: esc_status, rate_ctrl_status
+
+DIAGNOSABILITY (with the evidence this log can supply)
+  OUTPUT_STALE: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+  COMMAND_NO_RESPONSE: cannot be raised (no observable record can raise it (reads actuation.electrical_response))
+  MULTIPLE_SENSORS_DEGRADED: cannot be raised (no observable record can raise it (reads v1_1.source_health))
+  POSITION_UNAVAILABLE: cannot be raised (no observable record can raise it (reads v1_1.function_eligibility))
+  VOLTAGE_RAIL_LOW: cannot be raised (no observable record can raise it (reads power.rail_tolerance))
+  PROCESS_OUTPUT_LATE: cannot be raised (no observable record can raise it (reads compute.deadline_met))
+  HIGH_CURRENT_LOW_RPM: cannot be raised (no observable record can raise it (reads actuation.mechanical_response))
+  OUTPUT_MISSING: cannot be raised (no observable record can raise it (reads compute.process_producing))
+  FUNCTION_DEADLINE_MISS: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+
+========================================================================
+
+INPUTS
+  calibration_sha256: 7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e
+  configuration: stock producers and PX4 monitors
+  events_source: discovered
+  kind: px4_ulog_stock
+  rates: PX4 547e2ca default logging intervals
+  tick_s: 1.0
+  ulog: {'file': 'sample_log_boat_testing_2022-7-28-13-31-16.ulg', 'sha256': '304d21d591f3bf78c002eede98ae307a4674bbad76493b68ebc0639375bc9749'}
+
+PROFILE  multirotor-quad (ACCEPTED)
+
+TIMELINE  532 ticks in 102 intervals
+  0.000s: no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: start
+  1.000s .. 113.000s (113 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: admissibility, producer_health
+  114.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  115.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  116.000s .. 117.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  118.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  119.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  120.000s .. 122.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  123.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  124.000s .. 127.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  128.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  129.000s .. 155.000s (27 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  156.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  157.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  158.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  159.000s .. 160.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  161.000s .. 162.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  163.000s .. 165.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  166.000s .. 169.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  170.000s .. 171.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  172.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  173.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  174.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  175.000s .. 178.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  179.000s .. 180.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  181.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  182.000s .. 185.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  186.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  187.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  188.000s .. 189.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  190.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  191.000s .. 192.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  193.000s .. 194.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  195.000s .. 196.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  197.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  198.000s .. 199.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  200.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  201.000s .. 202.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  203.000s .. 204.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  205.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  206.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  207.000s .. 212.000s (6 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  213.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  214.000s .. 220.000s (7 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  221.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  222.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  223.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  224.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  225.000s .. 228.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  229.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  230.000s .. 232.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  233.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  234.000s .. 240.000s (9 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  241.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  242.000s .. 243.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  244.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  245.000s .. 247.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  248.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  248.912s .. 252.000s (7 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  253.000s .. 327.000s (81 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  327.546s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  328.000s .. 344.000s (17 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  345.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  346.000s .. 349.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  350.000s .. 351.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  352.000s .. 353.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  354.000s .. 356.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  357.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  358.000s .. 361.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  362.000s .. 365.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  366.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  367.000s .. 369.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  370.000s .. 372.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  373.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  374.000s .. 375.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  376.000s .. 378.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  379.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  380.000s .. 381.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  382.000s .. 383.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  384.000s .. 387.000s (5 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  388.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  388.752s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  389.000s .. 401.301s (16 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  401.752s .. 403.101s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  404.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  405.000s .. 408.000s (5 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  409.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  410.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  411.000s .. 412.901s (4 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  413.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  414.000s .. 419.000s (7 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  420.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  420.311s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  421.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  422.000s .. 423.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  424.000s .. 425.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  425.901s .. 433.111s (10 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  434.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  434.911s .. 440.111s (9 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  441.000s .. 457.000s (22 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  458.000s: no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+  459.000s .. 495.000s (38 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: abnormal
+
+KEY MOMENTS (in time order)
+  114.000s  FIRST ABNORMAL: adverse evidence only; observed by px4:battery.status
+  114.000s  first adverse output from px4:battery.status
+  114.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  115.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  116.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  118.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  119.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  120.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  123.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  124.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  128.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  129.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  156.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  157.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  158.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  159.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  161.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  163.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  166.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  170.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  172.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  173.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  174.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  175.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  179.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  181.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  182.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  186.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  187.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  188.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  190.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  191.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  193.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  195.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  197.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  198.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  200.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  201.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  203.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  205.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  206.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  207.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  213.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  214.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  221.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  222.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  223.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  224.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  225.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  229.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  230.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  233.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  234.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  241.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  242.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  244.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  245.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  248.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  248.912s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  253.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  327.546s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  328.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  345.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  346.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  350.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  352.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  354.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  357.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  358.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  362.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  366.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  367.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  370.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  373.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  374.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  376.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  379.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  380.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  382.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  384.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  388.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  388.752s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  389.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  401.752s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  404.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  405.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  409.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  410.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  411.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  413.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  414.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  420.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  420.311s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  421.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  422.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  424.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  425.901s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  434.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  434.911s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  441.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  458.000s  adverse: POWER/battery:power.battery_warning [px4:battery.status]
+  459.000s  no longer adverse: POWER/battery:power.battery_warning [px4:battery.status]
+
+FINAL STATE at 495.000s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  scope: the run observed 1 of the profile's 29 records; nothing is concluded about the other 28 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:battery.status: health VALID; 2 of 2 admitted
+  coverage: cusum:v1_1_sequential has no evidence for event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  coverage: px4:allocator.compensation has no evidence for ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  coverage: px4:ekf2.estimator_status has no evidence for estimator_status: estimator_status lacks the field 'hdg_test_ratio' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  coverage: px4:esc.telemetry_response has no evidence for ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  cusum:v1_1_sequential: event discovery: NO_COVERAGE 532
+  px4:allocator.compensation: ACTUATION/motor_*: NO_COVERAGE 532
+  px4:battery.status: POWER/battery:power.source_health [SOURCE_TELEMETRY]: NOMINAL 531
+  px4:battery.status: POWER/battery:power.battery_warning [WARNING]: ANOMALY 136, NO_ANOMALY 395
+  px4:ekf2.estimator_status: estimator_status: NO_COVERAGE 532
+  px4:esc.telemetry_response: ACTUATION/motor_*:actuation.electrical_response: NO_COVERAGE 532
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 1 of 29
+    POWER/battery (1)
+  NO PRODUCER in this run: 28: ACTUATION/motor_0 (4), ACTUATION/motor_1 (4), ACTUATION/motor_2 (4), ACTUATION/motor_3 (4), COMPUTE/control_allocator (4), COMPUTE/cpu (1), COMPUTE/state_estimator (4), POWER/battery (3)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 1: POWER/battery (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: none given

@@ -1,0 +1,147 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1
+input: sample_log_small.ulg (stock producers and PX4 monitors; PX4 547e2ca default logging intervals)
+
+WHAT HAPPENED?
+  - no event was discovered
+
+WHEN?
+  nothing
+
+WHAT DID CSIA OBSERVE? (adverse outputs, with their magnitudes)
+  nothing
+
+WHAT COULD CSIA NOT OBSERVE?
+  - 1 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - ULog: the logger recorded 1 dropout(s), 0.030 s in all; outputs whose windows overlap one are UNAVAILABLE
+  - ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  - estimator_status: estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+WHAT EXPLANATIONS REMAIN?
+  nothing
+
+WHAT WAS ELIMINATED, AND WHY?
+  nothing
+
+WHICH MONITORS AGREED?
+  nothing
+
+WERE THEY INDEPENDENT?
+  nothing
+
+WHAT WOULD RESOLVE THE REMAINING AMBIGUITY?
+  nothing
+
+IS ATTRIBUTION JUSTIFIED?
+  - no: NO_EVIDENCE; NOTHING_ADVERSE
+
+========================================================================
+DETAIL
+
+EVENTS (discovered; a trigger says something may have started, not what failed)
+  none
+
+EVIDENCE VALUES (every stock output)
+
+COVERAGE (1 of 29 profile records observed; unobserved is not healthy)
+  NOT OBSERVED ACTUATION/motor_0:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_0:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_0:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_0:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_1:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_1:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_1:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_1:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_2:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_2:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_2:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_2:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_3:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_3:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_3:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_3:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED COMPUTE/control_allocator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED COMPUTE/cpu:compute.resource_headroom: CPU headroom (cpuload exists, but nothing pairs it with a deadline; in SITL it measures the host)
+  NOT OBSERVED COMPUTE/state_estimator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED POWER/battery:power.cell_balance: cell balance (needs cell voltages)
+  NOT OBSERVED POWER/battery:power.droop_vs_current: voltage sag under load (needs measured current)
+  NOT OBSERVED POWER/battery:power.p_equals_vi: power balance P = V I (needs an independent power measurement)
+  topic battery_status: fields that never vary: connected (constant), warning (all_zero)
+  topic vehicle_status: fields that never vary: failsafe (all_zero), nav_state (all_zero)
+  topics absent: actuator_motors, control_allocator_status, esc_status, failure_detector_status
+
+DIAGNOSABILITY (with the evidence this log can supply)
+  OUTPUT_STALE: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+  COMMAND_NO_RESPONSE: cannot be raised (no observable record can raise it (reads actuation.electrical_response))
+  MULTIPLE_SENSORS_DEGRADED: cannot be raised (no observable record can raise it (reads v1_1.source_health))
+  POSITION_UNAVAILABLE: cannot be raised (no observable record can raise it (reads v1_1.function_eligibility))
+  VOLTAGE_RAIL_LOW: cannot be raised (no observable record can raise it (reads power.rail_tolerance))
+  PROCESS_OUTPUT_LATE: cannot be raised (no observable record can raise it (reads compute.deadline_met))
+  HIGH_CURRENT_LOW_RPM: cannot be raised (no observable record can raise it (reads actuation.mechanical_response))
+  OUTPUT_MISSING: cannot be raised (no observable record can raise it (reads compute.process_producing))
+  FUNCTION_DEADLINE_MISS: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+
+========================================================================
+
+INPUTS
+  calibration_sha256: 7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e
+  configuration: stock producers and PX4 monitors
+  events_source: discovered
+  kind: px4_ulog_stock
+  rates: PX4 547e2ca default logging intervals
+  tick_s: 1.0
+  ulog: {'file': 'sample_log_small.ulg', 'sha256': '68d1020f688109f027dba08d2950247cc0ae34aaefdcf37e4a7d60838f3e1aa3'}
+
+PROFILE  multirotor-quad (ACCEPTED)
+
+TIMELINE  7 ticks in 2 intervals
+  0.000s: no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: start
+  1.000s .. 6.000s (6 ticks): no symptom; attribution NO_EVIDENCE; 2 used, 0 rejected; changed: admissibility, producer_health
+
+KEY MOMENTS (in time order)
+  nothing abnormal observed at any tick (see PROFILE COVERAGE for what was observed)
+
+FINAL STATE at 6.000s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  scope: the run observed 1 of the profile's 29 records; nothing is concluded about the other 28 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:battery.status: health VALID; 2 of 2 admitted
+  coverage: cusum:v1_1_sequential has no evidence for event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  coverage: log has no evidence for ULog: the logger recorded 1 dropout(s), 0.030 s in all; outputs whose windows overlap one are UNAVAILABLE
+  coverage: px4:allocator.compensation has no evidence for ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  coverage: px4:ekf2.estimator_status has no evidence for estimator_status: estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  coverage: px4:esc.telemetry_response has no evidence for ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  cusum:v1_1_sequential: event discovery: NO_COVERAGE 7
+  log: ULog: NO_COVERAGE 7
+  px4:allocator.compensation: ACTUATION/motor_*: NO_COVERAGE 7
+  px4:battery.status: POWER/battery:power.source_health [SOURCE_TELEMETRY]: NOMINAL 6
+  px4:battery.status: POWER/battery:power.battery_warning [WARNING]: NO_ANOMALY 6
+  px4:ekf2.estimator_status: estimator_status: NO_COVERAGE 7
+  px4:esc.telemetry_response: ACTUATION/motor_*:actuation.electrical_response: NO_COVERAGE 7
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 1 of 29
+    POWER/battery (1)
+  NO PRODUCER in this run: 28: ACTUATION/motor_0 (4), ACTUATION/motor_1 (4), ACTUATION/motor_2 (4), ACTUATION/motor_3 (4), COMPUTE/control_allocator (4), COMPUTE/cpu (1), COMPUTE/state_estimator (4), POWER/battery (3)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 1: POWER/battery (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: none given

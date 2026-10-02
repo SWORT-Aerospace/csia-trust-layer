@@ -1,0 +1,43 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: V10.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: SUPPORTED
+
+WHAT HAPPENED?
+  - UNCONFIRMED: ACTUATION/motor_2:esc.telemetry_response DEGRADED -98.68 fraction of commanded thrust (threshold 0.00688; AFTER); context only: no symptom reads this output
+  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)
+WHEN DID IT START?
+  - E1: onset estimate 49.640 s, first alarm 49.640 s
+  - E2: onset estimate 56.504 s, first alarm 56.604 s, change complete 78.504 s
+  - E3: onset estimate 78.704 s, first alarm 78.804 s, change complete 79.704 s
+  - first abnormal output: 51.64 s (px4:esc.telemetry_response)
+WHICH SUBSYSTEM IS AFFECTED?
+  - none confirmed (unconfirmed observations on ACTUATION/motor_2)
+WHAT CAUSES REMAIN POSSIBLE?
+  - none (no symptom)
+WHAT WAS ELIMINATED, AND WHY?
+  - nothing
+WHAT EVIDENCE SUPPORTS THIS?
+  - no confirmed conclusion
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - ACTUATION/motor_2:actuation.physical_response: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[10.0,15.0]s: outside the time window this evidence is valid for (e.g. held from an earlier event)) x4
+  - ACTUATION/motor_2:esc.telemetry_response: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s: outside the time window this evidence is valid for (e.g. held from an earlier event)) x4
+  - ACTUATION/motor_2:vehicle.rate_transient: REGIME_INVALID (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.0,0.2]s: outside the time window this evidence is valid for (e.g. held from an earlier event)) x2
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 0 adverse output(s) in 0 lineage group(s): 0 independent line(s)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: OBSERVED 1, NO_ANOMALY 13, NOT_APPLICABLE 4, UNAVAILABLE 1, NO_COVERAGE 26
+  - 4 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 49.63 s)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - nothing is ambiguous
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - start-up (2-12 s): 5 aiding/reset changes, as in every flight (context, not a finding)
+  - 26.0 s: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  - 29.0 s: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - 49.64-49.64 s px4.log_message: [failure_injection_manager] Injected: esc wrong, instances 3 (raised 1x; E1)
+  - 56.50-56.50 s propulsion.telemetry_change (raised 1x; E2)
+  - 78.70-78.70 s propulsion.telemetry_change (raised 1x; E3)
