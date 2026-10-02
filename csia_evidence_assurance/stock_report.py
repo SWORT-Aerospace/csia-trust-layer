@@ -120,6 +120,22 @@ def _summary(m, extras) -> dict:
                             f" (threshold {_fmt(v['threshold'])}; window {v['window']})")
         else:
             observed.append(f"{_ev_short(eid)}: adverse")
+    # adverse outputs from the WHOLE flight, not only those still held at the
+    # end (validation flight V13: the injected motor's telemetry deficit had
+    # left its validity window by the end of the log)
+    last: dict = {}
+    for v in extras.get("evidence_values", []):
+        if (v["state"] in ("DEGRADED", "VIOLATED") and v.get("producer_health", "VALID") == "VALID"
+                and v["evidence_id"] not in adverse):
+            last[(v["event_id"], v["record"])] = v
+    earlier = sorted(last.values(), key=lambda v: (v["t"], v["record"]))
+    for v in earlier[:24]:
+        observed.append(f"{v['event_id']} {v['record']} [{v['producer_id']}]: {v['state']} "
+                        f"{_fmt(v['measured'])} {v['unit']} (threshold {_fmt(v['threshold'])}; "
+                        f"window {v['window']}; at {v['t']:.2f} s, no longer held at the end)")
+    if len(earlier) > 24:
+        observed.append(f"... and {len(earlier) - 24} more adverse outputs earlier in the flight "
+                        "(EVIDENCE VALUES below)")
     pc = m.get("profile_coverage") or {}
     not_obs = []
     if pc.get("enumerable"):

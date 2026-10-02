@@ -401,3 +401,73 @@ def test_a_symptom_raised_and_withdrawn_is_reported_in_what_happened():
         "profile_coverage": {}, "coverage_report": {}}
     s = SR._summary(m, {"events": [], "evidence_values": [], "diagnosability": {}})
     assert any("COMMAND_NO_RESPONSE|motor_0 was raised 1 time" in x for x in s["what_happened"])
+
+
+def test_the_summary_lists_adverse_outputs_from_the_whole_flight():
+    """Validation flight V13: an adverse output that left its validity window
+    before the end of the log is still named in WHAT DID CSIA OBSERVE?."""
+    m = {"final": {"localizations": [], "state": {"abnormal": {"adverse_evidence": []}}},
+         "key_moments": {"candidate_changes": []}, "profile_coverage": {}, "coverage_report": {}}
+    ev = [{"evidence_id": "p|C|ACTUATION/motor_2:esc.telemetry_response|78.600000",
+           "event_id": "E4", "producer_id": "px4:esc.telemetry_response",
+           "record": "ACTUATION/motor_2:esc.telemetry_response", "t": 78.6,
+           "state": "DEGRADED", "reason_codes": ["ESC_TELEMETRY_DEFICIT"], "measured": 0.4,
+           "unit": "fraction", "threshold": 0.0069, "window": "EARLY", "producer_health": "VALID"}]
+    s = SR._summary(m, {"events": [], "evidence_values": ev, "diagnosability": {}})
+    assert any("E4 ACTUATION/motor_2:esc.telemetry_response" in x and "no longer held" in x
+               for x in s["observed"])
+
+
+# ------------------------------------------------------------------ the package
+DOCS = {"README.md", "REVIEW_AND_DECISION.md", "TOPIC_INVENTORY.md", "CLAIM_REGISTER.md",
+        "STOCK_PRODUCERS.md", "MULTIROTOR_PROFILE.md", "SCALE.md", "EVENT_DISCOVERY.md",
+        "CUSUM_TRIGGER.md", "UNKNOWN_ONSET.md", "LOCALIZATION.md", "MOTOR_VS_TELEMETRY.md",
+        "DISCIPLINE.md", "ORDINARY_ULOG.md", "REPORT_PRODUCT.md", "VALIDATION_SET.md",
+        "FALSE_POSITIVES.md", "VALIDATION_FLIGHTS_DESIGN.md", "VALIDATION_FLIGHTS_DESIGN_2.md",
+        "VALIDATION_FLIGHTS.md"}
+BANNED = ("no prior work exists", "we are the first", "is the first to",
+          "first ever", "no one has", "never been studied", "has never been",
+          "no prior art exists")
+TOKENS = ("CSIA_2_3_READY_FOR_HARDWARE_LOG_TRIAL", "CSIA_2_3_STOCK_BRIDGE_DEMONSTRATED_NARROW",
+          "CSIA_2_3_NO_VALUE_ON_STOCK_LOGS", "CSIA_2_3_SEMANTIC_CORE_DEFECT_STOP",
+          "CSIA_2_3_GOVERNANCE_BLOCK")
+
+
+def test_the_2_3_documents_exist_and_keep_the_repositorys_wording_rules():
+    assert {p.name for p in PKG.glob("*.md")} == DOCS
+    for name in sorted(DOCS):
+        text = (PKG / name).read_text(encoding="utf-8").lower()
+        assert len(text) > 1500, name
+        assert not re.search(r"\bnovel\b", text), name
+        for phrase in BANNED:
+            assert phrase not in text, (name, phrase)
+
+
+def test_the_2_3_decision_chooses_one_token_and_keeps_the_authority_boundary():
+    text = (PKG / "REVIEW_AND_DECISION.md").read_text(encoding="utf-8")
+    chosen = [t for t in TOKENS if f"**`{t}`**" in text]
+    assert chosen == ["CSIA_2_3_STOCK_BRIDGE_DEMONSTRATED_NARROW"]
+    assert "CSIA_2_3_STOCK_BRIDGE_DEMONSTRATED_NARROW" in (PKG / "README.md").read_text()
+    for doc in ("README.md", "REVIEW_AND_DECISION.md"):
+        t = (PKG / doc).read_text(encoding="utf-8").upper()
+        assert "OFFBOARD" in t and "ZERO CONTROL" in t and "NO FORGE" in t
+
+
+def test_the_validation_designs_were_committed_before_their_results():
+    """Each design must be in git history before the commit that adds the
+    results it governs (the order is the point of a design)."""
+    import subprocess
+
+    def first(path):
+        out = subprocess.run(["git", "log", "--diff-filter=A", "--format=%ct", "--", path],
+                             cwd=REPO, capture_output=True, text=True).stdout.split()
+        return int(out[-1]) if out else None
+    d1 = first("research/csia_2_3_stock_bridge/VALIDATION_FLIGHTS_DESIGN.md")
+    r1 = first("research/csia_2_3_stock_bridge/VALIDATION_RESULTS_AS_FLOWN.json")
+    d2 = first("research/csia_2_3_stock_bridge/VALIDATION_FLIGHTS_DESIGN_2.md")
+    r2 = first("research/csia_2_3_stock_bridge/reports/V11/report.txt")
+    if None in (d1, r1, d2):
+        pytest.skip("history not available")
+    assert d1 < r1 and d1 <= d2
+    if r2 is not None:
+        assert d2 < r2

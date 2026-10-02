@@ -113,3 +113,20 @@ every other motor. The fix was found on one development run, before any
 systematic evaluation. `csia_evidence_assurance/stock_stats.py` is the
 authoritative definition. The register is left as written, with this
 amendment recorded here.
+
+## 6. Where the code fell short of the register, found by validation
+
+**Three of the register's own conditions were not implemented in the
+first version of the producers.** Each was found by a validation flight
+(`VALIDATION_FLIGHTS.md`), and each is now implemented and tested:
+
+| register entry | condition | found by | now |
+|---|---|---|---|
+| ALLOCATOR_COMPENSATION, assumption | "near-steady flight in both windows"; failure mode "maneuvering or wind in a window" | V5, V6: maneuvers raised false `COMMAND_NO_RESPONSE` | UNAVAILABLE (NOT_STEADY_FLIGHT) above theta_steady (calibration revision 3) |
+| ESC_TELEMETRY_RESPONSE, failure mode | "telemetry dropout" | V9: PX4's ESC OFF read as a measured 100 % deficit | an ESC offline in `esc_online_flags` gives UNAVAILABLE (ESC_TELEMETRY_OFFLINE) |
+| LOG_COMPLETENESS, decision | IMPLEMENT as producer health | review of the register against the code | outputs over a logger dropout or a topic gap are producer-UNAVAILABLE |
+
+**The lesson.** The register was right and the code was incomplete. A
+permanent test now pins each condition (`DISCIPLINE.md`). The steadiness
+fix was tested blind on flights designed after it
+(`VALIDATION_FLIGHTS_DESIGN_2.md`).

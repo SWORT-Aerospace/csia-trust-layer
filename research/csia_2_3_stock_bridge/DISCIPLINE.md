@@ -54,6 +54,8 @@ producer: a NOMINAL state must mean APPLICABLE.
 | diagnosability | with SIH stock evidence the never-eliminable explanations on a motor are drive_no_current, command_not_delivered, path_unavailable; the probe does not change the core |
 | report | the engineer's questions come first, WHAT HAPPENED? before DETAIL; every propulsion value carries a unit, threshold and window |
 | the command line | `analyze V1.ulg` takes the stock path and writes a schema-4 report with a path-free manifest (skips without the raw flight) |
+| found by the validation flights | compensation during a maneuver is UNAVAILABLE (NOT_STEADY_FLIGHT), never a loss, and no symptom is raised at any tick; an offline ESC is telemetry UNAVAILABLE, not a deficit; a total reported loss passes the power gate; a symptom raised and withdrawn is named in WHAT HAPPENED?; adverse outputs from the whole flight are named in WHAT DID CSIA OBSERVE?; calibration r3 keeps every r2 threshold |
+| the package | the 20 documents exist and keep the wording rules; the decision chooses one token and keeps the authority boundary; each validation design is in git history before the results it governs |
 
 ## 4. Why synthetic
 

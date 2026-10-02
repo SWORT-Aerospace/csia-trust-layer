@@ -81,8 +81,7 @@ def main():
     out["replays"] = VP.replays()
     out["profile_and_contracts"] = VP.profile_and_contracts()
     out["dataset_reports_match"] = VP.dataset_reports()
-    if not final:
-        out["batch_66"] = batch_66()
+    out["batch_66"] = batch_66()       # the 2.2 batch reports, byte for byte, at the end too
     out["provenance"] = provenance_test()
     g, rp, pc = out["gates_2_1_1"], out["replays"], out["profile_and_contracts"]
     ok = (all(out["ancestry"].values())
@@ -97,7 +96,7 @@ def main():
           and rp["v2_corpus_equal"] and rp["xsys_equal"] and rp["receipts_equal"] and rp["e1_equal"]
           and pc["r2_gate"] == "ACCEPTED"
           and all(out["dataset_reports_match"].values())
-          and (final or out["batch_66"]["identical"] == 66)
+          and out["batch_66"]["identical"] == 66
           and out["provenance"]["ok"])
     out["BASELINE_2_3_LOCKED" if not final else "FINAL_STATE_2_3_OK"] = ok
     C.write_json(FINAL if final else OUT, out)

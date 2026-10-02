@@ -51,14 +51,14 @@ input.
 
 ## 4. On ordinary logs
 
-**The logs.** The ten validation flights were recorded with PX4's default
-logging. They are the first ordinary logs this project has analysed
-end to end.
+**The logs.** The thirteen validation flights were recorded with PX4's
+default logging. They are the first ordinary logs this project has
+analysed end to end.
 
 | question | answer on the validation flights |
 |---|---|
-| correct | 7 of 10 as stated before flying; no wrong diagnosis in any (`VALIDATION_FLIGHTS.md`) |
-| useful | the right motor named in 4/4 losses, with the magnitude (compensation 0.662-0.663 against 1/eta - 1 = 0.667); telemetry faults kept out of the motor; PX4's own warnings shown in the timeline |
+| correct | first design: 7 of 10 as stated before flying, and the frozen code raised transient false symptoms in the two maneuvering flights; second design (after the fixes, blind): 3 of 3; with the final code, no false symptom at any time in any of the 13 flights (`VALIDATION_FLIGHTS.md`) |
+| useful | the right motor named in 5/5 losses in hover or hold (V1-V4, V12), with the magnitude (compensation 0.662-0.663 against 1/eta - 1 = 0.667); telemetry faults kept out of the motor; PX4's own warnings shown in the timeline |
 | honest | every report lists what it could not observe (4 of 29 profile records observed; no ESC current; battery current not measured; the frozen CUSUM has no coverage) and why the remaining explanations could not be eliminated; attribution "no" in every run |
 | reproducible | the same `report.json`, byte for byte, from another working directory with another `PYTHONHASHSEED` (checked on V1, V5, V9); the manifest carries the ULog's SHA-256, the calibration's, the contracts' digests and the code digests, and no machine path |
 
@@ -71,10 +71,15 @@ goes through the stock path (`VALIDATION_SET.json`).
 ## 5. Where the experience falls short
 
 **Maneuvering logs carry many false events.**
-- V5 and V6 have 11 events each.
-- Each is dismissed (no symptom), and the report says so event by event.
-- But an engineer reads eleven "something may have started here" entries
+- V5, V6 and V11 have 11 events each.
+- With the final code each raises no symptom, and the report says so.
+- As first frozen, each raised a transient false symptom.
+- An engineer still reads eleven "something may have started here" entries
   for a normal flight (`FALSE_POSITIVES.md`).
+
+**A loss during continuous maneuvering is not confirmed (V13).** The
+report gives the telemetry deficit and says why the vehicle's response
+could not be assessed.
 
 **The answer is almost always AMBIGUOUS.** On a stock SIH log the floor is
 three explanations. The product says what would resolve them. It cannot

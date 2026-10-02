@@ -97,7 +97,7 @@ def main():
         print(name, len(rows[-1]["events"]), len(rows[-1]["false_events"]), flush=True)
     vt = {"V1": "motor", "V2": "motor", "V3": "motor", "V4": "motor", "V5": "nominal",
           "V6": "nominal", "V7": "gps_off", "V8": "battery_wrong", "V9": "esc_off",
-          "V10": "esc_wrong"}
+          "V10": "esc_wrong", "V11": "nominal", "V12": "motor", "V13": "motor"}
     for rid, kind in vt.items():
         ulg = VAL / f"{rid}.ulg"
         if not ulg.exists():

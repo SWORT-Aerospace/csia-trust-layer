@@ -41,6 +41,14 @@ All four met their stated expectation.
 **Together with XSYS-001** (motor_0, 55/55 at eta 0.55-0.95), every motor
 of the quad has now been localized at least once, on ordinary logs.
 
+**After maneuvering (V12, second design, blind).** The loss on motor_2 came
+during a hold after three maneuvers. It was localized the same way:
+- C = 0.664, L = 0.399;
+- no other motor at any time.
+
+**During continuous maneuvering (V13)** it was not confirmed:
+NOT_STEADY_FLIGHT, a stated and honest miss (`VALIDATION_FLIGHTS.md`).
+
 ## 3. The secondary motor, and why it is not localized
 
 **Three of four events also contain a compensation trigger on a second
@@ -86,5 +94,6 @@ symptom. A trigger is a reason to look, not a finding.
   but the statistics normalise by the median motor. With two of four
   motors deviating, the median moves, and the per-motor change is then
   understated. That is untested on flight data.
-- **Maneuvering degrades event discovery** (`FALSE_POSITIVES.md`). Whether
-  a loss during a maneuver is localized as cleanly was not flown.
+- **Maneuvering degrades event discovery** (`FALSE_POSITIVES.md`).
+- **A loss during continuous maneuvering is not localized at all (V13).**
+  The compensation is not assessable there.

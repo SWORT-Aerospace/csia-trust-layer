@@ -15,6 +15,8 @@ WHAT DID CSIA OBSERVE? (adverse outputs, with their magnitudes)
   - ACTUATION/motor_0:actuation.physical_response [px4:allocator.compensation]: VIOLATED 0.6631 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; window AFTER)
   - ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3991 fraction of commanded thrust (threshold 0.00688; window AFTER)
   - ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.1268 rad/s (threshold 0.02882; window event + [0, 0.2] s)
+  - E1 ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3971 fraction of commanded thrust (threshold 0.00688; window EARLY; at 51.60 s, no longer held at the end)
+  - E1 ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.01184 fraction of commanded thrust (threshold 0.00688; window EARLY; at 51.60 s, no longer held at the end)
 
 WHAT COULD CSIA NOT OBSERVE?
   - 4 of the profile's 29 records observed
@@ -137,7 +139,7 @@ DIAGNOSABILITY (with the evidence this log can supply)
 ========================================================================
 
 INPUTS
-  calibration_sha256: ca4b4eb8e8406fd4ce285175b918fbb61f4672686bdae66a9280665ebd444da9
+  calibration_sha256: 7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e
   configuration: stock producers and PX4 monitors
   events_source: discovered
   kind: px4_ulog_stock

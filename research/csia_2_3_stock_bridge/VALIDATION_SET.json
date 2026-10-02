@@ -1,0 +1,370 @@
+{
+ "label": "Phase 25 product validation set; sources marked; synthetic rows are logic checks",
+ "rows": [
+  {
+   "case": "V5",
+   "class": "nominal",
+   "correct": true,
+   "expected": "no event, no symptom",
+   "honest": true,
+   "note": "events are false triggers, dismissed by the analysis",
+   "observed": {
+    "as_expected": false,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: no symptom": true,
+     "discovery: no event": false
+    },
+    "events": 11,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (maneuvering)",
+   "useful": false
+  },
+  {
+   "case": "V6",
+   "class": "nominal",
+   "correct": true,
+   "expected": "no event, no symptom",
+   "honest": true,
+   "note": "events are false triggers, dismissed by the analysis",
+   "observed": {
+    "as_expected": false,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: no symptom": true,
+     "discovery: no event": false
+    },
+    "events": 11,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (maneuvering)",
+   "useful": false
+  },
+  {
+   "case": "XSYS-001 benign-onset flights (11)",
+   "class": "nominal",
+   "correct": true,
+   "expected": "no event, no symptom",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "B": {
+     "CORRECT_NO_SYMPTOM": 11
+    }
+   },
+   "source": "XSYS-001 REPLAY",
+   "useful": true
+  },
+  {
+   "case": "V1",
+   "class": "motor degradation",
+   "correct": true,
+   "expected": "symptom on the injected motor, ambiguous",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "AMBIGUOUS",
+    "checks": {
+     "analysis: ACTUATION/mechanical among the remaining": true,
+     "analysis: COMMAND_NO_RESPONSE on the injected motor only": true,
+     "analysis: SENSOR/response_sensor eliminated": true,
+     "discovery: one event within 2 s of onset": true,
+     "discovery: triggered on the injected motor": true
+    },
+    "events": 1,
+    "headline": "COMMAND_NO_RESPONSE|motor_1 AMBIGUOUS: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable; attribution AMBIGUOUS"
+   },
+   "source": "REAL SITL",
+   "useful": true
+  },
+  {
+   "case": "V2",
+   "class": "motor degradation",
+   "correct": true,
+   "expected": "symptom on the injected motor, ambiguous",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "AMBIGUOUS",
+    "checks": {
+     "analysis: ACTUATION/mechanical among the remaining": true,
+     "analysis: COMMAND_NO_RESPONSE on the injected motor only": true,
+     "analysis: SENSOR/response_sensor eliminated": true,
+     "discovery: one event within 2 s of onset": true,
+     "discovery: triggered on the injected motor": true
+    },
+    "events": 1,
+    "headline": "COMMAND_NO_RESPONSE|motor_2 AMBIGUOUS: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable; attribution AMBIGUOUS"
+   },
+   "source": "REAL SITL",
+   "useful": true
+  },
+  {
+   "case": "V3",
+   "class": "motor degradation",
+   "correct": true,
+   "expected": "symptom on the injected motor, ambiguous",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "AMBIGUOUS",
+    "checks": {
+     "analysis: ACTUATION/mechanical among the remaining": true,
+     "analysis: COMMAND_NO_RESPONSE on the injected motor only": true,
+     "analysis: SENSOR/response_sensor eliminated": true,
+     "discovery: one event within 2 s of onset": true,
+     "discovery: triggered on the injected motor": true
+    },
+    "events": 1,
+    "headline": "COMMAND_NO_RESPONSE|motor_3 AMBIGUOUS: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable; attribution AMBIGUOUS"
+   },
+   "source": "REAL SITL",
+   "useful": true
+  },
+  {
+   "case": "V4",
+   "class": "motor degradation",
+   "correct": true,
+   "expected": "symptom on the injected motor, ambiguous",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "AMBIGUOUS",
+    "checks": {
+     "analysis: ACTUATION/mechanical among the remaining": true,
+     "analysis: COMMAND_NO_RESPONSE on the injected motor only": true,
+     "analysis: SENSOR/response_sensor eliminated": true,
+     "discovery: one event within 2 s of onset": true,
+     "discovery: triggered on the injected motor": true
+    },
+    "events": 1,
+    "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable; attribution AMBIGUOUS"
+   },
+   "source": "REAL SITL",
+   "useful": true
+  },
+  {
+   "case": "XSYS-001 A trials (55)",
+   "class": "motor degradation",
+   "correct": true,
+   "expected": "symptom on motor_0, ambiguous",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "B": {
+     "MOTOR_0_PROPULSION_CHAIN_TELEMETRY_EXCLUDED": 55
+    }
+   },
+   "source": "XSYS-001 REPLAY",
+   "useful": true
+  },
+  {
+   "case": "V9",
+   "class": "telemetry corruption",
+   "correct": false,
+   "expected": "no symptom; telemetry change reported as context",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": false,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: compensation on the motor NOMINAL (deficit not confirmed)": false,
+     "analysis: no symptom": true,
+     "discovery: telemetry trigger on the motor": true
+    },
+    "events": 1,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (PX4 failure injection)",
+   "useful": true
+  },
+  {
+   "case": "V10",
+   "class": "telemetry corruption",
+   "correct": true,
+   "expected": "no symptom; telemetry change reported as context",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: no symptom": true,
+     "analysis: telemetry excess reported as context": true,
+     "discovery: telemetry trigger on the motor": true
+    },
+    "events": 3,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (PX4 failure injection)",
+   "useful": true
+  },
+  {
+   "case": "XSYS-001 B trials (55)",
+   "class": "telemetry corruption",
+   "correct": true,
+   "expected": "no symptom; deficit unconfirmed by the vehicle",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "B": {
+     "NO_SYMPTOM_TELEMETRY_DEFICIT_UNCONFIRMED_BY_VEHICLE": 55
+    }
+   },
+   "source": "XSYS-001 REPLAY (frozen case-B construction)",
+   "useful": true
+  },
+  {
+   "case": "V8",
+   "class": "power anomaly",
+   "correct": true,
+   "expected": "battery warning and failsafe triggers; no propulsion symptom",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "as_expected": true,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: battery warning reported as context": true,
+     "analysis: no propulsion symptom": true,
+     "analysis: source health UNAVAILABLE": true,
+     "discovery: battery-warning trigger": true,
+     "discovery: failsafe trigger": true
+    },
+    "events": 2,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (PX4 failure injection)",
+   "useful": true
+  },
+  {
+   "case": "V7",
+   "class": "navigation anomaly",
+   "correct": true,
+   "expected": "no propulsion symptom; navigation outside the profile (EKF2 context)",
+   "honest": true,
+   "note": "useful only if the estimator context tells the story",
+   "observed": {
+    "as_expected": true,
+    "attribution": "NO_EVIDENCE",
+    "checks": {
+     "analysis: no propulsion symptom": true
+    },
+    "events": 2,
+    "headline": "no symptom; attribution NO_EVIDENCE"
+   },
+   "source": "REAL SITL (PX4 failure injection)",
+   "useful": null
+  },
+  {
+   "case": "S1 (2.2 pilot, SENS_IMU_MODE=0 selector run)",
+   "class": "configuration transition",
+   "correct": true,
+   "expected": "configuration changes in the timeline; no false propulsion symptom",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "attribution": "NO_EVIDENCE",
+    "configuration_changes": 13,
+    "events": 1,
+    "headline": "no symptom; attribution NO_EVIDENCE",
+    "not_observed": [
+     "4 of the profile's 29 records observed",
+     "event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here",
+     "POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)",
+     "ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)",
+     "POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 74.43 s)"
+    ],
+    "observed_records": 4,
+    "trigger_kinds": [
+     "px4.log_message"
+    ]
+   },
+   "source": "REAL SITL",
+   "useful": null
+  },
+  {
+   "case": "esc_status silent 2 s in the AFTER window",
+   "class": "producer failure",
+   "correct": true,
+   "expected": "outputs over the gap UNAVAILABLE and refused; no fault claimed from them",
+   "honest": true,
+   "note": "",
+   "observed": {
+    "attribution": "NO_EVIDENCE",
+    "configuration_changes": 0,
+    "events": 1,
+    "headline": "no symptom; attribution NO_EVIDENCE",
+    "not_observed": [
+     "0 of the profile's 29 records observed",
+     "event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here",
+     "POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)",
+     "ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)",
+     "POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 60.00 s)"
+    ],
+    "observed_records": 0,
+    "trigger_kinds": [
+     "propulsion.compensation_change",
+     "propulsion.telemetry_change"
+    ]
+   },
+   "source": "SYNTHETIC",
+   "useful": true
+  },
+  {
+   "case": "motor loss with esc_status absent",
+   "class": "no coverage",
+   "correct": true,
+   "expected": "no propulsion evidence and no propulsion trigger; said so; nothing called healthy",
+   "honest": true,
+   "note": "the loss is missed: the honest outcome when the log cannot show it",
+   "observed": {
+    "attribution": "NO_EVIDENCE",
+    "configuration_changes": 0,
+    "events": 0,
+    "headline": "no symptom; attribution NO_EVIDENCE",
+    "not_observed": [
+     "0 of the profile's 29 records observed",
+     "event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here",
+     "ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2",
+     "POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)",
+     "ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)"
+    ],
+    "observed_records": 0,
+    "trigger_kinds": []
+   },
+   "source": "SYNTHETIC",
+   "useful": true
+  },
+  {
+   "case": "every motor loss above",
+   "class": "ambiguous",
+   "correct": true,
+   "expected": "AMBIGUOUS among 4 explanations, with what would resolve it",
+   "honest": true,
+   "note": "",
+   "observed": "see motor degradation rows",
+   "source": "REAL SITL and XSYS-001 REPLAY",
+   "useful": true
+  },
+  {
+   "case": "v2 CPU_OVERLOAD (2.2 path)",
+   "class": "compute/timing anomaly",
+   "correct": null,
+   "expected": "a compute symptom where compute evidence exists",
+   "honest": true,
+   "note": "no stock PX4 topic carries deadline evidence: on a stock log this class is NOT DIAGNOSABLE (cpuload is context only)",
+   "observed": {
+    "headline": "OUTPUT_STALE|nav_solution SUPPORTED: COMPUTE/processing_delay; POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; PROCESS_OUTPUT_LATE|state_estimator SUPPORTED: COMPUTE/resource_exhaustion; attribution AMBIGUOUS"
+   },
+   "source": "SYNTHETIC (frozen v2 scenario)",
+   "useful": null
+  }
+ ]
+}

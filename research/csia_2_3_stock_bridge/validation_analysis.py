@@ -33,7 +33,10 @@ REPORTS = C.HERE / "reports"
 #: run -> (injected motor index, kind); motor index is CSIA's (SIH MotorN = motor_{N-1})
 TRUTH = {"V1": (1, "motor"), "V2": (2, "motor"), "V3": (3, "motor"), "V4": (0, "motor"),
          "V5": (None, "nominal"), "V6": (None, "nominal"), "V7": (None, "gps_off"),
-         "V8": (None, "battery_wrong"), "V9": (1, "esc_off"), "V10": (2, "esc_wrong")}
+         "V8": (None, "battery_wrong"), "V9": (1, "esc_off"), "V10": (2, "esc_wrong"),
+         # second design (VALIDATION_FLIGHTS_DESIGN_2.md)
+         "V11": (None, "nominal_2"), "V12": (2, "motor_after_maneuvers"),
+         "V13": (2, "motor_during_maneuvers")}
 MATCH_S = 2.0
 
 
@@ -111,6 +114,35 @@ def score(rid, m, onset, truth):
             mine and "SENSOR/response_sensor" in mine[0]["eliminated"])
         checks["analysis: ACTUATION/mechanical among the remaining"] = bool(
             mine and "ACTUATION/mechanical" in mine[0]["candidates"])
+    elif kind == "nominal_2":
+        checks["analysis: no symptom at any time"] = not syms and not anytime
+    elif kind == "motor_after_maneuvers":
+        sub = f"motor_{motor}"
+        near = [e for e in ev if onset is not None and abs(e["t0"] - onset) <= MATCH_S]
+        checks["discovery: an event within 2 s of the injection, motor among its triggers"] = bool(
+            near) and motor in near[0]["motors"]
+        checks["analysis: COMMAND_NO_RESPONSE on the injected motor, no other motor at any time"] = (
+            f"COMMAND_NO_RESPONSE|{sub}" in anytime and all(k.endswith(f"|{sub}") for k in anytime))
+        mine = [s_ for s_ in syms if s_["key"].endswith(sub)]
+        checks["analysis: SENSOR/response_sensor eliminated"] = bool(
+            mine and "SENSOR/response_sensor" in mine[0]["eliminated"])
+        checks["analysis: ACTUATION/mechanical among the remaining"] = bool(
+            mine and "ACTUATION/mechanical" in mine[0]["candidates"])
+    elif kind == "motor_during_maneuvers":
+        sub = f"motor_{motor}"
+        checks["analysis: no symptom on any other motor at any time"] = all(
+            k.endswith(f"|{sub}") for k in anytime)
+        near = [e for e in ev if onset is not None and abs(e["t0"] - onset) <= MATCH_S]
+        eid = near[0]["event_id"] if near else None
+        vals = [v for v in m["evidence_values"] if v["event_id"] == eid
+                and v["record"].startswith(f"ACTUATION/{sub}:")]
+        checks["analysis: telemetry deficit reported for the injection event"] = any(
+            v["record"].endswith("esc.telemetry_response") and v["state"] == "DEGRADED"
+            and (v["measured"] or 0) > 0 for v in vals)
+        checks["analysis: compensation UNAVAILABLE (NOT_STEADY_FLIGHT) for the injection event"] = any(
+            v["record"].endswith("actuation.physical_response") and v["state"] == "UNAVAILABLE"
+            and "NOT_STEADY_FLIGHT" in v["reason_codes"] for v in vals)
+        out["injection_event"] = eid
     elif kind == "nominal":
         checks["discovery: no event"] = len(ev) == 0
         checks["analysis: no symptom"] = not syms and not anytime

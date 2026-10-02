@@ -93,10 +93,27 @@ order. Nothing is learned and nothing is weighted.
 
 **The weakness.** The thresholds were set from hover. A reposition or yaw
 turn changes the motor command split. The compensation CUSUM reads that as
-a change, and so it fires at every maneuver.
+a change, and so it fires at every maneuver:
+- 11 events in each of the nominal maneuvering flights V5, V6 and V11;
+- 3-7 maneuver events around the losses in V12 and V13.
 
-The analysis dismisses those events: compensation without a telemetry
-deficit is NOT_APPLICABLE, so no symptom is raised. But the event list is
-noisy, and an engineer must page through it. Section 4 of
-`FALSE_POSITIVES.md` sets out what a fix needs: maneuvering null data,
-recalibrated by the same rule, never tuned on the validation flights.
+**What the events led to, first time round.** With the producers as
+frozen, these events did not stay harmless. Each event's AFTER window
+overlapped the next maneuver, so the compensation claim reported a loss on
+the yaw pair, motors 0 and 1. That raised a transient false
+`COMMAND_NO_RESPONSE` 11 times in V5 and 11 times in V6
+(`FALSE_POSITIVE_SEARCH_r2_as_found.json`).
+
+**The fix.** The claim's register assumption, "near-steady flight in both
+windows", is now checked (NOT_STEADY_FLIGHT; `STOCK_PRODUCERS.md`). In the
+blind flights (V11-V13), the maneuver events raised no symptom.
+
+**What remains.** The event list stays noisy: an engineer reads eleven
+"something may have started here" entries for a normal flight.
+
+**What reducing it needs, not done here:**
+- maneuver-aware discovery, reading the commanded setpoints, so that a
+  commanded change is not a candidate event;
+- or null data from maneuvering flights, calibrated by the same rule.
+
+Neither may be tuned on the validation flights.

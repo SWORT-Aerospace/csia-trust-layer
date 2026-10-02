@@ -57,13 +57,26 @@ The battery is sampled every tick (1 s).
 - **UNAVAILABLE** when:
   - fewer than 10 samples are in a window;
   - the allocator saturated over most of the window;
+  - **the flight was not near-steady** (NOT_STEADY_FLIGHT): the largest
+    body rate in BEFORE or AFTER exceeds theta_steady = 0.0989 rad/s;
   - a log gap touches a window.
+- **ESC telemetry offline.** When PX4 clears the motor's bit in
+  `esc_online_flags`, there is no reported deficit to test, so the output
+  is NOT_APPLICABLE (ESC_TELEMETRY_OFFLINE_NOTHING_TO_TEST).
+- **A total reported loss** (L >= 1, the ESC online) passes the power gate.
+
+The last two bullets, the steadiness check and the log-gap rule
+implement assumptions and failure modes that the claim register already
+listed but revision 1 of the producers did not check. The validation
+flights found them (`VALIDATION_FLIGHTS.md`).
 
 **Telemetry (rank 2):**
 - **DEGRADED** when L = 1 - q_after / q_before is beyond ±theta_tel
   (deficit or excess);
 - **NOMINAL** within it;
-- **UNAVAILABLE** when not measurable.
+- **UNAVAILABLE** when not measurable, or when the ESC is offline
+  (ESC_TELEMETRY_OFFLINE): PX4 then reports 0 RPM, which is not a
+  measurement.
 
 **Rate transient (rank 4):**
 - **DEGRADED** when D_m >= theta_dyn (0.0288 rad/s) on motor m's loss axis;
@@ -109,8 +122,16 @@ Each contract declares:
 ## 4. Calibration
 
 Thresholds come from apparatus data only (`CALIBRATION_2_3.json`,
-revision 2). The 32 nominal apparatus flights give 160 pseudo-onsets every
+revision 3). The 32 nominal apparatus flights give 160 pseudo-onsets every
 0.5 s in hover.
+
+**Revision history:**
+- **r1** (67bc92f) normalized by the mean of the other motors.
+- **r2** normalized by the median of all motors: a definition fix before
+  any systematic evaluation.
+- **r3** adds theta_steady, the null maximum of the peak body rate
+  (0.0494 rad/s) x 2. Every r2 threshold is unchanged; r2 is kept as
+  `CALIBRATION_2_3_r2_superseded.json`.
 
 **The rule** is XSYS-001's: threshold = 2 x the largest null |value|;
 CUSUM h = 3k.

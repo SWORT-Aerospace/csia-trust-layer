@@ -1,107 +1,94 @@
-# Validation flights: results against the expectations stated before flying
+# Validation flights: results against expectations stated before flying
 
 **2026-10-02.**
 
-**Design:** `VALIDATION_FLIGHTS_DESIGN.md`, committed in 6812abc before
-any flight was flown.
+**Designs, each committed before its flights were flown:**
+- `VALIDATION_FLIGHTS_DESIGN.md` (6812abc): V1-V10;
+- `VALIDATION_FLIGHTS_DESIGN_2.md` (edcb896): V11-V13, a blind test of the
+  fixes the first set forced.
 
-**Runner:** `sitl_validation_runs.py`.
-
-**Analysis:** `validation_analysis.py`. It runs the product path on the
-ULog alone, then reads each run's JSON for scoring.
+**Scripts:**
+- runner: `sitl_validation_runs.py`;
+- analysis: `validation_analysis.py`. It runs the product path on the ULog
+  alone, then reads each run's JSON for scoring. Symptoms are scored at
+  every tick of the timeline, not only at the end.
 
 **Results:**
-- `VALIDATION_RESULTS_AS_FLOWN.json`: scored with the code as frozen;
-- `VALIDATION_RESULTS.json`: scored after the fixes in section 3;
-- `reports/V1`-`V10`: the product's own reports, post-fix.
+- `VALIDATION_RESULTS_AS_FLOWN.json`: V1-V10 with the code as frozen in
+  6812abc;
+- `VALIDATION_RESULTS.json`: V1-V13 with the final code;
+- `reports/V1`-`V13`: the product's own reports.
 
 **Raw logs are not committed.** Their SHA-256 values are in the results.
 
-## 1. All ten were flown
+## 1. All thirteen were flown
 
 Every run armed, flew its schedule and disarmed, with PX4's default
-logging. None was re-flown. The injection acknowledgements are in each
-run's JSON: every `MAV_CMD_INJECT_FAILURE` was ACCEPTED.
+logging. None was re-flown. Every `MAV_CMD_INJECT_FAILURE` was ACCEPTED,
+and every parameter injection was acknowledged.
 
-## 2. Against the expectations (configuration B, the product default)
+## 2. First design, V1-V10 (configuration B, the product default)
 
-| run | expectation (stated before flying) | result | as expected? |
+| run | expectation (stated before flying) | as frozen (6812abc) | final code | as expected? |
+|---|---|---|---|---|
+| V1-V4 | one event within 2 s, on the injected motor; COMMAND_NO_RESPONSE on that motor only; response_sensor eliminated; mechanical remains | exactly that, motors 1, 2, 3, 0; onset errors -0.156 to -0.056 s | same; no other motor at any time | **yes** (4/4) |
+| V5 | nominal maneuvering: no event; no symptom | **11 events; 11 times a transient false `COMMAND_NO_RESPONSE` on motors 0 and 1**, each withdrawn when its evidence aged out. The end-of-log result read "no symptom" and hid them. | 11 events; **no symptom at any time** | **no**: false events (and, as frozen, false symptoms) |
+| V6 | as V5, 5 m/s wind | as V5: 11 events, 11 transient false symptoms on motors 0 and 1 | 11 events; no symptom at any time | **no**: same |
+| V7 | GPS off: possibly a failsafe or estimator trigger; no propulsion symptom | PX4 log message at injection (+0.004 s), failsafe 5 s later; no symptom | same | **yes** |
+| V8 | battery wrong: battery-warning and failsafe triggers; no propulsion symptom; warning as context; source health UNAVAILABLE | all of that, at +0.004 s | same | **yes** |
+| V9 | ESC 2 off: telemetry trigger on motor_1; no symptom; compensation NOMINAL (deficit not confirmed) | trigger and no symptom; offline ESC read as a 100 % deficit; compensation UNAVAILABLE | telemetry UNAVAILABLE (ESC_TELEMETRY_OFFLINE); compensation NOT_APPLICABLE; no symptom | **no**: part of the expectation not met (section 4) |
+| V10 | ESC 3 wrong: telemetry trigger (excess) on motor_2; no symptom; excess as context | PX4 log message at injection; excess L = -98.6 on motor_2 as context; no symptom | same | **yes** |
+
+## 3. Second design, V11-V13: the fixes, tested blind
+
+| run | expectation (stated before flying) | result (final code = the code in edcb896, plus a report-text change) | as expected? |
 |---|---|---|---|
-| V1 | one event within 2 s, on motor_1; COMMAND_NO_RESPONSE on motor_1 only; response_sensor eliminated; mechanical remains | 1 event, -0.136 s, first trigger motor 1; exactly that | **yes** |
-| V2 | same, motor_2 | 1 event, -0.056 s; exactly that | **yes** |
-| V3 | same, motor_3 | 1 event, -0.156 s; exactly that | **yes** |
-| V4 | same, motor_0, ordinary log | 1 event, -0.088 s; exactly that | **yes** |
-| V5 | nominal maneuvering: no event; no symptom | **11 events** (compensation triggers at every reposition and yaw turn); no symptom | **no**: false events (`FALSE_POSITIVES.md`) |
-| V6 | as V5 with 5 m/s wind | **11 events**; no symptom | **no**: same |
-| V7 | GPS off: possibly a failsafe or estimator trigger; no propulsion symptom | PX4 log message at injection (+0.004 s), failsafe 5 s later; no symptom | **yes** |
-| V8 | battery wrong: battery-warning and failsafe triggers; no propulsion symptom; warning as context; source health UNAVAILABLE | all of that, at +0.004 s | **yes** |
-| V9 | ESC 2 off: telemetry trigger on motor_1; no symptom; compensation NOMINAL (deficit not confirmed) | telemetry trigger on motor_1; no symptom; **compensation UNAVAILABLE** (as flown) / **NOT_APPLICABLE** (post-fix) | **no**: part of the expectation not met; see section 3 |
-| V10 | ESC 3 wrong: telemetry trigger (excess) on motor_2; no symptom; excess as context | PX4 log message at injection; excess L = -98.6 on motor_2 as context; a deficit-direction telemetry trigger 7 s later; no symptom | **yes** |
+| V11 | nominal, maneuvering (15 s, 60 m legs, 180-degree turns), crosswind 3 m/s: no symptom at any time; events counted | 11 events; no symptom at any time; every compensation UNAVAILABLE (NOT_STEADY_FLIGHT) | **yes** |
+| V12 | loss on motor_2 at 100 s, in a hold after three maneuvers: event within 2 s with motor_2 among its triggers; COMMAND_NO_RESPONSE on motor_2 and no other motor at any time; response_sensor eliminated; mechanical remains | 3 maneuver events (no symptom), then the injection event (-0.084 s); COMMAND_NO_RESPONSE on motor_2 only; compensation 0.664, telemetry deficit 0.399; response_sensor eliminated; AMBIGUOUS among 4 | **yes** |
+| V13 | loss on motor_2 at 77 s, mid-maneuver, maneuvers continuing: no symptom on any other motor at any time; for the injection event, motor_2's telemetry deficit reported and its compensation UNAVAILABLE (NOT_STEADY_FLIGHT) | telemetry event on motor_2 at -0.076 s; deficit DEGRADED; compensation UNAVAILABLE (NOT_STEADY_FLIGHT); no symptom on any motor at any time; later, PX4's allocator reported setpoints not achieved during the turns (`px4.allocation_not_achieved`) | **yes** |
 
-**Seven of ten as expected.**
+**The verdict on the fixes.** All three blind runs met the expectations
+stated before flying.
 
-**The three that differ:**
-- **V5 and V6** found that event discovery fires at every maneuver.
-- **V9** found a gap between the bridge's code and its own claim register.
+**V13 is a stated miss, and the product reports it honestly.**
+- During continuous maneuvering the loss is not confirmed and no motor is
+  blamed.
+- The report shows the telemetry deficit and says why the vehicle's
+  response could not be assessed.
 
-**No run produced a wrong diagnosis.** No healthy motor was blamed, and no
-injected motor was missed or misplaced.
+## 4. What the flights found, and what changed
 
-## 3. What V9 found, and what was changed
+| found by | defect | fix (tested) |
+|---|---|---|
+| V5, V6 | the compensation claim's register assumption "near-steady flight in both windows" was not checked; maneuvers moved the command split as a loss does and raised false symptoms | NOT_STEADY_FLIGHT above theta_steady (calibration revision 3: 2 x the apparatus hover null of the peak body rate, 0.0989 rad/s) |
+| V5 review | the summary showed the end-of-log result only, which hid symptoms raised and withdrawn | "WHAT HAPPENED?" names every symptom raised at any time; the scoring checks every tick |
+| V9 | an ESC offline (`esc_online_flags`) was read as a measured 100 % deficit; the power gate's division guard made a total reported loss untestable | ESC_TELEMETRY_OFFLINE gives UNAVAILABLE; L >= 1 passes the gate |
+| V13 review | "WHAT DID CSIA OBSERVE?" listed only outputs still held at the end of the log | the whole flight's adverse outputs are listed, per event |
 
-**What happened.** PX4's ESC OFF injection clears the ESC's bit in
-`esc_online_flags` and reports its RPM as 0.
+**Unchanged by the fixes:**
+- no XSYS-001 replay decision (`BLIND_ONSET_REPLAY.json`, re-run on the
+  final code);
+- no 2.2 or pilot report;
+- V1-V4, V7, V8, V10.
 
-**The two defects, as frozen:**
-1. **The telemetry producer read the zero as a measured 100 % deficit.**
-   The claim register (`CLAIMS.json`, ESC_TELEMETRY_RESPONSE) lists
-   "telemetry dropout" as a failure mode, but the producer did not
-   implement it.
-2. **The compensation's power gate could not test a total reported loss.**
-   It computes 1/(1 - L) - 1, and a guard against division by zero turned
-   L = 1 into "untestable" (UNAVAILABLE). A genuine total loss would need
-   unbounded compensation, so it should pass the gate (XSYS-001's own
-   witness rule).
+**The cost of not revising expectations.** V9 still differs from its
+expectation, and that is reported, not removed.
 
-**After the fix (`adapters/px4_stock.py`, tests
-`test_an_offline_esc_is_telemetry_unavailable_not_a_deficit` and
-`test_a_total_reported_loss_without_compensation_passes_the_power_gate`):**
-- **An offline ESC:** its telemetry is UNAVAILABLE (ESC_TELEMETRY_OFFLINE)
-  and the compensation is NOT_APPLICABLE. The report's "WHAT COULD CSIA
-  NOT OBSERVE?" names it.
-- **An online ESC reporting a total loss that the vehicle does not
-  compensate:** NOMINAL ("deficit not confirmed").
-
-**V9 still differs from its expectation, and the expectation is not
-revised.** The expectation assumed the zero RPM would be read as a
-deficit, and post-fix it rightly is not. The difference is reported here,
-not removed.
-
-**What the fixes did not change:**
-- no other validation run;
-- no decision in the XSYS-001 replay (`BLIND_ONSET_REPLAY.json`, re-run
-  on the final code);
-- no 2.2 or pilot report.
-
-**Log completeness was implemented in the same session, after the freeze.**
-The claim register had marked it IMPLEMENT, but it had not been coded.
-No validation flight had a logger dropout or a topic gap, so it changed no
-output.
-
-## 4. What the flights establish, and what they do not
+## 5. What the flights establish, and what they do not
 
 **What they establish:**
-- `python -m csia_evidence_assurance analyze V*.ulg` works on ordinary
-  logs with no sidecar.
-- It localizes each of the four motors.
-- It keeps telemetry faults, power and navigation anomalies out of the
+- On ordinary SITL logs, the product names the right motor for a thrust
+  loss in hover (5 of 5 including V12) and blames no healthy motor.
+- After the fixes it raises no false symptom in four nominal maneuvering
+  flights.
+- It keeps telemetry, power and navigation anomalies out of the
   propulsion diagnosis.
-- It says what it could not see.
+- It says what it could not assess, and why.
 
 **What they do not establish:**
-- **Each condition was flown once,** in SIH, which is nearly noise-free.
-  These are checks of behaviour, not rates.
-- **Hardware is untested.** Real ESC telemetry, vibration and battery
-  current change both the evidence and the noise.
-- **The design rule had a cost.** Expectations were not revised, so V9's
-  row is "no" even though the post-fix behaviour is the better one.
+- **Event discovery is still noisy under maneuvering:** about 11 false
+  events per 2.5-minute maneuvering flight (`FALSE_POSITIVES.md`).
+- **A loss during continuous maneuvering is not confirmed (V13).** That is
+  honest, but it is a miss.
+- **The sample is small.** Each condition was flown once, in SIH. These
+  are checks of behaviour, not rates. Hardware is untested.
