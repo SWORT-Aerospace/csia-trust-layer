@@ -6,7 +6,7 @@
 **The data.** The only real-hardware PX4 logs this session can reach are the
 test logs of PX4's own `pyulog` repository (raw.githubusercontent.com; every
 other log host and dataset host is blocked by the session's network policy,
-ENVIRONMENT_AND_ACCESS.md). Fetched into /home/user/rb001_raw/github/ with
+HARDWARE_INVENTORY.md, RB0_REAL_LOGS.md). Fetched into /home/user/rb001_raw/github/ with
 their SHA-256 recorded here. Two of the six are SITL and are labelled so.
 
 **What is measured, per log:**

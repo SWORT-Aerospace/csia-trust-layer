@@ -102,6 +102,7 @@ would answer it without any hardware:
 2. **RflyMAD's real subset:** 497 real multicopter flights with labelled
    faults, as ULogs (Le et al. 2023).
 
-**Either can be placed under `/home/user/rb001_raw/`.** The RB0 script reads
-any directory of ULogs. The maneuver-study harness reads any ULog that has
-the stock topics.
+**Either can be placed under `/home/user/rb001_raw/github/`.** The RB0
+script reads every `.ulg` in that directory; its `source` field would then
+have to be corrected by hand. The maneuver-study harness (`maneuver.load`)
+reads any ULog that has the stock topics.

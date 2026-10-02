@@ -54,3 +54,38 @@ propulsion analysis.
 | false symptoms per hour | RB5/RB6 | 30 nominal flight-hours for the 0.1 / h claim |
 | wrong UNIQUE per hour | RB6 or a fleet | 300 nominal flight-hours for 0.01 / h |
 | coverage | RB3 (FC on bench) | one log per logging profile in use |
+
+## 3. The product on RB-001's 13 new SITL flights
+
+**The shipped product (B0), on the maneuver study's evaluation flights**
+(`MANEUVER_STUDY.md`). These are new data, flown after the preregistration:
+- EN1-EN4 nominal maneuvering;
+- EF1-EF6, maneuvering losses;
+- EH1, a hover loss;
+- ET1-ET2, telemetry faults.
+
+In-flight time 0.482 h.
+
+| measure | value |
+|---|---|
+| correct UNIQUE | 0 |
+| wrong UNIQUE | **0** |
+| correct AMBIGUOUS | 1 (EH1: `ACTUATION/motor_0`, attribution not justified) |
+| false AMBIGUOUS | 0 |
+| correct symptom | 1 (EH1) |
+| false symptom, at any time | **0** |
+| missed fault | **6 of 7**: every loss during maneuvering (EF1-EF6) |
+| candidate events per in-flight hour | 161 / 0.482 h = 334 / h overall; 339 / h on the nominal and telemetry flights |
+| false symptoms per hour | 0 (bound 6.2 / h) |
+| false attribution per hour | 0 (bound 6.2 / h) |
+| coverage | as in 2.3: the compensation, as replicated in the study harness (B0), refused at 141 of 152 scored events (NOT_STEADY_FLIGHT) |
+
+**The trade, in one line:**
+- the product is safe and blind during maneuvering;
+- the one candidate that is not blind in SITL (B3) has not met reality.
+
+**For comparison, not product numbers:** B3, the research candidate, on the
+same flights:
+- 0 false symptoms;
+- 7 of 7 losses found;
+- 0 wrong motors.
