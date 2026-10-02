@@ -1,0 +1,225 @@
+{
+ "receipts": [
+  {
+   "conclusion": "COMMAND_NO_RESPONSE on motor_0: AMBIGUOUS",
+   "configuration": {
+    "changes": [],
+    "not_admitted_by_epoch": []
+   },
+   "eliminated": [
+    {
+     "all_refuters": [
+      "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+     ],
+     "by": "PHYSICAL_RESPONSE_NOMINAL_FALSE",
+     "hypothesis": "SENSOR/response_sensor"
+    }
+   ],
+   "evidence_that_could_not_be_evaluated": [
+    "ACTUATOR_LINK_NOMINAL_FALSE",
+    "ACTUATOR_POWER_NOMINAL",
+    "ACTUATOR_POWER_NOMINAL_FALSE",
+    "COMMAND_DELIVERED",
+    "COMMAND_DELIVERED_FALSE",
+    "CURRENT_PRESENT",
+    "CURRENT_PRESENT_FALSE",
+    "STALL_SIGNATURE",
+    "STALL_SIGNATURE_FALSE"
+   ],
+   "kind": "symptom",
+   "producer_health": {
+    "px4:allocator.compensation": [
+     "VALID"
+    ],
+    "px4:esc.telemetry_response": [
+     "VALID"
+    ],
+    "px4:vehicle.rate_transient": [
+     "VALID"
+    ]
+   },
+   "refuting_evidence": [
+    {
+     "content_time_s": 64.604,
+     "eliminates": [
+      "SENSOR/response_sensor"
+     ],
+     "evidence": "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+     "measured": 0.663092,
+     "producer": "px4:allocator.compensation",
+     "producer_health": "VALID",
+     "reason_codes": [
+      "ACT_NO_PHYSICAL_RESPONSE"
+     ],
+     "record": "ACTUATION/motor_0:actuation.physical_response",
+     "state": "VIOLATED",
+     "threshold": 0.006881,
+     "unit": "compensation ratio change (1/eta - 1 for a compensated loss)",
+     "window": "AFTER"
+    }
+   ],
+   "rejected_evidence": [],
+   "semantic_state": "AMBIGUOUS",
+   "source_lineage": {
+    "independent_lines": 2,
+    "lineage_groups": [
+     [
+      "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+      "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000",
+      "px4:vehicle.rate_transient|RATE_TRANSIENT|ACTUATION/motor_0:vehicle.rate_transient|49.804000"
+     ]
+    ],
+    "roots": {
+     "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000": [
+      "channel:motor_command.motor_0",
+      "channel:motor_command.motor_1",
+      "channel:motor_command.motor_2",
+      "channel:motor_command.motor_3",
+      "model:ekf2",
+      "model:px4_control_allocator",
+      "model:px4_rate_controller",
+      "sensor:imu.unknown"
+     ]
+    }
+   },
+   "still_possible": [
+    "ACTUATION/drive_no_current",
+    "ACTUATION/mechanical",
+    "COMMUNICATION/command_not_delivered",
+    "POWER/path_unavailable"
+   ],
+   "supporting_evidence": [
+    {
+     "content_time_s": 64.604,
+     "evidence": "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+     "measured": 0.663092,
+     "producer": "px4:allocator.compensation",
+     "producer_health": "VALID",
+     "reason_codes": [
+      "ACT_NO_PHYSICAL_RESPONSE"
+     ],
+     "record": "ACTUATION/motor_0:actuation.physical_response",
+     "state": "VIOLATED",
+     "threshold": 0.006881,
+     "unit": "compensation ratio change (1/eta - 1 for a compensated loss)",
+     "window": "AFTER"
+    },
+    {
+     "content_time_s": 64.604,
+     "evidence": "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000",
+     "measured": 0.399105,
+     "producer": "px4:esc.telemetry_response",
+     "producer_health": "VALID",
+     "reason_codes": [
+      "ESC_TELEMETRY_DEFICIT"
+     ],
+     "record": "ACTUATION/motor_0:esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.00688,
+     "unit": "fraction of commanded thrust",
+     "window": "AFTER"
+    },
+    {
+     "content_time_s": 49.804,
+     "evidence": "px4:vehicle.rate_transient|RATE_TRANSIENT|ACTUATION/motor_0:vehicle.rate_transient|49.804000",
+     "measured": 0.126836,
+     "producer": "px4:vehicle.rate_transient",
+     "producer_health": "VALID",
+     "reason_codes": [
+      "RATE_RESPONSE_ON_LOSS_AXIS"
+     ],
+     "record": "ACTUATION/motor_0:vehicle.rate_transient",
+     "state": "DEGRADED",
+     "threshold": 0.028821,
+     "unit": "rad/s",
+     "window": "event + [0, 0.2] s"
+    }
+   ],
+   "versions": {
+    "analyzer": "2.2.1",
+    "profile": "multirotor-quad r1",
+    "profile_digest": "c701b72aee1f3be1a334505c52df355796614ac83376f883c396cdc265e64171",
+    "semantics": "2.1.1",
+    "view": "prime-view-1"
+   },
+   "why": "SEVERAL_SURVIVORS_NONE_CONFIRMED",
+   "would_resolve": [
+    {
+     "description": "NOT (every COMMUNICATION link the actuator declares is healthy)",
+     "predicate": "ACTUATOR_LINK_NOMINAL_FALSE"
+    },
+    {
+     "description": "every POWER node the actuator declares is within tolerance",
+     "predicate": "ACTUATOR_POWER_NOMINAL"
+    },
+    {
+     "description": "the transmitted command matches the requested command",
+     "predicate": "COMMAND_DELIVERED"
+    },
+    {
+     "description": "the actuator draws roughly the current its command implies",
+     "predicate": "CURRENT_PRESENT"
+    },
+    {
+     "description": "current present AND shaft speed absent",
+     "predicate": "STALL_SIGNATURE"
+    }
+   ]
+  },
+  {
+   "candidates": [
+    "ACTUATION/motor_0"
+   ],
+   "conclusion": "attribution: AMBIGUOUS",
+   "justified": false,
+   "kind": "attribution",
+   "semantic_state": "AMBIGUOUS",
+   "unexcluded_alternatives": [
+    "COMPUTE/control_allocator",
+    "POWER/battery"
+   ],
+   "unique": null,
+   "versions": {
+    "analyzer": "2.2.1",
+    "profile": "multirotor-quad r1",
+    "profile_digest": "c701b72aee1f3be1a334505c52df355796614ac83376f883c396cdc265e64171",
+    "semantics": "2.1.1",
+    "view": "prime-view-1"
+   },
+   "why": "SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN",
+   "withheld_unique_because": []
+  },
+  {
+   "conclusion": "unconfirmed: ACTUATION/motor_2:esc.telemetry_response DEGRADED",
+   "kind": "unconfirmed",
+   "rejected_evidence": [],
+   "semantic_state": "UNCONFIRMED_OBSERVATION",
+   "supporting_evidence": [
+    {
+     "content_time_s": 51.604,
+     "evidence": "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_2:esc.telemetry_response|51.604000",
+     "measured": -0.011836,
+     "producer": "px4:esc.telemetry_response",
+     "producer_health": "VALID",
+     "reason_codes": [
+      "ESC_TELEMETRY_EXCESS"
+     ],
+     "record": "ACTUATION/motor_2:esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.00688,
+     "unit": "fraction of commanded thrust",
+     "window": "EARLY"
+    }
+   ],
+   "versions": {
+    "analyzer": "2.2.1",
+    "profile": "multirotor-quad r1",
+    "profile_digest": "c701b72aee1f3be1a334505c52df355796614ac83376f883c396cdc265e64171",
+    "semantics": "2.1.1",
+    "view": "prime-view-1"
+   },
+   "why": "an adverse output that no symptom reads (context), or whose confirmation was refused"
+  }
+ ],
+ "view_version": "prime-view-1"
+}

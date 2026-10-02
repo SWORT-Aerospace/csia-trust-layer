@@ -1,0 +1,35 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: CAL1.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: SUPPORTED
+
+WHAT HAPPENED?
+  - UNCONFIRMED: ACTUATION/motor_0:esc.telemetry_response DEGRADED 0.3998 fraction of commanded thrust (threshold 0.00688; AFTER); context only: no symptom reads this output
+  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)
+WHEN DID IT START?
+  - E1: onset estimate 69.904 s, first alarm 70.004 s, change complete 119.504 s
+  - first abnormal output: 71.904 s (px4:esc.telemetry_response)
+WHICH SUBSYSTEM IS AFFECTED?
+  - none confirmed (unconfirmed observations on ACTUATION/motor_0)
+WHAT CAUSES REMAIN POSSIBLE?
+  - none (no symptom)
+WHAT WAS ELIMINATED, AND WHY?
+  - nothing
+WHAT EVIDENCE SUPPORTS THIS?
+  - no confirmed conclusion
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - none
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 1 adverse output(s) in 1 lineage group(s): 1 independent line(s)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: OBSERVED 1, NO_ANOMALY 10, NOT_APPLICABLE 3, UNAVAILABLE 1, NO_COVERAGE 26
+  - 4 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 70.00 s)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - nothing is ambiguous
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - none recorded (or no estimator evidence in this log)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - 69.90-69.90 s propulsion.telemetry_change (raised 1x; E1)

@@ -1,0 +1,212 @@
+{
+ "cases": {
+  "A": {
+   "attribution": {
+    "candidates": [
+     "ACTUATION/motor_0"
+    ],
+    "justified": false,
+    "verdict": "AMBIGUOUS",
+    "why": "SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN"
+   },
+   "coverage_classes": {
+    "FAULTED": 0,
+    "NOT_APPLICABLE": 4,
+    "NO_ANOMALY": 6,
+    "NO_COVERAGE": 26,
+    "OBSERVED": 4,
+    "STALE": 0,
+    "UNAVAILABLE": 1,
+    "UNKNOWN": 0
+   },
+   "eliminated": [
+    "COMMAND_NO_RESPONSE|motor_0: SENSOR/response_sensor by PHYSICAL_RESPONSE_NOMINAL_FALSE (ACTUATION/motor_0:actuation.physical_response [px4:allocator.compensation] = 0.6631 compensation ratio change (1/eta - 1 for a compensated loss))"
+   ],
+   "explanations_remaining": {
+    "COMMAND_NO_RESPONSE|motor_0": [
+     "ACTUATION/drive_no_current",
+     "ACTUATION/mechanical",
+     "COMMUNICATION/command_not_delivered",
+     "POWER/path_unavailable"
+    ]
+   },
+   "independence": {
+    "adverse_outputs": 3,
+    "group_links": [
+     [
+      {
+       "evidence": [
+        "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+        "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000"
+       ],
+       "root": "channel:motor_command.motor_0"
+      },
+      {
+       "evidence": [
+        "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+        "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000"
+       ],
+       "root": "channel:motor_command.motor_1"
+      },
+      {
+       "evidence": [
+        "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+        "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000"
+       ],
+       "root": "channel:motor_command.motor_2"
+      },
+      {
+       "evidence": [
+        "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+        "px4:esc.telemetry_response|TELEMETRY_RESPONSE|ACTUATION/motor_0:esc.telemetry_response|64.604000"
+       ],
+       "root": "channel:motor_command.motor_3"
+      },
+      {
+       "evidence": [
+        "px4:allocator.compensation|PHYSICAL_EFFECT|ACTUATION/motor_0:actuation.physical_response|64.604000",
+        "px4:vehicle.rate_transient|RATE_TRANSIENT|ACTUATION/motor_0:vehicle.rate_transient|49.804000"
+       ],
+       "root": "sensor:imu.unknown"
+      }
+     ]
+    ],
+    "independent_lines": 2,
+    "lineage_groups": 1
+   },
+   "input_sha256": "e9ebc75f35c401ee7f1873786f91c8ac0f112dc4d3de7b7c538fcf8498030ffa",
+   "label": "SITL: physical loss, motor_0 at 60 % effect (2.3 V4)",
+   "monitors_on_motor_0": [
+    {
+     "measured": 0.126836,
+     "producer": "px4:vehicle.rate_transient",
+     "reasons": [
+      "RATE_RESPONSE_ON_LOSS_AXIS"
+     ],
+     "record": "vehicle.rate_transient",
+     "state": "DEGRADED",
+     "threshold": 0.02882144985008057,
+     "unit": "rad/s",
+     "window": "event + [0, 0.2] s"
+    },
+    {
+     "measured": 0.397147,
+     "producer": "px4:esc.telemetry_response",
+     "reasons": [
+      "ESC_TELEMETRY_DEFICIT"
+     ],
+     "record": "esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.0068798851916218595,
+     "unit": "fraction of commanded thrust",
+     "window": "EARLY"
+    },
+    {
+     "measured": 0.663092,
+     "producer": "px4:allocator.compensation",
+     "reasons": [
+      "ACT_NO_PHYSICAL_RESPONSE"
+     ],
+     "record": "actuation.physical_response",
+     "state": "VIOLATED",
+     "threshold": 0.006881424935098357,
+     "unit": "compensation ratio change (1/eta - 1 for a compensated loss)",
+     "window": "AFTER"
+    },
+    {
+     "measured": 0.399105,
+     "producer": "px4:esc.telemetry_response",
+     "reasons": [
+      "ESC_TELEMETRY_DEFICIT"
+     ],
+     "record": "esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.0068798851916218595,
+     "unit": "fraction of commanded thrust",
+     "window": "AFTER"
+    }
+   ],
+   "symptoms": [
+    "COMMAND_NO_RESPONSE|motor_0"
+   ]
+  },
+  "B": {
+   "attribution": {
+    "candidates": [],
+    "justified": false,
+    "verdict": "NO_EVIDENCE",
+    "why": "NOTHING_ADVERSE"
+   },
+   "coverage_classes": {
+    "FAULTED": 0,
+    "NOT_APPLICABLE": 3,
+    "NO_ANOMALY": 10,
+    "NO_COVERAGE": 26,
+    "OBSERVED": 1,
+    "STALE": 0,
+    "UNAVAILABLE": 1,
+    "UNKNOWN": 0
+   },
+   "eliminated": [],
+   "explanations_remaining": {},
+   "independence": {
+    "adverse_outputs": 1,
+    "group_links": [
+     []
+    ],
+    "independent_lines": 1,
+    "lineage_groups": 1
+   },
+   "input_sha256": "d76e1563e7729fc06a8bc34c71b977aee2fe8c48dcd00cf1dd4982dadecb8178",
+   "label": "SITL + OFFLINE CORRUPTION: healthy motor_0, its RPM telemetry x sqrt(0.6) from 70 s (RB-001 CAL1)",
+   "monitors_on_motor_0": [
+    {
+     "measured": 0.008202,
+     "producer": "px4:vehicle.rate_transient",
+     "reasons": [],
+     "record": "vehicle.rate_transient",
+     "state": "NOMINAL",
+     "threshold": 0.02882144985008057,
+     "unit": "rad/s",
+     "window": "event + [0, 0.2] s"
+    },
+    {
+     "measured": 0.398038,
+     "producer": "px4:esc.telemetry_response",
+     "reasons": [
+      "ESC_TELEMETRY_DEFICIT"
+     ],
+     "record": "esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.0068798851916218595,
+     "unit": "fraction of commanded thrust",
+     "window": "EARLY"
+    },
+    {
+     "measured": 0.001547,
+     "producer": "px4:allocator.compensation",
+     "reasons": [],
+     "record": "actuation.physical_response",
+     "state": "NOMINAL",
+     "threshold": 0.006881424935098357,
+     "unit": "compensation ratio change (1/eta - 1 for a compensated loss)",
+     "window": "AFTER"
+    },
+    {
+     "measured": 0.399767,
+     "producer": "px4:esc.telemetry_response",
+     "reasons": [
+      "ESC_TELEMETRY_DEFICIT"
+     ],
+     "record": "esc.telemetry_response",
+     "state": "DEGRADED",
+     "threshold": 0.0068798851916218595,
+     "unit": "fraction of commanded thrust",
+     "window": "AFTER"
+    }
+   ],
+   "symptoms": []
+  }
+ },
+ "label": "PRIME D4 demo facts; SITL, not physical"
+}
