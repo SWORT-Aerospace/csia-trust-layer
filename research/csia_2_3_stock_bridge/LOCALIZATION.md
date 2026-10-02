@@ -3,7 +3,7 @@
 **2026-10-02.** **Data:**
 - validation flights V1-V4 (`VALIDATION_FLIGHTS_DESIGN.md`, committed
   before flying; results in `VALIDATION_RESULTS.json`; reports in
-  `reports/V1`-`V4`);
+  `research/csia_2_3_stock_bridge/reports/`, V1-V4);
 - the XSYS-001 replay (`UNKNOWN_ONSET.md`).
 
 ## 1. Why new flights were needed

@@ -17,7 +17,7 @@
 - `VALIDATION_RESULTS_AS_FLOWN.json`: V1-V10 with the code as frozen in
   6812abc;
 - `VALIDATION_RESULTS.json`: V1-V13 with the final code;
-- `reports/V1`-`V13`: the product's own reports.
+- `research/csia_2_3_stock_bridge/reports/` (V1-V13): the product's own reports.
 
 **Raw logs are not committed.** Their SHA-256 values are in the results.
 
