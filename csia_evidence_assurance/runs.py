@@ -285,8 +285,20 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
     from .stock_log import StockLog
     if stock_log is None:
         stock_log = StockLog.from_ulog(path)
+    schema_notices = []
     if est_log is None and path is not None:
-        est_log = PX.EstimatorLog.from_ulog(path)
+        try:
+            est_log = PX.EstimatorLog.from_ulog(path)
+        except KeyError as exc:
+            # RB-001 receipt RR-01: a log from another PX4 version can lack a
+            # field the estimator contract (547e2ca) reads. The producer is then
+            # not run, and the report says so, instead of the analysis crashing.
+            est_log = None
+            schema_notices.append({
+                "producer_id": "px4:ekf2.estimator_status", "source": "estimator_status",
+                "available": False,
+                "why": f"estimator_status lacks the field {exc.args[0]!r} the contract reads "
+                       "(PX4 547e2ca schema); the estimator producer is not run"})
     log = stock_log.decimate()
     cal = calibration or PS.load_calibration()
     _engine, core, gate = quad_setup(max(log.n_motors, 1) if log.n_motors else 4)
@@ -322,7 +334,8 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
                                 "why": f"the log ends {tc - t_end:.2f} s before event + {dt} s"})
                 continue
             ticks.setdefault(round(tc, 6), []).append((e, cp))
-    notices = sp.coverage_notices() + ev_notices + (est.coverage_notices() if est else [])
+    notices = (sp.coverage_notices() + ev_notices + (est.coverage_notices() if est else [])
+               + schema_notices)
     out, current, values = [], None, {}
     for t in sorted(ticks):
         envs, epochs = [], None

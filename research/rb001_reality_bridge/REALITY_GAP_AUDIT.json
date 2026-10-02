@@ -1,0 +1,699 @@
+{
+ "claims": [
+  {
+   "claim": "ESC_TELEMETRY_RESPONSE",
+   "role_2_3": "context; trigger (telemetry CUSUM); power gate of the compensation",
+   "simulation_assumption": "SIH reports the rotor state as RPM: exact, instantaneous, unquantised, identical motors and propellers, rpm^2 exactly proportional to thrust through PX4's own thrust model (THR_MDL_FAC = 0 in both)",
+   "statistic": "q_m = (rpm_m^2 / T(c_m)) / median_j; L = 1 - q_after/q_before",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "eRPM steps (DShot: 1/pole-pairs; serial telemetry: 100 eRPM) add a floor to q's noise",
+     "test_required": "RB2: logged RPM against an optical tachometer",
+     "threat": "ESC telemetry quantization"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "RPM lags the command by the telemetry path (bidirectional DShot per frame; serial round-robin tens of ms); event windows are 1.5-5 s, so means are barely affected, the CUSUM onset estimate is",
+     "test_required": "RB2: command step against RPM, latency distribution",
+     "threat": "ESC telemetry latency"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a wrong pole count scales all motors alike and cancels in the median normalisation; a per-ESC error does not",
+     "test_required": "RB2: tachometer",
+     "threat": "RPM estimation error"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "constant per-motor offsets in q; removed by the event-relative difference (after minus before)",
+     "test_required": "RB2/RB5: q per motor across runs",
+     "threat": "motor-to-motor variation"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "as above if constant; a damaged propeller changes q only if it changes thrust per RPM, which RPM cannot show",
+     "test_required": "RB2: same motor, two propellers, thrust stand",
+     "threat": "propeller variation"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (condition on command level, or use the vehicle's identified thrust curve)",
+     "expected_effect": "if THR_MDL_FAC is wrong, q depends on the command level, so climbs and maneuvers move q without a fault",
+     "test_required": "RB2: thrust-stand sweep of rpm^2 against command",
+     "threat": "thrust nonlinearity"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "lower voltage lowers RPM per command on every motor; the median normalisation cancels a common change",
+     "test_required": "RB2: supply-voltage sweep",
+     "threat": "battery sag"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "slow RPM-per-command drift on one motor; the trailing reference absorbs slow drift (benign), a step is a change",
+     "test_required": "RB2: long run, thermocouple, q drift",
+     "threat": "motor heating"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "YES (regime validity: airspeed or attitude condition)",
+     "expected_effect": "forward flight changes inflow differently on front and rear rotors: q splits by position, like a fault",
+     "test_required": "RB5/RB6: q in forward flight",
+     "threat": "aerodynamic disturbance"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "MAYBE (window means already average it)",
+     "expected_effect": "fast command changes: RPM lags, q transiently splits",
+     "test_required": "SITL now; RB5 later",
+     "threat": "maneuver coupling"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "real RPM noise is orders above SIH's: theta_tel = 0.0069 and CUSUM k = 0.039 will fire constantly",
+     "test_required": "RB2 nominal corpus, RB5 hover",
+     "threat": "sensor noise"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "missing samples: handled by LOG_COMPLETENESS (outputs over a gap UNAVAILABLE)",
+     "test_required": "RB0 measured: real dropouts flagged",
+     "threat": "ULog dropout"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "an ESC derating under heat lowers RPM per command on one motor: a genuine loss of effect, correctly a change",
+     "test_required": "RB2 long run (never by overheating on purpose: observe natural warm-up only)",
+     "threat": "ESC heating"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "ESC/motor deadband at low command makes rpm^2/T(c) nonlinear near idle; samples below MIN_COMMAND (0.15) are already excluded",
+     "test_required": "RB2 low-command sweep",
+     "threat": "deadband"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "MAYBE (window means; or condition on command slope)",
+     "expected_effect": "RPM for a rising command differs from a falling one: maneuvers, which reverse command direction, split q transiently",
+     "test_required": "RB2 triangle sweep",
+     "threat": "hysteresis"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "covered by ESC telemetry quantization; command values are floats",
+     "test_required": "RB2",
+     "threat": "sensor quantization"
+    }
+   ]
+  },
+  {
+   "claim": "ALLOCATOR_COMPENSATION",
+   "role_2_3": "profile evidence: actuation.physical_response; raises COMMAND_NO_RESPONSE when VIOLATED",
+   "simulation_assumption": "a perfectly symmetric vehicle: identical motors and propellers, centre of gravity at the geometric centre, no trim torque, a noise-free command split in hover, constant mass",
+   "statistic": "C_m = change in c_m / median_j c_j, AFTER [t0+10, t0+15) minus BEFORE",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a CG offset is a constant trim in the command split; constant, so the event-relative difference removes it",
+     "test_required": "RB5: trim before and after a known ballast shift",
+     "threat": "CG uncertainty"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "YES (needs a validity condition, or corroboration from RPM or current)",
+     "expected_effect": "a payload change mid-flight moves the split exactly like a loss: a false COMMAND_NO_RESPONSE",
+     "test_required": "RB5: known ballast added on a restrained vehicle",
+     "threat": "vehicle mass uncertainty"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (steadiness must include translational disturbance, or condition on it)",
+     "expected_effect": "steady wind adds a steady split; a gust or wind change during the windows moves C",
+     "test_required": "SITL (CAL3, CAL4, EN1-EN4 have wind); RB6",
+     "threat": "wind"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "YES (2.3 refuses it; candidates B2-B4)",
+     "expected_effect": "maneuvers move the split as a loss does: measured in 2.3 (V5/V6 false symptoms until NOT_STEADY_FLIGHT); the maneuver study measures the alternatives",
+     "test_required": "SITL maneuver study (this package)",
+     "threat": "maneuver coupling"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "vibration adds command noise through the rate loop; window means average it",
+     "test_required": "RB3/RB5: C null on a running vehicle",
+     "threat": "mechanical vibration"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a saturated loop cannot compensate: C understates the loss; 2.3 refuses saturated windows",
+     "test_required": "SITL (EF flights with eta 0.6 during turns)",
+     "threat": "actuator saturation"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "different rate gains change how fast C settles, not where; the AFTER window starts 10 s after",
+     "test_required": "RB5: two tunings",
+     "threat": "control-loop variation"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "common to all motors: cancels in the ratio to the median",
+     "test_required": "RB2",
+     "threat": "battery sag"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "real command noise is far above SIH's; theta_ctrl = 0.0069 will not hold",
+     "test_required": "RB3/RB5 nominal corpus",
+     "threat": "sensor noise"
+    }
+   ]
+  },
+  {
+   "claim": "STEADINESS (2.3 r3 validity condition of the compensation)",
+   "role_2_3": "validity condition: compensation UNAVAILABLE (NOT_STEADY_FLIGHT) above it",
+   "simulation_assumption": "SIH gyro noise and vibration are tiny, so a peak statistic measures maneuvering and nothing else",
+   "statistic": "R = largest |omega| in BEFORE and AFTER, refused above theta_steady = 0.0989 rad/s",
+   "threats": [
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (a robust statistic: a percentile or a low-passed rate, not the maximum)",
+     "expected_effect": "a peak statistic catches every vibration spike: a hovering real vehicle may never count as steady, so the compensation is never assessable",
+     "test_required": "RB0 measured at rest; RB3/RB5 in flight",
+     "threat": "mechanical vibration"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (same)",
+     "expected_effect": "as above",
+     "test_required": "RB0 measured",
+     "threat": "sensor noise"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (same)",
+     "expected_effect": "narrow-band rate oscillation lifts the peak without any maneuver",
+     "test_required": "RB3/RB5 spectrum",
+     "threat": "frame resonance"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "MAYBE",
+     "expected_effect": "turbulence keeps rates above theta_steady in calm-looking flight",
+     "test_required": "RB6",
+     "threat": "wind"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a rotated IMU mapping changes the axes, not the magnitude: harmless to R, harmful to the loss axis of D",
+     "test_required": "RB3",
+     "threat": "sensor mounting orientation"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "YES (remove the window median before the peak, or rely on PX4's bias-corrected rate)",
+     "expected_effect": "an uncalibrated gyro bias adds a constant to |omega|: R never drops below the bias (RB0: up to 0.067 rad/s yaw bias on a real CubeOrange at rest)",
+     "test_required": "RB0 measured; RB3",
+     "threat": "sensor bias"
+    }
+   ]
+  },
+  {
+   "claim": "VEHICLE_RATE_TRANSIENT",
+   "role_2_3": "context only (0.2 s validity; 2.3 showed its magnitude falls with onset error)",
+   "simulation_assumption": "a clean step in rotor effectiveness, a noise-free gyro, an onset known or found to within tens of ms",
+   "statistic": "D_m = mean body-rate change on motor m's loss axis in [t0, t0+0.2 s)",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a 0.2 s mean of a noisy gyro; theta_dyn = 0.029 rad/s from SIH will not hold",
+     "test_required": "RB3",
+     "threat": "sensor noise"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "as above, worse",
+     "test_required": "RB3/RB5",
+     "threat": "mechanical vibration"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "ALREADY CONTEXT ONLY",
+     "expected_effect": "the window is 0.2 s; event-time error of tens of ms already halves the magnitude (2.3 UNKNOWN_ONSET.md)",
+     "test_required": "RB0 measured jitter; RB3",
+     "threat": "timestamp jitter"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "YES (needs the board rotation, SENS_BOARD_ROT, in the lineage)",
+     "expected_effect": "a wrong rotation puts the transient on the wrong motor's axis",
+     "test_required": "RB3: rotated board",
+     "threat": "sensor mounting orientation"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "moves the loss axes slightly",
+     "test_required": "RB5",
+     "threat": "CG uncertainty"
+    }
+   ]
+  },
+  {
+   "claim": "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)",
+   "role_2_3": "none: research candidate",
+   "simulation_assumption": "the torque setpoint is the torque the allocator applied; omega_dot is clean; inertia and effectiveness are constant; no trim torque",
+   "statistic": "d_tau = lp(tau_sp) - (omega_dot - c)/g; per-motor loss fraction",
+   "threats": [
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "omega_dot is a differentiated gyro: real noise is large; window means and the GLR weighting reduce it",
+     "test_required": "RB3/RB5",
+     "threat": "sensor noise"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "as above; IMU_DGYRO_CUTOFF filters it at the cost of lag",
+     "test_required": "RB3/RB5",
+     "threat": "mechanical vibration"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "a trim torque is a constant d_tau: event-relative difference removes it",
+     "test_required": "RB5",
+     "threat": "CG uncertainty"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "MAYBE (re-identify g, or refuse after a configuration change)",
+     "expected_effect": "inertia scales g: a payload changes g and so the residual during maneuvers (not in hover)",
+     "test_required": "RB5 ballast",
+     "threat": "vehicle mass uncertainty"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "MAYBE (g as a function of voltage)",
+     "expected_effect": "less torque per normalised setpoint on every motor: g drops during the flight; roll/pitch residual grows with maneuver intensity",
+     "test_required": "RB2/RB5 voltage sweep",
+     "threat": "battery sag"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "the setpoint-to-torque map is not linear at the extremes",
+     "test_required": "RB2 thrust stand",
+     "threat": "thrust nonlinearity"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "the setpoint is not achieved by design: refused when the allocator reports it",
+     "test_required": "SITL",
+     "threat": "actuator saturation"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "the model is of the plant, not the controller: retuning does not change it",
+     "test_required": "RB5",
+     "threat": "control-loop variation"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "NO",
+     "expected_effect": "a weaker propeller is a smaller b_m: indistinguishable from a partial loss (it is one)",
+     "test_required": "RB2",
+     "threat": "propeller variation"
+    }
+   ]
+  },
+  {
+   "claim": "BATTERY_SOURCE_STATUS",
+   "role_2_3": "profile evidence: power.source_health",
+   "simulation_assumption": "SIH reports no current (current_a = -1), so the record is always UNAVAILABLE",
+   "statistic": "voltage and current present and readable",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "with a power module the record becomes NOMINAL and POWER/path_unavailable becomes eliminable: the claim gains reach; its meaning (present and readable) needs no threshold",
+     "test_required": "RB2/RB3 with a power module",
+     "threat": "current measurement noise"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "NO (the claim is presence, by v2 semantics)",
+     "expected_effect": "a wrong amps-per-volt still reads as present: the claim says nothing about accuracy",
+     "test_required": "RB2: shunt against module",
+     "threat": "calibration error"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "context: PX4's warning and the voltage floor",
+     "test_required": "RB2",
+     "threat": "battery sag"
+    }
+   ]
+  },
+  {
+   "claim": "PX4 MONITORS AS TRIGGERS (failure detector, battery warning, failsafe, WARNING messages, allocator)",
+   "role_2_3": "event discovery only",
+   "simulation_assumption": "SIH flights log almost no warnings; the failure detector never fired",
+   "statistic": "rising edges in flight",
+   "threats": [
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "real flights log more warnings (GPS, sensor, timing): more candidate events, each dismissed or not",
+     "test_required": "RB0 with real flight logs (not reachable here); RB5/RB6",
+     "threat": "real PX4 scheduler behavior"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "PX4's own thresholds (FD_FAIL_R/P, battery levels) are the vehicle's, not CSIA's: nothing to calibrate",
+     "test_required": "none",
+     "threat": "calibration error"
+    }
+   ]
+  },
+  {
+   "claim": "ESTIMATOR_STATUS (2.2 adapter)",
+   "role_2_3": "context (navigation integrity)",
+   "simulation_assumption": "one PX4 version (547e2ca) and its estimator_status schema; one IMU, one EKF lane in SIH",
+   "statistic": "EKF2 test ratios, aiding and resets",
+   "threats": [
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "YES (done: schema mismatch is a notice; a per-version contract is the real fix)",
+     "expected_effect": "another PX4 version renames or lacks fields: 2.3 CRASHED on every reachable real log until RR-01 (now a coverage notice)",
+     "test_required": "RB0 measured",
+     "threat": "calibration error"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "real innovations are larger; the 1.0 gate is EKF2's own",
+     "test_required": "RB0 real flights (not reachable here)",
+     "threat": "sensor noise"
+    },
+    {
+     "calibration_can_handle": "PARTLY",
+     "definition_must_change": "NO",
+     "expected_effect": "multiple IMU and EKF lanes on real boards: lane switches happen, which SIH never showed",
+     "test_required": "RB3/RB4: lane-switch experiment",
+     "threat": "real PX4 scheduler behavior"
+    }
+   ]
+  },
+  {
+   "claim": "LOG_COMPLETENESS",
+   "role_2_3": "producer health: outputs over a gap UNAVAILABLE",
+   "simulation_assumption": "SITL logs had no dropouts at all (0 in 79 flights)",
+   "statistic": "a logger dropout or a gap over 3 logging intervals inside a window",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "real logs have them (RB0: 3 of 4 real logs, 10-119 ms); every one was flagged",
+     "test_required": "RB0 measured",
+     "threat": "ULog dropout"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "real topic jitter is larger (RB0: actuator_outputs 1.4-16 ms std; largest gaps 65-164 ms) but below the 3-interval rule in most windows",
+     "test_required": "RB0 measured; RB3",
+     "threat": "logging jitter"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "MAVLink loss does not touch the ULog; a telemetry-link producer would need its own rule",
+     "test_required": "not needed now",
+     "threat": "packet loss"
+    }
+   ]
+  },
+  {
+   "claim": "CONTENT TIME (2.2 semantics)",
+   "role_2_3": "admissibility and validity windows",
+   "simulation_assumption": "publication time equals acquisition time",
+   "statistic": "stock producers use the ULog `timestamp` (publication) as content time",
+   "threats": [
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "IMU publish-minus-sample 0.4 ms on a real CubeOrange (RB0): negligible against 0.2-15 s windows",
+     "test_required": "RB0 measured",
+     "threat": "timestamp jitter"
+    },
+    {
+     "calibration_can_handle": "NO",
+     "definition_must_change": "MAYBE (content time of ESC outputs = publication minus a measured latency)",
+     "expected_effect": "ESC telemetry carries no sample time in esc_status: its true age is unknown",
+     "test_required": "RB2: command step against RPM",
+     "threat": "ESC telemetry latency"
+    },
+    {
+     "calibration_can_handle": "YES",
+     "definition_must_change": "NO",
+     "expected_effect": "one clock (the FMU's) stamps every topic; drift matters only against external ground truth",
+     "test_required": "RB2: align external instruments by a shared step",
+     "threat": "clock drift"
+    }
+   ]
+  }
+ ],
+ "label": "RB-001 Part 1: reality-gap audit; no evidence definition changed",
+ "measured_so_far": {
+  "product_on_real_logs_before_RR01": "KeyError in the estimator reader on 6/6 logs",
+  "real_dropouts_flagged_by_log_completeness": {
+   "sample.ulg": [
+    4,
+    4
+   ],
+   "sample_appended.ulg": [
+    1,
+    1
+   ],
+   "sample_appended_multiple.ulg": [
+    0,
+    0
+   ],
+   "sample_log_small.ulg": [
+    1,
+    1
+   ]
+  },
+  "real_gyro_peak_rate_at_rest_rad_s": {
+   "sample.ulg": {
+    "max": 3.2874,
+    "median": 0.0061
+   },
+   "sample_appended.ulg": {
+    "max": 0.1716,
+    "median": 0.0266
+   },
+   "sample_appended_multiple.ulg": {
+    "max": 0.2458,
+    "median": 0.2458
+   },
+   "sample_log_small.ulg": {
+    "max": 0.0812,
+    "median": 0.0812
+   }
+  },
+  "real_logger_dropouts": {
+   "sample.ulg": {
+    "count": 4,
+    "total_ms": 119
+   },
+   "sample_appended.ulg": {
+    "count": 1,
+    "total_ms": 10
+   },
+   "sample_appended_multiple.ulg": {
+    "count": 0,
+    "total_ms": 0
+   },
+   "sample_log_small.ulg": {
+    "count": 1,
+    "total_ms": 30
+   }
+  },
+  "real_windows_over_theta_steady": {
+   "sample.ulg": [
+    2,
+    13
+   ],
+   "sample_appended.ulg": [
+    2,
+    22
+   ],
+   "sample_appended_multiple.ulg": [
+    1,
+    1
+   ],
+   "sample_log_small.ulg": [
+    0,
+    1
+   ]
+  }
+ },
+ "threat_index": {
+  "CG uncertainty": [
+   "ALLOCATOR_COMPENSATION",
+   "VEHICLE_RATE_TRANSIENT",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "ESC heating": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "ESC telemetry latency": [
+   "ESC_TELEMETRY_RESPONSE",
+   "CONTENT TIME (2.2 semantics)"
+  ],
+  "ESC telemetry quantization": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "RPM estimation error": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "ULog dropout": [
+   "ESC_TELEMETRY_RESPONSE",
+   "LOG_COMPLETENESS"
+  ],
+  "actuator saturation": [
+   "ALLOCATOR_COMPENSATION",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "aerodynamic disturbance": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "battery sag": [
+   "ESC_TELEMETRY_RESPONSE",
+   "ALLOCATOR_COMPENSATION",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)",
+   "BATTERY_SOURCE_STATUS"
+  ],
+  "calibration error": [
+   "BATTERY_SOURCE_STATUS",
+   "PX4 MONITORS AS TRIGGERS (failure detector, battery warning, failsafe, WARNING messages, allocator)",
+   "ESTIMATOR_STATUS (2.2 adapter)"
+  ],
+  "clock drift": [
+   "CONTENT TIME (2.2 semantics)"
+  ],
+  "control-loop variation": [
+   "ALLOCATOR_COMPENSATION",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "current measurement noise": [
+   "BATTERY_SOURCE_STATUS"
+  ],
+  "deadband": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "frame resonance": [
+   "STEADINESS (2.3 r3 validity condition of the compensation)"
+  ],
+  "hysteresis": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "logging jitter": [
+   "LOG_COMPLETENESS"
+  ],
+  "maneuver coupling": [
+   "ESC_TELEMETRY_RESPONSE",
+   "ALLOCATOR_COMPENSATION"
+  ],
+  "mechanical vibration": [
+   "ALLOCATOR_COMPENSATION",
+   "STEADINESS (2.3 r3 validity condition of the compensation)",
+   "VEHICLE_RATE_TRANSIENT",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "motor heating": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "motor-to-motor variation": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "packet loss": [
+   "LOG_COMPLETENESS"
+  ],
+  "propeller variation": [
+   "ESC_TELEMETRY_RESPONSE",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "real PX4 scheduler behavior": [
+   "PX4 MONITORS AS TRIGGERS (failure detector, battery warning, failsafe, WARNING messages, allocator)",
+   "ESTIMATOR_STATUS (2.2 adapter)"
+  ],
+  "sensor bias": [
+   "STEADINESS (2.3 r3 validity condition of the compensation)"
+  ],
+  "sensor mounting orientation": [
+   "STEADINESS (2.3 r3 validity condition of the compensation)",
+   "VEHICLE_RATE_TRANSIENT"
+  ],
+  "sensor noise": [
+   "ESC_TELEMETRY_RESPONSE",
+   "ALLOCATOR_COMPENSATION",
+   "STEADINESS (2.3 r3 validity condition of the compensation)",
+   "VEHICLE_RATE_TRANSIENT",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)",
+   "ESTIMATOR_STATUS (2.2 adapter)"
+  ],
+  "sensor quantization": [
+   "ESC_TELEMETRY_RESPONSE"
+  ],
+  "thrust nonlinearity": [
+   "ESC_TELEMETRY_RESPONSE",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "timestamp jitter": [
+   "VEHICLE_RATE_TRANSIENT",
+   "CONTENT TIME (2.2 semantics)"
+  ],
+  "vehicle mass uncertainty": [
+   "ALLOCATOR_COMPENSATION",
+   "CONTROL-CONDITIONED RESIDUAL (maneuver-study candidate B3/B4; not in the product)"
+  ],
+  "wind": [
+   "ALLOCATOR_COMPENSATION",
+   "STEADINESS (2.3 r3 validity condition of the compensation)"
+  ]
+ },
+ "threats_with_no_claim_row": []
+}

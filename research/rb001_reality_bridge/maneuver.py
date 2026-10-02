@@ -220,8 +220,9 @@ def _mask(t, t0, w):
 
 
 def peak_rate(f: Flight, t0, w):
-    m = _mask(f.t, t0, w) & f.in_flight
-    return float(np.max(np.linalg.norm(f.omega[m], axis=1))) if m.any() else float("nan")
+    """2.3's steadiness statistic, on the decimated stock log exactly as the
+    product computes it (stock_stats.peak_rate)."""
+    return SS.peak_rate(f.stock, t0, w)
 
 
 def saturated(f: Flight, t0):
