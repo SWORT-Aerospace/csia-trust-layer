@@ -17,6 +17,7 @@ of the other motors, one motor's change entered every other motor's
 denominator: a deficit on motor 0 appeared as an "excess" on motors 1-3.
 The median of all motors cannot be moved by a single deviating motor (four
 motors: the mean of the middle two).
+| R_w, steadiness | the largest body-rate magnitude in window w; the compensation claim assumes near-steady flight (R <= theta_steady) in BEFORE and AFTER | PHYSICAL VEHICLE STATE |
 | D_m, rate transient | mean over [t0, t0 + 0.2 s) of (omega - omega_before) projected on motor m's thrust-loss axis | PHYSICAL VEHICLE RESPONSE |
 
 T(c) = (1 - f) c + f c^2 is PX4's thrust model with f = THR_MDL_FAC. Only
@@ -161,6 +162,21 @@ def rate_transient(log, t0: float, motor: int):
 
 
 # ------------------------------------------------------------------ change detection
+def peak_rate(log, t0: float, window: str) -> float:
+    """The largest body-rate magnitude |omega| (rad/s) in an event window,
+    or NaN. The steadiness test of the compensation claim's assumption
+    "near-steady flight in both windows" (claim register)."""
+    if not log.has("vehicle_angular_velocity"):
+        return float("nan")
+    av = log.topics["vehicle_angular_velocity"]
+    a, b = WINDOWS[window]
+    m = (av["t"] >= t0 + a) & (av["t"] < t0 + b)
+    if not m.any():
+        return float("nan")
+    g = np.stack([av["xyz[0]"][m], av["xyz[1]"][m], av["xyz[2]"][m]], 1)
+    return float(np.max(np.linalg.norm(g, axis=1)))
+
+
 def trailing_reference(t, x):
     """Median of the finite samples in [t - 10, t - 2] for every sample, or
     NaN where fewer than 10 exist."""

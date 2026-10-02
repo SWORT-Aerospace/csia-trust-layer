@@ -1,11 +1,20 @@
 """CSIA Flight Assurance Analyzer, command line. OFFBOARD ONLY.
 
-    python -m csia_evidence_assurance analyze INPUT [--out DIR]
+    python -m csia_evidence_assurance analyze INPUT [--out DIR] [--estimator-only]
     python -m csia_evidence_assurance analyze-many DIR_OR_LIST --out DIR
 
 INPUT is a PX4 `.ulg`, an estimator extract `.npz`, a frozen v2 scenario
 name, a frozen v1 scenario name (CUSUM), or an XSYS-001 analysis id
-(`--ulog` adds that trial's flight log). `analyze` writes:
+(`--ulog` adds that trial's flight log).
+
+**A `.ulg` (2.3).** By default an ordinary PX4 log goes through the stock
+path: stock topics, event discovery, the stock producers, the multirotor
+quad r1 profile, and a schema-4 report whose summary comes first. No onset,
+label, sidecar or research feature is read. `--estimator-only` keeps the
+2.2 path (the PX4 estimator producer alone, schema 3), which is what every
+2.2 and pilot report was made with.
+
+`analyze` writes:
 - `report.json`: deterministic machine report, with the timeline, key
   moments and coverage;
 - `report.txt`: for an engineer;
@@ -39,7 +48,7 @@ from . import runs
 
 
 def _write(run, out: Path, config: dict) -> dict:
-    m = R.machine_report(run.results, run.inputs, run.gate, run.contracts)
+    m = R.machine_report(run.results, run.inputs, run.gate, run.contracts, extras=run.extras)
     body = R.dumps(m)
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.json").write_bytes(body)
@@ -49,12 +58,30 @@ def _write(run, out: Path, config: dict) -> dict:
     return {"m": m, "manifest": man}
 
 
+def _stock(a) -> bool:
+    return Path(a.input).suffix.lower() == ".ulg" and not a.estimator_only
+
+
 def cmd_analyze(a) -> int:
-    run = runs.resolve(a.input, a.variant, a.ulog, a.tick)
+    stock = _stock(a)
+    tick = a.tick if a.tick is not None else (runs.STOCK_TICK_S if stock else 0.1)
+    run = runs.resolve(a.input, a.variant, a.ulog, tick, stock=stock)
     name = Path(a.input).stem if Path(a.input).suffix else a.input
     out = Path(a.out or f"csia_report_{name}")
-    w = _write(run, out, {"tick_s": a.tick, "variant": a.variant,
-                          "input": Path(a.input).name})
+    config = {"tick_s": tick, "variant": a.variant, "input": Path(a.input).name}
+    if stock:
+        config = {"tick_s": tick, "path": "stock", "input": Path(a.input).name}
+    w = _write(run, out, config)
+    if "summary" in w["m"]:
+        s = w["m"]["summary"]
+        print(f"wrote {out}/report.json, report.txt, manifest.json")
+        print(f"  events: {len(w['m']['events'])}; final: {w['m']['final']['state']['headline']}")
+        print(f"  attribution justified: {'yes' if s['attribution']['justified'] else 'no'} "
+              f"({s['attribution']['verdict']})")
+        cr = w["m"]["coverage_report"]
+        print(f"  profile records observed: {cr['profile_records_observed']} of "
+              f"{cr['profile_records_expected']}")
+        return 0
     k = w["m"]["key_moments"]
     fa = k["first_abnormal"]
     print(f"wrote {out}/report.json, report.txt, manifest.json")
@@ -106,7 +133,9 @@ def cmd_analyze_many(a) -> int:
         name = Path(spec).stem if Path(spec).suffix else spec
         d = out / name
         cmd = [sys.executable, "-m", "csia_evidence_assurance", "analyze", spec,
-               "--out", str(d), "--tick", str(a.tick), "--variant", a.variant]
+               "--out", str(d), "--variant", a.variant]
+        cmd += ["--tick", str(a.tick)] if a.tick is not None else []
+        cmd += ["--estimator-only"] if a.estimator_only else []
         t0 = time.perf_counter()
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         _pid, status, usage = os.wait4(p.pid, 0)
@@ -166,12 +195,16 @@ def main(argv=None) -> int:
     s.add_argument("--out")
     s.add_argument("--ulog", help="for an XSYS-001 analysis id: the trial's flight log")
     s.add_argument("--variant", default="V3_TEMPORAL")
-    s.add_argument("--tick", type=float, default=0.1)
+    s.add_argument("--tick", type=float, default=None,
+                   help="seconds between ticks (default: 1.0 on the stock path, else 0.1)")
+    s.add_argument("--estimator-only", action="store_true",
+                   help="a .ulg through the 2.2 path: the PX4 estimator producer alone")
     s = sub.add_parser("analyze-many", help="a directory of logs, or a file of inputs")
     s.add_argument("inputs")
     s.add_argument("--out", required=True)
     s.add_argument("--variant", default="V3_TEMPORAL")
-    s.add_argument("--tick", type=float, default=0.1)
+    s.add_argument("--tick", type=float, default=None)
+    s.add_argument("--estimator-only", action="store_true")
     for name, helptext in (("scenario", "a frozen CSIA v2 scenario"),
                            ("cusum", "a frozen v1 scenario through the frozen CUSUM bank")):
         s = sub.add_parser(name, help=helptext)

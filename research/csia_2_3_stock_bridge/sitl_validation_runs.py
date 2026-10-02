@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Fly the validation runs of VALIDATION_FLIGHTS_DESIGN.md. RESEARCH ONLY.
+"""Fly the validation runs of VALIDATION_FLIGHTS_DESIGN.md (V1-V10) and
+VALIDATION_FLIGHTS_DESIGN_2.md (V11-V13). RESEARCH ONLY.
 
     .venv/bin/python research/csia_2_3_stock_bridge/sitl_validation_runs.py --runs V1,V2 [--out DIR]
 
@@ -45,6 +46,16 @@ RUNS = {
     "V8": {"inject": (BAT, WRONG, 0), "end": 90.0},
     "V9": {"inject": (ESC, OFF, 2), "end": 80.0},
     "V10": {"inject": (ESC, WRONG, 3), "end": 80.0},
+    # second design (VALIDATION_FLIGHTS_DESIGN_2.md): the steadiness fix, blind
+    "V11": {"maneuver_spec": {"start": 40.0, "period": 15.0, "until": 150.0, "pts": [
+        (60, 0, 180), (60, 60, 0), (0, 60, 180), (0, 0, 0)]},
+            "end": 160.0, "boot_params": {"SIH_WIND_E": 3.0}},
+    "V12": {"maneuver_spec": {"start": 40.0, "period": 15.0, "until": 71.0, "pts": [
+        (60, 0, 180), (60, 60, 0), (0, 0, 90)]},
+            "param": ("SIH_MOT_EFF3", 0.6), "onset": 100.0, "end": 130.0},
+    "V13": {"maneuver_spec": {"start": 40.0, "period": 15.0, "until": 130.0, "pts": [
+        (60, 0, 180), (60, 60, 0), (0, 60, 180), (0, 0, 0)]},
+            "param": ("SIH_MOT_EFF3", 0.6), "onset": 77.0, "end": 140.0},
 }
 ARM, ONSET = 20.0, 50.0
 
@@ -74,8 +85,11 @@ def fly(rid: str, build: Path, out: Path, work: Path) -> dict:
     console = open(out / f"{rid}.console.txt", "w")
     px4 = subprocess.Popen([str(build / "bin" / "px4"), "-d", "-i", "0", "-w", str(wd)], cwd=wd,
                            env=env, stdout=console, stderr=subprocess.STDOUT, start_new_session=True)
-    rec = {"run": rid, "design": "VALIDATION_FLIGHTS_DESIGN.md", "spec": {k: v for k, v in spec.items()},
-           "boot_params": boot, "arm_s": ARM, "onset_s": ONSET if not spec.get("maneuver") else None,
+    onset = spec.get("onset", ONSET)
+    design = "VALIDATION_FLIGHTS_DESIGN_2.md" if "maneuver_spec" in spec else "VALIDATION_FLIGHTS_DESIGN.md"
+    injected = "param" in spec or "inject" in spec
+    rec = {"run": rid, "design": design, "spec": {k: v for k, v in spec.items()},
+           "boot_params": boot, "arm_s": ARM, "onset_s": onset if injected else None,
            "px4_sha256": C.sha(build / "bin" / "px4"), "logging": "PX4 default (no logger_topics.txt)",
            "events_ms": {}}
     v = RT.Vehicle("udpin:127.0.0.1:14540")
@@ -101,6 +115,27 @@ def fly(rid: str, build: Path, out: Path, work: Path) -> dict:
                 rec["events_ms"][f"reposition_{i}"] = v.command(
                     mavutil.mavlink.MAV_CMD_DO_REPOSITION, -1, 1, 0, math.radians(yaw), lat, lon,
                     H0 + 10.0)
+        elif "maneuver_spec" in spec:
+            # timed repositions, and the injection at its own time between them
+            ms_ = spec["maneuver_spec"]
+            plan = []
+            i, t = 0, ms_["start"]
+            while t <= ms_["until"]:
+                plan.append((t, "reposition", ms_["pts"][i % len(ms_["pts"])], i))
+                i, t = i + 1, t + ms_["period"]
+            if injected:
+                plan.append((onset, "inject", None, None))
+            for t, what, pt, k in sorted(plan, key=lambda x: x[0]):
+                v.wait_until(ms(t))
+                if what == "reposition":
+                    lat, lon = _offset(pt[0], pt[1])
+                    rec["events_ms"][f"reposition_{k}"] = v.command(
+                        mavutil.mavlink.MAV_CMD_DO_REPOSITION, -1, 1, 0, math.radians(pt[2]),
+                        lat, lon, H0 + 10.0)
+                elif "param" in spec:
+                    rec["events_ms"]["onset_param_set"] = v.set_param(*spec["param"])
+                else:
+                    rec["events_ms"]["inject_sent"] = v.command(INJECT, *spec["inject"])
         else:
             v.wait_until(ms(ONSET))
             if "param" in spec:
@@ -142,7 +177,7 @@ def fly(rid: str, build: Path, out: Path, work: Path) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", default=",".join(RUNS))
+    ap.add_argument("--runs", default="V1,V2,V3,V4,V5,V6,V7,V8,V9,V10")
     ap.add_argument("--build", default=str(C.CP.PX4_BUILD))
     ap.add_argument("--out", default=str(C.OUT_RAW / "validation"))
     ap.add_argument("--work", default="/tmp/claude-0/csia23_validation_work")

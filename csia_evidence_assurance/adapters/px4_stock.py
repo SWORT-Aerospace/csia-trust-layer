@@ -30,6 +30,32 @@ produced a compensation of at least 2 theta: 1 / (1 - L) - 1 >= 2 theta.
 Without such a deficit there is nothing to test, and the record is
 NOT_APPLICABLE.
 
+**Near-steady flight** (the compensation claim's assumption; found
+unimplemented by validation flights V5 and V6, where every reposition and
+yaw turn raised a false COMMAND_NO_RESPONSE). The compensation is
+UNAVAILABLE (NOT_STEADY_FLIGHT) when the largest body-rate magnitude in
+the BEFORE or AFTER window exceeds theta_steady (calibration revision 3,
+apparatus hover data only). The onset transient of a fault itself lies in
+neither window.
+
+**ESC telemetry offline** (the claim register's "telemetry dropout"
+failure mode; found missing by validation flight V9). When PX4 clears an
+ESC's bit in `esc_online_flags`, it reports that ESC's RPM as 0. That is
+not a measurement: the telemetry output is UNAVAILABLE
+(ESC_TELEMETRY_OFFLINE) and the compensation has no reported deficit to
+test (NOT_APPLICABLE).
+
+**A total reported loss** (L >= 1, the ESC online and reporting 0 RPM)
+passes the power gate: a genuine total loss would need unbounded
+compensation (also found by V9; the gate's division guard had made it
+untestable).
+
+**Log completeness** (claim LOG_COMPLETENESS). An output whose windows
+overlap a logger dropout, or a gap longer than 3 logging intervals in a
+topic it reads, keeps its computed state but is emitted with producer
+health UNAVAILABLE (`detail["log_gap"]` says where). Admissibility refuses
+it: a log gap is neither NOMINAL nor a vehicle fault.
+
 **Thresholds** come from `stock_calibration.json`: apparatus data only,
 frozen before any XSYS-001 evaluation.
 """
@@ -98,9 +124,31 @@ class StockProducers:
         self.ms = SS.motor_series(log)
         self.n = log.n_motors
 
+    def _offline(self, m, t0, windows) -> bool:
+        """The claim register's "telemetry dropout" failure mode: ESC m's
+        online bit (`esc_status.esc_online_flags`) cleared in any of the
+        windows. Its RPM is then not a measurement (PX4 reports 0)."""
+        es = self.log.topics.get("esc_status") or {}
+        if "esc_online_flags" not in es:
+            return False
+        t = es["t"]
+        bit = (es["esc_online_flags"].astype(np.int64) >> m) & 1
+        for w in windows:
+            a, b = SS.WINDOWS[w]
+            msk = (t >= t0 + a) & (t < t0 + b)
+            if msk.any() and np.any(bit[msk] == 0):
+                return True
+        return False
+
     # ------------------------------------------------------------ coverage
     def coverage_notices(self) -> list:
         out = []
+        if self.log.dropouts:
+            total = sum(d for _s, d in self.log.dropouts)
+            out.append({"producer_id": "log", "source": "ULog", "available": False,
+                        "why": f"the logger recorded {len(self.log.dropouts)} dropout(s), "
+                               f"{total:.3f} s in all; outputs whose windows overlap one are "
+                               "UNAVAILABLE"})
         if self.ms is None:
             out.append({"producer_id": COMP, "source": "ACTUATION/motor_*", "available": False,
                         "why": "actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2"})
@@ -123,14 +171,19 @@ class StockProducers:
         tc = t0 + CHECKPOINTS[checkpoint]
         out = []
         if checkpoint == "T1":
-            out += self._rate(t0, tc)
+            out += self._gapped(self._rate(t0, tc),
+                                self._gap(t0, ("vehicle_angular_velocity",), ("BEFORE", "T1")))
         if checkpoint in ("EARLY", "AFTER") and self.ms is not None:
             ch = SS.event_changes(self.ms, t0)
             w = checkpoint
-            out += self._telemetry(ch, w, tc)
+            prop = ("esc_status", "actuator_motors")
+            out += self._gapped(self._telemetry(ch, w, tc, t0), self._gap(t0, prop, ("BEFORE", w)))
             if w == "AFTER":
-                out += self._compensation(ch, tc)
-            out += self._allocation(t0, w, tc)
+                out += self._gapped(self._compensation(ch, tc, t0),
+                                    self._gap(t0, prop + ("control_allocator_status",),
+                                              ("BEFORE", w)))
+            out += self._gapped(self._allocation(t0, w, tc),
+                                self._gap(t0, ("control_allocator_status",), (w,)))
         out += self._battery(tc)
         return out
 
@@ -142,16 +195,39 @@ class StockProducers:
                                 producer_health=health, produced_time=round(produced_t, 6),
                                 detail=detail or {})
 
+    def _gap(self, t0, topics, windows):
+        """LOG_COMPLETENESS: the first log gap inside the windows this output
+        reads, or None."""
+        for w in windows:
+            a, b = SS.WINDOWS[w]
+            for tp in topics:
+                g = self.log.gap_in(tp, t0 + a, t0 + b)
+                if g:
+                    return f"{g} (window {w})"
+        return None
+
+    def _gapped(self, envs, gap):
+        """Outputs computed over a log gap: producer health UNAVAILABLE, so
+        admissibility refuses them. A gap is neither NOMINAL nor a vehicle
+        fault."""
+        if not gap:
+            return envs
+        return [EvidenceEnvelope(**{**e.__dict__, "producer_health": ProducerHealth.UNAVAILABLE,
+                                    "detail": dict(e.detail, log_gap=gap)}) for e in envs]
+
     def _cmd_roots(self):
         return [f"channel:motor_command.motor_{j}" for j in range(self.n)]
 
-    def _telemetry(self, ch, w, tc):
+    def _telemetry(self, ch, w, tc, t0=None):
         th = self.cal["theta_tel"]
         lin = Lineage.of(*[f"channel:esc_rpm.motor_{j}" for j in range(self.n)], *self._cmd_roots())
         out = []
         for m in range(self.n):
             L, n = ch[f"L_tel_{w}"][m], min(ch["n_before"][m], ch[f"n_{w}"][m])
-            if n < 10 or not math.isfinite(L):
+            if t0 is not None and self._offline(m, t0, ("BEFORE", w)):
+                st, app, codes = (ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING,
+                                  ("ESC_TELEMETRY_OFFLINE",))
+            elif n < 10 or not math.isfinite(L):
                 st, app, codes = (ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING,
                                   ("NOT_MEASURABLE_IN_FLIGHT_WINDOWS",))
             elif L >= th:
@@ -169,29 +245,48 @@ class StockProducers:
             out.append(self._env(TEL, "TELEMETRY_RESPONSE", rec, lin, tc, tc))
         return out
 
-    def _compensation(self, ch, tc):
+    def _compensation(self, ch, tc, t0=None):
         th, tht = self.cal["theta_ctrl"], self.cal["theta_tel"]
         lin = Lineage.of(*self._cmd_roots(), self.imu, "model:ekf2", "model:px4_rate_controller",
                          "model:px4_control_allocator")
         sat = self._saturated(tc - 5.0, tc) if self.log.has("control_allocator_status") else False
+        th_s = self.cal.get("theta_steady")
+        t_ev = tc - CHECKPOINTS["AFTER"]
+        peaks = {w: SS.peak_rate(self.log, t_ev, w) for w in ("BEFORE", "AFTER")}
+        steady = th_s is None or all(math.isfinite(v) and v <= th_s for v in peaks.values())
         out = []
         for m in range(self.n):
             C, n = ch["C_AFTER"][m], min(ch["n_before"][m], ch["n_AFTER"][m])
             L = ch["L_tel_AFTER"][m]
-            gate = (1.0 / (1.0 - L) - 1.0) if math.isfinite(L) and L < 1.0 else float("nan")
+            offline = t0 is not None and self._offline(m, t0, ("BEFORE", "AFTER"))
+            if offline:
+                L = float("nan")          # an offline ESC reports no deficit to test
+            # a total reported loss (L >= 1) would need unbounded compensation
+            gate = (float("inf") if math.isfinite(L) and L >= 1.0
+                    else (1.0 / (1.0 - L) - 1.0) if math.isfinite(L) else float("nan"))
             detail = {"unit": "compensation ratio change (1/eta - 1 for a compensated loss)",
                       "window": "AFTER", "samples": n, "threshold": th,
-                      "telemetry_deficit_L": _num(L), "expected_if_genuine": _num(gate)}
+                      "telemetry_deficit_L": _num(L),
+                      "steadiness_peak_rate_rad_s": {w: _num(v) for w, v in peaks.items()},
+                      "theta_steady": th_s,
+                      "expected_if_genuine": "unbounded" if gate == float("inf") else _num(gate)}
             if n < 10 or not math.isfinite(C) or sat:
                 st, app = ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING
                 codes = ("ALLOCATOR_SATURATED",) if sat else ("NOT_MEASURABLE_IN_FLIGHT_WINDOWS",)
+            elif not steady:
+                # the claim's assumption "near-steady flight in both windows"
+                # (claim register) does not hold: a maneuver moves the motor
+                # command split exactly as a loss does
+                st, app = ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING
+                codes = ("NOT_STEADY_FLIGHT",)
             elif C >= th:
                 st, app, codes = ObservationState.VIOLATED, Applicability.APPLICABLE, ("ACT_NO_PHYSICAL_RESPONSE",)
             elif C <= -th or not (math.isfinite(L) and L >= tht):
                 # the opposite direction is explained by no single-motor loss;
                 # no local deficit means nothing to test
                 st, app = ObservationState.NOT_APPLICABLE, Applicability.NOT_APPLICABLE
-                codes = ("NO_LOCAL_DEFICIT_TO_TEST",) if C > -th else ("COMPENSATION_OPPOSITE",)
+                codes = (("ESC_TELEMETRY_OFFLINE_NOTHING_TO_TEST",) if offline and C > -th
+                         else ("NO_LOCAL_DEFICIT_TO_TEST",) if C > -th else ("COMPENSATION_OPPOSITE",))
             elif gate >= 2.0 * th:
                 st, app, codes = ObservationState.NOMINAL, Applicability.APPLICABLE, ()
             else:

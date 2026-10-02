@@ -22,6 +22,12 @@ WHAT IS READ
 **Also read:** the initial parameters the producers declare as configuration
 dependencies, and the PX4 log messages of level WARNING and above.
 
+**Also read: the logger's own dropouts** (`dropouts`: start and length of
+each gap the logger recorded), for log completeness (claim
+LOG_COMPLETENESS): an output whose window overlaps a dropout, or a gap of
+more than GAP_FACTOR times its topic's logging interval, is reported with
+producer health UNAVAILABLE (`gap_in`).
+
 **In-flight parameter changes are NOT read.** In a SITL campaign they are
 how faults are injected (XSYS-001 sets `SIH_MOT_EFF1` at onset), so reading
 them would hand the onset to the analysis.
@@ -48,6 +54,8 @@ from pathlib import Path
 import numpy as np
 
 MAX_MOTORS = 8
+#: A gap longer than this many logging intervals is a log gap (claim LOG_COMPLETENESS).
+GAP_FACTOR = 3.0
 _WARN_LEVELS = ("EMERGENCY", "ALERT", "CRITICAL", "ERROR", "WARNING")
 
 #: PX4 547e2ca `add_default_topics()` intervals, ms, for a real board.
@@ -111,6 +119,8 @@ class StockLog:
     messages: list = field(default_factory=list)
     #: per topic: the sampling the arrays reflect ("as logged" or an interval)
     sampling: dict = field(default_factory=dict)
+    #: the logger's recorded dropouts: (start s from log start, length s)
+    dropouts: list = field(default_factory=list)
 
     @property
     def n_motors(self) -> int:
@@ -142,8 +152,10 @@ class StockLog:
             topics[d.name] = out
         msgs = [(round((int(m.timestamp) - t0) * 1e-6, 3), m.log_level_str(), m.message.strip())
                 for m in u.logged_messages if m.log_level_str() in _WARN_LEVELS]
+        drops = [(round((int(d.timestamp) - t0) * 1e-6, 6), round(int(d.duration) * 1e-3, 6))
+                 for d in u.dropouts]
         return cls({"file": path.name, "sha256": _sha(path)}, t0, topics, params, msgs,
-                   {k: "as logged" for k in topics})
+                   {k: "as logged" for k in topics}, drops)
 
     # ------------------------------------------------------------ rates
     def decimate(self, intervals_ms=None) -> "StockLog":
@@ -166,13 +178,14 @@ class StockLog:
             topics[name] = {f: v[idx] for f, v in d.items()}
             sampling[name] = f"decimated to {iv} ms"
         return StockLog(dict(self.origin), self.t0_us, topics, dict(self.params),
-                        list(self.messages), sampling)
+                        list(self.messages), sampling, list(self.dropouts))
 
     # ------------------------------------------------------------ cache
     def to_npz(self, path) -> None:
         flat = {f"{t}|{f}": v for t, d in self.topics.items() for f, v in d.items()}
         meta = {"origin": self.origin, "t0_us": self.t0_us, "params": self.params,
-                "messages": self.messages, "sampling": self.sampling}
+                "messages": self.messages, "sampling": self.sampling,
+                "dropouts": self.dropouts}
         import json
         np.savez_compressed(path, __meta__=np.frombuffer(json.dumps(meta).encode(), np.uint8),
                             **flat)
@@ -190,9 +203,35 @@ class StockLog:
             topics.setdefault(t, {})[f] = z[k]
         origin = dict(meta["origin"], extract=Path(path).name)
         return cls(origin, meta["t0_us"], topics, meta["params"],
-                   [tuple(m) for m in meta["messages"]], meta["sampling"])
+                   [tuple(m) for m in meta["messages"]], meta["sampling"],
+                   [tuple(d) for d in meta.get("dropouts", [])])
 
     # ------------------------------------------------------------ helpers
+    def gap_in(self, topic: str, a: float, b: float):
+        """The first log gap touching [a, b) on `topic`, as a short text, or
+        None. A gap is a logger dropout overlapping the span, or two
+        consecutive samples further apart than GAP_FACTOR times the topic's
+        logging interval (its stock interval, or the median spacing when the
+        topic is logged on every publication)."""
+        for s0, dur in self.dropouts:
+            if s0 < b and s0 + dur > a:
+                return f"logger dropout of {dur:.3f} s at {s0:.3f} s"
+        d = self.topics.get(topic)
+        if d is None or len(d["t"]) < 2:
+            return None
+        t = d["t"]
+        iv = STOCK_INTERVAL_MS.get(topic) or 0
+        step = iv * 1e-3 if iv else float(np.median(np.diff(t)))
+        lo = max(int(np.searchsorted(t, a, side="right")) - 1, 0)
+        hi = min(int(np.searchsorted(t, b, side="left")), len(t) - 1)
+        if hi <= lo:
+            return None
+        gaps = np.diff(t[lo:hi + 1])
+        k = int(np.argmax(gaps))
+        if gaps[k] > GAP_FACTOR * step:
+            return f"{topic}: no sample for {gaps[k]:.3f} s from {t[lo + k]:.3f} s"
+        return None
+
     def in_flight(self, t: np.ndarray) -> np.ndarray:
         """True where the vehicle is armed and not landed (zero-order hold of
         `vehicle_status` and `vehicle_land_detected`). False where unknown."""

@@ -113,9 +113,6 @@ def stock_outcome(run):
     m = R.machine_report(run.results, run.inputs, run.gate, run.contracts, extras=run.extras)
     f = m["final"]
     locs = [(x["key"], x["outcome"], tuple(x["candidates"])) for x in f["localizations"]]
-    by = {}
-    for e in f["evidence"]["used"] if isinstance(f["evidence"]["used"], list) else []:
-        pass
     adverse = f["state"]["abnormal"]["adverse_evidence"]
     held = {}
     for c in m["coverage"]:

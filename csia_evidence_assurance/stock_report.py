@@ -90,6 +90,18 @@ def _summary(m, extras) -> dict:
     for loc in locs:
         happened.append(f"{loc['symptom']} on {loc['subject']}: {loc['outcome']}"
                         + (f" among {len(loc['candidates'])} explanations" if len(loc["candidates"]) > 1 else ""))
+    final_keys = {loc["key"] for loc in locs}
+    raised: dict = {}
+    for c in km.get("candidate_changes", []):
+        if c["what"] == "attribution" or c["what"] in final_keys:
+            continue
+        r = raised.setdefault(c["what"], {"raised": [], "withdrawn": []})
+        (r["raised"] if c["to"] else r["withdrawn"]).append(c["t"])
+    for key, r in sorted(raised.items()):
+        if r["raised"]:
+            happened.append(f"{key} was raised {len(r['raised'])} time(s) (first at {r['raised'][0]} s) "
+                            "and withdrawn each time when its evidence left its validity window; "
+                            "it is not in the final result")
     when = []
     for e in ev:
         when.append(f"{e['event_id']}: onset estimate {e['t0']:.3f} s, first alarm {e['first_alarm_t']:.3f} s"
@@ -114,6 +126,12 @@ def _summary(m, extras) -> dict:
         not_obs.append(f"{len(pc['observed'])} of the profile's {pc['profile_records']} records observed")
     for n in (m.get("coverage_report") or {}).get("coverage_notices", []):
         not_obs.append(f"{n['source']}: {n['why']}")
+    seen = set()
+    for v in extras.get("evidence_values", []):
+        key = (v["record"], tuple(v["reason_codes"]))
+        if v["state"] == "UNAVAILABLE" and v["reason_codes"] and key not in seen:
+            seen.add(key)
+            not_obs.append(f"{v['record']}: {', '.join(v['reason_codes'])} (from {v['t']:.2f} s)")
     remaining = {loc["key"]: loc["candidates"] for loc in locs}
     eliminated = []
     for loc in locs:
@@ -247,7 +265,10 @@ def human_summary(m) -> list:
     L += ["", "EVIDENCE VALUES (every stock output)"]
     for v in m["evidence_values"]:
         L.append(f"  {v['t']:.3f}s {_ev_short(v['evidence_id'])}: {v['state']} {_fmt(v['measured'])} "
-                 f"{v['unit']} (threshold {_fmt(v['threshold'])}; {v['window']})")
+                 f"{v['unit']} (threshold {_fmt(v['threshold'])}; {v['window']})"
+                 + (f" {', '.join(v['reason_codes'])}" if v["state"] != "NOMINAL" and v["reason_codes"] else "")
+                 + (f" [producer {v['producer_health']}: {v['log_gap'] or 'not admitted'}; not used]"
+                    if v.get("producer_health", "VALID") != "VALID" else ""))
     cr = m["coverage_report"]
     L += ["", f"COVERAGE ({cr['profile_records_observed']} of {cr['profile_records_expected']} profile "
               "records observed; unobserved is not healthy)"]

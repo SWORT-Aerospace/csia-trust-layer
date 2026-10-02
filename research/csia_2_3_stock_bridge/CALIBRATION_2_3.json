@@ -6,6 +6,7 @@
   "k_tel": 0.03935864094294361,
   "theta_ctrl": 0.006881424935098357,
   "theta_dyn": 0.02882144985008057,
+  "theta_steady": 0.09889434104510486,
   "theta_tel": 0.0068798851916218595
  },
  "label": "CSIA 2.3 stock calibration; apparatus data only; frozen before XSYS-001 evaluation",
@@ -15,15 +16,22 @@
   "C": 0.0034407124675491785,
   "D": 0.014410724925040285,
   "L": 0.0034399425958109298,
+  "R_steady": 0.04944717052255243,
   "d_ctrl": 0.02007122571272557,
   "d_tel": 0.019679320471471806
  },
  "null_pseudo_onsets": 160,
+ "null_steady": {
+  "flights": 32,
+  "pseudo_onsets": 160,
+  "statistic": "largest |omega| (rad/s) in the BEFORE and AFTER windows"
+ },
  "rates": "PX4 547e2ca default logging intervals (stock_log.STOCK_INTERVAL_MS)",
- "revision": 2,
+ "revision": 3,
  "revision_history": [
   "r1 (67bc92f): q and kappa normalized by the mean of the OTHER motors",
-  "r2: normalized by the median of ALL motors. Found on a development run of one XSYS-001 flight (XS1A1-C00-A-E055) through the full pipeline: with the mean of the others, motor 0's deficit appeared as an 'excess' on motors 1-3. A definition fix, not a threshold choice; every threshold re-derived from apparatus data by the same rule. No systematic XSYS-001 evaluation had been run"
+  "r2: normalized by the median of ALL motors. Found on a development run of one XSYS-001 flight (XS1A1-C00-A-E055) through the full pipeline: with the mean of the others, motor 0's deficit appeared as an 'excess' on motors 1-3. A definition fix, not a threshold choice; every threshold re-derived from apparatus data by the same rule. No systematic XSYS-001 evaluation had been run",
+  "r3: adds theta_steady for the compensation claim's assumption 'near-steady flight in both windows' (claim register), which r2 did not implement; found missing by validation flights V5 and V6, whose maneuvers raised false COMMAND_NO_RESPONSE symptoms. Same rule, same 32 apparatus nominal flights; every r2 threshold unchanged; no XSYS-001 or validation flight sets it"
  ],
  "rule": "threshold = 2 x the largest |value| of the statistic under the null (pseudo-onsets every 0.5 s in hover); CUSUM h = 3k",
  "sweep_validation": {

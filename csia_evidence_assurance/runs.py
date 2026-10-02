@@ -218,12 +218,14 @@ def estimator_log(log, tick_s: float = 0.1, t_end=None) -> Run:
 
 
 # ------------------------------------------------------------------ one input
-def resolve(spec: str, variant: str = "V3_TEMPORAL", ulog_path=None, tick_s: float = 0.1) -> Run:
+def resolve(spec: str, variant: str = "V3_TEMPORAL", ulog_path=None, tick_s: float = 0.1,
+            stock: bool = False) -> Run:
     """Any input the Analyzer accepts, by what it is:
 
     | input | analysis |
     |---|---|
-    | a `.ulg` file | the PX4 estimator over the flight (`ulog`) |
+    | a `.ulg` file, `stock=True` (the 2.3 command-line default) | the stock producers, event discovery and the quad profile (`stock_flight`) |
+    | a `.ulg` file, `stock=False` | the PX4 estimator over the flight (`ulog`, the 2.2 path) |
     | a `.npz` extract written by `EstimatorLog.to_npz` | the same, from the extract |
     | a frozen v2 scenario name (`NOMINAL`, `PROCESS_STALL`, ...) | `v2_scenario` |
     | a frozen v1 scenario name (`power_sag`, ...) | the frozen CUSUM (`cusum_scenario`) |
@@ -233,7 +235,7 @@ def resolve(spec: str, variant: str = "V3_TEMPORAL", ulog_path=None, tick_s: flo
     from csia.v2.profiles import SCENARIOS as V2S
     p = Path(spec)
     if p.suffix.lower() == ".ulg" and p.exists():
-        return ulog(p, tick_s)
+        return stock_flight(p, tick_s=tick_s) if stock else ulog(p, tick_s)
     if p.suffix.lower() == ".npz" and p.exists():
         return estimator_log(PX.EstimatorLog.from_npz(p), tick_s)
     if spec in V2S:
@@ -374,4 +376,6 @@ def _value_row(env, event_id) -> dict:
             "measured": None if r.measured_value is None else round(float(r.measured_value), 6),
             "expected": None if r.expected_value is None else round(float(r.expected_value), 6),
             "unit": d.get("unit", ""), "threshold": d.get("threshold"),
-            "window": d.get("window", ""), "samples": d.get("samples")}
+            "window": d.get("window", ""), "samples": d.get("samples"),
+            "producer_health": env.producer_health.value,
+            "log_gap": (env.detail or {}).get("log_gap")}

@@ -1,0 +1,69 @@
+{
+ "analysis_config": {
+  "configuration": "stock producers and PX4 monitors",
+  "events_source": "discovered",
+  "input": "V8.ulg",
+  "kind": "px4_ulog_stock",
+  "path": "stock",
+  "rates": "PX4 547e2ca default logging intervals",
+  "tick_s": 1.0
+ },
+ "analyzer_version": "2.2.1",
+ "code": {
+  "csia_evidence_assurance": "c964fb333913eff57685d95901b9b7f1a82f9b5ec256559b3996996421e53502",
+  "csia_semantic_core": "949e6dc8aa46b912a23348904c965329072625f5fedd8fe9f38e8b1b0e436862"
+ },
+ "inputs": [
+  {
+   "file": "V8.ulg",
+   "sha256": "0d347e3a24a6b414b697486f6e23b59d4864ff28945bbd12291bcd425df04fe4"
+  },
+  {
+   "name": "calibration",
+   "sha256": "ca4b4eb8e8406fd4ce285175b918fbb61f4672686bdae66a9280665ebd444da9"
+  }
+ ],
+ "producers": {
+  "px4:allocator.compensation": {
+   "contract_version": "stock-1",
+   "digest": "1d23d371c23413ef27a5063379e568942e509a91ddbd2392501d009f3f792fc0",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:allocator.status": {
+   "contract_version": "stock-1",
+   "digest": "1ffb93776005afb0d36b0f0010830564f30a0bf5a22df90d72f23033cbf5896b",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:battery.status": {
+   "contract_version": "stock-1",
+   "digest": "b116a633e084cb20df1432b0ddc8bd9778086232cdd7506cd01184a1ed75455c",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:ekf2.estimator_status": {
+   "contract_version": "px4-ekf2-status-2",
+   "digest": "c73a23cb8c4ca9f5b1ff8980195ef0c4c4eae64fc46b401f17a88a83fcc1f91b",
+   "producer_version": "547e2ca"
+  },
+  "px4:esc.telemetry_response": {
+   "contract_version": "stock-1",
+   "digest": "320e7b8e8eaea7430c930510f575707704f0cf358dbd6769747be7a03eab4386",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:vehicle.rate_transient": {
+   "contract_version": "stock-1",
+   "digest": "e4a56b90505b148748118c4d4c8117607eb828756916176c6317e305a6aa5fb8",
+   "producer_version": "csia-2.3-stock-r1"
+  }
+ },
+ "profile": {
+  "base_profile": "csia_evidence_assurance/profiles/multirotor_quad.py",
+  "digest": "c701b72aee1f3be1a334505c52df355796614ac83376f883c396cdc265e64171",
+  "gate": "ACCEPTED",
+  "name": "multirotor-quad",
+  "version": "r1"
+ },
+ "report_schema": "csia.flight_assurance_report/4",
+ "report_sha256": "d3fd9afc7c97afbc3ccd193178bfb58539174a390d1848eef28975d2d4543bc4",
+ "schema": "csia.analysis_manifest/1",
+ "semantic_version": "2.1.1"
+}

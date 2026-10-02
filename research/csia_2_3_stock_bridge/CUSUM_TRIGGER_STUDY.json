@@ -1,0 +1,440 @@
+{
+ "gap_s": 3.0,
+ "label": "frozen v1.1 CUSUM as an event trigger on the frozen v1 scenarios (its coverage)",
+ "match_s": 2.0,
+ "scenarios": [
+  {
+   "alarms": {},
+   "alarms_total": 0,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [],
+   "false_events": 0,
+   "fault_targets_covered": [],
+   "fault_targets_not_covered": [],
+   "faults": [],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "clean",
+   "title": "Clean flight \u2014 no faults injected"
+  },
+  {
+   "alarms": {
+    "gps": [
+     21.16
+    ]
+   },
+   "alarms_total": 1,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [
+    20.0
+   ],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [
+    {
+     "delay_from_onset_s": 1.16,
+     "event_id": "E1",
+     "first_alarm_t": 21.16,
+     "matched_onset": 20.0,
+     "nodes": [
+      "gps"
+     ],
+     "onset_estimate_error_s": -7.96,
+     "t0": 12.04,
+     "triggers": 1
+    }
+   ],
+   "false_events": 0,
+   "fault_targets_covered": [
+    "gps"
+   ],
+   "fault_targets_not_covered": [],
+   "faults": [
+    {
+     "end": 35.0,
+     "kind": "gps_spoof",
+     "start": 20.0,
+     "target": "gps"
+    }
+   ],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "gps_spoof",
+   "title": "GPS spoof 20-35 s: position walks off ~3.2 m/s, Doppler clean"
+  },
+  {
+   "alarms": {},
+   "alarms_total": 0,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [],
+   "false_events": 0,
+   "fault_targets_covered": [
+    "gps"
+   ],
+   "fault_targets_not_covered": [],
+   "faults": [
+    {
+     "end": 33.0,
+     "kind": "dropout",
+     "start": 25.0,
+     "target": "gps"
+    }
+   ],
+   "missed": [
+    25.0
+   ],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "gps_dropout",
+   "title": "GPS dropout 25-33 s: no fix \u2014 trust must HOLD, not false-alarm"
+  },
+  {
+   "alarms": {},
+   "alarms_total": 0,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [],
+   "false_events": 0,
+   "fault_targets_covered": [],
+   "fault_targets_not_covered": [
+    "imu0"
+   ],
+   "faults": [
+    {
+     "end": 40.0,
+     "kind": "bias_drift",
+     "start": 20.0,
+     "target": "imu0"
+    }
+   ],
+   "missed": [
+    20.0
+   ],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "imu0_bias_drift",
+   "title": "imu0 accel-z bias drift 20-40 s (0.05 m/s^2 per s)"
+  },
+  {
+   "alarms": {
+    "mag": [
+     25.080000000000002
+    ]
+   },
+   "alarms_total": 1,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [
+    25.0
+   ],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [
+    {
+     "delay_from_onset_s": 0.08,
+     "event_id": "E1",
+     "first_alarm_t": 25.08,
+     "matched_onset": 25.0,
+     "nodes": [
+      "mag"
+     ],
+     "onset_estimate_error_s": 0.04,
+     "t0": 25.04,
+     "triggers": 1
+    }
+   ],
+   "false_events": 0,
+   "fault_targets_covered": [
+    "mag"
+   ],
+   "fault_targets_not_covered": [],
+   "faults": [
+    {
+     "end": 33.0,
+     "kind": "emi_spike",
+     "start": 25.0,
+     "target": "mag"
+    }
+   ],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "mag_emi",
+   "title": "Magnetometer EMI bursts 25-33 s (10 uT spikes @ 12 Hz)"
+  },
+  {
+   "alarms": {
+    "battery": [
+     30.2
+    ],
+    "motor_esc": [
+     30.12
+    ],
+    "vibration": [
+     35.36
+    ]
+   },
+   "alarms_total": 3,
+   "cleared": {
+    "vibration": [
+     39.64
+    ]
+   },
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [
+    30.0
+   ],
+   "duplicates_absorbed": 2,
+   "duration_s": 59.96,
+   "events": [
+    {
+     "delay_from_onset_s": 0.12,
+     "event_id": "E1",
+     "first_alarm_t": 30.12,
+     "matched_onset": 30.0,
+     "nodes": [
+      "battery",
+      "motor_esc",
+      "vibration"
+     ],
+     "onset_estimate_error_s": -0.12,
+     "t0": 29.88,
+     "triggers": 3
+    }
+   ],
+   "false_events": 0,
+   "fault_targets_covered": [
+    "battery",
+    "motor_esc"
+   ],
+   "fault_targets_not_covered": [],
+   "faults": [
+    {
+     "end": 36.0,
+     "kind": "power_sag",
+     "start": 30.0,
+     "target": "battery"
+    },
+    {
+     "end": 36.0,
+     "kind": "power_sag",
+     "start": 30.0,
+     "target": "motor_esc"
+    }
+   ],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "power_sag",
+   "title": "Power sag 30-36 s: pack V dips 1.2 V, ESC telemetry RPM sags"
+  },
+  {
+   "alarms": {
+    "vibration": [
+     28.080000000000002
+    ]
+   },
+   "alarms_total": 1,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [
+    28.0
+   ],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [
+    {
+     "delay_from_onset_s": 0.08,
+     "event_id": "E1",
+     "first_alarm_t": 28.08,
+     "matched_onset": 28.0,
+     "nodes": [
+      "vibration"
+     ],
+     "onset_estimate_error_s": 0.04,
+     "t0": 28.04,
+     "triggers": 1
+    }
+   ],
+   "false_events": 0,
+   "fault_targets_covered": [
+    "vibration"
+   ],
+   "fault_targets_not_covered": [],
+   "faults": [
+    {
+     "end": 40.0,
+     "kind": "vibration_anomaly",
+     "start": 28.0,
+     "target": "vibration"
+    }
+   ],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "vibration_anomaly",
+   "title": "Prop damage signature 28-40 s: 3x vibration + half-order line"
+  },
+  {
+   "alarms": {},
+   "alarms_total": 0,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [],
+   "false_events": 0,
+   "fault_targets_covered": [],
+   "fault_targets_not_covered": [
+    "imu0",
+    "imu1"
+   ],
+   "faults": [
+    {
+     "end": 55.0,
+     "kind": "bias_drift",
+     "start": 25.0,
+     "target": "imu0"
+    },
+    {
+     "end": 55.0,
+     "kind": "bias_drift",
+     "start": 27.0,
+     "target": "imu1"
+    }
+   ],
+   "missed": [
+    25.0,
+    27.0
+   ],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "dual_imu_failure",
+   "title": "Both IMUs drift (25 s / 28 s onset, opposite signs): attitude reference integrity lost \u2014 failsafe must command stabilize + controlled descent"
+  },
+  {
+   "alarms": {},
+   "alarms_total": 0,
+   "cleared": {},
+   "covered_nodes": [
+    "battery",
+    "gps",
+    "mag",
+    "motor_esc",
+    "vibration"
+   ],
+   "detected": [],
+   "duplicates_absorbed": 0,
+   "duration_s": 59.96,
+   "events": [],
+   "false_events": 0,
+   "fault_targets_covered": [],
+   "fault_targets_not_covered": [],
+   "faults": [],
+   "missed": [],
+   "not_covered": [
+    "baro",
+    "imu0",
+    "imu1"
+   ],
+   "scenario": "high_speed_dash",
+   "title": "High-speed forward dash \u2014 ~55 m/s cruise (kinematic high-speed ENVELOPE; aerodynamic drag NOT modeled, sensor tolerances quad-tuned)"
+  }
+ ],
+ "totals": {
+  "alarms": 6,
+  "events": 4,
+  "false_events": 0,
+  "faults": 8,
+  "missed": 4,
+  "scenarios": 9,
+  "simulated_s": 539.6
+ }
+}
