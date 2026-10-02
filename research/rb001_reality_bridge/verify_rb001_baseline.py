@@ -10,7 +10,7 @@ result files are not rewritten.
 | check | how |
 |---|---|
 | 2.3 commit | 0f9222c is an ancestor of HEAD |
-| no architecture expansion | `csia_evidence_assurance/`, `csia_semantic_core/`, `csia/` identical to 0f9222c |
+| no architecture expansion | `csia_evidence_assurance/`, `csia_semantic_core/`, `csia/` identical to 0f9222c, except, at --final, the one documented receipt fix (RR-01, `csia_evidence_assurance/runs.py`) |
 | historical results | the 2.3 package (including the validation-flight outcomes), both 2.2 packages and their tests identical to 0f9222c |
 | Semantic Core 2.1.1, frozen v2.0 | as in the 2.3 verifier |
 | 2.1.1 governance, XSYS-001 55/55 gate, Phase C | the revision's gate functions |
@@ -27,6 +27,9 @@ import verify_pilot_baseline as VP
 
 OUT = C.HERE / "BASELINE_RB001.json"
 FINAL = C.HERE / "FINAL_STATE_RB001.json"
+# The only product change RB-001 may carry: receipt RR-01 (REALITY_RECEIPTS.md),
+# a crash on other PX4 versions' estimator_status, fixed in one adapter.
+RECEIPT_FIXES = {"csia_evidence_assurance/runs.py": "RR-01"}
 
 
 def main():
@@ -38,6 +41,10 @@ def main():
     out["ancestry"] = dict(VP.ancestry(), **{C.ACCEPTED_2_3: r.returncode == 0})
     out["product_code_changed_since_2_3"] = VP.unchanged(
         C.ACCEPTED_2_3, "csia_evidence_assurance", "csia_semantic_core", "csia")
+    changed = set(C.git("diff", "--name-only", C.ACCEPTED_2_3, "--",
+                        "csia_evidence_assurance", "csia_semantic_core", "csia").split())
+    out["product_files_changed_since_2_3"] = {f: RECEIPT_FIXES.get(f, "UNDOCUMENTED") for f in sorted(changed)}
+    product_ok = (not changed) or (final and changed <= set(RECEIPT_FIXES))
     out["historical_results_changed_since_2_3"] = VP.unchanged(
         C.ACCEPTED_2_3, "research/csia_2_3_stock_bridge", "research/csia_2_2_offboard_pilot",
         "research/csia_2_2_evidence_assurance", "tests/test_evidence_assurance_2_2.py",
@@ -52,7 +59,7 @@ def main():
     out["tests_2_3"] = VP.pytest_file("tests/test_csia_2_3_stock_bridge.py")
     g = out["gates_2_1_1"]
     ok = (all(out["ancestry"].values())
-          and out["product_code_changed_since_2_3"] == "none"
+          and product_ok
           and out["historical_results_changed_since_2_3"] == "none"
           and out["semantic_core_changed_since_2_1_1"] == "none"
           and out["frozen_v2_changed_since_2_2"] == "none"
