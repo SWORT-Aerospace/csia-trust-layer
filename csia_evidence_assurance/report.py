@@ -281,11 +281,17 @@ def profile_coverage(coverage: list, profile_records) -> dict:
                                       if prof and r not in set(prof) and st - {"NO_COVERAGE"})}
 
 
-def machine_report(results, inputs: dict, gate, contracts: dict) -> dict:
+def machine_report(results, inputs: dict, gate, contracts: dict, extras: dict | None = None) -> dict:
+    """`extras` (2.3 stock runs only) adds the stock sections and schema 4;
+    without it the report is byte-identical to schema 3."""
     rs = [_canon(x.to_dict()) for x in results]
     tl = timeline(rs)
     final = rs[-1] if rs else None
     cov = coverage_summary(rs)
+    if extras is not None:
+        from . import stock_report as SR
+        return SR.machine_report_4(rs, tl, final, cov, inputs, gate, contracts, extras,
+                                   key_moments(rs), profile_coverage(cov, getattr(gate, "records", ())))
     return {
         "schema": SCHEMA,
         "analyzer_version": ANALYZER_VERSION,
@@ -497,9 +503,14 @@ def _profile_coverage_lines(pc: dict) -> list:
 
 
 def human_report(m: dict) -> str:
-    """The short text report for an engineer."""
-    L = ["CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)",
-         f"analyzer {m['analyzer_version']}, semantics {m['semantic_version']}", ""]
+    """The short text report for an engineer. A schema-4 (stock) report
+    opens with the summary (`stock_report.human_summary`)."""
+    if m.get("summary") is not None:
+        from . import stock_report as SR
+        L = SR.human_summary(m)
+    else:
+        L = ["CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)",
+             f"analyzer {m['analyzer_version']}, semantics {m['semantic_version']}", ""]
     L.append("INPUTS")
     for k, v in sorted(m["inputs"].items()):
         L.append(f"  {k}: {v}")

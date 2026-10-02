@@ -259,7 +259,7 @@ def quad_setup(n_motors: int = 4):
 
 
 def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STOCK_TICK_S,
-                 calibration=None) -> Run:
+                 calibration=None, known_onsets=None, px4_monitors: bool = True) -> Run:
     """An ordinary PX4 ULog, with no onset, label or sidecar file.
 
     1. Stock topics at PX4's default logging rates (`stock_log.py`).
@@ -269,6 +269,13 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
        timeline every `tick_s`.
     4. Admissibility, then Semantic Core 2.1.1 with the multirotor quad r1
        profile.
+
+    Benchmark hooks (research comparisons only, never the product path):
+    - `known_onsets`: analyse at these times instead of discovering events
+      (Phase 15, known against discovered onset);
+    - `px4_monitors=False`: stock producers and propulsion change detection
+      only, without PX4's own monitors (failure detector, battery warning,
+      allocator flags, EKF2) as triggers or context (Phase 18 configuration A).
     """
     from . import events as EV
     from .adapters import px4_stock as PS
@@ -290,7 +297,18 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
         if len(g):
             imu = f"sensor:imu.{int(g[-1])}"
     sp = PS.StockProducers(log, imu, cal)
-    events, triggers, ev_notices = EV.discover(log, est_log, cal)
+    if not px4_monitors:
+        est_log, est = None, None
+    if known_onsets is not None:
+        events = [EV.Event(f"K{i}", float(t), float(t),
+                           [EV.Trigger("benchmark", "benchmark.known_onset", float(t), float(t))], None)
+                  for i, t in enumerate(sorted(known_onsets), 1)]
+        triggers, ev_notices = events[0].triggers if events else [], []
+    elif px4_monitors:
+        events, triggers, ev_notices = EV.discover(log, est_log, cal)
+    else:
+        triggers = EV.propulsion_triggers(log, cal["calibration"] if "calibration" in cal else cal)
+        events, ev_notices = EV.cluster(triggers), []
     t_end = max(float(v["t"][-1]) for v in log.topics.values() if len(v["t"]))
     ticks = {round(i * tick_s, 6): [] for i in range(int(t_end / tick_s) + 1)}
     skipped = []
@@ -303,13 +321,20 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
                 continue
             ticks.setdefault(round(tc, 6), []).append((e, cp))
     notices = sp.coverage_notices() + ev_notices + (est.coverage_notices() if est else [])
-    out, current = [], None
+    out, current, values = [], None, {}
     for t in sorted(ticks):
         envs, epochs = [], None
         for e, cp in ticks[t]:
             current = e
-            envs += [x for x in sp.at(e.t0, cp) if x.producer_id != PS.BAT]
-        envs += sp._battery(t)
+            got = [x for x in sp.at(e.t0, cp) if x.producer_id != PS.BAT]
+            envs += got
+            for x in got:
+                values[x.evidence_id] = _value_row(x, e.event_id)
+        bat = sp._battery(t)
+        envs += bat
+        if ticks[t]:
+            for x in bat:
+                values[x.evidence_id] = _value_row(x, ticks[t][0][0].event_id)
         if est is not None:
             envs += est.step(t)
             cur, ev = est.context(t)
@@ -317,9 +342,18 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
         evs = {PS.EVENT: current.t0} if current is not None else {}
         out.append(an.step(t, envs, epochs=epochs, events=evs, coverage=notices))
     inputs = {"kind": "px4_ulog_stock", "ulog": stock_log.origin,
+              "configuration": ("stock producers and PX4 monitors" if px4_monitors
+                                else "stock producers only"),
               "rates": "PX4 547e2ca default logging intervals", "tick_s": tick_s,
+              "events_source": "known onset (benchmark)" if known_onsets is not None
+              else "discovered",
               "calibration_sha256": hashlib.sha256(json.dumps(cal, sort_keys=True).encode()).hexdigest()}
+    from . import diagnosability as DG
+    observable = sorted({v["record"] for v in values.values()
+                         if v["state"] not in ("UNAVAILABLE",)})
     extras = {"events": [e.to_dict() for e in events],
+              "evidence_values": sorted(values.values(), key=lambda v: (v["t"], v["evidence_id"])),
+              "diagnosability": DG.analyze(core, Q.sample_records(_engine), observable, gate.records),
               "triggers_total": len(triggers),
               "checkpoints_skipped": skipped,
               "topic_coverage": log.coverage(),
@@ -327,3 +361,17 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
                                    if v is not None and not k.startswith("CA_ROTOR")},
               "profile_catalog": list(gate.records)}
     return Run(out, inputs, gate, contracts, an, extras)
+
+
+def _value_row(env, event_id) -> dict:
+    """Phase 22: an output's magnitude, with its unit, threshold and window."""
+    r = env.record
+    d = r.detail or {}
+    return {"evidence_id": env.evidence_id, "event_id": event_id, "producer_id": env.producer_id,
+            "claim": env.claim, "record": f"{r.domain}/{r.component}:{r.relation}",
+            "t": round(float(env.content_time), 6), "state": r.observation_state.value,
+            "reason_codes": list(r.reason_codes),
+            "measured": None if r.measured_value is None else round(float(r.measured_value), 6),
+            "expected": None if r.expected_value is None else round(float(r.expected_value), 6),
+            "unit": d.get("unit", ""), "threshold": d.get("threshold"),
+            "window": d.get("window", ""), "samples": d.get("samples")}

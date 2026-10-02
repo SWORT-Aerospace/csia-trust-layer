@@ -4,7 +4,8 @@ truth separately. RESEARCH ONLY.
 
     .venv/bin/python research/csia_2_3_stock_bridge/extract_stock.py [--workers N]
 
-Writes /home/user/csia_2_3_raw/extracts/<flight>.npz (StockLog, as logged)
+Writes /home/user/csia_2_3_raw/extracts/<flight>.npz (StockLog, as logged),
+<flight>.est.npz (the 2.2 EstimatorLog extract)
 and ONSET_TRUTH.json (committed). The truth is used only to score the
 Analyzer, never as its input:
 - A flights: the frozen XSYS-001 onset (`xsys_extract.onset_time` on
@@ -32,6 +33,8 @@ def one(path: str) -> dict:
     p = Path(path)
     s = StockLog.from_ulog(p)
     s.to_npz(EXTRACTS / f"{p.stem}.npz")
+    from csia_evidence_assurance.adapters.px4_estimator import EstimatorLog
+    EstimatorLog.from_ulog(p).to_npz(EXTRACTS / f"{p.stem}.est.npz")
     rec = json.loads(p.with_suffix(".json").read_text())
     u = ULog(str(p), ["parameter_update", "esc_status"])
     on = XE.onset_time(u, rec["onset_param"])

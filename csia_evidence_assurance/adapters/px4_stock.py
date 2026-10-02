@@ -252,6 +252,11 @@ class StockProducers:
                                   ("NOT_MEASURABLE",))
             elif D >= th:
                 st, app, codes = ObservationState.DEGRADED, Applicability.APPLICABLE, ("RATE_RESPONSE_ON_LOSS_AXIS",)
+            elif D <= -th:
+                # a response OPPOSITE to this motor's loss axis is explained by no
+                # loss on this motor (XSYS-001's dynamics_witness: None)
+                st, app, codes = (ObservationState.NOT_APPLICABLE, Applicability.NOT_APPLICABLE,
+                                  ("RESPONSE_OPPOSITE_TO_LOSS_AXIS",))
             else:
                 st, app, codes = ObservationState.NOMINAL, Applicability.APPLICABLE, ()
             rec = _rec("ACTUATION", f"motor_{m}", "vehicle.rate_transient", DYN, st, app,
