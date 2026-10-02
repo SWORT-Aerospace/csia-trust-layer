@@ -1,0 +1,41 @@
+{
+ "claim_register": "research/csia_2_3_stock_bridge/CLAIMS.json#VEHICLE_RATE_TRANSIENT",
+ "claims": {
+  "RATE_TRANSIENT": {
+   "attributable": false,
+   "domain": "ACTUATION",
+   "meaning": "roll and pitch rate in the first 0.2 s after the event, projected on motor m's thrust-loss axis, against before. Context; valid only when the event time is accurate to a fraction of 0.2 s",
+   "relation": "vehicle.rate_transient"
+  }
+ },
+ "contract_version": "stock-1",
+ "expected_inputs": [
+  "a PX4 ULog with the stock topics (stock_log.py)",
+  "a discovered event (events.py)"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is UNAVAILABLE (INPUTS_MISSING), never NOMINAL",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "sensor:imu.<device>",
+  "calibration:rotor_geometry"
+ ],
+ "producer_id": "px4:vehicle.rate_transient",
+ "producer_version": "csia-2.3-stock-r1",
+ "profile_compatibility": [
+  "csia_evidence_assurance/profiles/multirotor_quad.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   0.0,
+   0.2
+  ],
+  "relative_to": "stock.event"
+ },
+ "validity_rule": "XSYS-001's validated T1 window (W_DYN)"
+}

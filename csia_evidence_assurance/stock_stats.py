@@ -9,8 +9,14 @@ Every statistic is per motor m, from stock topics only (`stock_log.py`):
 
 | name | definition | stage it reflects |
 |---|---|---|
-| q_m, telemetry response | (rpm_m^2 / T(c_m)) / mean_{j != m}(rpm_j^2 / T(c_j)) | TELEMETRY RESPONSE: ESC-reported rotor speed per commanded thrust, against the other rotors |
-| kappa_m, compensation ratio | c_m / mean_{j != m} c_j | COMMAND / CONTROLLER COMPENSATION: the closed loop asking one motor for more than the others |
+| q_m, telemetry response | (rpm_m^2 / T(c_m)) / median over all motors j of (rpm_j^2 / T(c_j)) | TELEMETRY RESPONSE: ESC-reported rotor speed per commanded thrust, against the other rotors |
+| kappa_m, compensation ratio | c_m / median over all motors j of c_j | COMMAND / CONTROLLER COMPENSATION: the closed loop asking one motor for more than the others |
+
+**Median, not mean of the others (calibration revision 2).** With the mean
+of the other motors, one motor's change entered every other motor's
+denominator: a deficit on motor 0 appeared as an "excess" on motors 1-3.
+The median of all motors cannot be moved by a single deviating motor (four
+motors: the mean of the middle two).
 | D_m, rate transient | mean over [t0, t0 + 0.2 s) of (omega - omega_before) projected on motor m's thrust-loss axis | PHYSICAL VEHICLE RESPONSE |
 
 T(c) = (1 - f) c + f c^2 is PX4's thrust model with f = THR_MDL_FAC. Only
@@ -90,9 +96,8 @@ def motor_series(log) -> MotorSeries | None:
     c_at = zoh(am["t"], c, es["t"])
     with np.errstate(divide="ignore", invalid="ignore"):
         e = rpm ** 2 / thrust_model(c_at, f)
-        q = np.stack([e[:, m] / np.mean(np.delete(e, m, axis=1), axis=1) for m in range(n)], 1)
-        kappa = np.stack([c[:, m] / np.mean(np.delete(c, m, axis=1), axis=1)
-                          for m in range(n)], 1)
+        q = e / np.median(e, axis=1, keepdims=True)
+        kappa = c / np.median(c, axis=1, keepdims=True)
     ok_e = log.in_flight(es["t"])[:, None] & (c_at >= MIN_COMMAND)
     ok_c = log.in_flight(am["t"])[:, None] & (c >= MIN_COMMAND)
     q = np.where(ok_e & np.isfinite(q), q, np.nan)

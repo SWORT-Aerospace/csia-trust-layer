@@ -233,9 +233,12 @@ class EstimatorProducer:
     previous step; `context(t)` returns the configuration epochs in force
     at t, and the transitions since the previous call."""
 
-    def __init__(self, log: EstimatorLog):
+    def __init__(self, log: EstimatorLog, contract_version: str = CONTRACT_VERSION):
         self.log = log
         self.version = (log.ver_sw or "")[:7]
+        #: px4-ekf2-status-1 for the 2.2 aircraft runs; px4-ekf2-status-2
+        #: (same claims, also declared for the 2.3 quad profile) for 2.3 runs
+        self.contract_version = contract_version
         self.notices = []
         self._lane_mode = "STRUCTURAL_0"
         if log.multi_mode():
@@ -377,7 +380,7 @@ class EstimatorProducer:
             stamp = {k: item["epochs"][k] for k in claim_keys(claim) if k in item["epochs"]}
             out.append(EvidenceEnvelope(
                 producer_id=PRODUCER_ID, producer_version=self.version,
-                contract_version=CONTRACT_VERSION, claim=claim, record=rec,
+                contract_version=self.contract_version, claim=claim, record=rec,
                 lineage=Lineage.of(*roots),
                 content_time=self._sec(row["timestamp_sample"]),
                 producer_health=item["health"], produced_time=self._sec(row["timestamp"]),

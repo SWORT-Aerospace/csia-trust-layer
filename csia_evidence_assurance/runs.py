@@ -6,6 +6,7 @@
 | `cusum_scenario(name)` | a frozen v1 scenario (`csia/scenarios.py`) | the frozen v1.1 CUSUM bank | 2.1.1 + r2 (the CUSUM claims carry no symptom: the result is the evidence, its lineage and coverage) |
 | `xsys_trial(analysis_id)` | one XSYS-001 trial, from the sealed stage-1 features | W_RPM, W_DYN, W_CTRL (+ the PX4 estimator when the flight's ULog is given) | 2.1.1 with the XSYS-001 research specification |
 | `ulog(path)` | a PX4 ULog | the PX4 estimator | 2.1.1 + r2 |
+| `stock_flight(path)` (2.3) | a PX4 ULog, nothing else | event discovery, the stock producers and the PX4 estimator (contract px4-ekf2-status-2) | 2.1.1 with the multirotor quad r1 profile |
 
 Each returns `Run(results, inputs, gate, contracts)`, which
 `report.machine_report` turns into a report.
@@ -41,6 +42,10 @@ class Run:
     gate: object
     contracts: dict
     analyzer: object = None
+    #: 2.3 stock runs only: events, topic coverage, diagnosability and the
+    #: profile's catalog for the report (None keeps every earlier report
+    #: byte-identical)
+    extras: dict = None
 
 
 def _sha(path) -> str:
@@ -239,3 +244,86 @@ def resolve(spec: str, variant: str = "V3_TEMPORAL", ulog_path=None, tick_s: flo
         return xsys_trial(spec, variant, ulog_path, tick_s)
     raise ValueError(f"not an Analyzer input: {spec!r} (expected a .ulg or .npz file, a v2 or "
                      f"v1 scenario name, or an XSYS-001 analysis id)")
+
+
+# ------------------------------------------------------------------ 2.3 stock bridge
+STOCK_TICK_S = 1.0
+
+
+def quad_setup(n_motors: int = 4):
+    """(engine, core, gate) for the multirotor quad r1 profile."""
+    from .profiles import multirotor_quad as Q
+    engine = Q.build_quad_engine(n_motors)
+    core = SemanticCore21.from_engine(engine, Corrections.revised(), trace=True)
+    return engine, core, Q.gate(engine, n_motors)
+
+
+def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STOCK_TICK_S,
+                 calibration=None) -> Run:
+    """An ordinary PX4 ULog, with no onset, label or sidecar file.
+
+    1. Stock topics at PX4's default logging rates (`stock_log.py`).
+    2. Event discovery (`events.py`).
+    3. Per event, the stock producers at event + 0.2 s, + 2 s and + 15 s
+       (or the end of the log); the battery and the PX4 estimator on a
+       timeline every `tick_s`.
+    4. Admissibility, then Semantic Core 2.1.1 with the multirotor quad r1
+       profile.
+    """
+    from . import events as EV
+    from .adapters import px4_stock as PS
+    from .profiles import multirotor_quad as Q
+    from .stock_log import StockLog
+    if stock_log is None:
+        stock_log = StockLog.from_ulog(path)
+    if est_log is None and path is not None:
+        est_log = PX.EstimatorLog.from_ulog(path)
+    log = stock_log.decimate()
+    cal = calibration or PS.load_calibration()
+    _engine, core, gate = quad_setup(max(log.n_motors, 1) if log.n_motors else 4)
+    contracts = load_contracts(*PS.CONTRACT_FILES, "px4_ekf2_estimator_status_2")
+    an = FlightAssuranceAnalyzer(core, contracts, gate, Q.BASE)
+    est = PX.EstimatorProducer(est_log, contract_version="px4-ekf2-status-2") if est_log else None
+    imu = "sensor:imu.unknown"
+    if est_log is not None and est_log.status:
+        g = est_log.status[min(est_log.status)]["gyro_device_id"]
+        if len(g):
+            imu = f"sensor:imu.{int(g[-1])}"
+    sp = PS.StockProducers(log, imu, cal)
+    events, triggers, ev_notices = EV.discover(log, est_log, cal)
+    t_end = max(float(v["t"][-1]) for v in log.topics.values() if len(v["t"]))
+    ticks = {round(i * tick_s, 6): [] for i in range(int(t_end / tick_s) + 1)}
+    skipped = []
+    for e in events:
+        for cp, dt in PS.CHECKPOINTS.items():
+            tc = e.t0 + dt
+            if tc > t_end + 1e-9:
+                skipped.append({"event_id": e.event_id, "checkpoint": cp,
+                                "why": f"the log ends {tc - t_end:.2f} s before event + {dt} s"})
+                continue
+            ticks.setdefault(round(tc, 6), []).append((e, cp))
+    notices = sp.coverage_notices() + ev_notices + (est.coverage_notices() if est else [])
+    out, current = [], None
+    for t in sorted(ticks):
+        envs, epochs = [], None
+        for e, cp in ticks[t]:
+            current = e
+            envs += [x for x in sp.at(e.t0, cp) if x.producer_id != PS.BAT]
+        envs += sp._battery(t)
+        if est is not None:
+            envs += est.step(t)
+            cur, ev = est.context(t)
+            epochs = EpochContext(cur, ev)
+        evs = {PS.EVENT: current.t0} if current is not None else {}
+        out.append(an.step(t, envs, epochs=epochs, events=evs, coverage=notices))
+    inputs = {"kind": "px4_ulog_stock", "ulog": stock_log.origin,
+              "rates": "PX4 547e2ca default logging intervals", "tick_s": tick_s,
+              "calibration_sha256": hashlib.sha256(json.dumps(cal, sort_keys=True).encode()).hexdigest()}
+    extras = {"events": [e.to_dict() for e in events],
+              "triggers_total": len(triggers),
+              "checkpoints_skipped": skipped,
+              "topic_coverage": log.coverage(),
+              "stock_parameters": {k: v for k, v in sorted(log.params.items())
+                                   if v is not None and not k.startswith("CA_ROTOR")},
+              "profile_catalog": list(gate.records)}
+    return Run(out, inputs, gate, contracts, an, extras)

@@ -20,8 +20,8 @@ f = THR_MDL_FAC, T(c) = (1 - f) c + f c^2 (PX4's thrust model):
 
 | name | definition | separates |
 |---|---|---|
-| q_m (telemetry response) | (rpm_m^2 / T(c_m)) / mean over j != m of (rpm_j^2 / T(c_j)) | TELEMETRY: reported rotor response per unit commanded thrust, against the other rotors |
-| kappa_m (compensation) | c_m / mean over j != m of c_j | COMMAND: the allocator asking one motor for more than the others |
+| q_m (telemetry response) | (rpm_m^2 / T(c_m)) / median over all motors of (rpm_j^2 / T(c_j)) | TELEMETRY: reported rotor response per unit commanded thrust, against the other rotors |
+| kappa_m (compensation) | c_m / median over all motors of c_j | COMMAND: the allocator asking one motor for more than the others |
 | unallocated torque | norm of `control_allocator_status.unallocated_torque` | ALLOCATION: demand not achieved |
 | saturation | `actuator_saturation[m]` != 0 | ALLOCATION |
 | integrators | roll and pitch rate integrators | CONTROLLER COMPENSATION (context) |
@@ -40,6 +40,7 @@ import numpy as np
 
 import common_23 as C
 
+from csia_evidence_assurance import stock_stats as SS  # noqa: E402
 from csia_evidence_assurance.stock_log import StockLog  # noqa: E402
 
 EXTRACTS = C.OUT_RAW / "extracts"
@@ -60,20 +61,9 @@ def zoh(t_src, v_src, t_dst):
 
 
 def motor_series(s: StockLog):
-    am, es = s.topics["actuator_motors"], s.topics["esc_status"]
-    n = s.n_motors
-    c = np.stack([am[f"control[{m}]"] for m in range(n)], axis=1)
-    rpm = np.stack([es[f"esc[{m}].esc_rpm"] for m in range(n)], axis=1)
-    t = es["t"]
-    c_at = zoh(am["t"], c, t)                    # latest command at each ESC report
-    f = float(s.params.get("THR_MDL_FAC") or 0.0)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        e = rpm ** 2 / thrust_model(c_at, f)
-        q = np.stack([e[:, m] / np.mean(np.delete(e, m, axis=1), axis=1) for m in range(n)], 1)
-        kap_t = am["t"]
-        kappa = np.stack([c[:, m] / np.mean(np.delete(c, m, axis=1), axis=1)
-                          for m in range(n)], 1)
-    return t, q, kap_t, kappa, c_at
+    """The product's own definitions (stock_stats), on the stock log."""
+    ms = SS.motor_series(s)
+    return ms.t_esc, ms.q, ms.t_cmd, ms.kappa, None
 
 
 def wmean(t, v, onset, w):

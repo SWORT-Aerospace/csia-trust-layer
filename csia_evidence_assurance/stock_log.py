@@ -87,7 +87,7 @@ def _topic_fields(n_motors: int) -> dict:
                                     "fd_battery", "fd_imbalanced_prop", "fd_motor",
                                     "motor_failure_mask", "imbalanced_prop_metric"],
         "vehicle_land_detected": ["landed"],
-        "vehicle_status": ["arming_state"],
+        "vehicle_status": ["arming_state", "failsafe", "nav_state"],
         "cpuload": ["load"],
     }
 
@@ -208,3 +208,34 @@ class StockLog:
         armed[ok] = vs["arming_state"][ia[ok]] == 2          # vehicle_status ARMING_STATE_ARMED
         landed[ok] = ld["landed"][il[ok]] > 0.5
         return armed & ~landed
+
+    # ------------------------------------------------------------ coverage
+    def coverage(self) -> dict:
+        """Per topic the stock bridge reads: present, samples, median rate,
+        the default logging interval, and which fields never vary (all
+        zero, constant or all NaN) and so carry no evidence."""
+        out = {}
+        for name in sorted(STOCK_INTERVAL_MS):
+            d = self.topics.get(name)
+            if d is None or len(d["t"]) == 0:
+                out[name] = {"present": False, "default_interval_ms": STOCK_INTERVAL_MS[name]}
+                continue
+            t = d["t"]
+            dt = np.diff(t)
+            silent = {}
+            for f, v in sorted(d.items()):
+                if f == "t":
+                    continue
+                v = np.asarray(v, float)
+                if np.all(np.isnan(v)):
+                    silent[f] = "all_nan"
+                elif np.all(v[~np.isnan(v)] == 0):
+                    silent[f] = "all_zero"
+                elif np.all(v[~np.isnan(v)] == v[~np.isnan(v)][0]):
+                    silent[f] = "constant"
+            out[name] = {"present": True, "samples": int(len(t)),
+                         "rate_hz": round(1.0 / float(np.median(dt)), 2) if dt.size else None,
+                         "default_interval_ms": STOCK_INTERVAL_MS[name],
+                         "sampling": self.sampling.get(name, "as logged"),
+                         "fields_read": len(d) - 1, "fields_without_information": silent}
+        return out
