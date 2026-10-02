@@ -1,0 +1,47 @@
+{
+ "DRAFT": "PRIME B4: specified before any bench exists; the adapter is built only with the first bench CSV (reality-first rule 5). Not loaded by the product.",
+ "claims": {
+  "THRUST_RESPONSE": {
+   "attributable": false,
+   "domain": "ACTUATION",
+   "meaning": "the load-cell thrust per unit commanded thrust of motor m, against its own pre-event window, fell beyond the nominal-corpus threshold (VIOLATED) or did not (NOMINAL); UNAVAILABLE if the load cell's samples do not cover the window",
+   "relation": "actuation.physical_response"
+  }
+ },
+ "configuration_assumptions": [
+  "motor m on a single-axis load cell, rigidly mounted, no contact with the guard",
+  "the load cell's timebase aligned to the FC by the logic analyzer's sync pulse"
+ ],
+ "contract_version": "bench-draft-1",
+ "expected_inputs": [
+  "a PX4 ULog of the run (actuator_motors, esc_status)",
+  "a load-cell CSV: time (s, on the FC timebase, rounded to whole microseconds: see D-PRIME-1), thrust (N)",
+  "a discovered event (events.py)"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is UNAVAILABLE (INPUTS_MISSING), never NOMINAL",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "sensor:loadcell.<n>",
+  "channel:motor_command.motor_<m>"
+ ],
+ "producer_id": "bench:loadcell.thrust_response",
+ "producer_version": "bench-draft-1",
+ "profile_compatibility": [
+  "csia_evidence_assurance/profiles/multirotor_quad.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "thresholds": "from the nominal corpus only: 2 x the largest null value; 99.9th percentile reported (B4_MATCHED_AB_PROTOCOL.md section 6)",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   10.0,
+   15.0
+  ],
+  "relative_to": "stock.event"
+ },
+ "validity_rule": "the AFTER window, as the stock compensation"
+}

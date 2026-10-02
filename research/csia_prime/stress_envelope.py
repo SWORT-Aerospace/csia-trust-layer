@@ -38,7 +38,16 @@ by flights already flown (winds 0-5 m/s; the 2.3 and RB-001 maneuver
 patterns) and stay open for real data. Configuration changes are not read
 by the stock path in flight, by design (`stock_log.py`).
 
-Writes STRESS_ENVELOPE.json.
+**Version 2 (this file).** Version 1 (`STRESS_ENVELOPE.json`, commit
+0ead374, as run) perturbed timestamps with continuous noise, which produced
+sub-microsecond times that no ULog can contain (ULog timestamps are whole
+microseconds). That exposed defect D-PRIME-1 (`DEFECT_D_PRIME_1.md`). Version 2
+keeps v1's variables unchanged, ADDS `jitter_us` (the same jitter, rounded to
+the microsecond grid, as a real log would carry it), and records, for every
+run, the evidence the admissibility gate rejected and why. Version 1's file is
+not rewritten.
+
+Writes STRESS_ENVELOPE_V2.json.
 """
 from __future__ import annotations
 
@@ -59,9 +68,10 @@ PROP = ("esc_status", "actuator_motors", "control_allocator_status", "battery_st
         "rate_ctrl_status", "failure_detector_status")
 CORRUPT_T = 70.0
 SEEDS = 5
-RANDOM_VARS = {"jitter_pct", "loss_p", "rpm_noise_pct", "gyro_noise"}
+RANDOM_VARS = {"jitter_pct", "jitter_us", "loss_p", "rpm_noise_pct", "gyro_noise"}
 VARIABLES = {
-    "jitter_pct": [0, 2, 5, 10, 20, 40],            # timestamp std, % of the topic's interval
+    "jitter_pct": [0, 2, 5, 10, 20, 40],            # timestamp std, % of the topic's interval (v1: off-grid)
+    "jitter_us": [0, 2, 5, 10, 20, 40],             # the same, rounded to whole microseconds (v2)
     "loss_p": [0, 0.02, 0.05, 0.1, 0.2, 0.4],        # independent sample loss, every topic
     "rate_mult": [1, 1.5, 2, 2.5, 3, 5],             # propulsion/allocator/battery logging interval x
     "esc_latency_ms": [0, 50, 100, 200, 400, 1000],  # esc_status timestamps late by
@@ -120,12 +130,14 @@ def perturb(log, var, level, seed, anchor):
     rng = np.random.default_rng(seed)
     out = copy.deepcopy(log)
     T = out.topics
-    if var == "jitter_pct":
+    if var in ("jitter_pct", "jitter_us"):
         for tp, d in T.items():
             iv = STOCK_INTERVAL_MS.get(tp) or 0
             if not iv:
                 continue
             t = d["t"] + rng.normal(0.0, level / 100.0 * iv * 1e-3, len(d["t"]))
+            if var == "jitter_us":
+                t = np.round(t * 1e6) * 1e-6
             o = np.argsort(t, kind="stable")
             T[tp] = {k: (t[o] if k == "t" else v[o]) for k, v in d.items()}
     elif var == "loss_p":
@@ -208,6 +220,9 @@ def summarize(log, base):
             "unique": m["final"]["attribution"].get("unique"),
             "events": len(m["events"]),
             "refused": sum(1 for v in vals if v.get("producer_health", "VALID") != "VALID"),
+            "rejected_by_gate": sorted({x["reasons"][0].split(":")[0] for x in m["final"]["evidence"]["rejected"]}),
+            "rejected_outside_window": sum(1 for x in m["final"]["evidence"]["rejected"]
+                                           if any("CONTENT_OUTSIDE_VALIDATED_WINDOW" in r for r in x["reasons"])),
             "unavailable": sum(1 for v in vals if v["state"] == "UNAVAILABLE"),
             "telemetry_deficit_on_corrupted_motor": tel_deficit}
 
@@ -240,9 +255,9 @@ def main():
     out = {}
     for base, var, level, seed, r in res:
         out.setdefault(base, {}).setdefault(var, {}).setdefault(str(level), []).append(dict(r, seed=seed))
-    C.write_json(C.HERE / "STRESS_ENVELOPE.json", {
-        "label": "PRIME B2: offline perturbation of already-flown SITL logs; product path unchanged; "
-                 "a tolerance envelope, NOT physical evidence",
+    C.write_json(C.HERE / "STRESS_ENVELOPE_V2.json", {
+        "label": "PRIME B2 v2: offline perturbation of already-flown SITL logs; product path unchanged; "
+                 "a tolerance envelope, NOT physical evidence; adds jitter_us and gate rejections",
         "bases": {k: {"log": "/".join(v["log"]), "injected": v["injected"],
                       "corrupted": v.get("corrupted")} for k, v in BASES.items()},
         "variables": VARIABLES, "seeds_for_random_variables": SEEDS,

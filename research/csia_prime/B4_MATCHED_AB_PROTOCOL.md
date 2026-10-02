@@ -175,6 +175,20 @@ confounded with condition.
 - **any B_AS_A or WRONG_UNIQUE:** the product would mislead an engineer;
 - **S4 failing:** stop condition 5, lineage disagreeing with the hardware.
 
+**A prediction recorded before any data (S4).** The stock ESC telemetry
+contract roots its lineage at topic channels (`channel:esc_rpm.motor_<all>`,
+`channel:motor_command.motor_<all>`), not at the ESC's hardware.
+- **What 2.2 would therefore do:** count ESC RPM and an ESC-current output
+  as two independent lines, unless a hardware map adds their shared root,
+  the ESC MCU (`sensor:esc.<n>`).
+- **What follows:** **S4 is expected to fail as the product stands.** That
+  is stop condition 5: lineage disagreeing with the hardware.
+- **What to do:** the hardware map (RB-001 Part 19) is the fix to specify
+  before the bench, not after.
+
+**The scoring script.** `ab_scoring.py` implements sections 7, 8 and 10.
+Its SHA-256 goes into the run log before run 1, with this document's.
+
 **What a PASS would not say:**
 - nothing about flight;
 - nothing about the closed-loop compensation, which needs RB5;
