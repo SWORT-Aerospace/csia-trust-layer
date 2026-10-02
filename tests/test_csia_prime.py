@@ -82,3 +82,22 @@ def test_the_frozen_protocol_names_its_scoring_script_and_holds():
     assert contract["DRAFT"] and "sensor:loadcell.<n>" in contract["lineage_rule"]
     # the draft is not in the product's contract directory: nothing loads it yet
     assert not (REPO / "csia_evidence_assurance/contracts/bench_loadcell_thrust_response.json").exists()
+
+
+# ------------------------------------------------------------------ C1: the negative control is permanent
+def test_the_steadiness_gate_is_not_loosened():
+    """Track C1: maneuvering is not fixed by raising the threshold. The shipped
+    product's theta_steady stays 2.3's calibration revision 3."""
+    cal = json.loads((REPO / "csia_evidence_assurance/stock_calibration.json").read_text())
+    assert cal["calibration"]["theta_steady"] == pytest.approx(0.09889434104510486, abs=1e-15)
+
+
+def test_the_loosened_gate_negative_control_stays_on_record():
+    """RB-001's preregistered evaluation: the loosened gate (B1) raised 163 false
+    COMMAND_NO_RESPONSE and 52 wrong-motor states; the shipped gate (B0) none.
+    The as-run result file must keep saying so."""
+    ev = json.loads((REPO / "research/rb001_reality_bridge/MANEUVER_RESULTS_EVAL.json").read_text())["score"]
+    assert ev["B1"]["false_violated"] == 163 and ev["B1"]["wrong_motor"] == 52
+    assert ev["B0"]["false_violated"] == 0 and ev["B0"]["wrong_motor"] == 0
+    verdict = json.loads((REPO / "research/rb001_reality_bridge/MANEUVER_VERDICT_EVAL.json").read_text())
+    assert verdict["candidates"]["B1"]["verdict"].startswith("FAIL (S1")
