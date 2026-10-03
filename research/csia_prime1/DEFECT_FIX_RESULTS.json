@@ -1,0 +1,525 @@
+{
+ "2.3": {
+  "d_prime_1": {
+   "by_shift": {
+    "0.0us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.3us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.4999us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.5001us": {
+     "rejected": 13,
+     "symptoms": []
+    },
+    "0.5us": {
+     "rejected": 13,
+     "symptoms": []
+    },
+    "0.7us": {
+     "rejected": 13,
+     "symptoms": []
+    },
+    "1.0us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "2.7us": {
+     "rejected": 13,
+     "symptoms": []
+    }
+   },
+   "label": "SYNTHETIC motor_0 loss, timestamps shifted",
+   "release": "2.3",
+   "reproduces": true,
+   "shifts_losing_the_symptom_or_rejecting_evidence": [
+    "0.5us",
+    "0.5001us",
+    "0.7us",
+    "2.7us"
+   ]
+  },
+  "d_prime_2": {
+   "reproduces": true,
+   "synthetic": {
+    "by_scale": {
+     "x0.1": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.99,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.99,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.telemetry_change"
+      ]
+     },
+     "x0.5": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.75,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.75,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.telemetry_change"
+      ]
+     },
+     "x0.775": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.3994,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.3994,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.telemetry_change"
+      ]
+     },
+     "x0.9": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.19,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.19,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.telemetry_change"
+      ]
+     },
+     "x1.1": {
+      "adverse": false,
+      "events": 0,
+      "symptoms": [],
+      "telemetry_outputs": [],
+      "trigger_kinds": []
+     },
+     "x1.29": {
+      "adverse": false,
+      "events": 0,
+      "symptoms": [],
+      "telemetry_outputs": [],
+      "trigger_kinds": []
+     },
+     "x10.0": {
+      "adverse": false,
+      "events": 0,
+      "symptoms": [],
+      "telemetry_outputs": [],
+      "trigger_kinds": []
+     },
+     "x2.0": {
+      "adverse": false,
+      "events": 0,
+      "symptoms": [],
+      "telemetry_outputs": [],
+      "trigger_kinds": []
+     }
+    },
+    "excess_scales_never_reported": [
+     "x1.1",
+     "x1.29",
+     "x2.0",
+     "x10.0"
+    ],
+    "label": "SYNTHETIC motor_2 RPM scaled from 60 s",
+    "release": "2.3"
+   },
+   "v10_blinded": {
+    "events": [
+     {
+      "kinds": [
+       "propulsion.telemetry_change"
+      ],
+      "t0": 56.504
+     },
+     {
+      "kinds": [
+       "propulsion.telemetry_change"
+      ],
+      "t0": 78.704
+     }
+    ],
+    "exit_code": 0,
+    "first_page_head": [
+     "CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)",
+     "log: V10_blinded.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1",
+     "SUPPORT: SUPPORTED"
+    ],
+    "label": "2.3 V10 (RPM x 10, motor_2, healthy motor), injection message removed",
+    "release": "2.3",
+    "removed": [
+     [
+      50.004,
+      "[failure_injection_manager] Injected: esc wrong, instances 3"
+     ]
+    ],
+    "telemetry_outputs_motor_2": [
+     [
+      "AFTER",
+      "NOMINAL",
+      0.0002,
+      ""
+     ],
+     [
+      "EARLY",
+      "NOMINAL",
+      -0.0011,
+      ""
+     ]
+    ],
+    "what_happened": [
+     "- nothing adverse was observed",
+     "- attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)",
+     "WHEN DID IT START?"
+    ]
+   }
+  }
+ },
+ "label": "D-PRIME-1 and D-PRIME-2 reproductions on both releases (synthetic logs and 2.3 V10 blinded)",
+ "prime1": {
+  "d_prime_1": {
+   "by_shift": {
+    "0.0us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.3us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.4999us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.5001us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.5us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "0.7us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "1.0us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    },
+    "2.7us": {
+     "rejected": 0,
+     "symptoms": [
+      "COMMAND_NO_RESPONSE|motor_0"
+     ]
+    }
+   },
+   "label": "SYNTHETIC motor_0 loss, timestamps shifted",
+   "release": "prime1",
+   "reproduces": false,
+   "shifts_losing_the_symptom_or_rejecting_evidence": []
+  },
+  "d_prime_2": {
+   "reproduces": false,
+   "synthetic": {
+    "by_scale": {
+     "x0.1": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.99,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.99,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_deficit"
+      ]
+     },
+     "x0.5": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.75,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.75,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_deficit"
+      ]
+     },
+     "x0.775": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.3994,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.3994,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_deficit"
+      ]
+     },
+     "x0.9": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        0.19,
+        "ESC_TELEMETRY_DEFICIT"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        0.19,
+        "ESC_TELEMETRY_DEFICIT"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_deficit"
+      ]
+     },
+     "x1.1": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        -0.21,
+        "ESC_TELEMETRY_EXCESS"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        -0.21,
+        "ESC_TELEMETRY_EXCESS"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_excess"
+      ]
+     },
+     "x1.29": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        -0.6641,
+        "ESC_TELEMETRY_EXCESS"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        -0.6641,
+        "ESC_TELEMETRY_EXCESS"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_excess"
+      ]
+     },
+     "x10.0": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        -99.0,
+        "ESC_TELEMETRY_EXCESS"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        -99.0,
+        "ESC_TELEMETRY_EXCESS"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_excess"
+      ]
+     },
+     "x2.0": {
+      "adverse": true,
+      "events": 1,
+      "symptoms": [],
+      "telemetry_outputs": [
+       [
+        "AFTER",
+        "DEGRADED",
+        -3.0,
+        "ESC_TELEMETRY_EXCESS"
+       ],
+       [
+        "EARLY",
+        "DEGRADED",
+        -3.0,
+        "ESC_TELEMETRY_EXCESS"
+       ]
+      ],
+      "trigger_kinds": [
+       "propulsion.rpm_excess"
+      ]
+     }
+    },
+    "excess_scales_never_reported": [],
+    "label": "SYNTHETIC motor_2 RPM scaled from 60 s",
+    "release": "prime1"
+   },
+   "v10_blinded": {
+    "events": [
+     {
+      "kinds": [
+       "propulsion.rpm_excess"
+      ],
+      "t0": 49.604
+     }
+    ],
+    "exit_code": 0,
+    "first_page_head": [
+     "CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)",
+     "log: V10_blinded.ulg   release prime1, analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime1-view-1, support contract prime1-r1",
+     "SUPPORT: SUPPORTED (configuration quadx-allocation-esc; validation level SIMULATION)"
+    ],
+    "label": "2.3 V10 (RPM x 10, motor_2, healthy motor), injection message removed",
+    "release": "prime1",
+    "removed": [
+     [
+      50.004,
+      "[failure_injection_manager] Injected: esc wrong, instances 3"
+     ]
+    ],
+    "telemetry_outputs_motor_2": [
+     [
+      "AFTER",
+      "DEGRADED",
+      -98.5925,
+      "ESC_TELEMETRY_EXCESS"
+     ],
+     [
+      "EARLY",
+      "DEGRADED",
+      -98.6719,
+      "ESC_TELEMETRY_EXCESS"
+     ]
+    ],
+    "what_happened": [
+     "- observed, not confirmed: motor_2's ESC reports MORE rotor speed than commanded, against the other rotors (telemetry excess, L = -98.67); 1.43e+04 x its threshold",
+     "2. WHEN",
+     "- E1 at 49.60 s: RPM_EXCESS_EVENT on motor_2 (ESC-reported rotor speed rose above its recent level)"
+    ]
+   }
+  }
+ }
+}

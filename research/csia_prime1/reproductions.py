@@ -88,10 +88,14 @@ def blinded_v10(dst: Path) -> dict:
     return B.blind(C.SITL_2_3 / "V10.ulg", dst, corrupt=False)
 
 
+#: The command line names the historical release after the product that shipped it (PRIME).
+CLI_RELEASE = {"2.3": "prime", "prime": "prime", "prime1": "prime1"}
+
+
 def assure(path, out, release=None):
     cmd = [sys.executable, "-m", "csia_evidence_assurance", "assure", str(path), "--out", str(out)]
     if release is not None:
-        cmd += ["--release", release]
+        cmd += ["--release", CLI_RELEASE[release]]
     r = subprocess.run(cmd, cwd=C.REPO, capture_output=True, text=True)
     return r
 
@@ -106,7 +110,8 @@ def d_prime_2_v10(release=None) -> dict:
         m = json.loads((td / "out/report.json").read_text())
         s = (td / "out/assurance_summary.txt").read_text()
         head = s.split("\n\n")[0]
-        wh = s.split("WHAT HAPPENED?\n")[1].split("\n")[:3] if "WHAT HAPPENED?" in s else []
+        head_ = "WHAT HAPPENED?\n" if "WHAT HAPPENED?\n" in s else "1. WHAT HAPPENED\n"
+        wh = s.split(head_)[1].split("\n")[:3] if head_ in s else []
         return {"label": "2.3 V10 (RPM x 10, motor_2, healthy motor), injection message removed",
                 "release": release, "removed": rec["removed_messages"], "exit_code": r.returncode,
                 "events": [{"t0": round(e["t0"], 3), "kinds": sorted({t["kind"] for t in e["triggers"]})}

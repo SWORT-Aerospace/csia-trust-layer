@@ -1,0 +1,96 @@
+# DRAFTS ONLY (PRIME-1 Phase 32). NOT APPENDED to
+# research/physical_validation/FAILURE_LEDGER.yaml, whose SHA-256 is pinned and
+# whose governance requires owner approval for new entries. Ids are proposals
+# (the ledger's last entry is FL-052); the owner assigns the final ids.
+entries:
+  - id: FL-053 (proposed)
+    date: 2026-10-02
+    phase: CSIA PRIME Track B2 (stress envelope v1)
+    kind: CODE
+    what_happened: >-
+      A sub-microsecond shift of every timestamp of a log (0.5, 0.5001, 0.7
+      or 2.7 us) lost a hover loss's COMMAND_NO_RESPONSE symptom, with 13
+      pieces of valid evidence rejected as REGIME_INVALID. Content times
+      were rounded to the microsecond; the event anchor was not; the 2.2
+      gate compared floats with a 1 ns tolerance.
+    found_by: >-
+      PRIME's stress envelope v1, whose continuous timestamp jitter produced
+      off-grid times no ULog can contain.
+    honest_limit: >-
+      No real ULog reaches it: ULog times are whole microseconds. It is
+      reachable from synthetic, resampled or nanosecond-clock inputs.
+    verdict: FIXED_IN_SUCCESSOR_RELEASE
+    consequence: >-
+      Fixed in release prime1 (canonical integer-microsecond timebase;
+      integer-tick comparisons in the gate). Release 2.3 keeps the defect as
+      recorded; no historical result changed.
+    artifact: >-
+      research/csia_prime/DEFECT_D_PRIME_1.md;
+      research/csia_prime1/DEFECT_FIXES.md;
+      tests/test_csia_prime1.py
+  - id: FL-054 (proposed)
+    date: 2026-10-03
+    phase: CSIA PRIME Track E (pilot bundle blinding)
+    kind: CODE
+    what_happened: >-
+      An ESC telemetry EXCESS (RPM x 10 on a healthy motor) opened no event
+      once PX4's simulation-only failure-injection message was removed: the
+      telemetry CUSUM accumulated only deficits. A later event compared a
+      corrupted BEFORE window with a corrupted AFTER window and read
+      NOMINAL; the first page said "nothing adverse was observed".
+    found_by: >-
+      Building PRIME's blinded pilot bundle: the blinded copy of 2.3 V10
+      changed its conclusion; the cause was then reproduced on a synthetic
+      log.
+    honest_limit: >-
+      2.3's validation result for V10 had relied on a simulation artefact.
+      A real telemetry corruption raising the reported RPM would have gone
+      unreported by release 2.3.
+    verdict: FIXED_IN_SUCCESSOR_RELEASE
+    consequence: >-
+      Fixed in release prime1 (RPM_DEFICIT and RPM_EXCESS as separate
+      one-sided arms; telemetry baseline-validity condition; ESC-offline
+      events; test-harness messages never triggers). Release 2.3 unchanged.
+      The public telemetry claim was narrowed to the classes demonstrated.
+    artifact: >-
+      research/csia_prime/DEFECT_D_PRIME_2.md;
+      research/csia_prime1/DEFECT_FIXES.md;
+      tests/test_csia_prime1.py
+  - id: FL-055 (proposed)
+    date: 2026-10-02
+    phase: CSIA PRIME Track B1 (real data)
+    kind: SCOPE
+    what_happened: >-
+      A real PX4 boat log (airframe 50005) passed the profile gate and was
+      analysed with the multirotor-quad profile; the report never said the
+      vehicle was outside the supported boundary.
+    found_by: PRIME's real-data acquisition (receipt RR-09).
+    honest_limit: >-
+      No false conclusion was produced (no motor producers ran), but the
+      report was silent about scope.
+    verdict: FIXED_IN_SUCCESSOR_RELEASE
+    consequence: >-
+      PRIME added a support check to its view; PRIME-1 decides the support
+      state before any interpretation (UNSUPPORTED_VEHICLE_CONFIGURATION:
+      no diagnostic interpretation; generic analysis only).
+    artifact: >-
+      research/csia_prime/SIM_TO_REAL_RECEIPTS.md;
+      csia_evidence_assurance/support_prime1.py
+  - id: FL-056 (proposed; only if the owner judges it ledger-worthy)
+    date: 2026-10-02
+    phase: CSIA PRIME Track C3 (event discovery)
+    kind: METHOD
+    what_happened: >-
+      The product's event discovery raised 310 false candidate events per
+      nominal in-flight hour while maneuvering in SITL; real loss onsets
+      were sometimes clustered into earlier maneuver events and missed.
+    found_by: PRIME's preregistered event-discovery evaluation.
+    honest_limit: SITL only; the real-flight rate is unmeasured.
+    verdict: SUCCESSOR_UNDER_HELD_OUT_EVALUATION
+    consequence: >-
+      PRIME-1's successor discovery is evaluated once on prospectively
+      flown held-out SITL flights; its verdict is recorded in
+      research/csia_prime1/HELDOUT_RESULTS.json.
+    artifact: >-
+      research/csia_prime/EVENT_DISCOVERY_STUDY.md;
+      research/csia_prime1/HELDOUT_PREREGISTRATION.md
