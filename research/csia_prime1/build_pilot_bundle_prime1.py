@@ -258,6 +258,7 @@ def main():
         shutil.copyfile(f, out / "experimenter" / f.name)
     C.write_json(C.HERE / "BLINDNESS_AUDIT.json", dict(
         {k: v for k, v in audit.items() if k != "per_log"},
+        verdict="ZERO KNOWN GROUND-TRUTH LEAKS" if audit["zero_known_leaks"] else "GROUND-TRUTH LEAKS FOUND",
         label="PRIME-1 Phase 20: blindness audit of every participant artifact",
         per_log={p: {k: v for k, v in a.items() if k != "messages_with_generic_words"}
                  for p, a in audit["per_log"].items()}))

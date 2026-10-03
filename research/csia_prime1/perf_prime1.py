@@ -45,7 +45,7 @@ REPEATS = 3
 STAGES = r'''
 import json, sys, time
 t0 = time.perf_counter()
-from csia_evidence_assurance import assure_prime1, events, support_prime1, releases
+from csia_evidence_assurance import assure_prime1, events, support_prime1, releases, runs
 from csia_evidence_assurance.adapters import px4_stock, px4_estimator
 from csia_evidence_assurance.stock_log import StockLog
 t1 = time.perf_counter()
@@ -66,7 +66,7 @@ if sup["interpretation"] == "FULL":
     t5 = time.perf_counter()
     out.update(parse_s=t3 - t2, discovery_s=t5 - t4)
 t6 = time.perf_counter()
-assure_prime1.run(path, sys.argv[2], 0.2)
+assure_prime1.run(path, sys.argv[2], runs.STOCK_TICK_S)
 out["analysis_and_report_s"] = time.perf_counter() - t6
 print(json.dumps(out))
 '''

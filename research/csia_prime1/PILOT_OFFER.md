@@ -118,7 +118,7 @@ decision for three SITL logs (no customer data):
 
 ## 9. Pricing hypothesis
 
-**COMMERCIAL HYPOTHESIS, NOT YET MARKET-VALIDATED.**
+**COMMERCIAL HYPOTHESIS NOT YET MARKET-VALIDATED.**
 - **Structure:** a fixed-fee pilot for a bounded number of logs (up to 20)
   and one review session, credited against a later licence.
 - **Effort basis:** about 8 to 12 SWORT engineering days for 20 logs

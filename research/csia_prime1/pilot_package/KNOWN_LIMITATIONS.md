@@ -24,6 +24,7 @@ contract (`SUPPORT_MATRIX.md`).
 | a slow drift in reported RPM | may not open an event (slower than the change detector's reference) |
 | a frozen ("stuck") RPM value in steady hover | not visible as a change |
 | compute, timing or command-delivery faults | not observable in the stock topics |
+| a real loss on one motor | the other motors' reported RPM shifts slightly as the controller compensates; such a shift can cross its threshold by about 1x and appear as "observed, not confirmed" with a telemetry check suggested. Read the multiple: the lost motor's line is tens of times its threshold |
 | vehicles other than a quad X | no interpretation (UNSUPPORTED_VEHICLE_CONFIGURATION) |
 
 ## 3. How to read silence

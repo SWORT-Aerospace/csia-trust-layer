@@ -39,7 +39,30 @@ import verify_prime_baseline as VPR
 OUT = C.HERE / "BASELINE_PRIME1.json"
 FINAL = C.HERE / "FINAL_STATE_PRIME1.json"
 #: Product files PRIME-1 may change, each with the defect or workflow it answers.
-PRIME1_CHANGES: dict = {}
+PRIME1_CHANGES: dict = {
+    "csia_evidence_assurance/releases.py": "versioned releases: 2.3 (historical) and prime1 (successor)",
+    "csia_evidence_assurance/admissibility.py": "D-PRIME-1: integer-tick comparisons at the declared resolution "
+                                                "(only when a resolution is set; 2.3 unchanged)",
+    "csia_evidence_assurance/analyzer.py": "D-PRIME-1: passes the release's time resolution to the gate",
+    "csia_evidence_assurance/stock_log.py": "D-PRIME-1: canonical integer-microsecond timebase (successor only)",
+    "csia_evidence_assurance/stock_stats.py": "D-PRIME-2: the excess deviation (d_tel_excess), additive",
+    "csia_evidence_assurance/events.py": "D-PRIME-2 and Phases 6-9: discover_prime1 (deficit/excess arms, "
+                                         "ESC offline, gated compensation, merge, harness messages ignored); "
+                                         "discover() for 2.3 unchanged",
+    "csia_evidence_assurance/adapters/px4_stock.py": "D-PRIME-2: telemetry baseline-validity condition and level "
+                                                     "notices (successor only)",
+    "csia_evidence_assurance/runs.py": "stock_flight(release=...): the successor path; 2.3 the default",
+    "csia_evidence_assurance/contracts/stock_esc_telemetry_response_prime1.json": "D-PRIME-2: the successor's "
+                                                                                  "telemetry contract",
+    "csia_evidence_assurance/support_prime1.py": "Phases 13-15: support decided before interpretation",
+    "csia_evidence_assurance/support_contract_prime1.json": "Phase 15: the support matrix as a product contract",
+    "csia_evidence_assurance/view_prime1.py": "Phases 16-17: receipts and the engineer-first page",
+    "csia_evidence_assurance/assure_prime1.py": "the prime1 assure path (support first; withheld or full)",
+    "csia_evidence_assurance/engagement.py": "Phase 27: the local engagement workflow",
+    "csia_evidence_assurance/__main__.py": "assure --release {prime1,prime}; the engagement subcommand",
+    "csia_evidence_assurance/assure_cli.py": "csia-assure forwards the engagement subcommand",
+    "pyproject.toml": "D-PRIME-3: package data covers every product JSON file; the support contract",
+}
 HISTORICAL = ("research/csia_2_3_stock_bridge", "research/csia_2_2_offboard_pilot",
               "research/csia_2_2_evidence_assurance", "research/rb001_reality_bridge",
               "research/csia_prime",
@@ -118,6 +141,34 @@ def prime_e_artifacts() -> dict:
     return {n: (C.PRIME / n).exists() for n in need}
 
 
+def _rec(name: str) -> dict:
+    p = C.HERE / name
+    return json.loads(p.read_text()) if p.exists() else {}
+
+
+def gates(out: dict) -> dict:
+    """PRIME-1 Phase 40, read from the measured artifacts (none is asserted here)."""
+    hist, fresh = _rec("HISTORICAL_GATE.json"), _rec("FRESH_INSTALL_PRIME1.json")
+    held, bundle, real = _rec("HELDOUT_RESULTS.json"), _rec("PILOT_BUNDLE_PRIME1.json"), _rec("REAL_DATA_READY_CHECK.json")
+    p1 = (not out["d_prime_1_prime1"]["reproduces"] and not out["d_prime_2_prime1"]["reproduces"]
+          and out["defects_reproduce_on_historical_path"] and bool(hist.get("HISTORICAL_UNCHANGED"))
+          and bool(fresh.get("identical_to_repository")) and bool(fresh.get("no_repository_dependency")))
+    verdict = (held.get("verdict") or {}).get("verdict")
+    return {
+        "P1_KNOWN_DEFECTS_CLOSED": {"met": p1, "evidence": "D-PRIME-1/2 gone on prime1 and still reproduced on "
+                                    "2.3; HISTORICAL_GATE.json; D-PRIME-3: FRESH_INSTALL_PRIME1.json"},
+        "P2_EVENT_DISCOVERY_COMMERCIALLY_USABLE": {"met": verdict == "PROMOTE", "heldout_verdict": verdict,
+                                                   "scope": "EVENT DISCOVERY PROMOTION IS SIMULATION-ONLY"},
+        "P3_EXTERNAL_PILOT_PACKAGE_READY": {"met": bool(bundle.get("zero_known_leaks")) and bool(bundle.get(
+            "all_exit_zero")) and bool(fresh.get("identical_to_repository")),
+            "evidence": "PILOT_BUNDLE_PRIME1.json, BLINDNESS_AUDIT.json, FRESH_INSTALL_PRIME1.json"},
+        "P4_REAL_DATA_READY": {"met": bool(real.get("REAL_DATA_READY")), "evidence": "REAL_DATA_READY_CHECK.json",
+                               "not_shown": real.get("not_shown_here")},
+        "P5_PHYSICAL_VALIDATION": {"met": False, "why": "no physical propulsion evidence exists; nothing is "
+                                   "PHYSICAL_VALIDATED (support contract)"},
+    }
+
+
 def main():
     final = "--final" in sys.argv
     hist_release = "prime" if final else None
@@ -129,7 +180,7 @@ def main():
                                 cwd=C.REPO).returncode == 0
     out["ancestry"] = dict(VP.ancestry(), **anc)
     changed = set(C.git("diff", "--name-only", C.PRIME_HEAD, "--",
-                        "csia_evidence_assurance", "csia_semantic_core", "csia").split())
+                        "csia_evidence_assurance", "csia_semantic_core", "csia", "pyproject.toml").split())
     out["product_files_changed_since_prime"] = {f: PRIME1_CHANGES.get(f, "UNDOCUMENTED") for f in sorted(changed)}
     product_ok = (not changed) or (final and changed <= set(PRIME1_CHANGES))
     out["historical_results_changed_since_prime"] = VP.unchanged(C.PRIME_HEAD, *HISTORICAL)
@@ -169,6 +220,11 @@ def main():
           and out["prime_bundle"].get("present") and not out["prime_bundle"]["mismatched"]
           and all(out["prime_e_artifacts"].values()))
     out["defects_reproduce_on_historical_path"] = reproduced
+    if final:
+        out["d_prime_1_prime1"] = RX.d_prime_1("prime1")
+        out["d_prime_2_prime1"] = RX.d_prime_2("prime1")
+        out["gates"] = gates(out)
+        ok = ok and not out["d_prime_1_prime1"]["reproduces"] and not out["d_prime_2_prime1"]["reproduces"]
     if not reproduced:
         out["decision"] = "PRIME1_BASELINE_MISMATCH"
     out["FINAL_STATE_PRIME1_OK" if final else "BASELINE_PRIME1_LOCKED"] = ok and reproduced
