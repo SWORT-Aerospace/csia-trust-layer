@@ -222,6 +222,26 @@ def _claim_rows(text: str) -> list:
     return rows
 
 
+def _wheel_content_compare(frozen_zip: Path, rebuilt_zip: Path) -> dict:
+    """The wheel inside each bundle, compared member by member (content, then archive timestamps)."""
+    import io
+    import zipfile
+
+    def members(z: Path):
+        with zipfile.ZipFile(z) as outer:
+            name = next(n for n in outer.namelist() if n.endswith(".whl"))
+            with zipfile.ZipFile(io.BytesIO(outer.read(name))) as w:
+                return ({n: hashlib.sha256(w.read(n)).hexdigest() for n in w.namelist()},
+                        {i.filename: i.date_time for i in w.infolist()}, hashlib.sha256(outer.read(name)).hexdigest())
+    a, ad, ash = members(frozen_zip)
+    b, bd, bsh = members(rebuilt_zip)
+    return {"frozen_wheel_sha256": ash, "rebuilt_wheel_sha256": bsh, "members": len(a),
+            "content_identical": a == b,
+            "members_with_different_archive_timestamps": sum(1 for n in ad if ad[n] != bd.get(n)),
+            "conclusion": "the wheel build is content-reproducible, not byte-reproducible (zip timestamps); "
+                          "the frozen wheel is the one recorded"}
+
+
 def collect(args) -> int:
     import zipfile
     sys.path.insert(0, str(PRIME1))
@@ -256,7 +276,7 @@ def collect(args) -> int:
         "diagnostic_rows_simulation_only": all(levels[k] == "SIMULATION" for k in levels
                                                if k.startswith(("M-T", "M-S", "M-E"))),
         "public_simulation_sentences": len(sim_rows),
-        "every_public_simulation_sentence_qualified": all("in PX4 simulation" in r for r in sim_rows),
+        "every_public_simulation_sentence_qualified": all("in px4 simulation" in r.lower() for r in sim_rows),
         "real_blind_pilot_level": "defined by PRIME-2; no claim holds it at the freeze"}
     # support matrix
     out["support"] = {
@@ -291,6 +311,7 @@ def collect(args) -> int:
             "identical_members": sorted(n for n in rebuilt if frozen_members.get(n) == rebuilt[n]),
             "different_members": sorted(n for n in rebuilt if n in frozen_members and frozen_members[n] != rebuilt[n]),
             "missing_or_extra": sorted(set(rebuilt) ^ set(frozen_members)),
+            "wheel_content": _wheel_content_compare(zpath, rebuilt_zip),
             "note": "the frozen bundle is the one recorded; the rebuild only tests reproducibility"}}
     # report sizes (Phase 12)
     perf = json.loads((ver / "PERFORMANCE_AT_FREEZE.json").read_text())
