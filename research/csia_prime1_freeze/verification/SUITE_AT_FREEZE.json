@@ -1,0 +1,29 @@
+{
+ "command": ".venv/bin/python -m pytest -o addopts='' -q -rfEX -p no:cacheprovider",
+ "duration_s": 708.35,
+ "errors": 0,
+ "expected_failures": 2,
+ "expected_failures_are": [
+  "tests/test_csia_prime.py: strict pin of D-PRIME-1 on the historical release 2.3",
+  "tests/test_csia_prime.py: strict pin of D-PRIME-2 on the historical release 2.3"
+ ],
+ "failed": 1,
+ "failed_test": "tests/test_post_e1_hardening_round2.py::test_the_build_provenance_describes_this_checkout",
+ "failure_classification": "procedural, not a product defect: the build-provenance record named a commit outside the last 3 after the freeze-tooling commits. Resolved by the repository's documented provenance refresh (data record, no code change); the test then passed (27 passed in its file). The final audit re-runs the suite at the freeze commit",
+ "label": "PRIME-1 freeze: full test suite at the freeze (Phase 3)",
+ "passed": 4759,
+ "provenance_gate": {
+  "blocking_guards": "PASS",
+  "frozen_core": "PASS (frozen core identical to the freeze)",
+  "sealed_manifests": {
+   "research/consequence/phase32/SHA256_MANIFEST32.json": "ok (23 files)",
+   "research/phase4/SHA256_MANIFEST4.json": "ok (19 files)",
+   "research/phase5/SHA256_MANIFEST5.json": "ok (30 files)"
+  },
+  "suite": "PASS (the only failure is the node the refresh resolves)"
+ },
+ "run_at_head": "7ec0a56 (freeze tooling commits on top of 39f6fcf; no product file differs)",
+ "skipped": 41,
+ "skips": "environment-dependent tests (e.g. the sitl marker for a live simulator binary); PRIME-1 adds no skipped test",
+ "unexpected_passes": 0
+}

@@ -79,6 +79,8 @@ AUTHORITATIVE = (
     "research/physical_validation/FAILURE_LEDGER.yaml",
     "research/csia_prime/FINAL_STATE_PRIME.json",
     "research/csia_prime/PILOT_BUNDLE.json",
+    "research/csia_prime1_freeze/PRIME1_FREEZE_README.md",
+    "research/csia_prime1_freeze/verify_prime1_freeze.py",
 )
 #: Directories whose every tracked file is frozen with its hash.
 AUTHORITATIVE_DIRS = ("research/csia_prime1/pilot_package", "research/csia_prime1/pilot_package_experimenter",

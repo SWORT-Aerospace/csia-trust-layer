@@ -30,7 +30,7 @@ validation boundary is PRIME-1. Every hash is in
 | claim set | `research/csia_prime1/CLAIM_EVIDENCE_MATRIX_PRIME1.md`, `PUBLIC_CLAIMS.md` |
 | support matrix | `csia_evidence_assurance/support_contract_prime1.json` (rendered: `research/csia_prime1/SUPPORT_MATRIX.md`) |
 | decision | `research/csia_prime1/PRIME1_REVIEW_AND_DECISION.md`, `FINAL_STATE_PRIME1.json` |
-| test state | TEST_STATE |
+| test state | full suite at the freeze: 4,759 passed, 41 skipped, 2 expected failures (PRIME's strict pins of D-PRIME-1 and D-PRIME-2 on the historical release), 1 procedural failure (the build-provenance record went stale after the freeze-tooling commits; refreshed, no code change). `verification/SUITE_AT_FREEZE.json` |
 | freeze-time verification | `verification/` (re-measured at the freeze; PRIME-1's own records are unchanged) |
 
 **Why:** the decision was accepted. Results from future real data must be
