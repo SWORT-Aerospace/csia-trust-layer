@@ -31,9 +31,13 @@ plus:
 - `batch_metrics.json`: time and peak memory, the only non-deterministic
   file.
 
-`assure` (CSIA PRIME, the commercial path) writes everything `analyze`
-writes, byte for byte, plus the assurance view (`assurance_view.py`,
-`support.py`):
+`assure` (the commercial path) runs CSIA Flight Assurance PRIME-1 by default
+(`--release prime1`, `assure_prime1.py`): the support decision first
+(`support_prime1.py`), then the release-prime1 analysis and its first page and
+receipts (`view_prime1.py`); outside the supported boundary no diagnostic
+interpretation is made. `--release prime` is the historical PRIME path, which
+writes everything `analyze` writes, byte for byte, plus PRIME's assurance view
+(`assurance_view.py`, `support.py`):
 - `assurance_summary.txt`: the first page, answering the engineer's
   questions in order, with no confidence figures;
 - `receipts.json`: one receipt per conclusion (supporting, refuting and
@@ -142,6 +146,8 @@ def _row(name, out: Path) -> dict:
 
 
 def cmd_assure(a) -> int:
+    if getattr(a, "release", "prime") == "prime1":
+        return cmd_assure_prime1(a)
     from . import assurance_view as AV
     from . import support as SP
     tick = a.tick if a.tick is not None else runs.STOCK_TICK_S
@@ -159,6 +165,41 @@ def cmd_assure(a) -> int:
     print(f"\nwrote {out}/: report.json, report.txt, manifest.json, assurance_summary.txt, "
           "receipts.json, coverage_states.json, support.json, alerts.json")
     return 0
+
+
+def cmd_assure_prime1(a) -> int:
+    from . import assure_prime1 as A1
+    tick = a.tick if a.tick is not None else runs.STOCK_TICK_S
+    out = Path(a.out or f"csia_assurance_{Path(a.input).stem}")
+    r = A1.run(Path(a.input), out, tick)
+    sys.stdout.write(r["summary_text"])
+    print(f"\nwrote {out}/: " + ", ".join(r["files"]))
+    return 0
+
+
+def cmd_engagement(a) -> int:
+    from . import engagement as EN
+    try:
+        if a.action == "init":
+            r = EN.init(a.dir, a.label or Path(a.dir).name, a.mode)
+        elif a.action == "ingest":
+            intake = json.loads(Path(a.intake).read_text()) if a.intake else None
+            r = [EN.ingest(a.dir, f, intake) for f in a.files]
+        elif a.action == "run":
+            r = EN.run(a.dir, a.tick if a.tick is not None else runs.STOCK_TICK_S)
+        elif a.action == "seal":
+            r = EN.seal(a.dir)
+        elif a.action == "reveal":
+            if len(a.files) != 1:
+                raise EN.EngagementError("reveal takes exactly one diagnosis file")
+            r = EN.reveal(a.dir, a.files[0])
+        else:
+            r = EN.verify(a.dir)
+    except EN.EngagementError as exc:
+        print(f"engagement: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(r, indent=1, sort_keys=True)[:4000])
+    return 0 if not (isinstance(r, dict) and r.get("ok") is False) else 1
 
 
 def cmd_analyze_many(a) -> int:
@@ -240,6 +281,18 @@ def main(argv=None) -> int:
     s.add_argument("input")
     s.add_argument("--out")
     s.add_argument("--tick", type=float, default=None)
+    s.add_argument("--release", choices=("prime1", "prime"), default="prime1",
+                   help="prime1 (default): CSIA Flight Assurance PRIME-1. prime: the historical PRIME "
+                        "path (2.3 analysis, PRIME view), byte-identical to PRIME's outputs")
+    s = sub.add_parser("engagement", help="a local, offline pilot engagement: init, ingest, run, seal, "
+                                          "reveal, verify (engagement.py)")
+    s.add_argument("action", choices=("init", "ingest", "run", "seal", "reveal", "verify"))
+    s.add_argument("dir")
+    s.add_argument("files", nargs="*")
+    s.add_argument("--label")
+    s.add_argument("--mode", choices=("blind", "non-blind"), default="blind")
+    s.add_argument("--intake", help="a JSON file of intake fields for the logs being ingested")
+    s.add_argument("--tick", type=float, default=None)
     s = sub.add_parser("analyze-many", help="a directory of logs, or a file of inputs")
     s.add_argument("inputs")
     s.add_argument("--out", required=True)
@@ -267,6 +320,8 @@ def main(argv=None) -> int:
         return cmd_analyze_many(a)
     if a.kind == "assure":
         return cmd_assure(a)
+    if a.kind == "engagement":
+        return cmd_engagement(a)
     if a.kind == "scenario":
         run = runs.v2_scenario(a.name)
     elif a.kind == "cusum":

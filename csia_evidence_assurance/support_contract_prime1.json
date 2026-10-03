@@ -1,0 +1,117 @@
+{
+ "schema": "csia.support_contract/1",
+ "contract_version": "prime1-r1",
+ "label": "CSIA Flight Assurance PRIME-1: what the Analyzer supports, as a product contract. Every entry names its validation level and evidence. No entry is PHYSICAL_VALIDATED: no physical evidence exists yet. Do not claim generic PX4 support.",
+ "validation_levels": {
+  "SIMULATION": "shown in PX4 software-in-the-loop simulation (SIH quadrotor) only",
+  "HIL": "shown in hardware-in-the-loop simulation (none yet)",
+  "REAL_LOG_CONTEXT_ONLY": "real logs are read and their coverage stated; no diagnostic conclusion has been checked against real truth",
+  "PHYSICAL_VALIDATED": "a diagnostic conclusion checked against independent physical truth (none yet)"
+ },
+ "product_boundary": {
+  "kind": "offboard analysis of PX4 ULogs (SITL, HIL, flight test, incident replay)",
+  "not": ["onboard use", "control authority", "automatic recovery", "FORGE", "flight-critical decisions", "flight-safety approval"]
+ },
+ "states": {
+  "SUPPORTED": "vehicle, PX4 version, schema, topics and logging all inside a supported configuration",
+  "PARTIAL": "the analysis runs; some evidence is missing, refused or untested for this configuration (each reason listed)",
+  "UNKNOWN_VERSION": "the log does not say which PX4 version produced it; the analysis runs with every conclusion qualified",
+  "UNSUPPORTED_SCHEMA": "the log cannot be read as a PX4 ULog with the topics any analysis needs; only log integrity is reported",
+  "UNSUPPORTED_VEHICLE_CONFIGURATION": "the vehicle is outside every profile; no diagnostic interpretation is made; only generic analysis is reported"
+ },
+ "configurations": [
+  {
+   "id": "quadx-allocation-esc",
+   "state": "SUPPORTED",
+   "vehicle": "multirotor quadrotor, X configuration (vehicle_status.vehicle_type 1, CA_ROTOR_COUNT 4, not VTOL)",
+   "profile": "multirotor-quad r1",
+   "px4": {"tested_full_analysis": ["547e2ca (SITL, SIH)"], "other_versions": "analysed; state PARTIAL (version untested)"},
+   "required_topics": ["actuator_motors", "esc_status (esc_rpm)", "control_allocator_status", "vehicle_angular_velocity", "vehicle_status", "vehicle_land_detected"],
+   "optional_topics": {"battery_status": "battery context; current needed for power records", "failure_detector_status": "PX4 failure-detector triggers", "estimator_status": "EKF2 evidence and configuration epochs"},
+   "minimum_rates": {"actuator_motors_max_gap_ms": 300, "esc_status_max_gap_ms": 300, "control_allocator_status_max_gap_ms": 600, "vehicle_angular_velocity_max_gap_ms": 60, "note": "3 x PX4 547e2ca's default logging interval; propulsion topics at >= 5 Hz kept every confirmation in PRIME's stress envelope (SITL)"},
+   "conditions_checked_per_log": {"gyro_bias_at_rest_rad_s_max": 0.05, "logger_dropouts": 0},
+   "producers": ["px4:esc.telemetry_response (csia-prime1-stock-tel-r1)", "px4:allocator.compensation", "px4:vehicle.rate_transient", "px4:allocator.status", "px4:battery.status", "px4:ekf2.estimator_status"],
+   "hypotheses": ["COMMAND_NO_RESPONSE per motor: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable, SENSOR/response_sensor"],
+   "validation_level": "SIMULATION",
+   "evidence": "2.3 validation flights V1-V13; RB-001 flights; XSYS-001; PRIME-1 held-out evaluation (research/csia_prime1/)"
+  },
+  {
+   "id": "quadx-no-esc-telemetry",
+   "state": "PARTIAL",
+   "vehicle": "as quadx-allocation-esc, without ESC RPM telemetry",
+   "effect": "no propulsion evidence and no propulsion event discovery; PX4 monitor events, battery and EKF2 context only",
+   "validation_level": "SIMULATION",
+   "evidence": "2.3 synthetic esc=False logs; PRIME support check"
+  },
+  {
+   "id": "quadx-pre-allocation",
+   "state": "PARTIAL",
+   "vehicle": "quad X on PX4 before control allocation (actuator_controls_0 / actuator_outputs only)",
+   "effect": "no propulsion evidence; PX4 monitor events and battery context only",
+   "validation_level": "REAL_LOG_CONTEXT_ONLY",
+   "evidence": "RB-001 RB0 (real boards); PRIME RR-11 (RflyMAD's real-flight topic descriptor)"
+  },
+  {
+   "id": "other-multirotor",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "vehicle": "hexa-, octo-, tri- or coaxial multirotor (CA_ROTOR_COUNT != 4)",
+   "validation_level": "SIMULATION",
+   "evidence": "profile r1 is a quadrotor"
+  },
+  {
+   "id": "fixed-wing",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "vehicle": "fixed wing (vehicle_type 2)",
+   "validation_level": "REAL_LOG_CONTEXT_ONLY",
+   "evidence": "no profile"
+  },
+  {
+   "id": "vtol",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "vehicle": "VTOL (is_vtol, airframes 13000-13999)",
+   "validation_level": "REAL_LOG_CONTEXT_ONLY",
+   "evidence": "real CubeOrange VTOL log (pyulog sample_log_small)"
+  },
+  {
+   "id": "rover-boat",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "vehicle": "rover or boat (vehicle_type 3; airframes 50000-59999)",
+   "validation_level": "REAL_LOG_CONTEXT_ONLY",
+   "evidence": "real FMUv5 boat log (PX4 documentation sample); PRIME RR-09"
+  },
+  {
+   "id": "not-ulog",
+   "state": "UNSUPPORTED_SCHEMA",
+   "vehicle": "any log that is not a PX4 ULog (e.g. ArduPilot .bin, .tlog)",
+   "validation_level": "REAL_LOG_CONTEXT_ONLY",
+   "evidence": "pyulog cannot parse it"
+  }
+ ],
+ "generic_analysis_when_withheld": [
+  "log integrity: topics present, logging gaps, logger dropouts",
+  "PX4's own warnings, failsafes and failure-detector flags, as a timeline (re-raised identical conditions grouped)",
+  "PX4 version, hardware and airframe as recorded"
+ ],
+ "telemetry_classes": {
+  "rpm_shortfall": {"supported": "discovered (RPM_DEFICIT_EVENT) and reported as telemetry evidence; never a motor fault on its own", "validation_level": "SIMULATION"},
+  "rpm_excess": {"supported": "discovered (RPM_EXCESS_EVENT) and reported as telemetry evidence (PRIME-1; D-PRIME-2)", "validation_level": "SIMULATION"},
+  "esc_offline": {"supported": "discovered (ESC_OFFLINE_EVENT); telemetry UNAVAILABLE, never read as a deficit", "validation_level": "SIMULATION"},
+  "log_dropout": {"supported": "evidence over the gap refused; support PARTIAL", "validation_level": "SIMULATION"},
+  "stuck_value": {"supported": "NOT discovered in steady hover (no change to see); see the telemetry matrix", "validation_level": "SIMULATION"},
+  "static_offset_or_slow_drift": {"supported": "NOT discovered as a change; a gross static inconsistency with the other rotors is stated as a coverage notice", "validation_level": "SIMULATION"},
+  "matched_physical_vs_telemetry_discrimination": {"supported": "in simulation only; physical test designed, not run", "validation_level": "SIMULATION"}
+ },
+ "known_blind_spots": [
+  "losses during continuous maneuvering are discovered but not confirmed (the compensation witness needs steady flight)",
+  "ESC current not logged by stock PX4: drive-without-current and stall cannot be separated",
+  "battery current often not logged: the power path cannot be eliminated",
+  "a propeller loss that leaves RPM unchanged has only the compensation witness",
+  "compute and timing faults, command-delivery faults",
+  "a compensation change between two steady holds at different headings is not an event, but its evidence is not yet refused (candidate validity condition)",
+  "every threshold is SITL-calibrated (SIH has almost no noise); real vehicles need their own nominal calibration"
+ ],
+ "known_defects": [
+  {"id": "D-PRIME-1", "affected": "release 2.3 (historical)", "fixed_in": "prime1", "summary": "sub-microsecond time representation changed admissibility decisions"},
+  {"id": "D-PRIME-2", "affected": "release 2.3 (historical)", "fixed_in": "prime1", "summary": "an RPM excess opened no event; a late event read a corrupted reference as NOMINAL"}
+ ]
+}

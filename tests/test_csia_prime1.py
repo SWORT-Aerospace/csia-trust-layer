@@ -245,3 +245,137 @@ def test_the_releases_are_distinguishable_in_every_report():
     assert s["inputs"]["release"] == "prime1" and s["inputs"]["time_resolution_s"] == 1e-6
     assert s["contracts"]["px4:esc.telemetry_response"]["producer_version"] == "csia-prime1-stock-tel-r1"
     assert s["contracts"]["px4:allocator.compensation"]["producer_version"] == "csia-2.3-stock-r1"
+
+
+# ------------------------------------------------------------------ Phases 13-15: support before interpretation
+from csia_evidence_assurance import engagement as EN  # noqa: E402
+from csia_evidence_assurance import support_prime1 as SP1  # noqa: E402
+from csia_evidence_assurance import view_prime1 as V1  # noqa: E402
+
+QUAD = {"readable": True, "hardware": "PX4_SITL", "px4_git": "547e2caa98", "px4_release": None,
+        "sys_autostart": 10040, "ca_rotor_count": 4, "vehicle_type": 1, "is_vtol": False,
+        "topics": sorted(SP1.PROPULSION_TOPICS + ("battery_status",)), "intervals": {},
+        "esc_rpm_present": True, "dropouts": 0, "gyro_mean_while_landed_rad_s": [0.0, 0.0, 0.0]}
+
+
+@pytest.mark.parametrize("change,state", [
+    ({}, "SUPPORTED"),
+    ({"vehicle_type": 3, "sys_autostart": 50005, "ca_rotor_count": None}, "UNSUPPORTED_VEHICLE_CONFIGURATION"),
+    ({"vehicle_type": 2}, "UNSUPPORTED_VEHICLE_CONFIGURATION"),
+    ({"is_vtol": True, "sys_autostart": 13014}, "UNSUPPORTED_VEHICLE_CONFIGURATION"),
+    ({"ca_rotor_count": 6}, "UNSUPPORTED_VEHICLE_CONFIGURATION"),
+    ({"topics": ["battery_status"]}, "UNSUPPORTED_SCHEMA"),
+    ({"px4_git": "fd483321a5"}, "UNKNOWN_VERSION"),
+    ({"px4_git": "cb09dde606", "px4_release": "v1.15.0-dev"}, "PARTIAL"),
+    ({"ca_rotor_count": None}, "PARTIAL"),
+    ({"esc_rpm_present": False}, "PARTIAL"),
+    ({"gyro_mean_while_landed_rad_s": [0.0, 0.0, 0.067]}, "PARTIAL"),
+    ({"dropouts": 2}, "PARTIAL"),
+])
+def test_support_states_are_decided_before_interpretation(change, state):
+    r = SP1.check(dict(QUAD, **change))
+    assert r["status"] == state
+    assert r["interpretation"] == ("WITHHELD" if state in ("UNSUPPORTED_VEHICLE_CONFIGURATION",
+                                                           "UNSUPPORTED_SCHEMA") else "FULL")
+
+
+def test_an_unsupported_vehicle_is_described_not_called_broken():
+    r = SP1.check(dict(QUAD, vehicle_type=3, sys_autostart=50005, ca_rotor_count=None))
+    v = r["vehicle"]
+    assert v["detected"] == "rover or boat" and v["requested_profile"] == "multirotor-quad r1"
+    assert v["supported_vehicle_classes"] and r["generic_analysis_safe"]
+    text = V1.generic_text("boat.ulg", r, {"log_integrity": {}, "alerts": []})
+    assert "INTERPRETATION WITHHELD" in text and "not judged broken" in text
+    assert "COMMAND_NO_RESPONSE" not in text
+
+
+def test_an_unreadable_file_is_an_unsupported_schema_not_a_crash(tmp_path):
+    f = tmp_path / "not_a_log.ulg"
+    f.write_bytes(b"this is not a ULog")
+    r = SP1.check(SP1.inspect(f))
+    assert r["status"] == "UNSUPPORTED_SCHEMA" and r["interpretation"] == "WITHHELD"
+
+
+def test_the_support_contract_claims_no_physical_validation_and_names_the_defects():
+    c = SP1.contract()
+    assert {x["validation_level"] for x in c["configurations"]} <= {"SIMULATION", "HIL", "REAL_LOG_CONTEXT_ONLY"}
+    assert all(v["validation_level"] != "PHYSICAL_VALIDATED" for v in c["telemetry_classes"].values())
+    assert {d["id"]: d["fixed_in"] for d in c["known_defects"]} == {"D-PRIME-1": "prime1", "D-PRIME-2": "prime1"}
+    for x in c["configurations"]:
+        assert x["state"] in c["states"] and x.get("evidence"), x["id"]
+
+
+# ------------------------------------------------------------------ Phases 16-17: receipts and first page
+RECEIPT_KEYS = {"type", "conclusion", "status", "supporting_evidence", "refuting_evidence", "rejected_evidence",
+                "rejection_reasons", "source_lineage", "independent_line_count", "producer_health",
+                "content_time_s", "configuration_epoch", "coverage", "would_resolve", "version"}
+SECTIONS = ("1. WHAT HAPPENED", "2. WHEN", "3. WHAT CSIA CAN JUSTIFY", "4. WHAT CSIA CANNOT JUSTIFY", "5. WHY",
+            "6. KEY EVIDENCE", "7. EVIDENCE REJECTED", "8. DEPENDENCY / SHARED SOURCES",
+            "9. MISSING INSTRUMENTATION", "10. NEXT ENGINEERING CHECK", "TECHNICAL DETAIL")
+
+
+@pytest.fixture(scope="module")
+def motor_view():
+    m = _report(synth("motor"), "prime1")
+    return m, V1.build(m, SP1.check(QUAD))
+
+
+def test_every_conclusion_has_a_complete_receipt(motor_view):
+    m, v = motor_view
+    kinds = [r["type"] for r in v["receipts"]]
+    assert "SYMPTOM" in kinds and "ATTRIBUTION" in kinds
+    for r in v["receipts"]:
+        assert RECEIPT_KEYS <= set(r), (r["type"], RECEIPT_KEYS - set(r))
+        assert r["version"]["release"] == "prime1" and r["version"]["view"] == V1.VIEW_VERSION
+    sym = next(r for r in v["receipts"] if r["type"] == "SYMPTOM")
+    assert sym["independent_line_count"] == 2 and sym["content_time_s"] and sym["coverage"]
+
+
+def test_the_first_page_keeps_the_engineers_order_and_no_confidence_figures(motor_view):
+    _m, v = motor_view
+    t = v["summary_text"]
+    pos = [t.index(s) for s in SECTIONS]
+    assert pos == sorted(pos)
+    low = t.lower()
+    assert "%" not in t and not any(w in low for w in ("probab", "confiden", "likel"))
+    assert "COMMAND_NO_RESPONSE on motor_0: AMBIGUOUS" in t
+
+
+def test_the_view_and_receipts_are_deterministic():
+    m1 = _report(synth("motor"), "prime1")
+    m2 = _report(synth("motor"), "prime1")
+    a, b = V1.build(m1, SP1.check(QUAD)), V1.build(m2, SP1.check(QUAD))
+    assert RP.dumps(a["receipts"]) == RP.dumps(b["receipts"]) and a["summary_text"] == b["summary_text"]
+
+
+# ------------------------------------------------------------------ Phase 27: the engagement workflow
+def test_the_engagement_enforces_the_blind_protocol(tmp_path):
+    d = tmp_path / "eng"
+    EN.init(d, "T", "blind")
+    assert (d / ".gitignore").read_text().strip().endswith("*")
+    f = tmp_path / "flight.ulg"
+    f.write_bytes(b"not a real log: analysed as UNSUPPORTED_SCHEMA")
+    with pytest.raises(EN.EngagementError):
+        EN.ingest(d, f, {"expected_event_time_s": 50.0})
+    r = EN.ingest(d, f, {"esc_telemetry": "yes"})
+    assert r["sha256"] == EN._sha(f)
+    diag = tmp_path / "diag.json"
+    diag.write_text('{"flight.ulg": "truth"}')
+    with pytest.raises(EN.EngagementError):
+        EN.reveal(d, diag)
+    runs_ = EN.run(d)
+    assert runs_["runs"]["flight.ulg"]["interpretation"] == "WITHHELD"
+    s = EN.seal(d)
+    with pytest.raises(EN.EngagementError):
+        EN.run(d)
+    assert EN.reveal(d, diag)["after_seal_sha256"] == s["seal_sha256"]
+    assert EN.verify(d)["ok"]
+    out = d / "derived/flight/assurance_summary.txt"
+    out.chmod(0o644)
+    out.write_text(out.read_text() + "tampered\n")
+    assert not EN.verify(d)["ok"]
+
+
+def test_customer_logs_are_ignored_by_git():
+    gi = (REPO / ".gitignore").read_text()
+    assert "*.ulg" in gi and "engagements/" in gi and "customer_data/" in gi
