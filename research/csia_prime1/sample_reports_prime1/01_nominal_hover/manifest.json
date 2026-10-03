@@ -1,0 +1,81 @@
+{
+ "analysis_config": {
+  "configuration": "stock producers and PX4 monitors",
+  "events_source": "discovered",
+  "input": "01_nominal_hover.ulg",
+  "kind": "px4_ulog_stock",
+  "path": "stock",
+  "rates": "PX4 547e2ca default logging intervals",
+  "release": "prime1",
+  "support_contract": "prime1-r1",
+  "tick_s": 1.0,
+  "time_resolution_s": 1e-06,
+  "view": "prime1-view-2"
+ },
+ "analyzer_version": "2.2.1",
+ "code": {
+  "csia_evidence_assurance": "4228ecc7cec934defebdc40b813297ae97a8bc5f0711b3bd02e3acb212ff4c53",
+  "csia_semantic_core": "949e6dc8aa46b912a23348904c965329072625f5fedd8fe9f38e8b1b0e436862"
+ },
+ "inputs": [
+  {
+   "file": "01_nominal_hover.ulg",
+   "sha256": "e5b59abdd28d9f4a8ac14eeafaf39cf405c8c49a17cf524b46ee330b085280a4"
+  },
+  {
+   "name": "calibration",
+   "sha256": "7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e"
+  }
+ ],
+ "outputs_sha256": {
+  "alerts.json": "50b6b7a241abcc7038c303fef9a8667687202e7ec1b9d1632600528627adccd5",
+  "assurance_summary.txt": "5655f2323a5ad21005e3de137d2c161dc881dd1e6558192a9242006ea56293eb",
+  "coverage_states.json": "5756e083ba701667cbc786ceb06bcce92dc67c54720187c3081498aa0ab86d4b",
+  "receipts.json": "3342da42652253c0d207cef2bb52b22349c2415333dcd30b4ddaf9b31e335a99",
+  "report.txt": "8eb3319128c6fc21e6f038da46ea632f42e6f348c436a18d05540d0b507d70f2",
+  "support.json": "fae801addfc494970cbf48d168eaae8230a2ec3db4fe2fa300137fc9058d0af2"
+ },
+ "producers": {
+  "px4:allocator.compensation": {
+   "contract_version": "stock-1",
+   "digest": "1d23d371c23413ef27a5063379e568942e509a91ddbd2392501d009f3f792fc0",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:allocator.status": {
+   "contract_version": "stock-1",
+   "digest": "1ffb93776005afb0d36b0f0010830564f30a0bf5a22df90d72f23033cbf5896b",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:battery.status": {
+   "contract_version": "stock-1",
+   "digest": "b116a633e084cb20df1432b0ddc8bd9778086232cdd7506cd01184a1ed75455c",
+   "producer_version": "csia-2.3-stock-r1"
+  },
+  "px4:ekf2.estimator_status": {
+   "contract_version": "px4-ekf2-status-2",
+   "digest": "c73a23cb8c4ca9f5b1ff8980195ef0c4c4eae64fc46b401f17a88a83fcc1f91b",
+   "producer_version": "547e2ca"
+  },
+  "px4:esc.telemetry_response": {
+   "contract_version": "stock-tel-2",
+   "digest": "4eb885d6a6a61acda545d0c53a2a5497cc82749cb7aa60306d5b92806c9a2ce3",
+   "producer_version": "csia-prime1-stock-tel-r1"
+  },
+  "px4:vehicle.rate_transient": {
+   "contract_version": "stock-1",
+   "digest": "e4a56b90505b148748118c4d4c8117607eb828756916176c6317e305a6aa5fb8",
+   "producer_version": "csia-2.3-stock-r1"
+  }
+ },
+ "profile": {
+  "base_profile": "csia_evidence_assurance/profiles/multirotor_quad.py",
+  "digest": "c701b72aee1f3be1a334505c52df355796614ac83376f883c396cdc265e64171",
+  "gate": "ACCEPTED",
+  "name": "multirotor-quad",
+  "version": "r1"
+ },
+ "report_schema": "csia.flight_assurance_report/4",
+ "report_sha256": "81bfc8c0bdbaaa69efac7a84baaf44566b0a695f55aedbc8681fd072aa7f8943",
+ "schema": "csia.analysis_manifest/1",
+ "semantic_version": "2.1.1"
+}

@@ -1,0 +1,54 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 05_maneuvering_loss.ulg   release prime1, analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime1-view-2, support contract prime1-r1
+SUPPORT: SUPPORTED (configuration quadx-allocation-esc; validation level SIMULATION)
+
+1. WHAT HAPPENED
+  - observed, not confirmed: motor_2's ESC reports LESS rotor speed than commanded, against the other rotors (telemetry deficit, L = 0.3986); 57.9 x its threshold
+  - observed, not confirmed: the vehicle rotated toward motor_2's side at the event (0.1577 rad/s); 5.47 x its threshold
+  - observed, not confirmed: the vehicle rotated toward motor_0's side at the event (0.04147 rad/s); 1.44 x its threshold
+  - observed, not confirmed: motor_1's ESC reports MORE rotor speed than commanded, against the other rotors (telemetry excess, L = -0.008545); 1.24 x its threshold
+  - observed, not confirmed: motor_3's ESC reports MORE rotor speed than commanded, against the other rotors (telemetry excess, L = -0.0073); 1.06 x its threshold
+  - observed, not confirmed: COMPUTE/control_allocator:allocation.authority: DEGRADED 0.6 fraction of window samples not achieved or saturated
+2. WHEN
+  - E1 at 76.60 s: RPM_DEFICIT_EVENT on motor_2 (ESC-reported rotor speed dropped below its recent level)
+  - E2 at 86.87 s: px4.allocation_not_achieved
+3. WHAT CSIA CAN JUSTIFY
+  - motor_2's ESC telemetry changed at an event (a telemetry observation, not a motor fault)
+  - motor_1's ESC telemetry changed at an event (a telemetry observation, not a motor fault)
+  - motor_3's ESC telemetry changed at an event (a telemetry observation, not a motor fault)
+4. WHAT CSIA CANNOT JUSTIFY
+  - that ACTUATION/motor_2 has a fault: its observation was not confirmed by an independent witness
+  - that ACTUATION/motor_0 has a fault: its observation was not confirmed by an independent witness
+  - that ACTUATION/motor_1 has a fault: its observation was not confirmed by an independent witness
+  - that ACTUATION/motor_3 has a fault: its observation was not confirmed by an independent witness
+  - that COMPUTE/control_allocator has a fault: its observation was not confirmed by an independent witness
+  - anything about the 29 of 29 profile records with no admitted evidence (not observed, or observed without confirmation; silence is not health)
+5. WHY
+  - attribution NO_EVIDENCE: NOTHING_ADVERSE (no symptom was established: an unconfirmed observation is not a symptom)
+6. KEY EVIDENCE
+  - ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.04147 rad/s (threshold 0.02882; event + [0, 0.2] s; at 87.072 s)
+  - ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.008545 fraction of commanded thrust (threshold 0.00688; EARLY; at 78.604 s)
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3986 fraction of commanded thrust (threshold 0.00688; EARLY; at 78.604 s)
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.009488 fraction of commanded thrust (threshold 0.00688; EARLY; at 88.872 s)
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3986 fraction of commanded thrust (threshold 0.00688; AFTER; at 91.604 s)
+  - ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.1577 rad/s (threshold 0.02882; event + [0, 0.2] s; at 76.804 s)
+7. EVIDENCE REJECTED
+  - POWER/battery:power.source_health [px4:battery.status] 6 times from 76.672 s: BATTERY_CURRENT_NOT_MEASURED: battery current is not measured
+  - ACTUATION/motor_0:actuation.physical_response [px4:allocator.compensation] 2 times from 91.604 s: NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight
+  - ACTUATION/motor_1:actuation.physical_response [px4:allocator.compensation] 2 times from 91.604 s: NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight
+  - ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation] 2 times from 91.604 s: NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight
+  - ACTUATION/motor_3:actuation.physical_response [px4:allocator.compensation] 2 times from 91.604 s: NOT_STEADY_FLIGHT: vehicle maneuvering: the compensation statistic is valid only in near-steady flight
+8. DEPENDENCY / SHARED SOURCES
+  - 1 adverse output(s) amount to 1 independent line(s) of evidence (1 lineage group(s))
+9. MISSING INSTRUMENTATION
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+10. NEXT ENGINEERING CHECK
+  - verify motor_2's ESC telemetry (pole-count and scaling configuration, connector) against an independent tachometer before trusting its RPM
+  - verify motor_1's ESC telemetry (pole-count and scaling configuration, connector) against an independent tachometer before trusting its RPM
+  - verify motor_3's ESC telemetry (pole-count and scaling configuration, connector) against an independent tachometer before trusting its RPM
+
+TECHNICAL DETAIL
+  - coverage rows (record x producer) by class: OBSERVED 6, NO_ANOMALY 8, UNAVAILABLE 5, NO_COVERAGE 26
+  - alert 76.60-76.60 s propulsion.rpm_deficit (raised 1x)
+  - alert 86.87-86.87 s px4.allocation_not_achieved (raised 1x)

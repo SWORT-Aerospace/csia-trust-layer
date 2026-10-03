@@ -1,0 +1,293 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1
+input: 05_maneuvering_loss.ulg (stock producers and PX4 monitors; PX4 547e2ca default logging intervals)
+
+WHAT HAPPENED?
+  - E1 at 76.60 s: propulsion.rpm_deficit on motor(s) 2
+  - E2 at 86.87 s: px4.allocation_not_achieved
+
+WHEN?
+  - E1: onset estimate 76.604 s, first alarm 76.704 s, change complete 136.904 s
+  - E2: onset estimate 86.872 s, first alarm 87.672 s
+  - first abnormal output: 76.804 s (px4:vehicle.rate_transient)
+
+WHAT DID CSIA OBSERVE? (adverse outputs, with their magnitudes)
+  - ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.04147 rad/s (threshold 0.02882; window event + [0, 0.2] s)
+  - E1 ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.1577 rad/s (threshold 0.02882; window event + [0, 0.2] s; at 76.80 s, no longer held at the end)
+  - E1 ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.008545 fraction of commanded thrust (threshold 0.00688; window EARLY; at 78.60 s, no longer held at the end)
+  - E2 ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.009488 fraction of commanded thrust (threshold 0.00688; window EARLY; at 88.87 s, no longer held at the end)
+  - E2 ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.0073 fraction of commanded thrust (threshold 0.00688; window EARLY; at 88.87 s, no longer held at the end)
+  - E2 COMPUTE/control_allocator:allocation.authority [px4:allocator.status]: DEGRADED 0.6 fraction of window samples not achieved or saturated (threshold n/a; window EARLY; at 88.87 s, no longer held at the end)
+  - E1 ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3986 fraction of commanded thrust (threshold 0.00688; window AFTER; at 91.60 s, no longer held at the end)
+
+WHAT COULD CSIA NOT OBSERVE?
+  - 0 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - POWER/battery:power.source_health: BATTERY_CURRENT_NOT_MEASURED (from 76.67 s)
+  - ACTUATION/motor_0:actuation.physical_response: NOT_STEADY_FLIGHT (from 91.60 s)
+  - ACTUATION/motor_1:actuation.physical_response: NOT_STEADY_FLIGHT (from 91.60 s)
+  - ACTUATION/motor_2:actuation.physical_response: NOT_STEADY_FLIGHT (from 91.60 s)
+  - ACTUATION/motor_3:actuation.physical_response: NOT_STEADY_FLIGHT (from 91.60 s)
+
+WHAT EXPLANATIONS REMAIN?
+  nothing
+
+WHAT WAS ELIMINATED, AND WHY?
+  nothing
+
+WHICH MONITORS AGREED?
+  - px4:vehicle.rate_transient: ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]
+
+WERE THEY INDEPENDENT?
+  - 1 adverse outputs in 1 lineage group(s): 1 independent line(s)
+
+WHAT WOULD RESOLVE THE REMAINING AMBIGUITY?
+  nothing
+
+IS ATTRIBUTION JUSTIFIED?
+  - no: NO_EVIDENCE; NOTHING_ADVERSE
+
+========================================================================
+DETAIL
+
+EVENTS (discovered; a trigger says something may have started, not what failed)
+  E1: t0 76.604 s, first alarm 76.704 s
+    propulsion.rpm_deficit motor 2: onset 76.604 s, alarm 76.704 s, magnitude 0.175 (telemetry response deficit (fraction))
+  E2: t0 86.872 s, first alarm 87.672 s
+    px4.allocation_not_achieved: onset 86.872 s, alarm 87.672 s
+
+EVIDENCE VALUES (every stock output)
+  76.672s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  76.672s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  76.804s ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]: NOMINAL -0.0235 rad/s (threshold 0.02882; event + [0, 0.2] s)
+  76.804s ACTUATION/motor_1:vehicle.rate_transient [px4:vehicle.rate_transient]: NOMINAL 0.0235 rad/s (threshold 0.02882; event + [0, 0.2] s)
+  76.804s ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.1577 rad/s (threshold 0.02882; event + [0, 0.2] s) RATE_RESPONSE_ON_LOSS_AXIS
+  76.804s ACTUATION/motor_3:vehicle.rate_transient [px4:vehicle.rate_transient]: NOT_APPLICABLE -0.1577 rad/s (threshold 0.02882; event + [0, 0.2] s) RESPONSE_OPPOSITE_TO_LOSS_AXIS
+  78.272s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  78.272s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  78.604s COMPUTE/control_allocator:allocation.authority [px4:allocator.status]: NOMINAL 0 fraction of window samples not achieved or saturated (threshold n/a; EARLY)
+  78.604s ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -0.006813 fraction of commanded thrust (threshold 0.00688; EARLY)
+  78.604s ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.008545 fraction of commanded thrust (threshold 0.00688; EARLY) ESC_TELEMETRY_EXCESS
+  78.604s ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3986 fraction of commanded thrust (threshold 0.00688; EARLY) ESC_TELEMETRY_DEFICIT
+  78.604s ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL 0.001805 fraction of commanded thrust (threshold 0.00688; EARLY)
+  87.072s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  87.072s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  87.072s ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.04147 rad/s (threshold 0.02882; event + [0, 0.2] s) RATE_RESPONSE_ON_LOSS_AXIS
+  87.072s ACTUATION/motor_1:vehicle.rate_transient [px4:vehicle.rate_transient]: NOT_APPLICABLE -0.04147 rad/s (threshold 0.02882; event + [0, 0.2] s) RESPONSE_OPPOSITE_TO_LOSS_AXIS
+  87.072s ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]: NOMINAL 0.02484 rad/s (threshold 0.02882; event + [0, 0.2] s)
+  87.072s ACTUATION/motor_3:vehicle.rate_transient [px4:vehicle.rate_transient]: NOMINAL -0.02484 rad/s (threshold 0.02882; event + [0, 0.2] s)
+  88.872s COMPUTE/control_allocator:allocation.authority [px4:allocator.status]: DEGRADED 0.6 fraction of window samples not achieved or saturated (threshold n/a; EARLY) ALLOCATION_NOT_ACHIEVED
+  88.872s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  88.872s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  88.872s ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL 0.004593 fraction of commanded thrust (threshold 0.00688; EARLY)
+  88.872s ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL 0.003083 fraction of commanded thrust (threshold 0.00688; EARLY)
+  88.872s ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.009488 fraction of commanded thrust (threshold 0.00688; EARLY) ESC_TELEMETRY_EXCESS
+  88.872s ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.0073 fraction of commanded thrust (threshold 0.00688; EARLY) ESC_TELEMETRY_EXCESS
+  91.272s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  91.272s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  91.604s ACTUATION/motor_0:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE -0.003031 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  91.604s ACTUATION/motor_1:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE -0.007596 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  91.604s ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE 0.6647 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  91.604s ACTUATION/motor_3:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE -0.01953 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  91.604s COMPUTE/control_allocator:allocation.authority [px4:allocator.status]: NOMINAL 0.3 fraction of window samples not achieved or saturated (threshold n/a; AFTER)
+  91.604s ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -0.003236 fraction of commanded thrust (threshold 0.00688; AFTER)
+  91.604s ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -0.003892 fraction of commanded thrust (threshold 0.00688; AFTER)
+  91.604s ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3986 fraction of commanded thrust (threshold 0.00688; AFTER) ESC_TELEMETRY_DEFICIT
+  91.604s ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -0.00288 fraction of commanded thrust (threshold 0.00688; AFTER)
+  101.872s ACTUATION/motor_0:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE -0.01051 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  101.872s ACTUATION/motor_1:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE -0.002268 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  101.872s ACTUATION/motor_2:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE 0.000204 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  101.872s ACTUATION/motor_3:actuation.physical_response [px4:allocator.compensation]: UNAVAILABLE 0.005503 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER) NOT_STEADY_FLIGHT
+  101.872s COMPUTE/control_allocator:allocation.authority [px4:allocator.status]: NOMINAL 0 fraction of window samples not achieved or saturated (threshold n/a; AFTER)
+  101.872s POWER/battery:power.source_health [px4:battery.status]: UNAVAILABLE 15.3 V (threshold n/a; ) BATTERY_CURRENT_NOT_MEASURED
+  101.872s POWER/battery:power.battery_warning [px4:battery.status]: NOMINAL 15.3 V (threshold n/a; )
+  101.872s ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -0.001188 fraction of commanded thrust (threshold 0.00688; AFTER)
+  101.872s ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL 0.002506 fraction of commanded thrust (threshold 0.00688; AFTER)
+  101.872s ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL 0.00115 fraction of commanded thrust (threshold 0.00688; AFTER)
+  101.872s ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: NOMINAL -8.1e-05 fraction of commanded thrust (threshold 0.00688; AFTER)
+
+COVERAGE (0 of 29 profile records observed; unobserved is not healthy)
+  NOT OBSERVED ACTUATION/motor_0:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_0:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_0:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_0:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_1:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_1:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_1:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_1:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_2:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_2:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_2:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_2:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_3:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_3:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_3:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_3:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED COMPUTE/control_allocator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED COMPUTE/cpu:compute.resource_headroom: CPU headroom (cpuload exists, but nothing pairs it with a deadline; in SITL it measures the host)
+  NOT OBSERVED COMPUTE/state_estimator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED POWER/battery:power.cell_balance: cell balance (needs cell voltages)
+  NOT OBSERVED POWER/battery:power.droop_vs_current: voltage sag under load (needs measured current)
+  NOT OBSERVED POWER/battery:power.p_equals_vi: power balance P = V I (needs an independent power measurement)
+  NOT OBSERVED POWER/battery:power.source_health: battery voltage and current both present (v2: current must be measured)
+  topic battery_status: fields that never vary: connected (constant), current_a (constant), faults (all_zero), warning (all_zero)
+  topic control_allocator_status: fields that never vary: handled_motor_failure_mask (all_zero), unallocated_thrust[0] (all_zero), unallocated_thrust[1] (all_zero)
+  topic esc_status: fields that never vary: esc[0].esc_current (all_zero), esc[0].esc_errorcount (all_zero), esc[0].esc_voltage (all_zero), esc[0].failures (all_zero), esc[1].esc_current (all_zero), esc[1].esc_errorcount (all_zero), esc[1].esc_voltage (all_zero), esc[1].failures (all_zero), esc[2].esc_current (all_zero), esc[2].esc_errorcount (all_zero), esc[2].esc_voltage (all_zero), esc[2].failures (all_zero), esc[3].esc_current (all_zero), esc[3].esc_errorcount (all_zero), esc[3].esc_voltage (all_zero), esc[3].failures (all_zero), esc_count (constant), esc_online_flags (constant)
+  topic failure_detector_status: fields that never vary: fd_alt (all_zero), fd_arm_escs (all_zero), fd_battery (all_zero), fd_ext (all_zero), fd_imbalanced_prop (all_zero), fd_motor (all_zero), fd_pitch (all_zero), fd_roll (all_zero), motor_failure_mask (all_zero)
+  topic vehicle_status: fields that never vary: failsafe (all_zero)
+
+DIAGNOSABILITY (with the evidence this log can supply)
+  OUTPUT_STALE: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+  COMMAND_NO_RESPONSE: cannot be raised (no observable record can raise it (reads actuation.electrical_response))
+  MULTIPLE_SENSORS_DEGRADED: cannot be raised (no observable record can raise it (reads v1_1.source_health))
+  POSITION_UNAVAILABLE: cannot be raised (no observable record can raise it (reads v1_1.function_eligibility))
+  VOLTAGE_RAIL_LOW: cannot be raised (no observable record can raise it (reads power.rail_tolerance))
+  PROCESS_OUTPUT_LATE: cannot be raised (no observable record can raise it (reads compute.deadline_met))
+  HIGH_CURRENT_LOW_RPM: cannot be raised (no observable record can raise it (reads actuation.mechanical_response))
+  OUTPUT_MISSING: cannot be raised (no observable record can raise it (reads compute.process_producing))
+  FUNCTION_DEADLINE_MISS: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+
+========================================================================
+
+INPUTS
+  calibration_sha256: 7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e
+  configuration: stock producers and PX4 monitors
+  event_discovery: {'compensation_alarms_outside_steadiness': 10, 'telemetry_alarms_on_inconsistent_reference': 0, 'test_harness_messages_ignored': 0, 'reraised_px4_conditions_merged': 3, 'mode': 'prime1', 'arms': ['COMPENSATION_CHANGE_EVENT', 'ESC_OFFLINE_EVENT', 'RPM_DEFICIT_EVENT', 'RPM_EXCESS_EVENT'], 'merge_s': 60.0, 'steady_windows': ['BEFORE', 'AFTER'], 'heading_tolerance_deg': 15.0}
+  events_source: discovered
+  kind: px4_ulog_stock
+  rates: PX4 547e2ca default logging intervals
+  release: prime1
+  tick_s: 1.0
+  time_resolution_s: 1e-06
+  ulog: {'file': '05_maneuvering_loss.ulg', 'sha256': 'dd7fa860512307b8c30e626fd862a59b9271fe84f18fd07eaf50c9af36440af6'}
+
+PROFILE  multirotor-quad (ACCEPTED)
+
+TIMELINE  147 ticks in 12 intervals
+  0.000s: no symptom; attribution NO_EVIDENCE; 0 used, 0 rejected; changed: start
+  1.000s: no symptom; attribution NO_EVIDENCE; 2 used, 4 rejected; changed: admissibility, epochs, producer_health
+  2.000s: no symptom; attribution NO_EVIDENCE; 2 used, 4 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 1 -> 3 (hgt aiding fused: GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags))
+      configuration: ekf2.reset.reset_count_pos_ne 2 -> 3 (EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3))
+      configuration: ekf2.reset.reset_count_vel_ne 1 -> 2 (EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2))
+  3.000s .. 25.000s (23 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: admissibility, epochs, producer_health
+      configuration: ekf2.aiding.hdg 0 -> 1 (hdg aiding fused: none -> magnetic heading (control_mode_flags))
+      configuration: ekf2.aiding.pos 0 -> 1 (pos aiding fused: none -> GNSS position (control_mode_flags))
+      configuration: ekf2.aiding.vel 0 -> 1 (vel aiding fused: none -> GNSS velocity (control_mode_flags))
+      configuration: ekf2.reset.reset_count_quat 0 -> 1 (EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1))
+  26.000s .. 28.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hdg 1 -> 2 (hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags))
+  29.000s .. 76.000s (48 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 3 -> 4 (hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags))
+  76.804s .. 78.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 10 used, 0 rejected; changed: abnormal, admissibility, producer_health
+  78.604s .. 87.000s (10 ticks): no symptom; attribution NO_EVIDENCE; 15 used, 0 rejected; changed: abnormal, admissibility, producer_health
+  87.072s .. 88.000s (2 ticks): no symptom; attribution NO_EVIDENCE; 10 used, 5 rejected; changed: abnormal, admissibility
+  88.872s .. 91.000s (4 ticks): no symptom; attribution NO_EVIDENCE; 15 used, 0 rejected; changed: abnormal, admissibility
+  91.604s .. 101.000s (11 ticks): no symptom; attribution NO_EVIDENCE; 15 used, 4 rejected; changed: abnormal, admissibility, producer_health
+  101.872s .. 140.000s (40 ticks): no symptom; attribution NO_EVIDENCE; 19 used, 0 rejected; changed: abnormal, admissibility
+
+KEY MOMENTS (in time order)
+  1.000s  producer px4:ekf2.estimator_status health None -> ['UNAVAILABLE']
+  2.000s  configuration: hgt aiding fused: GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)
+  2.000s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +1, unwrapped total 3)
+  2.000s  configuration: EKF2 horizontal velocity reset (reset_count_vel_ne +1, unwrapped total 2)
+  3.000s  producer px4:ekf2.estimator_status health ['UNAVAILABLE'] -> ['VALID']
+  3.000s  configuration: hdg aiding fused: none -> magnetic heading (control_mode_flags)
+  3.000s  configuration: pos aiding fused: none -> GNSS position (control_mode_flags)
+  3.000s  configuration: vel aiding fused: none -> GNSS velocity (control_mode_flags)
+  3.000s  configuration: EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)
+  26.000s  configuration: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  29.000s  configuration: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+  76.804s  FIRST ABNORMAL: adverse evidence only; observed by px4:vehicle.rate_transient
+  76.804s  first adverse output from px4:vehicle.rate_transient
+  76.804s  adverse: ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]
+  78.604s  first adverse output from px4:esc.telemetry_response
+  78.604s  adverse: ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]
+  78.604s  adverse: ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]
+  87.072s  adverse: ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]
+  87.072s  no longer adverse: ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]
+  87.072s  no longer adverse: ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]
+  87.072s  no longer adverse: ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient]
+  87.072s  first REGIME_INVALID: COMPUTE/control_allocator:allocation.authority [px4:allocator.status] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s)
+  87.072s  first REGIME_INVALID: ACTUATION/motor_0:esc.telemetry_response [px4:esc.telemetry_response] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s)
+  87.072s  first REGIME_INVALID: ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s)
+  87.072s  first REGIME_INVALID: ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s)
+  87.072s  first REGIME_INVALID: ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.5,15.0]s)
+  88.872s  first adverse output from px4:allocator.status
+  88.872s  adverse: COMPUTE/control_allocator:allocation.authority [px4:allocator.status]
+  88.872s  adverse: ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]
+  88.872s  adverse: ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]
+  91.604s  no longer adverse: COMPUTE/control_allocator:allocation.authority [px4:allocator.status]
+  91.604s  no longer adverse: ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]
+  91.604s  no longer adverse: ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]
+  91.604s  first REGIME_INVALID: ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.0,0.2]s)
+  91.604s  first REGIME_INVALID: ACTUATION/motor_1:vehicle.rate_transient [px4:vehicle.rate_transient] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.0,0.2]s)
+  91.604s  first REGIME_INVALID: ACTUATION/motor_2:vehicle.rate_transient [px4:vehicle.rate_transient] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.0,0.2]s)
+  91.604s  first REGIME_INVALID: ACTUATION/motor_3:vehicle.rate_transient [px4:vehicle.rate_transient] (CONTENT_OUTSIDE_VALIDATED_WINDOW:stock.event+[0.0,0.2]s)
+  101.872s  adverse: ACTUATION/motor_0:vehicle.rate_transient [px4:vehicle.rate_transient]
+  101.872s  no longer adverse: ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]
+
+FINAL STATE at 140.000s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  adverse evidence: ACTUATION/motor_0:vehicle.rate_transient@87.072s [px4:vehicle.rate_transient]
+  scope: the run observed 0 of the profile's 29 records; nothing is concluded about the other 29 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:allocator.compensation: health VALID; 4 of 4 admitted
+  px4:allocator.status: health VALID; 1 of 1 admitted
+  px4:battery.status: health VALID; 2 of 2 admitted
+  px4:ekf2.estimator_status: health VALID; 4 of 4 admitted
+  px4:esc.telemetry_response: health VALID; 4 of 4 admitted
+  px4:vehicle.rate_transient: health VALID; 4 of 4 admitted
+  coverage: cusum:v1_1_sequential has no evidence for event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  coverage: px4:battery.status has no evidence for POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  coverage: px4:esc.telemetry_response has no evidence for ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  cusum:v1_1_sequential: event discovery: NO_COVERAGE 147
+  px4:allocator.compensation: ACTUATION/motor_0:actuation.physical_response [PHYSICAL_EFFECT]: UNAVAILABLE 51
+  px4:allocator.compensation: ACTUATION/motor_1:actuation.physical_response [PHYSICAL_EFFECT]: UNAVAILABLE 51
+  px4:allocator.compensation: ACTUATION/motor_2:actuation.physical_response [PHYSICAL_EFFECT]: UNAVAILABLE 51
+  px4:allocator.compensation: ACTUATION/motor_3:actuation.physical_response [PHYSICAL_EFFECT]: UNAVAILABLE 51
+  px4:allocator.status: COMPUTE/control_allocator:allocation.authority [AUTHORITY]: ANOMALY 4, NO_ANOMALY 61, REJECTED:REGIME_INVALID 2
+  px4:battery.status: POWER/battery:power.droop_vs_current: NO_COVERAGE 147
+  px4:battery.status: POWER/battery:power.source_health [SOURCE_TELEMETRY]: UNAVAILABLE 146
+  px4:battery.status: POWER/battery:power.battery_warning [WARNING]: NO_ANOMALY 146
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hdg [INNOVATION_HDG]: NOMINAL 144, UNAVAILABLE 2
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hgt [INNOVATION_HGT]: NOMINAL 144, UNAVAILABLE 2
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.pos [INNOVATION_POS]: NOMINAL 144, UNAVAILABLE 2
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.vel [INNOVATION_VEL]: NOMINAL 144, UNAVAILABLE 2
+  px4:esc.telemetry_response: ACTUATION/motor_*:actuation.electrical_response: NO_COVERAGE 147
+  px4:esc.telemetry_response: ACTUATION/motor_0:esc.telemetry_response [TELEMETRY_RESPONSE]: NOMINAL 65, REJECTED:REGIME_INVALID 2
+  px4:esc.telemetry_response: ACTUATION/motor_1:esc.telemetry_response [TELEMETRY_RESPONSE]: ANOMALY 10, NOMINAL 55, REJECTED:REGIME_INVALID 2
+  px4:esc.telemetry_response: ACTUATION/motor_2:esc.telemetry_response [TELEMETRY_RESPONSE]: ANOMALY 25, NOMINAL 40, REJECTED:REGIME_INVALID 2
+  px4:esc.telemetry_response: ACTUATION/motor_3:esc.telemetry_response [TELEMETRY_RESPONSE]: ANOMALY 4, NOMINAL 61, REJECTED:REGIME_INVALID 2
+  px4:vehicle.rate_transient: ACTUATION/motor_0:vehicle.rate_transient [RATE_TRANSIENT]: ANOMALY 46, NOMINAL 13, REJECTED:REGIME_INVALID 11
+  px4:vehicle.rate_transient: ACTUATION/motor_1:vehicle.rate_transient [RATE_TRANSIENT]: NOMINAL 13, NOT_APPLICABLE 46, REJECTED:REGIME_INVALID 11
+  px4:vehicle.rate_transient: ACTUATION/motor_2:vehicle.rate_transient [RATE_TRANSIENT]: ANOMALY 13, NOMINAL 46, REJECTED:REGIME_INVALID 11
+  px4:vehicle.rate_transient: ACTUATION/motor_3:vehicle.rate_transient [RATE_TRANSIENT]: NOMINAL 46, NOT_APPLICABLE 13, REJECTED:REGIME_INVALID 11
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 0 of 29
+  outputs held, never admitted: 6: ACTUATION/motor_0 (1), ACTUATION/motor_1 (1), ACTUATION/motor_2 (1), ACTUATION/motor_3 (1), POWER/battery (2)
+  NO PRODUCER in this run: 23: ACTUATION/motor_0 (3), ACTUATION/motor_1 (3), ACTUATION/motor_2 (3), ACTUATION/motor_3 (3), COMPUTE/control_allocator (4), COMPUTE/cpu (1), COMPUTE/state_estimator (4), POWER/battery (2)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 14: ACTUATION/motor_0 (2), ACTUATION/motor_1 (2), ACTUATION/motor_2 (2), ACTUATION/motor_3 (2), COMPUTE/control_allocator (1), COMPUTE/state_estimator (4), POWER/battery (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 1 outputs in 1 lineage group(s), 1 independent line(s)
+  ACTUATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: ekf2.aiding.hdg=2, ekf2.aiding.hgt=4, ekf2.aiding.pos=1, ekf2.aiding.vel=1, ekf2.imu.change_count=0, ekf2.reset.reset_count_pod_d=1, ekf2.reset.reset_count_pos_ne=3, ekf2.reset.reset_count_quat=1, ekf2.reset.reset_count_vel_d=0, ekf2.reset.reset_count_vel_ne=2, ekf2.selector.instance_changed_count=0

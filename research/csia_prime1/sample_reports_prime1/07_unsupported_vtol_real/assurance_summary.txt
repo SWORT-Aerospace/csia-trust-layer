@@ -1,0 +1,21 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 07_unsupported_vtol_real.ulg   view prime1-view-2, support contract prime1-r1
+SUPPORT: UNSUPPORTED_VEHICLE_CONFIGURATION
+  - detected vehicle: VTOL (airframe 13014, CA_ROTOR_COUNT None)
+  - requested profile: multirotor-quad r1
+  - supported vehicle classes: multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)
+  - vehicle: VTOL; the only profile is multirotor-quad r1
+  - PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence
+  - PX4 v1.11.2-dev (8583f1da): not among the versions tested for full analysis (547e2ca, SITL); no validation exists for this version
+  - vehicle_angular_velocity has a 164 ms gap (> 60 ms): its evidence is refused there
+  - gyro bias at rest 0.066 rad/s (>= 0.05): the compensation witness will be refused as not steady
+  - 1 logger dropout(s): evidence over them is refused
+
+INTERPRETATION WITHHELD
+  - no diagnostic conclusion is drawn for this log. This is a statement about the Analyzer's
+    scope, not about the log or the vehicle: the log is not judged broken.
+
+GENERIC ANALYSIS (safe for any PX4 log)
+  - PX4 v1.11.2-dev (8583f1da30b6), hardware CUBEPILOT_CUBEORANGE
+  - log integrity: 7 topics; 1 logger dropout(s); largest gaps: vehicle_angular_velocity 163.75 ms
+  - PX4 raised no warning, failsafe or failure-detector flag in flight

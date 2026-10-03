@@ -1,0 +1,32 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 03_rpm_excess_motor_healthy.ulg   release prime1, analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime1-view-2, support contract prime1-r1
+SUPPORT: SUPPORTED (configuration quadx-allocation-esc; validation level SIMULATION)
+
+1. WHAT HAPPENED
+  - observed, not confirmed: motor_2's ESC reports MORE rotor speed than commanded, against the other rotors (telemetry excess, L = -98.67); 14,342 x its threshold
+2. WHEN
+  - E1 at 49.60 s: RPM_EXCESS_EVENT on motor_2 (ESC-reported rotor speed rose above its recent level)
+3. WHAT CSIA CAN JUSTIFY
+  - motor_2's ESC telemetry changed at an event (a telemetry observation, not a motor fault)
+4. WHAT CSIA CANNOT JUSTIFY
+  - that ACTUATION/motor_2 has a fault: its observation was not confirmed by an independent witness
+  - anything about the 25 of 29 profile records with no admitted evidence (not observed, or observed without confirmation; silence is not health)
+5. WHY
+  - attribution NO_EVIDENCE: NOTHING_ADVERSE (no symptom was established: an unconfirmed observation is not a symptom)
+6. KEY EVIDENCE
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -98.67 fraction of commanded thrust (threshold 0.00688; EARLY; at 51.604 s)
+  - ACTUATION/motor_2:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -98.59 fraction of commanded thrust (threshold 0.00688; AFTER; at 64.604 s)
+7. EVIDENCE REJECTED
+  - POWER/battery:power.source_health [px4:battery.status] 3 times from 49.628 s: BATTERY_CURRENT_NOT_MEASURED: battery current is not measured
+8. DEPENDENCY / SHARED SOURCES
+  - 1 adverse output(s) amount to 1 independent line(s) of evidence (1 lineage group(s))
+9. MISSING INSTRUMENTATION
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - ACTUATION/motor_2:esc.telemetry_response: motor_2's ESC-reported rotor speed disagrees with the other rotors over the flight (median q = 99.1; consistent band [0.5, 2]): its telemetry is no reference for a change
+10. NEXT ENGINEERING CHECK
+  - verify motor_2's ESC telemetry (pole-count and scaling configuration, connector) against an independent tachometer before trusting its RPM
+
+TECHNICAL DETAIL
+  - coverage rows (record x producer) by class: OBSERVED 1, NO_ANOMALY 13, NOT_APPLICABLE 4, UNAVAILABLE 1, NO_COVERAGE 27
+  - alert 49.60-49.60 s propulsion.rpm_excess (raised 1x)

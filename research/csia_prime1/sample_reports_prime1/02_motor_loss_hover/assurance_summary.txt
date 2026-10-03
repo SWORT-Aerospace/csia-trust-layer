@@ -1,0 +1,51 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 02_motor_loss_hover.ulg   release prime1, analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime1-view-2, support contract prime1-r1
+SUPPORT: SUPPORTED (configuration quadx-allocation-esc; validation level SIMULATION)
+
+1. WHAT HAPPENED
+  - COMMAND_NO_RESPONSE on motor_1: AMBIGUOUS (explanations remaining: 4)
+  - observed, not confirmed: motor_3's ESC reports MORE rotor speed than commanded, against the other rotors (telemetry excess, L = -0.00774); 1.13 x its threshold
+2. WHEN
+  - E1 at 49.30 s: RPM_DEFICIT_EVENT on motor_1 (ESC-reported rotor speed dropped below its recent level); COMPENSATION_CHANGE_EVENT on motor_1 (the controller started asking one motor for more than the others)
+3. WHAT CSIA CAN JUSTIFY
+  - COMMAND_NO_RESPONSE on motor_1 is supported by admitted evidence
+  - motor_1: SENSOR/response_sensor is eliminated (PHYSICAL_RESPONSE_NOMINAL_FALSE)
+  - motor_3's ESC telemetry changed at an event (a telemetry observation, not a motor fault)
+4. WHAT CSIA CANNOT JUSTIFY
+  - a single root cause (attribution AMBIGUOUS: SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN)
+  - which of 4 explanations caused COMMAND_NO_RESPONSE on motor_1
+  - that ACTUATION/motor_3 has a fault: its observation was not confirmed by an independent witness
+  - anything about the 25 of 29 profile records with no admitted evidence (not observed, or observed without confirmation; silence is not health)
+5. WHY
+  - attribution AMBIGUOUS: SINGLE_CANDIDATE_NOTHING_NOMINAL_IN_ANOTHER_DOMAIN
+  - COMMAND_NO_RESPONSE on motor_1: SEVERAL_SURVIVORS_NONE_CONFIRMED
+6. KEY EVIDENCE
+  - ACTUATION/motor_1:actuation.physical_response [px4:allocator.compensation]: VIOLATED 0.6608 compensation ratio change (1/eta - 1 for a compensated loss) (threshold 0.006881; AFTER; at 64.304 s)
+  - ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3958 fraction of commanded thrust (threshold 0.00688; EARLY; at 51.304 s)
+  - ACTUATION/motor_1:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED 0.3985 fraction of commanded thrust (threshold 0.00688; AFTER; at 64.304 s)
+  - ACTUATION/motor_1:vehicle.rate_transient [px4:vehicle.rate_transient]: DEGRADED 0.2812 rad/s (threshold 0.02882; event + [0, 0.2] s; at 49.504 s)
+  - ACTUATION/motor_3:esc.telemetry_response [px4:esc.telemetry_response]: DEGRADED -0.00774 fraction of commanded thrust (threshold 0.00688; EARLY; at 51.304 s)
+7. EVIDENCE REJECTED
+  - POWER/battery:power.source_health [px4:battery.status] 3 times from 49.404 s: BATTERY_CURRENT_NOT_MEASURED: battery current is not measured
+8. DEPENDENCY / SHARED SOURCES
+  - 3 adverse output(s) amount to 2 independent line(s) of evidence (1 lineage group(s))
+  - shared sources: channel:motor_command.motor_0, channel:motor_command.motor_1, channel:motor_command.motor_2, channel:motor_command.motor_3, sensor:imu.1310988
+9. MISSING INSTRUMENTATION
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+  - to separate ACTUATION/drive_no_current for motor_1: ESC current per motor (esc_status.esc_current)
+  - to separate ACTUATION/mechanical for motor_1: ESC current together with RPM (the stall signature)
+  - to separate COMMUNICATION/command_not_delivered for motor_1: the command each ESC actually received (ESC-side telemetry of the command)
+  - to separate POWER/path_unavailable for motor_1: battery current (battery_status.current_a) and per-ESC supply voltage
+10. NEXT ENGINEERING CHECK
+  - inspect motor_1's ESC and motor phase wiring; log ESC current on the next flight
+  - inspect motor_1's propeller, bearings and mount; run the motor on a bench
+  - check motor_1's signal path (connector, ESC protocol configuration)
+  - check motor_1's power path (connector, distribution board); log battery current
+  - verify motor_3's ESC telemetry (pole-count and scaling configuration, connector) against an independent tachometer before trusting its RPM
+
+TECHNICAL DETAIL
+  - remaining for COMMAND_NO_RESPONSE|motor_1: ACTUATION/drive_no_current, ACTUATION/mechanical, COMMUNICATION/command_not_delivered, POWER/path_unavailable
+  - eliminated: COMMAND_NO_RESPONSE|motor_1: SENSOR/response_sensor by PHYSICAL_RESPONSE_NOMINAL_FALSE (ACTUATION/motor_1:actuation.physical_response [px4:allocator.compensation] = 0.6608 compensation ratio change (1/eta - 1 for a compensated loss))
+  - coverage rows (record x producer) by class: OBSERVED 4, NO_ANOMALY 10, NOT_APPLICABLE 4, UNAVAILABLE 1, NO_COVERAGE 26
+  - alert 49.30-49.30 s propulsion.compensation_change+propulsion.rpm_deficit (raised 1x)

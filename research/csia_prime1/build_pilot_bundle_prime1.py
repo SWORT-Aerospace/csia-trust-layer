@@ -49,8 +49,8 @@ from pathlib import Path
 import numpy as np
 from pyulog import ULog
 
-import build_pilot_bundle as B0            # PRIME's builder: CASES, NOTICE, assignment, wheel
-import common_prime1 as C
+import common_prime1 as C                  # first: puts the PRIME package on the import path
+import build_pilot_bundle as B0            # noqa: E402  PRIME's builder: CASES, NOTICE, assignment, wheel
 
 DEFAULT_OUT = C.OUT_RAW / "pilot_bundle"
 SEED = 20261003
@@ -241,6 +241,7 @@ def main():
             z.write(f, f.name)
             files[f.name] = _sha(f)
         sm = support_matrix_md(contract)
+        (C.HERE / "SUPPORT_MATRIX.md").write_text(sm, encoding="utf-8")
         z.writestr("SUPPORT_MATRIX.md", sm)
         files["SUPPORT_MATRIX.md"] = hashlib.sha256(sm.encode()).hexdigest()
         z.writestr("DATA_NOTICE.txt", B0.NOTICE)

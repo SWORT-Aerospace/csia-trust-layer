@@ -31,7 +31,7 @@ from __future__ import annotations
 
 from . import assurance_view as AV
 
-VIEW_VERSION = "prime1-view-1"
+VIEW_VERSION = "prime1-view-2"
 CLASSES = AV.CLASSES
 SEMANTICS_PLAIN = {
     "RPM_DEFICIT_EVENT": "ESC-reported rotor speed dropped below its recent level",
@@ -115,7 +115,8 @@ def _times_threshold(v: dict) -> str:
     th, x = v.get("threshold"), v.get("measured")
     if not th or x is None:
         return ""
-    return f"; {abs(x) / th:.3g} x its threshold"
+    r = abs(x) / th
+    return f"; {r:,.0f} x its threshold" if r >= 1000 else f"; {r:.3g} x its threshold"
 
 
 def _num(x) -> str:
@@ -203,8 +204,17 @@ def build(m: dict, sup: dict) -> dict:
                      + (f" (explanations remaining: {n})" if n else ""))
     for v in unconfirmed:
         L.append(f"  - observed, not confirmed: {_plain_value(v)}")
+    offline = sorted({(e["t0"], t["motor"]) for e in m.get("events", []) for t in e.get("triggers", [])
+                      if (t.get("detail") or {}).get("semantics") == "ESC_OFFLINE_EVENT" and t.get("motor") is not None},
+                     key=lambda x: (x[1], x[0]))
+    first_offline = {}
+    for t0, mot in offline:
+        first_offline.setdefault(mot, t0)
+    for mot, t0 in sorted(first_offline.items()):
+        L.append(f"  - motor_{mot}'s ESC reported itself offline at {t0:.2f} s: its telemetry is UNAVAILABLE from "
+                 "then (neither a motor fault nor evidence of health)")
     if not symptoms and not unconfirmed:
-        L.append("  - nothing adverse was observed in the records CSIA could judge")
+        L.append(f"  - nothing {'else ' if first_offline else ''}adverse was observed in the records CSIA could judge")
     if baseline:
         motors = sorted({v["record"].split("/")[1].split(":")[0] for v in baseline})
         L.append(f"  - telemetry of {', '.join(motors)} had no valid reference at some events: no change "
@@ -232,8 +242,12 @@ def build(m: dict, sup: dict) -> dict:
                        "(a telemetry observation, not a motor fault)")
     if att.get("verdict") == "UNIQUE" and att.get("justified"):
         can.append(f"a single cause: {', '.join(att.get('candidates', []))}")
-    if not can:
-        can.append("no propulsion fault in the records that were observed (see 9 for what was not)")
+    cr = m.get("coverage_report", {})
+    exp, obs = cr.get("profile_records_expected"), cr.get("profile_records_observed")
+    if not can and obs:
+        can.append(f"no fault in the {obs} profile record(s) with admitted evidence (see 9 for the rest)")
+    elif not can:
+        can.append("nothing about the vehicle's health: no profile record had admitted evidence (see 9)")
     L += [f"  - {c}" for c in can]
     # 4
     L.append("4. WHAT CSIA CANNOT JUSTIFY")
@@ -245,16 +259,17 @@ def build(m: dict, sup: dict) -> dict:
             cannot.append(f"which of {len(x['unresolved'])} explanations caused {x['symptom']} on {x['subject']}")
     for v in unconfirmed:
         comp = v["record"].split(":")[0]
-        cannot.append(f"that {comp} has a physical fault: its observation was not confirmed by an independent witness")
-    cr = m.get("coverage_report", {})
-    exp, obs = cr.get("profile_records_expected"), cr.get("profile_records_observed")
+        cannot.append(f"that {comp} has a fault: its observation was not confirmed by an independent witness")
     if exp is not None and obs is not None and obs < exp:
-        cannot.append(f"anything about the {exp - obs} of {exp} profile records that were not observed "
-                      "(silence is not health)")
+        cannot.append(f"anything about the {exp - obs} of {exp} profile records with no admitted evidence "
+                      "(not observed, or observed without confirmation; silence is not health)")
+    cannot = list(dict.fromkeys(cannot))
     L += [f"  - {c}" for c in cannot] or ["  - nothing withheld"]
     # 5
     L.append("5. WHY")
-    L.append(f"  - attribution {att.get('verdict')}: {att.get('why')}")
+    L.append(f"  - attribution {att.get('verdict')}: {att.get('why')}"
+             + (" (no symptom was established: an unconfirmed observation is not a symptom)"
+                if att.get("why") == "NOTHING_ADVERSE" and unconfirmed else ""))
     for x in symptoms:
         L.append(f"  - {x['symptom']} on {x['subject']}: {x.get('why')}")
     # 6

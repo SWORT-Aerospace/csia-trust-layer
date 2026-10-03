@@ -348,6 +348,22 @@ def test_the_view_and_receipts_are_deterministic():
     assert RP.dumps(a["receipts"]) == RP.dumps(b["receipts"]) and a["summary_text"] == b["summary_text"]
 
 
+def test_an_esc_going_offline_is_stated_as_what_happened_not_as_health():
+    m = _report(synth("esc_offline", motor=1), "prime1")
+    t = V1.build(m, SP1.check(QUAD))["summary_text"]
+    first = t.split("1. WHAT HAPPENED")[1].split("2. WHEN")[0]
+    assert "motor_1's ESC reported itself offline" in first and "UNAVAILABLE" in first
+    assert "nothing else adverse" in first and not _symptoms(m)
+
+
+def test_a_page_without_admitted_evidence_justifies_nothing_about_health():
+    m = _report(synth("nominal", esc=False), "prime1")
+    m["coverage_report"]["profile_records_observed"] = 0
+    t = V1.build(m, SP1.check(QUAD))["summary_text"]
+    can = t.split("3. WHAT CSIA CAN JUSTIFY")[1].split("4. WHAT CSIA CANNOT JUSTIFY")[0]
+    assert "nothing about the vehicle's health" in can and "no fault" not in can
+
+
 # ------------------------------------------------------------------ Phase 27: the engagement workflow
 def test_the_engagement_enforces_the_blind_protocol(tmp_path):
     d = tmp_path / "eng"

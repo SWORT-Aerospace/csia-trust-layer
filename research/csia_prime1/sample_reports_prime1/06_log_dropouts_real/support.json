@@ -1,0 +1,46 @@
+{
+ "support": {
+  "conditions": [
+   {
+    "condition": "logger dropouts",
+    "ok": false,
+    "value": 4
+   }
+  ],
+  "configuration": "quadx-pre-allocation",
+  "contract_version": "prime1-r1",
+  "dimensions": {
+   "logging": "PARTIAL",
+   "schema": "PARTIAL",
+   "vehicle": "SUPPORTED_VEHICLE",
+   "version": "UNKNOWN_VERSION"
+  },
+  "generic_analysis_safe": null,
+  "interpretation": "FULL",
+  "px4": {
+   "git": "fd483321a5cf",
+   "hardware": "AUAV_X21",
+   "release": null
+  },
+  "reasons": [
+   "PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence",
+   "the log does not record a PX4 release version (ver_sw_release); git fd483321 is not a tested build",
+   "4 logger dropout(s): evidence over them is refused",
+   "estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run"
+  ],
+  "status": "UNKNOWN_VERSION",
+  "validation_level": "REAL_LOG_CONTEXT_ONLY",
+  "vehicle": {
+   "ca_rotor_count": null,
+   "detected": "unknown (no vehicle_status.vehicle_type)",
+   "requested_profile": "multirotor-quad r1",
+   "state": "SUPPORTED_VEHICLE",
+   "supported_vehicle_classes": [
+    "multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)"
+   ],
+   "sys_autostart": 10020,
+   "why": null
+  }
+ },
+ "view_version": "prime1-view-2"
+}

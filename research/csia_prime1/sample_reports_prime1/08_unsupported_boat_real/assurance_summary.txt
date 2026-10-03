@@ -1,0 +1,24 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 08_unsupported_boat_real.ulg   view prime1-view-2, support contract prime1-r1
+SUPPORT: UNSUPPORTED_VEHICLE_CONFIGURATION
+  - detected vehicle: rover or boat (airframe 50005, CA_ROTOR_COUNT None)
+  - requested profile: multirotor-quad r1
+  - supported vehicle classes: multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)
+  - vehicle: rover or boat; the only profile is multirotor-quad r1
+  - PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence
+  - PX4 v1.13.0-beta (32f79c37): not among the versions tested for full analysis (547e2ca, SITL); no validation exists for this version
+
+INTERPRETATION WITHHELD
+  - no diagnostic conclusion is drawn for this log. This is a statement about the Analyzer's
+    scope, not about the log or the vehicle: the log is not judged broken.
+
+GENERIC ANALYSIS (safe for any PX4 log)
+  - PX4 v1.13.0-beta (32f79c3772ca), hardware PX4_FMU_V5
+  - log integrity: 9 topics; 0 logger dropout(s); largest gaps: actuator_motors 115.21 ms, control_allocator_status 215.28 ms, vehicle_angular_velocity 40.06 ms
+  - PX4's own warnings and failsafes (identical re-raised conditions grouped):
+    236.49-236.49 s px4.log_message: [commander] Low battery level, return advised (raised 1x)
+    236.51-236.51 s px4.battery_warning (raised 1x)
+    265.44-265.44 s px4.log_message: [commander] Kill-switch engaged (raised 1x)
+    386.75-386.75 s px4.log_message: [commander] Low battery level, return advised (raised 1x)
+    387.30-387.30 s px4.battery_warning (raised 1x)
+    447.11-447.11 s px4.log_message: [commander] Kill-switch engaged (raised 1x)

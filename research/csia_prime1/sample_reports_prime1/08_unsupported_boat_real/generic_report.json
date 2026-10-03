@@ -1,0 +1,151 @@
+{
+ "generic": {
+  "alerts": [
+   {
+    "events": [
+     "E1"
+    ],
+    "first_t": 236.492,
+    "kind": "px4.log_message",
+    "last_t": 236.492,
+    "raised": 1,
+    "text": "[commander] Low battery level, return advised"
+   },
+   {
+    "events": [
+     "E1"
+    ],
+    "first_t": 236.5111,
+    "kind": "px4.battery_warning",
+    "last_t": 236.5111,
+    "raised": 1,
+    "text": null
+   },
+   {
+    "events": [
+     "E2"
+    ],
+    "first_t": 265.435,
+    "kind": "px4.log_message",
+    "last_t": 265.435,
+    "raised": 1,
+    "text": "[commander] Kill-switch engaged"
+   },
+   {
+    "events": [
+     "E3"
+    ],
+    "first_t": 386.752,
+    "kind": "px4.log_message",
+    "last_t": 386.752,
+    "raised": 1,
+    "text": "[commander] Low battery level, return advised"
+   },
+   {
+    "events": [
+     "E3"
+    ],
+    "first_t": 387.301118,
+    "kind": "px4.battery_warning",
+    "last_t": 387.301118,
+    "raised": 1,
+    "text": null
+   },
+   {
+    "events": [
+     "E4"
+    ],
+    "first_t": 447.114,
+    "kind": "px4.log_message",
+    "last_t": 447.114,
+    "raised": 1,
+    "text": "[commander] Kill-switch engaged"
+   }
+  ],
+  "event_discovery": {
+   "reraised_px4_conditions_merged": 25,
+   "test_harness_messages_ignored": 0
+  },
+  "log_integrity": {
+   "dropouts": 0,
+   "largest_gap_ms": {
+    "actuator_motors": 115.21,
+    "control_allocator_status": 215.28,
+    "vehicle_angular_velocity": 40.06
+   },
+   "topics": 9
+  }
+ },
+ "interpretation": "WITHHELD",
+ "schema": "csia.generic_report/1",
+ "support": {
+  "conditions": [
+   {
+    "condition": "actuator_motors largest gap",
+    "limit_ms": 300,
+    "ok": true,
+    "value_ms": 115.21
+   },
+   {
+    "condition": "control_allocator_status largest gap",
+    "limit_ms": 600,
+    "ok": true,
+    "value_ms": 215.28
+   },
+   {
+    "condition": "vehicle_angular_velocity largest gap",
+    "limit_ms": 60,
+    "ok": true,
+    "value_ms": 40.06
+   },
+   {
+    "condition": "gyro bias at rest (largest axis)",
+    "limit_rad_s": 0.05,
+    "ok": true,
+    "value_rad_s": 0.0133
+   }
+  ],
+  "configuration": "rover-boat",
+  "contract_version": "prime1-r1",
+  "dimensions": {
+   "logging": "OK",
+   "schema": "PARTIAL",
+   "vehicle": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "version": "UNTESTED_VERSION"
+  },
+  "generic_analysis_safe": [
+   "log integrity: topics present, logging gaps, logger dropouts",
+   "PX4's own warnings, failsafes and failure-detector flags, as a timeline (re-raised identical conditions grouped)",
+   "PX4 version, hardware and airframe as recorded"
+  ],
+  "interpretation": "WITHHELD",
+  "px4": {
+   "git": "32f79c3772ca",
+   "hardware": "PX4_FMU_V5",
+   "release": "v1.13.0-beta"
+  },
+  "reasons": [
+   "vehicle: rover or boat; the only profile is multirotor-quad r1",
+   "PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence",
+   "PX4 v1.13.0-beta (32f79c37): not among the versions tested for full analysis (547e2ca, SITL); no validation exists for this version"
+  ],
+  "status": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+  "validation_level": "REAL_LOG_CONTEXT_ONLY",
+  "vehicle": {
+   "ca_rotor_count": null,
+   "detected": "rover or boat",
+   "requested_profile": "multirotor-quad r1",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "supported_vehicle_classes": [
+    "multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)"
+   ],
+   "sys_autostart": 50005,
+   "why": "rover or boat"
+  }
+ },
+ "versions": {
+  "release": "prime1",
+  "support_contract": "prime1-r1",
+  "view": "prime1-view-2"
+ }
+}

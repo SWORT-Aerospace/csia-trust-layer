@@ -1,0 +1,64 @@
+{
+ "support": {
+  "conditions": [
+   {
+    "condition": "vehicle_angular_velocity largest gap",
+    "limit_ms": 60,
+    "ok": false,
+    "value_ms": 163.75
+   },
+   {
+    "condition": "gyro bias at rest (largest axis)",
+    "limit_rad_s": 0.05,
+    "ok": false,
+    "value_rad_s": 0.0655
+   },
+   {
+    "condition": "logger dropouts",
+    "ok": false,
+    "value": 1
+   }
+  ],
+  "configuration": "vtol",
+  "contract_version": "prime1-r1",
+  "dimensions": {
+   "logging": "PARTIAL",
+   "schema": "PARTIAL",
+   "vehicle": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "version": "UNTESTED_VERSION"
+  },
+  "generic_analysis_safe": [
+   "log integrity: topics present, logging gaps, logger dropouts",
+   "PX4's own warnings, failsafes and failure-detector flags, as a timeline (re-raised identical conditions grouped)",
+   "PX4 version, hardware and airframe as recorded"
+  ],
+  "interpretation": "WITHHELD",
+  "px4": {
+   "git": "8583f1da30b6",
+   "hardware": "CUBEPILOT_CUBEORANGE",
+   "release": "v1.11.2-dev"
+  },
+  "reasons": [
+   "vehicle: VTOL; the only profile is multirotor-quad r1",
+   "PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence",
+   "PX4 v1.11.2-dev (8583f1da): not among the versions tested for full analysis (547e2ca, SITL); no validation exists for this version",
+   "vehicle_angular_velocity has a 164 ms gap (> 60 ms): its evidence is refused there",
+   "gyro bias at rest 0.066 rad/s (>= 0.05): the compensation witness will be refused as not steady",
+   "1 logger dropout(s): evidence over them is refused"
+  ],
+  "status": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+  "validation_level": "REAL_LOG_CONTEXT_ONLY",
+  "vehicle": {
+   "ca_rotor_count": null,
+   "detected": "VTOL",
+   "requested_profile": "multirotor-quad r1",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "supported_vehicle_classes": [
+    "multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)"
+   ],
+   "sys_autostart": 13014,
+   "why": "VTOL"
+  }
+ },
+ "view_version": "prime1-view-2"
+}

@@ -1,0 +1,68 @@
+{
+ "support": {
+  "conditions": [
+   {
+    "condition": "actuator_motors largest gap",
+    "limit_ms": 300,
+    "ok": true,
+    "value_ms": 115.21
+   },
+   {
+    "condition": "control_allocator_status largest gap",
+    "limit_ms": 600,
+    "ok": true,
+    "value_ms": 215.28
+   },
+   {
+    "condition": "vehicle_angular_velocity largest gap",
+    "limit_ms": 60,
+    "ok": true,
+    "value_ms": 40.06
+   },
+   {
+    "condition": "gyro bias at rest (largest axis)",
+    "limit_rad_s": 0.05,
+    "ok": true,
+    "value_rad_s": 0.0133
+   }
+  ],
+  "configuration": "rover-boat",
+  "contract_version": "prime1-r1",
+  "dimensions": {
+   "logging": "OK",
+   "schema": "PARTIAL",
+   "vehicle": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "version": "UNTESTED_VERSION"
+  },
+  "generic_analysis_safe": [
+   "log integrity: topics present, logging gaps, logger dropouts",
+   "PX4's own warnings, failsafes and failure-detector flags, as a timeline (re-raised identical conditions grouped)",
+   "PX4 version, hardware and airframe as recorded"
+  ],
+  "interpretation": "WITHHELD",
+  "px4": {
+   "git": "32f79c3772ca",
+   "hardware": "PX4_FMU_V5",
+   "release": "v1.13.0-beta"
+  },
+  "reasons": [
+   "vehicle: rover or boat; the only profile is multirotor-quad r1",
+   "PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence",
+   "PX4 v1.13.0-beta (32f79c37): not among the versions tested for full analysis (547e2ca, SITL); no validation exists for this version"
+  ],
+  "status": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+  "validation_level": "REAL_LOG_CONTEXT_ONLY",
+  "vehicle": {
+   "ca_rotor_count": null,
+   "detected": "rover or boat",
+   "requested_profile": "multirotor-quad r1",
+   "state": "UNSUPPORTED_VEHICLE_CONFIGURATION",
+   "supported_vehicle_classes": [
+    "multirotor quadrotor, X configuration (CA_ROTOR_COUNT 4, not VTOL)"
+   ],
+   "sys_autostart": 50005,
+   "why": "rover or boat"
+  }
+ },
+ "view_version": "prime1-view-2"
+}

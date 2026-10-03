@@ -1,0 +1,35 @@
+CSIA FLIGHT ASSURANCE (PRIME-1): ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: 06_log_dropouts_real.ulg   release prime1, analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime1-view-2, support contract prime1-r1
+SUPPORT: UNKNOWN_VERSION (configuration quadx-pre-allocation; validation level REAL_LOG_CONTEXT_ONLY)
+  - PX4 before control allocation (no CA_ROTOR_COUNT or actuator_motors): no propulsion evidence
+  - the log does not record a PX4 release version (ver_sw_release); git fd483321 is not a tested build
+  - 4 logger dropout(s): evidence over them is refused
+  - estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+
+1. WHAT HAPPENED
+  - nothing adverse was observed in the records CSIA could judge
+2. WHEN
+  - no event was discovered
+3. WHAT CSIA CAN JUSTIFY
+  - nothing about the vehicle's health: no profile record had admitted evidence (see 9)
+4. WHAT CSIA CANNOT JUSTIFY
+  - anything about the 29 of 29 profile records with no admitted evidence (not observed, or observed without confirmation; silence is not health)
+5. WHY
+  - attribution NO_EVIDENCE: NOTHING_ADVERSE
+6. KEY EVIDENCE
+  - no adverse evidence
+7. EVIDENCE REJECTED
+  - none
+8. DEPENDENCY / SHARED SOURCES
+  - 0 adverse output(s) amount to 0 independent line(s) of evidence (0 lineage group(s))
+9. MISSING INSTRUMENTATION
+  - ULog: the logger recorded 4 dropout(s), 0.119 s in all; outputs whose windows overlap one are UNAVAILABLE
+  - ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - estimator_status: estimator_status lacks the field 'accel_device_id' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+10. NEXT ENGINEERING CHECK
+  - none required by this log; the records not observed (9) are where a fault could hide
+
+TECHNICAL DETAIL
+  - coverage rows (record x producer) by class: NO_COVERAGE 34
