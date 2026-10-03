@@ -53,6 +53,27 @@ def test_a_sub_microsecond_shift_does_not_change_the_conclusion():
     assert m["final"]["evidence"]["rejected"] == []
 
 
+# ------------------------------------------------------------------ D-PRIME-2
+def _telemetry_outputs(scale):
+    """motor_2's adverse ESC telemetry outputs when its reported RPM is scaled from 60 s (SYNTHETIC)."""
+    syms, m = _symptoms(synth("telemetry", motor=2, eta=scale ** 2))
+    return [v for v in m["evidence_values"] if v["record"] == "ACTUATION/motor_2:esc.telemetry_response"
+            and v["state"] in ("DEGRADED", "VIOLATED", "ANOMALY")], syms, m
+
+
+def test_a_telemetry_deficit_is_discovered_and_kept_out_of_the_motor():
+    adverse, syms, m = _telemetry_outputs(0.775)
+    assert adverse and len(m["events"]) == 1 and syms == []
+
+
+@pytest.mark.xfail(strict=True, reason="D-PRIME-2 (DEFECT_D_PRIME_2.md): the telemetry CUSUM is one-sided "
+                   "(deficit); an RPM report above command opens no event and is never reported. "
+                   "Reported, not patched (stop condition 2).")
+def test_a_telemetry_excess_is_reported():
+    adverse, _, _ = _telemetry_outputs(10.0)
+    assert adverse
+
+
 # ------------------------------------------------------------------ B4 frozen decision rule (SYNTHETIC rows)
 def _row(rid, cond, level, L, syms, tel, phys, cause, unique=None, lines=2, esc_lines=1):
     return {"run_id": rid, "condition": cond, "level": level, "L_median": L,
@@ -211,3 +232,77 @@ def test_re_raised_identical_px4_conditions_become_one_alert_and_propulsion_even
     bw = [x for x in a if x["kind"] == "px4.battery_warning"]
     assert [x["raised"] for x in bw] == [2, 1]
     assert len([x for x in a if x["kind"].startswith("propulsion")]) == 2
+
+
+# ------------------------------------------------------------------ the package (documents, decision, pilot bundle)
+DOCS = {"README.md", "PRIME_EXECUTION_PLAN.md", "REAL_DATA_ACQUISITION.md", "STRESS_ENVELOPE.md",
+        "B4_MATCHED_AB_PROTOCOL.md", "SIM_TO_REAL_RECEIPTS.md", "DEFECT_D_PRIME_1.md", "B3_CHALLENGE.md",
+        "EVENT_DISCOVERY_PREREG.md", "EVENT_DISCOVERY_STUDY.md", "TRACK_A_MVP.md",
+        "COMPETITOR_FUNCTION_MATRIX.md", "DEFENSIBILITY_AND_IP.md", "TECHNICAL_DEMO.md",
+        "EXTERNAL_PILOT_PACKAGE.md", "COMMERCIAL_PILOT.md", "DEFECT_D_PRIME_2.md", "CLAIM_EVIDENCE_MATRIX.md",
+        "PRIME_REVIEW_AND_DECISION.md"}
+PILOT_DOCS = {"QUICKSTART.md", "REPORT_GUIDE.md", "DIAGNOSTIC_QUESTIONS.md", "FEEDBACK_FORM.md"}
+BANNED = ("no prior work exists", "we are the first", "is the first to", "first ever", "no one has",
+          "never been studied", "has never been", "no prior art exists")
+TOKENS = ("CSIA_PRIME_BLOCKED_ON_REAL_DATA", "CSIA_PRIME_REALITY_GAP_FOUND",
+          "CSIA_PRIME_PHYSICAL_EVIDENCE_SUPPORTED", "CSIA_PRIME_COMMERCIAL_PILOT_READY",
+          "CSIA_PRIME_REQUIRES_ARCHITECTURE_REVISION")
+
+
+def _all_docs():
+    return ([PKG / n for n in sorted(DOCS)] + [PKG / "pilot_package" / n for n in sorted(PILOT_DOCS)]
+            + [PKG / "pilot_package_experimenter/SCORING_RUBRIC.md"])
+
+
+def test_the_prime_documents_exist_and_keep_the_repositorys_wording_rules():
+    assert {p.name for p in PKG.glob("*.md")} == DOCS
+    assert {p.name for p in (PKG / "pilot_package").glob("*.md")} == PILOT_DOCS
+    for p in _all_docs():
+        text = p.read_text(encoding="utf-8").lower()
+        assert len(text) > 1500, p.name
+        assert not re.search(r"\bnovel\b", text), p.name
+        for phrase in BANNED:
+            assert phrase not in text, (p.name, phrase)
+
+
+def test_the_prime_decision_chooses_one_token_and_keeps_the_authority_boundary():
+    text = (PKG / "PRIME_REVIEW_AND_DECISION.md").read_text(encoding="utf-8")
+    assert [t for t in TOKENS if f"**`{t}`**" in text] == ["CSIA_PRIME_BLOCKED_ON_REAL_DATA"]
+    assert "CSIA_PRIME_BLOCKED_ON_REAL_DATA" in (PKG / "README.md").read_text()
+    for q in range(1, 21):
+        assert f"**{q}. " in text, q
+    for doc in ("README.md", "PRIME_REVIEW_AND_DECISION.md", "COMMERCIAL_PILOT.md", "EXTERNAL_PILOT_PACKAGE.md"):
+        t = (PKG / doc).read_text(encoding="utf-8").upper()
+        assert "OFFBOARD" in t and "ZERO CONTROL" in t and "NO FORGE" in t, doc
+
+
+def test_the_claim_matrix_has_the_briefs_columns_and_keeps_physical_claims_out():
+    text = (PKG / "CLAIM_EVIDENCE_MATRIX.md").read_text(encoding="utf-8")
+    assert "| # | public claim | experiment | dataset | result | limitations | version | public-safe? |" in text
+    unsafe = text.split("## 3. Claims that are NOT public-safe")[1]
+    for claim in ("on hardware", "Validated on real flights", "Diagnoses maneuvering faults", "ROI"):
+        assert claim in unsafe, claim
+
+
+def test_the_commercial_pilot_invents_no_roi_or_price():
+    text = (PKG / "COMMERCIAL_PILOT.md").read_text(encoding="utf-8")
+    assert not re.search(r"[$€£]\s?\d", text)
+    assert not re.search(r"\d+\s?%", text)
+
+
+def test_the_pilot_bundle_record_holds_no_truth_and_found_no_leak():
+    """PILOT_BUNDLE.json is in the repository; the truth key is written only into the
+    experimenter folder outside git. No case name or truth field may appear in the record."""
+    rec = json.loads((PKG / "PILOT_BUNDLE.json").read_text())
+    raw = json.dumps(rec)
+    src = (PKG / "build_pilot_bundle.py").read_text()
+    names = re.findall(r'^    \("([A-Za-z0-9_]+)", ', src, re.M)
+    assert len(names) == 12
+    for n in names:
+        assert n not in raw, n
+    assert "truth" not in rec and "GROUND_TRUTH" not in json.dumps(rec["participant_files_sha256"])
+    assert rec["all_blinded_without_leaks"] and rec["all_exit_zero"]
+    assert {v["data"] for v in rec["logs"].values()} == {"SITL", "REAL"}
+    assert rec["wheel"]["has_support_matrix"] and not rec["wheel"]["has_research_tests_or_truth"]
+    # D-PRIME-2: exactly one blinded log changed its conclusion, and it is recorded, not hidden.
+    assert sum(1 for v in rec["logs"].values() if v["conclusions_equal"] is False) == 1

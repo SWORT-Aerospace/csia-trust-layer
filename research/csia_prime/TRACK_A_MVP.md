@@ -131,6 +131,12 @@ shipped with the package). Every entry names its evidence. In short:
 | maneuvering | 2.3 V13 | SITL | SUPPORTED | 55 |
 | unsupported vehicle | PX4 docs boat | **REAL** | UNSUPPORTED (rover/boat) | 42 |
 
+**Case 03 (telemetry corruption) depends on a simulation artefact.** Found
+later by the pilot bundle's blinding step: its UNCONFIRMED excess line exists
+only because PX4's failure-injection message opened the event at the true
+onset. Without that message, which no real fault prints, the excess is never
+reported (`DEFECT_D_PRIME_2.md`). The sample is kept as run.
+
 **Can an engineer understand the main result in two minutes?** That is not
 measured here. It needs real engineers, and the protocol is
 `EXTERNAL_PILOT_PACKAGE.md`. What is measured:
