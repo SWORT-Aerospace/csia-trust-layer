@@ -220,11 +220,16 @@ def cusum(t, d, k, h):
 
 def deviations(ms: MotorSeries):
     """Per motor: (t, d_tel) with d_tel = ref - q, and (t, d_ctrl) with
-    d_ctrl = kappa - ref."""
+    d_ctrl = kappa - ref.
+
+    PRIME-1 adds d_tel_excess = q - ref, the same deviation with the opposite
+    sign, for the RPM-excess arm of event discovery. The 2.3 calibration rule
+    set k_tel from the largest |d_tel| under the null, so both arms share it."""
     out = []
     for m in range(ms.n_motors):
         rq = trailing_reference(ms.t_esc, ms.q[:, m])
         rk = trailing_reference(ms.t_cmd, ms.kappa[:, m])
         out.append({"t_tel": ms.t_esc, "d_tel": rq - ms.q[:, m],
+                    "d_tel_excess": ms.q[:, m] - rq,
                     "t_ctrl": ms.t_cmd, "d_ctrl": ms.kappa[:, m] - rk})
     return out

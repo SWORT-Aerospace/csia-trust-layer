@@ -50,8 +50,21 @@ SAMPLE_KEEP = ("assurance_summary.txt", "support.json", "alerts.json", "receipts
                "coverage_states.json", "report.txt", "manifest.json")
 
 
+def same_output(a: Path, b: Path) -> bool:
+    """Byte-identical, except that manifest.json's `code` field (the tree digest of the
+    product package at run time, `report.code_digests`) is excluded: it changes whenever any
+    file in the package changes, including successor-only files the historical path never
+    runs. Every other byte of every output must match."""
+    if a.name != "manifest.json":
+        return filecmp.cmp(a, b, shallow=False)
+    ja, jb = json.loads(a.read_text()), json.loads(b.read_text())
+    ja.pop("code", None)
+    jb.pop("code", None)
+    return ja == jb
+
+
 def sample_reports(release=None) -> dict:
-    """PRIME's 11 sample outputs, regenerated and compared file by file."""
+    """PRIME's 11 sample outputs, regenerated and compared file by file (`same_output`)."""
     import sample_reports as SR
     out = {}
     with tempfile.TemporaryDirectory() as td:
@@ -60,7 +73,7 @@ def sample_reports(release=None) -> dict:
             r = RX.assure(path, d, release)
             committed = C.PRIME / "sample_reports" / name
             same = r.returncode == 0 and all(
-                filecmp.cmp(d / f, committed / f, shallow=False) for f in SAMPLE_KEEP if (committed / f).exists())
+                same_output(d / f, committed / f) for f in SAMPLE_KEEP if (committed / f).exists())
             out[name] = same
     return out
 

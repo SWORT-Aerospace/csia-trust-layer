@@ -219,13 +219,185 @@ def cluster(triggers, gap_s: float = GAP_S) -> list:
     return out
 
 
-def discover(log, est_log=None, calibration=None):
-    """-> (events, triggers, notices). `log` is a StockLog at stock rates."""
+def discover(log, est_log=None, calibration=None, mode: str = "2.3"):
+    """-> (events, triggers, notices). `log` is a StockLog at stock rates.
+
+    `mode` "2.3" is the historical discovery every 2.3 and PRIME report used;
+    "prime1" is the PRIME-1 successor (`discover_prime1`)."""
+    if mode == "prime1":
+        events, trs, notices, _stats = discover_prime1(log, est_log, calibration)
+        return events, trs, notices
+    if mode != "2.3":
+        raise ValueError(f"unknown discovery mode {mode!r}")
     from .adapters.px4_stock import load_calibration
     cal = (calibration or load_calibration())["calibration"]
     trs = propulsion_triggers(log, cal) + px4_triggers(log, est_log)
-    notices = [{"producer_id": "cusum:v1_1_sequential", "source": "event discovery",
-                "available": False,
-                "why": "the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a "
-                       "PX4 log has none, so it cannot trigger here"}]
+    notices = [V11_NOTICE]
     return cluster(trs), trs, notices
+
+
+V11_NOTICE = {"producer_id": "cusum:v1_1_sequential", "source": "event discovery", "available": False,
+              "why": "the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a "
+                     "PX4 log has none, so it cannot trigger here"}
+
+
+# ------------------------------------------------------------------ PRIME-1 successor discovery
+#: The two telemetry arms, as distinct event semantics (D-PRIME-2). The event layer says only
+#: "this telemetry channel changed enough to warrant analysis"; it attributes nothing.
+RPM_DEFICIT = "propulsion.rpm_deficit"
+RPM_EXCESS = "propulsion.rpm_excess"
+COMPENSATION = "propulsion.compensation_change"
+ESC_OFFLINE = "px4.esc_offline"
+#: PRIME C3's merge rule (supported by a real log, RR-10): a re-raised identical PX4 condition.
+MERGE_S = 60.0
+#: PX4's failure-injection manager announces a test-harness injection. That is ground truth,
+#: not vehicle evidence: never a trigger, counted in a labelled debug field only.
+HARNESS_PREFIX = "[failure_injection_manager]"
+#: A compensation alarm opens an event only where the compensation claim itself could be
+#: admitted: near-steady flight (peak body rate <= theta_steady) in its BEFORE and AFTER windows,
+#: exactly the producer's validity condition (`adapters/px4_stock.py`). The change's own transient
+#: lies between the two windows and does not count. PRIME C3's E2 used [onset - 5, onset + 0.5] s,
+#: which includes the transient of a real loss; PRIME-1's development checks showed that drop a
+#: hover loss's compensation alarm (2.3 V4).
+STEADY_WINDOWS = ("BEFORE", "AFTER")
+#: ...and the two windows must be the same flight condition: the net heading change from the
+#: end of BEFORE to the start of AFTER (integrated body yaw rate) within this tolerance. A
+#: commanded heading change between two steady holds moves the motor split in wind exactly as
+#: a loss does (PRIME-1 development: 2.3/RB-001 EN4, 180 degree reversals in a 4 m/s wind).
+#: DECLARED, NOT CALIBRATED: it separates commanded heading changes from the yaw transient a
+#: motor loss leaves behind, which the yaw controller returns to the held heading.
+HEADING_TOL_DEG = 15.0
+SEMANTICS = {RPM_DEFICIT: "RPM_DEFICIT_EVENT", RPM_EXCESS: "RPM_EXCESS_EVENT",
+             COMPENSATION: "COMPENSATION_CHANGE_EVENT", ESC_OFFLINE: "ESC_OFFLINE_EVENT"}
+
+
+def _heading_change_deg(log, onset: float) -> float:
+    """Net heading change (deg) from the end of BEFORE to the start of AFTER: the body
+    yaw rate integrated over that interval (near-level flight), or NaN."""
+    if not log.has("vehicle_angular_velocity"):
+        return float("nan")
+    av = log.topics["vehicle_angular_velocity"]
+    a, b = onset + SS.WINDOWS["BEFORE"][1], onset + SS.WINDOWS["AFTER"][0]
+    msk = (av["t"] >= a) & (av["t"] <= b)
+    if msk.sum() < 2:
+        return float("nan")
+    t, wz = av["t"][msk], np.asarray(av["xyz[2]"], float)[msk]
+    return float(np.degrees(np.sum(0.5 * (wz[1:] + wz[:-1]) * np.diff(t))))
+
+
+def _steady_around(log, onset: float, theta) -> bool:
+    if theta is None:
+        return False
+    peaks = [SS.peak_rate(log, onset, w) for w in STEADY_WINDOWS]
+    if not all(math.isfinite(v) and v <= theta for v in peaks):
+        return False
+    dpsi = _heading_change_deg(log, onset)
+    return math.isfinite(dpsi) and abs(dpsi) <= HEADING_TOL_DEG
+
+
+def propulsion_triggers_prime1(log, cal) -> tuple:
+    """-> (triggers, stats). One-sided CUSUMs (Page 1954) on the 2.3 statistics:
+    RPM_DEFICIT on reference - q, RPM_EXCESS on q - reference (same k_tel, h_tel:
+    the 2.3 rule calibrated them on |d|), and the compensation ratio, whose alarm
+    counts only inside its own steadiness regime (its BEFORE and AFTER windows). A telemetry alarm
+    counts only while the channel's own trailing reference is consistent with the
+    other rotors (`releases.TELEMETRY_LEVEL_BAND`)."""
+    from .releases import TELEMETRY_LEVEL_BAND as band
+    ms = SS.motor_series(log)
+    stats = {"compensation_alarms_outside_steadiness": 0, "telemetry_alarms_on_inconsistent_reference": 0}
+    if ms is None:
+        return [], stats
+    out = []
+    for m, dv in enumerate(SS.deviations(ms)):
+        # the telemetry channel's own trailing reference (q is relative to the other rotors)
+        ref = dv["d_tel"] + ms.q[:, m]
+        arms = ((RPM_DEFICIT, dv["t_tel"], dv["d_tel"], cal["k_tel"], cal["h_tel"],
+                 "telemetry response deficit (fraction)"),
+                (RPM_EXCESS, dv["t_tel"], dv["d_tel_excess"], cal["k_tel"], cal["h_tel"],
+                 "telemetry response excess (fraction)"),
+                (COMPENSATION, dv["t_ctrl"], dv["d_ctrl"], cal["k_ctrl"], cal["h_ctrl"],
+                 "compensation ratio rise"))
+        for kind, tt, dd, k, h, unit in arms:
+            alarms, S = SS.cusum(tt, dd, k, h)
+            for onset, alarm, peak in alarms:
+                if kind == COMPENSATION and not _steady_around(log, onset, cal.get("theta_steady")):
+                    stats["compensation_alarms_outside_steadiness"] += 1
+                    continue
+                if kind in (RPM_DEFICIT, RPM_EXCESS):
+                    # a change is only a change against a valid reference: once a channel's own
+                    # reference disagrees grossly with the other rotors (a corruption already
+                    # reported), its further excursions open no new telemetry event
+                    j = min(int(np.searchsorted(tt, onset)), len(tt) - 1)
+                    r = ref[j]
+                    if not (math.isfinite(r) and 1.0 / band <= r <= band):
+                        stats["telemetry_alarms_on_inconsistent_reference"] += 1
+                        continue
+                after = np.flatnonzero((tt > alarm) & (S == 0.0))
+                cleared = float(tt[after[0]]) if after.size else None
+                i = int(np.searchsorted(tt, alarm))
+                mag = float(dd[i]) if i < len(dd) and math.isfinite(dd[i]) else None
+                out.append(Trigger("stock_stats", kind, onset, alarm, m, mag, unit, cleared,
+                                   {"cusum_peak": round(peak, 6), "k": k, "h": h,
+                                    "semantics": SEMANTICS[kind]}))
+    return out, stats
+
+
+def esc_offline_triggers(log) -> list:
+    """A rotor's bit in `esc_status.esc_online_flags` falling in flight: PX4 itself reports
+    the ESC offline (its RPM is then not a measurement)."""
+    es = log.topics.get("esc_status") or {}
+    if "esc_online_flags" not in es or not len(es.get("t", [])):
+        return []
+    fl = log.in_flight(es["t"])
+    flags = np.asarray(es["esc_online_flags"]).astype(np.int64)
+    out = []
+    for m in range(max(log.n_motors, 0)):
+        off = ((flags >> m) & 1) == 0
+        for t in _edges(es["t"], off, fl):
+            out.append(Trigger("esc_status", ESC_OFFLINE, t, t, m,
+                               detail={"semantics": SEMANTICS[ESC_OFFLINE]}))
+    return out
+
+
+def _condition_key(tr):
+    d = tr.detail or {}
+    return (tr.kind, d.get("text") or d.get("flag") or d.get("filter_fault_flags"), tr.motor)
+
+
+def px4_triggers_prime1(log, est_log=None) -> tuple:
+    """-> (triggers, stats): PX4's monitors as in 2.3, without test-harness messages, plus
+    the ESC-offline edge, with re-raised identical conditions merged (MERGE_S)."""
+    raw = px4_triggers(log, est_log) + esc_offline_triggers(log)
+    stats = {"test_harness_messages_ignored": 0, "reraised_px4_conditions_merged": 0}
+    out, last = [], {}
+    for tr in sorted(raw, key=lambda x: (x.onset_t, x.kind, x.motor if x.motor is not None else -1)):
+        if tr.kind == "px4.log_message" and str((tr.detail or {}).get("text", "")).startswith(HARNESS_PREFIX):
+            stats["test_harness_messages_ignored"] += 1
+            continue
+        key = _condition_key(tr)
+        if key in last and tr.onset_t - last[key] <= MERGE_S:
+            last[key] = tr.onset_t
+            stats["reraised_px4_conditions_merged"] += 1
+            continue
+        last[key] = tr.onset_t
+        out.append(tr)
+    return out, stats
+
+
+def discover_prime1(log, est_log=None, calibration=None, resolution_s: float = 1e-6):
+    """-> (events, triggers, notices, stats). PRIME-1's event discovery; every onset and
+    alarm time on the analysis timebase (D-PRIME-1)."""
+    from .adapters.px4_stock import load_calibration
+    cal = (calibration or load_calibration())["calibration"]
+    prop, s1 = propulsion_triggers_prime1(log, cal)
+    px4, s2 = px4_triggers_prime1(log, est_log)
+    scale = round(1.0 / resolution_s)
+    trs = []
+    for tr in prop + px4:
+        tr.onset_t = round(tr.onset_t * scale) / scale
+        tr.alarm_t = round(tr.alarm_t * scale) / scale
+        trs.append(tr)
+    stats = dict(s1, **s2, mode="prime1",
+                 arms=sorted(SEMANTICS.values()), merge_s=MERGE_S, steady_windows=list(STEADY_WINDOWS),
+                 heading_tolerance_deg=HEADING_TOL_DEG)
+    return cluster(trs), trs, [V11_NOTICE], stats

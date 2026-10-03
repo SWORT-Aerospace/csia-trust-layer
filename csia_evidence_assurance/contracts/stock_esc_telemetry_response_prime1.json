@@ -1,0 +1,46 @@
+{
+ "claim_register": "research/csia_2_3_stock_bridge/CLAIMS.json#ESC_TELEMETRY_RESPONSE; PRIME-1 (research/csia_prime1/DEFECT_FIXES.md)",
+ "claims": {
+  "TELEMETRY_RESPONSE": {
+   "attributable": false,
+   "domain": "ACTUATION",
+   "meaning": "the ESC-reported rotor speed per unit commanded thrust of motor m, against the other motors, changed after the event (DEGRADED: ESC_TELEMETRY_DEFICIT or ESC_TELEMETRY_EXCESS) or not (NOMINAL). NOMINAL is only claimed when the BEFORE window is itself a valid reference. Context: no symptom reads it (finding SB-1)",
+   "relation": "esc.telemetry_response"
+  }
+ },
+ "configuration_assumptions": [
+  "identical rotors",
+  "THR_MDL_FAC matches the propulsion",
+  "rotor-to-rotor telemetry level within a factor of 2 in q (declared, not calibrated)"
+ ],
+ "contract_version": "stock-tel-2",
+ "expected_inputs": [
+  "a PX4 ULog with the stock topics (stock_log.py)",
+  "a discovered event (events.py)"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is UNAVAILABLE (INPUTS_MISSING), never NOMINAL; a BEFORE window whose level disagrees grossly with the other rotors (q outside [1/2, 2]) is no reference: UNAVAILABLE (TELEMETRY_BASELINE_INCONSISTENT)",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "channel:esc_rpm.motor_<all>",
+  "channel:motor_command.motor_<all>"
+ ],
+ "producer_id": "px4:esc.telemetry_response",
+ "producer_version": "csia-prime1-stock-tel-r1",
+ "profile_compatibility": [
+  "csia_evidence_assurance/profiles/multirotor_quad.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   0.5,
+   15.0
+  ],
+  "relative_to": "stock.event"
+ },
+ "validity_rule": "the EARLY and AFTER windows, compared with a BEFORE window whose telemetry level is consistent with the other rotors"
+}

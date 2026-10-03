@@ -261,7 +261,8 @@ def quad_setup(n_motors: int = 4):
 
 
 def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STOCK_TICK_S,
-                 calibration=None, known_onsets=None, px4_monitors: bool = True) -> Run:
+                 calibration=None, known_onsets=None, px4_monitors: bool = True,
+                 release: str = "2.3") -> Run:
     """An ordinary PX4 ULog, with no onset, label or sidecar file.
 
     1. Stock topics at PX4's default logging rates (`stock_log.py`).
@@ -272,6 +273,11 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
     4. Admissibility, then Semantic Core 2.1.1 with the multirotor quad r1
        profile.
 
+    `release` (`releases.py`): "2.3", the default, is the historical stock bridge every
+    2.3 and PRIME report was made with; "prime1" is the PRIME-1 successor (canonical
+    microsecond timebase, resolution-aware admissibility, bidirectional telemetry
+    discovery and the telemetry baseline-validity condition).
+
     Benchmark hooks (research comparisons only, never the product path):
     - `known_onsets`: analyse at these times instead of discovering events
       (Phase 15, known against discovered onset);
@@ -280,11 +286,16 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
       allocator flags, EKF2) as triggers or context (Phase 18 configuration A).
     """
     from . import events as EV
+    from . import releases as RL
     from .adapters import px4_stock as PS
     from .profiles import multirotor_quad as Q
     from .stock_log import StockLog
+    rel = RL.get(release)
+    successor = rel.name != RL.HISTORICAL
     if stock_log is None:
         stock_log = StockLog.from_ulog(path)
+    if successor:
+        stock_log = stock_log.canonical(rel.time_resolution_s)
     schema_notices = []
     if est_log is None and path is not None:
         try:
@@ -302,15 +313,17 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
     log = stock_log.decimate()
     cal = calibration or PS.load_calibration()
     _engine, core, gate = quad_setup(max(log.n_motors, 1) if log.n_motors else 4)
-    contracts = load_contracts(*PS.CONTRACT_FILES, "px4_ekf2_estimator_status_2")
-    an = FlightAssuranceAnalyzer(core, contracts, gate, Q.BASE)
+    files = [rel.telemetry_contract if f == "stock_esc_telemetry_response" else f for f in PS.CONTRACT_FILES]
+    contracts = load_contracts(*files, "px4_ekf2_estimator_status_2")
+    an = (FlightAssuranceAnalyzer(core, contracts, gate, Q.BASE, time_resolution_s=rel.time_resolution_s)
+          if successor else FlightAssuranceAnalyzer(core, contracts, gate, Q.BASE))
     est = PX.EstimatorProducer(est_log, contract_version="px4-ekf2-status-2") if est_log else None
     imu = "sensor:imu.unknown"
     if est_log is not None and est_log.status:
         g = est_log.status[min(est_log.status)]["gyro_device_id"]
         if len(g):
             imu = f"sensor:imu.{int(g[-1])}"
-    sp = PS.StockProducers(log, imu, cal)
+    sp = PS.StockProducers(log, imu, cal, release=rel.name)
     if not px4_monitors:
         est_log, est = None, None
     if known_onsets is not None:
@@ -318,8 +331,13 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
                            [EV.Trigger("benchmark", "benchmark.known_onset", float(t), float(t))], None)
                   for i, t in enumerate(sorted(known_onsets), 1)]
         triggers, ev_notices = events[0].triggers if events else [], []
+    elif px4_monitors and successor:
+        events, triggers, ev_notices, disc_stats = EV.discover_prime1(log, est_log, cal, rel.time_resolution_s)
     elif px4_monitors:
         events, triggers, ev_notices = EV.discover(log, est_log, cal)
+    elif successor:
+        triggers, disc_stats = EV.propulsion_triggers_prime1(log, cal["calibration"] if "calibration" in cal else cal)
+        events, ev_notices = EV.cluster(triggers), []
     else:
         triggers = EV.propulsion_triggers(log, cal["calibration"] if "calibration" in cal else cal)
         events, ev_notices = EV.cluster(triggers), []
@@ -363,6 +381,11 @@ def stock_flight(path=None, *, stock_log=None, est_log=None, tick_s: float = STO
               "events_source": "known onset (benchmark)" if known_onsets is not None
               else "discovered",
               "calibration_sha256": hashlib.sha256(json.dumps(cal, sort_keys=True).encode()).hexdigest()}
+    if successor:
+        inputs.update({"release": rel.name, "time_resolution_s": rel.time_resolution_s,
+                       "event_discovery": dict(disc_stats if known_onsets is None else {},
+                                               mode="known onset (benchmark)" if known_onsets is not None
+                                               else disc_stats.get("mode", "prime1 (stock producers only)"))})
     from . import diagnosability as DG
     observable = sorted({v["record"] for v in values.values()
                          if v["state"] not in ("UNAVAILABLE",)})

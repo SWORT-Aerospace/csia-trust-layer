@@ -180,6 +180,24 @@ class StockLog:
         return StockLog(dict(self.origin), self.t0_us, topics, dict(self.params),
                         list(self.messages), sampling, list(self.dropouts))
 
+    def canonical(self, resolution_s: float = 1e-6) -> "StockLog":
+        """PRIME-1 (D-PRIME-1): every time on the integer grid of `resolution_s` (round half
+        to even). A PX4 ULog is already on its 1 us grid, so this only fixes the float
+        representation; synthetic, resampled or perturbed input is snapped. Two inputs
+        that differ by less than half a tick become the same input."""
+        scale = round(1.0 / resolution_s)
+        if abs(scale * resolution_s - 1.0) > 1e-12:
+            raise ValueError(f"resolution {resolution_s} s is not 1/integer seconds")
+
+        def snap(a):
+            return np.round(np.asarray(a, dtype=float) * scale) / scale
+
+        topics = {k: dict(v, t=snap(v["t"])) for k, v in self.topics.items()}
+        msgs = [(float(snap(t)), lv, tx) for t, lv, tx in self.messages]
+        drops = [(float(snap(s)), d) for s, d in self.dropouts]
+        return StockLog(dict(self.origin), self.t0_us, topics, dict(self.params), msgs,
+                        dict(self.sampling), drops)
+
     # ------------------------------------------------------------ cache
     def to_npz(self, path) -> None:
         flat = {f"{t}|{f}": v for t, d in self.topics.items() for f, v in d.items()}

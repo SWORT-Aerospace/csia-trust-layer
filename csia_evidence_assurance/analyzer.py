@@ -105,7 +105,12 @@ class FlightAssuranceAnalyzer:
     """Configured once for one platform: a Semantic Core 2.1.1 instance, the
     producers' contracts, and the gated profile."""
 
-    def __init__(self, core, contracts: dict, gate_result, profile_base: str):
+    def __init__(self, core, contracts: dict, gate_result, profile_base: str, *,
+                 time_resolution_s: float | None = None, producer_time_resolution_s: dict | None = None):
+        #: PRIME-1 (D-PRIME-1): the timebase the admissibility gate compares in; None is the
+        #: historical float comparison every 2.2, pilot and 2.3 analysis used.
+        self.time_resolution_s = time_resolution_s
+        self.producer_time_resolution_s = dict(producer_time_resolution_s or {})
         self.core = core
         self.contracts = dict(contracts)
         self.gate = gate_result
@@ -141,7 +146,8 @@ class FlightAssuranceAnalyzer:
                 {"headline": PROFILE_REFUSED, "attribution": PROFILE_REFUSED},
                 (), {}, {"used": [], "rejected": []}, {}, {}, {}, warnings,
                 {"why": "the profile failed its load gate; nothing was reasoned"})
-        ctx = AnalysisContext(t, self.profile_base, epochs, dict(events or {}))
+        ctx = AnalysisContext(t, self.profile_base, epochs, dict(events or {}),
+                              self.time_resolution_s, self.producer_time_resolution_s)
         a = assess(held, self.contracts, ctx)
         tr = self.core.reason(a.records, a.epochs)
         self.last_tick = tr

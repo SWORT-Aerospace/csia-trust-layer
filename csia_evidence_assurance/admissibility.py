@@ -63,6 +63,15 @@ class AnalysisContext:
     profile_base: str
     epochs: object = None          # EpochContext, a {key: epoch} map, or None
     events: dict = field(default_factory=dict)
+    #: PRIME-1 (D-PRIME-1). The analysis timebase resolution in seconds. None (every
+    #: historical analysis): times are compared as floats with TIME_EPS. Set: every time
+    #: the gate compares is first converted to integer ticks of this resolution, so two
+    #: representations of the same instant at the supported precision always get the same
+    #: decision, and an instant one tick outside a window is still outside.
+    time_resolution_s: float | None = None
+    #: A producer whose clock is coarser than the analysis timebase declares it here
+    #: ({producer_id: seconds}); its times are compared at that coarser resolution.
+    producer_time_resolution_s: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -93,6 +102,17 @@ class Assessment:
 
 def _finite(x) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
+def _tick_fn(ctx: AnalysisContext, producer_id: str):
+    """None for the historical float comparison, else t -> integer ticks (round half to
+    even) at the coarser of the analysis and the producer's declared resolution."""
+    r = ctx.time_resolution_s
+    if not r:
+        return None
+    rp = ctx.producer_time_resolution_s.get(producer_id)
+    res = max(r, rp) if rp else r
+    return lambda x: round(x / res)
 
 
 def check(env: EvidenceEnvelope, contracts: dict, ctx: AnalysisContext):
@@ -156,27 +176,47 @@ def check(env: EvidenceEnvelope, contracts: dict, ctx: AnalysisContext):
         fail(PRODUCER_INVALID, "PRODUCER_HEALTH_NOT_REPORTED")
     elif h in (ProducerHealth.UNAVAILABLE, ProducerHealth.FAULTED):
         fail(PRODUCER_INVALID, f"PRODUCER_{h.value}")
+    q = _tick_fn(ctx, env.producer_id)
+    if q is None:                       # historical: float comparison
+        def later(a, b):                # a > b
+            return a > b + TIME_EPS
+
+        def older_than(age, limit):     # age > limit
+            return age > limit + TIME_EPS
+
+        def inside(x, ev, lo, hi):
+            return ev + lo - TIME_EPS <= x <= ev + hi + TIME_EPS
+    else:                               # PRIME-1: integer ticks of the declared resolution
+        def later(a, b):
+            return q(a) > q(b)
+
+        def older_than(age_pair, limit):
+            return q(age_pair[0]) - q(age_pair[1]) > q(limit)
+
+        def inside(x, ev, lo, hi):
+            return q(ev) + q(lo) <= q(x) <= q(ev) + q(hi)
     if h in (ProducerHealth.VALID, ProducerHealth.DEGRADED) and _finite(env.content_time):
         impossible = []
-        if env.content_time > ctx.t + TIME_EPS:
+        if later(env.content_time, ctx.t):
             impossible.append("CONTENT_TIME_IN_THE_FUTURE")
         if _finite(env.produced_time):
-            if env.produced_time + TIME_EPS < env.content_time:
+            if later(env.content_time, env.produced_time):
                 impossible.append("PRODUCED_BEFORE_ITS_CONTENT")
-            if env.produced_time > ctx.t + TIME_EPS:
+            if later(env.produced_time, ctx.t):
                 impossible.append("PRODUCED_IN_THE_FUTURE")
         if impossible:
             fault = "IMPOSSIBLE_METADATA_WHILE_REPORTING_" + h.value + ":" + ",".join(impossible)
             fail(PRODUCER_INVALID, fault)
     if _finite(env.content_time):
-        if c.max_content_age_s is not None and ctx.t - env.content_time > c.max_content_age_s + TIME_EPS:
+        age = ctx.t - env.content_time if q is None else (ctx.t, env.content_time)
+        if c.max_content_age_s is not None and older_than(age, c.max_content_age_s):
             fail(STALE, f"CONTENT_AGE_{ctx.t - env.content_time:.3f}s_OVER_{c.max_content_age_s}s")
         if c.event_window is not None:
             name, lo, hi = c.event_window
             ev = ctx.events.get(name)
             if ev is None:
                 fail(REGIME_INVALID, f"VALIDITY_EVENT_UNKNOWN:{name}")
-            elif not (ev + lo - TIME_EPS <= env.content_time <= ev + hi + TIME_EPS):
+            elif not inside(env.content_time, ev, lo, hi):
                 fail(REGIME_INVALID, f"CONTENT_OUTSIDE_VALIDATED_WINDOW:{name}+[{lo},{hi}]s")
     return status or ADMISSIBLE, tuple(reasons), tuple(warnings), fault
 

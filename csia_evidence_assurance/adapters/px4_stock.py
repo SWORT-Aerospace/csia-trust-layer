@@ -79,6 +79,8 @@ from ..profiles import multirotor_quad as Q
 EVENT = "stock.event"
 PRODUCER_VERSION = "csia-2.3-stock-r1"
 CONTRACT_VERSION = "stock-1"
+#: PRIME-1's telemetry-response producer (its version is in `releases.py`).
+TEL_CONTRACT_VERSION_PRIME1 = "stock-tel-2"
 CALIBRATION = Path(__file__).resolve().parents[1] / "stock_calibration.json"
 CHECKPOINTS = {"T1": 0.2, "EARLY": 2.0, "AFTER": 15.0}
 
@@ -117,12 +119,18 @@ class StockProducers:
     """Event-relative stock evidence for one log (already decimated to the
     stock rates), and one IMU lineage root."""
 
-    def __init__(self, log, imu_root: str = "sensor:imu.unknown", calibration=None):
+    def __init__(self, log, imu_root: str = "sensor:imu.unknown", calibration=None, release: str = "2.3"):
+        from .. import releases as RL
         self.log = log
         self.cal = (calibration or load_calibration())["calibration"]
         self.imu = imu_root
         self.ms = SS.motor_series(log)
         self.n = log.n_motors
+        #: "2.3": the historical producers. "prime1": the telemetry-response producer checks its
+        #: BEFORE reference (D-PRIME-2) and carries its own version and contract.
+        self.release = RL.get(release)
+        self.successor = self.release.name != RL.HISTORICAL
+        self.band = RL.TELEMETRY_LEVEL_BAND
 
     def _offline(self, m, t0, windows) -> bool:
         """The claim register's "telemetry dropout" failure mode: ESC m's
@@ -163,7 +171,35 @@ class StockProducers:
             out.append({"producer_id": BAT, "source": "POWER/battery:power.droop_vs_current",
                         "available": False,
                         "why": "battery current not measured (battery_status.current_a = -1)"})
+        if self.successor and self.ms is not None:
+            out += self._level_notices()
         return out
+
+    def _level_notices(self) -> list:
+        """PRIME-1: a rotor whose in-flight telemetry level disagrees grossly with the other
+        rotors for most of the flight (median q outside the declared band). Not evidence, and
+        not a fault: its ESC RPM cannot serve as a reference for that rotor."""
+        out = []
+        for m in range(self.n):
+            col = self.ms.q[:, m]
+            col = col[np.isfinite(col)]
+            if col.size < 10:
+                continue
+            med = float(np.median(col))
+            if not (1.0 / self.band <= med <= self.band):
+                out.append({"producer_id": TEL, "source": f"ACTUATION/motor_{m}:esc.telemetry_response",
+                            "available": False,
+                            "why": f"motor_{m}'s ESC-reported rotor speed disagrees with the other rotors "
+                                   f"over the flight (median q = {med:.3g}; consistent band "
+                                   f"[{1.0 / self.band:.3g}, {self.band:.3g}]): its telemetry is no "
+                                   "reference for a change"})
+        return out
+
+    def _baseline_ok(self, ch, m) -> bool:
+        """PRIME-1 (D-PRIME-2): the BEFORE window is a valid reference only if its level is
+        consistent with the other rotors."""
+        qb = ch["q_before"][m]
+        return math.isfinite(qb) and 1.0 / self.band <= qb <= self.band
 
     # ------------------------------------------------------------ envelopes
     def at(self, t0: float, checkpoint: str) -> list:
@@ -189,8 +225,11 @@ class StockProducers:
 
     def _env(self, pid, claim, rec, lineage, content_t, produced_t, health=ProducerHealth.VALID,
              detail=None):
-        return EvidenceEnvelope(producer_id=pid, producer_version=PRODUCER_VERSION,
-                                contract_version=CONTRACT_VERSION, claim=claim, record=rec,
+        pv, cv = PRODUCER_VERSION, CONTRACT_VERSION
+        if self.successor and pid == TEL:
+            pv, cv = self.release.telemetry_producer_version, TEL_CONTRACT_VERSION_PRIME1
+        return EvidenceEnvelope(producer_id=pid, producer_version=pv,
+                                contract_version=cv, claim=claim, record=rec,
                                 lineage=lineage, content_time=round(content_t, 6),
                                 producer_health=health, produced_time=round(produced_t, 6),
                                 detail=detail or {})
@@ -230,6 +269,11 @@ class StockProducers:
             elif n < 10 or not math.isfinite(L):
                 st, app, codes = (ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING,
                                   ("NOT_MEASURABLE_IN_FLIGHT_WINDOWS",))
+            elif self.successor and not self._baseline_ok(ch, m):
+                # D-PRIME-2: a corrupted BEFORE window compared with a corrupted AFTER
+                # window shows no change; that is not evidence of a healthy report
+                st, app, codes = (ObservationState.UNAVAILABLE, Applicability.INPUTS_MISSING,
+                                  ("TELEMETRY_BASELINE_INCONSISTENT",))
             elif L >= th:
                 st, app, codes = ObservationState.DEGRADED, Applicability.APPLICABLE, ("ESC_TELEMETRY_DEFICIT",)
             elif L <= -th:
@@ -240,8 +284,10 @@ class StockProducers:
                        codes=codes, measured=_num(L), expected=0.0,
                        expected_relation=f"implied thrust deficit from ESC RPM within +/-{th:.4g}",
                        deps=MOTOR_DEPS, fns=MOTOR_FNS, attributable=False, t=tc,
-                       detail={"unit": "fraction of commanded thrust", "window": w, "samples": n,
-                               "threshold": th})
+                       detail=dict({"unit": "fraction of commanded thrust", "window": w, "samples": n,
+                                    "threshold": th},
+                                   **({"q_before": _num(ch["q_before"][m]),
+                                       "baseline_band": [1.0 / self.band, self.band]} if self.successor else {})))
             out.append(self._env(TEL, "TELEMETRY_RESPONSE", rec, lin, tc, tc))
         return out
 
@@ -261,6 +307,9 @@ class StockProducers:
             offline = t0 is not None and self._offline(m, t0, ("BEFORE", "AFTER"))
             if offline:
                 L = float("nan")          # an offline ESC reports no deficit to test
+            no_reference = self.successor and not offline and not self._baseline_ok(ch, m)
+            if no_reference:
+                L = float("nan")          # PRIME-1: a deficit against no valid reference is no deficit
             # a total reported loss (L >= 1) would need unbounded compensation
             gate = (float("inf") if math.isfinite(L) and L >= 1.0
                     else (1.0 / (1.0 - L) - 1.0) if math.isfinite(L) else float("nan"))
@@ -286,6 +335,7 @@ class StockProducers:
                 # no local deficit means nothing to test
                 st, app = ObservationState.NOT_APPLICABLE, Applicability.NOT_APPLICABLE
                 codes = (("ESC_TELEMETRY_OFFLINE_NOTHING_TO_TEST",) if offline and C > -th
+                         else ("TELEMETRY_BASELINE_INCONSISTENT_NOTHING_TO_TEST",) if no_reference and C > -th
                          else ("NO_LOCAL_DEFICIT_TO_TEST",) if C > -th else ("COMPENSATION_OPPOSITE",))
             elif gate >= 2.0 * th:
                 st, app, codes = ObservationState.NOMINAL, Applicability.APPLICABLE, ()
