@@ -65,8 +65,12 @@ GENERIC_WORDS = ("fail", "fault", "inject")
 
 def blind(src: Path, dst: Path, corrupt: bool) -> dict:
     u = ULog(str(src))
-    params = [c for c in u.changed_parameters if c[1].startswith("SIH_")]
-    u.changed_parameters[:] = [c for c in u.changed_parameters if not c[1].startswith("SIH_")]
+    # the fault parameters, and every parameter the test harness changed in flight (after the first
+    # second: e.g. MIS_TAKEOFF_ALT). A customer's log carries none of the experimenter's actions.
+    harness = [c for c in u.changed_parameters
+               if c[1].startswith("SIH_") or c[0] - u.start_timestamp > 1_000_000]
+    params = [c for c in harness if c[1].startswith("SIH_")]
+    u.changed_parameters[:] = [c for c in u.changed_parameters if c not in harness]
     msgs = [m for m in u.logged_messages if "failure_injection" in m.message]
     u.logged_messages[:] = [m for m in u.logged_messages if "failure_injection" not in m.message]
     for k, lst in list(u.logged_messages_tagged.items()):
@@ -74,6 +78,11 @@ def blind(src: Path, dst: Path, corrupt: bool) -> dict:
     dropped = sorted(k for k in DROP_PARAMS if k in u.initial_parameters)
     for k in dropped:
         del u.initial_parameters[k]
+    # the firmware-default records ('Q' messages) name the injection parameters too (value 0)
+    dropped_defaults = sorted({k for d in u._default_parameters.values() for k in d if k in DROP_PARAMS})
+    for d in u._default_parameters.values():
+        for k in DROP_PARAMS:
+            d.pop(k, None)
     corrupted = 0
     if corrupt:
         for d in u.data_list:
@@ -83,8 +92,11 @@ def blind(src: Path, dst: Path, corrupt: bool) -> dict:
                 d.data["esc[0].esc_rpm"] = np.where(after, np.round(f * np.sqrt(0.6)), f).astype(f.dtype)
                 corrupted += int(after.sum())
     u.write_ulog(str(dst))
-    return {"removed_parameter_changes": len(params), "removed_messages": len(msgs),
-            "dropped_initial_parameters": dropped, "corrupted_samples": corrupted}
+    return {"removed_parameter_changes": len(params),
+            "removed_harness_parameter_changes": sorted({c[1] for c in harness if not c[1].startswith("SIH_")}),
+            "removed_messages": len(msgs),
+            "dropped_initial_parameters": dropped, "dropped_default_parameters": dropped_defaults,
+            "corrupted_samples": corrupted}
 
 
 def assure(path: Path, out: Path) -> dict:
@@ -105,11 +117,32 @@ def _sha(p: Path) -> str:
 
 
 # ------------------------------------------------------------------ the blindness audit
-def audit_ulog(path: Path) -> dict:
+INJECTION_NAMES = ("SIH_MOT", "SYS_FAILURE", "FAIL_INJ")
+
+
+def _injection(name: str) -> bool:
+    return name.startswith(INJECTION_NAMES[:2]) or INJECTION_NAMES[2] in name
+
+
+def audit_ulog(path: Path, real: bool) -> dict:
+    """Rules (the first run's broader rule, which flagged every parameter change, is kept in
+    BLINDNESS_AUDIT_FIRST_RUN.json):
+    - SITL logs (sanitized here): no injection parameter may appear anywhere (initial, default,
+      changed), no parameter may change after the first logged second (an experimenter action in
+      flight), and no leak token may appear in the raw bytes;
+    - REAL logs (copied unchanged; no fault was injected): an injection parameter is a leak only if
+      it is ENABLED (non-zero); PX4's standard disabled SYS_FAILURE_EN is not case information;
+    - every log: no leak token in any logged message or info field."""
     u = ULog(str(path))
-    out = {"changed_parameters": [c[1] for c in u.changed_parameters],
-           "injection_parameters": sorted(k for k in u.initial_parameters
-                                          if k.startswith(("SIH_MOT", "SYS_FAILURE")) or "FAIL_INJ" in k),
+    t0 = u.start_timestamp
+    defaults = {k: v for d in u._default_parameters.values() for k, v in d.items()}
+    named = {**defaults, **u.initial_parameters, **{c[1]: c[2] for c in u.changed_parameters}}
+    inj = sorted(k for k in named if _injection(k))
+    out = {"changed_parameters": [c[1] for c in u.changed_parameters
+                                  if _injection(c[1]) or (not real and c[0] - t0 > 1_000_000)],
+           "changed_parameters_reviewed": len(u.changed_parameters),
+           "injection_parameters": [k for k in inj if not real or named[k]],
+           "injection_parameters_present_disabled": [k for k in inj if real and not named[k]],
            "messages_with_leak_tokens": [m.message for m in u.logged_messages
                                          if any(t.lower() in m.message.lower() for t in LEAK_TOKENS)],
            "messages_with_generic_words": sorted({m.message for m in u.logged_messages
@@ -119,7 +152,9 @@ def audit_ulog(path: Path) -> dict:
            "multi_info_with_leak_tokens": [k for k, v in u.msg_info_multiple_dict.items()
                                            if any(t.lower() in str(v).lower() for t in LEAK_TOKENS)]}
     raw = path.read_bytes()
-    out["raw_bytes_leak_tokens"] = [t for t in LEAK_TOKENS if t.encode() in raw]
+    allowed = set(out["injection_parameters_present_disabled"])
+    out["raw_bytes_leak_tokens"] = [t for t in LEAK_TOKENS if t.encode() in raw
+                                    and not any(t in a for a in allowed)]
     return out
 
 
@@ -127,6 +162,7 @@ def audit_bundle(zpath: Path, case_names: list) -> dict:
     """Every participant artifact: known leak tokens, case names, file names, per-log ULog checks."""
     findings, logs = [], {}
     with zipfile.ZipFile(zpath) as z, tempfile.TemporaryDirectory() as td:
+        kinds = json.loads(z.read("LOGS.json"))["logs"]
         for n in z.namelist():
             data = z.read(n)
             if not re.fullmatch(r"(logs/P\d\d\.ulg|install/csia_trust_layer-[0-9.]+-py3-none-any\.whl|"
@@ -135,7 +171,7 @@ def audit_bundle(zpath: Path, case_names: list) -> dict:
             if n.endswith(".ulg"):
                 p = Path(td) / Path(n).name
                 p.write_bytes(data)
-                logs[Path(n).stem] = audit_ulog(p)
+                logs[Path(n).stem] = audit_ulog(p, real=kinds[Path(n).stem] == "REAL")
                 continue
             if n.endswith(".whl"):
                 continue                      # product code: audited separately below
@@ -259,6 +295,13 @@ def main():
     C.write_json(C.HERE / "BLINDNESS_AUDIT.json", dict(
         {k: v for k, v in audit.items() if k != "per_log"},
         verdict="ZERO KNOWN GROUND-TRUTH LEAKS" if audit["zero_known_leaks"] else "GROUND-TRUTH LEAKS FOUND",
+        first_run=("BLINDNESS_AUDIT_FIRST_RUN.json: 24 findings. 13 SITL logs kept SYS_FAILURE_EN in the "
+                   "firmware-default records (value 0): now removed by blind(). Every log's boot-time CAL_* "
+                   "parameter changes and the real AUAV log's own in-flight changes were flagged by a rule "
+                   "that counted any parameter change: the rule is now the documented one in audit_ulog. The "
+                   "second run flagged MIS_TAKEOFF_ALT (set in flight by the harness in all 10 SITL logs, "
+                   "nominal included): blind() now removes every in-flight harness parameter change. "
+                   "The real boat's standard SYS_FAILURE_EN = 0 is recorded as present-disabled"),
         label="PRIME-1 Phase 20: blindness audit of every participant artifact",
         per_log={p: {k: v for k, v in a.items() if k != "messages_with_generic_words"}
                  for p, a in audit["per_log"].items()}))
