@@ -181,7 +181,21 @@ from telemetry evidence survives real data.
 
 ## 4. Regression
 
-SUITE_RESULT
+Full suite at commit 343389a: **4,759 passed, 41 skipped, 2 expected
+failures, 1 failure.**
+- **The one failure** was the build-provenance check, which by design fails
+  until the record is refreshed for a new checkout. It was refreshed
+  (`research/physical_validation/results/BUILD_PROVENANCE.json`) in the
+  commit that carries this section.
+- **The 2 expected failures** are PRIME's strict pins of D-PRIME-1 and
+  D-PRIME-2 on the historical release 2.3, which keeps both defects by the
+  owner's decision.
+- **No PRIME-1 test is an expected failure.** The fixed behaviour is pinned
+  by ordinary tests on the successor path: 65 in `tests/test_csia_prime1.py`
+  and 8 in `tests/test_csia_prime1_docs.py`.
+- **The 41 skips** are the suite's environment-dependent tests (for
+  example the `sitl` marker for a live simulator binary). PRIME-1 adds no
+  skipped test.
 
 ## 5. What PRIME-1 did not do (on purpose)
 
