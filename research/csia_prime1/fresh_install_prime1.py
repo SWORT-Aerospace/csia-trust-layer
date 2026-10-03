@@ -3,7 +3,8 @@
 
     .venv/bin/python research/csia_prime1/fresh_install_prime1.py
 
-1. Builds the wheel exactly as the pilot bundle does (`pip wheel --no-deps`).
+1. Takes the exact wheel shipped in the participant bundle (its SHA-256 checked
+   against PILOT_BUNDLE_PRIME1.json).
 2. Checks the wheel's contents: only the product packages; no research code,
    tests, logs, answer keys or ground truth.
 3. Creates a new virtual environment and installs `<wheel>[logs]`
@@ -30,7 +31,6 @@ import zipfile
 from pathlib import Path
 
 import common_prime1 as C
-import build_pilot_bundle as B0  # noqa: E402  (after common_prime1: PRIME on the path)
 import sample_reports_prime1 as SR  # noqa: E402
 
 FORBIDDEN = ("research/", "tests/", ".ulg", "GROUND_TRUTH", "ASSIGNMENT", "answer_key", "SCORING_RUBRIC")
@@ -51,7 +51,13 @@ def main():
     res = {"label": "PRIME-1 Phase 39: fresh install of the participant wheel", "logs": {}}
     with tempfile.TemporaryDirectory(dir=C.OUT_RAW) as td:
         td = Path(td)
-        whl = B0.wheel(td / "wheel")
+        # the exact wheel shipped in the participant bundle, checked against its recorded hash
+        rec = json.loads((C.HERE / "PILOT_BUNDLE_PRIME1.json").read_text())
+        with zipfile.ZipFile(rec["bundle"]) as z:
+            (td / "wheel").mkdir()
+            whl = td / "wheel" / rec["wheel"]["file"]
+            whl.write_bytes(z.read(f"install/{rec['wheel']['file']}"))
+        assert _sha(whl) == rec["wheel"]["sha256"], "the bundle's wheel does not match its record"
         names = zipfile.ZipFile(whl).namelist()
         tops = sorted({n.split("/")[0] for n in names})
         res["wheel"] = {"file": whl.name, "sha256": _sha(whl), "top_level": tops,
