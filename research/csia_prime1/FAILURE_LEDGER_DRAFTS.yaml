@@ -94,3 +94,23 @@ entries:
     artifact: >-
       research/csia_prime/EVENT_DISCOVERY_STUDY.md;
       research/csia_prime1/HELDOUT_PREREGISTRATION.md
+  - id: FL-057 (proposed)
+    date: 2026-10-03
+    phase: CSIA PRIME-1 Phase 39 (fresh install)
+    kind: PROCESS
+    what_happened: >-
+      The wheel shipped in PRIME's participant bundle omitted
+      stock_calibration.json, so an installed csia-assure crashed on every
+      analysable log. PRIME's installability gate had installed from the
+      source tree, not from the shipped wheel, and passed.
+    found_by: PRIME-1's fresh-install check of the wheel itself.
+    honest_limit: >-
+      No analysis result was wrong; the defect would have stopped a pilot
+      participant at the first log.
+    verdict: FIXED_IN_SUCCESSOR_RELEASE
+    consequence: >-
+      Package data now covers every JSON file of the product; a permanent
+      test checks it; the pilot gate tests the artifact that ships.
+    artifact: >-
+      research/csia_prime1/KNOWN_DEFECT_REGISTER.md;
+      research/csia_prime1/FRESH_INSTALL_PRIME1.json

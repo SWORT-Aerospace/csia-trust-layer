@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import copy
 import sys
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -300,7 +301,8 @@ def test_the_support_contract_claims_no_physical_validation_and_names_the_defect
     c = SP1.contract()
     assert {x["validation_level"] for x in c["configurations"]} <= {"SIMULATION", "HIL", "REAL_LOG_CONTEXT_ONLY"}
     assert all(v["validation_level"] != "PHYSICAL_VALIDATED" for v in c["telemetry_classes"].values())
-    assert {d["id"]: d["fixed_in"] for d in c["known_defects"]} == {"D-PRIME-1": "prime1", "D-PRIME-2": "prime1"}
+    assert {d["id"]: d["fixed_in"] for d in c["known_defects"]} == {"D-PRIME-1": "prime1", "D-PRIME-2": "prime1",
+                                                                         "D-PRIME-3": "prime1"}
     for x in c["configurations"]:
         assert x["state"] in c["states"] and x.get("evidence"), x["id"]
 
@@ -390,6 +392,20 @@ def test_the_engagement_enforces_the_blind_protocol(tmp_path):
     out.chmod(0o644)
     out.write_text(out.read_text() + "tampered\n")
     assert not EN.verify(d)["ok"]
+
+
+def test_every_runtime_data_file_of_the_product_is_packaged():
+    """D-PRIME-3: the PRIME wheel omitted stock_calibration.json, so an installed csia-assure crashed."""
+    import fnmatch
+    import tomllib
+    pd = tomllib.loads((REPO / "pyproject.toml").read_text())["tool"]["setuptools"]["package-data"]
+    tracked = subprocess.run(["git", "ls-files", "csia_evidence_assurance", "csia_semantic_core"], cwd=REPO,
+                             capture_output=True, text=True, check=True).stdout.split()
+    data = [f for f in tracked if not f.endswith(".py")]
+    assert "csia_evidence_assurance/stock_calibration.json" in data
+    for f in data:
+        pkg, rel = f.split("/", 1)
+        assert any(fnmatch.fnmatch(rel, g) for g in pd.get(pkg, [])), f
 
 
 def test_customer_logs_are_ignored_by_git():

@@ -38,3 +38,4 @@ Silence about those is not health.
 |---|---|---|
 | D-PRIME-1 | a sub-microsecond time difference could refuse valid evidence | fixed (integer-microsecond timebase) |
 | D-PRIME-2 | an RPM report above command opened no event and could vanish from the report | fixed (separate RPM_DEFICIT and RPM_EXCESS events; a corrupted reference is never read as NOMINAL) |
+| D-PRIME-3 | the installed analyzer stopped with an error on every analysable log (a data file was missing from the package) | fixed (the package carries every data file; the installed tool was checked against the reference outputs) |

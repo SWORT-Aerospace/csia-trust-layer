@@ -17,6 +17,20 @@ recorded here, never erased.**
 | regression tests | `tests/test_csia_prime1.py`: the gate tests (boundaries, ticks, nanosecond and coarse clocks, negative windows, anchors, ordering, staleness) and end-to-end shifts; the 2.3 behaviour pinned as an ordinary test; PRIME's strict expected-fail kept for the historical path | `tests/test_csia_prime1.py`: deficit and excess semantics, the late-event condition, no `abs()`, the injection-message invariance; the 2.3 behaviour pinned; PRIME's strict expected-fail kept for the historical path |
 | public relevance | low: a robustness property. Worth stating only as "timestamps are compared at their recorded resolution" | **high:** "reports RPM telemetry corruption" was only true for shortfalls before PRIME-1. The claim matrix now separates shortfall, excess, offline, dropout and stuck |
 
+## D-PRIME-3: the participant wheel could not analyse a log (found in PRIME-1 Phase 39)
+
+| field | D-PRIME-3 |
+|---|---|
+| original defect | `pyproject.toml` never listed `csia_evidence_assurance/stock_calibration.json` as package data. Every wheel built from the repository omitted it. An installed `csia-assure` crashed (FileNotFoundError) on every SUPPORTED or PARTIAL log; only withheld logs (boat, VTOL) completed |
+| found | PRIME-1 Phase 39: a fresh virtual environment, the wheel installed from file, `csia-assure` run outside the repository (`fresh_install_prime1.py`), 2026-10-03 |
+| minimal reproduction | install the wheel from PRIME's participant bundle (`install/csia_trust_layer-0.8.0-py3-none-any.whl`) in a new venv; run `csia-assure` on any SITL sample log |
+| affected versions | every wheel of the analyzer, including the one inside PRIME's participant bundle. Repository runs (`.venv`, editable install) were never affected |
+| why PRIME's install check missed it | `prime_a_gate.py --install` installed from the source directory (`pip install <repo>[logs]`), not from the wheel shipped in the bundle. That check passed and is recorded as it was |
+| fixed version | PRIME-1 (`pyproject.toml`: `"*.json"` and `"contracts/*.json"` for the package) |
+| historical impact | none on any analysis result. **PRIME's participant bundle is unusable as shipped** and must not be given to anyone; it stays as recorded |
+| regression tests | `tests/test_csia_prime1.py::test_every_runtime_data_file_of_the_product_is_packaged`; `FRESH_INSTALL_PRIME1.json` (the wheel itself, installed, outputs byte-identical to the repository's) |
+| public relevance | none outside the pilot. It is the reason the pilot gate now tests the shipped artifact, not the source tree |
+
 ## Other product findings closed in PRIME-1 (not code defects)
 
 | finding | where found | fixed in | how |
