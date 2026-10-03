@@ -85,4 +85,86 @@ any frozen file changed or if results already exist, so it ran once.
 **Priority order (the brief's):** no wrong attribution, then no false
 symptoms, then recall, then burden.
 
-HELDOUT_RESULTS_SECTION
+## 5. Results (`HELDOUT_RESULTS.json`, run once)
+
+**Verdict:** **PROMOTE**. **EVENT DISCOVERY PROMOTION IS SIMULATION-ONLY.**
+The successor front end stays the commercial default of `assure`. Every
+criterion held:
+
+| criterion | requirement | prime1 | holds |
+|---|---|---|---|
+| S1 safety | no false symptom, no wrong motor, no wrong UNIQUE (blinded and jittered) | none of the three, in either copy | yes |
+| S2 recall | every held-out fault found, at least as many as 2.3 | 6 of 6 (2.3: 5 of 6) | yes |
+| S3 burden | <= 6 false events per nominal hour (blinded and jittered), at most half of 2.3's | 3.35 and 3.35 (2.3: 308.4) | yes |
+| S4 onset | median absolute onset error <= 0.5 s | 0.010 s | yes |
+| S5 telemetry matrix | every held-out case as expected | 30 of 30 (HN1 hover, HN4 maneuvering) | yes |
+| S6 no simulation leak | raw and blinded copies give identical events, symptoms, attribution | 14 of 14 flights | yes |
+
+### 5.1 Per flight (blinded copies)
+
+| flight | condition | in-flight min | 2.3 events | prime1 events | prime1 symptoms |
+|---|---|---|---|---|---|
+| HN1 | hover | 2.13 | 0 | 0 | none |
+| HN2 | maneuvering, wind N 3 | 2.30 | 16 | 0 | none |
+| HN3 | maneuvering, altitude changes, wind E 4 | 1.97 | 9 | 0 | none |
+| HN4 | long legs, heading reversals | 2.30 | 15 | 0 | none |
+| HN5 | yaw-only spins, wind N 2 | 2.30 | 13 | 0 | none |
+| HN6 | configuration transition (magnetometer off) | 2.30 | 13 | 1 | none |
+| HN7 | mixed, wind E 2 | 2.30 | 15 | 0 | none |
+| HN8 | hover then maneuvers, wind N 5 | 2.30 | 11 | 0 | none |
+| HF1 | loss in hover | 1.80 | 1 | 1 | COMMAND_NO_RESPONSE on motor_1 (AMBIGUOUS) |
+| HF2 | loss in a hold | 2.13 | 10 | 1 | COMMAND_NO_RESPONSE on motor_2 (AMBIGUOUS) |
+| HF3 | loss mid-maneuver | 2.30 | 13 | 1 | none (found, not confirmed) |
+| HF4 | loss mid-maneuver in wind | 2.30 | 16 | 1 | none (found, not confirmed) |
+| HT1 | RPM excess on a healthy motor | 2.30 | 13 (excess missed) | 1 (RPM_EXCESS_EVENT) | none |
+| HT2 | ESC telemetry offline | 1.80 | 1 | 1 (ESC_OFFLINE_EVENT) | none |
+
+**The one nominal event** (HN6, 90.03 s) is PX4's own error
+`MAG #0 failed: TIMEOUT`, 0.3 s after the magnetometer was switched off. It
+is a true sensor-loss warning, not a propulsion false alarm. The
+preregistration counts every event in a nominal flight, so it is counted.
+**Propulsion events on nominal flights: 0.**
+
+### 5.2 The Phase 9 measures
+
+| measure (per in-flight hour) | prime1 | 2.3 |
+|---|---|---|
+| candidate events, all flights (0.509 h) | 13.76 | 286.95 |
+| false events, nominal flights (0.298 h) | 3.35 (1 event: PX4's magnetometer timeout) | 308.43 |
+| false events, nominal flights with timestamp jitter | 3.35 (the same event) | not run (preregistered for prime1 only) |
+| false telemetry events, nominal flights | 0 | 0 |
+| extra events inside fault flights | 0 | 49 |
+| false symptoms, all flights | 0 | 0 |
+| wrong attribution (wrong motor or wrong UNIQUE), all flights | 0 | 0 |
+| median onset error | 0.010 s | 0.012 s |
+
+**Onset errors (prime1):** -0.012, -0.020, -0.008, +0.008, 0.000, -0.096 s.
+An event's time is its first triggering sample on the logging grid; the
+truth time is the injection message's log time (read from the raw log, for
+scoring only). Every difference is under 0.1 s.
+
+### 5.3 What the numbers do not show
+
+- **Statistical power is small.** 0.298 nominal hours: one event in that
+  time has a 95 per cent upper bound near 16 per hour; zero events would
+  have had 10.1.
+- **SITL noise is far below real.** SIH has almost no vibration or sensor
+  noise; real nominal flights will open more telemetry events and refuse
+  more compensation evidence. The thresholds were calibrated on SITL only.
+- **Maneuvering losses are found, not confirmed.** HF3 and HF4 opened an
+  RPM_DEFICIT_EVENT at onset, but no symptom: the physical-response witness
+  needs steady flight. That is the product's stated limitation, not a miss.
+- **One airframe, one PX4 version.**
+
+## 6. Commercial target and status
+
+| target | status |
+|---|---|
+| no wrong attribution | met in simulation (0 in 0.509 h) |
+| no false symptoms | met in simulation (0) |
+| every injected propulsion and telemetry fault opens an event at onset | met in simulation (6 of 6, median 0.010 s) |
+| alert burden an engineer will read (<= 6 per nominal flight hour) | met in simulation (3.35 per hour, and 0 propulsion events) |
+| the same on real nominal flights | **not measured**: needs a pilot customer's nominal logs |
+
+**Statement for every use of these numbers:** EVENT DISCOVERY PROMOTION IS
+SIMULATION-ONLY.

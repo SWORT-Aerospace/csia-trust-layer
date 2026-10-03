@@ -76,6 +76,7 @@ def cli(path: Path, out: Path) -> tuple[float, int]:
     t = time.perf_counter()
     pid = os.fork()
     if pid == 0:
+        os.chdir(C.REPO)
         os.execv(sys.executable, [sys.executable, "-m", "csia_evidence_assurance", "assure", str(path),
                                   "--out", str(out)])
     _pid, status, ru = os.wait4(pid, 0)

@@ -37,7 +37,7 @@ been checked against a real propulsion fault.
 | "In PX4 simulation, an ESC reporting itself offline was stated as missing telemetry, never read as a loss or as health." | M-T5 |
 | "In PX4 simulation, a telemetry corruption with the same RPM symptom as a real motor loss was not reported as a motor failure." | M-T6 |
 | "In PX4 simulation, losses during continuous maneuvering are reported as found but unconfirmed, with the reason, rather than attributed." | M-S4 |
-| EVENT_DISCOVERY_CLAIM | M-E1 |
+| "In PX4 simulation, on 14 new flights analysed blind, its event discovery found every injected propulsion and telemetry fault at onset and raised no propulsion event on about 18 minutes of nominal flight, including maneuvering, wind and a sensor reconfiguration." | M-E1 |
 
 ## 3. UNDER PHYSICAL VALIDATION
 
