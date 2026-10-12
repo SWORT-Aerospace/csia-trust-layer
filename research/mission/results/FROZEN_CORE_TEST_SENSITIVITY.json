@@ -1,0 +1,96 @@
+{
+  "SUPERSEDED_BY": "MX-015",
+  "correction": {
+    "corrected_measurements": {
+      "csia/diagnosis/causal.py": {
+        "evaluated": 11,
+        "killed": 3,
+        "now": 0.273,
+        "was": 0.0
+      },
+      "csia/diagnosis/hypothesis.py": {
+        "evaluated": 29,
+        "killed": 13,
+        "now": 0.448,
+        "was": 0.0
+      }
+    },
+    "the_lesson": "A subset-sensitivity check is only evidence if the subset it varies actually contains the tests that matter. Comparing two subsets that both omit the decisive file measures the two omissions, not the tests.",
+    "what_is_still_true": "The narrow-vs-wide comparison itself is real: 9 files to 18 files, over 250 extra tests, killed zero additional mutants and left a byte-identical surviving set. What was wrong was GENERALISING from it while the one decisive test file was missing from both sides.",
+    "what_survives_the_correction": "The BIMODAL finding stands, and so does the online.py row. trust_engine/engine.py, runtime/failsafe.py and diagnosis/bayes.py still score 1.000. online.py still shows 88.8% coverage against 0.154 mutation, which remains the largest coverage-versus-mutation gap measured here.",
+    "what_was_wrong": "This artifact concluded that the frozen core's 0.35 was 'a property of what the tests ASSERT, not of which tests were chosen', on the strength of a narrow-vs-wide subset comparison that killed zero extra mutants. THAT CONCLUSION WAS WRONG. Neither subset included tests/test_hypothesis.py -- 44 tests whose whole subject is the file carrying 46 of the 78 survivors."
+  },
+  "coverage_measured_under": "the WIDE 18-file subset",
+  "headline": {
+    "mutants_killed_only_by_the_wider_subset": 0,
+    "narrow_score": 0.35,
+    "narrow_subset_files": 9,
+    "survivors_identical_across_subsets": true,
+    "wide_score": 0.35,
+    "wide_subset_files": 18
+  },
+  "per_file": [
+    {
+      "coverage_percent": 96.2,
+      "evaluated": 9,
+      "file": "csia/diagnosis/bayes.py",
+      "killed": 9,
+      "mutation_score": 1.0,
+      "reading": "WELL CONSTRAINED: high coverage and high mutation score"
+    },
+    {
+      "coverage_percent": 29.8,
+      "evaluated": 19,
+      "file": "csia/diagnosis/causal.py",
+      "killed": 0,
+      "mutation_score": 0.0,
+      "reading": "weakly constrained"
+    },
+    {
+      "coverage_percent": 38.4,
+      "evaluated": 46,
+      "file": "csia/diagnosis/hypothesis.py",
+      "killed": 0,
+      "mutation_score": 0.0,
+      "reading": "weakly constrained"
+    },
+    {
+      "coverage_percent": null,
+      "evaluated": 2,
+      "file": "csia/profiles.py",
+      "killed": 0,
+      "mutation_score": 0.0,
+      "reading": "NOT EXERCISED by this subset at all -- the mutation score is a coverage artifact, not a finding about the tests"
+    },
+    {
+      "coverage_percent": 39.3,
+      "evaluated": 20,
+      "file": "csia/runtime/failsafe.py",
+      "killed": 20,
+      "mutation_score": 1.0,
+      "reading": "THE GOOD PATTERN: modest coverage, but everything covered is genuinely constrained"
+    },
+    {
+      "coverage_percent": 88.8,
+      "evaluated": 13,
+      "file": "csia/runtime/online.py",
+      "killed": 2,
+      "mutation_score": 0.154,
+      "reading": "THE WORST PATTERN: the tests EXECUTE most of this file and CONSTRAIN almost none of it"
+    },
+    {
+      "coverage_percent": 96.3,
+      "evaluated": 11,
+      "file": "csia/trust_engine/engine.py",
+      "killed": 11,
+      "mutation_score": 1.0,
+      "reading": "WELL CONSTRAINED: high coverage and high mutation score"
+    }
+  ],
+  "schema": "csia.mission.frozen_core_test_sensitivity/1",
+  "the_aggregate_is_misleading": "0.35 across the core hides a BIMODAL distribution. The mathematical heart -- the trust engine, the failsafe policy and the Bayesian likelihood -- scores 1.000. Two files carry 65 of the 78 survivors.",
+  "the_subset_is_not_the_explanation": "Doubling the test subset from 9 files to 18 -- adding over 250 tests including test_v2_scenarios' 114 -- killed ZERO additional mutants, and the surviving set is byte-identical. The low score is a property of what the tests ASSERT, not of which tests were chosen.",
+  "what_a_low_score_does_not_mean": "It does NOT mean the frozen core is wrong, and it does NOT invalidate E1. E1's evidence is campaign artifacts, reconciliations and the three-campaign 120/120 record -- not unit tests. A low mutation score says the TESTS constrain less of the code than they appear to.",
+  "what_may_not_be_done_about_it": "No test may be added to the frozen core, and no core file may be changed. Improving this means adding tests AROUND the core, which is a deliberate decision with its own evidence and is not taken here.",
+  "what_this_is": "A measurement of how much the EXISTING test suite constrains the frozen scientific core. The core was mutated ONLY in a temporary copy of the tree; csia/ is byte-unchanged and the diff against csia-v1.0-research-final is empty."
+}

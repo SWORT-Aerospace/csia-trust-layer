@@ -1,0 +1,17 @@
+{
+ "calibration": {
+  "h_ctrl": 0.12042735427635343,
+  "h_tel": 0.11807592282883084,
+  "k_ctrl": 0.04014245142545114,
+  "k_tel": 0.03935864094294361,
+  "theta_ctrl": 0.006881424935098357,
+  "theta_dyn": 0.02882144985008057,
+  "theta_steady": 0.09889434104510486,
+  "theta_tel": 0.0068798851916218595
+ },
+ "label": "CSIA 2.3 stock thresholds, revision 3; apparatus data only (research/csia_2_3_stock_bridge/CALIBRATION_2_3.json); r1 frozen at 67bc92f, r2 a definition fix before any systematic XSYS-001 evaluation, r3 adds theta_steady (the compensation claim's near-steady-flight assumption) after validation flights V5/V6",
+ "limit": "SIH carries almost no noise on these signals; the thresholds do not transfer to hardware",
+ "rates": "PX4 547e2ca default logging intervals (stock_log.STOCK_INTERVAL_MS)",
+ "revision": 3,
+ "rule": "threshold = 2 x the largest |value| of the statistic under the null (pseudo-onsets every 0.5 s in hover); CUSUM h = 3k"
+}

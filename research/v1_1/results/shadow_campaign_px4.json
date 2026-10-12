@@ -1,0 +1,1533 @@
+{
+ "R13": [
+  "FAIL: 1 ticks over budget",
+  "FAIL: 1 ticks over budget",
+  "FAIL: 1 ticks over budget"
+ ],
+ "caveat": "SITL, not hardware. 'Clean' means no injected fault; the noise profile is the simulator's, and W-3 records that detection can be a property of the noise model rather than of the fault. No number here transfers to an aircraft.",
+ "clean_flights_with_an_escalation": 1,
+ "command_authority_results": [
+  "NO_COMMAND_PATH_REACHABLE"
+ ],
+ "escalation_detail": [
+  {
+   "csia_top": [
+    "nominal"
+   ],
+   "disagreement": [
+    "CSIA_ONLY"
+   ],
+   "first_t_mono": 13.161802,
+   "index": 1,
+   "levels": [
+    "CAUTION"
+   ],
+   "ticks_above_normal": 140,
+   "ticks_total": 751
+  }
+ ],
+ "flights": [
+  {
+   "escalations": {
+    "above_normal": [],
+    "levels_seen": [
+     "NORMAL"
+    ],
+    "ticks": 751
+   },
+   "exit_code": 1,
+   "index": 0,
+   "log_readable": true,
+   "platform": "px4",
+   "result": {
+    "R13": "FAIL: 1 ticks over budget",
+    "adapter_counters": {
+     "mapped": 4633,
+     "messages": 13102,
+     "rejected_sentinel": 15,
+     "time_reanchors": 0,
+     "unmapped": 10967
+    },
+    "command_authority": {
+     "checked": 21,
+     "mode": "SHADOW",
+     "probes": {
+      "arducopter_arm": "DENIED",
+      "arducopter_disarm": "DENIED",
+      "mav": "DENIED",
+      "mav.command_long_send": "DENIED",
+      "mav.manual_control_send": "DENIED",
+      "mav.param_set_send": "DENIED",
+      "mav.rc_channels_override_send": "DENIED",
+      "mav.set_actuator_control_target_send": "DENIED",
+      "mav.set_mode_send": "DENIED",
+      "motors_armed_wait": "DENIED",
+      "param_set_send": "DENIED",
+      "reboot_autopilot": "DENIED",
+      "send": "DENIED",
+      "send_mavlink": "DENIED",
+      "set_mode": "DENIED",
+      "set_mode_apm": "DENIED",
+      "set_mode_px4": "DENIED",
+      "set_relay": "DENIED",
+      "set_servo": "DENIED",
+      "waypoint_clear_all_send": "DENIED",
+      "write": "DENIED"
+     },
+     "result": "NO_COMMAND_PATH_REACHABLE",
+     "write_half_closed": true,
+     "write_half_state": "CLOSED_ENOTCONN"
+    },
+    "flight_id": "20260825T001849Z-96841757",
+    "host_noise_control": {
+     "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+     "concurrent_with_measurement": false,
+     "iterations_per_tick": 12786,
+     "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+     "tail_is_measurable_on_this_host": true,
+     "target_us": 789.13,
+     "trials": [
+      {
+       "budget_us": 2000.0,
+       "max_us": 1688.1,
+       "median_us": 765.6,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1037.0,
+       "p99_us": 1212.2
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1234.1,
+       "median_us": 757.6,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1006.7,
+       "p99_us": 1071.9
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1639.0,
+       "median_us": 770.8,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1065.2,
+       "p99_us": 1323.9
+      }
+     ],
+     "worst_trial": {
+      "budget_us": 2000.0,
+      "max_us": 1688.1,
+      "median_us": 765.6,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 1037.0,
+      "p99_us": 1212.2
+     }
+    },
+    "latency": {
+     "budget_us": 2000.0,
+     "max_us": 8764.61,
+     "mean_us": 807.92,
+     "median_us": 789.13,
+     "min_us": 155.08,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 924.63,
+     "p99_us": 1130.95,
+     "worst_headroom_x": 0.23
+    },
+    "latency_positive_control": {
+     "messages_ingested": 13102,
+     "rule": "a latency figure from an idle tick measures the loop, not the workload",
+     "satisfied": true,
+     "usable_channels_at_end": 6
+    },
+    "live_transmit_probe": [
+     "command_long_send: denied",
+     "set_mode_send: denied",
+     "rc_channels_override_send: denied"
+    ],
+    "log_dir": "logs/shadow-sitl-px4",
+    "phases": {
+     "convert": {
+      "budget_us": 2000.0,
+      "max_us": 87.72,
+      "mean_us": 25.16,
+      "median_us": 23.48,
+      "min_us": 16.19,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 36.56,
+      "p99_us": 58.49,
+      "worst_headroom_x": 22.8
+     },
+     "core": {
+      "budget_us": 2000.0,
+      "max_us": 8618.47,
+      "mean_us": 655.64,
+      "median_us": 637.87,
+      "min_us": 0.43,
+      "n": 751,
+      "over_budget": 1,
+      "p95_us": 760.98,
+      "p99_us": 910.58,
+      "worst_headroom_x": 0.23
+     },
+     "sample": {
+      "budget_us": 2000.0,
+      "max_us": 321.65,
+      "mean_us": 127.11,
+      "median_us": 118.98,
+      "min_us": 91.32,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 174.42,
+      "p99_us": 224.4,
+      "worst_headroom_x": 6.22
+     }
+    },
+    "platform": "px4",
+    "rig_flight": {
+     "armed": true,
+     "climbed_m": 1.52
+    },
+    "seconds": 30.0,
+    "stats": {
+     "max_latency_us": 8764.60599999973,
+     "messages": 13102,
+     "reconnects": 0,
+     "stale_ticks": 1,
+     "ticks": 751,
+     "watchdog_trips": 0
+    },
+    "tee": {
+     "csia_link": "udpin:127.0.0.1:14540",
+     "reason": "this platform streams a full set on every mavlink instance unprompted; CSIA binds a separate link directly, which is what a companion port is",
+     "used": false
+    },
+    "timing_caveat": "no tee in this configuration: CSIA binds a separate mavlink instance directly. Remaining variance is the host, which also runs the simulator.",
+    "unmapped_types": {
+     "ALTITUDE": 297,
+     "ATTITUDE": 2962,
+     "ATTITUDE_QUATERNION": 1481,
+     "ATTITUDE_TARGET": 297,
+     "CURRENT_EVENT_SEQUENCE": 10,
+     "CURRENT_MODE": 15,
+     "DISTANCE_SENSOR": 297,
+     "ESC_INFO": 297,
+     "ESTIMATOR_SENSOR_FUSION_STATUS": 30,
+     "EXTENDED_SYS_STATE": 149,
+     "GLOBAL_POSITION_INT": 1481,
+     "GNSS_INTEGRITY": 30,
+     "HOME_POSITION": 15,
+     "LINK_NODE_STATUS": 30,
+     "LOCAL_POSITION_NED": 889,
+     "MISSION_CURRENT": 30,
+     "ODOMETRY": 889,
+     "OPEN_DRONE_ID_LOCATION": 30,
+     "OPEN_DRONE_ID_SYSTEM": 30,
+     "PING": 30,
+     "POSITION_TARGET_GLOBAL_INT": 296,
+     "POSITION_TARGET_LOCAL_NED": 297,
+     "SERVO_OUTPUT_RAW": 297,
+     "SYSTEM_TIME": 30,
+     "SYS_STATUS": 149,
+     "TIMESYNC": 297,
+     "TIME_ESTIMATE_TO_TARGET": 15,
+     "VFR_HUD": 297
+    },
+    "wall_s": 30.02
+   },
+   "result_file": "research/v1_1/results/shadow_flights/flight_px4_00.json",
+   "wall_s": 49.8
+  },
+  {
+   "escalations": {
+    "above_normal": [
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.161802
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.202301
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.242625
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.283139
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.32354
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.364485
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.404721
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.445183
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.490455
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.523157
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.568049
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.600475
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.640868
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.681307
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.721715
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.76191
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.802215
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.84302
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.883485
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.924109
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 13.96467
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.005159
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.045601
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.086102
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.126425
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.166872
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.207129
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.247537
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.288002
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.320263
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.360668
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.40124
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.441742
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.482068
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.522337
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.562811
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.603151
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.643521
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.680176
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.720643
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.760949
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.80131
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.841646
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.881883
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.922262
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 14.962746
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.003525
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.040628
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.085183
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.125893
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.166857
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.20736
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.243672
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.280093
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.320504
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.360927
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.401449
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.442078
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.482749
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.523026
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.563824
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.604149
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.644806
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.684993
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.725452
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.765754
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.806361
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.846618
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.887175
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.920144
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 15.960669
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.001097
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.041478
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.082335
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.123126
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.163651
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.200299
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.240726
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.281107
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.321446
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.361951
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.402574
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.443095
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.48365
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.523992
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.560595
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.605266
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.645762
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.686197
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.726583
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.762788
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.807426
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.840112
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.880463
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.920913
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 16.961456
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.001944
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.042245
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.082915
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.12369
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.163935
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.204548
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.244904
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.285202
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.325751
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.366577
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.407122
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.447794
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.480121
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.520843
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.561334
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.602027
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.642506
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.682895
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.723374
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.760017
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.800115
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.840489
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.881106
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.921453
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 17.961844
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.002186
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.042861
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.083008
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.123334
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.163651
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.204113
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.24455
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.2809
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.32526
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.365577
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.406275
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.446687
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.483124
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.527759
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.567961
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.600234
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.640644
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.681031
+     },
+     {
+      "csia_top": "nominal",
+      "disagreement": "CSIA_ONLY",
+      "level": "CAUTION",
+      "t_mono": 18.721353
+     }
+    ],
+    "levels_seen": [
+     "CAUTION",
+     "NORMAL"
+    ],
+    "ticks": 751
+   },
+   "exit_code": 1,
+   "index": 1,
+   "log_readable": true,
+   "platform": "px4",
+   "result": {
+    "R13": "FAIL: 1 ticks over budget",
+    "adapter_counters": {
+     "mapped": 4631,
+     "messages": 13095,
+     "rejected_sentinel": 15,
+     "time_reanchors": 0,
+     "unmapped": 10961
+    },
+    "command_authority": {
+     "checked": 21,
+     "mode": "SHADOW",
+     "probes": {
+      "arducopter_arm": "DENIED",
+      "arducopter_disarm": "DENIED",
+      "mav": "DENIED",
+      "mav.command_long_send": "DENIED",
+      "mav.manual_control_send": "DENIED",
+      "mav.param_set_send": "DENIED",
+      "mav.rc_channels_override_send": "DENIED",
+      "mav.set_actuator_control_target_send": "DENIED",
+      "mav.set_mode_send": "DENIED",
+      "motors_armed_wait": "DENIED",
+      "param_set_send": "DENIED",
+      "reboot_autopilot": "DENIED",
+      "send": "DENIED",
+      "send_mavlink": "DENIED",
+      "set_mode": "DENIED",
+      "set_mode_apm": "DENIED",
+      "set_mode_px4": "DENIED",
+      "set_relay": "DENIED",
+      "set_servo": "DENIED",
+      "waypoint_clear_all_send": "DENIED",
+      "write": "DENIED"
+     },
+     "result": "NO_COMMAND_PATH_REACHABLE",
+     "write_half_closed": true,
+     "write_half_state": "CLOSED_ENOTCONN"
+    },
+    "flight_id": "20260825T001940Z-fe7cd1cf",
+    "host_noise_control": {
+     "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+     "concurrent_with_measurement": false,
+     "iterations_per_tick": 12172,
+     "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+     "tail_is_measurable_on_this_host": true,
+     "target_us": 766.42,
+     "trials": [
+      {
+       "budget_us": 2000.0,
+       "max_us": 1506.3,
+       "median_us": 732.0,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1022.7,
+       "p99_us": 1158.3
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1514.4,
+       "median_us": 738.1,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1053.0,
+       "p99_us": 1220.5
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1131.9,
+       "median_us": 728.4,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 987.2,
+       "p99_us": 1071.7
+      }
+     ],
+     "worst_trial": {
+      "budget_us": 2000.0,
+      "max_us": 1506.3,
+      "median_us": 732.0,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 1022.7,
+      "p99_us": 1158.3
+     }
+    },
+    "latency": {
+     "budget_us": 2000.0,
+     "max_us": 8799.54,
+     "mean_us": 792.16,
+     "median_us": 766.42,
+     "min_us": 141.99,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 948.13,
+     "p99_us": 1105.18,
+     "worst_headroom_x": 0.23
+    },
+    "latency_positive_control": {
+     "messages_ingested": 13095,
+     "rule": "a latency figure from an idle tick measures the loop, not the workload",
+     "satisfied": true,
+     "usable_channels_at_end": 6
+    },
+    "live_transmit_probe": [
+     "command_long_send: denied",
+     "set_mode_send: denied",
+     "rc_channels_override_send: denied"
+    ],
+    "log_dir": "logs/shadow-sitl-px4",
+    "phases": {
+     "convert": {
+      "budget_us": 2000.0,
+      "max_us": 80.04,
+      "mean_us": 25.3,
+      "median_us": 23.79,
+      "min_us": 17.73,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 35.17,
+      "p99_us": 58.14,
+      "worst_headroom_x": 24.99
+     },
+     "core": {
+      "budget_us": 2000.0,
+      "max_us": 8673.71,
+      "mean_us": 644.98,
+      "median_us": 624.51,
+      "min_us": 0.53,
+      "n": 751,
+      "over_budget": 1,
+      "p95_us": 781.23,
+      "p99_us": 921.08,
+      "worst_headroom_x": 0.23
+     },
+     "sample": {
+      "budget_us": 2000.0,
+      "max_us": 442.38,
+      "mean_us": 121.88,
+      "median_us": 112.83,
+      "min_us": 84.54,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 175.73,
+      "p99_us": 227.0,
+      "worst_headroom_x": 4.52
+     }
+    },
+    "platform": "px4",
+    "rig_flight": {
+     "armed": true,
+     "climbed_m": 2.7
+    },
+    "seconds": 30.0,
+    "stats": {
+     "max_latency_us": 8799.54499998803,
+     "messages": 13095,
+     "reconnects": 0,
+     "stale_ticks": 1,
+     "ticks": 751,
+     "watchdog_trips": 0
+    },
+    "tee": {
+     "csia_link": "udpin:127.0.0.1:14540",
+     "reason": "this platform streams a full set on every mavlink instance unprompted; CSIA binds a separate link directly, which is what a companion port is",
+     "used": false
+    },
+    "timing_caveat": "no tee in this configuration: CSIA binds a separate mavlink instance directly. Remaining variance is the host, which also runs the simulator.",
+    "unmapped_types": {
+     "ALTITUDE": 297,
+     "ATTITUDE": 2961,
+     "ATTITUDE_QUATERNION": 1480,
+     "ATTITUDE_TARGET": 297,
+     "CURRENT_EVENT_SEQUENCE": 10,
+     "CURRENT_MODE": 15,
+     "DISTANCE_SENSOR": 297,
+     "ESC_INFO": 297,
+     "ESTIMATOR_SENSOR_FUSION_STATUS": 30,
+     "EXTENDED_SYS_STATE": 149,
+     "GLOBAL_POSITION_INT": 1480,
+     "GNSS_INTEGRITY": 30,
+     "HOME_POSITION": 15,
+     "LINK_NODE_STATUS": 30,
+     "LOCAL_POSITION_NED": 888,
+     "MISSION_CURRENT": 30,
+     "ODOMETRY": 888,
+     "OPEN_DRONE_ID_LOCATION": 30,
+     "OPEN_DRONE_ID_SYSTEM": 30,
+     "PING": 30,
+     "POSITION_TARGET_GLOBAL_INT": 296,
+     "POSITION_TARGET_LOCAL_NED": 297,
+     "SERVO_OUTPUT_RAW": 297,
+     "SYSTEM_TIME": 30,
+     "SYS_STATUS": 149,
+     "TIMESYNC": 297,
+     "TIME_ESTIMATE_TO_TARGET": 14,
+     "VFR_HUD": 297
+    },
+    "wall_s": 30.02
+   },
+   "result_file": "research/v1_1/results/shadow_flights/flight_px4_01.json",
+   "wall_s": 50.7
+  },
+  {
+   "escalations": {
+    "above_normal": [],
+    "levels_seen": [
+     "NORMAL"
+    ],
+    "ticks": 751
+   },
+   "exit_code": 1,
+   "index": 2,
+   "log_readable": true,
+   "platform": "px4",
+   "result": {
+    "R13": "FAIL: 1 ticks over budget",
+    "adapter_counters": {
+     "mapped": 4631,
+     "messages": 13097,
+     "rejected_sentinel": 15,
+     "time_reanchors": 0,
+     "unmapped": 10963
+    },
+    "command_authority": {
+     "checked": 21,
+     "mode": "SHADOW",
+     "probes": {
+      "arducopter_arm": "DENIED",
+      "arducopter_disarm": "DENIED",
+      "mav": "DENIED",
+      "mav.command_long_send": "DENIED",
+      "mav.manual_control_send": "DENIED",
+      "mav.param_set_send": "DENIED",
+      "mav.rc_channels_override_send": "DENIED",
+      "mav.set_actuator_control_target_send": "DENIED",
+      "mav.set_mode_send": "DENIED",
+      "motors_armed_wait": "DENIED",
+      "param_set_send": "DENIED",
+      "reboot_autopilot": "DENIED",
+      "send": "DENIED",
+      "send_mavlink": "DENIED",
+      "set_mode": "DENIED",
+      "set_mode_apm": "DENIED",
+      "set_mode_px4": "DENIED",
+      "set_relay": "DENIED",
+      "set_servo": "DENIED",
+      "waypoint_clear_all_send": "DENIED",
+      "write": "DENIED"
+     },
+     "result": "NO_COMMAND_PATH_REACHABLE",
+     "write_half_closed": true,
+     "write_half_state": "CLOSED_ENOTCONN"
+    },
+    "flight_id": "20260825T002030Z-f82f847b",
+    "host_noise_control": {
+     "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+     "concurrent_with_measurement": false,
+     "iterations_per_tick": 12733,
+     "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+     "tail_is_measurable_on_this_host": true,
+     "target_us": 785.9,
+     "trials": [
+      {
+       "budget_us": 2000.0,
+       "max_us": 1442.1,
+       "median_us": 774.4,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1047.3,
+       "p99_us": 1237.4
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1117.5,
+       "median_us": 766.5,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1019.6,
+       "p99_us": 1094.9
+      },
+      {
+       "budget_us": 2000.0,
+       "max_us": 1312.4,
+       "median_us": 769.4,
+       "n": 751,
+       "over_budget": 0,
+       "p95_us": 1029.9,
+       "p99_us": 1135.0
+      }
+     ],
+     "worst_trial": {
+      "budget_us": 2000.0,
+      "max_us": 1442.1,
+      "median_us": 774.4,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 1047.3,
+      "p99_us": 1237.4
+     }
+    },
+    "latency": {
+     "budget_us": 2000.0,
+     "max_us": 8599.76,
+     "mean_us": 804.8,
+     "median_us": 785.9,
+     "min_us": 133.28,
+     "n": 751,
+     "over_budget": 1,
+     "p95_us": 957.16,
+     "p99_us": 1079.1,
+     "worst_headroom_x": 0.23
+    },
+    "latency_positive_control": {
+     "messages_ingested": 13097,
+     "rule": "a latency figure from an idle tick measures the loop, not the workload",
+     "satisfied": true,
+     "usable_channels_at_end": 6
+    },
+    "live_transmit_probe": [
+     "command_long_send: denied",
+     "set_mode_send: denied",
+     "rc_channels_override_send: denied"
+    ],
+    "log_dir": "logs/shadow-sitl-px4",
+    "phases": {
+     "convert": {
+      "budget_us": 2000.0,
+      "max_us": 83.54,
+      "mean_us": 25.57,
+      "median_us": 23.85,
+      "min_us": 15.44,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 41.17,
+      "p99_us": 61.65,
+      "worst_headroom_x": 23.94
+     },
+     "core": {
+      "budget_us": 2000.0,
+      "max_us": 8442.15,
+      "mean_us": 650.78,
+      "median_us": 631.78,
+      "min_us": 0.38,
+      "n": 751,
+      "over_budget": 1,
+      "p95_us": 772.25,
+      "p99_us": 888.64,
+      "worst_headroom_x": 0.24
+     },
+     "sample": {
+      "budget_us": 2000.0,
+      "max_us": 317.26,
+      "mean_us": 128.45,
+      "median_us": 120.94,
+      "min_us": 84.47,
+      "n": 751,
+      "over_budget": 0,
+      "p95_us": 187.96,
+      "p99_us": 224.26,
+      "worst_headroom_x": 6.3
+     }
+    },
+    "platform": "px4",
+    "rig_flight": {
+     "armed": true,
+     "climbed_m": 2.64
+    },
+    "seconds": 30.0,
+    "stats": {
+     "max_latency_us": 8599.763999995957,
+     "messages": 13097,
+     "reconnects": 0,
+     "stale_ticks": 1,
+     "ticks": 751,
+     "watchdog_trips": 0
+    },
+    "tee": {
+     "csia_link": "udpin:127.0.0.1:14540",
+     "reason": "this platform streams a full set on every mavlink instance unprompted; CSIA binds a separate link directly, which is what a companion port is",
+     "used": false
+    },
+    "timing_caveat": "no tee in this configuration: CSIA binds a separate mavlink instance directly. Remaining variance is the host, which also runs the simulator.",
+    "unmapped_types": {
+     "ALTITUDE": 297,
+     "ATTITUDE": 2961,
+     "ATTITUDE_QUATERNION": 1481,
+     "ATTITUDE_TARGET": 297,
+     "CURRENT_EVENT_SEQUENCE": 10,
+     "CURRENT_MODE": 15,
+     "DISTANCE_SENSOR": 297,
+     "ESC_INFO": 297,
+     "ESTIMATOR_SENSOR_FUSION_STATUS": 30,
+     "EXTENDED_SYS_STATE": 149,
+     "GLOBAL_POSITION_INT": 1481,
+     "GNSS_INTEGRITY": 30,
+     "HOME_POSITION": 15,
+     "LINK_NODE_STATUS": 30,
+     "LOCAL_POSITION_NED": 888,
+     "MISSION_CURRENT": 30,
+     "ODOMETRY": 888,
+     "OPEN_DRONE_ID_LOCATION": 30,
+     "OPEN_DRONE_ID_SYSTEM": 30,
+     "PING": 30,
+     "POSITION_TARGET_GLOBAL_INT": 296,
+     "POSITION_TARGET_LOCAL_NED": 297,
+     "SERVO_OUTPUT_RAW": 297,
+     "SYSTEM_TIME": 30,
+     "SYS_STATUS": 149,
+     "TIMESYNC": 297,
+     "TIME_ESTIMATE_TO_TARGET": 14,
+     "VFR_HUD": 297
+    },
+    "wall_s": 30.03
+   },
+   "result_file": "research/v1_1/results/shadow_flights/flight_px4_02.json",
+   "wall_s": 50.8
+  }
+ ],
+ "flights_completed": 3,
+ "flights_requested": 3,
+ "latency_median_us": {
+  "max": 789.13,
+  "median_of_medians": 785.9,
+  "min": 766.42,
+  "per_flight": [
+   789.13,
+   766.42,
+   785.9
+  ]
+ },
+ "logs_unreadable": [],
+ "platform": "px4",
+ "seconds_each": 30.0
+}

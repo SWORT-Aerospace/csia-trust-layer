@@ -1,0 +1,420 @@
+{
+ "harness": "semantic_core_2_1_adversarial_profiles",
+ "mutations": {
+  "M1_MISSING_EDGE_nav_solution_not_on_estimator": {
+   "detected_by_validator": false,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 265,
+    "underconfident": 226
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 265,
+    "underconfident": 226
+   },
+   "validator_new_findings": [],
+   "what": "missing edge: the position channel no longer declares that it depends on the estimator"
+  },
+  "M1b_MISSING_SERVING_precision_undeclared": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 601,
+    "underconfident": 601
+   },
+   "validator_new_findings": [
+    {
+     "detail": "no timing.end_to_end/compute.process_alive/compute.process_producing/compute.deadline_met/comm.link_state record names PRECISION_NAVIGATION; scoped predicates on it can only be UNKNOWN",
+     "rule": "PV1_SUBJECT_WITHOUT_SERVING_COMPONENT",
+     "severity": "GAP",
+     "subject": "PRECISION_NAVIGATION"
+    }
+   ],
+   "what": "missing edge: nothing declares it serves PRECISION_NAVIGATION (G-1 reproduced on a sibling)"
+  },
+  "M2_EXTRA_EDGE_esc_can_serves_navigation": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 126,
+    "ticks_changed": 204,
+    "underconfident": 0
+   },
+   "validator_new_findings": [
+    {
+     "detail": "COMMUNICATION is not a domain COARSE_NAVIGATION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+     "rule": "PV3_UNWATCHED_DECLARATION",
+     "severity": "WARNING",
+     "subject": "COMMUNICATION/esc_can -> COARSE_NAVIGATION"
+    },
+    {
+     "detail": "COMMUNICATION is not a domain POSITION_HOLD watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+     "rule": "PV3_UNWATCHED_DECLARATION",
+     "severity": "WARNING",
+     "subject": "COMMUNICATION/esc_can -> POSITION_HOLD"
+    },
+    {
+     "detail": "COMMUNICATION is not a domain PRECISION_NAVIGATION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+     "rule": "PV3_UNWATCHED_DECLARATION",
+     "severity": "WARNING",
+     "subject": "COMMUNICATION/esc_can -> PRECISION_NAVIGATION"
+    }
+   ],
+   "what": "extra irrelevant edge: the ESC CAN bus declared to serve the navigation functions (R-BAD)"
+  },
+  "M2b_EXTRA_EDGE_telemetry_serves_navigation": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "validator_new_findings": [
+    {
+     "detail": "COMMUNICATION is not a domain POSITION_HOLD watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+     "rule": "PV3_UNWATCHED_DECLARATION",
+     "severity": "WARNING",
+     "subject": "COMMUNICATION/telemetry_radio -> POSITION_HOLD"
+    },
+    {
+     "detail": "COMMUNICATION is not a domain PRECISION_NAVIGATION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+     "rule": "PV3_UNWATCHED_DECLARATION",
+     "severity": "WARNING",
+     "subject": "COMMUNICATION/telemetry_radio -> PRECISION_NAVIGATION"
+    }
+   ],
+   "what": "extra irrelevant edge: the telemetry downlink declared to serve position hold and precision navigation"
+  },
+  "M3_WRONG_SUBJECT_typo": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 601,
+    "underconfident": 601
+   },
+   "validator_new_findings": [
+    {
+     "detail": "names function 'PRECISION_NAVIGATON', which the function table does not define",
+     "rule": "PV7_UNKNOWN_FUNCTION",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution"
+    },
+    {
+     "detail": "names function 'PRECISION_NAVIGATON', which the function table does not define",
+     "rule": "PV7_UNKNOWN_FUNCTION",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.decision_delay"
+    },
+    {
+     "detail": "names function 'PRECISION_NAVIGATON', which the function table does not define",
+     "rule": "PV7_UNKNOWN_FUNCTION",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.processing_delay"
+    },
+    {
+     "detail": "names function 'PRECISION_NAVIGATON', which the function table does not define",
+     "rule": "PV7_UNKNOWN_FUNCTION",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.sensor_slow"
+    },
+    {
+     "detail": "names function 'PRECISION_NAVIGATON', which the function table does not define",
+     "rule": "PV7_UNKNOWN_FUNCTION",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.transport_delay"
+    }
+   ],
+   "what": "wrong subject: the position channel names 'PRECISION_NAVIGATON' (a typo)"
+  },
+  "M4_WRONG_DOMAIN_dependency": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 3,
+    "underconfident": 3
+   },
+   "validator_new_findings": [
+    {
+     "detail": "cpu exists, but as ['COMPUTE'], not SENSOR",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "COMPUTE/state_estimator -> SENSOR/cpu"
+    }
+   ],
+   "what": "wrong domain: the estimator declares it depends on SENSOR/cpu instead of COMPUTE/cpu"
+  },
+  "M4b_WRONG_DOMAIN_record": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 81,
+    "spurious": 0,
+    "ticks_changed": 276,
+    "underconfident": 123
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 366,
+    "underconfident": 213
+   },
+   "validator_new_findings": [
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "SENSOR/source.gps -> COMMUNICATION/gnss_serial"
+    },
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution -> COMMUNICATION/gnss_serial"
+    },
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.decision_delay -> COMMUNICATION/gnss_serial"
+    },
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.processing_delay -> COMMUNICATION/gnss_serial"
+    },
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.sensor_slow -> COMMUNICATION/gnss_serial"
+    },
+    {
+     "detail": "gnss_serial exists, but as ['SENSOR'], not COMMUNICATION",
+     "rule": "PV5_DEPENDENCY_DOMAIN_MISMATCH",
+     "severity": "ERROR",
+     "subject": "TIMING/nav_solution.transport_delay -> COMMUNICATION/gnss_serial"
+    }
+   ],
+   "what": "wrong domain: the GNSS link's records are labelled SENSOR instead of COMMUNICATION"
+  },
+  "M5_DUPLICATE_RELATION_identical": {
+   "detected_by_validator": false,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 313,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "validator_new_findings": [],
+   "what": "duplicate relation: every estimator record appears twice, identical"
+  },
+  "M5b_DUPLICATE_RELATION_conflicting_declaration": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 313,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 313,
+    "underconfident": 0
+   },
+   "validator_new_findings": [
+    {
+     "detail": "its records declare different dependency sets: - | COMPUTE/cpu,SENSOR/source.imu0",
+     "rule": "PV8_INCONSISTENT_COMPONENT_DEPENDENCIES",
+     "severity": "ERROR",
+     "subject": "COMPUTE/state_estimator"
+    }
+   ],
+   "what": "duplicate relation: every estimator record appears twice, the copy declaring no dependencies"
+  },
+  "M6_CYCLE_cpu_depends_on_estimator": {
+   "detected_by_validator": true,
+   "v2_0": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "v2_1": {
+    "crash_example": null,
+    "crashed_ticks": 0,
+    "overconfident": 0,
+    "spurious": 0,
+    "ticks_changed": 0,
+    "underconfident": 0
+   },
+   "validator_new_findings": [
+    {
+     "detail": "dependency cycle",
+     "rule": "PV6_DEPENDENCY_CYCLE",
+     "severity": "ERROR",
+     "subject": "COMPUTE/cpu -> COMPUTE/state_estimator -> COMPUTE/cpu"
+    }
+   ],
+   "what": "cycle: the CPU declared to depend on the estimator that depends on it"
+  }
+ },
+ "scenarios": [
+  "ACTUATOR_NO_RESPONSE",
+  "CLOCK_DRIFT",
+  "CPU_OVERLOAD",
+  "ESTIMATOR_LATE",
+  "MS_A1_SENSOR_DELAY",
+  "MS_A2_COMMUNICATION_DELAY",
+  "MS_A3_COMPUTE_DELAY",
+  "MS_A4_PROCESS_STALL",
+  "MS_B1_COMMAND_LOST",
+  "MS_B2_POWER_PATH",
+  "MS_B3_DRIVE_NO_CURRENT",
+  "MS_B4_MECHANICAL",
+  "MS_B5_RESPONSE_SENSOR",
+  "MS_C1_INDEPENDENT",
+  "MS_C2_SHARED_POWER",
+  "MS_C3_LINKS_DOWN_NOT_SHARED",
+  "MS_C4_CPU_SATURATED_NOT_SHARED",
+  "MS_D1_NAV_SOURCE",
+  "MS_D2_ESTIMATOR_STALE",
+  "MS_D3_COMM_STARVATION",
+  "MS_D4_COMPUTE_DEADLINE",
+  "NETWORK_LATENCY",
+  "NOMINAL",
+  "PACKET_LOSS",
+  "POWER_SAG",
+  "PROCESS_STALL",
+  "REGULATOR_FAILURE",
+  "SHARED_RAIL",
+  "SHARED_SOURCE",
+  "STALLED_ACTUATOR"
+ ],
+ "ticks": 1800,
+ "validator_on_unmutated_aircraft_profile": [
+  {
+   "detail": "no timing.end_to_end/compute.process_alive/compute.process_producing/compute.deadline_met/comm.link_state record names COARSE_NAVIGATION; scoped predicates on it can only be UNKNOWN",
+   "rule": "PV1_SUBJECT_WITHOUT_SERVING_COMPONENT",
+   "severity": "GAP",
+   "subject": "COARSE_NAVIGATION"
+  },
+  {
+   "detail": "COARSE_NAVIGATION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+   "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+   "severity": "WARNING",
+   "subject": "COARSE_NAVIGATION:COMPUTE"
+  },
+  {
+   "detail": "COARSE_NAVIGATION declares TIMING a supporting/optional domain, but no TIMING record names it, so the declaration can never act",
+   "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+   "severity": "WARNING",
+   "subject": "COARSE_NAVIGATION:TIMING"
+  },
+  {
+   "detail": "GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+   "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+   "severity": "WARNING",
+   "subject": "GEOFENCE_SUPPORT:COMPUTE"
+  },
+  {
+   "detail": "PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+   "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+   "severity": "WARNING",
+   "subject": "PROPULSION:COMPUTE"
+  },
+  {
+   "detail": "TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+   "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+   "severity": "WARNING",
+   "subject": "TELEMETRY:COMPUTE"
+  },
+  {
+   "detail": "COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+   "rule": "PV3_UNWATCHED_DECLARATION",
+   "severity": "WARNING",
+   "subject": "COMMUNICATION/esc_can -> PROPULSION"
+  }
+ ]
+}

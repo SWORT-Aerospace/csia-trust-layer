@@ -1,0 +1,273 @@
+%YAML 1.2
+---
+# Gate-conditioning (mathematical) paper — artifact map.
+#
+# STATUS: THE MANUSCRIPT HAS LANDED. papers/gate_conditioning/main.tex is the
+# paper. Its subject is POSTERIOR DISTORTION (P1-P6, C2, C3), which is the
+# canonical title's scope; the anytime-valid e-process work (T-1..T-5) is a
+# DIFFERENT body of work, keeps its own register at docs/math/PROOF_STATUS.md,
+# and is explicitly named in the manuscript as not part of it.
+#
+# Validated by `python tools/publication/artifact_map_check.py`.
+
+schema: csia.publication.artifact_map/1
+paper: Gate Conditioning and Anytime-Valid Evidence
+short_name: gate_conditioning
+manuscript: main.tex
+phase: 1
+manuscript_status: DRAFT_COMPLETE_BIBLIOGRAPHY_UNVERIFIED
+
+naming_collision_warning: >-
+  docs/research/PAPER1_EMPIRICAL_SECTION.md belongs to THIS paper, not to CSIA
+  Systems Paper I, despite the filename. Its own header says "draft for the
+  theory paper". Do not wire it into papers/csia_systems/.
+
+# ---------------------------------------------------------------------------
+# FORMAL SOURCES
+# Theorems map to proof sections, not to result files.
+# ---------------------------------------------------------------------------
+formal_sources:
+  - id: M-SPEC
+    what: the formal setting, evidence objects and gate definitions
+    path: docs/math/CSIA_EVIDENCE_FORMAL_SPEC.md
+  - id: M-AVE
+    what: anytime-valid evidence framing, e-values and Ville's inequality
+    path: docs/math/ANYTIME_VALID_EVIDENCE.md
+  - id: M-T1
+    what: blockwise e-process construction; Lemma 1, Lemma 2, section 5, section 6
+    path: docs/math/T1_BLOCKWISE_EPROCESS.md
+  - id: M-T2
+    what: mission-level error control, e-BH and alpha spending
+    path: docs/math/T2_MISSION_ERROR_CONTROL.md
+  - id: M-REG
+    what: >-
+      the authoritative claim register for the ANYTIME-VALID work (T-1..T-5).
+      It does NOT govern P1-P6; a reader who assumes it does will look for
+      Proposition 3 here and not find it.
+    path: docs/math/PROOF_STATUS.md
+  - id: M-CORE
+    what: >-
+      THE MANUSCRIPT'S OWN FORMAL SOURCE. P1-P6, C2 and C3 with assumptions
+      stated exactly, proofs, and the counterexamples to weakened assumptions.
+    path: research/math-paper/FORMAL_CORE.md
+  - id: M-NOV
+    what: >-
+      the novelty audit. Every proposition is labelled KNOWN; the forbidden
+      phrase list is enforced by tests/test_math_paper_proofs.py.
+    path: research/math-paper/NOVELTY_AUDIT.md
+  - id: M-PRIOR
+    what: prior-art matrix; every row WEB_SEARCH_ONLY, one NOT_FOUND_NEEDS_HUMAN
+    path: research/math-paper/PRIOR_ART_MATRIX.csv
+  - id: M-EMP
+    what: empirical section drafted for this paper (coarsening from channel
+      unavailability, explicitly NOT a measurement of gate conditioning)
+    path: docs/research/PAPER1_EMPIRICAL_SECTION.md
+
+# ---------------------------------------------------------------------------
+# VERIFICATION
+# ---------------------------------------------------------------------------
+verification:
+  - id: V-2
+    what: >-
+      symbolic (sympy, n=4, exact) and numeric (20000 instances) verification
+      of every proposition in the manuscript. This is the verification
+      Table 1 of the manuscript transcribes.
+    script: research/math-paper/proof_audit.py
+    regenerate: PYTHONPATH=. python research/math-paper/proof_audit.py
+    determinism: >-
+      numpy default_rng(20260903); N_TRIALS=20000, H=5 fixed in source. The
+      symbolic pass needs sympy, which is deliberately NOT a project
+      dependency; without it the script runs the numeric pass and says so.
+    emits: research/math-paper/results/proof_audit.json
+  - id: V-1
+    what: >-
+      Monte-Carlo check of the calibrator's admissibility and of Ville's bound
+      under IID, autocorrelated and misspecified nulls. This is the script
+      that produced the six REFUTED entries in the register.
+    script: docs/math/proofs/eprocess_null_simulation.py
+    regenerate: PYTHONPATH=. python docs/math/proofs/eprocess_null_simulation.py
+    determinism: >-
+      seeded with numpy default_rng(0); K=0.5, T=2000, N=4000 fixed in source
+    emits: stdout only; no committed result file
+    open_item: OI-M1
+
+# ---------------------------------------------------------------------------
+# COUNTEREXAMPLES
+# Retained deliberately. Each one refuted a construction the project proposed.
+# ---------------------------------------------------------------------------
+counterexamples:
+  - id: CX-1
+    refutes: product of e-values across dependent residuals
+    measured: 2.87
+    against_bound: 1.0
+    source: V-1
+  - id: CX-2
+    refutes: naive per-tick temporal product under CSIA-like smoothing
+    measured: 0.442
+    against_bound: 0.05
+    condition: rho approximately 0.94
+    source: V-1
+  - id: CX-3
+    refutes: LR e-process under a misspecified null
+    measured: 0.4467
+    against_bound: 0.05
+    source: V-1
+  - id: CX-4
+    refutes: context-ignorant calibration under regime switching
+    measured: 0.7850
+    against_bound: 0.05
+    source: V-1
+  - id: CX-5
+    refutes: restart validity without first-observation conditioning
+    measured: 0.196
+    against_bound: 0.05
+    source: V-1
+    note: found by the verification suite against the project's own proposal
+  - id: CX-6
+    refutes: assumption A3 at rho = 0.99
+    measured: 0.208
+    against_bound: 0.05
+    source: V-1
+
+# ---------------------------------------------------------------------------
+# MANUSCRIPT CONTENT
+# Empty until the manuscript lands. The checker requires the table count to
+# match the scaffold, which currently has one transcribed register table.
+# ---------------------------------------------------------------------------
+figures: []
+
+tables:
+  - id: GT01
+    label: setting -- concentration versus discriminating support
+    what: >-
+      the two-row definition table in section 6. Definitional, no values.
+    artifact: research/math-paper/FORMAL_CORE.md
+    script: research/math-paper/FORMAL_CORE.md
+    derivation: >-
+      definitional, taken from FORMAL_CORE.md section 6. No generating script
+      exists; `script` names the source document because the checker resolves
+      this field as a path.
+    values: []
+  - id: GT02
+    label: verification
+    what: >-
+      symbolic and numeric verification of every proposition
+    artifact: research/math-paper/results/proof_audit.json
+    script: research/math-paper/proof_audit.py
+    derivation: >-
+      transcribed from proof_audit.json. Worst absolute deviations for the
+      identities, max slack and violation counts for the bounds, the P4
+      condition-met / agreed counts, and -- added by the math-paper red team
+      pass -- the P7 gated-score deviations (5.55e-16, 3.55e-15, 1.78e-15) and
+      P8's denominator (2282), the sampled instances in which a pinned pair
+      with equal prior mass was the top two under q.
+    values: [4.44, 1.78, 8.88, 1.33, 1.53, 8.38, 2721, 5.55, 3.55, 2282]
+  - id: GT03
+    label: independent checker against production
+    what: >-
+      the 378000 tick-by-pair comparison, and the zero occurrences of the one
+      known disagreement class
+    artifact: research/systems-paper/results/checker_agreement.json
+    script: research/systems-paper/compare_checker_vs_production.py
+    derivation: transcribed from checker_agreement.json totals.
+    values: [378000, 0]
+  - id: GT04
+    label: novelty audit
+    what: >-
+      per-proposition novelty status. Every row reads KNOWN.
+    artifact: research/math-paper/NOVELTY_AUDIT.md
+    script: research/math-paper/NOVELTY_AUDIT.md
+    derivation: >-
+      transcription; no generating script. NOVELTY_AUDIT.md governs and is enforced by
+      tests/test_math_paper_proofs.py; if the table and it disagree, the table
+      is stale.
+    values: []
+
+scalars:
+  # Section 10 states that NO posterior threshold enters the support rule.
+  # An earlier draft said "a leader above 0.999", which was wrong twice: the
+  # implementation has no such threshold (csia/v1_1/eligibility.py fires on
+  # the structural condition alone, and engineering/v1_1/support/support.py
+  # says why -- "No filtering by posterior mass -- that would make
+  # identifiability depend on the score whose support is in question"), and
+  # the observed firing ticks go down to 0.9691, which a 0.999 gate would
+  # have excluded. Both endpoints are bound here so the corrected sentence
+  # cannot drift back.
+  - id: GS01
+    value: "0.9691"
+    statement: >-
+      lowest leader posterior at a tick where the support rule fires; a
+      posterior-gated rule would not have fired here
+    artifact: engineering/v1_1/SUPPORT_STATE_RESULTS.csv
+    json_pointer: >-
+      not JSON: min of the `posterior` column over rows with a non-empty
+      `non_identifiable_against` (0.969087, 4 dp)
+    script: engineering/v1_1/support/run_phase2.py
+  - id: GS02
+    value: "0.9998"
+    statement: >-
+      highest leader posterior at a tick where the support rule fires; the
+      value the terminology remark uses to show concentration is not support
+    artifact: engineering/v1_1/SUPPORT_STATE_RESULTS.csv
+    json_pointer: >-
+      not JSON: max of the `posterior` column over rows with a non-empty
+      `non_identifiable_against` (0.999822, 4 dp)
+    script: engineering/v1_1/support/run_phase2.py
+
+non_empirical:
+  # A COUNTERFACTUAL threshold, not a measurement: section 10 names 0.999 to
+  # say that a rule gated there would have missed most of the firing ticks.
+  # It is the number an earlier draft wrongly claimed the implementation used,
+  # and naming it is what makes the correction legible.
+  - "0\\.999"
+  - "0\\.[0-9]{2}"
+  - "0\\.[0-9]"
+  - "[0-9]"
+  - "1[0-9]"
+  - "[2-9][0-9]"
+  - "19[0-9]{2}|20[0-9]{2}"
+  - "[0-9]{3,4}"
+
+open_items:
+  - id: OI-M1
+    what: >-
+      eprocess_null_simulation.py prints to stdout and commits no result file,
+      so its numbers cannot be diffed or regression-tested.
+    blocker: false
+    owner: manuscript author
+    resolution: >-
+      have it emit docs/math/proofs/results/eprocess_null.json and map each
+      counterexample above to a json_pointer, as the systems paper does.
+  - id: OI-M2
+    what: the manuscript itself has not been delivered
+    blocker: false
+    owner: manuscript agent
+    status: CLOSED
+    resolution: >-
+      DONE. main.tex is the manuscript; `make paper-math` builds an 8-page PDF
+      with every citation resolved. The e-process register it used to
+      transcribe is named in the manuscript as a separate body of work.
+  - id: OI-M4
+    what: >-
+      EVERY entry in papers/gate_conditioning/refs.bib is UNVERIFIED, and the
+      most important of them -- the coarsening-at-random reference that makes
+      Proposition 5 KNOWN rather than a contribution -- is RECONSTRUCTED from
+      search results alone.
+    blocker: true
+    owner: a human with publisher access
+    resolution: >-
+      run `make bib-verify` from a host whose egress permits api.crossref.org,
+      read each diff, and clear a marker only for an entry it reports clean.
+      A web search result is not a publisher record.
+  - id: OI-M3
+    what: >-
+      papers/gate_conditioning/refs.bib was empty, so the bibliography guard
+      passed trivially.
+    blocker: false
+    owner: manuscript agent
+    status: CLOSED
+    resolution: >-
+      DONE, and it now does real work: six entries, all carrying markers, so
+      `make bib-guard` reports this paper as blocked too. That is the honest
+      state -- a paper that labels every proposition KNOWN and cites nothing
+      would be claiming novelty by omission. See OI-M4.

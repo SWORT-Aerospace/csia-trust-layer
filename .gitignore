@@ -20,3 +20,100 @@ __pycache__/
 
 csia/native/*.dylib
 csia/native/*.so
+
+# SITL scratch working directories from research/phase2 campaigns
+research/phase2/results/_wd_*/
+
+# Three PX4 boots' worth of console logs and parameter files (~28 MB) from
+# tools/simulation/px4_link_rate_probe.py. The MEASUREMENT is the artifact
+# (research/v1_1/results/PX4_LINK_RATE_PROBE.json); this is the boot litter,
+# and re-running the probe regenerates it.
+research/v1_1/results/.px4_link_probe/
+
+# P1 per-tick residual streams: regenerable by re-running p1_fault_suite.py,
+# several MB each, and not the scientific record (the analyses are).
+research/phase2/results/p1_streams_*.json
+
+# --- LaTeX auxiliaries and paper build outputs -----------------------------
+# `make paper-*` writes to build/papers/, already covered by /build/ above.
+# These catch a stray in-tree pdflatex run inside a paper directory. Generated
+# PDFs are never committed: a committed PDF drifts from its source silently.
+papers/**/*.aux
+papers/**/*.bbl
+papers/**/*.blg
+papers/**/*.fdb_latexmk
+papers/**/*.fls
+papers/**/*.lof
+papers/**/*.log
+papers/**/*.lot
+papers/**/*.out
+papers/**/*.synctex.gz
+papers/**/*.toc
+papers/**/main.pdf
+
+# --- editor and OS junk ----------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Public archives are build products of tools/publication/build_public_release.py,
+# packed from the allowlist in PUBLIC_RELEASE_MANIFEST.yaml. The SOURCES are
+# committed — evidence_export/ is the deliverable, and every other member is a
+# tracked artifact — so the archives are reproducible byte-for-byte and a
+# committed copy could only drift from its own inputs. Rebuild with
+# `make public-release`; the manifest and the build log carry the SHA-256.
+publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz
+publication/system_paper_i/PAPER1_SANITIZED_PACKAGE.tar.gz
+
+# Shadow/advisory flight logs are per-run artifacts, like the archives above:
+# one JSONL file per flight, rotated and gzipped, written by
+# csia.deploy.flight_log. They are EVIDENCE from a specific run, not source --
+# a committed one would be a snapshot of a container that no longer exists.
+# Keep the ones that matter by archiving them deliberately, not by default.
+logs/
+
+# Two SITL boots per platform from research/maer/maer_raw_gnss_probe.py. The
+# MEASUREMENT is raw_gnss_probe_<platform>.json; this is the boot litter.
+research/maer/.raw_probe/
+
+# SITL boots from research/maer/maer_jam_qualification.py; the MEASUREMENT is
+# MAER_ARDUPILOT_JAM_RAW/.
+research/maer/.jam_probe/
+
+# SITL boots from research/maer/maer_capture.py; the RECORDING is
+# research/maer/results/scored/raw/.
+research/maer/.capture/
+
+# Six ArduPilot SITL boots' worth of console logs and parameter files from
+# research/dual_admissibility_confirmatory/heldout_capture.py. The RECORDINGS
+# are the artifact (results/heldout_raw/*.json.gz, committed); this is the
+# boot litter, and re-running the capture regenerates it.
+research/dual_admissibility_confirmatory/.heldout/
+research/evidence_semantics/__pycache__/
+research/ai_contract_synthesis/__pycache__/
+research/ai_contract_synthesis/*/__pycache__/
+research/semantic_authority_conflict/__pycache__/
+
+# Coverage and notebook checkpoints. Neither is produced by any committed
+# workflow today; the rules exist so a local `pytest --cov` or a scratch
+# notebook cannot end up tracked.
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.ipynb_checkpoints/
+
+# The calibration rehearsal artifact. It fixed one design decision, recorded in
+# PREREGISTRATION_AMENDMENT_2.md, and its arm list no longer matches the final
+# design. 11.6 MB of rows nobody will read again; the run is reproducible from
+# tools/research/iv_campaign.py --partition calibration.
+research/active_evidence/independent_validation/results/CAMPAIGN_CALIBRATION.json
+
+# E2M acquisition runs are generated hardware artifacts, never committed.
+# A raw log in git would be indistinguishable from a fixture, and a fixture
+# that looks like a run is how a synthetic stream becomes 'evidence'.
+runs/
+*.observations.jsonl

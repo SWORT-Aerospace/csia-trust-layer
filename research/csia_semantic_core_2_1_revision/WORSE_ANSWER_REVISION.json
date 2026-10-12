@@ -1,0 +1,181 @@
+{
+ "H1_undeclared_pacing_input": {
+  "both_pace_ALL_only_imu0_declared_imu1_dies": {
+   "2_1_0_r1": {
+    "supported": [
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [
+     "COMMUNICATION/input_starvation"
+    ],
+    "verdict": "AMBIGUOUS"
+   },
+   "2_1_1_declared_both": {
+    "supported": [
+     "COMMUNICATION/input_starvation",
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [],
+    "verdict": "AMBIGUOUS"
+   },
+   "2_1_1_declared_imu0_only": {
+    "supported": [
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [],
+    "verdict": "SUPPORTED"
+   }
+  },
+  "declared_imu0_dies_control": {
+   "2_1_1_declared_imu0": {
+    "supported": [
+     "COMMUNICATION/input_starvation",
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [],
+    "verdict": "AMBIGUOUS"
+   }
+  },
+  "imu_failover_declared_imu0_in_use_imu1_dies": {
+   "2_1_0_r1": {
+    "supported": [
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [
+     "COMMUNICATION/input_starvation"
+    ],
+    "verdict": "AMBIGUOUS"
+   },
+   "2_1_1_declared_imu0": {
+    "supported": [
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [],
+    "verdict": "SUPPORTED"
+   },
+   "2_1_1_declared_imu1": {
+    "supported": [
+     "COMMUNICATION/input_starvation",
+     "COMPUTE/process_stall"
+    ],
+    "unresolved": [],
+    "verdict": "AMBIGUOUS"
+   }
+  },
+  "reading": "the estimator's output stops; the true reason is that a pacing input is dead. SUPPORTED process_stall is then wrong."
+ },
+ "O1_O2_order_and_duplicates": {
+  "E1_ticks": 60,
+  "dataset_A_ticks": 2640,
+  "decision_changes_2_1_0": 0,
+  "duplicate_changes": 0,
+  "examples": [],
+  "presentation_only_changes_2_1_0": 459,
+  "presentation_only_changes_2_1_1": 754,
+  "reverse_changes": 0,
+  "shuffle_changes": 0
+ },
+ "U1_epoch_fail_closed": {
+  "BASE": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "DUPLICATE_OLD": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "EARLY_NEW_EPOCH": {
+   "missed_position_ticks": 1,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 2
+  },
+  "LATE_OLD_EPOCH": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "MALFORMED_EPOCH": {
+   "missed_position_ticks": 5,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 51
+  },
+  "MISSING_TRANSITION": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 61
+  },
+  "MISSING_TRANSITION_SILENT": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 9,
+   "stale_position_ticks": 9,
+   "valid_withheld": 26
+  },
+  "RAPID_SWITCHING": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "RESTART_COMPOSITE": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "RESTART_COUNTER_ONLY": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 6,
+   "stale_position_ticks": 6,
+   "valid_withheld": 0
+  },
+  "ROLLOVER_UINT8": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 9
+  },
+  "SWITCH_BACK": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  },
+  "SWITCH_BACK_LANE_ID": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 4,
+   "stale_position_ticks": 4,
+   "valid_withheld": 0
+  },
+  "UNRELATED_TRANSITION": {
+   "missed_position_ticks": 0,
+   "stale_admitted": 0,
+   "stale_position_ticks": 0,
+   "valid_withheld": 0
+  }
+ },
+ "U1_no_context": {
+  "missed_position_symptom_ticks": 5,
+  "stale_position_symptom_ticks": 0,
+  "valid_record_ticks_made_unavailable": 111
+ },
+ "X1_fault_on_e1_with_epochs": {
+  "injections": 1620,
+  "stale_position_ticks": 0,
+  "withheld": 0,
+  "wrong_supported": 0,
+  "wrong_unique": 0
+ },
+ "X2_overlay_keeps_epoch_stamps": {
+  "aircraft_successor_r1": true,
+  "aircraft_successor_r2": true
+ },
+ "harness": "semantic_core_2_1_revision_worse_answer_search"
+}

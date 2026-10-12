@@ -1,0 +1,45 @@
+# ULog topics for the actuator-effectiveness apparatus.
+# Format: <topic> <interval_ms> <instance>. Interval 0 logs every publication.
+# Added on top of SDLOG_PROFILE (logged_topics.cpp:616). Under lockstep the
+# logger is a lockstep component, so interval-0 topics published once per
+# 4 ms step are captured without drops; missed generations are counted.
+# COMMAND
+actuator_motors 0 0
+actuator_outputs_sim 0 0
+vehicle_torque_setpoint 0 0
+vehicle_thrust_setpoint 0 0
+vehicle_rates_setpoint 0 0
+vehicle_attitude_setpoint 0 0
+vehicle_local_position_setpoint 0 0
+control_allocator_status 0 0
+rate_ctrl_status 0 0
+# PHYSICAL ROTOR STATE and TELEMETRY (one variable in SIH; see preflight)
+esc_status 0 0
+# VEHICLE RESPONSE (truth and measured)
+vehicle_angular_velocity_groundtruth 0 0
+vehicle_attitude_groundtruth 0 0
+vehicle_local_position_groundtruth 20 0
+sensor_combined 0 0
+vehicle_angular_velocity 0 0
+vehicle_acceleration 0 0
+# ESTIMATED STATE
+vehicle_attitude 0 0
+vehicle_local_position 0 0
+estimator_innovations 0 0
+estimator_innovation_test_ratios 0 0
+estimator_innovation_variances 20 0
+hover_thrust_estimate 0 0
+# EVENTS
+parameter_update 0 0
+vehicle_command 0 0
+vehicle_status 0 0
+failure_detector_status 0 0
+# REDUCED: large topics the SITL profile logs at full rate that this apparatus
+# does not use. Re-adding a logged topic only changes its interval
+# (logged_topics.cpp add_topic). Logging is outside the control loop.
+estimator_states 100 0
+estimator_aid_src_gravity 100 0
+yaw_estimator_status 100 0
+vehicle_global_position 100 0
+ekf2_timestamps 100 0
+estimator_fusion_control 100 0

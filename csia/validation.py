@@ -115,7 +115,26 @@ def monte_carlo(runs=150, field_mode=True, seed=0, out_path=None):
     clean = {"n": 0, "alarms": 0, "hours": 0.0}
     t0 = time.time()
     for i in range(runs):
-        truth = generate_flight(seed=int(rng.integers(1, 2**31)))
+        # EVERY RUN FLIES THE SAME TRAJECTORY, and this line used to hide it.
+        # It read `generate_flight(seed=int(rng.integers(1, 2 ** 31)))`, which
+        # looks like per-trial flight randomization and is not: the scripted
+        # truth is a closed-form function of t with no noise term, so `seed`
+        # changes nothing (see csia.sensors.truth.generate_flight, and
+        # tests/test_flight_truth_determinism.py, which pins it).
+        #
+        # The draw is STILL TAKEN, deliberately. `rng` is one stream; dropping
+        # a draw would shift every subsequent `rng.random()` and
+        # `rng.uniform()` below and silently change a committed regression
+        # artifact (campaigns/monte_carlo.json) that reproduces bit-identically
+        # today. Preserving the stream is the whole reason this is a bare
+        # expression rather than a deletion.
+        #
+        # CONSEQUENCE, and it belongs with the numbers this function prints:
+        # the campaign varies fault class, amplitude, onset and the
+        # clean/faulted split. It does NOT vary the flight. Every TPR and
+        # confidence interval below is conditioned on one trajectory.
+        rng.integers(1, 2**31)          # stream position only -- see above
+        truth = generate_flight()
         if rng.random() < 0.4:   # clean run for false-alarm statistics
             s = _run_one(truth, [], field_mode)
             clean["n"] += 1

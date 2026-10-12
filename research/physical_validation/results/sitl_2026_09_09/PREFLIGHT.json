@@ -1,0 +1,140 @@
+{
+  "checks": [
+    {
+      "check": "frozen_core_vs_tag",
+      "detail": "byte-identical to the freeze tag",
+      "status": "PASS"
+    },
+    {
+      "check": "frozen_core_vs_source_digests",
+      "detail": "6 paths match",
+      "status": "PASS"
+    },
+    {
+      "check": "working_tree_clean",
+      "commit": "a1bd182a554fa5d4048e140cb143bdde845d0286",
+      "detail": "the working tree is DIRTY. A trial run from an uncommitted tree cannot be attributed to a commit, and its log will name one that does not describe it.",
+      "dirty_files": 8,
+      "status": "FAIL"
+    },
+    {
+      "check": "no_mode_claims_command",
+      "detail": "modes ['ADVISORY', 'SHADOW'] all report may_command=False",
+      "modes": {
+        "ADVISORY": false,
+        "SHADOW": false
+      },
+      "status": "PASS"
+    },
+    {
+      "check": "read_only_connection_has_no_transmit_surface",
+      "detail": "21 send-capable names, all DENIED or ABSENT",
+      "probes": {
+        "arducopter_arm": "DENIED",
+        "arducopter_disarm": "DENIED",
+        "mav": "DENIED",
+        "mav.command_long_send": "DENIED",
+        "mav.manual_control_send": "DENIED",
+        "mav.param_set_send": "DENIED",
+        "mav.rc_channels_override_send": "DENIED",
+        "mav.set_actuator_control_target_send": "DENIED",
+        "mav.set_mode_send": "DENIED",
+        "motors_armed_wait": "DENIED",
+        "param_set_send": "DENIED",
+        "reboot_autopilot": "DENIED",
+        "send": "DENIED",
+        "send_mavlink": "DENIED",
+        "set_mode": "DENIED",
+        "set_mode_apm": "DENIED",
+        "set_mode_px4": "DENIED",
+        "set_relay": "DENIED",
+        "set_servo": "DENIED",
+        "waypoint_clear_all_send": "DENIED",
+        "write": "DENIED"
+      },
+      "status": "PASS"
+    },
+    {
+      "check": "adapter_present",
+      "contract_version": 2,
+      "detail": "ardupilot -> 1.1.0",
+      "status": "PASS"
+    },
+    {
+      "check": "staleness_timeouts_derived",
+      "detail": "8 nodes, derived from the channel contract (no constant is introduced)",
+      "status": "PASS",
+      "timeouts": {
+        "baro": 0.5,
+        "battery": 0.5,
+        "gps": 1.0,
+        "imu0": 0.2,
+        "imu1": 0.2,
+        "mag": 0.2,
+        "motor_esc": 0.5,
+        "vibration": 0.5
+      }
+    },
+    {
+      "arm_time_s": 10.0,
+      "check": "failsafe_policy",
+      "detail": "FROZEN_ONLY",
+      "dwell_down_s": 5.0,
+      "dwell_up_s": 1.0,
+      "policy": "FROZEN_ONLY",
+      "status": "PASS"
+    },
+    {
+      "check": "log_dir_writable",
+      "detail": "/home/user/csia-trust-layer/logs/shadow is writable",
+      "status": "PASS"
+    },
+    {
+      "check": "log_dir_free_space",
+      "detail": "18878 MB free",
+      "free_mb": 18878.3,
+      "status": "PASS"
+    }
+  ],
+  "counts": {
+    "FAIL": 1,
+    "INCONCLUSIVE": 0,
+    "PASS": 9
+  },
+  "data_loss_supervision": false,
+  "host": {
+    "machine": "x86_64",
+    "python": "3.12.3",
+    "release": "6.18.44-fc-v24",
+    "system": "Linux"
+  },
+  "inconclusive_is_not_pass": "a check that could not be performed tells you nothing. A preflight with any INCONCLUSIVE is not a green preflight, and this repository has already been bitten once by a skip that read as a success.",
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "no adapter is registered under that name; FAIL follows from the adapter registry, not from this tool",
+        "control": "an unknown platform is refused",
+        "kind": "POSITIVE",
+        "observed": "'FAIL'",
+        "status": "PASS"
+      },
+      {
+        "basis": "the ardupilot adapter is registered and imported by the runtime; a preflight that rejects it is broken",
+        "control": "a real platform is not refused",
+        "kind": "NEGATIVE",
+        "observed": "'PASS'",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.deploy.preflight",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "platform": "ardupilot",
+  "schema": "csia.deploy.preflight/1",
+  "t_unix": 1788928889.448925,
+  "verdict": "DO_NOT_FLY",
+  "what_this_does_not_establish": "that the vehicle is airworthy, that the sensors are calibrated, or that any hypothesis is true. It establishes that the SOFTWARE is the software you think it is and cannot transmit."
+}

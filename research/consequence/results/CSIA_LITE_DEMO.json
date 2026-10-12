@@ -1,0 +1,131 @@
+{
+ "closing_feature": "f_airspeed_vs_ground",
+ "evidence_level": "DETERMINISTIC_SIMULATION",
+ "executed_an_autopilot": false,
+ "gates_open": {
+  "f_airspeed_vs_ground": 1.0,
+  "f_airspeed_vs_throttle": 1.0,
+  "f_baro_vs_gnss_alt": 1.0
+ },
+ "h6_outcome": "H6 is not killed. Both mechanisms reproduce, and the fresh-interpreter import check finds no csia module loaded. The reproduction is independent of the CODE and not of the AUTHOR, which is a cross-check on the derivation rather than a replication by a second party.",
+ "hypotheses": [
+  "h_pitot_blocked",
+  "h_static_port_blocked",
+  "h_wind_shear"
+ ],
+ "low_sets": {
+  "h_pitot_blocked": [
+   "f_airspeed_vs_ground",
+   "f_airspeed_vs_throttle"
+  ],
+  "h_static_port_blocked": [
+   "f_baro_vs_gnss_alt"
+  ],
+  "h_wind_shear": [
+   "f_airspeed_vs_throttle"
+  ]
+ },
+ "model_note": "A three-hypothesis toy modelled on the airspeed relations named in the phase 6 audit, and CONSTRUCTED so that one pair is separated by exactly one feature. It demonstrates the MECHANISM. It measures nothing about PX4, ArduPilot, or any aircraft, and the construction is an illustration, not a result.",
+ "observation": {
+  "f_airspeed_vs_ground": true,
+  "f_airspeed_vs_throttle": true,
+  "f_baro_vs_gnss_alt": false
+ },
+ "occlusion_demo": {
+  "all_measurements_fresh_throughout": true,
+  "closing_feature": "f_airspeed_vs_ground",
+  "max_posterior_after": 0.4969325153374233,
+  "posterior_after": {
+   "h_pitot_blocked": 0.4969325153374233,
+   "h_static_port_blocked": 0.006134969325153372,
+   "h_wind_shear": 0.4969325153374233
+  },
+  "posterior_after_leader_is_a_tie": true,
+  "posterior_after_leaders": [
+   "h_pitot_blocked",
+   "h_wind_shear"
+  ],
+  "posterior_after_sums_to_one": true,
+  "posterior_before": {
+   "h_pitot_blocked": 0.8988902589395807,
+   "h_static_port_blocked": 0.0012330456226880393,
+   "h_wind_shear": 0.09987669543773123
+  },
+  "support_after": "AMBIGUOUS",
+  "support_before": "IDENTIFIABLE",
+  "support_changed": true
+ },
+ "pairwise_max_abs_llr_closed": {
+  "h_pitot_blocked|h_static_port_blocked": 4.394449154672439,
+  "h_pitot_blocked|h_wind_shear": 0.0,
+  "h_static_port_blocked|h_wind_shear": 4.394449154672439
+ },
+ "pairwise_max_abs_llr_open": {
+  "h_pitot_blocked|h_static_port_blocked": 6.591673732008658,
+  "h_pitot_blocked|h_wind_shear": 2.1972245773362196,
+  "h_static_port_blocked|h_wind_shear": 4.394449154672439
+ },
+ "phase": "7 -- CSIA-Lite independent reproduction (H6)",
+ "redundancy_note": "Occlusion bites only where the closing relation is the sole separator of two candidates. Where a second relation also separates them, closing the first changes the support state not at all -- which is why `support_all_gates_open` and `support_after_one_gate_closes` differ here by construction and would not in a redundantly instrumented system.",
+ "schema": "csia.consequence.csia_lite_demo/1",
+ "support_after_one_gate_closes": {
+  "reason": "SOME_PAIRS_UNSEPARATED",
+  "separating_features": {
+   "h_pitot_blocked|h_static_port_blocked": [
+    "f_airspeed_vs_throttle",
+    "f_baro_vs_gnss_alt"
+   ],
+   "h_static_port_blocked|h_wind_shear": [
+    "f_airspeed_vs_throttle",
+    "f_baro_vs_gnss_alt"
+   ]
+  },
+  "state": "AMBIGUOUS",
+  "unseparated": [
+   [
+    "h_pitot_blocked",
+    "h_wind_shear"
+   ]
+  ]
+ },
+ "support_all_gates_closed": {
+  "reason": "NOTHING_SEPARATES_ANY_PAIR",
+  "separating_features": {},
+  "state": "NON_IDENTIFIABLE",
+  "unseparated": [
+   [
+    "h_pitot_blocked",
+    "h_static_port_blocked"
+   ],
+   [
+    "h_pitot_blocked",
+    "h_wind_shear"
+   ],
+   [
+    "h_static_port_blocked",
+    "h_wind_shear"
+   ]
+  ]
+ },
+ "support_all_gates_open": {
+  "reason": "ALL_PAIRS_SEPARATED",
+  "separating_features": {
+   "h_pitot_blocked|h_static_port_blocked": [
+    "f_airspeed_vs_ground",
+    "f_airspeed_vs_throttle",
+    "f_baro_vs_gnss_alt"
+   ],
+   "h_pitot_blocked|h_wind_shear": [
+    "f_airspeed_vs_ground"
+   ],
+   "h_static_port_blocked|h_wind_shear": [
+    "f_airspeed_vs_throttle",
+    "f_baro_vs_gnss_alt"
+   ]
+  },
+  "state": "IDENTIFIABLE",
+  "unseparated": []
+ },
+ "touched_hardware": false,
+ "what_this_is_not": "Not a measurement, not a validation, not evidence about any autopilot, and not a second party's replication."
+}

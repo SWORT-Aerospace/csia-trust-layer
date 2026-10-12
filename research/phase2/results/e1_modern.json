@@ -1,0 +1,1186 @@
+{
+ "F3_VERDICT": "SURVIVES_BOUNDED",
+ "F3_verdict_reason": "3 validated significant cell(s) missed by both monitors: ['a55.7_s60', 'a55.7_s120', 'a55.7_s240']",
+ "F4_coverage_decomposition_significant": {
+  "N_autopilot_only": 4,
+  "N_both": 1,
+  "N_csia_only": 0,
+  "N_joint_miss": 3,
+  "N_total": 8,
+  "R_autopilot_dependence": 0.5,
+  "R_incremental_csia_only": 0.0,
+  "R_joint_miss": 0.375,
+  "note": "counts over a small deterministic grid; not probabilities"
+ },
+ "R10_budget": {
+  "blocks_candidate_comparison": true,
+  "budget": 0,
+  "failsafe_transitions_observed": 4,
+  "nominal_flights": 4,
+  "note": "R10 is a hard constraint in CANDIDATE_REGISTRY.yaml. A frozen baseline that violates it on this build must be understood before any candidate is scored against it. See results/r10_modern.json.",
+  "per_flight": [
+   {
+    "alarms": [
+     {
+      "level": "CRITICAL",
+      "reasons": [
+       "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+      ],
+      "t": 46.76
+     }
+    ],
+    "label": "nominal_20"
+   },
+   {
+    "alarms": [
+     {
+      "level": "CRITICAL",
+      "reasons": [
+       "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+      ],
+      "t": 46.72
+     }
+    ],
+    "label": "nominal_60"
+   },
+   {
+    "alarms": [
+     {
+      "level": "CRITICAL",
+      "reasons": [
+       "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+      ],
+      "t": 46.68
+     }
+    ],
+    "label": "nominal_120"
+   },
+   {
+    "alarms": [
+     {
+      "level": "CRITICAL",
+      "reasons": [
+       "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+      ],
+      "t": 46.04
+     }
+    ],
+    "label": "nominal_240"
+   }
+  ],
+  "within_budget": false
+ },
+ "airframe_consequence": {
+  "per_cell": [
+   {
+    "autopilot_detects": true,
+    "coverage": "AUTOPILOT_ONLY",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 6.248744,
+    "excess_m": -0.22,
+    "injected_offset_m": 56.54,
+    "label": "a55.7_s20",
+    "nominal_control_m": 39.23,
+    "slew_s": 20,
+    "true_excursion_m": 39.01
+   },
+   {
+    "autopilot_detects": false,
+    "coverage": "JOINT_MISS",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 0.524579,
+    "excess_m": 48.76,
+    "injected_offset_m": 56.42,
+    "label": "a55.7_s60",
+    "nominal_control_m": 39.13,
+    "slew_s": 60,
+    "true_excursion_m": 87.89
+   },
+   {
+    "autopilot_detects": false,
+    "coverage": "JOINT_MISS",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 0.262402,
+    "excess_m": 48.48,
+    "injected_offset_m": 56.51,
+    "label": "a55.7_s120",
+    "nominal_control_m": 39.55,
+    "slew_s": 120,
+    "true_excursion_m": 88.03
+   },
+   {
+    "autopilot_detects": false,
+    "coverage": "JOINT_MISS",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 0.139383,
+    "excess_m": 48.04,
+    "injected_offset_m": 56.49,
+    "label": "a55.7_s240",
+    "nominal_control_m": 39.59,
+    "slew_s": 240,
+    "true_excursion_m": 87.63
+   },
+   {
+    "autopilot_detects": true,
+    "coverage": "BOTH",
+    "csia_escalates_for_gps": true,
+    "ekf_var_post": 59.308849,
+    "excess_m": -0.37,
+    "injected_offset_m": 557.4,
+    "label": "a556.6_s20",
+    "nominal_control_m": 39.23,
+    "slew_s": 20,
+    "true_excursion_m": 38.86
+   },
+   {
+    "autopilot_detects": true,
+    "coverage": "AUTOPILOT_ONLY",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 19.776329,
+    "excess_m": 4.35,
+    "injected_offset_m": 557.4,
+    "label": "a556.6_s60",
+    "nominal_control_m": 39.13,
+    "slew_s": 60,
+    "true_excursion_m": 43.48
+   },
+   {
+    "autopilot_detects": true,
+    "coverage": "AUTOPILOT_ONLY",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 9.892565,
+    "excess_m": 8.15,
+    "injected_offset_m": 557.39,
+    "label": "a556.6_s120",
+    "nominal_control_m": 39.55,
+    "slew_s": 120,
+    "true_excursion_m": 47.7
+   },
+   {
+    "autopilot_detects": true,
+    "coverage": "AUTOPILOT_ONLY",
+    "csia_escalates_for_gps": false,
+    "ekf_var_post": 5.295883,
+    "excess_m": 68.83,
+    "injected_offset_m": 557.4,
+    "label": "a556.6_s240",
+    "nominal_control_m": 39.59,
+    "slew_s": 240,
+    "true_excursion_m": 108.42
+   }
+  ],
+  "quantity": "true_vehicle_excursion_m minus the matched-window nominal control",
+  "why_it_is_reported": "the injected offset is what the receiver reports; the excess excursion is where the airframe physically went. A ramp the estimator accepts is flown; a ramp it rejects is not."
+ },
+ "criteria": {
+  "autopilot_detects": "EKF pos_horiz_variance > 0.8",
+  "coverage_is_computed_on": "ESCALATION for CSIA, DETECTION for the autopilot estimator",
+  "csia_detects": "gps physics residual < 0.1",
+  "csia_escalates": "failsafe leaves NORMAL"
+ },
+ "experiment": "E1 \u2014 slow-slew extension on modern ArduPilot",
+ "grid": {
+  "amplitudes_m": [
+   55.7,
+   556.6
+  ],
+  "cells": 8,
+  "slews_s": [
+   20,
+   60,
+   120,
+   240
+  ]
+ },
+ "instrument": {
+  "control": {
+   "corrected_instrument_reads_on_nominal_m": 0.91,
+   "must_be_below_m": 2.0,
+   "note": "a validity instrument that reads non-null with no injection cannot certify that an injection happened",
+   "passes": true,
+   "run1_instrument_reads_on_nominal_m": 39.55,
+   "status": "PASS"
+  },
+  "displacement_estimator": "sep(GPS_RAW_INT, SIMSTATE) \u2014 the reported position minus the simulator's own truth",
+  "run": 2,
+  "run1_artifact": "results/e1_modern_run1_defective_instrument.json",
+  "run1_estimator": "sep(GPS_RAW_INT(t), GPS_RAW_INT(t_inject)) \u2014 contains the airframe's own motion",
+  "why_this_is_the_glitch": "libraries/SITL/SIM_GPS.cpp:581 adds the glitch to the true latitude after the receiver delay buffer"
+ },
+ "per_trial": [
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 49.2,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.52; diagnosis nominal p=0.98)"
+     ],
+     "t": 44.52
+    },
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "magnetometer untrusted (mag 0.57; diagnosis nominal p=0.97)"
+     ],
+     "t": 69.2
+    }
+   ],
+   "amplitude_m": 55.7,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": 1.362,
+   "autopilot_detects": true,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": 9.2,
+   "csia_escalates": true,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 500,
+   "csia_max_gps_input_shift_m": 64.32,
+   "csia_min_evidence": 0.647564,
+   "csia_min_phys": 0.538659,
+   "csia_min_trust": 0.942369,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 6.248744,
+   "ekf_var_pre": 0.003336,
+   "end_s": 110.0,
+   "excess_true_excursion_m": -0.22,
+   "final_layer_time_s": 110.0,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 20,
+   "invalidity_reason": null,
+   "label": "a55.7_s20",
+   "max_fused_position_error_m": 58.32,
+   "max_injected_sensor_offset_m": 56.54,
+   "max_relative_alt_m": 18.5,
+   "max_reported_position_change_m": 58.5,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.83,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.2,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 1773,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.23,
+   "param_readback_after": 0.0005003593396395445,
+   "param_requested": 0.000500359,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.84,
+   "requested_rate_m_s": 2.785,
+   "significant": true,
+   "slew_s": 20,
+   "true_vehicle_excursion_m": 39.01,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": true
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 49.8,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=1.00)"
+     ],
+     "t": 46.08
+    }
+   ],
+   "amplitude_m": 55.7,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 901,
+   "csia_max_gps_input_shift_m": 38.72,
+   "csia_min_evidence": 0.748587,
+   "csia_min_phys": 0.252166,
+   "csia_min_trust": 0.923113,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.524579,
+   "ekf_var_pre": 0.0032,
+   "end_s": 150.0,
+   "excess_true_excursion_m": 48.76,
+   "final_layer_time_s": 150.04,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 60,
+   "invalidity_reason": null,
+   "label": "a55.7_s60",
+   "max_fused_position_error_m": 38.62,
+   "max_injected_sensor_offset_m": 56.42,
+   "max_relative_alt_m": 18.6,
+   "max_reported_position_change_m": 38.72,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.6,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2761,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.13,
+   "param_readback_after": 0.0005003593396395445,
+   "param_requested": 0.000500359,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.72,
+   "requested_rate_m_s": 0.9283,
+   "significant": true,
+   "slew_s": 60,
+   "true_vehicle_excursion_m": 87.89,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.3,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.68
+    }
+   ],
+   "amplitude_m": 55.7,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 1500,
+   "csia_max_gps_input_shift_m": 48.65,
+   "csia_min_evidence": 0.808956,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.959142,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.262402,
+   "ekf_var_pre": 0.003247,
+   "end_s": 210.0,
+   "excess_true_excursion_m": 48.48,
+   "final_layer_time_s": 210.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 120,
+   "invalidity_reason": null,
+   "label": "a55.7_s120",
+   "max_fused_position_error_m": 39.17,
+   "max_injected_sensor_offset_m": 56.51,
+   "max_relative_alt_m": 18.5,
+   "max_reported_position_change_m": 38.35,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.6,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 4236,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.55,
+   "param_readback_after": 0.0005003593396395445,
+   "param_requested": 0.000500359,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 0.4642,
+   "significant": true,
+   "slew_s": 120,
+   "true_vehicle_excursion_m": 88.03,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.72
+    }
+   ],
+   "amplitude_m": 55.7,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 2700,
+   "csia_max_gps_input_shift_m": 49.67,
+   "csia_min_evidence": 0.812645,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.96187,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.139383,
+   "ekf_var_pre": 0.003224,
+   "end_s": 330.0,
+   "excess_true_excursion_m": 48.04,
+   "final_layer_time_s": 330.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 240,
+   "invalidity_reason": null,
+   "label": "a55.7_s240",
+   "max_fused_position_error_m": 39.64,
+   "max_injected_sensor_offset_m": 56.49,
+   "max_relative_alt_m": 18.8,
+   "max_reported_position_change_m": 39.03,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.6,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 7236,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.59,
+   "param_readback_after": 0.0005003593396395445,
+   "param_requested": 0.000500359,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 0.2321,
+   "significant": true,
+   "slew_s": 240,
+   "true_vehicle_excursion_m": 87.63,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.8
+    },
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS trust 0.70 (diagnosis nominal p=0.94)"
+     ],
+     "t": 70.4
+    },
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "GPS trust 0.71 (diagnosis nominal p=0.97)"
+     ],
+     "t": 79.24
+    }
+   ],
+   "amplitude_m": 556.6,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": 0.257,
+   "autopilot_detects": true,
+   "csia_detect_delay_s": 0.24,
+   "csia_detects": true,
+   "csia_escalate_delay_s": 10.4,
+   "csia_escalates": true,
+   "csia_escalates_for_gps": true,
+   "csia_gps_escalate_delay_s": 10.4,
+   "csia_gps_samples_post": 500,
+   "csia_max_gps_input_shift_m": 558.94,
+   "csia_min_evidence": 0.405675,
+   "csia_min_phys": 0.0,
+   "csia_min_trust": 0.64601,
+   "csia_phys_floor_ticks": 220,
+   "ekf_var_post": 59.308849,
+   "ekf_var_pre": 0.003215,
+   "end_s": 110.0,
+   "excess_true_excursion_m": -0.37,
+   "final_layer_time_s": 110.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 20,
+   "invalidity_reason": null,
+   "label": "a556.6_s20",
+   "max_fused_position_error_m": 557.67,
+   "max_injected_sensor_offset_m": 557.4,
+   "max_relative_alt_m": 18.6,
+   "max_reported_position_change_m": 558.12,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 1736,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.23,
+   "param_readback_after": 0.004999999888241291,
+   "param_requested": 0.005,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 27.83,
+   "significant": true,
+   "slew_s": 20,
+   "true_vehicle_excursion_m": 38.86,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.72
+    }
+   ],
+   "amplitude_m": 556.6,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": 0.232,
+   "autopilot_detects": true,
+   "csia_detect_delay_s": 0.24,
+   "csia_detects": true,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 900,
+   "csia_max_gps_input_shift_m": 553.23,
+   "csia_min_evidence": 0.346444,
+   "csia_min_phys": 1.3e-05,
+   "csia_min_trust": 0.775221,
+   "csia_phys_floor_ticks": 287,
+   "ekf_var_post": 19.776329,
+   "ekf_var_pre": 0.00324,
+   "end_s": 150.0,
+   "excess_true_excursion_m": 4.35,
+   "final_layer_time_s": 150.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 60,
+   "invalidity_reason": null,
+   "label": "a556.6_s60",
+   "max_fused_position_error_m": 551.91,
+   "max_injected_sensor_offset_m": 557.4,
+   "max_relative_alt_m": 18.9,
+   "max_reported_position_change_m": 552.38,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2736,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.13,
+   "param_readback_after": 0.004999999888241291,
+   "param_requested": 0.005,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 9.2767,
+   "significant": true,
+   "slew_s": 60,
+   "true_vehicle_excursion_m": 43.48,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.76
+    }
+   ],
+   "amplitude_m": 556.6,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": 0.232,
+   "autopilot_detects": true,
+   "csia_detect_delay_s": 0.24,
+   "csia_detects": true,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 1500,
+   "csia_max_gps_input_shift_m": 547.26,
+   "csia_min_evidence": 0.413818,
+   "csia_min_phys": 0.067068,
+   "csia_min_trust": 0.881709,
+   "csia_phys_floor_ticks": 24,
+   "ekf_var_post": 9.892565,
+   "ekf_var_pre": 0.003212,
+   "end_s": 210.0,
+   "excess_true_excursion_m": 8.15,
+   "final_layer_time_s": 210.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 120,
+   "invalidity_reason": null,
+   "label": "a556.6_s120",
+   "max_fused_position_error_m": 546.0,
+   "max_injected_sensor_offset_m": 557.39,
+   "max_relative_alt_m": 18.8,
+   "max_reported_position_change_m": 546.45,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 4236,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.55,
+   "param_readback_after": 0.004999999888241291,
+   "param_requested": 0.005,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 4.6383,
+   "significant": true,
+   "slew_s": 120,
+   "true_vehicle_excursion_m": 47.7,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.63; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.76
+    },
+    {
+     "level": "CAUTION",
+     "reasons": [
+      "magnetometer untrusted (mag 0.56; diagnosis nominal p=0.97)"
+     ],
+     "t": 70.28
+    }
+   ],
+   "amplitude_m": 556.6,
+   "arm": "ramp",
+   "autopilot_detect_delay_s": 1.232,
+   "autopilot_detects": true,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": 10.28,
+   "csia_escalates": true,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 2700,
+   "csia_max_gps_input_shift_m": 481.84,
+   "csia_min_evidence": 0.684401,
+   "csia_min_phys": 0.638913,
+   "csia_min_trust": 0.896773,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 5.295883,
+   "ekf_var_pre": 0.003233,
+   "end_s": 330.0,
+   "excess_true_excursion_m": 68.83,
+   "final_layer_time_s": 330.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 240,
+   "invalidity_reason": null,
+   "label": "a556.6_s240",
+   "max_fused_position_error_m": 480.46,
+   "max_injected_sensor_offset_m": 557.4,
+   "max_relative_alt_m": 18.8,
+   "max_reported_position_change_m": 480.9,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 7236,
+   "nav_caution_threshold": 0.75,
+   "nominal_control_excursion_m": 39.59,
+   "param_readback_after": 0.004999999888241291,
+   "param_requested": 0.005,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 2.3192,
+   "significant": true,
+   "slew_s": 240,
+   "true_vehicle_excursion_m": 108.42,
+   "validity_checks": {
+    "V1_command_issued": true,
+    "V2_param_readback": true,
+    "V3_sensor_output_changed": true,
+    "V4_autopilot_affected": true,
+    "V5_csia_ingested": true,
+    "V6_truth_matches_schedule": true
+   },
+   "wrong_isolation": true
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.76
+    }
+   ],
+   "amplitude_m": 0.0,
+   "arm": "nominal",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 500,
+   "csia_max_gps_input_shift_m": 49.29,
+   "csia_min_evidence": 0.814258,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.963753,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.01604,
+   "ekf_var_pre": 0.00323,
+   "end_s": 110.0,
+   "final_layer_time_s": 110.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 0,
+   "invalidity_reason": null,
+   "label": "nominal_20",
+   "max_fused_position_error_m": 39.2,
+   "max_injected_sensor_offset_m": 0.81,
+   "max_relative_alt_m": 18.8,
+   "max_reported_position_change_m": 38.97,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 1736,
+   "nav_caution_threshold": 0.75,
+   "param_readback_after": null,
+   "param_requested": 0.0,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 0.0,
+   "significant": false,
+   "slew_s": 20,
+   "true_vehicle_excursion_m": 39.23,
+   "validity_checks": {
+    "nominal_arm": "no injection to verify"
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.4,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.72
+    }
+   ],
+   "amplitude_m": 0.0,
+   "arm": "nominal",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 900,
+   "csia_max_gps_input_shift_m": 48.53,
+   "csia_min_evidence": 0.812457,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.963447,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.015468,
+   "ekf_var_pre": 0.003247,
+   "end_s": 150.0,
+   "final_layer_time_s": 150.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 0,
+   "invalidity_reason": null,
+   "label": "nominal_60",
+   "max_fused_position_error_m": 39.14,
+   "max_injected_sensor_offset_m": 0.81,
+   "max_relative_alt_m": 18.8,
+   "max_reported_position_change_m": 38.82,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 2736,
+   "nav_caution_threshold": 0.75,
+   "param_readback_after": null,
+   "param_requested": 0.0,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 0.0,
+   "significant": false,
+   "slew_s": 60,
+   "true_vehicle_excursion_m": 39.13,
+   "validity_checks": {
+    "nominal_arm": "no injection to verify"
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 50.3,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.68
+    }
+   ],
+   "amplitude_m": 0.0,
+   "arm": "nominal",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 1500,
+   "csia_max_gps_input_shift_m": 49.53,
+   "csia_min_evidence": 0.811237,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.962767,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.01586,
+   "ekf_var_pre": 0.003246,
+   "end_s": 210.0,
+   "final_layer_time_s": 210.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 0,
+   "invalidity_reason": null,
+   "label": "nominal_120",
+   "max_fused_position_error_m": 39.54,
+   "max_injected_sensor_offset_m": 0.81,
+   "max_relative_alt_m": 18.6,
+   "max_reported_position_change_m": 39.27,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.74,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.7,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 4236,
+   "nav_caution_threshold": 0.75,
+   "param_readback_after": null,
+   "param_requested": 0.0,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.8,
+   "requested_rate_m_s": 0.0,
+   "significant": false,
+   "slew_s": 120,
+   "true_vehicle_excursion_m": 39.55,
+   "validity_checks": {
+    "nominal_arm": "no injection to verify"
+   },
+   "wrong_isolation": false
+  },
+  {
+   "TRIAL_VALID": true,
+   "airborne_at_s": 49.8,
+   "alarms": [
+    {
+     "level": "CRITICAL",
+     "reasons": [
+      "power integrity fault (battery 0.62; diagnosis nominal p=0.98)"
+     ],
+     "t": 46.04
+    }
+   ],
+   "amplitude_m": 0.0,
+   "arm": "nominal",
+   "autopilot_detect_delay_s": null,
+   "autopilot_detects": false,
+   "csia_detect_delay_s": null,
+   "csia_detects": false,
+   "csia_escalate_delay_s": null,
+   "csia_escalates": false,
+   "csia_escalates_for_gps": false,
+   "csia_gps_escalate_delay_s": null,
+   "csia_gps_samples_post": 2700,
+   "csia_max_gps_input_shift_m": 49.49,
+   "csia_min_evidence": 0.834198,
+   "csia_min_phys": 1.0,
+   "csia_min_trust": 0.969334,
+   "csia_phys_floor_ticks": 0,
+   "ekf_var_post": 0.017375,
+   "ekf_var_pre": 0.003187,
+   "end_s": 330.0,
+   "final_layer_time_s": 330.03,
+   "gate_closed_ticks": 0,
+   "gps_fix_types_seen": [
+    0,
+    1,
+    6
+   ],
+   "inject_at_s": 60.0,
+   "injection_commands_sent": 0,
+   "invalidity_reason": null,
+   "label": "nominal_240",
+   "max_fused_position_error_m": 39.44,
+   "max_injected_sensor_offset_m": 0.91,
+   "max_relative_alt_m": 18.7,
+   "max_reported_position_change_m": 39.55,
+   "mean_sats_post": 10.0,
+   "mean_sats_pre": 8.76,
+   "mode_changes": [
+    [
+     0.0,
+     "STABILIZE"
+    ],
+    [
+     13.6,
+     "GUIDED"
+    ]
+   ],
+   "monitored_ticks": 7261,
+   "nav_caution_threshold": 0.75,
+   "param_readback_after": null,
+   "param_requested": 0.0,
+   "param_used": "SIM_GPS1_GLTCH_X",
+   "preinject_sensor_offset_m": 0.9,
+   "requested_rate_m_s": 0.0,
+   "significant": false,
+   "slew_s": 240,
+   "true_vehicle_excursion_m": 39.59,
+   "validity_checks": {
+    "nominal_arm": "no injection to verify"
+   },
+   "wrong_isolation": false
+  }
+ ],
+ "precommitted": true,
+ "significance_source": "csia/scenarios.py:27 gps_spoof reference displacement (~3.2 m/s x 15 s)",
+ "significance_threshold_m": 48.0,
+ "target": {
+  "binary": "/home/user/ardupilot/ardupilot/build/sitl/bin/arducopter",
+  "firmware": "ArduCopter V4.8.0-dev"
+ },
+ "trial_validity": {
+  "contract": "V1..V6, see modern_rig.py",
+  "invalid_detail": [],
+  "invalid_trials": 0,
+  "policy": "invalid trials are excluded from every metric and retained in per_trial",
+  "valid_trials": 8
+ }
+}

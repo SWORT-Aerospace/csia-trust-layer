@@ -1,0 +1,133 @@
+{
+  "additional_families_selected": [
+    "mag",
+    "estimator_health"
+  ],
+  "artifact": "CROSS_SENSOR_AUDIT",
+  "channels_audited": 10,
+  "families_audited": 9,
+  "limit": "item 23 permits at most TWO additional families",
+  "rows": [
+    {
+      "adapter_branch": "pop + _reject_sentinel(NO_3D_FIX)",
+      "channel": "gnss.position/velocity",
+      "citation": "csia/aircraft/adapters/ardupilot.py:227",
+      "cited_text": "fix = g(\"fix_type\", 0)",
+      "explicit_source_state": "YES -- fix_type < 3",
+      "family": "gnss",
+      "reaches_core": "YES (CORE_MAP['gps'])",
+      "reason_delivered": "YES (NO_3D_FIX)",
+      "selected": "ALREADY PROBED (item 14)",
+      "source_field": "GPS_RAW_INT.fix_type"
+    },
+    {
+      "adapter_branch": "_reject_sentinel(default SENTINEL), NO pop",
+      "channel": "battery.current",
+      "citation": "csia/aircraft/adapters/ardupilot.py:32",
+      "cited_text": "CURRENT_NOT_MEASURED = -1",
+      "explicit_source_state": "YES -- documented -1 'not measured'",
+      "family": "battery",
+      "reaches_core": "YES (CORE_MAP['battery'])",
+      "reason_delivered": "NO -- counted, then overridden by the retained value",
+      "selected": "ALREADY PROBED (item 13)",
+      "source_field": "BATTERY_STATUS.current_battery"
+    },
+    {
+      "adapter_branch": "filtered out of the sum; NO rejection path at all",
+      "channel": "battery.voltage",
+      "citation": "csia/aircraft/adapters/ardupilot.py:31",
+      "cited_text": "CELL_ABSENT = 65535",
+      "explicit_source_state": "YES -- 65535 'cell not present'",
+      "family": "battery",
+      "reaches_core": "YES (CORE_MAP['battery'])",
+      "reason_delivered": "NO -- `if volts:` simply does not _put",
+      "selected": "NO -- same family as battery.current, would not be an independent replication",
+      "source_field": "BATTERY_STATUS.voltages[i]"
+    },
+    {
+      "adapter_branch": "no _put on the else branch; NO _reject_sentinel",
+      "channel": "mag.field_ut",
+      "citation": "csia/aircraft/adapters/ardupilot.py:146",
+      "cited_text": "if any(mag) and all(finite(x) for x in mag):",
+      "explicit_source_state": "YES in the decoders' own reading -- an all-zero triple; NOT a documented MAVLink sentinel",
+      "family": "mag",
+      "reaches_core": "YES (CORE_MAP['mag'])",
+      "reason_delivered": "NO -- nothing is recorded at all",
+      "selected": "YES -- ADDITIONAL FAMILY 1",
+      "source_field": "SCALED_IMU.xmag/ymag/zmag"
+    },
+    {
+      "adapter_branch": "_put only; no invalid path",
+      "channel": "estimator.variances",
+      "citation": "csia/aircraft/adapters/ardupilot.py:204",
+      "cited_text": "self._put(\"estimator.variances\", {",
+      "explicit_source_state": "YES -- the flags bitfield is the autopilot's own estimator health signal",
+      "family": "estimator_health",
+      "reaches_core": "NO -- absent from CORE_MAP entirely",
+      "reason_delivered": "n/a",
+      "selected": "YES -- ADDITIONAL FAMILY 2, as a STRUCTURAL row only: the channel never crosses the core boundary, so there is no trace to run and the finding is the absence itself",
+      "source_field": "EKF_STATUS_REPORT.flags + variances"
+    },
+    {
+      "adapter_branch": "_put only when the guard passes; silent otherwise",
+      "channel": "baro.altitude",
+      "citation": "csia/aircraft/adapters/ardupilot.py:156",
+      "cited_text": "if p is not None and finite(p) and p > 0:",
+      "explicit_source_state": "NO -- no sentinel; the adapter's own `p > 0` guard is a plausibility check, not a source state",
+      "family": "baro",
+      "reaches_core": "YES (CORE_MAP['baro'])",
+      "reason_delivered": "NO",
+      "selected": "NO -- no explicit source state, so it cannot test preservation of one",
+      "source_field": "SCALED_PRESSURE.press_abs"
+    },
+    {
+      "adapter_branch": "finite() guard only",
+      "channel": "imu0.accel / imu0.gyro",
+      "citation": "csia/aircraft/adapters/ardupilot.py:130",
+      "cited_text": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]",
+      "explicit_source_state": "NO -- MAVLink defines no per-axis invalid encoding for these",
+      "family": "imu",
+      "reaches_core": "YES (CORE_MAP['imu0'], ['imu1'])",
+      "reason_delivered": "NO",
+      "selected": "NO -- no explicit source state",
+      "source_field": "RAW_IMU / SCALED_IMU x/y/z acc+gyro"
+    },
+    {
+      "adapter_branch": "_put; missing fields default to 0",
+      "channel": "esc.rpm / esc.current",
+      "citation": "csia/aircraft/adapters/ardupilot.py:194",
+      "cited_text": "cur = np.asarray(list(g(\"current\", [0] * 4))[:4], dtype=float)",
+      "explicit_source_state": "NO -- the adapter defaults a missing current array to zeros rather than reading a sentinel",
+      "family": "motor_esc",
+      "reaches_core": "YES (CORE_MAP['motor_esc'])",
+      "reason_delivered": "NO",
+      "selected": "NO -- a defaulted zero is a separate defect class (fabricated value), already exercised by plugins.py in the battery family",
+      "source_field": "ESC_TELEMETRY_1_TO_4 / ESC_STATUS"
+    },
+    {
+      "adapter_branch": "finite() guard only",
+      "channel": "vibration.rms",
+      "citation": "csia/aircraft/adapters/ardupilot.py:187",
+      "cited_text": "if all(finite(v) for v in (vx, vy, vz)):",
+      "explicit_source_state": "NO",
+      "family": "vibration",
+      "reaches_core": "YES (CORE_MAP['vibration'])",
+      "reason_delivered": "NO",
+      "selected": "NO -- no explicit source state",
+      "source_field": "VIBRATION.vibration_x/y/z"
+    },
+    {
+      "adapter_branch": "sender-type filter",
+      "channel": "vehicle_status.armed",
+      "citation": "csia/aircraft/adapters/ardupilot.py:30",
+      "cited_text": "MAV_TYPE_GCS = 6",
+      "explicit_source_state": "NO -- but the GCS/vehicle distinction is handled (MAV_TYPE_GCS is excluded)",
+      "family": "vehicle_status",
+      "reaches_core": "YES (CORE_MAP['vehicle_status'])",
+      "reason_delivered": "n/a",
+      "selected": "NO -- not a measurement channel",
+      "source_field": "HEARTBEAT.base_mode"
+    }
+  ],
+  "with_explicit_source_state": 5
+}

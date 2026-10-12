@@ -1,0 +1,312 @@
+{
+ "families_source": "csia/scenarios.py, unchanged",
+ "injectable": [
+  "gps_spoof",
+  "gps_dropout",
+  "imu0_bias_drift",
+  "imu1_bias_drift",
+  "mag_emi",
+  "power_sag"
+ ],
+ "not_injectable": [
+  "vibration_anomaly",
+  "wind_factor"
+ ],
+ "parameter_existence": {
+  "SIM_ACC1_BIAS_Z": 0.0,
+  "SIM_ACC2_BIAS_Z": 0.0,
+  "SIM_BATT_VOLTAGE": 12.600000381469727,
+  "SIM_GPS1_ENABLE": 1.0,
+  "SIM_GPS1_GLTCH_X": 0.0,
+  "SIM_MAG1_OFS_X": 5.0,
+  "SIM_VIB_MOT_MAX": 0.0,
+  "SIM_WIND_SPD": 0.0
+ },
+ "probes": [
+  {
+   "observed": {
+    "batt_v": 12.6,
+    "ekf_compass_var": 0.0076,
+    "ekf_pos_var": 0.0013,
+    "ekf_vel_var": 0.0022,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.0,
+    "gps_sats": 10,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": 217,
+    "vibe_rms": 0.0029,
+    "wind_effect": 0.0029
+   },
+   "stage": "baseline",
+   "t": 45.1
+  },
+  {
+   "baseline_value": 0.0,
+   "description": "GPS position offset, the E1 injection",
+   "injected_value": 54.86,
+   "observed": {
+    "batt_v": 12.306,
+    "ekf_compass_var": 0.0045,
+    "ekf_pos_var": 0.0106,
+    "ekf_vel_var": 0.016,
+    "gps_fix_type": 6,
+    "gps_offset_m": 54.86,
+    "gps_sats": 10,
+    "imu0_zacc": -995,
+    "imu1_zacc": -995,
+    "mag_x": 286,
+    "vibe_rms": 0.0053,
+    "wind_effect": 0.1631
+   },
+   "params": [
+    [
+     "SIM_GPS1_GLTCH_X",
+     0.0005
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "gps_offset_m",
+   "readback": {
+    "SIM_GPS1_GLTCH_X": 0.0005000000237487257
+   },
+   "stage": "gps_spoof",
+   "t": 57.2,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": 6,
+   "description": "outright GNSS denial",
+   "injected_value": 1,
+   "observed": {
+    "batt_v": 12.312,
+    "ekf_compass_var": 0.0081,
+    "ekf_pos_var": 14.7983,
+    "ekf_vel_var": 0.016,
+    "gps_fix_type": 1,
+    "gps_offset_m": 0.24,
+    "gps_sats": 3,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": 11,
+    "vibe_rms": 0.0043,
+    "wind_effect": 0.0002
+   },
+   "params": [
+    [
+     "SIM_GPS1_ENABLE",
+     0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "gps_fix_type",
+   "readback": {
+    "SIM_GPS1_ENABLE": 0.0
+   },
+   "stage": "gps_dropout",
+   "t": 69.2,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": -1001,
+   "description": "accel-z bias on the primary IMU",
+   "injected_value": -797,
+   "observed": {
+    "batt_v": 12.316,
+    "ekf_compass_var": 0.0178,
+    "ekf_pos_var": 0.0057,
+    "ekf_vel_var": 0.0124,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.05,
+    "gps_sats": 10,
+    "imu0_zacc": -797,
+    "imu1_zacc": -1001,
+    "mag_x": 16,
+    "vibe_rms": 0.0035,
+    "wind_effect": 0.0002
+   },
+   "params": [
+    [
+     "SIM_ACC1_BIAS_Z",
+     2.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "imu0_zacc",
+   "readback": {
+    "SIM_ACC1_BIAS_Z": 2.0
+   },
+   "stage": "imu0_bias_drift",
+   "t": 81.2,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": -1001,
+   "description": "accel-z bias on the secondary IMU",
+   "injected_value": -1206,
+   "observed": {
+    "batt_v": 12.316,
+    "ekf_compass_var": 0.0174,
+    "ekf_pos_var": 0.0046,
+    "ekf_vel_var": 0.0603,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.03,
+    "gps_sats": 10,
+    "imu0_zacc": -1002,
+    "imu1_zacc": -1206,
+    "mag_x": 13,
+    "vibe_rms": 0.0035,
+    "wind_effect": 0.0002
+   },
+   "params": [
+    [
+     "SIM_ACC2_BIAS_Z",
+     -2.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "imu1_zacc",
+   "readback": {
+    "SIM_ACC2_BIAS_Z": -2.0
+   },
+   "stage": "imu1_bias_drift",
+   "t": 93.2,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": 217,
+   "description": "magnetometer offset (EMI stand-in)",
+   "injected_value": -280,
+   "observed": {
+    "batt_v": 12.599,
+    "ekf_compass_var": 0.4271,
+    "ekf_pos_var": 0.005,
+    "ekf_vel_var": 0.0295,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.0,
+    "gps_sats": 10,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": -280,
+    "vibe_rms": 0.0028,
+    "wind_effect": 0.0051
+   },
+   "params": [
+    [
+     "SIM_MAG1_OFS_X",
+     300.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "mag_x",
+   "readback": {
+    "SIM_MAG1_OFS_X": 300.0
+   },
+   "stage": "mag_emi",
+   "t": 105.3,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": 12.6,
+   "description": "pack voltage sag",
+   "injected_value": 11.0,
+   "observed": {
+    "batt_v": 11.0,
+    "ekf_compass_var": 0.1531,
+    "ekf_pos_var": 0.0066,
+    "ekf_vel_var": 0.0157,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.0,
+    "gps_sats": 10,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": 19,
+    "vibe_rms": 0.0029,
+    "wind_effect": 0.0042
+   },
+   "params": [
+    [
+     "SIM_BATT_VOLTAGE",
+     11.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "batt_v",
+   "readback": {
+    "SIM_BATT_VOLTAGE": 11.0
+   },
+   "stage": "power_sag",
+   "t": 117.3,
+   "target_telemetry_moved": true
+  },
+  {
+   "baseline_value": 0.0029,
+   "description": "airframe vibration",
+   "injected_value": 0.0029,
+   "observed": {
+    "batt_v": 12.6,
+    "ekf_compass_var": 0.0985,
+    "ekf_pos_var": 0.0056,
+    "ekf_vel_var": 0.0111,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.0,
+    "gps_sats": 10,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": 19,
+    "vibe_rms": 0.0029,
+    "wind_effect": 0.0039
+   },
+   "params": [
+    [
+     "SIM_VIB_MOT_MAX",
+     8.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "vibe_rms",
+   "readback": {
+    "SIM_VIB_MOT_MAX": 8.0
+   },
+   "stage": "vibration_anomaly",
+   "t": 129.3,
+   "target_telemetry_moved": false
+  },
+  {
+   "baseline_value": 0.0029,
+   "description": "flight-spec wind axis; cosmetic on 3.3 per WP-C7",
+   "injected_value": 0.0038,
+   "observed": {
+    "batt_v": 12.6,
+    "ekf_compass_var": 0.0634,
+    "ekf_pos_var": 0.0054,
+    "ekf_vel_var": 0.0095,
+    "gps_fix_type": 6,
+    "gps_offset_m": 0.0,
+    "gps_sats": 10,
+    "imu0_zacc": -1001,
+    "imu1_zacc": -1001,
+    "mag_x": 19,
+    "vibe_rms": 0.0028,
+    "wind_effect": 0.0038
+   },
+   "params": [
+    [
+     "SIM_WIND_SPD",
+     12.0
+    ]
+   ],
+   "params_exist": true,
+   "probe_key": "wind_effect",
+   "readback": {
+    "SIM_WIND_SPD": 12.0
+   },
+   "stage": "wind_factor",
+   "t": 141.3,
+   "target_telemetry_moved": false
+  }
+ ],
+ "purpose": "decide which of CSIA's canonical fault families can be injected on ArduCopter 4.8, and what the per-family validity check should be",
+ "rule": "COMMAND_ISSUED != INTERVENTION_VALID",
+ "wind_axis_note": "SIM_WIND_SPD drives the flight-spec partition's second factor. WP-C7 measured it as cosmetic on ArduCopter 3.3. If it is cosmetic here too, FLIGHT_SPECS 0-5 differ only by home site."
+}

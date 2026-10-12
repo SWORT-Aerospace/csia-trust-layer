@@ -1,0 +1,385 @@
+{
+  "admissibility": {
+    "ardupilot": {
+      "baro": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "battery": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "gps": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "imu0": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "imu1": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "mag": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "motor_esc": {
+        "admissible": false,
+        "blocked_by": [
+          "esc.current:STUB_OR_NONINFORMATIVE",
+          "esc.rpm:STUB_OR_NONINFORMATIVE"
+        ]
+      },
+      "vibration": {
+        "admissible": true,
+        "blocked_by": []
+      }
+    },
+    "px4": {
+      "baro": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "battery": {
+        "admissible": false,
+        "blocked_by": [
+          "battery.current:UNAVAILABLE"
+        ]
+      },
+      "gps": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "imu0": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "imu1": {
+        "admissible": false,
+        "blocked_by": [
+          "imu1.accel:UNAVAILABLE",
+          "imu1.gyro:UNAVAILABLE"
+        ]
+      },
+      "mag": {
+        "admissible": true,
+        "blocked_by": []
+      },
+      "motor_esc": {
+        "admissible": false,
+        "blocked_by": [
+          "esc.current:STUB_OR_NONINFORMATIVE",
+          "esc.rpm:AVAILABLE_UNVALIDATED"
+        ]
+      },
+      "vibration": {
+        "admissible": true,
+        "blocked_by": []
+      }
+    }
+  },
+  "artifact": "STALENESS_REGRESSION_SUMMARY",
+  "csia_sha": "bf6a19eaa0f04014150e95acc7c1b8353716cbe5",
+  "derivation": {
+    "ardupilot": [
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "baro.altitude",
+        "margin_periods": 5.0,
+        "node": "baro",
+        "required_channels": [
+          "baro.altitude"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "battery.current",
+        "margin_periods": 5.0,
+        "node": "battery",
+        "required_channels": [
+          "battery.current",
+          "battery.voltage"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 5,
+        "driving_channel": "gnss.position",
+        "margin_periods": 5.0,
+        "node": "gps",
+        "required_channels": [
+          "gnss.position",
+          "gnss.velocity"
+        ],
+        "runtime_stale_timeout_s": 1.0,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 25,
+        "driving_channel": "imu0.accel",
+        "margin_periods": 5.0,
+        "node": "imu0",
+        "required_channels": [
+          "imu0.accel",
+          "imu0.gyro"
+        ],
+        "runtime_stale_timeout_s": 0.2,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 25,
+        "driving_channel": "imu1.accel",
+        "margin_periods": 5.0,
+        "node": "imu1",
+        "required_channels": [
+          "imu1.accel",
+          "imu1.gyro"
+        ],
+        "runtime_stale_timeout_s": 0.2,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 25,
+        "driving_channel": "mag.field_ut",
+        "margin_periods": 5.0,
+        "node": "mag",
+        "required_channels": [
+          "mag.field_ut"
+        ],
+        "runtime_stale_timeout_s": 0.2,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "esc.current",
+        "margin_periods": 5.0,
+        "node": "motor_esc",
+        "required_channels": [
+          "esc.current",
+          "esc.rpm"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "vibration.rms",
+        "margin_periods": 5.0,
+        "node": "vibration",
+        "required_channels": [
+          "vibration.rms"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      }
+    ],
+    "px4": [
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "baro.altitude",
+        "margin_periods": 5.0,
+        "node": "baro",
+        "required_channels": [
+          "baro.altitude"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "battery.current",
+        "margin_periods": 5.0,
+        "node": "battery",
+        "required_channels": [
+          "battery.current",
+          "battery.voltage"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 5,
+        "driving_channel": "gnss.position",
+        "margin_periods": 5.0,
+        "node": "gps",
+        "required_channels": [
+          "gnss.position",
+          "gnss.velocity"
+        ],
+        "runtime_stale_timeout_s": 1.0,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 50,
+        "driving_channel": "imu0.accel",
+        "margin_periods": 5.0,
+        "node": "imu0",
+        "required_channels": [
+          "imu0.accel",
+          "imu0.gyro"
+        ],
+        "runtime_stale_timeout_s": 0.1,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 25,
+        "driving_channel": "imu1.accel",
+        "margin_periods": 5.0,
+        "node": "imu1",
+        "required_channels": [
+          "imu1.accel",
+          "imu1.gyro"
+        ],
+        "runtime_stale_timeout_s": 0.2,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 14,
+        "driving_channel": "mag.field_ut",
+        "margin_periods": 5.0,
+        "node": "mag",
+        "required_channels": [
+          "mag.field_ut"
+        ],
+        "runtime_stale_timeout_s": 0.357143,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 1,
+        "driving_channel": "esc.current",
+        "margin_periods": 5.0,
+        "node": "motor_esc",
+        "required_channels": [
+          "esc.current",
+          "esc.rpm"
+        ],
+        "runtime_stale_timeout_s": 5.0,
+        "source": "contract"
+      },
+      {
+        "declared_rate_hz": 10,
+        "driving_channel": "vibration.rms",
+        "margin_periods": 5.0,
+        "node": "vibration",
+        "required_channels": [
+          "vibration.rms"
+        ],
+        "runtime_stale_timeout_s": 0.5,
+        "source": "contract"
+      }
+    ]
+  },
+  "derived_stale_timeout_s": {
+    "ardupilot": {
+      "baro": 0.5,
+      "battery": 0.5,
+      "gps": 1.0,
+      "imu0": 0.2,
+      "imu1": 0.2,
+      "mag": 0.2,
+      "motor_esc": 0.5,
+      "vibration": 0.5
+    },
+    "px4": {
+      "baro": 0.5,
+      "battery": 0.5,
+      "gps": 1.0,
+      "imu0": 0.1,
+      "imu1": 0.2,
+      "mag": 0.35714285714285715,
+      "motor_esc": 5.0,
+      "vibration": 0.5
+    }
+  },
+  "drop_at_s": 15.0,
+  "duration_s": 30.0,
+  "evidence_tier": {
+    "matrix": "SYNTHETIC_DEPLOYMENT_REGRESSION",
+    "ulog_rates": "REAL_PX4_ULOG_TIMING"
+  },
+  "frozen_stale_timeout_s": {
+    "baro": 0.1,
+    "battery": 0.5,
+    "gps": 0.5,
+    "imu0": 0.05,
+    "imu1": 0.05,
+    "mag": 0.1,
+    "motor_esc": 0.1,
+    "vibration": 0.5
+  },
+  "gate_B_jitter_pass": true,
+  "gate_B_nominal_rate_pass": true,
+  "gate_C_hard_dropout_pass": true,
+  "generation_command": "python validation/v1_1/deployment/run_staleness.py",
+  "jitter_fraction": 0.3,
+  "nodes_exposed_to_false_stale": {
+    "DERIVED_RULE/NOMINAL_RATE": [],
+    "DERIVED_RULE/RATE_JITTER": [],
+    "FROZEN_DEFAULT/NOMINAL_RATE": [],
+    "FROZEN_DEFAULT/RATE_JITTER": [
+      "ardupilot/baro=0.0277",
+      "px4/baro=0.0369"
+    ]
+  },
+  "px4_motor_esc": {
+    "declared_esc_status_rate_hz": 1.0,
+    "post_fix": {
+      "dropout_stale_latency_s": null,
+      "nominal_false_stale_fraction": 1.0,
+      "nominal_false_stale_ticks": 325,
+      "nominal_ticks": 325,
+      "recovery_latency_s": null
+    },
+    "post_fix_timeout_s": 5.0,
+    "pre_fix": {
+      "dropout_stale_latency_s": null,
+      "nominal_false_stale_fraction": 1.0,
+      "nominal_false_stale_ticks": 325,
+      "nominal_ticks": 325,
+      "recovery_latency_s": null
+    },
+    "pre_fix_timeout_s": 0.1
+  },
+  "seed": 20260902,
+  "tick_hz": 25.0,
+  "ulog_rows": 241,
+  "worst_nominal_false_stale": {
+    "DERIVED_RULE/NOMINAL_RATE": {
+      "fraction": 0.0,
+      "node": "vibration",
+      "platform": "px4"
+    },
+    "DERIVED_RULE/RATE_JITTER": {
+      "fraction": 0.0,
+      "node": "vibration",
+      "platform": "px4"
+    },
+    "FROZEN_DEFAULT/NOMINAL_RATE": {
+      "fraction": 0.0,
+      "node": "vibration",
+      "platform": "px4"
+    },
+    "FROZEN_DEFAULT/RATE_JITTER": {
+      "fraction": 0.0369,
+      "node": "baro",
+      "platform": "px4"
+    }
+  },
+  "worst_sustained_dropout_latency_s": {
+    "DERIVED_RULE": {
+      "latency_s": 1.08,
+      "node": "gps",
+      "platform": "px4"
+    },
+    "FROZEN_DEFAULT": {
+      "latency_s": 0.56,
+      "node": "vibration",
+      "platform": "px4"
+    }
+  }
+}

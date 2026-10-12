@@ -1,6 +1,6 @@
 # Source inventory — WP1
 
-Commit `bc3ed977e14d6eb6c5dc3a8b771b2349337de91a`, branch `research/wp1-formalization`,
+Commit `bc3ed977e14d6eb6c5dc3a8b771b2349337de91a`, branch `research/formalization`,
 worktree clean at audit start. Repository is **untagged**.
 
 Package version `0.8.0` (`pyproject.toml:7`).

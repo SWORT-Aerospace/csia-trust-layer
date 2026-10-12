@@ -1,0 +1,533 @@
+{
+ "analysis_type_meanings": {
+  "MEASURED_CORPUS_PROPERTY": "a property of the flights that happen to have been flown",
+  "POST_HOC_ANALYSIS": "computed after the fact from recorded traces; never a prediction and never pooled with the preregistered result",
+  "PREREGISTERED_CAMPAIGN": "declared before any trial was run",
+  "QUALIFICATION_HARNESS_AUDIT": "a property of the measurement harness, not of the vehicle"
+ },
+ "claims_by_analysis_type": {
+  "MEASURED_CORPUS_PROPERTY": [
+   "heading_course.live_share.ardupilot",
+   "heading_course.live_share.px4",
+   "heading_course.verdict",
+   "corpus.max_horizontal_speed_ms",
+   "gate.speed_lo_ms"
+  ],
+  "POST_HOC_ANALYSIS": [
+   "s0.share.t075",
+   "s0.share.t080",
+   "s0.share.t085",
+   "s0.share.t065",
+   "s0.share.t070"
+  ],
+  "PREREGISTERED_CAMPAIGN": [
+   "mechanism_a.gps_weight.ardupilot.control",
+   "mechanism_a.gps_weight.ardupilot.post",
+   "mechanism_a.gps_weight.px4.control",
+   "mechanism_a.gps_weight.px4.post",
+   "mechanism_a.rule_b_ticks.ardupilot",
+   "mechanism_a.rule_b_ticks.px4",
+   "mechanism_b.threshold",
+   "mechanism_b.ardupilot.verdict",
+   "mechanism_b.ardupilot.trials_total",
+   "mechanism_b.ardupilot.trials_valid",
+   "mechanism_b.ardupilot.max_reconstruction_error",
+   "mechanism_b.px4.verdict",
+   "provenance.mechanism_b.distinct_commits",
+   "provenance.mechanism_b.trial_affecting_paths_changed",
+   "provenance.mechanism_b.frozen_core_consistent"
+  ],
+  "QUALIFICATION_HARNESS_AUDIT": [
+   "px4.baro.delivered_passive_hz",
+   "px4.baro.delivered_driven_hz",
+   "px4.baro.qualification_measured_hz",
+   "px4.baro.declared_hz",
+   "px4.baro.derived_max_age_s",
+   "px4.baro.channel_usable_share",
+   "px4.baro.node_stale_timeout_s",
+   "px4.baro.node_fresh_share",
+   "px4.baro.binding_gate",
+   "ardupilot.baro.node_fresh_share",
+   "px4.altitude_baro.live_share",
+   "ardupilot.altitude_baro.live_share",
+   "px4.altitude_baro.verdict",
+   "px4.probe.simulator_sha",
+   "mechanism_a.verdict.ardupilot",
+   "mechanism_a.verdict.px4"
+  ]
+ },
+ "corpus_speed_detail": {
+  "flights": 26,
+  "per_platform": {
+   "ardupilot": 0.17,
+   "px4": 0.13
+  },
+  "value": 0.17
+ },
+ "entries": [
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/PX4_LINK_RATE_PROBE.json",
+   "claim_id": "px4.baro.delivered_passive_hz",
+   "generating_commit": "8eea19b",
+   "in_manuscript": false,
+   "lookup": "arms.passive.links.14540.SCALED_PRESSURE.hz",
+   "paper_text": "On the passive shadow connection PX4 delivered SCALED_PRESSURE at this rate, having requested nothing.",
+   "status": "SUPPORTED",
+   "value": 1.0
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/PX4_LINK_RATE_PROBE.json",
+   "claim_id": "px4.baro.delivered_driven_hz",
+   "generating_commit": "8eea19b",
+   "in_manuscript": false,
+   "lookup": "arms.request_onboard.links.14540.SCALED_PRESSURE.hz",
+   "paper_text": "On the same connection in the same simulator build, after SET_MESSAGE_INTERVAL was requested on it, PX4 delivered the same message at this rate.",
+   "status": "SUPPORTED",
+   "value": 9.775
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/qualification_px4.json",
+   "claim_id": "px4.baro.qualification_measured_hz",
+   "generating_commit": "4efb284",
+   "in_manuscript": false,
+   "lookup": "rows[channel=baro.altitude].measured_rate_hz",
+   "paper_text": "The driven qualification connection measured this rate, which is what the channel contract was validated against.",
+   "status": "SUPPORTED",
+   "value": 9.82
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.declared_hz",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.declared_hz",
+   "paper_text": "The channel contract declares this rate for the platform.",
+   "status": "SUPPORTED",
+   "value": 10.0
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.derived_max_age_s",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.derived_max_age_s",
+   "paper_text": "The freshness budget is derived from the declaration, not measured, so a slower delivering link is stale for part of every period.",
+   "status": "SUPPORTED",
+   "value": 0.5
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.channel_usable_share",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.channel_usable_share",
+   "paper_text": "Share of shadow ticks on which the barometric channel was usable to the diagnostic consumer, against the freshness budget the declaration buys.",
+   "status": "SUPPORTED",
+   "value": 0.4943
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.node_stale_timeout_s",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.node_stale_timeout_s",
+   "paper_text": "A SECOND freshness budget applies at the node layer. It is a fixed constant in the frozen runtime that no rate declaration feeds, and for the barometer it is five times stricter than the budget the declared rate buys.",
+   "status": "SUPPORTED",
+   "value": 0.1
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.node_fresh_share",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.node_fresh_share",
+   "paper_text": "Share of ticks on which the barometric NODE was fresh. A relation's weight is gated on its endpoint nodes, not on channel usability, so this is the quantity that governs evidence availability.",
+   "status": "SUPPORTED",
+   "value": 0.0967
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.baro.binding_gate",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.endpoints.baro.binding_gate",
+   "paper_text": "Which of the two freshness budgets is the stricter one for this endpoint. Reporting max_age alone predicts roughly half the ticks and the measurement shows under a tenth.",
+   "status": "SUPPORTED",
+   "value": "node_stale_timeout"
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "ardupilot.baro.node_fresh_share",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.ardupilot.relations.altitude_baro.endpoints.baro.node_fresh_share",
+   "paper_text": "The same node on ArduPilot, whose link is driven by the tee.",
+   "status": "SUPPORTED",
+   "value": 0.9992
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.altitude_baro.live_share",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.relation_live_share",
+   "paper_text": "Share of PX4 shadow ticks on which the baro/GNSS cross-check carried non-zero gate weight.",
+   "status": "SUPPORTED",
+   "value": 0.0812
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "ardupilot.altitude_baro.live_share",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.ardupilot.relations.altitude_baro.relation_live_share",
+   "paper_text": "The same relation on ArduPilot, whose link is driven by the tee.",
+   "status": "SUPPORTED",
+   "value": 0.9984
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "px4.altitude_baro.verdict",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.altitude_baro.verdict",
+   "paper_text": "Classification of the PX4 barometric starvation. It denotes an under-delivering consumer link, NOT an intrinsic platform rate and NOT a universally wrong declaration.",
+   "status": "SUPPORTED",
+   "value": "STARVED_BY_TRANSPORT"
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/PX4_LINK_RATE_PROBE.json",
+   "claim_id": "px4.probe.simulator_sha",
+   "generating_commit": "8eea19b",
+   "in_manuscript": false,
+   "lookup": "simulator_provenance.sha",
+   "paper_text": "The PX4 build these delivery rates were measured on; they are defaults of this firmware and airframe.",
+   "status": "SUPPORTED",
+   "value": "547e2caa9883bc1609325f02b4914b4e2482fe62"
+  },
+  {
+   "analysis_type": "MEASURED_CORPUS_PROPERTY",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "heading_course.live_share.ardupilot",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.ardupilot.relations.heading_course.relation_live_share",
+   "paper_text": "The only magnetometer cross-check against an independent reference carried zero gate weight across the ArduPilot corpus.",
+   "status": "SUPPORTED",
+   "value": 0.0
+  },
+  {
+   "analysis_type": "MEASURED_CORPUS_PROPERTY",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "heading_course.live_share.px4",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.heading_course.relation_live_share",
+   "paper_text": "The same relation, on PX4.",
+   "status": "SUPPORTED",
+   "value": 0.0
+  },
+  {
+   "analysis_type": "MEASURED_CORPUS_PROPERTY",
+   "artifact": "research/v1_1/results/EVIDENCE_COVERAGE_LEDGER.json",
+   "claim_id": "heading_course.verdict",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "ledger.px4.relations.heading_course.verdict",
+   "paper_text": "It is dark because the flown corpus never entered its operating region, not because either platform fails to supply the inputs.",
+   "status": "SUPPORTED",
+   "value": "DARK_BY_GATE"
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.verdict.ardupilot",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "verdicts.ardupilot",
+   "paper_text": "Whether the ArduPilot Mechanism A headline is affected by transport starvation.",
+   "status": "SUPPORTED",
+   "value": "UNAFFECTED"
+  },
+  {
+   "analysis_type": "QUALIFICATION_HARNESS_AUDIT",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.verdict.px4",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "verdicts.px4",
+   "paper_text": "Whether the PX4 Mechanism A headline is affected by transport starvation.",
+   "status": "SUPPORTED",
+   "value": "PARTIALLY_AFFECTED"
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.gps_weight.ardupilot.control",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.gps_gate_weight_sum.control_arm",
+   "paper_text": "Evidence carried by GNSS-gated relations before the fault, ArduPilot.",
+   "status": "SUPPORTED",
+   "value": 3.0
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.gps_weight.ardupilot.post",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.gps_gate_weight_sum.fault_arm_post",
+   "paper_text": "The same quantity after fix loss.",
+   "status": "SUPPORTED",
+   "value": 0.0
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.gps_weight.px4.control",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.px4.gps_gate_weight_sum.control_arm",
+   "paper_text": "Evidence carried by GNSS-gated relations before the fault, PX4. Smaller than ArduPilot's because three relations were already dark, for three different reasons, none of which is that PX4 lacks the relations.",
+   "status": "SUPPORTED",
+   "value": 1.0
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.gps_weight.px4.post",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.px4.gps_gate_weight_sum.fault_arm_post",
+   "paper_text": "The same quantity after fix loss.",
+   "status": "SUPPORTED",
+   "value": 0.0
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.rule_b_ticks.ardupilot",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.rule_b_observable.ticks_observed",
+   "paper_text": "Ticks on which the declared downstream observable was present, so the injection is measured rather than assumed.",
+   "status": "SUPPORTED",
+   "value": 450
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json",
+   "claim_id": "mechanism_a.rule_b_ticks.px4",
+   "generating_commit": "8f141ed",
+   "in_manuscript": false,
+   "lookup": "platforms.px4.rule_b_observable.ticks_observed",
+   "paper_text": "The same, on PX4.",
+   "status": "SUPPORTED",
+   "value": 448
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.threshold",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "threshold",
+   "paper_text": "The preregistered crossing threshold.",
+   "status": "SUPPORTED",
+   "value": 0.75
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.ardupilot.verdict",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.verdict",
+   "paper_text": "Outcome of the preregistered ArduPilot GNSS step/ramp campaign.",
+   "status": "SUPPORTED",
+   "value": "REPLICATED"
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.ardupilot.trials_total",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.trials_total",
+   "paper_text": "Trials run in the preregistered grid.",
+   "status": "SUPPORTED",
+   "value": 20
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.ardupilot.trials_valid",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.trials_valid",
+   "paper_text": "Trials that satisfied the validity conditions declared before any trial was run.",
+   "status": "SUPPORTED",
+   "value": 20
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.ardupilot.max_reconstruction_error",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "platforms.ardupilot.max_reconstruction_error",
+   "paper_text": "Worst tick-by-tick reconstruction error across all valid trials, against a preregistered tolerance.",
+   "status": "SUPPORTED",
+   "value": 1.9984e-15
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/current_stack_replication.json",
+   "claim_id": "mechanism_b.px4.verdict",
+   "generating_commit": "670aa7a",
+   "in_manuscript": false,
+   "lookup": "platforms.px4.verdict",
+   "paper_text": "PX4 outcome. No fix-preserving GNSS position offset exists on PX4 SIH, so the condition could not be run; no substitute was flown.",
+   "status": "SUPPORTED",
+   "value": "INAPPLICABLE"
+  },
+  {
+   "analysis_type": "POST_HOC_ANALYSIS",
+   "artifact": "research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json",
+   "claim_id": "s0.share.t075",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "rows[threshold=0.75].history_attributable_share",
+   "paper_text": "Share of reconstructed crossing delay attributable to banked history at the preregistered threshold.",
+   "status": "SUPPORTED",
+   "value": 0.44003280629500435
+  },
+  {
+   "analysis_type": "POST_HOC_ANALYSIS",
+   "artifact": "research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json",
+   "claim_id": "s0.share.t080",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "rows[threshold=0.8].history_attributable_share",
+   "paper_text": "The same share at a higher evaluated threshold.",
+   "status": "SUPPORTED",
+   "value": 0.5195232276459365
+  },
+  {
+   "analysis_type": "POST_HOC_ANALYSIS",
+   "artifact": "research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json",
+   "claim_id": "s0.share.t085",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "rows[threshold=0.85].history_attributable_share",
+   "paper_text": "The same share at a higher evaluated threshold still.",
+   "status": "SUPPORTED",
+   "value": 0.5658790000078566
+  },
+  {
+   "analysis_type": "POST_HOC_ANALYSIS",
+   "artifact": "research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json",
+   "claim_id": "s0.share.t065",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "rows[threshold=0.65].history_attributable_share",
+   "paper_text": "At this threshold no crossing occurred in the reconstruction, so no share is defined.",
+   "status": "SUPPORTED",
+   "value": null
+  },
+  {
+   "analysis_type": "POST_HOC_ANALYSIS",
+   "artifact": "research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json",
+   "claim_id": "s0.share.t070",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "rows[threshold=0.7].history_attributable_share",
+   "paper_text": "At this threshold no crossing occurred in the reconstruction, so no share is defined.",
+   "status": "SUPPORTED",
+   "value": null
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/PROVENANCE_BACKFILL.json",
+   "claim_id": "provenance.mechanism_b.distinct_commits",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "campaigns.mechanism_b_gps.distinct_generating_commits",
+   "paper_text": "The trials were generated across successive result-recording commits, not all at one.",
+   "status": "SUPPORTED",
+   "value": [
+    "256ca517491fa6e559f75a302e9f5d06b06bc57d",
+    "2cc79bb4556fe545975cab51ddb1da095958242d",
+    "3ef828314e391a989eafdc2dd254cb391b70cb36",
+    "80959bb5469e7183d633f93fb2e8ee1b4ccd0eca",
+    "a94f9494f43c01af6242c08c281f16e0ab71b24b",
+    "a96ff6fa44996266b23d81d7a78166927ab8a2dd",
+    "dd3c532fd1a76e32d5f408fefe8b1762104f603d"
+   ]
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/PROVENANCE_BACKFILL.json",
+   "claim_id": "provenance.mechanism_b.trial_affecting_paths_changed",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "campaigns.mechanism_b_gps.code_invariance.paths_changed",
+   "paper_text": "A provenance audit found the declared trial-affecting code paths byte-identical across the generating interval.",
+   "status": "SUPPORTED",
+   "value": {}
+  },
+  {
+   "analysis_type": "PREREGISTERED_CAMPAIGN",
+   "artifact": "research/v1_1/results/PROVENANCE_BACKFILL.json",
+   "claim_id": "provenance.mechanism_b.frozen_core_consistent",
+   "generating_commit": "2622d0f",
+   "in_manuscript": false,
+   "lookup": "campaigns.mechanism_b_gps.frozen_core_consistent",
+   "paper_text": "Every trial ran against the same frozen diagnostic core.",
+   "status": "SUPPORTED",
+   "value": true
+  },
+  {
+   "analysis_type": "MEASURED_CORPUS_PROPERTY",
+   "artifact": "research/v1_1/results/**/*.jsonl (flight logs)",
+   "claim_id": "corpus.max_horizontal_speed_ms",
+   "generating_commit": null,
+   "in_manuscript": false,
+   "lookup": "measured by this tool",
+   "paper_text": "Fastest horizontal speed on any tick of the committed corpus.",
+   "status": "SUPPORTED",
+   "value": 0.17
+  },
+  {
+   "analysis_type": "MEASURED_CORPUS_PROPERTY",
+   "artifact": "csia/prediction/comparator.py:GATE_SPEED_LO",
+   "claim_id": "gate.speed_lo_ms",
+   "generating_commit": null,
+   "in_manuscript": false,
+   "lookup": "measured by this tool",
+   "paper_text": "Horizontal speed below which the heading/course relation contributes nothing.",
+   "status": "SUPPORTED",
+   "value": 2.0
+  }
+ ],
+ "supported_scalars": 41,
+ "unsupported_claim_ids": [],
+ "unsupported_scalars": 0,
+ "what_this_is": "every current-stack scalar, resolved from the artifact that produced it at run time rather than transcribed into this file",
+ "why_a_resolver": "a transcribed ledger drifts silently when an artifact is regenerated; this repository has already had a scalar ledger record one generating commit for twenty trials when there were seven"
+}

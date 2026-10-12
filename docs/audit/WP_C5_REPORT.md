@@ -1,6 +1,6 @@
 # WP-C5 — Reposition as a Systems Paper, Close the Loose Ends
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **PR #13**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **PR #13**
 **Suite: 467 → 482.** One production change: the `DiagnosisCore` input guard,
 committed only after verifying it changes nothing.
 **Deliverables:** `papers/csia_systems/`, `docs/audit/WP_C5_REPORT.md`,

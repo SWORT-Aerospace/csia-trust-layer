@@ -1,0 +1,141 @@
+{
+  "artifact": "DIAGNOSTIC_CONSEQUENCES",
+  "caveats": [
+    "N = 1 recorded jamming episode. These are properties of THIS run, not an estimate over runs.",
+    "PROPAGATE_INVALID_HOLD and _ZERO are research-only adapter subclasses. Only DROP is committed behaviour.",
+    "The trust and gate numbers are produced by the frozen core unmodified; the harness reads its published state."
+  ],
+  "detection_comparison": {
+    "answer": "NO on this recording. The masking policy reaches a HIGHER gps_fault posterior than either propagating policy. What masking changes is how old the measurement behind an open gate is allowed to be.",
+    "gps_fault_posterior_final": {
+      "DROP": 0.892201,
+      "PROPAGATE_INVALID_HOLD": 0.722429,
+      "PROPAGATE_INVALID_ZERO": 0.722429
+    },
+    "max_slot_age_with_open_gate_s": {
+      "DROP": 0.36,
+      "PROPAGATE_INVALID_HOLD": 0.0,
+      "PROPAGATE_INVALID_ZERO": 0.0
+    },
+    "min_trust_gps": {
+      "DROP": 0.197184,
+      "PROPAGATE_INVALID_HOLD": 0.234617,
+      "PROPAGATE_INVALID_ZERO": 0.242179
+    },
+    "question": "does masking the invalidity weaken fault detection on this recording?",
+    "ticks_with_gps_fault_as_top_cause": {
+      "DROP": 963,
+      "PROPAGATE_INVALID_HOLD": 836,
+      "PROPAGATE_INVALID_ZERO": 836
+    }
+  },
+  "fixture": "NON_SCORED_TEST_FIXTURE_M1",
+  "fixture_sha256": "2986106a8decd9f0913a7de5d9d30004d05bf6e63ba6e9d5d485d67b57a98de7",
+  "gate_difference_fraction": 0.277277,
+  "input_sha256_recorded_at_capture": "e0197fa54432ac1673a1c3860ef1154c3de91f4fcd6dd368d01b33d12cac8c79",
+  "intervention": {
+    "param": "SIM_GPS1_JAM",
+    "value": 1.0
+  },
+  "n_realisations": 1,
+  "onset_s": 7.00442,
+  "paired_ticks_post_onset": 999,
+  "policies": {
+    "DROP": {
+      "final_post_gps_fault": 0.892201,
+      "final_trust_gps": 0.492244,
+      "fixture": "NON_SCORED_TEST_FIXTURE_M1",
+      "gvalid_masking_fraction": 1.0,
+      "masking_fraction": 1.0,
+      "max_post_gps_fault": 0.892201,
+      "max_slot_age_with_open_gate_s": 0.36,
+      "min_post_nominal": 0.105336,
+      "min_trust_gps": 0.197184,
+      "n_masked_ticks": 276,
+      "n_ticks": 999,
+      "n_ticks_effective_gate_zero": 0,
+      "n_ticks_gvalid_zero": 0,
+      "n_ticks_last_obs_invalid": 276,
+      "n_ticks_top_cause_gps_fault": 963,
+      "policy": "DROP"
+    },
+    "PROPAGATE_INVALID_HOLD": {
+      "final_post_gps_fault": 0.722429,
+      "final_trust_gps": 0.4657,
+      "fixture": "NON_SCORED_TEST_FIXTURE_M1",
+      "gvalid_masking_fraction": 0.003623,
+      "masking_fraction": 0.003623,
+      "max_post_gps_fault": 0.825018,
+      "max_slot_age_with_open_gate_s": 0.0,
+      "min_post_nominal": 0.171116,
+      "min_trust_gps": 0.234617,
+      "n_masked_ticks": 1,
+      "n_ticks": 999,
+      "n_ticks_effective_gate_zero": 277,
+      "n_ticks_gvalid_zero": 277,
+      "n_ticks_last_obs_invalid": 276,
+      "n_ticks_top_cause_gps_fault": 836,
+      "policy": "PROPAGATE_INVALID_HOLD"
+    },
+    "PROPAGATE_INVALID_ZERO": {
+      "final_post_gps_fault": 0.722429,
+      "final_trust_gps": 0.451438,
+      "fixture": "NON_SCORED_TEST_FIXTURE_M1",
+      "gvalid_masking_fraction": 0.003623,
+      "masking_fraction": 0.003623,
+      "max_post_gps_fault": 0.825018,
+      "max_slot_age_with_open_gate_s": 0.0,
+      "min_post_nominal": 0.171116,
+      "min_trust_gps": 0.242179,
+      "n_masked_ticks": 1,
+      "n_ticks": 999,
+      "n_ticks_effective_gate_zero": 277,
+      "n_ticks_gvalid_zero": 277,
+      "n_ticks_last_obs_invalid": 276,
+      "n_ticks_top_cause_gps_fault": 836,
+      "policy": "PROPAGATE_INVALID_ZERO"
+    }
+  },
+  "raw_stream": {
+    "delivered_gps_raw_hz_post_onset": 50.148,
+    "fix_type_histogram_post_onset": {
+      "1": 582,
+      "6": 1422
+    },
+    "gps_stale_timeout_s": 0.5,
+    "invalid_fraction_post_onset": 0.290419,
+    "invalid_run_lengths": {
+      "1": 414,
+      "17": 1,
+      "2": 56,
+      "3": 10,
+      "4": 1,
+      "5": 1
+    },
+    "longest_continuous_invalid_interval_s": 0.342832,
+    "longest_invalid_run_messages": 17,
+    "max_accepted_gap_exceeds_timeout": false,
+    "max_accepted_gap_s": 0.363088,
+    "median_accepted_gap_s": 0.021012,
+    "n_accepted_post_onset": 1422,
+    "n_gps_raw_post_onset": 2004,
+    "n_gps_raw_total": 2360,
+    "n_invalid_post_onset": 582
+  },
+  "simulator": "ArduCopter V4.8.0-dev@01a504b",
+  "ticks_where_gate_differs_DROP_vs_HOLD": 277,
+  "trust_gps_post_onset": {
+    "DROP": {
+      "final": 0.492244,
+      "min": 0.197184
+    },
+    "PROPAGATE_INVALID_HOLD": {
+      "final": 0.4657,
+      "min": 0.234617
+    },
+    "PROPAGATE_INVALID_ZERO": {
+      "final": 0.451438,
+      "min": 0.242179
+    }
+  }
+}

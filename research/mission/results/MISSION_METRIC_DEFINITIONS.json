@@ -1,0 +1,78 @@
+{
+  "declared_before_any_run": true,
+  "definitions": [
+    {
+      "denominator": "every product certification issued in the run",
+      "direction": "lower_is_better",
+      "formula": "false_certifications / certifications_issued",
+      "name": "false_product_certification_rate",
+      "numerator": "certifications in which a product property was reported SUPPORTED while the ground-truth scenario had removed a dependency that property declares",
+      "trap": "A system that certifies nothing scores 0.0. Never read it without product_coverage beside it.",
+      "units": "dimensionless in [0, 1]",
+      "why": "It is THE number. Every other metric here is about how much the system delivers; this one is about whether what it delivers can be believed."
+    },
+    {
+      "denominator": "not applicable",
+      "direction": "lower_is_better",
+      "formula": "|false_certifications|",
+      "name": "false_product_certification_count",
+      "numerator": "the same set, counted rather than divided",
+      "trap": "none. It is a count.",
+      "units": "count",
+      "why": "A rate of 0.01 over 100 trials and over 10000 trials are not the same evidence, and a table showing only the rate lets them look identical."
+    },
+    {
+      "denominator": "products declared in the contract set",
+      "direction": "higher_is_better",
+      "formula": "products_with_at_least_one_supported_property / products_declared",
+      "name": "product_coverage",
+      "numerator": "products whose assurance result lists at least one supported quality property",
+      "trap": "A product with one supported property counts the same as one with five. Use assured_mission_yield for the graded view.",
+      "units": "dimensionless in [0, 1]",
+      "why": "The counterweight to the false-certification rate. Together they say whether the system is both honest AND useful; either alone can be satisfied by a system that is one and not the other."
+    },
+    {
+      "denominator": "products declared",
+      "direction": "higher_is_better",
+      "formula": "sum over products of (supported_properties / declared_properties) / products_declared",
+      "name": "assured_mission_yield",
+      "numerator": "per-product fraction of properties supported, summed",
+      "trap": "It weights every property and every product equally, which no real mission does. It is a benchmark number, not a mission value function, and must not be optimised against.",
+      "units": "dimensionless in [0, 1]",
+      "why": "The product principle is MAXIMIZE ASSURANCE-QUALIFIED USEFUL INFORMATION. This is the closest thing to a direct measurement of it: partial products count partially."
+    },
+    {
+      "denominator": "not applicable",
+      "direction": "neither",
+      "formula": "t_recertified - t_evidence_returned",
+      "name": "capability_recovery_latency",
+      "numerator": "not applicable -- a duration per capability per event",
+      "trap": "Lower is NOT better. Reporting it with a 'lower is better' arrow would reward the exact defect it detects.",
+      "units": "seconds",
+      "why": "It is expected to be POSITIVE and non-trivial. A latency near zero means the system restored a capability on presence rather than on re-established evidence, which is BAD_PRODUCT_05."
+    },
+    {
+      "denominator": "not applicable",
+      "direction": "neither",
+      "formula": "|planner actions rejected by the gate|",
+      "name": "unsupported_planner_request_count",
+      "numerator": "authorization calls returning REJECTED",
+      "trap": "Neither direction is good. It is a liveness check on the gate, not a score.",
+      "units": "count",
+      "why": "A non-zero count means the gate is doing work. Zero across a degradation scenario means either the planner never tried anything ambitious or the gate is not wired in."
+    },
+    {
+      "denominator": "not applicable",
+      "direction": "lower_is_better",
+      "formula": "|certificates that expired while still being consulted|",
+      "name": "certificate_expiry_events",
+      "numerator": "reads of a certificate after its expires_at",
+      "trap": "none.",
+      "units": "count",
+      "why": "Every one is a place where stale support could have leaked into a decision. It should be zero, and if it is not, the individual events are more interesting than the total."
+    }
+  ],
+  "novelty": "NOVELTY_NOT_ESTABLISHED",
+  "schema": "csia.mission.metric_definitions/1",
+  "status": "EXPERIMENTAL"
+}

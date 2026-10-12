@@ -1,0 +1,248 @@
+{
+ "R13": "FAIL: 1 ticks over budget",
+ "adapter_counters": {
+  "mapped": 6243,
+  "messages": 17646,
+  "rejected_sentinel": 21,
+  "time_reanchors": 0,
+  "unmapped": 14768
+ },
+ "command_authority": {
+  "checked": 21,
+  "mode": "SHADOW",
+  "probes": {
+   "arducopter_arm": "DENIED",
+   "arducopter_disarm": "DENIED",
+   "mav": "DENIED",
+   "mav.command_long_send": "DENIED",
+   "mav.manual_control_send": "DENIED",
+   "mav.param_set_send": "DENIED",
+   "mav.rc_channels_override_send": "DENIED",
+   "mav.set_actuator_control_target_send": "DENIED",
+   "mav.set_mode_send": "DENIED",
+   "motors_armed_wait": "DENIED",
+   "param_set_send": "DENIED",
+   "reboot_autopilot": "DENIED",
+   "send": "DENIED",
+   "send_mavlink": "DENIED",
+   "set_mode": "DENIED",
+   "set_mode_apm": "DENIED",
+   "set_mode_px4": "DENIED",
+   "set_relay": "DENIED",
+   "set_servo": "DENIED",
+   "waypoint_clear_all_send": "DENIED",
+   "write": "DENIED"
+  },
+  "result": "NO_COMMAND_PATH_REACHABLE",
+  "write_half_closed": true,
+  "write_half_state": "CLOSED_ENOTCONN"
+ },
+ "flight_id": "20260825T020141Z-cbe7e259",
+ "host_noise_control": {
+  "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+  "concurrent_with_measurement": false,
+  "iterations_per_tick": 11891,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 751.17,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1670.2,
+    "median_us": 739.8,
+    "n": 1001,
+    "over_budget": 0,
+    "p95_us": 999.9,
+    "p99_us": 1102.7
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1664.0,
+    "median_us": 739.1,
+    "n": 1001,
+    "over_budget": 0,
+    "p95_us": 1120.5,
+    "p99_us": 1413.1
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1662.5,
+    "median_us": 751.2,
+    "n": 1001,
+    "over_budget": 0,
+    "p95_us": 1054.3,
+    "p99_us": 1271.9
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 1670.2,
+   "median_us": 739.8,
+   "n": 1001,
+   "over_budget": 0,
+   "p95_us": 999.9,
+   "p99_us": 1102.7
+  }
+ },
+ "injection": {
+  "arm": "INJECTED",
+  "at_s": 15.0,
+  "axes": [
+   {
+    "before": 0.0,
+    "commanded": 0.005,
+    "confirmed": true,
+    "param": "SIM_MAG_OFFSET_X",
+    "readback": 0.004999999888241291
+   },
+   {
+    "before": 0.0,
+    "commanded": 0.005,
+    "confirmed": true,
+    "param": "SIM_MAG_OFFSET_Y",
+    "readback": 0.004999999888241291
+   },
+   {
+    "before": 0.0,
+    "commanded": 0.005,
+    "confirmed": true,
+    "param": "SIM_MAG_OFFSET_Z",
+    "readback": 0.004999999888241291
+   }
+  ],
+  "confirmed": true,
+  "expected_field_shift_ut": 0.866025,
+  "kind": "mag_emi",
+  "micro_tesla_per_axis": 0.5,
+  "native_delta_per_axis": 0.005,
+  "native_unit": "gauss",
+  "param_type": "REAL32",
+  "params": [
+   "SIM_MAG_OFFSET_X",
+   "SIM_MAG_OFFSET_Y",
+   "SIM_MAG_OFFSET_Z"
+  ],
+  "prereg": "research/v1_1/MECHANISM_B_PREREGISTRATION.md",
+  "rule": "RULE B -- the intermediate quantity is the observed mag.field_ut vector shift of u*sqrt(3) uT across the injection instant, not the parameter write",
+  "sent_by": "rig",
+  "write_burst_ms": 0.12,
+  "wrote_at_rel_s": 15.001,
+  "wrote_at_wall": 1787623316.9131863
+ },
+ "latency": {
+  "budget_us": 2000.0,
+  "max_us": 8356.02,
+  "mean_us": 769.14,
+  "median_us": 751.17,
+  "min_us": 134.66,
+  "n": 1001,
+  "over_budget": 1,
+  "p95_us": 905.04,
+  "p99_us": 1030.98,
+  "worst_headroom_x": 0.24
+ },
+ "latency_positive_control": {
+  "messages_ingested": 17646,
+  "rule": "a latency figure from an idle tick measures the loop, not the workload",
+  "satisfied": true,
+  "usable_channels_at_end": 7
+ },
+ "live_transmit_probe": [
+  "command_long_send: denied",
+  "set_mode_send: denied",
+  "rc_channels_override_send: denied"
+ ],
+ "log_dir": "logs/shadow-sitl-px4",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 102.81,
+   "mean_us": 23.64,
+   "median_us": 22.1,
+   "min_us": 16.96,
+   "n": 1001,
+   "over_budget": 0,
+   "p95_us": 32.99,
+   "p99_us": 54.67,
+   "worst_headroom_x": 19.45
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 8210.36,
+   "mean_us": 625.28,
+   "median_us": 609.71,
+   "min_us": 0.69,
+   "n": 1001,
+   "over_budget": 1,
+   "p95_us": 745.87,
+   "p99_us": 848.4,
+   "worst_headroom_x": 0.24
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 406.1,
+   "mean_us": 120.23,
+   "median_us": 112.74,
+   "min_us": 85.18,
+   "n": 1001,
+   "over_budget": 0,
+   "p95_us": 164.38,
+   "p99_us": 211.93,
+   "worst_headroom_x": 4.92
+  }
+ },
+ "platform": "px4",
+ "rig_flight": {
+  "armed": true,
+  "climbed_m": 2.71
+ },
+ "seconds": 40.0,
+ "stats": {
+  "max_latency_us": 8356.020000064746,
+  "messages": 17646,
+  "reconnects": 0,
+  "stale_ticks": 1,
+  "ticks": 1001,
+  "watchdog_trips": 0
+ },
+ "tee": {
+  "csia_link": "udpin:127.0.0.1:14540",
+  "reason": "this platform streams a full set on every mavlink instance unprompted; CSIA binds a separate link directly, which is what a companion port is",
+  "used": false
+ },
+ "timing_caveat": "no tee in this configuration: CSIA binds a separate mavlink instance directly. Remaining variance is the host, which also runs the simulator.",
+ "trust_trace": "logs/mechanism_b/px4_SUB_1.trace.jsonl",
+ "trust_trace_steps": 1001,
+ "unmapped_types": {
+  "ALTITUDE": 399,
+  "ATTITUDE": 3990,
+  "ATTITUDE_QUATERNION": 1995,
+  "ATTITUDE_TARGET": 399,
+  "CURRENT_EVENT_SEQUENCE": 14,
+  "CURRENT_MODE": 21,
+  "DISTANCE_SENSOR": 399,
+  "ESC_INFO": 399,
+  "ESTIMATOR_SENSOR_FUSION_STATUS": 41,
+  "EXTENDED_SYS_STATE": 199,
+  "GLOBAL_POSITION_INT": 1994,
+  "GNSS_INTEGRITY": 41,
+  "HOME_POSITION": 21,
+  "LINK_NODE_STATUS": 41,
+  "LOCAL_POSITION_NED": 1197,
+  "MISSION_CURRENT": 40,
+  "ODOMETRY": 1197,
+  "OPEN_DRONE_ID_LOCATION": 41,
+  "OPEN_DRONE_ID_SYSTEM": 41,
+  "PARAM_VALUE": 3,
+  "PING": 41,
+  "POSITION_TARGET_GLOBAL_INT": 399,
+  "POSITION_TARGET_LOCAL_NED": 399,
+  "SERVO_OUTPUT_RAW": 399,
+  "SYSTEM_TIME": 41,
+  "SYS_STATUS": 199,
+  "TIMESYNC": 399,
+  "TIME_ESTIMATE_TO_TARGET": 20,
+  "VFR_HUD": 399
+ },
+ "wall_s": 40.01
+}

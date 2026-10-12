@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "EXPERIMENTAL. Supports are reported separately, never as a grade.",
+  "properties": {
+    "attitude_support": {},
+    "calibration_id": {},
+    "certificate_hash": {},
+    "compute_support": {},
+    "evidence_manifest_hash": {},
+    "issue_time": {},
+    "payload_module_id": {},
+    "permitted_use": {
+      "type": "array"
+    },
+    "position_support": {},
+    "processing_software": {
+      "type": "object"
+    },
+    "product_id": {},
+    "product_type": {},
+    "prohibited_use": {
+      "type": "array"
+    },
+    "quality_properties": {
+      "type": "object"
+    },
+    "semantics_version": {
+      "x-csia-specific": "identifies the evaluator that issued the record. A certificate carrying a different semantics version than the evaluator asked to honour it is stale by definition, so the field is load-bearing and is kept rather than disguised."
+    },
+    "source_data_hashes": {
+      "type": "array"
+    },
+    "status": {},
+    "timing_support": {},
+    "vehicle_configuration_hash": {}
+  },
+  "required": [
+    "attitude_support",
+    "calibration_id",
+    "compute_support",
+    "evidence_manifest_hash",
+    "issue_time",
+    "payload_module_id",
+    "permitted_use",
+    "position_support",
+    "processing_software",
+    "product_id",
+    "product_type",
+    "prohibited_use",
+    "quality_properties",
+    "semantics_version",
+    "source_data_hashes",
+    "status",
+    "timing_support",
+    "vehicle_configuration_hash"
+  ],
+  "title": "MissionProductCertificate",
+  "type": "object",
+  "x-generated-from": "csia_mission.product.MissionProductCertificate",
+  "x-implementation-neutral": "Nothing here requires a trust coefficient, a Bayesian update, a graph, or this repository. CSIA-specific fields, where any, carry x-csia-specific with the reason they are kept."
+}

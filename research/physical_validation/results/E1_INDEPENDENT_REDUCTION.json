@@ -1,0 +1,142 @@
+{
+  "all_agree": true,
+  "campaigns": [
+    {
+      "agrees": true,
+      "campaign": "A2_ARDUPILOT",
+      "distribution_differences_by_method": {
+        "exclusive": [],
+        "inclusive": [
+          {
+            "difference": 4.0908435117170683e-07,
+            "field": "q1",
+            "independent": 0.007004210787304899,
+            "published": 0.007003801702953727
+          },
+          {
+            "difference": -5.673320720989139e-07,
+            "field": "q3",
+            "independent": 0.007016108447564784,
+            "published": 0.007016675779636883
+          },
+          {
+            "difference": -9.764164232706207e-07,
+            "field": "iqr",
+            "independent": 1.1897660259885257e-05,
+            "published": 1.2874076683155877e-05
+          }
+        ]
+      },
+      "distribution_independent_exclusive": {
+        "iqr": 1.2874076683155877e-05,
+        "max": 0.007145460476676857,
+        "median": 0.007006942734442356,
+        "min": 0.0069960030152779185,
+        "n": 20,
+        "q1": 0.007003801702953727,
+        "q3": 0.007016675779636883,
+        "quartile_method": "exclusive"
+      },
+      "distribution_independent_inclusive": {
+        "iqr": 1.1897660259885257e-05,
+        "max": 0.007145460476676857,
+        "median": 0.007006942734442356,
+        "min": 0.0069960030152779185,
+        "n": 20,
+        "q1": 0.007004210787304899,
+        "q3": 0.007016108447564784,
+        "quartile_method": "inclusive"
+      },
+      "distribution_mismatches": [],
+      "distribution_published": {
+        "iqr": 1.2874076683155877e-05,
+        "max": 0.007145460476676857,
+        "median": 0.007006942734442356,
+        "min": 0.0069960030152779185,
+        "n": 20,
+        "q1": 0.007003801702953727,
+        "q3": 0.007016675779636883
+      },
+      "fault_trials_with_positive_delta_independent": 20,
+      "fault_trials_with_positive_delta_published": 20,
+      "n_median_min_max_agree": true,
+      "per_trial_mismatches": [],
+      "quartile_methods_that_reproduce_the_published_figures": [
+        "exclusive"
+      ],
+      "traces_missing": [],
+      "trials_reduced": 40
+    },
+    {
+      "agrees": true,
+      "campaign": "P1_PX4",
+      "distribution_differences_by_method": {
+        "exclusive": [],
+        "inclusive": [
+          {
+            "difference": 8.659777053204865e-05,
+            "field": "q1",
+            "independent": 0.0031447019795675935,
+            "published": 0.003058104209035545
+          },
+          {
+            "difference": -1.2901625978889442e-05,
+            "field": "q3",
+            "independent": 0.0035816006603957007,
+            "published": 0.00359450228637459
+          },
+          {
+            "difference": -9.949939651093809e-05,
+            "field": "iqr",
+            "independent": 0.00043689868082810723,
+            "published": 0.0005363980773390453
+          }
+        ]
+      },
+      "distribution_independent_exclusive": {
+        "iqr": 0.0005363980773390453,
+        "max": 0.003999003945681978,
+        "median": 0.0035132369714049316,
+        "min": 0.00226938281553013,
+        "n": 20,
+        "q1": 0.003058104209035545,
+        "q3": 0.00359450228637459,
+        "quartile_method": "exclusive"
+      },
+      "distribution_independent_inclusive": {
+        "iqr": 0.00043689868082810723,
+        "max": 0.003999003945681978,
+        "median": 0.0035132369714049316,
+        "min": 0.00226938281553013,
+        "n": 20,
+        "q1": 0.0031447019795675935,
+        "q3": 0.0035816006603957007,
+        "quartile_method": "inclusive"
+      },
+      "distribution_mismatches": [],
+      "distribution_published": {
+        "iqr": 0.0005363980773390453,
+        "max": 0.003999003945681978,
+        "median": 0.0035132369714049316,
+        "min": 0.00226938281553013,
+        "n": 20,
+        "q1": 0.003058104209035545,
+        "q3": 0.00359450228637459
+      },
+      "fault_trials_with_positive_delta_independent": 20,
+      "fault_trials_with_positive_delta_published": 20,
+      "n_median_min_max_agree": true,
+      "per_trial_mismatches": [],
+      "quartile_methods_that_reproduce_the_published_figures": [
+        "exclusive"
+      ],
+      "traces_missing": [],
+      "trials_reduced": 40
+    }
+  ],
+  "how_the_rule_was_obtained": "reconstructed by testing mean, median and last-value against a single published trial. The median reproduced it to the last digit and the others did not. The original extractor was not read.",
+  "node": "gps",
+  "rule": "median of the node's trust over each half-open window; trust_delta = POST - PRE",
+  "schema": "csia.e1.independent_reduction/1",
+  "what_agreement_establishes": "that the published numbers follow from the archived traces under a stated rule. NOT that the traces describe reality, that the windows were the right windows, or that the experiment answers its question."
+}

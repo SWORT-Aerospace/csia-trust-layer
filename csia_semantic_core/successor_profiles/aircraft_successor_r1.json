@@ -1,0 +1,29 @@
+{
+ "name": "aircraft-successor",
+ "version": "r1",
+ "base_profile": "csia/v2/profiles/aircraft.py",
+ "declarations": [
+  {
+   "domain": "COMPUTE",
+   "component": "state_estimator",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "DIRECT",
+   "justification": "Every PX4 position consumer (mc_pos_control, navigator, flight_mode_manager) reads the estimator's vehicle_local_position / vehicle_global_position, which EKF2 publishes and EKF2Selector republishes; no navigation function on this vehicle receives a position that did not come out of the estimator. The v2 function table already names COMPUTE a supporting domain of COARSE_NAVIGATION, but no compute component named the function, so that declaration was dead. Candidate R2 in the shadow study.",
+   "source": "PX4 547e2ca src/modules/ekf2/EKF2.hpp (vehicle_local_position, vehicle_global_position publications), src/modules/mc_pos_control/MulticopterPositionControl.hpp and src/modules/navigator/navigator_main.cpp (subscriptions); csia/v2/profiles/aircraft.py COARSE_NAVIGATION supporting_domains"
+  },
+  {
+   "domain": "TIMING",
+   "component": "nav_solution",
+   "add_affected_functions": [
+    "COARSE_NAVIGATION"
+   ],
+   "add_dependencies": [],
+   "kind": "DIRECT",
+   "justification": "nav_solution is the timing channel that carries the position (aircraft.py ChannelSpec comment); the v2 function table names TIMING a supporting domain of COARSE_NAVIGATION ('latency degrades but does not remove it'), but no timing channel named the function. Its declared dependencies (state_estimator, cpu, gnss_serial) then enter COARSE_NAVIGATION's scope by the existing closure, which is what makes a separate gnss_serial declaration (R1) redundant. Candidate R3 in the shadow study.",
+   "source": "engineering/v2/FUNCTION_DEPENDENCY_SPEC.md section 6; csia/v2/profiles/aircraft.py ChannelSpec nav_solution"
+  }
+ ]
+}

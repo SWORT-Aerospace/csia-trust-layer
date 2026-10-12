@@ -1,0 +1,79 @@
+{
+  "any_counterexample": false,
+  "claims": [
+    {
+      "claim": "the baro low-trust rule does not fire while baro is healthy",
+      "combinations_enumerated": 8,
+      "combinations_run": 8,
+      "counterexamples": [],
+      "edge_partners": [
+        "battery",
+        "gps"
+      ],
+      "effective_below_frozen_violations": 0,
+      "not_a_proof": "NO_COUNTEREXAMPLE_IN_SEARCHED_SPACE means exactly that. Outside this space: other sensors, magnitudes below the campaign maximum, other fault timings, other flight profiles, and any interaction with the frozen policy's own rules. A search that reported 'the claim holds' would sound more conclusive than the random campaign it replaces while establishing no more.",
+      "ordering": "most adversarial first -- combinations degrading more edge partners are run before those degrading fewer",
+      "search_was_exhaustive": true,
+      "sensor": "baro",
+      "threshold": 0.75,
+      "verdict": "NO_COUNTEREXAMPLE_IN_SEARCHED_SPACE",
+      "why_not_random": "SR-008: 140 randomised runs found zero counterexamples for this claim; one constructed case found a real one immediately. The dangerous region is a specific conjunction, and independent draws reach it with vanishing probability.",
+      "worst_trust_seen": 0.8182
+    }
+  ],
+  "fault_duration_s": 50.0,
+  "flight_duration_s": 90.0,
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "the stub reports the rule firing on every combination; FOUND follows from the definition of a counterexample, not from any physics this tool measures",
+        "control": "a counterexample placed in the space is found",
+        "kind": "POSITIVE",
+        "observed": "'COUNTEREXAMPLE_FOUND'",
+        "status": "PASS"
+      },
+      {
+        "basis": "the stub never fires, so NOT_FOUND follows by definition -- and combinations_run > 0 is what separates a real negative from a search over an empty space, which would report the same word",
+        "control": "a clean space reports not-found HAVING RUN SOMETHING",
+        "kind": "NEGATIVE",
+        "observed": "('NO_COUNTEREXAMPLE_IN_SEARCHED_SPACE', 3)",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "csia_stress.falsify",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "method": "enumeration of the region where a counterexample would live -- every assignment of a live fault kind to the rule sensor's edge partners, at the top of each campaign range, with the rule's own sensor left unfaulted -- ordered most adversarial first.",
+  "min_corroborators": 2,
+  "onset_s": 20.0,
+  "schema": "csia.stress.falsification/1",
+  "worst_params": {
+    "bias_drift": {
+      "axis": 2,
+      "channel": "accel",
+      "rate": 0.2
+    },
+    "dropout": {},
+    "emi_spike": {
+      "amplitude": 18.0,
+      "rate_hz": 20.0
+    },
+    "gps_spoof": {
+      "drift": [
+        4.0,
+        4.0,
+        0.0
+      ]
+    },
+    "power_sag": {
+      "depth_v": 2.0,
+      "rpm_loss": 700.0
+    },
+    "vibration_anomaly": {
+      "gain": 4.5
+    }
+  }
+}

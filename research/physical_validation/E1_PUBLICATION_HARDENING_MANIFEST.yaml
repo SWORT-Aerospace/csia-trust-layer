@@ -1,0 +1,75 @@
+%YAML 1.2
+---
+# GENERATED. Parent E1 freeze is IMMUTABLE and was not modified.
+schema: csia.publication.hardening_manifest/1
+state: POST-E1 PUBLICATION HARDENING
+parent_e1_freeze:
+  path: research/physical_validation/E1_FREEZE_MANIFEST.yaml
+  sha256: f224a46a37d816a62debe7a40520f256db077f528bfef64072e6b296c30237cf
+  head_commit_it_records: e0e3d0aace0fec10e6ffdf89d08f708de9469305
+  immutable: true
+  unmodified_by_this_pass: true
+scientific_semantics_changed: false
+scientific_core_diff_against_freeze_tag: ''
+scientific_core_diff_is_empty: true
+files:
+  paper:
+    path: papers/csia_systems/main.tex
+    sha256: 965750ca5c96187806451a8472d4fc614f2b870b6018bc1a16604e87bfdf2126
+  artifact_map:
+    path: papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml
+    sha256: 8504080c8b085aac1396984eb85aa5cf975596c304c22b64710b4b1ae8d566c8
+  prose_literal_extension:
+    path: research/physical_validation/results/POST_E1_PROSE_LITERAL_EXTENSION.json
+    sha256: ec4eef2879f3acfa2fafa8da62c293459bef8a96f2cf3a0a53c1a936c2a4259a
+  scalar_pointer_adjudication:
+    path: research/physical_validation/results/POST_E1_SCALAR_POINTER_ADJUDICATION.json
+    sha256: 231dd1b558618bd91606608b6503360e672b63193e476dfd7856fc54ad4fb75f
+  e1_claim_table:
+    path: research/physical_validation/E1_FINAL_CLAIM_TABLE.csv
+    sha256: 33a3d10e1ef895ff216d4d4da48bcb12cdcc27eec2726364ad7b50d1b7e9d8dd
+  e1_freeze_manifest:
+    path: research/physical_validation/E1_FREEZE_MANIFEST.yaml
+    sha256: f224a46a37d816a62debe7a40520f256db077f528bfef64072e6b296c30237cf
+numeric_binding_audit:
+  unmapped_prose_literals: 50
+  by_class:
+    DERIVED_QUANTITY: 3
+    FORMATTING: 2
+    SCIENTIFIC_RESULT: 42
+    SOURCE_CONSTANT: 3
+  unclassified: 0
+  scientific_results_classified: 42
+  scientific_results_bound_to_artifact_and_pointer: 0
+  honest_status: Every unmapped literal is CLASSIFIED. The SCIENTIFIC_RESULT ones
+    are NOT yet bound to artifact and pointer, and this file says so rather than
+    implying they are. Binding them needs each owning section's result artifact
+    opened and the pointer found -- work that is specified here and not done here.
+  target: 0 UNSUPPORTED scientific prose literals -- not 0 literals. A version number
+    and 1/alpha_s are not results.
+scalar_pointer_audit:
+  pointer_can_be_added: 2
+  pointer_kind_not_supported: 1
+  source_constant: 1
+  unresolved: 0
+  whole_artifact_only: 1
+  wrong_artifact_attribution: 1
+  total_scalar_entries: 19
+  dereferenceable_pointers: 13
+  adjudicated: 6
+  finding: S11 pointed at an artifact that does not contain its value (HF-003)
+paper_changes_this_pass: PROVENANCE ONLY plus the E1 current-stack paragraph committed
+  at e0e3d0a. No scientific claim was added, removed or restated by the post-E1
+  hardening work itself.
+guards:
+  make_check_blocking: PASS
+  manuscript_rules: PASS
+  phase_guard: PASS
+  artifact_map: PASS
+what_this_manifest_does_not_claim:
+- that the 42 SCIENTIFIC_RESULT prose literals are bound. They are CLASSIFIED and
+  specified for binding; the binding is not done.
+- that the three specified pointer corrections are applied. They are deliberately
+  deferred to a later re-freeze because the artifact map is hashed by the immutable
+  E1 freeze.
+- any independent review of any of it.

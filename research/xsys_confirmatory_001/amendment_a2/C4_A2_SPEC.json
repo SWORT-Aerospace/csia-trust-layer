@@ -1,0 +1,53 @@
+{
+ "id": "XSYS-001-A2 C4 correction",
+ "status": "FROZEN BEFORE USE: committed and pushed before any A2 pilot was flown",
+ "amends": "XSYS-001-A1 (manifest 55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b), which amends XSYS-001 (manifest 868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b); neither is changed",
+ "scope": "C4 only. C1, C2, C3, C5 keep their A1 definitions and thresholds; nothing else changes",
+ "a1_c4_outcome_kept": "A1 C4 (absolute |r| <= 0.1) FAILED and stays failed; A1 stays NOT ACCEPTED",
+ "question": "Does the segmented nuisance design introduce cross-condition dependence beyond what is naturally observed between independently separated nominal spans?",
+ "signals": [
+  "gyro_loss_axis_m0",
+  "kappa_m0",
+  "rho_m0",
+  "w_true_roll",
+  "w_true_pitch"
+ ],
+ "evidence_signals": [
+  "gyro_loss_axis_m0",
+  "kappa_m0",
+  "rho_m0"
+ ],
+ "preprocessing": "exactly A1: independence_diagnostics.span_signals / trajectory_corr (research/xsys_confirmatory_001/amendment_a1/independence/independence_diagnostics.py, frozen by A1), span [t0 - 5 s, t0 + 15 s) on the 4 ms step grid, aligned on relative step index, Pearson r over the finite common samples",
+ "reference_population": {
+  "flights": "the two A2 REFERENCE flights of PILOT_MATRIX_A2.csv: nominal eta = 1.00 long hovers (same aircraft, controller and nominal hover mission)",
+  "spans": "t0 = arm + 20 s + 25 s x k, k = 0..14, on the 4 ms grid (arm from the log); a span is used only if [t0 - 5, t0 + 15) lies inside the armed flight",
+  "valid_pair": "two spans whose onsets differ by >= 24.99 s in simulated time (the accepted C2 spacing S = 25 s), within one reference flight or across the two, AND whose spans (extended back by tau_mem = 0.332 s) share no noise draws under the unchanged C1 definition (I <= 0.001); pairs failing C1 are excluded and reported",
+  "duration": "20 s, the analysis span of the frozen statistics"
+ },
+ "candidate_population": "the eight A2 CANDIDATE flights: nominal flights flown exactly as the A1 25 s segmentation schedules a condition; t0 = the benign onset event (first step after its parameter_update); all 28 pairs",
+ "sample_unit": "candidate flight (candidate side) and reference span (reference side); pairwise |r| values are derived quantities",
+ "statistic": "for each signal s: Delta_s = mean |r| over candidate pairs - mean |r| over valid reference pairs",
+ "uncertainty": "one-sided 95% upper bound U_s = 95th percentile of Delta_s* over B = 20000 bootstrap replicates; each replicate resamples the 8 candidate flights with replacement and the reference spans with replacement, and averages |r| over pairs of distinct resampled units (candidate) or distinct resampled spans forming a valid pair (reference); replicates without a usable pair are discarded and counted; numpy default_rng(20260927), one joint draw sequence shared by all signals, signals in the listed order",
+ "treatment_of_autocorrelation": "no parametric standard error for r is used: the reference |r| values come from spans with the same signals, duration, preprocessing and autocorrelation as the candidates, so the comparison is calibrated empirically; dependence between pairs sharing a unit is carried by the unit bootstrap",
+ "treatment_of_multiple_variables": "intersection-union: C4-A2 passes only if every one of the five signals passes; no multiplicity adjustment is needed for the pass decision (each test at one-sided 5%)",
+ "C4_A2_rule": "PASS iff U_s <= 0.10 for every s in signals",
+ "margin_justification": "0.10 is the materiality scale A1 used as its absolute limit, now applied to the INCREASE over the independent reference instead of to |r| itself",
+ "EV_A2_evidence_gate": {
+  "role": "hard requirement on the inferential inputs; A2 fails if it fails, whatever C4-A2 says; C3 is kept unchanged in addition",
+  "rule": "for each evidence signal: U_s <= 0.05 (same statistic and bootstrap as C4-A2) AND every candidate pair |r| <= 0.20",
+  "justification": "the frozen statistics L, D, C are functions of exactly these per-step signals; their natural |r| between independent spans is 0.02-0.04, so an increase of 0.05 would more than double it; 0.20 is about twice the largest |r| of any evidence signal among 105 independent A1 reference pairs (0.117)"
+ },
+ "fresh_replication_gates": {
+  "C1": "unchanged definition and threshold (I <= 0.001, spans extended back by tau_mem = 0.332 s, global lag search) applied to all 28 candidate pairs; gating",
+  "C5": "unchanged definition and thresholds applied to every A2 flight (candidate hover pseudo-onsets from arm + 17 s; reference hover likewise; heading over T0 within 5 deg); gating",
+  "C3": "recomputed on each reference hover exactly as A1 did on Q1 (band [25, 35] s); DESCRIPTIVE ONLY, because C3 is carried from A1 unchanged"
+ },
+ "carried_from_A1": "C1 PASS, C2 PASS, C3 PASS, C5 PASS as recorded in research/xsys_confirmatory_001/amendment_a1/independence/DESIGN_CHECK.json",
+ "acceptance": "READY only if the carried A1 C1, C2, C3, C5 are PASS AND fresh C1 PASS AND fresh C5 PASS AND C4-A2 PASS AND EV-A2 PASS AND all frozen preregistration guard tests pass; otherwise XSYS_001_REQUIRES_FURTHER_DESIGN_WORK, and no A3 is created automatically",
+ "pilot_design": "PILOT_MATRIX_A2.csv: 2 reference hovers (headings 8.182, 188.182 deg; 30 reference spans) and 8 candidate flights at slots 0, 1, 2, 3, 5, 7, 9, 10 (headings 180.000, 212.727, 245.455, 278.182, 310.909, 343.636, 24.545, 57.273 deg); no confirmatory heading, no A1 pilot heading",
+ "sample_size_justification": "planning only from the A1 long-hover null (105 independent Q1 span pairs, never the A1 candidates Q2-Q5): with 8 candidates and 30 reference spans the rule passes an exchangeable null with probability 0.98-1.00 per signal and passes a true increase of exactly the margin with probability 0.01-0.03; with 6 candidates the null pass probability falls to 0.82-0.94 per signal and with 4 the flight bootstrap degenerates, so 8 is the smallest adequate number",
+ "stopping_rule": "fly exactly the 10 flights of PILOT_MATRIX_A2.csv in its order with fly_pilots_a2.py; one retry per technical failure with the identical configuration; no evaluation of any kind until all 10 are flown; if any flight cannot be completed the evaluation is incomplete and the verdict is XSYS_001_REQUIRES_FURTHER_DESIGN_WORK; no additional flight is added and none is dropped",
+ "q2_q5_status": "the A1 design pilots Q2-Q5 are historical context only; they are not part of the decisive A2 sample",
+ "pilot_authorization": "nominal only: eta = 1.00, no actuator fault, no telemetry corruption, no CSIA outcome scoring; ids A2P-..., permanently excluded from any confirmatory analysis",
+ "evaluation_code": "analyze_a2.py (committed with this spec, before any A2 pilot)"
+}

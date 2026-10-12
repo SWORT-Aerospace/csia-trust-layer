@@ -1,0 +1,363 @@
+{
+  "counts": {
+    "INVALID_MUTANT": 1,
+    "KILLED": 4,
+    "KILLED_BY_INTEGRITY_ONLY": 1
+  },
+  "head": "63af8c22cae92b28eebc4b98cf7f8db2a7feaee3",
+  "integrity_guards": {
+    "tests/test_phase_c_freeze.py::test_every_recorded_hash_still_matches": [
+      "sha256",
+      "hexdigest",
+      "_sha("
+    ],
+    "tests/test_v1_1_golden.py::test_every_case_names_its_source_config_input_and_output_hashes": [
+      "sha256"
+    ],
+    "tests/test_v1_1_golden.py::test_every_stored_file_matches_its_recorded_file_hash": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_corpus_hash_covers_every_case": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_the_tier_a_encoding_is_lossless": [
+      "sha256",
+      "hexdigest"
+    ],
+    "tests/test_v1_1_golden.py::test_tier_c_fields_are_not_in_the_frozen_ledger": [
+      "sha256"
+    ],
+    "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched": [
+      "\"diff\""
+    ],
+    "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched": [
+      "\"diff\""
+    ],
+    "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze": [
+      "FROZEN_TAG",
+      "_git(",
+      "\"diff\""
+    ],
+    "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes": [
+      "sha256",
+      "hexdigest"
+    ]
+  },
+  "integrity_guards_note": "DERIVED from the selection's own sources by integrity_guards(), not hand-listed -- the hand list was wrong on its first run. Nothing is deselected; these are the node ids a failure is classified AGAINST.",
+  "mutants": [
+    {
+      "behavioural_killers": [
+        "tests/test_scalar_rederivation.py::test_s0_rederives_from_the_frozen_engine",
+        "tests/test_scalar_rederivation.py::test_t0_rederives_from_the_frozen_engine",
+        "tests/test_scalar_rederivation.py::test_the_mass_term_rederives_to_the_published_118_82",
+        "tests/test_scalar_rederivation.py::test_s0_is_not_settled_at_the_published_horizon"
+      ],
+      "breaks": "Multiplies the Beta prior mass by 100. S_0 = 475.6775 -- the measured settled mass in the 118.82 chain -- is a consequence of this prior.",
+      "expect": "KILLED",
+      "family": "EVIDENCE",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_scalar_rederivation.py::test_s0_rederives_from_the_frozen_engine",
+          "tests/test_scalar_rederivation.py::test_t0_rederives_from_the_frozen_engine",
+          "tests/test_scalar_rederivation.py::test_the_mass_term_rederives_to_the_published_118_82",
+          "tests/test_scalar_rederivation.py::test_s0_is_not_settled_at_the_published_horizon"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 54.5,
+        "tail": [
+          "FAILED tests/test_scalar_rederivation.py::test_the_mass_term_rederives_to_the_published_118_82",
+          "FAILED tests/test_scalar_rederivation.py::test_s0_is_not_settled_at_the_published_horizon"
+        ]
+      },
+      "id": "EVIDENCE-05",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "alpha0: float = 800.0",
+      "note": "",
+      "old": "alpha0: float = 8.0",
+      "path": "csia/trust_engine/engine.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 34.3,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+      ],
+      "breaks": "Removes the baseline detectors' dwell. The Mechanism-B comparison is against these baselines; a baseline that fires instantly is not the baseline the paper describes.",
+      "expect": "KILLED",
+      "family": "TIMING",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 55.5,
+        "tail": [
+          "FAILED tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+        ]
+      },
+      "id": "TIMING-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "DWELL_TICKS = 0 * ",
+      "note": "",
+      "old": "DWELL_TICKS = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 33.3,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Caps every hypothesis at one source, so no multi-source hypothesis can form and shared-cause attribution becomes impossible.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": null,
+      "id": "SUPPORT-01",
+      "integrity_killers": [],
+      "new": "MAX_SOURCES_PER_HYPOTHESIS = 1 + 0 * ",
+      "note": "",
+      "old": "MAX_SOURCES_PER_HYPOTHESIS = ",
+      "path": "csia/diagnosis/hypothesis.py",
+      "result": {
+        "failures": [],
+        "first_failure": null,
+        "returncode": 4,
+        "seconds": 0.3,
+        "tail": []
+      },
+      "verdict": "INVALID_MUTANT"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+      ],
+      "breaks": "Lets a single degraded source establish a shared-resource verdict, removing the multi-source requirement the baselines are built on.",
+      "expect": "KILLED",
+      "family": "SUPPORT",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 56.4,
+        "tail": [
+          "FAILED tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign"
+        ]
+      },
+      "id": "SUPPORT-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "D_MIN_SOURCES = 1 + 0 * ",
+      "note": "",
+      "old": "D_MIN_SOURCES = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 34.4,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    },
+    {
+      "behavioural_killers": [],
+      "breaks": "Makes IMU isolation unreachable, so a divergent dual-IMU pair is never resolved to one unit.",
+      "expect": "KILLED",
+      "family": "CONFIGURATION",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 55.4,
+        "tail": [
+          "FAILED tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+          "FAILED tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+        ]
+      },
+      "id": "CONFIGURATION-02",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_golden.py::test_the_frozen_input_hashes_still_match_the_tree",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "imu_isolation_gap: float = 0.99",
+      "note": "",
+      "old": "imu_isolation_gap: float = 0.12",
+      "path": "csia/runtime/failsafe.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 34.4,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED_BY_INTEGRITY_ONLY"
+    },
+    {
+      "behavioural_killers": [
+        "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+        "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+        "tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
+      ],
+      "breaks": "Removes the voting baseline's threshold, so it detects at every tick.",
+      "expect": "KILLED",
+      "family": "DIAGNOSIS",
+      "full_run": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+          "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+          "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched",
+          "tests/test_shared_power_baselines.py::test_baseline_constants_match_protocol",
+          "tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+          "tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 55.9,
+        "tail": [
+          "FAILED tests/test_baseline_rederivation.py::test_the_baseline_verdicts_rederive_from_the_frozen_campaign",
+          "FAILED tests/test_baseline_rederivation.py::test_the_rederivation_is_sensitive_to_the_baseline_constants"
+        ]
+      },
+      "id": "DIAGNOSIS-04",
+      "integrity_killers": [
+        "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes",
+        "tests/test_v1_1_support.py::test_the_frozen_diagnosis_core_is_untouched",
+        "tests/test_v1_1_staleness.py::test_the_frozen_core_is_still_untouched"
+      ],
+      "new": "VOTE_C = 0.0 * ",
+      "note": "",
+      "old": "VOTE_C = ",
+      "path": "csia/diagnosis/baselines.py",
+      "result": {
+        "failures": [
+          "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze"
+        ],
+        "first_failure": "tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+        "returncode": 1,
+        "seconds": 33.4,
+        "tail": [
+          "FAILED tests/test_v1_frozen.py::test_diagnostic_core_is_unchanged_since_the_freeze",
+          "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        ]
+      },
+      "verdict": "KILLED"
+    }
+  ],
+  "python": "/home/user/csia-trust-layer/.venv/bin/python",
+  "schema": "csia.research.mutation_results/1",
+  "selection": [
+    "tests/test_diagnosis.py",
+    "tests/test_hypothesis.py",
+    "tests/test_causal.py",
+    "tests/test_engine.py",
+    "tests/test_runtime.py",
+    "tests/test_comparator.py",
+    "tests/test_determinism.py",
+    "tests/test_v1_frozen.py",
+    "tests/test_v1_1_golden.py",
+    "tests/test_v1_1_support.py",
+    "tests/test_v1_1_staleness.py",
+    "tests/test_phase_c_freeze.py",
+    "tests/test_prose_numeric_bindings.py",
+    "tests/test_systems_paper_numeric_claims.py",
+    "tests/test_scalar_rederivation.py",
+    "tests/test_shared_power_baselines.py",
+    "tests/test_baseline_rederivation.py"
+  ],
+  "self_check": {
+    "canary_verdict": "KILLED",
+    "sandbox_csia_file": "/tmp/csia-mutation-xn0d0390/wt/csia/__init__.py",
+    "why": "The canary sets PRIOR_NOMINAL to zero. If it had survived, every result here would be a false survivor caused by the editable install resolving `import csia` to the unmutated repository."
+  },
+  "verdict_vocabulary": {
+    "EQUIVALENT": "author judgement, recorded in MUTATION_PLAN.md and never inferred by this script",
+    "INVALID_MUTANT": "the mutated program does not run -- collection error or a pytest usage exit. Says nothing about the test suite.",
+    "KILLED": "at least one failing test was not a source-integrity guard, so a BEHAVIOUR change was detected",
+    "KILLED_BY_INTEGRITY_ONLY": "every failing test was a source-integrity guard -- a file-hash or tag diff, which would fire identically on a reformatted comment. The change cannot reach a commit, and NO test asserts the behaviour this line produces. Treated as a survivor for the purpose of 'what do the tests establish about the science'.",
+    "OUT_OF_SCOPE": "author judgement, recorded in MUTATION_PLAN.md",
+    "SURVIVED": "no test failed at all"
+  }
+}

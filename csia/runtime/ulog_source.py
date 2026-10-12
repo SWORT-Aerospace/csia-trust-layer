@@ -63,7 +63,6 @@ class UlogSource(SourcePlugin):
 
     def _build_events(self):
         ev = []
-        u = self.ulog
         t0_us = None
 
         def ts(data):
@@ -193,10 +192,32 @@ class UlogSource(SourcePlugin):
         if bt is not None:
             d = bt.data
             t_s = rel(ts(d))
+            # v1.1 ENGINEERING FIX (defect D3). `valid: True` was
+            # unconditional, so PX4's documented not-measured sentinel reached
+            # the trust layer as a physical current of -1 A. PX4 declares the
+            # sentinel machine-readably in its own message definition:
+            #
+            #   msg/versioned/BatteryStatus.msg:14
+            #     float32 current_a # [A] [@invalid -1] Battery current
+            #
+            # The measured PX4 log in this repository carries 216 battery
+            # samples and every one of them is -1.0, so this is the normal
+            # case on that hardware, not an edge case.
+            #
+            # Voltage keeps its own validity: [@invalid 0] on line 13. A pack
+            # can report voltage without a current shunt fitted, and losing
+            # the voltage because the current is unmeasured would trade one
+            # false statement for another.
+            cur_a = np.asarray(d["current_a"], float)
+            volt_v = np.asarray(d["voltage_v"], float)
             for i in range(len(t_s)):
+                cur_ok = bool(np.isfinite(cur_a[i]) and cur_a[i] != -1.0)
+                volt_ok = bool(np.isfinite(volt_v[i]) and volt_v[i] != 0.0)
                 ev.append((float(t_s[i]), "battery", {
-                    "voltage": float(d["voltage_v"][i]),
-                    "current": float(d["current_a"][i]), "valid": True}))
+                    "voltage": float(volt_v[i]),
+                    "current": (float(cur_a[i]) if cur_ok else None),
+                    "current_valid": cur_ok,
+                    "valid": bool(volt_ok and cur_ok)}))
 
         # --- esc (airframe-specific edges; off unless explicitly enabled) -----
         if self.include_esc:

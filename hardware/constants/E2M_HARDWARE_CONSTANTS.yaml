@@ -1,0 +1,153 @@
+# Governed hardware constants for the E2M bench and the TCA9548A bus.
+#
+# WHAT THIS FILE IS FOR
+# ---------------------
+# Every constant that could reach real silicon is declared here with its
+# provenance. A constant is usable for LIVE hardware only when its status is
+# VERIFIED, which requires a primary document that is IN this repository and
+# hashes to the digest recorded beside it, plus the page or section a human
+# read the value from.
+#
+# NOTHING HERE IS GUESSED. Where a value is not backed by a hashed document
+# the entry carries no value at all: `null` is an honest answer and a
+# plausible number is not. This is the same rule `hardware/inventory/
+# e2m_sensors.yaml` and `hardware/wiring/E2M_PIN_TABLE.md` already apply.
+#
+# THE THREE STATUSES
+#   VERIFIED    a human checked this value against the cited page of the
+#               hashed document named below. Required for live hardware.
+#   UNVERIFIED  a value for this exists in code, but from general engineering
+#               knowledge rather than a primary source. Blocks live hardware.
+#   MISSING     no value exists anywhere. Blocks live hardware.
+#
+# UNVERIFIED entries deliberately do NOT restate the number. The number lives
+# in one place, is cited here by symbol, and cannot drift from a copy.
+
+schema: csia.hardware.governed_constants/1
+bus: e2m_bench_0
+
+# Primary documents. A constant may only be VERIFIED against a document listed
+# here whose file exists and whose sha256 matches.
+documents: []
+# Template:
+# - document_id: tca9548a_scps207k
+#   path: hardware/datasheets/tca9548a/tca9548a.pdf
+#   sha256: null
+#   revision: null
+#   retrieved_utc: null
+
+constants:
+
+  # -- TCA9548A device semantics -------------------------------------------
+  # These exist in csia_bus_provenance/datasheet.py, written from general
+  # knowledge of the part. The datasheet could not be retrieved in this
+  # environment (403 at the agent proxy, recorded in DATASHEET_ACCESS_RECORD),
+  # so none of them is evidence about the device in front of anybody.
+
+  - name: tca9548a.i2c_address_range
+    kind: i2c_address
+    units: 7-bit address
+    declared_in: csia_bus_provenance.datasheet.VALID_ADDRESSES
+    source_document: null
+    source_page_section: null
+    status: UNVERIFIED
+
+  - name: tca9548a.control_register_power_on_value
+    kind: register_value
+    units: byte
+    declared_in: csia_bus_provenance.datasheet.POR_CONTROL_REGISTER
+    source_document: null
+    source_page_section: null
+    status: UNVERIFIED
+
+  - name: tca9548a.channel_count
+    kind: register_semantics
+    units: channels
+    declared_in: csia_bus_provenance.datasheet.CHANNEL_COUNT
+    source_document: null
+    source_page_section: null
+    status: UNVERIFIED
+
+  - name: tca9548a.control_register_is_readable
+    kind: register_semantics
+    units: boolean
+    declared_in: csia_bus_provenance.datasheet.CONTROL_REGISTER_IS_READABLE
+    source_document: null
+    source_page_section: null
+    status: UNVERIFIED
+
+  # -- Constants that do not exist anywhere --------------------------------
+  # Not written down in code, not in the inventory, not in a document. They
+  # are enumerated so the gap is a list rather than a silence.
+
+  - name: tca9548a.supply_voltage
+    kind: voltage
+    units: V
+    declared_in: null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: tca9548a.logic_threshold
+    kind: voltage
+    units: V
+    declared_in: null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: tca9548a.absolute_maximum_ratings
+    kind: electrical_limit
+    units: V
+    declared_in: null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: tca9548a.maximum_clock_rate
+    kind: timing_limit
+    units: kHz
+    declared_in: null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: tca9548a.reset_timing
+    kind: timing_limit
+    units: ns
+    declared_in: null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: bus.mux_address
+    kind: i2c_address
+    units: 7-bit address
+    declared_in: null        # hardware/inventory/e2m_sensors.yaml: mux_address is null
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: bus.pullup_resistance
+    kind: electrical_limit
+    units: ohm
+    declared_in: null        # hardware/wiring/E2M_PIN_TABLE.md rows are blocked
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: bus.rail_voltage
+    kind: voltage
+    units: V
+    declared_in: null        # 5 V vs 3.3 V is the hazard the pin table blocks on
+    source_document: null
+    source_page_section: null
+    status: MISSING
+
+  - name: sensors.i2c_addresses
+    kind: i2c_address
+    units: 7-bit address
+    declared_in: null        # hardware/inventory/e2m_sensors.yaml: sensors is empty
+    source_document: null
+    source_page_section: null
+    status: MISSING

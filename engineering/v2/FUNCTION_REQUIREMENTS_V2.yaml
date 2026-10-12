@@ -1,0 +1,264 @@
+note: "GENERATED from the profile tables by engineering/v2/run_phase_c.py. The profiles\
+  \ are the source of truth; this file exists so the requirements are reviewable\
+  \ as data (\xA728). Thresholds live in the profile and NEVER in framework source."
+profiles:
+  aircraft:
+    AUTONOMOUS_MISSION:
+      acceptable_degradation: ''
+      fallback: operator-supervised flight
+      fallback_requirements: {}
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - COMPUTE
+      - TIMING
+      - POWER
+      - ACTUATION
+      summary: the vehicle can execute a mission without an operator
+      supporting_domains:
+      - COMMUNICATION
+    COARSE_NAVIGATION:
+      acceptable_degradation: latency and compute pressure degrade but do not remove
+        it
+      fallback: INERTIAL_CONTINUATION
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - POWER
+      summary: position good enough to hold a corridor
+      supporting_domains:
+      - COMPUTE
+      - TIMING
+    GEOFENCE_SUPPORT:
+      acceptable_degradation: ''
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - POWER
+      summary: boundary enforcement
+      supporting_domains:
+      - COMPUTE
+    INERTIAL_CONTINUATION:
+      acceptable_degradation: ''
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - POWER
+      summary: dead reckoning through an outage
+      supporting_domains: []
+    LOGGING:
+      acceptable_degradation: a late log entry is still a log entry
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - COMPUTE
+      - POWER
+      summary: an assurance record is being written
+      supporting_domains: []
+    POSITION_HOLD:
+      acceptable_degradation: ''
+      fallback: attitude hold
+      fallback_requirements: {}
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - COMPUTE
+      - TIMING
+      - POWER
+      summary: station keeping against drift
+      supporting_domains: []
+    PRECISION_NAVIGATION:
+      acceptable_degradation: 'none: a late position is a wrong position at speed'
+      fallback: COARSE_NAVIGATION
+      fallback_requirements: {}
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - COMPUTE
+      - TIMING
+      - POWER
+      summary: metre-class positioning for guided flight
+      supporting_domains: []
+    PROPULSION:
+      acceptable_degradation: ''
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - POWER
+      - ACTUATION
+      summary: commanded thrust is being produced
+      supporting_domains:
+      - COMPUTE
+    SENSING:
+      acceptable_degradation: a degraded source set still senses
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - SENSOR
+      - POWER
+      - COMMUNICATION
+      summary: sources are being received and are usable at all
+      supporting_domains:
+      - COMPUTE
+    TELEMETRY:
+      acceptable_degradation: latency and loss degrade telemetry; they do not stop
+        it
+      fallback: onboard log only
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - COMMUNICATION
+      - POWER
+      summary: the ground station is being kept informed
+      supporting_domains:
+      - COMPUTE
+      - TIMING
+  pump_skid:
+    CONDITION_MONITORING:
+      acceptable_degradation: late samples still diagnose
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains:
+      - TIMING
+      redundant_groups: []
+      required_domains:
+      - COMPUTE
+      summary: the skid is recording enough to diagnose itself later
+      supporting_domains: []
+    FLOW_DELIVERY:
+      acceptable_degradation: one pump down is reduced margin, not lost flow
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups:
+      - - ACTUATION/pump_a
+        - ACTUATION/pump_b
+      required_domains:
+      - POWER
+      summary: the skid delivers its duty flow
+      supporting_domains:
+      - COMPUTE
+    PRESSURE_REGULATION:
+      acceptable_degradation: ''
+      fallback: open-loop speed control at reduced accuracy
+      fallback_requirements:
+        OPEN_LOOP_ON_SPEED:
+        - COMPUTE
+        - POWER
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - COMPUTE
+      - TIMING
+      - COMMUNICATION
+      summary: discharge pressure is held at setpoint
+      supporting_domains: []
+    UNATTENDED_OPERATION:
+      acceptable_degradation: ''
+      fallback: operator-attended running
+      fallback_requirements: {}
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups:
+      - - ACTUATION/pump_a
+        - ACTUATION/pump_b
+      required_domains:
+      - POWER
+      - COMPUTE
+      - TIMING
+      - COMMUNICATION
+      summary: the skid can run a duty cycle without an operator
+      supporting_domains: []
+  test_stand:
+    DATA_LOGGING:
+      acceptable_degradation: a late sample is still a sample
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - COMPUTE
+      - COMMUNICATION
+      summary: the run is being recorded for later analysis
+      supporting_domains: []
+    SPEED_MEASUREMENT:
+      acceptable_degradation: jitter degrades the measurement; loss of the encoder
+        link removes it
+      fallback: null
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - ACTUATION
+      - COMMUNICATION
+      - TIMING
+      summary: shaft speed is being measured and is trustworthy
+      supporting_domains: []
+    TEST_SEQUENCE_EXECUTION:
+      acceptable_degradation: ''
+      fallback: operator-driven single run
+      fallback_requirements: {}
+      no_degradation_domains:
+      - TIMING
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - COMPUTE
+      - TIMING
+      - POWER
+      - ACTUATION
+      - COMMUNICATION
+      summary: the bench can run its profile unattended
+      supporting_domains: []
+    TORQUE_DELIVERY:
+      acceptable_degradation: ''
+      fallback: hold the run point and alarm
+      fallback_requirements: {}
+      no_degradation_domains: []
+      optional_domains: []
+      redundant_groups: []
+      required_domains:
+      - POWER
+      - ACTUATION
+      summary: the motor produces the commanded torque at the shaft
+      supporting_domains:
+      - COMPUTE
+version: 2.0.0

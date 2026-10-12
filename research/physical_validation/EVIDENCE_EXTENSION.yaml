@@ -1,0 +1,155 @@
+%YAML 1.2
+---
+# CSIA PAPER EVIDENCE EXTENSION — PHYSICAL VALIDATION V1
+#
+# APPEND-ONLY. This file records what the extension is allowed to touch and
+# what it must not. It exists so that a referee can check, mechanically, that
+# the physical-validation program did not reach into the frozen scientific
+# core to make a result come out.
+#
+# THE ONE RULE THIS FILE ENFORCES
+# ------------------------------
+#   scientific_core_changed MUST remain false.
+#
+# tests/test_evidence_extension_is_append_only.py re-derives it from git at
+# every run: if any path under `forbidden_paths` differs from the frozen tag,
+# the test fails and names the file. The field is not a promise, it is a
+# measurement.
+#
+# WHY AN EXTENSION RATHER THAN NEW EVIDENCE IN PLACE
+# --------------------------------------------------
+# The dual-paper evidence freeze is what the two manuscripts were written
+# against. Adding physical trials to those directories would mean the papers
+# no longer describe the artifacts they cite. So the new evidence lands in
+# research/physical_validation/ and publication/physical_validation/, the
+# freeze is untouched, and the manuscripts are updated only when an evidence
+# tier COMPLETES -- tracked in PAPER_IMPACT_LEDGER.yaml, not decided ad hoc.
+
+schema: csia.research.evidence_extension/1
+name: CSIA PAPER EVIDENCE EXTENSION -- PHYSICAL VALIDATION V1
+
+parent_evidence_freeze:
+  tag: csia-dual-paper-evidence-freeze
+  commit: eb2577d6830208b26d33facb283aa5be0ddf7c86
+  note: >-
+    The state both manuscripts were written against. Nothing in this extension
+    modifies it. Measured at extension creation: zero diff across csia/,
+    campaigns/, figures/ and datasets/ between that tag and the creation
+    commit below.
+
+creation_commit: caa2aa199761e6443583db07fceabce67d525b29
+creation_branch: paper/physical-validation-and-vehicle-adapter
+created_on: 2026-09-06
+
+purpose: >-
+  Remove, as far as engineering honestly can, the remaining peer-review
+  weaknesses of the systems paper -- n=1 positive current-stack reproductions,
+  simulation-only evidence, no flight-controller hardware, no physical
+  sensor-fault evidence, no actuator-path evidence, one diagnostic
+  architecture, incomplete signature-table validation, unknown test
+  sensitivity, unknown exposure -- WITHOUT changing the frozen diagnostic
+  core. Simultaneously, establish a vehicle-adapter boundary so the same
+  frozen core can be plugged into a new airframe by profile alone.
+
+# ---------------------------------------------------------------------------
+# THE FROZEN SCIENTIFIC CORE
+# ---------------------------------------------------------------------------
+scientific_core_sha: ec5acd189295dab9259d4989657d42184d6142a3   # csia-v1.0-research-final
+scientific_core_changed: false
+
+# Re-measured at extension creation, `git diff --stat` against the tag above
+# across every path below: EMPTY.
+forbidden_paths:
+  - csia/trust_engine
+  - csia/diagnosis
+  - csia/runtime/online.py
+  - csia/runtime/failsafe.py
+  - csia/scenarios.py
+  - csia/profiles.py
+
+# Additionally forbidden for this program, though not part of the v1 freeze:
+# the two manuscripts and the evidence they cite. They move only when an
+# evidence tier completes and PAPER_IMPACT_LEDGER.yaml says so.
+forbidden_without_tier_completion:
+  - papers/csia_systems/main.tex
+  - papers/gate_conditioning/main.tex
+  - research/systems-paper/results
+  - research/wp_c4
+  - research/wp_c6
+  - research/wp_c7
+  - research/wp_c8
+  - research/math-paper/results
+
+allowed_paths:
+  - research/physical_validation
+  - publication/physical_validation
+  - hardware/validation_rig
+  - campaigns/physical_validation
+  - profiles
+  - tools/csia_experiment
+  - csia/aircraft            # the ADAPTER layer, not the diagnostic core
+  - csia/deploy
+  - docs
+  - tests
+  - Makefile
+
+# ---------------------------------------------------------------------------
+# WHY THERE IS NO csia/adapters/ OR csia/interfaces/
+# ---------------------------------------------------------------------------
+# The program brief asked for both. Inspecting the repository first showed the
+# abstraction already exists and is mature:
+#
+#   csia/aircraft/sample.py           the canonical record (AircraftSample),
+#                                     with Quality and MissingReason ladders
+#   csia/aircraft/adapters/base.py    PlatformAdapter: freshness, staleness,
+#                                     qualification, canonical assembly
+#   csia/aircraft/adapters/ardupilot.py
+#   csia/aircraft/adapters/px4.py
+#   csia/aircraft/qualification.py    per-platform SemanticContract
+#
+# Creating a parallel csia/adapters/ would have produced two adapter layers
+# and a silent question about which one the runtime uses. The extension
+# EXTENDS the existing layer instead. That is the brief's own instruction --
+# "inspect the existing code before choosing filenames" -- applied.
+adapter_layer_decision:
+  requested: csia/adapters + csia/interfaces
+  found_existing: csia/aircraft/adapters + csia/aircraft/sample.py
+  decision: EXTEND_EXISTING
+  rationale: >-
+    Two adapter layers is a defect, not a feature. The existing layer already
+    provides the canonical record, per-channel quality, per-platform semantic
+    qualification and ArduPilot/PX4 implementations. What it lacks -- explicit
+    capability negotiation, health, metadata, a replay adapter, a synthetic
+    adapter and a vehicle profile manifest -- is added to it.
+
+experiment_preregistrations: []      # appended as each is frozen, never edited
+
+artifact_manifest: []                # appended per trial, never edited
+
+hardware_manifest: []                # appended when physical hardware exists
+
+software_environment_manifest:
+  python: "3.12 (.venv), 3.12 and 3.13 both gated in CI"
+  os: "Linux 6.18.44"
+  repository_head_at_creation: caa2aa199761e6443583db07fceabce67d525b29
+  test_count_at_creation: 1704
+  systems_paper_pages_at_creation: 27
+  math_paper_pages_at_creation: 12
+  blocking_guards_at_creation: PASS
+  bib_guard_at_creation: "FAIL -- 53 unresolved markers, by design"
+
+evidence_tiers:
+  E0: desktop simulation
+  E1: current-stack SITL/SIH
+  E2: real flight-controller hardware
+  E3: real sensor plus physical fault
+  E4: physical actuator/output path
+  E5: controlled physical flight
+
+tier_status_at_creation:
+  E0: EXISTS          # the bench simulator campaigns behind Paper I
+  E1: EXISTS_AT_N_1   # mechanism_a_ardupilot.json, mechanism_a_px4.json
+  E2: NOT_STARTED
+  E3: NOT_STARTED
+  E4: NOT_STARTED
+  E5: NOT_STARTED

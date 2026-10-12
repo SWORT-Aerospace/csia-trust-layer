@@ -72,8 +72,22 @@ def generate_flight(duration: float = 60.0, dt: float = 0.01,
     follows kinematic acceleration only), so this is a kinematic regime demo,
     not a validated high-speed flight-dynamics model. Sensor tolerances remain
     quad-tuned; the dashboard labels this scenario accordingly.
+
+    ``seed`` HAS NO EFFECT AND NEVER HAS. The truth here is *scripted*: every
+    field is a closed-form function of ``t``, with no noise term anywhere, so
+    two calls differing only in ``seed`` return byte-identical output. The
+    parameter is kept because callers pass it and because removing it would
+    break them; it is not a randomness control.
+
+    This is not a defect in the trajectory --- determinism is what makes the
+    committed scenario artifacts reproducible --- but it *was* invisible, and
+    one caller (`csia.validation.monte_carlo`) drew a fresh seed per trial in
+    the belief that it was varying the flight. It was not.
+    `tests/test_flight_truth_determinism.py` pins the property so neither
+    mistake can recur: no silent seed dependence may be added, and no caller
+    may assume one exists. Sensor NOISE is applied downstream in
+    `csia.sensors`, which is where a seed does do something.
     """
-    rng = np.random.default_rng(seed)
     t = np.arange(0.0, duration, dt)
 
     # --- position + heading (per flight profile) ----------------------------

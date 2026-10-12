@@ -1,0 +1,193 @@
+{
+ "baseline_unmutated": {
+  "returncode": 0,
+  "seconds": 9.0
+ },
+ "canary": {
+  "first_failure": "tests/test_consequence_phase32.py::test_hand_built_controls[the faulty unit selected]",
+  "verdict": "KILLED"
+ },
+ "deselected": [
+  "tests/test_consequence_phase32.py::test_the_manifest_matches_every_file_it_lists",
+  "tests/test_consequence_phase32.py::test_the_mutation_counts_match_the_write_up"
+ ],
+ "elapsed_s": 31.3,
+ "evaluated": 12,
+ "invalid": 0,
+ "killed": 12,
+ "kills_attributed_to_a_bare_file": 0,
+ "kills_attributed_to_a_test_node": 12,
+ "phase": "3.2 -- direct preregistered consequence test",
+ "results": [
+  {
+   "breaks": "Removes the declared effect-size threshold, so any statistically significant difference however small would be called a demonstrated consequence. The threshold exists precisely to stop that, and it was declared before the locked run.",
+   "family": "PREREG",
+   "first_failure": "tests/test_consequence_phase32.py::test_a_significant_but_small_effect_does_not_pass_the_threshold",
+   "first_failure_is_test_node": true,
+   "id": "32-01",
+   "new": "MIN_RD = 0.0",
+   "old": "MIN_RD = 0.50",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Lets any number of exclusions pass without the test being reported as underpowered, so a verdict could be drawn from two surviving pairs.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase32_pipeline.py::test_too_many_exclusions_are_reported_as_underpowered",
+   "first_failure_is_test_node": true,
+   "id": "32-02",
+   "new": "MAX_DROPPED_PAIRS = 40",
+   "old": "MAX_DROPPED_PAIRS = 4",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 1.6,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Picks the best-performing grid point as the confirmatory one instead of the preregistered point. That is the cherry-pick the preregistration exists to prevent.",
+   "family": "PREREG",
+   "first_failure": "tests/test_consequence_phase32.py::test_the_locked_results_are_what_the_evaluator_produces",
+   "first_failure_is_test_node": true,
+   "id": "32-03",
+   "new": "    primary = max(tests, key=lambda t: t.get(\"risk_difference\", 0.0))",
+   "old": "    primary = next(t for t in tests\n                   if t[\"family\"] == \"structural\"\n                   and t[\"magnitude\"] == confirm[\"structural\"])",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 1.0,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Sorts the declared grid. Phase 3.1 measured crossing time to be non-monotone in fault rate, so ordering the grid is not a cosmetic change.",
+   "family": "PREREG",
+   "first_failure": "tests/test_consequence_phase32.py::test_the_grid_is_iterated_in_declaration_order_and_never_sorted",
+   "first_failure_is_test_node": true,
+   "id": "32-04",
+   "new": "            for magnitude in sorted(GRIDS[family], reverse=True):",
+   "old": "            for magnitude in GRIDS[family]:       # declaration order, no sort",
+   "path": "research/consequence/phase32/campaign32.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Turns the exact McNemar test one-sided, halving every p-value.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase32.py::test_mcnemar_is_unchanged_from_the_earlier_phases",
+   "first_failure_is_test_node": true,
+   "id": "32-05",
+   "new": "    return tail",
+   "old": "    return min(1.0, 2.0 * tail)",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Fabricates a finite odds ratio when c = 0 by substituting 1 for the zero denominator. The real quantity is not finite and the preregistration says no point estimate is reported in that case.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase32.py::test_the_odds_ratio_is_not_reported_when_it_is_not_finite",
+   "first_failure_is_test_node": true,
+   "id": "32-06",
+   "new": "        \"odds_ratio\": round(b / max(c, 1), 6),",
+   "old": "        \"odds_ratio\": None if c == 0 else round(b / c, 6),",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Drops the flag that says the risk-difference interval is conditional on the discordant-pair count, so a reader would take it for a marginal interval.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase32.py::test_the_risk_difference_interval_declares_that_it_is_conditional",
+   "first_failure_is_test_node": true,
+   "id": "32-07",
+   "new": "        \"ci95_is_conditional_on_discordant_pairs\": False,\n        \"odds_ratio\": None if c == 0 else round(b / c, 6),",
+   "old": "        \"ci95_is_conditional_on_discordant_pairs\": True,\n        \"odds_ratio\": None if c == 0 else round(b / c, 6),",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Pins every lower confidence bound at zero.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase32.py::test_clopper_pearson_matches_the_exact_interval[40-40-0.911903-1.0]",
+   "first_failure_is_test_node": true,
+   "id": "32-08",
+   "new": "    low = 0.0",
+   "old": "    low = 0.0 if k == 0 else bisect(lambda p: at_least(p, k), alpha / 2.0)",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Decides the conflict on response LABELS rather than classes, and stops counting 'nothing issued where a response was required' as a conflict -- which is the entire Phase-3.2 finding.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_consequence_phase32.py::test_hand_built_controls[nothing issued where TERMINATE was required]",
+   "first_failure_is_test_node": true,
+   "id": "32-09",
+   "new": "    conflict = (correct_response not in kinds) if kinds else False",
+   "old": "    conflict = (want not in classes) if kinds else (correct_response != R_NONE)",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops the matched nominal control from ever vetoing the verdict, so an H2 result could stand on a policy that escalates on clean flights.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_phase32_pipeline.py::test_a_false_escalation_in_the_nominal_arm_vetoes_the_verdict",
+   "first_failure_is_test_node": true,
+   "id": "32-10",
+   "new": "        \"false_escalation\": False,",
+   "old": "        \"false_escalation\": bool(correct_response == R_NONE\n                                 and actionable),",
+   "path": "research/consequence/phase32/evaluate32.py",
+   "seconds": 1.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops gating the evidence in the gated condition, so EG becomes EA and the study compares a condition against itself.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase32_pipeline.py::test_the_gated_condition_really_gates_the_evidence",
+   "first_failure_is_test_node": true,
+   "id": "32-11",
+   "new": "    drop = ()",
+   "old": "    drop = (GATING_SENSOR,) if condition == \"EG\" else ()",
+   "path": "research/consequence/phase32/campaign32.py",
+   "seconds": 3.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops detecting one class of invalid run, so scenarios the trust layer rejected samples in would be counted as valid data.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase32_pipeline.py::test_a_nonfinite_sample_is_rejected_as_an_invalid_run",
+   "first_failure_is_test_node": true,
+   "id": "32-12",
+   "new": "        if False:\n            return None, f\"trust layer rejected {layer.bad_samples} samples\"",
+   "old": "        if layer.bad_samples:\n            return None, f\"trust layer rejected {layer.bad_samples} samples\"",
+   "path": "research/consequence/phase32/campaign32.py",
+   "seconds": 8.3,
+   "verdict": "KILLED"
+  }
+ ],
+ "schema": "csia.consequence.phase32_mutation/1",
+ "score": 1.0,
+ "selection": [
+  "tests/test_consequence_phase32.py",
+  "tests/test_phase32_pipeline.py",
+  "--deselect=tests/test_consequence_phase32.py::test_the_manifest_matches_every_file_it_lists",
+  "--deselect=tests/test_consequence_phase32.py::test_the_mutation_counts_match_the_write_up"
+ ],
+ "separate_from": "E2M_MUTATION_RESULTS.json (38/36/2) and PHASE31_MUTATION_RESULTS.json (11/8), neither of which is touched by this runner, so none of their five survivors can be killed as a side effect",
+ "survived": 0,
+ "targets": [
+  "research/consequence/phase32/campaign32.py",
+  "research/consequence/phase32/evaluate32.py"
+ ],
+ "what_this_is_not": "not evidence about hardware, and not a re-measurement of any earlier phase.",
+ "why_deselected": "a sha256 manifest guard fails for every mutant because mutating a file changes its hash; including it manufactures a perfect score. See FL-033.",
+ "working_tree_files_synced_into_sandbox": [
+  "research/consequence/phase32/SHA256_MANIFEST32.json",
+  "research/consequence/phase32/build_manifest32.py",
+  "research/consequence/phase32/campaign32.py",
+  "research/consequence/phase32/evaluate32.py",
+  "research/consequence/phase32/results/PHASE32_MUTATION_RESULTS.json",
+  "tests/test_consequence_phase32.py",
+  "tests/test_phase32_pipeline.py",
+  "tools/mutation/run_phase32_mutations.py"
+ ]
+}

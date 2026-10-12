@@ -1,0 +1,394 @@
+"""Adapter base: freshness, staleness, qualification, canonical assembly.
+
+An adapter is a state machine over a telemetry stream. It holds the latest
+value per channel, ages them against wall time, and emits an `AircraftSample`
+on demand. It never blocks and never buffers unboundedly: exactly one value
+per channel is retained, which is also what keeps memory flat over a long
+flight (an acceptance criterion: "no unbounded queues").
+
+Freshness is not the same as validity and neither is the same as
+informativeness. All three are tracked separately:
+
+    received?      -> MissingReason.NOT_RECEIVED
+    recent enough? -> MissingReason.STALE
+    means anything?-> MissingReason.STUB / NOT_QUALIFIED
+
+A channel can be fresh, valid and still refused. That is the entire point of
+the S2 layer.
+"""
+
+from __future__ import annotations
+
+import math
+import time
+from typing import Optional
+
+from ..qualification import SemanticContract, default_contract
+from ..sample import (AircraftSample, ChannelValue, MissingReason, Quality,
+                      SensorFrame)
+
+# Per-channel maximum age before the value is STALE. Derived from the declared
+# producer rate in CHANNEL_SEMANTICS.yaml with a 5x margin: a channel that has
+# missed five consecutive publications is not "slightly old", it is gone.
+#
+# THIS TABLE IS NOW THE FALLBACK, NOT THE POLICY. It was hand-written from the
+# rule above and could not express a per-platform rate, so PX4 -- whose
+# ESC_STATUS publishes at ~1 Hz, not the 10 Hz the row claimed -- inherited a
+# 0.50 s limit and would have reported its ESC channels STALE for about half
+# of every publish period. The rule is now applied to the contract directly,
+# per platform, and this dict only covers channels with no declared rate.
+MAX_AGE_MARGIN = 5.0
+
+MaxAge = {
+    "imu0.accel": 0.20, "imu0.gyro": 0.20,
+    "imu1.accel": 0.20, "imu1.gyro": 0.20,
+    "mag.field_ut": 0.20,
+    "baro.altitude": 0.50, "baro.temp_c": 0.50,
+    "gnss.position": 1.00, "gnss.velocity": 1.00,
+    "battery.voltage": 0.50, "battery.current": 0.50,
+    "esc.rpm": 0.50, "esc.current": 0.50,
+    "vibration.rms": 0.50,
+    "vehicle_status.armed": 5.00,
+    "estimator.variances": 1.00,
+    "estimator.flight_mode": 5.00,
+}
+DEFAULT_MAX_AGE = 1.0
+
+# Which AircraftSample group each channel belongs in.
+GROUP_OF = {
+    "imu0.accel": "imu", "imu0.gyro": "imu",
+    "imu1.accel": "imu", "imu1.gyro": "imu",
+    "mag.field_ut": "magnetometer",
+    "baro.altitude": "barometer", "baro.temp_c": "barometer",
+    "gnss.position": "gnss", "gnss.velocity": "gnss",
+    "gnss.velocity_z": "gnss",
+    "battery.voltage": "battery", "battery.current": "battery",
+    "esc.rpm": "esc", "esc.current": "esc",
+    "vibration.rms": "imu",
+    "vehicle_status.armed": "navigation_state",
+    "estimator.variances": "estimator_health",
+    "estimator.flight_mode": "estimator_health",
+}
+
+
+class PlatformAdapter:
+    """Common machinery. Subclasses implement `ingest`."""
+
+    platform = "base"
+    adapter_version = "1.1.0"
+
+    def __init__(self, contract: Optional[SemanticContract] = None,
+                 max_age: Optional[dict] = None,
+                 clock=time.monotonic):
+        # Narrowed for THIS platform: qualification is per platform
+        # instance, never global. A base contract here would grade a
+        # channel the airframe does not physically have the same way
+        # as one that should be present and is not.
+        self.contract = contract or default_contract(self.platform)
+        self.max_age = self._derive_max_age()
+        if max_age:
+            self.max_age.update(max_age)
+        self._clock = clock
+        # channel -> (raw_value, t_mono_received, t_source, frame, unit)
+        self._latest: dict = {}
+        # Per-sensor receive stamps at the last core hand-off, so a
+        # sensor is not re-fed while it has nothing new to say.
+        self._emitted: dict = {}
+        self._t_source_last: Optional[float] = None
+        self._flight_mode: Optional[str] = None
+        self.counters = {"messages": 0, "mapped": 0, "unmapped": 0,
+                         "rejected_sentinel": 0, "time_reanchors": 0}
+        self._unmapped_types = {}
+        # channel -> how many times its producer arrived carrying the
+        # documented "not measured" sentinel. The global counter above says
+        # 375 rejections happened somewhere; it cannot say WHICH channel, and
+        # the qualification report consequently printed "never arrived" for a
+        # field whose message was arriving at 9 Hz with -1 in it. Those are
+        # different facts about the platform: one is an unimplemented stream,
+        # the other is an implemented stream declaring it has no sensor.
+        self._sentinels: dict = {}
+        # channel -> when its producer last arrived carrying the sentinel, so
+        # the DELIVERED value can say SENTINEL rather than NOT_RECEIVED.
+        self._sentinel_at: dict = {}
+
+    def _derive_max_age(self) -> dict:
+        """Apply the stated rule to the contract instead of restating it.
+
+        `5 / declared_rate_hz` for this platform, falling back to the hand
+        table and then to DEFAULT_MAX_AGE. A hand-written table cannot express
+        a per-platform rate, and the moment two platforms publish the same
+        channel at different rates one of them is wrong -- which is exactly
+        what happened to PX4's ESC channels.
+        """
+        derived = dict(MaxAge)
+        key = f"producer_{self.platform}"
+        for channel, row in self.contract.channels.items():
+            rate = (row.raw.get(key) or {}).get("rate_hz")
+            if rate:
+                derived[channel] = MAX_AGE_MARGIN / float(rate)
+        return derived
+
+    # -- subclass interface ------------------------------------------------
+
+    def ingest(self, msg) -> None:                      # pragma: no cover
+        raise NotImplementedError
+
+    # -- shared helpers ----------------------------------------------------
+
+    def _put(self, channel: str, value, *, t_source=None,
+             frame: SensorFrame = SensorFrame.NONE, unit: str = ""):
+        """Record the latest raw value for a channel."""
+        if value is None:
+            return
+        self._latest[channel] = (value, self._clock(), t_source, frame, unit)
+        # A real value supersedes an earlier sentinel: a sensor that starts
+        # reporting must not keep being described as unmeasured.
+        self._sentinel_at.pop(channel, None)
+        self.counters["mapped"] += 1
+        if t_source is not None:
+            self._t_source_last = t_source
+
+    def _reject_sentinel(self, *channels: str,
+                         reason: MissingReason = MissingReason.SENTINEL):
+        """Record that a channel's producer arrived and declared no value.
+
+        Named channels AND a delivered reason, not just a tally.
+
+        The first version of this method only counted, and the counting fix
+        was written up as though it had solved the problem. It had not:
+        `MissingReason.SENTINEL` was defined in sample.py and produced
+        NOWHERE, so a PX4 `BATTERY_STATUS` arriving at ~9.7 Hz with
+        `current_battery = -1` reached the flight log as `NOT_RECEIVED` --
+        byte for byte identical to a message that never came. The one
+        distinction the enum exists to carry was still being thrown away, one
+        layer further down than before.
+
+        The REASON is the caller's to name, and that matters. A lost GPS fix
+        and a -1 battery current are both in-band "no value" reports, but
+        `NO_3D_FIX` says something `SENTINEL` does not, and the enum already
+        carries the distinction. Defaulting every case to SENTINEL would have
+        replaced one imprecision with another --
+        `test_no_3d_fix_is_missing_not_a_zero_position` caught exactly that.
+
+        v1.1 ENGINEERING FIX (defects D1, D2). This method used to record the
+        sentinel WITHOUT clearing `_latest`, while `_put` cleared
+        `_sentinel_at`. The asymmetry meant a real value always won:
+        `_channel_value` consults `_latest` first, so a producer saying "not
+        measured now" was masked by whatever it had measured a moment earlier,
+        for as long as the old value stayed inside its max-age window.
+
+        Measured pre-fix, on ArduPilot `BATTERY_STATUS` with a real 5.00 A
+        reading followed 20 ms later by the documented `current_battery = -1`
+        sentinel: `battery.current` reported **5.00 A, present, INFORMATIVE**.
+        The declaration of absence was recorded and then ignored.
+
+        The GNSS path had already worked around this locally by popping
+        `_latest` itself before calling here (`ardupilot.py:232-233`), which is
+        why `NO_3D_FIX` reached the sample correctly while the battery sentinel
+        did not. That workaround is now the general rule, applied once, here.
+
+        A sentinel supersedes an earlier value for the same reason a value
+        supersedes an earlier sentinel: the producer's most recent statement
+        about the channel is the one that describes the present.
+        """
+        now = self._clock()
+        self.counters["rejected_sentinel"] += 1
+        for channel in channels:
+            self._sentinels[channel] = self._sentinels.get(channel, 0) + 1
+            self._sentinel_at[channel] = (now, reason)
+            self._latest.pop(channel, None)
+
+    def sentinel_counts(self) -> dict:
+        return dict(self._sentinels)
+
+    def _note_unmapped(self, type_name: str):
+        self.counters["unmapped"] += 1
+        self._unmapped_types[type_name] = \
+            self._unmapped_types.get(type_name, 0) + 1
+
+    def unmapped_types(self) -> dict:
+        """Message types seen but not consumed.
+
+        Reported rather than silently dropped: an integration where a channel
+        the contract expects never arrives should be visible at the adapter,
+        not diagnosed later as a mysterious abstention.
+        """
+        return dict(self._unmapped_types)
+
+    # -- sampling ----------------------------------------------------------
+
+    def _channel_value(self, channel: str, now: float) -> ChannelValue:
+        entry = self._latest.get(channel)
+        if entry is None:
+            # "The message never came" and "the message came and declared it
+            # has no sensor" are different facts about the vehicle, and only
+            # the second one tells a post-flight reader that the stream is
+            # wired and the hardware is not. Aged against the same limit as a
+            # real value: a sentinel from a minute ago says nothing about now.
+            record = self._sentinel_at.get(channel)
+            if record is not None:
+                t_sent, sent_reason = record
+                limit = self.max_age.get(channel, DEFAULT_MAX_AGE)
+                if now - t_sent <= limit:
+                    q, _may, _reason, _ = self.contract.effective(channel)
+                    return ChannelValue.absent(
+                        channel, sent_reason,
+                        quality=(Quality.UNAVAILABLE if q.admissible else q),
+                        note="producer arrived carrying the documented "
+                             "not-measured sentinel: stream implemented, "
+                             "measurement absent")
+            return self.contract.qualify(channel, None)
+        value, t_recv, t_source, frame, unit = entry
+        age = now - t_recv
+        limit = self.max_age.get(channel, DEFAULT_MAX_AGE)
+        if age > limit:
+            q, may, reason, _ = self.contract.effective(channel)
+            return ChannelValue.absent(
+                channel, MissingReason.STALE,
+                quality=(Quality.UNAVAILABLE if q.admissible else q),
+                note=f"age {age:.2f}s exceeds {limit:.2f}s")
+        return self.contract.qualify(channel, value, unit=unit, frame=frame,
+                                     t_source=t_source, age_s=age)
+
+    def sample(self, t_mono: Optional[float] = None) -> AircraftSample:
+        """Assemble the canonical sample. Never blocks."""
+        now = self._clock()
+        t = t_mono if t_mono is not None else now
+        s = AircraftSample(t_mono=t, t_source=self._t_source_last,
+                           flight_mode=self._flight_mode)
+        for channel in self.contract.channels:
+            cv = self._channel_value(channel, now)
+            group = GROUP_OF.get(channel)
+            if group is None:
+                continue
+            getattr(s, group)[channel] = cv
+        s.metadata = {
+            "platform": self.platform,
+            "adapter_version": self.adapter_version,
+            "contract_version": self.contract.version,
+            # WHICH CONTEXT qualified these rows. The contract says a bench
+            # with real hardware must re-run the probe rather than inherit a
+            # simulator row; a reader can only honour that if the record says
+            # which context produced it, and it said nothing.
+            "qualification_context": self.contract.context,
+            "frozen_core": self.contract.frozen_core,
+            "counters": dict(self.counters),
+        }
+        return s
+
+    # -- bridge to the FROZEN v1 core --------------------------------------
+    #
+    # The v1 online layer consumes (sensor, t, channels) tuples. This is the
+    # only place that shape is produced, and it is produced ONLY from
+    # admissible channels. A blocked channel is simply not emitted, so the
+    # frozen layer sees the sensor as unavailable and abstains -- which is
+    # behaviour it already had. No v1 code changes.
+
+    CORE_MAP = {
+        "imu0": {"accel": "imu0.accel", "gyro": "imu0.gyro"},
+        "imu1": {"accel": "imu1.accel", "gyro": "imu1.gyro"},
+        "mag": {"field_ut": "mag.field_ut"},
+        "baro": {"altitude": "baro.altitude", "temp_c": "baro.temp_c"},
+        "gps": {"pos": "gnss.position", "vel": "gnss.velocity"},
+        "battery": {"voltage": "battery.voltage",
+                    "current": "battery.current"},
+        "motor_esc": {"rpm": "esc.rpm", "current": "esc.current"},
+        "vibration": {"rms": "vibration.rms"},
+        "vehicle_status": {"armed": "vehicle_status.armed"},
+    }
+
+    def to_core_samples(self, s: AircraftSample) -> list:
+        """AircraftSample -> the frozen core's sample tuples.
+
+        A sensor is emitted only when ALL of its required channels are usable.
+        Partial sensors are withheld: half a GPS fix is not a degraded fix, it
+        is a fabricated one.
+
+        **And only when it has NEW data.** The reference runtime
+        (`csia/runtime/service.py:120`) iterates the source stream and feeds
+        each sample as it arrives, so the core sees one sample per actual
+        measurement. This adapter holds the latest value per channel, so
+        without a freshness gate it re-fed all nine sensors 25 times a second
+        regardless of whether anything had changed.
+
+        That was wrong twice over:
+
+        * **Cost.** Phase timing on live telemetry put 1542.7 us of a 1753 us
+          tick inside the frozen core -- 88% -- against 297-356 us/tick on the
+          replay path. Most of that was filter and residual work recomputed on
+          values the vehicle had not re-sent.
+        * **Semantics.** Feeding one GPS fix into a Holt filter 25 times makes
+          the filter behave as though 25 measurements agreed. It silently
+          changes the effective time constants of a FROZEN core.
+
+        The near-miss worth recording: this looked exactly like "the v1 core is
+        5x slower than its documented figure". It is not. It is v1.1 handing
+        the core work it never asked for.
+        """
+        out = []
+        for sensor, mapping in self.CORE_MAP.items():
+            chans = {}
+            complete = True
+            for core_key, channel in mapping.items():
+                cv = s.get(channel)
+                if cv is None or not cv.usable:
+                    # baro.temp_c is optional to the core; everything else is
+                    # required for its sensor to be emitted at all.
+                    if channel == "baro.temp_c":
+                        continue
+                    complete = False
+                    break
+                chans[core_key] = cv.value
+            if not complete or not chans:
+                continue
+            # Freshness gate: has anything in this sensor actually arrived
+            # since we last handed it over?
+            stamps = tuple(self._latest[ch][1]
+                           for ch in mapping.values()
+                           if ch in self._latest)
+            if stamps and self._emitted.get(sensor) == stamps:
+                continue
+            self._emitted[sensor] = stamps
+            if sensor == "gps":
+                # GPS_RAW_INT carries no vertical rate; the core already
+                # knows to judge horizontal only when told.
+                chans["vz_valid"] = False
+            if sensor != "vehicle_status":
+                chans["valid"] = True
+            out.append((sensor, s.t_mono, chans))
+        return out
+
+    # -- reporting ---------------------------------------------------------
+
+    def status(self) -> dict:
+        now = self._clock()
+        chans = {}
+        for channel in self.contract.channels:
+            cv = self._channel_value(channel, now)
+            chans[channel] = {
+                "usable": cv.usable,
+                "quality": cv.quality.value,
+                "missing": cv.missing.value if cv.missing else None,
+                "age_s": (None if cv.age_s is None
+                          else round(cv.age_s, 4)),
+            }
+        return {
+            "platform": self.platform,
+            "adapter_version": self.adapter_version,
+            "counters": dict(self.counters),
+            "unmapped_types": self.unmapped_types(),
+            "channels": chans,
+        }
+
+
+def finite(x) -> bool:
+    """Reject NaN/inf before they reach the core.
+
+    A NaN propagates silently through a weighted mean and turns an entire
+    trust vector into NaN several ticks later, far from the message that
+    produced it.
+    """
+    try:
+        return math.isfinite(float(x))
+    except (TypeError, ValueError):
+        return False

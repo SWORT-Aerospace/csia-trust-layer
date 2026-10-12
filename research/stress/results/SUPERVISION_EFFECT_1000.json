@@ -1,0 +1,33 @@
+{
+  "count": 1000,
+  "detected_frozen": 783,
+  "detected_supervised": 969,
+  "detections_lost": 0,
+  "newly_detected": 186,
+  "newly_detected_fault_kinds": {
+    "bias_drift": 106,
+    "dropout": 186,
+    "gps_spoof": 1,
+    "power_sag": 35,
+    "vibration_anomaly": 1
+  },
+  "peak_level_raised_in_runs": 255,
+  "schema": "csia.supervision.effect/1",
+  "seed": 20260907,
+  "still_undetected": 31,
+  "still_undetected_fault_kinds": {
+    "bias_drift": 31,
+    "power_sag": 10
+  },
+  "still_undetected_targets": {
+    "baro": 18,
+    "battery": 1,
+    "imu0": 10,
+    "imu1": 8,
+    "mag": 21,
+    "motor_esc": 9
+  },
+  "the_zero_that_matters": "detections_lost is 0. The overlay computes max(frozen, supervisor), so it can only add urgency; a non-zero value here would mean it had somehow removed a detection the frozen core made, which the composition forbids.",
+  "what_remains_is_a_different_class": "EVERY newly-detected run involved a `dropout`, which is exactly the absence-of-data mechanism SR-001 named. The 31 still undetected are dominated by `bias_drift` -- degradation too weak to cross a frozen trust threshold. That is a threshold question inside the FROZEN core, not a supervision gap, and it is not retuned here.",
+  "what_this_is_not": "a claim about a real airframe. Simulated sensors, simulated degradation, and CSIA remains advisory with no command authority."
+}

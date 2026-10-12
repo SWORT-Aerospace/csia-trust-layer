@@ -1,0 +1,42 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  kind: cusum_v1_scenario
+  scenario: imu0_bias_drift
+  ticks: 1500
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  1500 ticks in 2 intervals
+  0.000s .. 3.000s (76 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 1 rejected; changed: start
+  3.040s .. 59.960s (1424 ticks): no symptom; attribution NO_EVIDENCE; 5 used, 0 rejected; changed: admissibility, producer_health
+
+FINAL STATE at 59.960s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  attribution: NO_EVIDENCE
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  cusum:v1_1_sequential: health VALID; 5 of 5 admitted
+  coverage: cusum:v1_1_sequential has no evidence for source.baro: clean-arm sigma0 is degenerate (0.0 over 1500 ticks)
+  coverage: cusum:v1_1_sequential has no evidence for source.imu0: no per-IMU physics chi-square exists in this construction
+  coverage: cusum:v1_1_sequential has no evidence for source.imu1: no per-IMU physics chi-square exists in this construction
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: none given
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

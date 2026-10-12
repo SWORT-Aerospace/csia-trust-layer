@@ -1,0 +1,99 @@
+{
+  "answer": {
+    "silent_decision_divergence_runs": 0,
+    "verdict": "NO_SILENT_DIVERGENCE",
+    "visible_degradation_runs": 0
+  },
+  "criteria_declared_before_runs": {
+    "DEGRADED": "no decision change AND p99 > budget",
+    "NORMAL": "no decision change AND p99 <= budget",
+    "UNSUPPORTED": "a decision changed, or the process did not survive",
+    "tick_budget_us": 2000.0
+  },
+  "host": {
+    "cpus": 4,
+    "platform": "linux"
+  },
+  "latency_caveat": "Measured in a SHARED CONTAINER. These are not deployment numbers, and the E1 discipline -- latency recorded and NOT adjudicated -- carries here unchanged.",
+  "repeats_per_run": 20,
+  "runs": [
+    {
+      "band": "NORMAL",
+      "detail": "unloaded baseline",
+      "result": {
+        "decision_changes": [],
+        "jitter_us": 8.090980048453774,
+        "max_us": 132.89799994709028,
+        "mean_us": 7.403283332981421,
+        "p50_us": 6.410000196410692,
+        "p95_us": 11.34499984800641,
+        "p99_us": 17.901000092024333,
+        "samples": 300
+      },
+      "stressor": "none"
+    },
+    {
+      "band": "NORMAL",
+      "detail": "4 spinning workers on 4 cpus",
+      "result": {
+        "decision_changes": [],
+        "jitter_us": 5.543828694221887,
+        "max_us": 75.16499999837833,
+        "mean_us": 7.771373334435339,
+        "p50_us": 7.338999921557843,
+        "p95_us": 14.475999932983541,
+        "p99_us": 21.672999992006226,
+        "samples": 300
+      },
+      "stressor": "cpu_contention"
+    },
+    {
+      "band": "NORMAL",
+      "detail": "8 spinning workers on 4 cpus",
+      "result": {
+        "decision_changes": [],
+        "jitter_us": 5.544449676757587,
+        "max_us": 81.1610000255314,
+        "mean_us": 7.165360007851025,
+        "p50_us": 6.71499992677127,
+        "p95_us": 11.06600007005909,
+        "p99_us": 21.64500006074377,
+        "samples": 300
+      },
+      "stressor": "cpu_contention"
+    },
+    {
+      "band": "NORMAL",
+      "detail": "nice 19",
+      "result": {
+        "decision_changes": [],
+        "jitter_us": 4.158372390407202,
+        "max_us": 43.68800000520423,
+        "mean_us": 7.204436671296814,
+        "p50_us": 6.820000180596253,
+        "p95_us": 11.731000086001586,
+        "p99_us": 17.854999896371737,
+        "samples": 300
+      },
+      "stressor": "low_priority"
+    },
+    {
+      "band": "NORMAL",
+      "detail": "512 MiB resident ballast",
+      "result": {
+        "decision_changes": [],
+        "jitter_us": 6.4438849658314235,
+        "max_us": 83.64599989363342,
+        "mean_us": 7.786416673146353,
+        "p50_us": 7.159999995565158,
+        "p95_us": 13.288000218381057,
+        "p99_us": 27.961000114373746,
+        "samples": 300
+      },
+      "stressor": "memory_pressure"
+    }
+  ],
+  "schema": "csia.assurance.resource_envelope/1",
+  "the_question": "does compute degradation produce VISIBLE assurance degradation before SILENT scientific divergence?",
+  "vectors": 15
+}

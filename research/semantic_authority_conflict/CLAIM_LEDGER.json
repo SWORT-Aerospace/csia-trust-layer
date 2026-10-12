@@ -1,0 +1,201 @@
+{
+  "package": "research/semantic_authority_conflict",
+  "stage": "STAGE 0 -- prior-art kill test, formal model, source-grounded conflict reproduction, set-valued feasibility",
+  "base_commit": "d2cb07b",
+  "final_verdict": "ENGINEERING_INCONSISTENCY_ONLY",
+  "novelty": "NOT ESTABLISHED",
+  "preserved_prior_verdicts": {
+    "generic semantic-equivalence checking": "KNOWN/SUBSUMED",
+    "AI-assisted contract synthesis": "HEURISTICS_SUFFICIENT / architecture KNOWN/SUBSUMED",
+    "dual operational/diagnostic admissibility": "KNOWN/SUBSUMED",
+    "evidence-semantic checker": "useful engineering tool, not dissertation novelty"
+  },
+  "claims": [
+    {
+      "id": "S1",
+      "statement": "Every component of the proposed architecture is established prior art in a separate literature: tolerating conflicting specifications (ViewPoints), set-valued interpretation under model ambiguity (credal sets / imprecise probability / DRO), implementations disagreeing on identical raw input (parser differentials / LangSec / ParDiff), and conflicting evidence in a safety argument (Dempster-Shafer safety-case confidence).",
+      "evidence": "PRIOR_ART_MATRIX.md. ViewPoints states 'tolerate inconsistency' as its organising principle (Hunter & Nuseibeh TSE 1994; Managing inconsistent specifications TOSEM 1998).",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "Snippet-level search; full-text retrieval blocked by the environment's egress policy for every scholarly host tried. Understates prior art if anything.",
+      "strongest_allowed_wording": "Each component is subsumed; the literal four-way conjunction was not found in one work.",
+      "forbidden_stronger_wording": "Any suggestion that representing conflicting authorities without resolving them, or set-valued output, originates here.",
+      "next_falsification_test": "Search certification treatment (DO-178C, ISO 26262) of standards that are silent where implementations must choose."
+    },
+    {
+      "id": "S2",
+      "statement": "Item 44's proposition -- a conclusion is robust iff F(C,w) = y for all C in the authority set -- is the textbook definition of robustness over an ambiguity set.",
+      "evidence": "Credal sets, imprecise probability, distributionally robust optimization. The brief predicts it is tautological.",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "It is a definition, restated in a new vocabulary.",
+      "forbidden_stronger_wording": "Calling it a result, a theorem, or a proposition of this work.",
+      "next_falsification_test": "None needed."
+    },
+    {
+      "id": "S3",
+      "statement": "The battery disagreement reproduces exactly: 5.00 A, 0.00 A and -1.00 A into the same frozen core from one raw condition.",
+      "evidence": "Measured at the core boundary before anything else was built (item 51). Identical to research/evidence_semantics at 2036a2a.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Replay through committed decoders; no hardware.",
+      "strongest_allowed_wording": "Three committed decoders give one raw condition three different currents.",
+      "forbidden_stronger_wording": "That this is evidence of semantic uncertainty rather than of three consumer bugs. S5 settles that.",
+      "next_falsification_test": "Level-1 physical injection per PHYSICAL_AUTHORITY_VALIDATION_PLAN.md."
+    },
+    {
+      "id": "S4",
+      "statement": "The specification and the producer never disagree. Zero SPEC_VS_PRODUCER conflicts across all three cases.",
+      "evidence": "AUTHORITY_CONFLICTS.csv. Battery: MAVLink declares invalid=\"-1\" and ArduPilot's GCS_Common.cpp:390-393 writes exactly -1 when it has no current -- the sole AGREEMENT row in that case is that pair. GNSS and mag: the spec is SILENT on the aspect the producer speaks to, so there is nothing to disagree with. 17 conflicts total: 8 CROSS_CONSUMER, 6 PRODUCER_VS_CONSUMER, 3 SPEC_VS_CONSUMER.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Producer authority read from the ArduPilot source tree at /home/user/ardupilot/ardupilot, not from a flying binary.",
+      "strongest_allowed_wording": "There is no conflict between semantic authorities above the consumer. All disagreement is consumer-side.",
+      "forbidden_stronger_wording": "That no such conflict could exist in any system. Three cases in one codebase.",
+      "next_falsification_test": "A field whose schema and producer genuinely disagree -- none was found here, and finding one would reopen the direction."
+    },
+    {
+      "id": "S5",
+      "statement": "No authority disagreement in any of the three cases reaches the ACTION level. The failsafe issues an identical action set whichever consumer authority is chosen.",
+      "evidence": "DECISION_SENSITIVITY.csv: ACTION is ROBUST in all three cases. CONFLICT_PROPAGATION.csv: 0 of 9 authority pairs have disagreement reaching ACTION.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "One word per case, the shortest that realises the raw state; a 15 s run; a null control at every level.",
+      "strongest_allowed_wording": "Item 29's NO_DECISION_RELEVANT_SEMANTIC_AMBIGUITY holds at the action level for all three cases.",
+      "forbidden_stronger_wording": "That no conflict anywhere could change an action. The search covered three cases and one word each.",
+      "next_falsification_test": "Longer words and a fault severe enough to drive battery trust below power_critical (0.70), which this run never reached."
+    },
+    {
+      "id": "S6",
+      "statement": "The GNSS case is the only one whose disagreement reaches ASSURANCE, and even there only as timing: the level history and action set are identical.",
+      "evidence": "DECISION_SENSITIVITY.csv, gnss row: ASSURANCE SEMANTICALLY_AMBIGUOUS, ACTION ROBUST. The previous package measured the gap as 0.12-0.32 s of failsafe latency.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "As S5.",
+      "strongest_allowed_wording": "The deepest consequence found anywhere is a failsafe latency difference, not a different decision.",
+      "forbidden_stronger_wording": "'Changes failsafe behaviour' without the latency qualifier.",
+      "next_falsification_test": "As S5."
+    },
+    {
+      "id": "S7",
+      "statement": "The MAVLink schema is SILENT about what GPS_RAW_INT.lat/lon/alt contain when fix_type < 3, and about the magnetometer all-zero triple. The consumers' divergent choices there are licensed, not violations.",
+      "evidence": "common.xml:GPS_RAW_INT.lat carries no `invalid=` attribute and no clause covering the no-fix case; SCALED_IMU.xmag likewise. ArduPilot fills the position fields with the last known Location (AP_GPS.cpp:1399-1417), which the spec permits because the spec did not speak.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The dialects searched: common, minimal, ardupilotmega, standard.",
+      "strongest_allowed_wording": "This is UNDERSPECIFICATION, not conflict. Nobody is wrong because nobody said.",
+      "forbidden_stronger_wording": "Counting these pairs as authority conflicts. Doing so would inflate 7 gaps into disagreements.",
+      "next_falsification_test": "Check whether a later MAVLink revision or a dialect extension fills the gap."
+    },
+    {
+      "id": "S8",
+      "statement": "SILENT must be distinguished from an interpretation, or item 8's conflict definition miscounts every gap as a disagreement.",
+      "evidence": "conflicts.py. Item 8 defines conflict as |{C_a(r)}| > 1; encoding silence as an interpretation would make 7 UNDERSPECIFICATION pairs read as CONFLICT.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "Follows from the definition; it is a modelling observation, not a measurement.",
+      "strongest_allowed_wording": "The conflict/underspecification distinction is necessary for the count to mean anything.",
+      "forbidden_stronger_wording": "That the distinction is new. Incompleteness versus inconsistency is a named axis in the multi-perspective requirements literature.",
+      "next_falsification_test": "Read the ViewPoints incompleteness papers in full; they very likely make this distinction already."
+    },
+    {
+      "id": "S9",
+      "statement": "SPEC_FIRST resolves 2 of 3 cases and fails only where the spec is SILENT; IMPLEMENTATION_FIRST resolves 2 of 3; OBSERVATION_FIRST resolves 0 of 3.",
+      "evidence": "BASELINE_COMPARISON.csv, results/BASELINE_SUMMARY.json.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Three cases.",
+      "strongest_allowed_wording": "Spec precedence is sufficient wherever the spec speaks; where it is silent no precedence rule applies, because there is no higher authority to defer to.",
+      "forbidden_stronger_wording": "SPEC_PRECEDENCE_SUFFICIENT as the overall verdict -- it fails 1 of 3.",
+      "next_falsification_test": "More cases where the schema is silent; the previous package measured 91 of 106 MAVLink fields with no `invalid=` attribute, so silence is the common case."
+    },
+    {
+      "id": "S10",
+      "statement": "Set-valued output flags ambiguity at upstream levels but in 0 of 3 cases does that ambiguity reach ACTION.",
+      "evidence": "results/BASELINE_SUMMARY.json: ambiguity rate 0.389, robust rate 0.333, confounded 0.278 over 18 case-level cells; cases_where_B3_ambiguity_reaches_ACTION = 0.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "As S5.",
+      "strongest_allowed_wording": "On these cases the extra information set-valued output carries changes nothing the vehicle would do.",
+      "forbidden_stronger_wording": "SET_VALUED_OVERKILL as a general claim. Three cases cannot establish that.",
+      "next_falsification_test": "A case where a conflict reaches ACTION; none was found."
+    },
+    {
+      "id": "S11",
+      "statement": "Almost a third of the level cells are CONFOUNDED_BY_CONTROL: the three paths already disagree on an all-nominal word.",
+      "evidence": "results/BASELINE_SUMMARY.json, confounded_rate 0.278. The DIAGNOSIS level is confounded in all three cases.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The null control is V^k at the same length.",
+      "strongest_allowed_wording": "Without the control, DIAGNOSIS-level disagreement would have been reported as authority conflict in all three cases. It is a sample-rate and timestamp artifact.",
+      "forbidden_stronger_wording": "Reporting the raw distinct-outcome counts without the control column.",
+      "next_falsification_test": "Equalise the sample rates across paths and see whether the DIAGNOSIS confound disappears."
+    },
+    {
+      "id": "S12",
+      "statement": "The conflicts are removable by ordinary engineering: make the three consumers honour the agreed authority, and where no authority speaks, decide and write it down.",
+      "evidence": "S4 (no authority conflict above the consumer) plus S7 (the residue is a specification gap). Item 52's test.",
+      "status": "PROVISIONAL",
+      "assumptions": "The fixes were NOT implemented. Item 51 requires the research branch to retain pre-fix behaviour, so this is an analytic argument from the authority table, not a measured before/after.",
+      "strongest_allowed_wording": "Every counted conflict is attributable to a consumer choice that a fix would remove, and the remainder is a gap a decision would close.",
+      "forbidden_stronger_wording": "That the fixes were applied and the conflicts measured to disappear. They were not.",
+      "next_falsification_test": "Implement the three fixes on a separate branch and re-run conflicts.py; item 52 predicts the conflict count drops to zero."
+    },
+    {
+      "id": "S13",
+      "statement": "Two modelling errors of mine inflated the conflict count before they were caught.",
+      "evidence": "(1) C_producer_absence describes a DIFFERENT raw state (no GPS configured) and was pooled into the no-fix resolution, making IMPLEMENTATION_FIRST read as SELF_INCONSISTENT on GNSS. (2) C_spec speaks about what fix_type MEANS while C_producer speaks about what the position fields CONTAIN; comparing them produced a spurious SPEC_VS_PRODUCER conflict. Both fixed by adding explicit `scope` and `aspect` coordinates; both recorded in AUTHORITY_MODEL.md rather than silently repaired.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "The headline finding -- zero SPEC_VS_PRODUCER conflicts -- exists only after correcting a category error that had manufactured one.",
+      "forbidden_stronger_wording": "Presenting the corrected count without the correction.",
+      "next_falsification_test": "Re-derive aspects from the schema field names mechanically rather than by hand."
+    },
+    {
+      "id": "S14",
+      "statement": "The citation verifier caught five bad citations in the first run of the authority table, including one of my own line numbers and four schema locators written as placeholders.",
+      "evidence": "authorities.py:verify(). ardupilot.py:143 was wrong (the line is 146), and every common.xml citation used a line number where a MESSAGE.field locator was needed.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "Every authority citation in AUTHORITY_TABLE.csv is re-read from disk and 16 of 16 now verify.",
+      "forbidden_stronger_wording": "That the table was right first time.",
+      "next_falsification_test": "Re-run authorities.py; it exits non-zero if any citation stops resolving."
+    },
+    {
+      "id": "S15",
+      "statement": "No physical HIL was performed and no hardware is connected.",
+      "evidence": "pyserial enumerates only /dev/ttyS0. PHYSICAL_AUTHORITY_VALIDATION_PLAN.md specifies what would be needed.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "The producer authority was read from source; nothing confirms the flying binary behaves the same way.",
+      "forbidden_stronger_wording": "Any claim about physically observed interface semantics.",
+      "next_falsification_test": "Level 1 of the plan: emulator into a physical flight controller."
+    },
+    {
+      "id": "S16",
+      "statement": "Assurance under conflicting semantic authorities is a novel research direction.",
+      "evidence": "S1, S2, S4, S5.",
+      "status": "REFUTED",
+      "assumptions": "Snippet-level prior-art search; three cases in one codebase.",
+      "strongest_allowed_wording": "Not established. The authorities do not conflict, the consumer disagreements do not reach the action level, and every component of the machinery is prior art.",
+      "forbidden_stronger_wording": "novel, first, new paradigm, unprecedented, new theorem.",
+      "next_falsification_test": "A field where schema and producer genuinely disagree AND the disagreement changes a failsafe action. Neither half was observed here."
+    }
+  ],
+  "refuted_predictions": [
+    {
+      "prediction": "The battery three-way split is evidence of conflicting semantic authorities.",
+      "outcome": "REFUTED. The spec and the producer agree exactly; all three consumers disagree with that agreed authority. It is three bugs, not a conflict.",
+      "kept": true
+    },
+    {
+      "prediction": "The GNSS case would show a specification-versus-producer conflict.",
+      "outcome": "REFUTED. The specification is SILENT on the position fields, so the producer contradicts nothing. The first version of the classifier reported a conflict here and was wrong.",
+      "kept": true
+    },
+    {
+      "prediction": "At least one authority conflict would change a downstream assurance decision.",
+      "outcome": "REFUTED. 0 of 9 pairs reach ACTION. The deepest consequence is a failsafe latency difference.",
+      "kept": true
+    }
+  ],
+  "not_done": [
+    "No dissertation chapter, no paper, no novelty claim (item 61).",
+    "No production-core modification; FROZEN_PATHS untouched.",
+    "No physical HIL (item 42, no hardware).",
+    "No security exploit tooling (item 48); SECURITY_IMPLICATIONS_NOTES.md is conceptual only.",
+    "No engineering fixes applied -- item 51 requires the research branch to retain pre-fix behaviour, so S12 is analytic rather than measured.",
+    "No PX4 producer-side reading (item 41); the prediction is recorded in CROSS_PLATFORM_FEASIBILITY.md instead.",
+    "No ambiguity-exposure integral (item 31): with one word per case there is no time series to integrate, and a number computed from three points would be decoration."
+  ]
+}

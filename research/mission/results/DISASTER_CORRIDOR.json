@@ -1,0 +1,965 @@
+{
+  "expectations_corrected_after_the_run": [
+    {
+      "now": "PRODUCT_NOT_EVALUABLE",
+      "product": "global_rgb_orthomosaic",
+      "scenario": "S5_evidence_restored",
+      "was": "PRODUCT_NOT_SUPPORTED",
+      "when": "first_tick",
+      "why": "the expectation contradicted a state rule declared BEFORE the run: a held capability is UNKNOWN, UNKNOWN is never promoted, and a product whose properties are all UNKNOWN with none NOT_SUPPORTED is PRODUCT_NOT_EVALUABLE. NOT_SUPPORTED would have claimed the orthomosaic is known to be unusable; nobody yet knows. The implementation was right and the expectation was wrong."
+    }
+  ],
+  "expectations_declared_before_run": true,
+  "how_expectations_were_derived": "Read off csia_mission/xr1_contracts.py by hand. S0-S3 were run as a development probe BEFORE this table was written, so for those four the table is a re-derivation rather than a blind prediction. S4 and S5 were NEVER probed and are genuine predictions.",
+  "metrics": {
+    "assured_mission_yield": 0.7333333333333333,
+    "capability_recovery_latency_s": {
+      "absolute_navigation": 1.5
+    },
+    "certificate_expiry_events": 0,
+    "certifications_issued": 25,
+    "definitions_fixed_in": "csia_mission/metrics.py, before any run",
+    "false_certifications": [],
+    "false_product_certification_count": 0,
+    "false_product_certification_rate": 0.0,
+    "no_aggregate_score": "There is deliberately no single composite number. An aggregate lets a bad metric be hidden by a good one, which is the pooling mistake the hostile-input campaign already refuses to make.",
+    "novelty": "NOVELTY_NOT_ESTABLISHED",
+    "product_coverage": 0.8,
+    "products_declared": 5,
+    "products_with_supported_property": 4,
+    "schema": "csia.mission.metrics/1",
+    "status": "EXPERIMENTAL",
+    "unsupported_planner_request_count": 5
+  },
+  "not_a_flight": "No sensor produced any of this data. The scenarios are constructed evidence sets, and what is tested is whether the assurance semantics behave as the contracts say.",
+  "provenance": {
+    "all_intact": true,
+    "chains_per_scenario": {
+      "S0_all_healthy": {
+        "links": [
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "582b2637fbd561894cca9383755af5ad84d903716fea1d940ef43b7f7ba99ddc"
+            ],
+            "note": "",
+            "output_hash": "582b2637fbd561894cca9383755af5ad84d903716fea1d940ef43b7f7ba99ddc",
+            "software_version": "benchmark/1",
+            "stage": "RAW",
+            "timestamp": 10.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "582b2637fbd561894cca9383755af5ad84d903716fea1d940ef43b7f7ba99ddc"
+            ],
+            "note": "",
+            "output_hash": "18a76f5b17174fc42b6a91d9fa8cce97472c2896002a2e34c1e336e355e6cd7e",
+            "software_version": "benchmark/1",
+            "stage": "CANONICAL_EVIDENCE",
+            "timestamp": 10.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "18a76f5b17174fc42b6a91d9fa8cce97472c2896002a2e34c1e336e355e6cd7e"
+            ],
+            "note": "",
+            "output_hash": "ad628e5ae6158a0d14d5b930b89b3115d9ab44b984534288ec06717eea4c5f12",
+            "software_version": "benchmark/1",
+            "stage": "CAPABILITY_SUPPORT",
+            "timestamp": 10.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "ad628e5ae6158a0d14d5b930b89b3115d9ab44b984534288ec06717eea4c5f12"
+            ],
+            "note": "",
+            "output_hash": "814a99ec476a11c441b71e0b32c9e04b12f21731c16f8981ce82c59b674d16e6",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_PRODUCT_QUALIFICATION",
+            "timestamp": 10.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "814a99ec476a11c441b71e0b32c9e04b12f21731c16f8981ce82c59b674d16e6"
+            ],
+            "note": "",
+            "output_hash": "2519eaa79e4f08a3f467cbeda5c8e11fe70fb220935d24d0756a7b32cdd01d6c",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_REPORT",
+            "timestamp": 10.0
+          }
+        ],
+        "schema": "csia.mission.provenance_chain/1",
+        "verification": {
+          "intact": true,
+          "links": 5,
+          "problems": [],
+          "stages_present": [
+            "RAW",
+            "CANONICAL_EVIDENCE",
+            "CAPABILITY_SUPPORT",
+            "MISSION_PRODUCT_QUALIFICATION",
+            "MISSION_REPORT"
+          ],
+          "what_this_does_not_prove": "that nobody tampered with the record. Nothing here is signed and the hashes are written by the same process that computes them. This detects ACCIDENTAL divergence -- a re-run against different inputs, a configuration that changed mid-chain, a record edited by someone not trying to hide it. It is not tamper evidence."
+        }
+      },
+      "S1_comms_unavailable": {
+        "links": [
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "ab423f14fbb72508bf3ae325b670f55954fcb95b7bf320d4a26489c754b91990"
+            ],
+            "note": "",
+            "output_hash": "ab423f14fbb72508bf3ae325b670f55954fcb95b7bf320d4a26489c754b91990",
+            "software_version": "benchmark/1",
+            "stage": "RAW",
+            "timestamp": 20.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "ab423f14fbb72508bf3ae325b670f55954fcb95b7bf320d4a26489c754b91990"
+            ],
+            "note": "",
+            "output_hash": "cb40f308523dc0de9f354f9db05ed522d124c61ce90c140d80000ab6cb9610c3",
+            "software_version": "benchmark/1",
+            "stage": "CANONICAL_EVIDENCE",
+            "timestamp": 20.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "cb40f308523dc0de9f354f9db05ed522d124c61ce90c140d80000ab6cb9610c3"
+            ],
+            "note": "",
+            "output_hash": "575a05102c35490ed811dc2dd95bd64af3744227b370ef0d53b7318fc3278149",
+            "software_version": "benchmark/1",
+            "stage": "CAPABILITY_SUPPORT",
+            "timestamp": 20.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "575a05102c35490ed811dc2dd95bd64af3744227b370ef0d53b7318fc3278149"
+            ],
+            "note": "",
+            "output_hash": "814a99ec476a11c441b71e0b32c9e04b12f21731c16f8981ce82c59b674d16e6",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_PRODUCT_QUALIFICATION",
+            "timestamp": 20.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "814a99ec476a11c441b71e0b32c9e04b12f21731c16f8981ce82c59b674d16e6"
+            ],
+            "note": "",
+            "output_hash": "910cd2116b8c7051754d830ced71ff5f338b241b7847af5690ca9efd5f347b29",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_REPORT",
+            "timestamp": 20.0
+          }
+        ],
+        "schema": "csia.mission.provenance_chain/1",
+        "verification": {
+          "intact": true,
+          "links": 5,
+          "problems": [],
+          "stages_present": [
+            "RAW",
+            "CANONICAL_EVIDENCE",
+            "CAPABILITY_SUPPORT",
+            "MISSION_PRODUCT_QUALIFICATION",
+            "MISSION_REPORT"
+          ],
+          "what_this_does_not_prove": "that nobody tampered with the record. Nothing here is signed and the hashes are written by the same process that computes them. This detects ACCIDENTAL divergence -- a re-run against different inputs, a configuration that changed mid-chain, a record edited by someone not trying to hide it. It is not tamper evidence."
+        }
+      },
+      "S2_absolute_position_lost": {
+        "links": [
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "039321db71fe8f82086efb3e69b2d0f53384baf66d571b02b1a9c97e33637de6"
+            ],
+            "note": "",
+            "output_hash": "039321db71fe8f82086efb3e69b2d0f53384baf66d571b02b1a9c97e33637de6",
+            "software_version": "benchmark/1",
+            "stage": "RAW",
+            "timestamp": 30.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "039321db71fe8f82086efb3e69b2d0f53384baf66d571b02b1a9c97e33637de6"
+            ],
+            "note": "",
+            "output_hash": "9394710a5303a28d4c81aa2b13103936dc31f797a06252ed82037c586eabd178",
+            "software_version": "benchmark/1",
+            "stage": "CANONICAL_EVIDENCE",
+            "timestamp": 30.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "9394710a5303a28d4c81aa2b13103936dc31f797a06252ed82037c586eabd178"
+            ],
+            "note": "",
+            "output_hash": "087d1ba1d172ff0b00a163a48451afa9a349d2cd29bf9a2b19209a224a1e7971",
+            "software_version": "benchmark/1",
+            "stage": "CAPABILITY_SUPPORT",
+            "timestamp": 30.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "087d1ba1d172ff0b00a163a48451afa9a349d2cd29bf9a2b19209a224a1e7971"
+            ],
+            "note": "",
+            "output_hash": "f94c6b8ec427bb5dd75305dd97d04f03ba5793cb14fe9eec92e4354ec0e97d14",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_PRODUCT_QUALIFICATION",
+            "timestamp": 30.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "f94c6b8ec427bb5dd75305dd97d04f03ba5793cb14fe9eec92e4354ec0e97d14"
+            ],
+            "note": "",
+            "output_hash": "7e5de958a45493015b3600a77459e0b6ddcd41a18dabc552d73ee8fee95c3510",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_REPORT",
+            "timestamp": 30.0
+          }
+        ],
+        "schema": "csia.mission.provenance_chain/1",
+        "verification": {
+          "intact": true,
+          "links": 5,
+          "problems": [],
+          "stages_present": [
+            "RAW",
+            "CANONICAL_EVIDENCE",
+            "CAPABILITY_SUPPORT",
+            "MISSION_PRODUCT_QUALIFICATION",
+            "MISSION_REPORT"
+          ],
+          "what_this_does_not_prove": "that nobody tampered with the record. Nothing here is signed and the hashes are written by the same process that computes them. This detects ACCIDENTAL divergence -- a re-run against different inputs, a configuration that changed mid-chain, a record edited by someone not trying to hide it. It is not tamper evidence."
+        }
+      },
+      "S3_rgb_payload_unavailable": {
+        "links": [
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "8aa809421807d319f0a6d60032b5b2cce5c716f849eea55c41492773c349176a"
+            ],
+            "note": "",
+            "output_hash": "8aa809421807d319f0a6d60032b5b2cce5c716f849eea55c41492773c349176a",
+            "software_version": "benchmark/1",
+            "stage": "RAW",
+            "timestamp": 40.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "8aa809421807d319f0a6d60032b5b2cce5c716f849eea55c41492773c349176a"
+            ],
+            "note": "",
+            "output_hash": "eca01bedcbf9c2b44c0e0ec4621e0c17a688cb4c62b53b5f2c43e4a84d23a019",
+            "software_version": "benchmark/1",
+            "stage": "CANONICAL_EVIDENCE",
+            "timestamp": 40.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "eca01bedcbf9c2b44c0e0ec4621e0c17a688cb4c62b53b5f2c43e4a84d23a019"
+            ],
+            "note": "",
+            "output_hash": "ac123c1904467922bd81c3fb16ac56ffcda62b01bd520341c55216a8c5365120",
+            "software_version": "benchmark/1",
+            "stage": "CAPABILITY_SUPPORT",
+            "timestamp": 40.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "ac123c1904467922bd81c3fb16ac56ffcda62b01bd520341c55216a8c5365120"
+            ],
+            "note": "",
+            "output_hash": "d99d8573ba586403b71ec0d27d6fd41f8a5249f57234e15cf50b0e34245c83f6",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_PRODUCT_QUALIFICATION",
+            "timestamp": 40.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "d99d8573ba586403b71ec0d27d6fd41f8a5249f57234e15cf50b0e34245c83f6"
+            ],
+            "note": "",
+            "output_hash": "e4e8a3ccbcd32aa1f8fd0a5bf871a1ccbda31ab347f5b8b706754a41acca6561",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_REPORT",
+            "timestamp": 40.0
+          }
+        ],
+        "schema": "csia.mission.provenance_chain/1",
+        "verification": {
+          "intact": true,
+          "links": 5,
+          "problems": [],
+          "stages_present": [
+            "RAW",
+            "CANONICAL_EVIDENCE",
+            "CAPABILITY_SUPPORT",
+            "MISSION_PRODUCT_QUALIFICATION",
+            "MISSION_REPORT"
+          ],
+          "what_this_does_not_prove": "that nobody tampered with the record. Nothing here is signed and the hashes are written by the same process that computes them. This detects ACCIDENTAL divergence -- a re-run against different inputs, a configuration that changed mid-chain, a record edited by someone not trying to hide it. It is not tamper evidence."
+        }
+      },
+      "S4_compute_deadline_degraded": {
+        "links": [
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "9ba595b17afc8661437d31775e9687b12472e9b91329eb5665390ac40e49123a"
+            ],
+            "note": "",
+            "output_hash": "9ba595b17afc8661437d31775e9687b12472e9b91329eb5665390ac40e49123a",
+            "software_version": "benchmark/1",
+            "stage": "RAW",
+            "timestamp": 50.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "9ba595b17afc8661437d31775e9687b12472e9b91329eb5665390ac40e49123a"
+            ],
+            "note": "",
+            "output_hash": "18a76f5b17174fc42b6a91d9fa8cce97472c2896002a2e34c1e336e355e6cd7e",
+            "software_version": "benchmark/1",
+            "stage": "CANONICAL_EVIDENCE",
+            "timestamp": 50.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "18a76f5b17174fc42b6a91d9fa8cce97472c2896002a2e34c1e336e355e6cd7e"
+            ],
+            "note": "",
+            "output_hash": "1270901a7a03c5de7a5fb0cfffb596a1ad7758df7e84bef4645fa5810d5dc21f",
+            "software_version": "benchmark/1",
+            "stage": "CAPABILITY_SUPPORT",
+            "timestamp": 50.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "1270901a7a03c5de7a5fb0cfffb596a1ad7758df7e84bef4645fa5810d5dc21f"
+            ],
+            "note": "",
+            "output_hash": "e5fc3c2c24e1b7726473eea398c05a5fb18be378748f0d63aa5eda0849f27d7d",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_PRODUCT_QUALIFICATION",
+            "timestamp": 50.0
+          },
+          {
+            "configuration_hash": "c62b2f08efd102c013bcf0f3aac56bbc1eb1756ca0a19cc2a7ebbf9a3d3e6e16",
+            "input_hashes": [
+              "e5fc3c2c24e1b7726473eea398c05a5fb18be378748f0d63aa5eda0849f27d7d"
+            ],
+            "note": "",
+            "output_hash": "9607b4833c03782510920682aeb5e662a5ff3d2845b3c67a120a3cbb8e4ef650",
+            "software_version": "benchmark/1",
+            "stage": "MISSION_REPORT",
+            "timestamp": 50.0
+          }
+        ],
+        "schema": "csia.mission.provenance_chain/1",
+        "verification": {
+          "intact": true,
+          "links": 5,
+          "problems": [],
+          "stages_present": [
+            "RAW",
+            "CANONICAL_EVIDENCE",
+            "CAPABILITY_SUPPORT",
+            "MISSION_PRODUCT_QUALIFICATION",
+            "MISSION_REPORT"
+          ],
+          "what_this_does_not_prove": "that nobody tampered with the record. Nothing here is signed and the hashes are written by the same process that computes them. This detects ACCIDENTAL divergence -- a re-run against different inputs, a configuration that changed mid-chain, a record edited by someone not trying to hide it. It is not tamper evidence."
+        }
+      }
+    },
+    "why_one_chain_per_scenario": "A chain is a SINGLE derivation from raw data to report. Concatenating five scenarios into one chain made the verifier report OUT_OF_ORDER at every boundary, which was the verifier being right about a harness that was wrong."
+  },
+  "scenarios": [
+    {
+      "capabilities": {
+        "RGB_capture": "SUPPORTED",
+        "absolute_navigation": "SUPPORTED",
+        "airspeed_regulation": "SUPPORTED",
+        "altitude_hold": "SUPPORTED",
+        "attitude_hold": "SUPPORTED",
+        "controlled_glide": "SUPPORTED",
+        "global_mapping": "SUPPORTED",
+        "local_mapping": "SUPPORTED",
+        "relative_navigation": "SUPPORTED",
+        "stable_flight": "SUPPORTED",
+        "telemetry_downlink": "SUPPORTED",
+        "thermal_capture": "SUPPORTED",
+        "timing": "SUPPORTED"
+      },
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "planner_branch": "global_survey",
+      "planner_rejections": 0,
+      "products": {
+        "bridge_rgb_inspection": {
+          "permitted": [
+            "visual_damage_assessment",
+            "relative_crack_width_estimate",
+            "georeferenced_defect_logging"
+          ],
+          "prohibited": [],
+          "properties": {
+            "absolute_geolocation": "SUPPORTED",
+            "imagery_quality": "SUPPORTED",
+            "relative_geometry": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "bridge_thermal_inspection": {
+          "permitted": [
+            "thermal_anomaly_screening",
+            "absolute_temperature_estimate",
+            "thermal_to_structure_registration"
+          ],
+          "prohibited": [],
+          "properties": {
+            "imagery_quality": "SUPPORTED",
+            "radiometric_calibration": "SUPPORTED",
+            "thermal_alignment": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "global_rgb_orthomosaic": {
+          "permitted": [
+            "georeferenced_asset_mapping",
+            "survey_grade_absolute_measurement"
+          ],
+          "prohibited": [],
+          "properties": {
+            "absolute_geolocation": "SUPPORTED",
+            "survey_grade": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "raw_evidence_package": {
+          "permitted": [
+            "post_flight_analysis"
+          ],
+          "prohibited": [],
+          "properties": {
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "relative_reconstruction": {
+          "permitted": [
+            "relative_structural_comparison",
+            "change_detection_between_passes"
+          ],
+          "prohibited": [],
+          "properties": {
+            "relative_geometry": "SUPPORTED",
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        }
+      },
+      "scenario": "S0_all_healthy"
+    },
+    {
+      "capabilities": {
+        "RGB_capture": "SUPPORTED",
+        "absolute_navigation": "SUPPORTED",
+        "airspeed_regulation": "SUPPORTED",
+        "altitude_hold": "SUPPORTED",
+        "attitude_hold": "SUPPORTED",
+        "controlled_glide": "SUPPORTED",
+        "global_mapping": "SUPPORTED",
+        "local_mapping": "SUPPORTED",
+        "relative_navigation": "SUPPORTED",
+        "stable_flight": "SUPPORTED",
+        "telemetry_downlink": "NOT_SUPPORTED",
+        "thermal_capture": "SUPPORTED",
+        "timing": "SUPPORTED"
+      },
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "planner_branch": "global_survey",
+      "planner_rejections": 0,
+      "products": {
+        "bridge_rgb_inspection": {
+          "permitted": [
+            "visual_damage_assessment",
+            "relative_crack_width_estimate",
+            "georeferenced_defect_logging"
+          ],
+          "prohibited": [],
+          "properties": {
+            "absolute_geolocation": "SUPPORTED",
+            "imagery_quality": "SUPPORTED",
+            "relative_geometry": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "bridge_thermal_inspection": {
+          "permitted": [
+            "thermal_anomaly_screening",
+            "absolute_temperature_estimate",
+            "thermal_to_structure_registration"
+          ],
+          "prohibited": [],
+          "properties": {
+            "imagery_quality": "SUPPORTED",
+            "radiometric_calibration": "SUPPORTED",
+            "thermal_alignment": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "global_rgb_orthomosaic": {
+          "permitted": [
+            "georeferenced_asset_mapping",
+            "survey_grade_absolute_measurement"
+          ],
+          "prohibited": [],
+          "properties": {
+            "absolute_geolocation": "SUPPORTED",
+            "survey_grade": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "raw_evidence_package": {
+          "permitted": [
+            "post_flight_analysis"
+          ],
+          "prohibited": [],
+          "properties": {
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "relative_reconstruction": {
+          "permitted": [
+            "relative_structural_comparison",
+            "change_detection_between_passes"
+          ],
+          "prohibited": [],
+          "properties": {
+            "relative_geometry": "SUPPORTED",
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        }
+      },
+      "scenario": "S1_comms_unavailable"
+    },
+    {
+      "capabilities": {
+        "RGB_capture": "SUPPORTED",
+        "absolute_navigation": "NOT_SUPPORTED",
+        "airspeed_regulation": "SUPPORTED",
+        "altitude_hold": "SUPPORTED",
+        "attitude_hold": "SUPPORTED",
+        "controlled_glide": "SUPPORTED",
+        "global_mapping": "NOT_SUPPORTED",
+        "local_mapping": "SUPPORTED",
+        "relative_navigation": "SUPPORTED",
+        "stable_flight": "SUPPORTED",
+        "telemetry_downlink": "SUPPORTED",
+        "thermal_capture": "SUPPORTED",
+        "timing": "SUPPORTED"
+      },
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "planner_branch": "relative_inspection",
+      "planner_rejections": 1,
+      "products": {
+        "bridge_rgb_inspection": {
+          "permitted": [
+            "visual_damage_assessment",
+            "relative_crack_width_estimate"
+          ],
+          "prohibited": [
+            "survey_grade_absolute_measurement"
+          ],
+          "properties": {
+            "absolute_geolocation": "NOT_SUPPORTED",
+            "imagery_quality": "SUPPORTED",
+            "relative_geometry": "SUPPORTED"
+          },
+          "state": "PRODUCT_DEGRADED"
+        },
+        "bridge_thermal_inspection": {
+          "permitted": [
+            "thermal_anomaly_screening",
+            "absolute_temperature_estimate",
+            "thermal_to_structure_registration"
+          ],
+          "prohibited": [],
+          "properties": {
+            "imagery_quality": "SUPPORTED",
+            "radiometric_calibration": "SUPPORTED",
+            "thermal_alignment": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "global_rgb_orthomosaic": {
+          "permitted": [],
+          "prohibited": [
+            "georeferenced_asset_mapping",
+            "survey_grade_absolute_measurement"
+          ],
+          "properties": {
+            "absolute_geolocation": "NOT_SUPPORTED",
+            "survey_grade": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        },
+        "raw_evidence_package": {
+          "permitted": [
+            "post_flight_analysis"
+          ],
+          "prohibited": [],
+          "properties": {
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "relative_reconstruction": {
+          "permitted": [
+            "relative_structural_comparison",
+            "change_detection_between_passes"
+          ],
+          "prohibited": [],
+          "properties": {
+            "relative_geometry": "SUPPORTED",
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        }
+      },
+      "scenario": "S2_absolute_position_lost"
+    },
+    {
+      "capabilities": {
+        "RGB_capture": "NOT_SUPPORTED",
+        "absolute_navigation": "SUPPORTED",
+        "airspeed_regulation": "SUPPORTED",
+        "altitude_hold": "SUPPORTED",
+        "attitude_hold": "SUPPORTED",
+        "controlled_glide": "SUPPORTED",
+        "global_mapping": "NOT_SUPPORTED",
+        "local_mapping": "NOT_SUPPORTED",
+        "relative_navigation": "SUPPORTED",
+        "stable_flight": "SUPPORTED",
+        "telemetry_downlink": "SUPPORTED",
+        "thermal_capture": "SUPPORTED",
+        "timing": "SUPPORTED"
+      },
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "planner_branch": "thermal_only",
+      "planner_rejections": 2,
+      "products": {
+        "bridge_rgb_inspection": {
+          "permitted": [],
+          "prohibited": [
+            "any_use_of_this_imagery",
+            "relative_dimensional_measurement",
+            "survey_grade_absolute_measurement"
+          ],
+          "properties": {
+            "absolute_geolocation": "NOT_SUPPORTED",
+            "imagery_quality": "NOT_SUPPORTED",
+            "relative_geometry": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        },
+        "bridge_thermal_inspection": {
+          "permitted": [
+            "thermal_anomaly_screening",
+            "absolute_temperature_estimate",
+            "thermal_to_structure_registration"
+          ],
+          "prohibited": [],
+          "properties": {
+            "imagery_quality": "SUPPORTED",
+            "radiometric_calibration": "SUPPORTED",
+            "thermal_alignment": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "global_rgb_orthomosaic": {
+          "permitted": [],
+          "prohibited": [
+            "georeferenced_asset_mapping",
+            "survey_grade_absolute_measurement"
+          ],
+          "properties": {
+            "absolute_geolocation": "NOT_SUPPORTED",
+            "survey_grade": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        },
+        "raw_evidence_package": {
+          "permitted": [
+            "post_flight_analysis"
+          ],
+          "prohibited": [],
+          "properties": {
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "relative_reconstruction": {
+          "permitted": [],
+          "prohibited": [
+            "relative_structural_comparison",
+            "change_detection_between_passes"
+          ],
+          "properties": {
+            "relative_geometry": "NOT_SUPPORTED",
+            "temporal_consistency": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        }
+      },
+      "scenario": "S3_rgb_payload_unavailable"
+    },
+    {
+      "capabilities": {
+        "RGB_capture": "SUPPORTED",
+        "absolute_navigation": "SUPPORTED",
+        "airspeed_regulation": "SUPPORTED",
+        "altitude_hold": "SUPPORTED",
+        "attitude_hold": "SUPPORTED",
+        "controlled_glide": "SUPPORTED",
+        "global_mapping": "NOT_SUPPORTED",
+        "local_mapping": "NOT_SUPPORTED",
+        "relative_navigation": "SUPPORTED",
+        "stable_flight": "SUPPORTED",
+        "telemetry_downlink": "SUPPORTED",
+        "thermal_capture": "SUPPORTED",
+        "timing": "SUPPORTED"
+      },
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "planner_branch": "thermal_only",
+      "planner_rejections": 2,
+      "products": {
+        "bridge_rgb_inspection": {
+          "permitted": [
+            "visual_damage_assessment",
+            "relative_crack_width_estimate",
+            "georeferenced_defect_logging"
+          ],
+          "prohibited": [],
+          "properties": {
+            "absolute_geolocation": "SUPPORTED",
+            "imagery_quality": "SUPPORTED",
+            "relative_geometry": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "bridge_thermal_inspection": {
+          "permitted": [
+            "thermal_anomaly_screening",
+            "absolute_temperature_estimate",
+            "thermal_to_structure_registration"
+          ],
+          "prohibited": [],
+          "properties": {
+            "imagery_quality": "SUPPORTED",
+            "radiometric_calibration": "SUPPORTED",
+            "thermal_alignment": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "global_rgb_orthomosaic": {
+          "permitted": [],
+          "prohibited": [
+            "georeferenced_asset_mapping",
+            "survey_grade_absolute_measurement"
+          ],
+          "properties": {
+            "absolute_geolocation": "NOT_SUPPORTED",
+            "survey_grade": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        },
+        "raw_evidence_package": {
+          "permitted": [
+            "post_flight_analysis"
+          ],
+          "prohibited": [],
+          "properties": {
+            "temporal_consistency": "SUPPORTED"
+          },
+          "state": "PRODUCT_SUPPORTED"
+        },
+        "relative_reconstruction": {
+          "permitted": [],
+          "prohibited": [
+            "relative_structural_comparison",
+            "change_detection_between_passes"
+          ],
+          "properties": {
+            "relative_geometry": "NOT_SUPPORTED",
+            "temporal_consistency": "NOT_SUPPORTED"
+          },
+          "state": "PRODUCT_NOT_SUPPORTED"
+        }
+      },
+      "scenario": "S4_compute_deadline_degraded"
+    },
+    {
+      "capability_recovery_latency_s": 1.5,
+      "expected_mismatches": [],
+      "matches_expectation": true,
+      "recovery": {
+        "capability_id": "absolute_navigation",
+        "consecutive_supported": 3,
+        "history": [
+          {
+            "at": 60.0,
+            "from": "NOMINAL",
+            "to": "LOST",
+            "why": "observed NOT_SUPPORTED"
+          },
+          {
+            "at": 60.0,
+            "from": "LOST",
+            "to": "RESTRICTED",
+            "why": "capability withdrawn"
+          },
+          {
+            "at": 60.5,
+            "from": "RESTRICTED",
+            "to": "REMEASURING",
+            "why": "supported evidence reappeared"
+          },
+          {
+            "at": 61.5,
+            "from": "REMEASURING",
+            "to": "RECERTIFIED",
+            "why": "3 consecutive supported observations over 1.000s"
+          },
+          {
+            "at": 62.0,
+            "from": "RECERTIFIED",
+            "to": "NOMINAL",
+            "why": "restored"
+          }
+        ],
+        "holds_capability": false,
+        "min_dwell_s": 1.0,
+        "phase": "NOMINAL",
+        "required_fresh_observations": 3
+      },
+      "scenario": "S5_evidence_restored",
+      "ticks": [
+        {
+          "absolute_navigation": "UNKNOWN",
+          "bridge_rgb_inspection": "PRODUCT_DEGRADED",
+          "global_rgb_orthomosaic": "PRODUCT_NOT_EVALUABLE",
+          "phase": "REMEASURING",
+          "planner_branch": "relative_inspection",
+          "t": 60.5,
+          "tick": 0
+        },
+        {
+          "absolute_navigation": "UNKNOWN",
+          "bridge_rgb_inspection": "PRODUCT_DEGRADED",
+          "global_rgb_orthomosaic": "PRODUCT_NOT_EVALUABLE",
+          "phase": "REMEASURING",
+          "planner_branch": "relative_inspection",
+          "t": 61.0,
+          "tick": 1
+        },
+        {
+          "absolute_navigation": "UNKNOWN",
+          "bridge_rgb_inspection": "PRODUCT_DEGRADED",
+          "global_rgb_orthomosaic": "PRODUCT_NOT_EVALUABLE",
+          "phase": "RECERTIFIED",
+          "planner_branch": "relative_inspection",
+          "t": 61.5,
+          "tick": 2
+        },
+        {
+          "absolute_navigation": "SUPPORTED",
+          "bridge_rgb_inspection": "PRODUCT_SUPPORTED",
+          "global_rgb_orthomosaic": "PRODUCT_SUPPORTED",
+          "phase": "NOMINAL",
+          "planner_branch": "global_survey",
+          "t": 62.0,
+          "tick": 3
+        },
+        {
+          "absolute_navigation": "SUPPORTED",
+          "bridge_rgb_inspection": "PRODUCT_SUPPORTED",
+          "global_rgb_orthomosaic": "PRODUCT_SUPPORTED",
+          "phase": "NOMINAL",
+          "planner_branch": "global_survey",
+          "t": 62.5,
+          "tick": 4
+        },
+        {
+          "absolute_navigation": "SUPPORTED",
+          "bridge_rgb_inspection": "PRODUCT_SUPPORTED",
+          "global_rgb_orthomosaic": "PRODUCT_SUPPORTED",
+          "phase": "NOMINAL",
+          "planner_branch": "global_survey",
+          "t": 63.0,
+          "tick": 5
+        },
+        {
+          "absolute_navigation": "SUPPORTED",
+          "bridge_rgb_inspection": "PRODUCT_SUPPORTED",
+          "global_rgb_orthomosaic": "PRODUCT_SUPPORTED",
+          "phase": "NOMINAL",
+          "planner_branch": "global_survey",
+          "t": 63.5,
+          "tick": 6
+        },
+        {
+          "absolute_navigation": "SUPPORTED",
+          "bridge_rgb_inspection": "PRODUCT_SUPPORTED",
+          "global_rgb_orthomosaic": "PRODUCT_SUPPORTED",
+          "phase": "NOMINAL",
+          "planner_branch": "global_survey",
+          "t": 64.0,
+          "tick": 7
+        }
+      ]
+    }
+  ],
+  "scenarios_matching_expectation": 6,
+  "scenarios_mismatched": [],
+  "scenarios_total": 6,
+  "schema": "csia.mission.disaster_corridor/1",
+  "status": "SOFTWARE_SYNTHETIC_BENCHMARK",
+  "verdict": "ALL_TRANSITIONS_AS_EXPECTED"
+}

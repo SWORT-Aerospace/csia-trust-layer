@@ -17,8 +17,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "jsonschema>=4", "build>=1"]
+dev = ["pytest>=8", "jsonschema>=4", "build>=1", "pyflakes>=3"]
+# Post-E1 assurance hardening: the bounded verifier (z3), the
+# property-based tests (hypothesis) and the resource-envelope probe
+# (psutil). NOT imported by the runtime path or by the frozen core --
+# only by tools/assurance/ and its tests.
+assurance = ["z3-solver>=4.12", "hypothesis>=6", "psutil>=5.9"]
 mavlink = ["pymavlink>=2.4"]
+# E2M sensor-bus bench acquisition. pyserial is imported by exactly one
+# module -- csia_e2m/transport.py -- and lazily, inside SerialTransport.open(),
+# so importing csia_e2m pulls in no hardware library and the test suite needs
+# no port to exist. Declared as its own extra rather than folded into `dev`
+# because a hardware dependency should be visible as one.
+hardware = ["pyserial>=3.5"]
 logs = ["pyulog>=1.0"]
 # Research data lake only — the embedded runtime path (csia/runtime,
 # csia/native) must never import these; enforced by test.
@@ -27,6 +38,9 @@ data = ["duckdb>=1.0", "huggingface_hub>=0.34", "polars>=1.0", "pyarrow>=25",
 
 [project.scripts]
 csia = "csia.cli:main"
+csia-shadow = "csia.deploy.cli:main"
+csia-edge = "csia.deploy.edge:main"
+csia-assure = "csia_evidence_assurance.assure_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["csia*"]
@@ -34,10 +48,13 @@ include = ["csia*"]
 [tool.setuptools.package-data]
 "csia.dashboard" = ["web/*"]
 "csia.contracts" = ["*.json"]
+"csia_semantic_core" = ["successor_profiles/*.json"]
+"csia_evidence_assurance" = ["contracts/*.json", "pacing_citations.json", "support_matrix.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
 markers = [
     "slow: end-to-end runs through the full detector (seconds, not ms)",
+    "sitl: needs a live ArduPilot or PX4 SITL binary; excluded from the fast CI lane",
 ]

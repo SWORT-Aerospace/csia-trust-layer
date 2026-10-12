@@ -15,7 +15,8 @@
 \title{Measured Self-Occlusion in a Deployed Cross-Sensor Diagnostic Layer:\\
 When a Fault Destroys the Evidence That Would Name It}
 
-\author{SWORT Aerospace}
+\author{Andres Felipe Pena Avila\\
+SWORT LLC, Bethesda, Maryland, United States}
 \date{}
 
 \begin{document}
@@ -247,11 +248,23 @@ feature $f$ carries a gate $g_f \in [0,1]$, and the accumulation is
 followed by exponential smoothing with $\alpha_s = 0.06$, tempering by 1.5,
 and a softmax against a prior placing 0.86 on \code{nominal}.
 
+\textbf{We call the output a normalized hypothesis weight, not a posterior.}
+The three operations just listed each break the Bayesian reading, and any one
+of them alone would suffice: the evidence term is an exponential moving average
+over roughly fifteen ticks rather than the current tick's likelihood, it is
+raised to the power 1.5 before normalization, and $\varepsilon = 0.02$ is a
+floor inside the logarithm rather than a density. The weights sum to one and
+rank the hypotheses, which is what the assurance layer uses them for, but they
+are not $P(h \mid \text{observation at tick } k)$ and we do not report them as
+probabilities. Both the batch and the real-time paths compute the same
+quantity by the same three steps.
+
 \textbf{The load-bearing implementation detail} is that a feature with
 $g_f \le 10^{-9}$ is skipped by a \code{continue}, not down-weighted. It
 therefore contributes to no hypothesis. Two hypotheses whose LOW sets coincide
 over the surviving features accumulate identical likelihood indefinitely, and
-their posterior ratio remains pinned at the prior ratio. This is
+the ratio of their normalized hypothesis weights remains pinned at the
+prior ratio. This is
 indistinguishability, not weak evidence.
 
 \subsection{Gates}
@@ -876,7 +889,7 @@ N^* = \frac{\ln \left( \frac{M(T^* - e_f)}{S_0(T_0 - T^*) + M(T^* - e_f)}
 \label{eq:nstar}
 \end{equation}
 
-Note which term dominates: $S_0(T_0 - T^*) = 125$ against
+Note which term dominates: $S_0(T_0 - T^*) = 118.82$ against
 $M(T^* - e_f) = 1.0$. \textbf{The delay is set by how much agreement the calm
 period banked, not by how bad the fault is.} Halving the concentration cap
 nearly halves the delay; doubling the threshold margin barely moves it.
@@ -1013,7 +1026,7 @@ assess this'' surface as health.}
 Two lines of source produce the last two rows. In the diagnosis, a gated
 feature is skipped outright, so when a hypothesis's entire support is gated its
 likelihood ties with \code{nominal} over the surviving features and the prior
-decides; the posterior concentrates on health. In the trust recursion, a node
+decides; the normalized hypothesis weight concentrates on health. In the trust recursion, a node
 that loses every evidence source has its Beta belief held rather than driven
 down, which is the right choice given the available vocabulary. A held belief
 and a confirmed one are the same number at the output.
@@ -1236,15 +1249,15 @@ New collisions across 1232 reachable configurations & --- & \textbf{none} \\
 Pairs with an order-one cut set & 7 & \textbf{6} \\
 Components in any order-one cut set & 9 & \textbf{7} \\
 \code{imu0}/\code{imu1} minimum cut set size & 1 & \textbf{2} \\
-Peak posterior for \code{imu0\_bias\_drift} & 0.9861 & \textbf{0.9203} \\
+Peak hypothesis weight for \code{imu0\_bias\_drift} & 0.9861 & \textbf{0.9203} \\
 \bottomrule
 \end{tabular}
 \caption{The repair. Cut-set analysis follows
 \cite{hurdle2007faulttree,reeves2019sensorselection}.}
 \end{table}
 
-\textbf{The cost is real and we report it.} Peak posterior for the target
-hypothesis falls by 0.066, because a larger LOW set requires more features to
+\textbf{The cost is real and we report it.} Peak normalized hypothesis weight for the
+target hypothesis falls by 0.066, because a larger LOW set requires more features to
 be simultaneously anomalous. Detection latency and minimum trust are unchanged
 on all five scripted fault scenarios, the clean scenario produces zero false
 positives before and after, and the committed campaign artifact regenerates
@@ -1338,12 +1351,140 @@ report it as such. Wind was intended as a second axis of variation and turned
 out to apply no force in this build, so the campaign varied one axis and was
 described as varying two.
 
-\paragraph{Replication remains the binding constraint.} One deployed-system
-episode and two simulator campaigns against a single autopilot build, from
-2015, is not a replication base. Every SITL number here should be repeated on a
-current ArduPilot and on PX4 before it is relied on, and the satellite-ladder
-result in particular is a statement about one simulator's GNSS model rather
-than about receivers.
+\paragraph{Replication remains the binding constraint, and the baseline is
+named.} Every measurement in this paper is against \textbf{ArduCopter 3.3
+SITL} (dronekit-assets prebuilt, 2015-10-22) and the bench simulator. One
+deployed-system episode and two simulator campaigns against a single autopilot
+build, from 2015, is not a replication base. Every SITL number here should be
+repeated on a current ArduPilot and on PX4 before it is relied on, and the
+satellite-ladder result in particular is a statement about one simulator's
+GNSS model rather than about receivers.
+
+\paragraph{Both mechanisms have been repeated on current stacks, and this paper
+deliberately reports neither in its tables.} The history-dominated
+threshold-crossing mechanism of Section~\ref{sec:algebra} was re-run under a
+preregistration frozen before its first trial, on \textbf{ArduPilot 4.8} SITL:
+twenty valid trials, the source recursion reproducing the runtime trust
+trajectory from the platform's own measured banked state, and the observed
+threshold crossing predicted with zero tick error on every ramp. On
+\textbf{PX4 SIH} that intervention is \emph{inapplicable} --- no fix-preserving
+GNSS position offset exists there, four candidate routes were read out of
+source and all four fail, and the preregistration forbids substituting another
+intervention, so no trials were run.
+
+The self-occlusion mechanism itself --- the subject of
+Section~\ref{sec:measurement} --- has also been repeated, on \textbf{both}
+current stacks, and \textbf{no longer at $n=1$}. Three preregistered campaigns
+have now run, each frozen before its first trial: two on ArduPilot 4.8 and one
+on PX4 SIH, \textbf{twenty valid fault trials and twenty matched
+fix-preserving controls per campaign}, 120 of 120 trials adjudicated valid
+with the campaign arithmetic balancing in each. The intervention was validated
+by its downstream effect --- the observed loss of the GNSS position channel
+with \code{NO\_3D\_FIX}, not the parameter write --- before any scoring, in
+every valid trial.
+
+\textbf{The structural result repeated. A numerical trajectory did not, and we
+separate the two.} What repeated, on both stacks and in every valid trial: the
+gate weight supporting \code{gps\_fault} collapses to exactly zero under
+confirmed fix loss and does not move in the matched control; the diagnosis
+keeps \code{nominal} on top and never promotes \code{gps\_fault}, while
+\code{gps\_fault}'s normalised weight rises without ever leading; and the
+failsafe transitions in the fault arm and not in the control. The magnitude of
+the removed gate weight is link-dependent and was preregistered as such
+($3.0\to0.0$ on ArduPilot, $1.0\to0.0$ on PX4, where only one of four
+GNSS-gated relations is live before the fault); a cleaner PX4 link was not
+adopted to raise it.
+
+\textbf{The repeated campaigns took a claim away, and it is ours.} The single
+trials reported that the trust coefficient \emph{rises} across the gate
+collapse, and the project's own supporting documents had explained that rise
+causally: gating out an inconsistent comparison removes a source of
+disagreement, so a layer scoring agreement scores higher. \textbf{The matched
+control arms refute that explanation.} Trust rises in \emph{both} arms as
+evidence accumulates over the flight, and it rises \emph{more} where no fault
+was injected --- on ArduPilot a median $+0.0206$ in the control against
+$+0.0070$ under fix loss, on PX4 $+0.0095$ against $+0.0035$, with the two
+arms' ranges disjoint on both platforms. An explanation that requires the gate
+to close cannot account for a larger rise where it did not close. What the
+repeated data support is the mechanism this paper already states in
+Section~\ref{sec:measurement}: the belief update is \emph{frozen} by the
+freshness rule rather than driven down, because absence of evidence is not
+treated as evidence of fault. So trust did not provide a compensating
+indication of the loss of diagnostic support --- which is this paper's point
+--- but it did not rise \emph{because} the gate closed.
+
+\textbf{The exact trust and latency values from the single trials are not
+repeatable, and the reason is a configuration field neither preregistration
+pinned.} The original current-stack trials ran the frozen core's $0.5$\,s GNSS
+staleness watchdog; the repeated campaigns ran the $1.0$\,s value the
+deployment layer derives from the adapter's own maximum channel age. The gate
+therefore holds for about twice as long after the channel is lost, trust
+accrues for twice as long before freezing, and the single-trial deltas fall
+outside the repeated ranges on both platforms. The dwell itself is predictable
+from that constant --- collapse latency is approximately the watchdog minus the
+channel's age at its last usable tick, holding on four runs across both
+platforms and both watchdog values to within one tick period. \textbf{Neither
+run is wrong: they are different deployment configurations, and no latency or
+trust magnitude from either may be quoted without naming the watchdog it was
+measured under.} One difference remains unexplained and is recorded as
+unresolved rather than filled in: why ArduPilot's pre-fault trust was
+insensitive to the same change while PX4's was not.
+
+\textbf{What none of this licenses.} These are twenty valid fault trials and
+twenty matched controls per campaign on two simulated current stacks, repeated
+under the tested conditions. They establish that the mechanism is not an
+artifact of a 2015 build. They are not a rate, a frequency, an exposure figure
+or a statement about how often any of this occurs, on any fleet or in any
+population; no interval or significance statement is computed over them,
+because they are runs of a deterministic simulator differing in seed and
+timing jitter; and the three campaigns are reported separately and never
+pooled, with each platform compared only against its own baseline.
+
+None of that appears in this paper's tables, and the omission is enforced
+rather than promised: this manuscript's baseline is 3.3, mixing two autopilot
+builds into one table is the error the project's phase guard exists to prevent,
+and it fails the build if a Phase-I artifact references a later phase. The
+record is \code{research/physical\_validation/E1\_FINAL\_CLAIM\_TABLE.csv},
+which states per claim what repeated, what did not, what is configuration
+dependent and what wording each licenses; the reconciliations are
+\code{research/physical\_validation/ARDUPILOT\_REPEAT\_RECONCILIATION.md} and
+\code{PX4\_REPEAT\_RECONCILIATION.md}; the corrections above are FL-016,
+FL-017 and FL-019 in
+\code{research/physical\_validation/FAILURE\_LEDGER.yaml}; and the earlier
+single-trial record remains at
+\code{research/v1\_1/CURRENT\_STACK\_REPLICATION.md} with
+\code{mechanism\_a\_ardupilot.json} and \code{mechanism\_a\_px4.json}
+unedited. A referee who wants the current-stack evidence should read it there
+rather than infer its absence.
+
+\paragraph{No operational harm is demonstrated, and none is claimed.} The
+vehicle completes every scenario in this paper. The failsafe escalates, the
+navigation reconfigures, and nothing is lost. We have no evidence that a
+misattribution ever cost anything operationally, we do not have the data that
+would establish it, and we make no such claim. What we report is that a layer
+whose product is a cause distribution reported \code{nominal} at occupancy
+$1.0$ for an entire fault window --- a defect in the thing it exists to
+produce, not a demonstrated hazard.
+
+\paragraph{The gated naive-Bayes design is one implementation, and we do not
+claim it is representative.} A structural-analysis FDI design would not exhibit
+this at all: it would mark the fault set unisolable rather than treat an
+unavailable residual as absent evidence. Our finding is about one deployed
+layer whose gate \emph{skips} a term, which is a natural way to implement ``not
+applicable'' and is why we think the design rule of
+Section~\ref{sec:rule} is worth stating --- but $n=1$, and nothing here
+establishes how common the pattern is. The rule is offered as a check, not as
+evidence of prevalence.
+
+\paragraph{The reported scalars are model states, not calibrated
+probabilities.} The trust coefficient is a Beta-recursion state under adaptive
+forgetting. The diagnosis output is a normalized hypothesis weight: a tempered
+softmax over exponentially smoothed feature log-scores. Neither is calibrated, we do not calibrate
+them, and no claim of calibration is made anywhere in this paper. We
+deliberately call it neither a posterior nor a \emph{confidence}: a leader at
+$0.9998$ with no evidence distinguishing it from its nearest rival carries no
+information about that pair, and the word invites a reader to do arithmetic
+that is not licensed.
 
 \paragraph{The abstaining policy is measured, not validated.} It is research
 code scored on three flights per arm against one simulator. Its zero nuisance
@@ -1486,7 +1627,7 @@ evidence, the escalation condition is a duration, and it should be stated and
 tested as one.
 \item \textbf{Size the escalation delay from the concentration cap, not from
 the threshold margin.} In this system the delay is dominated by the belief mass
-banked during calm flight, 500 units against an evidence margin worth 1. A
+banked during calm flight: the two terms of $N^*$ are $118.82$ against $1.0$. A
 forgetting factor chosen for smoothness silently sets the worst-case time to
 alarm.
 \item \textbf{A monitor reading raw measurements and an estimator reading

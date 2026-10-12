@@ -1,0 +1,958 @@
+{
+ "analyzer_version": "2.2.0",
+ "contracts": {
+  "v2-domain:actuation": {
+   "contract_version": "v2-legacy-1",
+   "digest": "f43ca7a9a7e101254a248e0876d6a973e842085d9ae3f12599aa6ca08b24e601",
+   "producer_version": "8f8d52e5feb5f0aa"
+  },
+  "v2-domain:communication": {
+   "contract_version": "v2-legacy-1",
+   "digest": "c302ae0556cdb279fc7bc33e7c1dfc84c4c2e711213cccb5f5e56a88910440f7",
+   "producer_version": "45fd27fcf08f609c"
+  },
+  "v2-domain:compute": {
+   "contract_version": "v2-legacy-1",
+   "digest": "fe00bc236b03b602f6c15d0537e38979cd0a9bdbde5ae62fed5eff9766907c14",
+   "producer_version": "2b239be0f0e1611b"
+  },
+  "v2-domain:power": {
+   "contract_version": "v2-legacy-1",
+   "digest": "8bd868f0e8c8baa05b775b8ca5d3be9bbda70922e0fb0a408864ae1f33fa96c2",
+   "producer_version": "f3af6d1de8e9eb2d"
+  },
+  "v2-domain:sensor": {
+   "contract_version": "v2-legacy-1",
+   "digest": "5e3eafbd87772df9df3098b9b4245f9a36d9f8b4aa31a5788c4383c5aee5c945",
+   "producer_version": "717d67afd367f146"
+  },
+  "v2-domain:timing": {
+   "contract_version": "v2-legacy-1",
+   "digest": "a83e540e4d966ad52715f2a77189e84e57893847e9fe2a66afb5e9f9dc7704e4",
+   "producer_version": "f598b33a7157f8ea"
+  }
+ },
+ "final": {
+  "analyzer_version": "2.2.0",
+  "attribution": {
+   "candidates": [
+    "ACTUATION/motor_0"
+   ],
+   "relevant_discriminators": [
+    "COMMUNICATION/esc_can:comm.integrity",
+    "COMMUNICATION/esc_can:comm.link_state",
+    "COMMUNICATION/esc_can:comm.loss",
+    "COMMUNICATION/esc_can:comm.ordering",
+    "COMMUNICATION/esc_can:comm.rate",
+    "POWER/battery:power.cell_balance",
+    "POWER/battery:power.droop_vs_current",
+    "POWER/battery:power.p_equals_vi",
+    "POWER/battery:power.source_health"
+   ],
+   "retained_by_localization": [
+    {
+     "retains": [
+      "SENSOR/response_sensor"
+     ],
+     "symptom": "COMMAND_NO_RESPONSE"
+    },
+    {
+     "retains": [
+      "SENSOR/response_sensor"
+     ],
+     "symptom": "HIGH_CURRENT_LOW_RPM"
+    }
+   ],
+   "unexcluded_alternatives": [],
+   "unique": null,
+   "verdict": "AMBIGUOUS",
+   "why": "UNIQUE_WITHHELD",
+   "withheld_unique_because": [
+    "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+   ]
+  },
+  "configuration": {
+   "epochs": {},
+   "keys_with_context_behind": [],
+   "not_admitted_by_epoch": [],
+   "transition_events": {}
+  },
+  "corroboration": {
+   "by_component": [
+    {
+     "adverse_evidence": [
+      "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+     ],
+     "component": "ACTUATION/motor_0",
+     "independent_lines": 1,
+     "independent_lines_exact": true,
+     "lineage_groups": [
+      [
+       "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+      ]
+     ],
+     "producers": [
+      "v2-domain:actuation"
+     ]
+    }
+   ],
+   "overall": {
+    "adverse_evidence": 1,
+    "independent_lines": 1,
+    "independent_lines_exact": true,
+    "lineage_groups": [
+     [
+      "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+     ]
+    ]
+   }
+  },
+  "event_time": 2.95,
+  "evidence": {
+   "admitted_with_warnings": [],
+   "rejected": [],
+   "used": [
+    "v2-domain:actuation|actuation.command_path|ACTUATION/motor_0:actuation.command_path|2.950000",
+    "v2-domain:actuation|actuation.electrical_response|ACTUATION/motor_0:actuation.electrical_response|2.950000",
+    "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000",
+    "v2-domain:communication|comm.integrity|COMMUNICATION/esc_can:comm.integrity|2.950000",
+    "v2-domain:communication|comm.integrity|COMMUNICATION/gnss_serial:comm.integrity|2.950000",
+    "v2-domain:communication|comm.integrity|COMMUNICATION/telemetry_radio:comm.integrity|2.950000",
+    "v2-domain:communication|comm.link_state|COMMUNICATION/esc_can:comm.link_state|2.950000",
+    "v2-domain:communication|comm.link_state|COMMUNICATION/gnss_serial:comm.link_state|2.950000",
+    "v2-domain:communication|comm.link_state|COMMUNICATION/telemetry_radio:comm.link_state|2.950000",
+    "v2-domain:communication|comm.loss|COMMUNICATION/esc_can:comm.loss|2.950000",
+    "v2-domain:communication|comm.loss|COMMUNICATION/gnss_serial:comm.loss|2.950000",
+    "v2-domain:communication|comm.loss|COMMUNICATION/telemetry_radio:comm.loss|2.950000",
+    "v2-domain:communication|comm.ordering|COMMUNICATION/esc_can:comm.ordering|2.950000",
+    "v2-domain:communication|comm.ordering|COMMUNICATION/gnss_serial:comm.ordering|2.950000",
+    "v2-domain:communication|comm.ordering|COMMUNICATION/telemetry_radio:comm.ordering|2.950000",
+    "v2-domain:communication|comm.queue|COMMUNICATION/gnss_serial:comm.queue|2.950000",
+    "v2-domain:communication|comm.queue|COMMUNICATION/telemetry_radio:comm.queue|2.950000",
+    "v2-domain:communication|comm.rate|COMMUNICATION/esc_can:comm.rate|2.950000",
+    "v2-domain:communication|comm.rate|COMMUNICATION/gnss_serial:comm.rate|2.950000",
+    "v2-domain:communication|comm.rate|COMMUNICATION/telemetry_radio:comm.rate|2.950000",
+    "v2-domain:compute|compute.deadline_met|COMPUTE/csia:compute.deadline_met|2.950000",
+    "v2-domain:compute|compute.deadline_met|COMPUTE/logger:compute.deadline_met|2.950000",
+    "v2-domain:compute|compute.deadline_met|COMPUTE/state_estimator:compute.deadline_met|2.950000",
+    "v2-domain:compute|compute.process_alive|COMPUTE/csia:compute.process_alive|2.950000",
+    "v2-domain:compute|compute.process_alive|COMPUTE/logger:compute.process_alive|2.950000",
+    "v2-domain:compute|compute.process_alive|COMPUTE/state_estimator:compute.process_alive|2.950000",
+    "v2-domain:compute|compute.process_producing|COMPUTE/csia:compute.process_producing|2.950000",
+    "v2-domain:compute|compute.process_producing|COMPUTE/logger:compute.process_producing|2.950000",
+    "v2-domain:compute|compute.process_producing|COMPUTE/state_estimator:compute.process_producing|2.950000",
+    "v2-domain:compute|compute.resource_headroom|COMPUTE/cpu:compute.resource_headroom|2.950000",
+    "v2-domain:compute|compute.stability|COMPUTE/csia:compute.stability|2.950000",
+    "v2-domain:compute|compute.stability|COMPUTE/logger:compute.stability|2.950000",
+    "v2-domain:compute|compute.stability|COMPUTE/state_estimator:compute.stability|2.950000",
+    "v2-domain:power|power.cell_balance|POWER/battery:power.cell_balance|2.950000",
+    "v2-domain:power|power.droop_vs_current|POWER/battery:power.droop_vs_current|2.950000",
+    "v2-domain:power|power.p_equals_vi|POWER/battery:power.p_equals_vi|2.950000",
+    "v2-domain:power|power.rail_tolerance|POWER/rail_3v3:power.rail_tolerance|2.950000",
+    "v2-domain:power|power.rail_tolerance|POWER/rail_5v:power.rail_tolerance|2.950000",
+    "v2-domain:power|power.source_health|POWER/battery:power.source_health|2.950000",
+    "v2-domain:sensor|sensor.aggregate|SENSOR/sensor.aggregate:sensor.aggregate|2.950000",
+    "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility|2.950000",
+    "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility|2.950000",
+    "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility|2.950000",
+    "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility|2.950000",
+    "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.baro:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.battery:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.gps:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu0:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu1:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.mag:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.motor_esc:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.source_health|SENSOR/source.vibration:v1_1.source_health|2.950000",
+    "v2-domain:sensor|v1_1.support|SENSOR/v1_1.diagnosis:v1_1.support|2.950000",
+    "v2-domain:timing|timing.clock_consistency|TIMING/nav_solution:timing.clock_consistency|2.930000",
+    "v2-domain:timing|timing.clock_consistency|TIMING/telemetry_downlink:timing.clock_consistency|2.750000",
+    "v2-domain:timing|timing.end_to_end|TIMING/nav_solution:timing.end_to_end|2.930000",
+    "v2-domain:timing|timing.end_to_end|TIMING/telemetry_downlink:timing.end_to_end|2.750000",
+    "v2-domain:timing|timing.jitter|TIMING/nav_solution:timing.jitter|2.950000",
+    "v2-domain:timing|timing.jitter|TIMING/telemetry_downlink:timing.jitter|2.950000",
+    "v2-domain:timing|timing.rate|TIMING/nav_solution.sensor_slow:timing.rate|2.950000",
+    "v2-domain:timing|timing.rate|TIMING/telemetry_downlink.sensor_slow:timing.rate|2.950000",
+    "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.decision_delay:timing.segment_budget|2.930000",
+    "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.processing_delay:timing.segment_budget|2.930000",
+    "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.transport_delay:timing.segment_budget|2.930000",
+    "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.decision_delay:timing.segment_budget|2.750000",
+    "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.processing_delay:timing.segment_budget|2.750000",
+    "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.transport_delay:timing.segment_budget|2.750000"
+   ]
+  },
+  "localizations": [
+   {
+    "candidates": [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ],
+    "eliminated": [
+     {
+      "by": "CURRENT_PRESENT",
+      "hypothesis": "ACTUATION/drive_no_current"
+     },
+     {
+      "by": "COMMAND_DELIVERED",
+      "hypothesis": "COMMUNICATION/command_not_delivered"
+     },
+     {
+      "by": "ACTUATOR_POWER_NOMINAL",
+      "hypothesis": "POWER/path_unavailable"
+     }
+    ],
+    "evaluation": "EVIDENCE_UNAVAILABLE",
+    "evidence_unavailable": [
+     "PHYSICAL_RESPONSE_NOMINAL",
+     "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+    ],
+    "fault_impact": [],
+    "key": "COMMAND_NO_RESPONSE|motor_0",
+    "outcome": "AMBIGUOUS",
+    "outcome_reason": null,
+    "predicate_faults": [],
+    "refuting_evidence": [
+     "v2-domain:actuation|actuation.command_path|ACTUATION/motor_0:actuation.command_path|2.950000",
+     "v2-domain:actuation|actuation.electrical_response|ACTUATION/motor_0:actuation.electrical_response|2.950000",
+     "v2-domain:power|power.cell_balance|POWER/battery:power.cell_balance|2.950000",
+     "v2-domain:power|power.droop_vs_current|POWER/battery:power.droop_vs_current|2.950000",
+     "v2-domain:power|power.p_equals_vi|POWER/battery:power.p_equals_vi|2.950000",
+     "v2-domain:power|power.source_health|POWER/battery:power.source_health|2.950000"
+    ],
+    "scope_gaps": [],
+    "subject": "motor_0",
+    "supported": [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ],
+    "supporting_evidence": [
+     "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+    ],
+    "symptom": "COMMAND_NO_RESPONSE",
+    "unresolved": [],
+    "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+    "withheld_because": []
+   },
+   {
+    "candidates": [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ],
+    "eliminated": [],
+    "evaluation": "EVIDENCE_UNAVAILABLE",
+    "evidence_unavailable": [
+     "PHYSICAL_RESPONSE_NOMINAL",
+     "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+    ],
+    "fault_impact": [],
+    "key": "HIGH_CURRENT_LOW_RPM|motor_0",
+    "outcome": "AMBIGUOUS",
+    "outcome_reason": null,
+    "predicate_faults": [],
+    "refuting_evidence": [],
+    "scope_gaps": [],
+    "subject": "motor_0",
+    "supported": [
+     "ACTUATION/mechanical"
+    ],
+    "supporting_evidence": [
+     "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+    ],
+    "symptom": "HIGH_CURRENT_LOW_RPM",
+    "unresolved": [
+     "SENSOR/response_sensor"
+    ],
+    "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+    "withheld_because": []
+   }
+  ],
+  "producers": {
+   "by_producer": {
+    "v2-domain:actuation": {
+     "admitted": 3,
+     "evidence": 3,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "v2-domain:communication": {
+     "admitted": 17,
+     "evidence": 17,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "v2-domain:compute": {
+     "admitted": 13,
+     "evidence": 13,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "v2-domain:power": {
+     "admitted": 6,
+     "evidence": 6,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "v2-domain:sensor": {
+     "admitted": 15,
+     "evidence": 15,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "v2-domain:timing": {
+     "admitted": 14,
+     "evidence": 14,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    }
+   },
+   "coverage_gaps": []
+  },
+  "profile": {
+   "base_profile": "csia/v2/profiles/aircraft.py",
+   "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+   "gate": "ACCEPTED",
+   "name": "aircraft-successor",
+   "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+   "version": "r2"
+  },
+  "profile_warnings": [
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+   "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+   "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+  ],
+  "reason_trace": {
+   "attribution": "UNIQUE_WITHHELD",
+   "localizations": {
+    "COMMAND_NO_RESPONSE|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+    "HIGH_CURRENT_LOW_RPM|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+   }
+  },
+  "semantic_version": "2.1.1",
+  "state": {
+   "abnormal": {
+    "adverse_evidence": [
+     "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|2.950000"
+    ],
+    "symptoms": [
+     "COMMAND_NO_RESPONSE|motor_0",
+     "HIGH_CURRENT_LOW_RPM|motor_0"
+    ]
+   },
+   "attribution": "AMBIGUOUS",
+   "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS",
+   "localization_outcomes": {
+    "AMBIGUOUS": 2
+   }
+  }
+ },
+ "inputs": {
+  "kind": "v2_scenario",
+  "scenario": "MS_B5_RESPONSE_SENSOR",
+  "system": "aircraft",
+  "ticks": 60
+ },
+ "intervals": 2,
+ "profile_gate": {
+  "findings": [
+   {
+    "detail": "GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "GEOFENCE_SUPPORT:COMPUTE"
+   },
+   {
+    "detail": "PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "PROPULSION:COMPUTE"
+   },
+   {
+    "detail": "TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act",
+    "rule": "PV2_DEAD_SUPPORTING_DOMAIN",
+    "severity": "WARNING",
+    "subject": "TELEMETRY:COMPUTE"
+   },
+   {
+    "detail": "COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it",
+    "rule": "PV3_UNWATCHED_DECLARATION",
+    "severity": "WARNING",
+    "subject": "COMMUNICATION/esc_can -> PROPULSION"
+   }
+  ],
+  "profile": {
+   "base_profile": "csia/v2/profiles/aircraft.py",
+   "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+   "name": "aircraft-successor",
+   "version": "r2"
+  },
+  "status": "ACCEPTED"
+ },
+ "schema": "csia.flight_assurance_report/1",
+ "semantic_version": "2.1.1",
+ "ticks": 60,
+ "timeline": [
+  {
+   "changed": [
+    "start"
+   ],
+   "from": 0.0,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "epochs": {},
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": 0.0,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "v2-domain:actuation|actuation.command_path|ACTUATION/motor_0:actuation.command_path|0.000000",
+      "v2-domain:actuation|actuation.electrical_response|ACTUATION/motor_0:actuation.electrical_response|0.000000",
+      "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.000000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/esc_can:comm.integrity|0.000000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/gnss_serial:comm.integrity|0.000000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/telemetry_radio:comm.integrity|0.000000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/esc_can:comm.link_state|0.000000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/gnss_serial:comm.link_state|0.000000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/telemetry_radio:comm.link_state|0.000000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/esc_can:comm.loss|0.000000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/gnss_serial:comm.loss|0.000000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/telemetry_radio:comm.loss|0.000000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/esc_can:comm.ordering|0.000000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/gnss_serial:comm.ordering|0.000000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/telemetry_radio:comm.ordering|0.000000",
+      "v2-domain:communication|comm.queue|COMMUNICATION/gnss_serial:comm.queue|0.000000",
+      "v2-domain:communication|comm.queue|COMMUNICATION/telemetry_radio:comm.queue|0.000000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/esc_can:comm.rate|0.000000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/gnss_serial:comm.rate|0.000000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/telemetry_radio:comm.rate|0.000000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/csia:compute.deadline_met|0.000000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/logger:compute.deadline_met|0.000000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/state_estimator:compute.deadline_met|0.000000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/csia:compute.process_alive|0.000000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/logger:compute.process_alive|0.000000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/state_estimator:compute.process_alive|0.000000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/csia:compute.process_producing|0.000000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/logger:compute.process_producing|0.000000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/state_estimator:compute.process_producing|0.000000",
+      "v2-domain:compute|compute.resource_headroom|COMPUTE/cpu:compute.resource_headroom|0.000000",
+      "v2-domain:compute|compute.stability|COMPUTE/csia:compute.stability|0.000000",
+      "v2-domain:compute|compute.stability|COMPUTE/logger:compute.stability|0.000000",
+      "v2-domain:compute|compute.stability|COMPUTE/state_estimator:compute.stability|0.000000",
+      "v2-domain:power|power.cell_balance|POWER/battery:power.cell_balance|0.000000",
+      "v2-domain:power|power.droop_vs_current|POWER/battery:power.droop_vs_current|0.000000",
+      "v2-domain:power|power.p_equals_vi|POWER/battery:power.p_equals_vi|0.000000",
+      "v2-domain:power|power.rail_tolerance|POWER/rail_3v3:power.rail_tolerance|0.000000",
+      "v2-domain:power|power.rail_tolerance|POWER/rail_5v:power.rail_tolerance|0.000000",
+      "v2-domain:power|power.source_health|POWER/battery:power.source_health|0.000000",
+      "v2-domain:sensor|sensor.aggregate|SENSOR/sensor.aggregate:sensor.aggregate|0.000000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility|0.000000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility|0.000000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility|0.000000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility|0.000000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.baro:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.battery:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.gps:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu0:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu1:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.mag:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.motor_esc:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.vibration:v1_1.source_health|0.000000",
+      "v2-domain:sensor|v1_1.support|SENSOR/v1_1.diagnosis:v1_1.support|0.000000",
+      "v2-domain:timing|timing.clock_consistency|TIMING/nav_solution:timing.clock_consistency|-0.020000",
+      "v2-domain:timing|timing.clock_consistency|TIMING/telemetry_downlink:timing.clock_consistency|-0.200000",
+      "v2-domain:timing|timing.end_to_end|TIMING/nav_solution:timing.end_to_end|-0.020000",
+      "v2-domain:timing|timing.end_to_end|TIMING/telemetry_downlink:timing.end_to_end|-0.200000",
+      "v2-domain:timing|timing.jitter|TIMING/nav_solution:timing.jitter|0.000000",
+      "v2-domain:timing|timing.jitter|TIMING/telemetry_downlink:timing.jitter|0.000000",
+      "v2-domain:timing|timing.rate|TIMING/nav_solution.sensor_slow:timing.rate|0.000000",
+      "v2-domain:timing|timing.rate|TIMING/telemetry_downlink.sensor_slow:timing.rate|0.000000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.decision_delay:timing.segment_budget|-0.020000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.processing_delay:timing.segment_budget|-0.020000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.transport_delay:timing.segment_budget|-0.020000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.decision_delay:timing.segment_budget|-0.200000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.processing_delay:timing.segment_budget|-0.200000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.transport_delay:timing.segment_budget|-0.200000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "v2-domain:actuation": {
+       "admitted": 3,
+       "evidence": 3,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:communication": {
+       "admitted": 17,
+       "evidence": 17,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:compute": {
+       "admitted": 13,
+       "evidence": 13,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:power": {
+       "admitted": 6,
+       "evidence": 6,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:sensor": {
+       "admitted": 15,
+       "evidence": 15,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:timing": {
+       "admitted": 14,
+       "evidence": 14,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 18,
+   "to": 0.85
+  },
+  {
+   "changed": [
+    "abnormal",
+    "candidates",
+    "localizations",
+    "verdict"
+   ],
+   "from": 0.9,
+   "result": {
+    "analyzer_version": "2.2.0",
+    "attribution": {
+     "candidates": [
+      "ACTUATION/motor_0"
+     ],
+     "relevant_discriminators": [
+      "COMMUNICATION/esc_can:comm.integrity",
+      "COMMUNICATION/esc_can:comm.link_state",
+      "COMMUNICATION/esc_can:comm.loss",
+      "COMMUNICATION/esc_can:comm.ordering",
+      "COMMUNICATION/esc_can:comm.rate",
+      "POWER/battery:power.cell_balance",
+      "POWER/battery:power.droop_vs_current",
+      "POWER/battery:power.p_equals_vi",
+      "POWER/battery:power.source_health"
+     ],
+     "retained_by_localization": [
+      {
+       "retains": [
+        "SENSOR/response_sensor"
+       ],
+       "symptom": "COMMAND_NO_RESPONSE"
+      },
+      {
+       "retains": [
+        "SENSOR/response_sensor"
+       ],
+       "symptom": "HIGH_CURRENT_LOW_RPM"
+      }
+     ],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "AMBIGUOUS",
+     "why": "UNIQUE_WITHHELD",
+     "withheld_unique_because": [
+      "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+     ]
+    },
+    "configuration": {
+     "epochs": {},
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [
+      {
+       "adverse_evidence": [
+        "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+       ],
+       "component": "ACTUATION/motor_0",
+       "independent_lines": 1,
+       "independent_lines_exact": true,
+       "lineage_groups": [
+        [
+         "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+        ]
+       ],
+       "producers": [
+        "v2-domain:actuation"
+       ]
+      }
+     ],
+     "overall": {
+      "adverse_evidence": 1,
+      "independent_lines": 1,
+      "independent_lines_exact": true,
+      "lineage_groups": [
+       [
+        "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+       ]
+      ]
+     }
+    },
+    "event_time": 0.9,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "v2-domain:actuation|actuation.command_path|ACTUATION/motor_0:actuation.command_path|0.900000",
+      "v2-domain:actuation|actuation.electrical_response|ACTUATION/motor_0:actuation.electrical_response|0.900000",
+      "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/esc_can:comm.integrity|0.900000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/gnss_serial:comm.integrity|0.900000",
+      "v2-domain:communication|comm.integrity|COMMUNICATION/telemetry_radio:comm.integrity|0.900000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/esc_can:comm.link_state|0.900000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/gnss_serial:comm.link_state|0.900000",
+      "v2-domain:communication|comm.link_state|COMMUNICATION/telemetry_radio:comm.link_state|0.900000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/esc_can:comm.loss|0.900000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/gnss_serial:comm.loss|0.900000",
+      "v2-domain:communication|comm.loss|COMMUNICATION/telemetry_radio:comm.loss|0.900000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/esc_can:comm.ordering|0.900000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/gnss_serial:comm.ordering|0.900000",
+      "v2-domain:communication|comm.ordering|COMMUNICATION/telemetry_radio:comm.ordering|0.900000",
+      "v2-domain:communication|comm.queue|COMMUNICATION/gnss_serial:comm.queue|0.900000",
+      "v2-domain:communication|comm.queue|COMMUNICATION/telemetry_radio:comm.queue|0.900000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/esc_can:comm.rate|0.900000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/gnss_serial:comm.rate|0.900000",
+      "v2-domain:communication|comm.rate|COMMUNICATION/telemetry_radio:comm.rate|0.900000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/csia:compute.deadline_met|0.900000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/logger:compute.deadline_met|0.900000",
+      "v2-domain:compute|compute.deadline_met|COMPUTE/state_estimator:compute.deadline_met|0.900000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/csia:compute.process_alive|0.900000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/logger:compute.process_alive|0.900000",
+      "v2-domain:compute|compute.process_alive|COMPUTE/state_estimator:compute.process_alive|0.900000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/csia:compute.process_producing|0.900000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/logger:compute.process_producing|0.900000",
+      "v2-domain:compute|compute.process_producing|COMPUTE/state_estimator:compute.process_producing|0.900000",
+      "v2-domain:compute|compute.resource_headroom|COMPUTE/cpu:compute.resource_headroom|0.900000",
+      "v2-domain:compute|compute.stability|COMPUTE/csia:compute.stability|0.900000",
+      "v2-domain:compute|compute.stability|COMPUTE/logger:compute.stability|0.900000",
+      "v2-domain:compute|compute.stability|COMPUTE/state_estimator:compute.stability|0.900000",
+      "v2-domain:power|power.cell_balance|POWER/battery:power.cell_balance|0.900000",
+      "v2-domain:power|power.droop_vs_current|POWER/battery:power.droop_vs_current|0.900000",
+      "v2-domain:power|power.p_equals_vi|POWER/battery:power.p_equals_vi|0.900000",
+      "v2-domain:power|power.rail_tolerance|POWER/rail_3v3:power.rail_tolerance|0.900000",
+      "v2-domain:power|power.rail_tolerance|POWER/rail_5v:power.rail_tolerance|0.900000",
+      "v2-domain:power|power.source_health|POWER/battery:power.source_health|0.900000",
+      "v2-domain:sensor|sensor.aggregate|SENSOR/sensor.aggregate:sensor.aggregate|0.900000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility|0.900000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility|0.900000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility|0.900000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility|0.900000",
+      "v2-domain:sensor|v1_1.function_eligibility|SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.baro:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.battery:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.gps:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu0:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.imu1:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.mag:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.motor_esc:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.source_health|SENSOR/source.vibration:v1_1.source_health|0.900000",
+      "v2-domain:sensor|v1_1.support|SENSOR/v1_1.diagnosis:v1_1.support|0.900000",
+      "v2-domain:timing|timing.clock_consistency|TIMING/nav_solution:timing.clock_consistency|0.880000",
+      "v2-domain:timing|timing.clock_consistency|TIMING/telemetry_downlink:timing.clock_consistency|0.700000",
+      "v2-domain:timing|timing.end_to_end|TIMING/nav_solution:timing.end_to_end|0.880000",
+      "v2-domain:timing|timing.end_to_end|TIMING/telemetry_downlink:timing.end_to_end|0.700000",
+      "v2-domain:timing|timing.jitter|TIMING/nav_solution:timing.jitter|0.900000",
+      "v2-domain:timing|timing.jitter|TIMING/telemetry_downlink:timing.jitter|0.900000",
+      "v2-domain:timing|timing.rate|TIMING/nav_solution.sensor_slow:timing.rate|0.900000",
+      "v2-domain:timing|timing.rate|TIMING/telemetry_downlink.sensor_slow:timing.rate|0.900000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.decision_delay:timing.segment_budget|0.880000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.processing_delay:timing.segment_budget|0.880000",
+      "v2-domain:timing|timing.segment_budget|TIMING/nav_solution.transport_delay:timing.segment_budget|0.880000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.decision_delay:timing.segment_budget|0.700000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.processing_delay:timing.segment_budget|0.700000",
+      "v2-domain:timing|timing.segment_budget|TIMING/telemetry_downlink.transport_delay:timing.segment_budget|0.700000"
+     ]
+    },
+    "localizations": [
+     {
+      "candidates": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "eliminated": [
+       {
+        "by": "CURRENT_PRESENT",
+        "hypothesis": "ACTUATION/drive_no_current"
+       },
+       {
+        "by": "COMMAND_DELIVERED",
+        "hypothesis": "COMMUNICATION/command_not_delivered"
+       },
+       {
+        "by": "ACTUATOR_POWER_NOMINAL",
+        "hypothesis": "POWER/path_unavailable"
+       }
+      ],
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence_unavailable": [
+       "PHYSICAL_RESPONSE_NOMINAL",
+       "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+      ],
+      "fault_impact": [],
+      "key": "COMMAND_NO_RESPONSE|motor_0",
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_faults": [],
+      "refuting_evidence": [
+       "v2-domain:actuation|actuation.command_path|ACTUATION/motor_0:actuation.command_path|0.900000",
+       "v2-domain:actuation|actuation.electrical_response|ACTUATION/motor_0:actuation.electrical_response|0.900000",
+       "v2-domain:power|power.cell_balance|POWER/battery:power.cell_balance|0.900000",
+       "v2-domain:power|power.droop_vs_current|POWER/battery:power.droop_vs_current|0.900000",
+       "v2-domain:power|power.p_equals_vi|POWER/battery:power.p_equals_vi|0.900000",
+       "v2-domain:power|power.source_health|POWER/battery:power.source_health|0.900000"
+      ],
+      "scope_gaps": [],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "supporting_evidence": [
+       "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+      ],
+      "symptom": "COMMAND_NO_RESPONSE",
+      "unresolved": [],
+      "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+      "withheld_because": []
+     },
+     {
+      "candidates": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "eliminated": [],
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence_unavailable": [
+       "PHYSICAL_RESPONSE_NOMINAL",
+       "PHYSICAL_RESPONSE_NOMINAL_FALSE"
+      ],
+      "fault_impact": [],
+      "key": "HIGH_CURRENT_LOW_RPM|motor_0",
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_faults": [],
+      "refuting_evidence": [],
+      "scope_gaps": [],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical"
+      ],
+      "supporting_evidence": [
+       "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+      ],
+      "symptom": "HIGH_CURRENT_LOW_RPM",
+      "unresolved": [
+       "SENSOR/response_sensor"
+      ],
+      "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+      "withheld_because": []
+     }
+    ],
+    "producers": {
+     "by_producer": {
+      "v2-domain:actuation": {
+       "admitted": 3,
+       "evidence": 3,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:communication": {
+       "admitted": 17,
+       "evidence": 17,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:compute": {
+       "admitted": 13,
+       "evidence": 13,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:power": {
+       "admitted": 6,
+       "evidence": 6,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:sensor": {
+       "admitted": 15,
+       "evidence": 15,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "v2-domain:timing": {
+       "admitted": 14,
+       "evidence": 14,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "csia/v2/profiles/aircraft.py",
+     "digest": "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e",
+     "gate": "ACCEPTED",
+     "name": "aircraft-successor",
+     "pacing_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+     "version": "r2"
+    },
+    "profile_warnings": [
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE",
+     "WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE",
+     "WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION"
+    ],
+    "reason_trace": {
+     "attribution": "UNIQUE_WITHHELD",
+     "localizations": {
+      "COMMAND_NO_RESPONSE|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+      "HIGH_CURRENT_LOW_RPM|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+     }
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [
+       "v2-domain:actuation|actuation.mechanical_response|ACTUATION/motor_0:actuation.mechanical_response|0.900000"
+      ],
+      "symptoms": [
+       "COMMAND_NO_RESPONSE|motor_0",
+       "HIGH_CURRENT_LOW_RPM|motor_0"
+      ]
+     },
+     "attribution": "AMBIGUOUS",
+     "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; HIGH_CURRENT_LOW_RPM|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution AMBIGUOUS",
+     "localization_outcomes": {
+      "AMBIGUOUS": 2
+     }
+    }
+   },
+   "ticks": 42,
+   "to": 2.95
+  }
+ ]
+}

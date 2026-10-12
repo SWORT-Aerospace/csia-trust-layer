@@ -1,0 +1,70 @@
+{
+  "D_KL_upstream_nats": 2.456816,
+  "P_link_failed": [
+    0.05,
+    0.05,
+    0.9
+  ],
+  "P_receiver_failed": [
+    0.05,
+    0.9,
+    0.05
+  ],
+  "artifact": "INFORMATION_LOSS_ANALYSIS",
+  "caveat": "These are EXACT numbers for the stated hypothetical distributions, chosen to make the two worlds differ only in which of the two collapsed symbols dominates. They are NOT estimates from data: one recording cannot support a KL estimate and none is offered.",
+  "mappings": {
+    "phi_S0_drop_invalid": {
+      "D_KL_downstream_nats": 0.0,
+      "description": "OBSERVED_INVALID and NOT_OBSERVED both become NO_UPDATE; only OBSERVED_VALID survives",
+      "downstream_classes": [
+        [
+          0
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "information_loss_nats": 2.456816,
+      "semantic_collapse_count": 1
+    },
+    "phi_S1_coupled": {
+      "D_KL_downstream_nats": 0.0,
+      "description": "invalidity is propagated, but D = A means the downstream diagnostic vocabulary is still {evidence, no evidence}",
+      "downstream_classes": [
+        [
+          0
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "information_loss_nats": 2.456816,
+      "semantic_collapse_count": 1
+    },
+    "phi_S2_split": {
+      "D_KL_downstream_nats": 2.456816,
+      "description": "OBSERVED_INVALID keeps a distinct downstream symbol because status evidence survives A = 0",
+      "downstream_classes": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "information_loss_nats": 0.0,
+      "semantic_collapse_count": 0
+    }
+  },
+  "not_claimed": "The data-processing inequality is textbook. Nothing here claims it, or this application of it, is novel.",
+  "upstream_alphabet": [
+    "OBSERVED_VALID",
+    "OBSERVED_INVALID",
+    "NOT_OBSERVED"
+  ]
+}

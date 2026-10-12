@@ -1,0 +1,110 @@
+{
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "a relative difference of 0.5 against a tolerance of 1e-12 is arithmetic",
+        "control": "a real numeric difference exceeds the tolerance",
+        "kind": "POSITIVE",
+        "observed": "0.5",
+        "status": "PASS"
+      },
+      {
+        "basis": "a value equals itself; zero follows by arithmetic",
+        "control": "identical values differ by zero",
+        "kind": "NEGATIVE",
+        "observed": "0.0",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.assurance.decision_replay",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "note": "Bit identity is NOT demanded where the platform contract does not guarantee it. The four outcomes are reported separately so a numerical difference is never read as a decision failure, and a decision failure is never excused as rounding.",
+  "outcomes": [
+    "BIT_IDENTICAL",
+    "NUMERICALLY_EQUIVALENT_WITHIN_TOLERANCE",
+    "SEMANTICALLY_EQUIVALENT",
+    "DIVERGENT"
+  ],
+  "runs": [
+    {
+      "bit_identical": 439,
+      "decisions_compared": 1980,
+      "divergence_examples": [
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [],
+          "t": 0.04
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 1.04
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 1.56
+        },
+        {
+          "recorded_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 2.56
+        },
+        {
+          "recorded_live": [
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "replay_live": [
+            "altitude_baro",
+            "attitude_gravity_mag",
+            "velocity_gps_doppler_0"
+          ],
+          "t": 3.04
+        }
+      ],
+      "divergent": 119,
+      "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. Why the live side differed cannot be settled from these logs, which never recorded the layer's own `fresh` map; logs written after HF-014 do. THE VERDICT IS STILL DIVERGENT ON BOTH PLATFORMS: decision replay does not yet serve as a verification instrument, and the software-hardening gate must not count it as PASS.",
+      "log": "../px4-run/logs2/20260909T052355Z-d8a85c69.part000.jsonl",
+      "node": "gps",
+      "numerically_equivalent": 0,
+      "platform": "px4",
+      "reconstruction_gate": "arrival",
+      "replayed_states_unmatched": 271,
+      "semantically_equivalent_only": 1422,
+      "ticks_in_log": 2251,
+      "tolerance": 1e-12,
+      "verdict": "DIVERGENT",
+      "worst_relative_difference": 0.01824046558873945
+    }
+  ],
+  "schema": "csia.assurance.decision_replay/1"
+}

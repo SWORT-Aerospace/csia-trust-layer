@@ -1,0 +1,46 @@
+{
+  "artifact": "TEMPORAL_PATTERN_DEFINITIONS",
+  "fixture": "SYNTHETIC_VALIDITY_SCHEDULE over the NON_SCORED_TEST_FIXTURE_M1 non-GPS carrier",
+  "gps_stale_timeout_s": 0.5,
+  "onset_s": 12.0,
+  "patterns": {
+    "P0_ALL_VALID": {
+      "params": {},
+      "role": "NULL CONTROL. No observation is ever invalid, so nothing can be masked and the gate must never close."
+    },
+    "P1_SINGLE_BURST": {
+      "params": {
+        "d_s": "swept"
+      },
+      "role": "One contiguous invalid interval of commanded duration d. The sweep varies d across the predicted boundary."
+    },
+    "P2_PERIODIC_INTERLEAVE": {
+      "params": {
+        "n_invalid": 4,
+        "n_valid": 1
+      },
+      "role": "n_invalid rejected messages for every n_valid accepted one, repeating. High invalid DENSITY, short invalid INTERVALS."
+    },
+    "P3_RANDOM_DROPOUT": {
+      "params": {
+        "p": 0.5,
+        "seed": 20260826
+      },
+      "role": "Each message independently invalid with probability p. Fixed seed, so the realised schedule is reproducible."
+    },
+    "P4_CLUSTERED_BURSTS": {
+      "params": {
+        "count": 20,
+        "d_s": 0.4,
+        "gap_s": 0.2
+      },
+      "role": "Repeated invalid bursts, each shorter than the timeout, separated by a single accepted message."
+    },
+    "P5_PERMANENT": {
+      "params": {},
+      "role": "NULL CONTROL at the other extreme. Invalid from onset to the end of the recording: the gate MUST close, exactly one timeout after the last accepted sample."
+    }
+  },
+  "scope": "gate only; payload is constant, so trust and posterior numbers are not reported from this fixture",
+  "tick_s": 0.04
+}

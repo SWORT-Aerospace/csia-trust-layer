@@ -1,0 +1,121 @@
+{
+ "campaign_id": "XSYS-001-CONFIRMATORY",
+ "phase": "PHASE 0 - PRE-EXECUTION VERIFICATION",
+ "utc": "2026-09-27T21:41:11Z",
+ "checks": {
+  "01_verify_XSYS-001_manifest": {
+   "pass": true,
+   "sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+   "verifier": "{\"manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 31, \"violations\": []}"
+  },
+  "02_verify_XSYS-001-A1_manifest": {
+   "pass": true,
+   "sha256": "55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b",
+   "verifier": "{\"amendment_manifest_sha256\": \"55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b\", \"parent_manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 59, \"violations\": []}"
+  },
+  "03_verify_XSYS-001-A2_manifest": {
+   "pass": true,
+   "sha256": "d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f",
+   "verifier": "{\"a2_manifest_sha256\": \"d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f\", \"a1_manifest_sha256\": \"55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b\", \"xsys001_manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 74, \"violations\": []}"
+  },
+  "04_verify_manifest_chain": {
+   "pass": true,
+   "chain": {
+    "XSYS-001": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+    "XSYS-001-A1": "55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b",
+    "XSYS-001-A2": "d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f"
+   }
+  },
+  "05_verify_confirmatory_matrix": {
+   "pass": true,
+   "files": {
+    "research/xsys_confirmatory_001/amendment_a1/FLIGHT_MATRIX_A1.csv": {
+     "sha256": "4ff2f441538f8798d5a501321f5d90e2f776265a6f201f0f9412e464979437f7",
+     "frozen": "4ff2f441538f8798d5a501321f5d90e2f776265a6f201f0f9412e464979437f7"
+    },
+    "research/xsys_confirmatory_001/amendment_a1/ANALYSIS_MATRIX_A1.csv": {
+     "sha256": "0e90b5ab0969b0aec5cc8b8e6a8372726e4cfa524bd49c20e900f34a8ba73a4e",
+     "frozen": "0e90b5ab0969b0aec5cc8b8e6a8372726e4cfa524bd49c20e900f34a8ba73a4e"
+    }
+   }
+  },
+  "06_verify_execution_order": {
+   "pass": true,
+   "files": {
+    "research/xsys_confirmatory_001/amendment_a1/EXECUTION_ORDER_A1.csv": {
+     "sha256": "d4916ada4e9f7e192234074c005d31ac4c16d779450beda7e6b7c05e612c627c",
+     "frozen": "d4916ada4e9f7e192234074c005d31ac4c16d779450beda7e6b7c05e612c627c"
+    }
+   }
+  },
+  "07_verify_px4_source_commit": {
+   "pass": true,
+   "HEAD^": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+   "HEAD": "4c34870e9a7fbb6f72db7e8aa27f68771c63f22d",
+   "detail": "HEAD^ is 547e2ca, tree clean, diff 547e2ca..HEAD equals the frozen patch diff"
+  },
+  "08_verify_px4_patch": {
+   "pass": true,
+   "sha256": "c057ba451fef91d532d5d033c5e02968aa0f0851055b635117e462451b36c32c"
+  },
+  "09_verify_px4_build": {
+   "pass": true,
+   "binary_sha256": "4073466f1b3e42ed073b88d45bda4e4d1168a35730eb23f470ae5a0744dfc085",
+   "equals_reference_build": true,
+   "note": "the binary hash is recorded once in CAMPAIGN.json by the executor"
+  },
+  "10_verify_logger_configuration": {
+   "pass": true,
+   "sha256": "9d2c61280b623d53de3b9ff463cff20fce2f3493e1a5a739fcf1c12c7d9dd8df"
+  },
+  "11_verify_disk_space": {
+   "pass": true,
+   "free_GB": 19.9,
+   "required_GB": 12.0
+  },
+  "12_verify_output_location": {
+   "pass": true,
+   "raw_flights_dir": "/home/user/xsys_001_confirmatory_raw_artifacts/flights",
+   "outside_research_xsys_confirmatory_001": true,
+   "outside_git_working_tree": true,
+   "records_dir_in_repo": "research/xsys_001_confirmatory_campaign"
+  },
+  "13_verify_stage_0_1_2_hashes": {
+   "pass": true,
+   "files": {
+    "research/xsys_confirmatory_001/pipeline/xsys_features.py": "ec4037e6958110814ade245d6e5526f0f08eef79f5f96596b0b861c9a892b036",
+    "research/xsys_confirmatory_001/pipeline/xsys_extract.py": "6d72e2b94688ce084b4132216ae1e59da7fb07893c57356b59006eb9f7e4e601",
+    "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py": "b8b2041b3afcf4992038754f1509143da0fff63c9d4b71280f674fb775fd44e0",
+    "research/xsys_confirmatory_001/pipeline/xsys_freeze_check.py": "66eb75cced3dfc2cf06445436d8141bcb60c9f54c3c4d3efdee3b629464e2608",
+    "research/xsys_confirmatory_001/pipeline/stage0_prepare.py": "87d2cc83c54e54f20566381f9fb440c45af7a6098c140769b1193bcdb4777336",
+    "research/xsys_confirmatory_001/pipeline/stage1_evidence.py": "f537c4736cf6b586a70a773516a95f33061ce1f0779f977f5c8b55753c44d4a1",
+    "research/xsys_confirmatory_001/pipeline/stage2_score.py": "c7b2ea6f79ce7c3fa8fa8d34814ba548b75a2c27b23333055245bbde655349e2",
+    "research/xsys_confirmatory_001/pipeline/dry_run_matrix.py": "c0c24b7378f067b02745e306e7b1c664c86ebc7f401dab9fbc365b5bafe23b6c",
+    "research/xsys_confirmatory_001/amendment_a1/pipeline_a1/a1_paths.py": "63793cb4e1285832596eb5df35cb9ece66165a542b73ace008bcec7a6e0bcabe",
+    "research/xsys_confirmatory_001/amendment_a1/pipeline_a1/stage0_prepare_a1.py": "e642363b61c463300a0d48cfa857f9f8744ed57dec0965e4aef398cbfab3c799",
+    "research/xsys_confirmatory_001/amendment_a1/pipeline_a1/stage2_score_a1.py": "cf1a14187ab7ebb14b41793dd96ffa31d12e787c8dec81fde86801d25d1a5e13"
+   }
+  },
+  "14_verify_v2_hashes": {
+   "pass": true,
+   "files": {
+    "csia/v2/localization.py": "ffe2f79eae36dd910a51fecb2e4d4b19ce23d508f8238f6d5022a5ac6f497352",
+    "csia/v2/evidence.py": "0c3828de37501b29c14f52a982fef3d09a05e3d082abc8f45a44326c1db31384"
+   }
+  },
+  "15_confirmatory_dataset_has_zero_flights": {
+   "pass": true,
+   "campaigns": [],
+   "flight_files": []
+  },
+  "16_confirmatory_analysis_has_zero_trials": {
+   "pass": true,
+   "stage_outputs": []
+  }
+ },
+ "guard_tests": {
+  "pass": true,
+  "summary": "...................................                                      [100%]"
+ },
+ "all_pass": true
+}

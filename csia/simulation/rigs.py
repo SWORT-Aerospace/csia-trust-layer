@@ -1,0 +1,674 @@
+"""Simulator rigs: launching ArduPilot and PX4 SITL and flying them.
+
+This module MAY command a simulated vehicle. That is legitimate here and
+nowhere near `csia.deploy`: a qualification probe has to arm and climb, and a
+shadow deployment must never be able to. The separation is enforced by
+`tests/test_shadow_mode.py::test_no_send_calls_in_deployment_source` (which
+scans `csia/deploy` and `csia/aircraft`, not this file) and by
+`test_deploy_never_imports_the_rigs` below it.
+
+It lives in `csia.simulation` rather than beside the scripts because
+`run_campaign.py` was importing it as a bare sibling module, which only worked
+because the script's own directory happened to be on `sys.path` -- and the
+repository's CI-environment guard correctly flagged `qualify_platform` as an
+undeclared third-party import.
+"""
+
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+import time
+
+from .dialect import use_vehicle_dialect
+
+AP_ROOT = os.environ.get("CSIA_AP_ROOT", "/home/user/ardupilot/ardupilot")
+PX4_ROOT = os.environ.get("CSIA_PX4_ROOT", "/home/user/px4")
+HOME = "-35.363261,149.165230,584,353"
+
+# Motion positive control: the probe needs the airframe to have MOVED,
+# not to have reached a particular altitude. 1.5 m clears the 1.0 m
+# threshold qualify_platform requires with margin, and it is reachable
+# whatever MIS_TAKEOFF_ALT is set to. Keying success off alt_m * 0.5
+# made the loop wait for 12.5 m while PX4 climbed to its 2.5 m default.
+CLIMB_OK_M = 1.5
+
+
+def launch_ardupilot(workdir, speedup=10):
+    binary = os.path.join(AP_ROOT, "build", "sitl", "bin", "arducopter")
+    if not os.path.exists(binary):
+        raise SystemExit(f"ArduPilot SITL binary not found: {binary}\n"
+                         f"set CSIA_AP_ROOT or build it with "
+                         f"./waf configure --board sitl && ./waf copter")
+    shutil.rmtree(workdir, ignore_errors=True)
+    os.makedirs(workdir)
+    # SERIAL1 gives a SECOND MAVLink link, and it is not a convenience.
+    #
+    # SITL's SERIAL0 (tcp:5760) accepts one client. A shadow monitor sharing
+    # it with the rig cannot work: the rig holds it to arm and to request data
+    # streams, and when it disconnects the monitor's reconnect gets EOF.
+    #
+    # More importantly the two links have different AUTHORITY, and that is the
+    # real deployment shape rather than a test fixture. SERIAL0 is the rig or
+    # the GCS: it commands, and it is what asks the autopilot to stream.
+    # SERIAL1 is CSIA: passive, read-only, and structurally unable to ask for
+    # anything. On a real aircraft this is a GCS/telemetry link plus a
+    # companion port.
+    proc = subprocess.Popen(
+        [binary, "--model", "quad", "--speedup", str(speedup), "-w",
+         "--home", HOME, "--instance", "0",
+         "--serial1", "tcp:5762"],
+        cwd=workdir, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    return proc, "tcp:127.0.0.1:5760"
+
+
+# PASSIVE_LINKS was here and is GONE. It was never referenced, and the
+# telemetry-tee work made it BACKWARDS: it said an ArduPilot shadow monitor
+# listens on tcp:5762, when 5762 is the RIG's command link and CSIA listens on
+# the tee's UDP endpoint. tools/deploy/shadow_sitl_check.py holds the real
+# addresses (TEE_OUT, RIG_LINK) and is the only place that should.
+#
+# An unused constant cannot be wrong in a way any test notices, which is
+# exactly why it was still asserting the pre-tee architecture.
+
+
+# Which platforms actually honour a speedup request.
+#
+# PX4 SIH does NOT. `launch_px4` accepted a `speedup` argument and never used
+# it -- the console says "Simulation with 1.0x speedup" on a run invoked with
+# --speedup 10 -- so an operator asking for an accelerated PX4 run silently
+# got a real-time one. That is a small defect on its own and a large one
+# downstream: the qualification probe gates its rate-drift check on "is this
+# run real time?", read it from the REQUESTED speedup, and would therefore
+# have skipped the check on every default PX4 run.
+HONOURS_SPEEDUP = {"ardupilot": True, "px4": False}
+
+
+def effective_speedup(platform: str, requested: int) -> int:
+    """What the simulator will ACTUALLY run at, not what was asked for."""
+    return int(requested) if HONOURS_SPEEDUP.get(platform, True) else 1
+
+
+def launch_px4(workdir, speedup=1):
+    binary = os.path.join(PX4_ROOT, "build", "px4_sitl_default", "bin", "px4")
+    if not os.path.exists(binary):
+        raise SystemExit(f"PX4 SITL binary not found: {binary}\n"
+                         f"set CSIA_PX4_ROOT or build it with "
+                         f"make px4_sitl_default")
+    shutil.rmtree(workdir, ignore_errors=True)
+    os.makedirs(workdir)
+    if int(speedup) != 1:
+        # Loud, because a silently ignored argument is how a rate check ends
+        # up gated on a number that was never true.
+        print(f"    NOTE: PX4 SIH runs in real time; the requested speedup "
+              f"{speedup} is ignored (lockstep at 1.0x)")
+    etc = os.path.join(PX4_ROOT, "build", "px4_sitl_default", "etc")
+    env = dict(os.environ)
+    # SIH -- Simulation In Hardware. PX4's own rigid-body model, running
+    # inside the PX4 process. No Gazebo, no jMAVSim, no external frontend.
+    #
+    # `PX4_SIM_MODEL=none_iris` was tried first and PX4 never emitted a
+    # heartbeat: with no simulator attached, simulator_mavlink blocks on TCP
+    # 4560 waiting for one and the rest of the system never boots. SIH has
+    # real dynamics, so the motion positive control can actually fire.
+    env["PX4_SYS_AUTOSTART"] = "10040"      # sihsim_quadx
+    env["PX4_SIM_MODEL"] = "sihsim_quadx"
+    # CAPTURE THE CONSOLE. It was going to DEVNULL.
+    #
+    # PX4 prints boot progress, preflight failures, mode rejections and
+    # takeoff decisions to stdout. Three rounds of hypotheses about a failing
+    # climb were spent while that output was being discarded, and a fourth was
+    # spent on STATUSTEXT -- which turned out to be dead -- when the console
+    # says the same things and needs no MAVLink stream at all.
+    console = os.path.join(workdir, "px4_console.log")
+    fh = open(console, "wb")
+    proc = subprocess.Popen(
+        [binary, "-d", "-s", os.path.join(etc, "init.d-posix", "rcS"), etc],
+        cwd=workdir, env=env, stdout=fh, stderr=subprocess.STDOUT)
+    proc.console_path = console
+    return proc, "udp:127.0.0.1:14550"
+
+
+LAUNCHERS = {"ardupilot": launch_ardupilot, "px4": launch_px4}
+
+
+def wait_for_port(conn_str, timeout=60.0) -> bool:
+    """Wait for a TCP listener to exist before dialling it.
+
+    SITL does not open every serial port at once: SERIAL0 (5760) accepts
+    connections about 3 s after launch, SERIAL1 (5762) about 8 s. Dialling
+    5762 immediately gets ECONNREFUSED, and pymavlink's own retry can burn its
+    heartbeat window on the refused attempts -- which is exactly how a run
+    died with "no heartbeat within 90s" against a port that was working fine
+    five seconds later.
+
+    Non-TCP connection strings return True immediately; there is nothing to
+    wait for.
+    """
+    import socket as _s
+    if not conn_str.startswith("tcp:"):
+        return True
+    host, _, port = conn_str[4:].rpartition(":")
+    host, port = host or "127.0.0.1", int(port)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        sock = _s.socket()
+        sock.settimeout(0.5)
+        try:
+            sock.connect((host, port))
+            sock.close()
+            return True
+        except OSError:
+            time.sleep(0.5)
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+    return False
+
+
+ROOTS = {"ardupilot": AP_ROOT, "px4": PX4_ROOT}
+
+
+def simulator_provenance(platform: str) -> dict:
+    """Firmware version and upstream SHA of the simulator actually built.
+
+    WHY THIS EXISTS. The flight-log header carries an `autopilot_version`
+    field, and `tests/test_flight_log.py:39` shows the shape it was designed
+    for: "4.8.0-dev@01a504b". The SITL harness was filling it with the
+    PLATFORM NAME -- "ardupilot" -- so every flight log recorded a constant
+    where its firmware provenance belonged, and a published campaign could
+    not say which build produced it without an out-of-band note.
+
+    Read from the checkout that was built rather than from any hand-kept
+    document, so it cannot drift. Every field independently degrades to
+    "NOT RECORDED" instead of guessing.
+    """
+    root = ROOTS.get(platform)
+    out = {"platform": platform, "root": root,
+           "firmware": "NOT RECORDED", "sha": "NOT RECORDED",
+           "sha_short": "NOT RECORDED"}
+    if not root or not os.path.isdir(root):
+        return out
+    try:
+        sha = subprocess.run(["git", "-C", root, "rev-parse", "HEAD"],
+                             capture_output=True, text=True, timeout=15)
+        if sha.returncode == 0 and sha.stdout.strip():
+            out["sha"] = sha.stdout.strip()
+            out["sha_short"] = out["sha"][:7]
+    except (OSError, subprocess.SubprocessError):
+        pass
+    if platform == "ardupilot":
+        vh = os.path.join(root, "ArduCopter", "version.h")
+        try:
+            with open(vh, encoding="utf-8", errors="ignore") as fh:
+                for line in fh:
+                    if "THISFIRMWARE" in line and '"' in line:
+                        out["firmware"] = line.split('"')[1].strip()
+                        break
+        except OSError:
+            pass
+    else:
+        try:
+            tag = subprocess.run(["git", "-C", root, "describe", "--tags",
+                                  "--always"], capture_output=True, text=True,
+                                 timeout=15)
+            desc = tag.stdout.strip() if tag.returncode == 0 else ""
+            # `describe --always` falls back to the abbreviated SHA when no
+            # tag is reachable, which would render as "PX4-Autopilot
+            # 547e2ca@547e2ca". Drop the redundant half.
+            if desc and not out["sha"].startswith(desc):
+                out["firmware"] = f"PX4-Autopilot {desc}"
+            elif desc:
+                out["firmware"] = "PX4-Autopilot"
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return out
+
+
+def provenance_string(platform: str) -> str:
+    """`firmware@shortsha` for the flight-log header, or NOT RECORDED."""
+    p = simulator_provenance(platform)
+    if p["firmware"] == "NOT RECORDED" and p["sha_short"] == "NOT RECORDED":
+        return "NOT RECORDED"
+    return f"{p['firmware']}@{p['sha_short']}"
+
+# platform -> DialectReport for the decoder actually in use. Read by
+# qualify_platform.py so the result file records whether an "observed
+# UNAVAILABLE" row is a platform fact or a decoder limitation.
+DIALECTS: dict = {}
+
+
+def dialect_report(platform):
+    return DIALECTS.get(platform)
+
+
+def connect(conn_str, platform, timeout=90):
+    from pymavlink import mavutil
+    # BEFORE the connection is built: mavfile binds its MAVLink parser at
+    # construction, so a dialect switched afterwards decodes nothing.
+    if platform in ROOTS:
+        DIALECTS[platform] = use_vehicle_dialect(platform, ROOTS[platform])
+    if not wait_for_port(conn_str, timeout=min(timeout, 60.0)):
+        raise SystemExit(f"no TCP listener on {conn_str}")
+    deadline = time.time() + timeout
+    m = None
+    while time.time() < deadline:
+        try:
+            m = mavutil.mavlink_connection(conn_str)
+            if m.wait_heartbeat(timeout=10):
+                break
+        except Exception:
+            time.sleep(1.0)
+        m = None
+    if m is None:
+        raise SystemExit(f"no heartbeat on {conn_str} within {timeout}s")
+    if platform == "ardupilot":
+        for stream, hz in (
+                (mavutil.mavlink.MAV_DATA_STREAM_RAW_SENSORS, 25),
+                (mavutil.mavlink.MAV_DATA_STREAM_EXTENDED_STATUS, 10),
+                (mavutil.mavlink.MAV_DATA_STREAM_POSITION, 10),
+                (mavutil.mavlink.MAV_DATA_STREAM_EXTRA1, 10),
+                (mavutil.mavlink.MAV_DATA_STREAM_EXTRA2, 10),
+                (mavutil.mavlink.MAV_DATA_STREAM_EXTRA3, 5)):
+            m.mav.request_data_stream_send(m.target_system,
+                                           m.target_component, stream, hz, 1)
+    else:
+        # 253 STATUSTEXT and 33 GLOBAL_POSITION_INT were both missing.
+        #
+        # STATUSTEXT is the channel PX4 explains itself on. Without it a
+        # capture of PX4's diagnostics returns an empty list, and an empty
+        # list from an instrument nobody verified is alive is not a finding --
+        # it is the absence of one. That is the RULE A null-control failure,
+        # committed while adding a diagnostic FOR a RULE A positive control.
+        #
+        # 33 is what climbed_m is measured from. It happened to arrive on
+        # PX4's default stream set, so the altitude figures were real, but
+        # depending on a default nobody requested is luck rather than design.
+        for mid, hz in ((105, 50), (26, 25), (29, 10), (24, 5),
+                        (147, 10), (241, 10), (230, 5), (0, 1),
+                        (253, 10), (33, 10)):
+            m.mav.command_long_send(m.target_system, m.target_component,
+                                    511, 0, mid, int(1e6 / hz), 0, 0, 0, 0, 0)
+    return m
+
+
+def _fly_px4(conn, evidence, alt_m, timeout):
+    """Arm and take off on PX4 SIH.
+
+    PX4 is not ArduPilot with different command names: there is no
+    `arducopter_arm`, mode changes go through MAV_CMD_DO_SET_MODE with a
+    main/sub mode pair, and takeoff is MAV_CMD_NAV_TAKEOFF in AUTO.
+    """
+    from pymavlink import mavutil
+    # PX4 refuses to arm under a pile of preflight checks that exist for a
+    # real vehicle and are noise for a qualification probe. Relaxing them is
+    # legitimate HERE (a simulator, in a tool that may command) and is
+    # recorded in the probe evidence.
+    # Parameter TYPE matters. Every one of these used to be sent as INT32,
+    # including the four COM_ARM_EKF_* thresholds, which PX4 declares as
+    # float. A float parameter written with an integer type is not a rounding
+    # error -- the receiver reinterprets the payload, so 1.0 does not arrive
+    # as 1.0. Each entry now carries its own type.
+    #
+    # MIS_TAKEOFF_ALT is the important one and it was missing entirely.
+    # PX4's NAV_TAKEOFF handler (Commander.cpp:1205) does NOT read param7:
+    # it only switches to NAVIGATION_STATE_AUTO_TAKEOFF. The climb target
+    # comes from MIS_TAKEOFF_ALT, a float defaulting to 2.5 m
+    # (navigator/mission_params.yaml:5-15). So the rig commanded a takeoff to
+    # 25 m, the vehicle aimed for 2.5 m, and the loop waited for
+    # alt_m * 0.5 = 12.5 m that could never arrive -- 120 s of timeout
+    # reported as "climbed 0.43 m".
+    I32 = mavutil.mavlink.MAV_PARAM_TYPE_INT32
+    F32 = mavutil.mavlink.MAV_PARAM_TYPE_REAL32
+    for name, val, ptype in (
+            ("COM_RCL_EXCEPT", 7, I32), ("NAV_RCL_ACT", 0, I32),
+            ("NAV_DLL_ACT", 0, I32), ("COM_ARM_WO_GPS", 1, I32),
+            ("COM_PREARM_MODE", 0, I32), ("COM_ARM_MAG_STR", 0, I32),
+            # COM_ARM_EKF_{HGT,VEL,POS,YAW} and SYS_MC_EST_GROUP are GONE.
+            # The PX4 console rejected all five: "ERROR [mavlink] unknown
+            # param". They were phantom writes -- the same class as the SR1_*
+            # failure -- and the earlier work correcting their wire TYPE was
+            # correcting the type of parameters that do not exist.
+            ("COM_DISARM_LAND", -1.0, F32), ("COM_DISARM_PRFLT", -1.0, F32),
+            ("CBRK_SUPPLY_CHK", 894281, I32), ("CBRK_USB_CHK", 197848, I32),
+            ("MIS_TAKEOFF_ALT", float(alt_m), F32)):
+        conn.mav.param_set_send(conn.target_system, conn.target_component,
+                                name.encode(), float(val), ptype)
+    # VERIFY the write the takeoff depends on, rather than sleeping and
+    # hoping. run_campaign.py:46 already does readback for SIM_ parameters;
+    # this path did not, which is the same defect that let eight phantom
+    # SR1_* writes look successful for four runs.
+    time.sleep(1.0)
+    conn.mav.param_request_read_send(conn.target_system,
+                                     conn.target_component,
+                                     b"MIS_TAKEOFF_ALT", -1)
+    got = param_readback(conn, ["MIS_TAKEOFF_ALT"])["MIS_TAKEOFF_ALT"]
+    evidence["takeoff_alt_param"] = (None if got is None
+                                     else round(float(got), 2))
+    # THE READBACK MUST BE COMPARED, not merely recorded. This block existed
+    # to "verify the write the takeoff depends on" and then stored whatever
+    # came back without ever checking it against alt_m, so a parameter that
+    # read back as a completely different altitude passed in silence.
+    if got is not None and abs(float(got) - float(alt_m)) > 0.05:
+        evidence.setdefault("warnings", []).append(
+            f"MIS_TAKEOFF_ALT commanded {alt_m}, read back {got}")
+        evidence["takeoff_alt_confirmed"] = False
+    elif got is not None:
+        evidence["takeoff_alt_confirmed"] = True
+    if evidence.get("takeoff_alt_param") is None:
+        # Not fatal -- the probe still reports what happened -- but a takeoff
+        # target that did not stick is the single most likely reason a climb
+        # fails, and silence about it is what cost the last four runs.
+        log_note = "MIS_TAKEOFF_ALT did not read back; climb target unknown"
+        evidence.setdefault("warnings", []).append(log_note)
+    t0, last, phase, fix_t, base_alt = time.time(), 0.0, "wait_fix", None, None
+    while time.time() - t0 < timeout:
+        m = conn.recv_match(blocking=True, timeout=2.0)
+        if m is None:
+            continue
+        k, now = m.get_type(), time.time()
+
+        def due(gap=2.0):
+            nonlocal last
+            if now - last >= gap:
+                last = now
+                return True
+            return False
+
+        if k == "STATUSTEXT":
+            # The vehicle's own explanation. Three rounds of hypotheses were
+            # spent on this climb without once reading the channel PX4 uses to
+            # say what is wrong. Capturing it costs nothing and outranks any
+            # guess.
+            txt = getattr(m, "text", "")
+            txt = txt.decode() if isinstance(txt, bytes) else str(txt)
+            txt = txt.strip("\x00").strip()
+            if txt:
+                seen = evidence.setdefault("statustext", [])
+                if txt not in seen:
+                    seen.append(txt)
+        elif k in ("EVENT", "CURRENT_EVENT_SEQUENCE"):
+            # PX4 has MOVED ITS DIAGNOSTICS OFF STATUSTEXT.
+            #
+            # "Preflight Fail: no heading reference" appears in the console
+            # log and never on STATUSTEXT, and the reason is visible in the
+            # stream: PX4 publishes CURRENT_EVENT_SEQUENCE (id 411) and the
+            # EVENT protocol (id 410) instead. Both were arriving all along
+            # as UNKNOWN_411/UNKNOWN_410, because the bundled dialect could
+            # not decode them.
+            #
+            # This matters for the null control, not for the messages. An
+            # empty STATUSTEXT list means "PX4 does not use this channel", and
+            # that is a completely different statement from "PX4 had nothing
+            # to say" -- which is what an unqualified silence would imply.
+            evidence["events_seq"] = getattr(m, "sequence", None)
+            evidence["events_frames"] = evidence.get("events_frames", 0) + 1
+            if k == "EVENT":
+                ids = evidence.setdefault("event_ids", [])
+                eid = getattr(m, "id", None)
+                if eid is not None and eid not in ids:
+                    ids.append(eid)
+        elif k == "COMMAND_ACK":
+            # Evidence, not assumption. A takeoff can be TEMPORARILY_REJECTED
+            # (Commander.cpp:1211) and the old code could not tell that apart
+            # from a takeoff that was accepted and simply climbed slowly.
+            if getattr(m, "command", None) == \
+                    mavutil.mavlink.MAV_CMD_NAV_TAKEOFF:
+                evidence["takeoff_ack"] = int(getattr(m, "result", -1))
+            elif getattr(m, "command", None) == \
+                    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM:
+                evidence["arm_ack"] = int(getattr(m, "result", -1))
+        elif k == "GPS_RAW_INT":
+            evidence["fix_type"] = m.fix_type
+            if phase == "wait_fix" and m.fix_type >= 3:
+                fix_t, phase = now, "settle"
+        elif k == "GLOBAL_POSITION_INT":
+            alt = m.relative_alt / 1000.0
+            evidence["alt_samples"].append(alt)
+            base_alt = alt if base_alt is None else base_alt
+            evidence["climbed_m"] = max(evidence["climbed_m"], alt - base_alt)
+        elif k == "HEARTBEAT":
+            armed = bool(m.base_mode & 128)
+            evidence["armed"] = evidence["armed"] or armed
+            if phase == "settle" and fix_t and now - fix_t >= 8.0:
+                phase = "arm"
+            elif phase == "arm":
+                if armed:
+                    # param7 MUST be NaN, not the desired height.
+                    #
+                    # MAVLink defines NAV_TAKEOFF param7 as an AMSL altitude.
+                    # navigator/takeoff.cpp:194 takes it verbatim when finite:
+                    #
+                    #   if (rep->current.valid && PX4_ISFINITE(rep->current.alt))
+                    #       takeoff_altitude_amsl = rep->current.alt;
+                    #   else
+                    #       takeoff_altitude_amsl = current_alt + MIS_TAKEOFF_ALT;
+                    #
+                    # and then at :207 clamps anything below the vehicle:
+                    #   "Already higher than takeoff altitude".
+                    #
+                    # Sending 25.0 meant "climb to 25 m above SEA LEVEL". SIH
+                    # sits at 489.4 m AMSL (SIH_LOC_H0), so the target was
+                    # 464 m underground, got clamped to the current altitude,
+                    # and the vehicle correctly did nothing. NaN makes the
+                    # navigator use MIS_TAKEOFF_ALT relative to where it is.
+                    #
+                    # Note the rig's HOME="...,584,..." is an ArduPilot --home
+                    # flag and has never applied to PX4; SIH_LOC_H0 is the
+                    # PX4 equivalent.
+                    conn.mav.command_long_send(
+                        conn.target_system, conn.target_component,
+                        mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
+                        0, 0, 0, 0, float("nan"), 0, 0, float("nan"))
+                    phase = "climb"
+                elif due(1.5):
+                    # AUTO.TAKEOFF (main 4, sub 2) first: PX4 will not arm
+                    # into a mode it cannot hold, and force-arm (param2=21196)
+                    # bypasses the checks a simulator does not need.
+                    conn.mav.command_long_send(
+                        conn.target_system, conn.target_component,
+                        mavutil.mavlink.MAV_CMD_DO_SET_MODE, 0,
+                        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
+                        4, 2, 0, 0, 0, 0)
+                    conn.mav.command_long_send(
+                        conn.target_system, conn.target_component,
+                        mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
+                        0, 1, 21196, 0, 0, 0, 0, 0)
+            elif phase == "climb" and evidence["climbed_m"] >= CLIMB_OK_M:
+                phase = "flying"
+                break
+        evidence["phase"] = phase
+    # NULL CONTROL on the diagnostic channel, and it needs THREE outcomes
+    # rather than two.
+    #
+    # The two-outcome version said "the diagnostic channel is dead" whenever
+    # STATUSTEXT was empty. That was the right instinct and the wrong
+    # conclusion: PX4's diagnostics were arriving the whole time over the
+    # events interface, which the decoder could not read. Silence on one
+    # protocol is not silence from the vehicle.
+    #
+    #   text seen                  -> the channel works, use what it said
+    #   no text, events flowing    -> PX4 uses the events protocol; STATUSTEXT
+    #                                 silence carries NO information, and the
+    #                                 console log is the channel to read
+    #   nothing at all             -> genuinely deaf, and no absence of a
+    #                                 diagnostic may be treated as a finding
+    if not evidence.get("statustext"):
+        if evidence.get("events_frames"):
+            evidence.setdefault("warnings", []).append(
+                f"no STATUSTEXT, but {evidence['events_frames']} EVENT/"
+                f"CURRENT_EVENT_SEQUENCE frames arrived: PX4 publishes "
+                f"diagnostics over the events interface, so STATUSTEXT "
+                f"silence carries no information. Read px4_console.log.")
+        else:
+            evidence.setdefault("warnings", []).append(
+                "no STATUSTEXT and no EVENT frames: the diagnostic channel is "
+                "dead, so its silence carries no information")
+    return evidence
+
+
+def param_readback(conn, names, timeout=6.0, settle=0.5):
+    """Read several parameters back at once. {name: value or None}.
+
+    TAKES THE LAST MATCHING VALUE, NOT THE FIRST. Autopilots broadcast
+    PARAM_VALUE acks on a lag and interleaved with unrelated parameters, so
+    the first frame bearing a name is often a stale ack from an earlier write.
+    Measured on live ArduPilot SITL: three PARAM_SET frames all applied
+    correctly while a first-match readback reported the OLD value for two of
+    them.
+
+    Batched because `fly()` verifies several parameters and one request/settle
+    cycle each would add seconds to every flight in every campaign.
+    """
+    from pymavlink import mavutil as _mv
+    del _mv
+    deadline = time.time() + 0.5
+    while time.time() < deadline:                     # drain stale acks
+        if conn.recv_match(type="PARAM_VALUE", blocking=False) is None:
+            break
+    for n in names:
+        conn.mav.param_request_read_send(conn.target_system,
+                                         conn.target_component,
+                                         n.encode(), -1)
+    seen, last_t = {}, time.time()
+    end = time.time() + timeout
+    while time.time() < end:
+        m = conn.recv_match(type="PARAM_VALUE", blocking=True, timeout=0.2)
+        if m is None:
+            if seen and time.time() - last_t >= settle:
+                break
+            continue
+        pid = m.param_id.decode() if isinstance(m.param_id, bytes) \
+            else str(m.param_id)
+        pid = pid.strip("\x00")
+        if pid in names:
+            seen[pid] = float(m.param_value)
+            last_t = time.time()
+    return {n: seen.get(n) for n in names}
+
+
+def check_params(conn, expected, evidence, label):
+    """Read back `{name: expected}` and record any that did not stick.
+
+    A parameter write nobody confirmed is an assumption. These particular
+    writes are load-bearing: the failsafe disables are what stop an RC or GCS
+    failsafe from changing flight mode mid-trial, and a mode change mid-trial
+    corrupts the trial silently.
+    """
+    got = param_readback(conn, list(expected))
+    stuck, bad = {}, []
+    for name, want in expected.items():
+        val = got.get(name)
+        ok = val is not None and abs(val - float(want)) <= max(
+            1e-4, 1e-4 * abs(float(want)))
+        stuck[name] = {"commanded": float(want), "readback": val,
+                       "confirmed": bool(ok)}
+        if not ok:
+            bad.append(f"{name} commanded {want}, read back {val}")
+    evidence[f"{label}_params"] = stuck
+    if bad:
+        evidence.setdefault("warnings", []).extend(bad)
+    return not bad
+
+
+def fly(conn, platform, alt_m=25.0, timeout=120):
+    """Arm and climb, so the airframe is actually in motion while we measure.
+
+    THE PROBE IS INVALID WITHOUT THIS, and the first version of this tool did
+    not do it. Measured on a stationary disarmed ArduCopter, nine channels
+    read perfectly constant -- battery voltage (no load), GNSS position (not
+    moving), barometric altitude (on the ground), armed flag (false) -- and
+    the tool reported them as stubs. They are not stubs; nothing was
+    happening.
+
+    That is RULE A turned on the instrument itself: an informativeness probe
+    needs a positive control. Motion IS the positive control, and
+    `motion_observed` below is the evidence that it fired. If the vehicle
+    never moved, the run is INVALID_PROBE and no channel verdict is issued.
+
+    Commanding the vehicle is legitimate HERE because this is a simulation
+    tool under tools/. Nothing in csia/deploy/ may do this, and a test
+    enforces that separation.
+    """
+    from pymavlink import mavutil
+    evidence = {"armed": False, "climbed_m": 0.0, "alt_samples": [],
+                "phase": "start", "fix_type": 0}
+    if platform == "px4":
+        return _fly_px4(conn, evidence, alt_m, timeout)
+
+    ap_params = {"FS_THR_ENABLE": 0, "FS_GCS_ENABLE": 0, "FS_OPTIONS": 0,
+                 "BATT_FS_LOW_ACT": 0, "SIM_SPEEDUP": 10}
+    for name, val in ap_params.items():
+        conn.mav.param_set_send(conn.target_system, conn.target_component,
+                                name.encode(), float(val),
+                                mavutil.mavlink.MAV_PARAM_TYPE_INT32)
+    # VERIFY THEM. These were written and never read back. The four failsafe
+    # disables are what stop an RC or GCS failsafe from changing flight mode
+    # part way through a trial, and a mode change mid-trial corrupts the trial
+    # without announcing itself. Anything that flies in a non-position mode --
+    # the Mechanism B campaign flies ALT_HOLD precisely so the airframe cannot
+    # chase a GNSS glitch -- depends on these having stuck.
+    check_params(conn, ap_params, evidence, "failsafe")
+
+    # Sequence copied from the Phase-II rig, which is the version known to
+    # work against 4.8: wait for a real 3D fix, let the EKF settle, GUIDED,
+    # arm, take off. Arming checks are left ENABLED -- disabling them was the
+    # first thing tried and it produced an aircraft that reported armed and
+    # never left the ground, which is a worse failure than not arming.
+    t0, last, phase, fix_t = time.time(), 0.0, "wait_fix", None
+    base_alt = None
+    while time.time() - t0 < timeout:
+        m = conn.recv_match(blocking=True, timeout=2.0)
+        if m is None:
+            continue
+        k = m.get_type()
+        now = time.time()
+
+        def due(gap=2.0):
+            nonlocal last
+            if now - last >= gap:
+                last = now
+                return True
+            return False
+
+        if k == "GPS_RAW_INT":
+            evidence["fix_type"] = m.fix_type
+            if phase == "wait_fix" and m.fix_type >= 3:
+                fix_t, phase = now, "settle"
+        elif k == "GLOBAL_POSITION_INT":
+            alt = m.relative_alt / 1000.0
+            evidence["alt_samples"].append(alt)
+            base_alt = alt if base_alt is None else base_alt
+            evidence["climbed_m"] = max(evidence["climbed_m"], alt - base_alt)
+        elif k == "HEARTBEAT":
+            armed = bool(m.base_mode & 128)
+            evidence["armed"] = evidence["armed"] or armed
+            if phase == "settle" and fix_t and now - fix_t >= 6.0:
+                phase = "guided"
+            elif phase == "guided":
+                if m.custom_mode == 4:
+                    phase = "arm"
+                elif due():
+                    conn.mav.set_mode_send(
+                        conn.target_system,
+                        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, 4)
+            elif phase == "arm":
+                if armed:
+                    conn.mav.command_long_send(
+                        conn.target_system, conn.target_component,
+                        mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
+                        0, 0, 0, 0, 0, 0, 0, alt_m)
+                    phase = "climb"
+                elif due(1.0):
+                    conn.arducopter_arm()
+            elif phase == "climb" and evidence["climbed_m"] >= alt_m * 0.5:
+                phase = "flying"
+                break
+        evidence["phase"] = phase
+    return evidence
+
+
+LAUNCHERS = {"ardupilot": launch_ardupilot, "px4": launch_px4}

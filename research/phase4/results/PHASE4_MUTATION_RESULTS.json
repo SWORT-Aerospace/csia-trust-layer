@@ -1,0 +1,256 @@
+{
+ "baseline_unmutated": {
+  "returncode": 0,
+  "seconds": 96.4
+ },
+ "canary": {
+  "first_failure": "tests/test_phase4_detectors.py::test_a_detector_that_cannot_meet_a_target_is_reported_not_dropped",
+  "verdict": "KILLED"
+ },
+ "deselected": [
+  "tests/test_phase4_pipeline.py::test_the_manifest_matches_every_file_it_lists",
+  "tests/test_phase4_pipeline.py::test_the_mutation_counts_match_the_write_up"
+ ],
+ "elapsed_s": 811.2,
+ "evaluated": 17,
+ "invalid": 0,
+ "killed": 17,
+ "kills_attributed_to_a_bare_file": 0,
+ "kills_attributed_to_a_test_node": 17,
+ "phase": "4 -- detector performance",
+ "results": [
+  {
+   "breaks": "Moves the primary comparison off the zero-false-alarm point the preregistration names, to a level the preregistration says carries no verdict. Choosing the operating point after seeing the data is the cherry-pick the whole design exists to prevent.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase4_pipeline.py::test_build_reproduces_the_sealed_result_from_the_committed_runs",
+   "first_failure_is_test_node": true,
+   "id": "4-01",
+   "new": "PRIMARY_TARGET = 0.10",
+   "old": "PRIMARY_TARGET = 0.00",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 50.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Admits thresholds whose development false-alarm rate EXCEEDS the target, so a detector could be compared at an operating point it does not meet while another is held to the target exactly.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase4_pipeline.py::test_build_reproduces_the_sealed_result_from_the_committed_runs",
+   "first_failure_is_test_node": true,
+   "id": "4-02",
+   "new": "                if far is not None and far <= target + 0.05:",
+   "old": "                if far is not None and far <= target + 1e-12:",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 49.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Tunes thresholds on the locked partition. The preregistration says thresholds are selected on development only and applied unchanged.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase4_pipeline.py::test_build_reproduces_the_sealed_result_from_the_committed_runs",
+   "first_failure_is_test_node": true,
+   "id": "4-03",
+   "new": "    chosen = match_operating_points(locked)",
+   "old": "    chosen = match_operating_points(dev)",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 50.9,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Sorts the declared grid. Phase 3.1 measured crossing time to be non-monotone in fault rate and the preregistration says so explicitly, so ordering a grid is not a cosmetic change.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase4_detectors.py::test_the_grid_is_read_in_declaration_order",
+   "first_failure_is_test_node": true,
+   "id": "4-04",
+   "new": "    return [repr(v) for v in sorted(document[\"grids\"][detector])]",
+   "old": "    return [repr(v) for v in document[\"grids\"][detector]]",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Prunes the onset grid to one point, so 'delay by onset' would be reported from a single onset and the exhaustiveness the campaign claims would be false.",
+   "family": "PREREG",
+   "first_failure": "tests/test_phase4_pipeline.py::test_the_campaign_runs_every_onset_for_every_gain_on_a_real_seed",
+   "first_failure_is_test_node": true,
+   "id": "4-05",
+   "new": "            for onset in ONSET_GRID[:1]:",
+   "old": "            for onset in ONSET_GRID:                    # exhaustive",
+   "path": "research/phase4/campaign4.py",
+   "seconds": 101.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Restores the FL-035 false-alarm defect: a latched detector that crossed during the settling window and stayed above threshold for the rest of the flight would be scored as having no false alarm.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_phase4_detectors.py::test_a_latched_alarm_from_the_settling_window_is_a_false_alarm",
+   "first_failure_is_test_node": true,
+   "id": "4-06",
+   "new": "               if r[\"alarms\"][detector][threshold][\"first\"] is not None)",
+   "old": "               if r[\"alarms\"][detector][threshold][\"after_settle\"] is not None)",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Restores the FL-035 detection defect: an alarm raised BEFORE the fault onset is scored as a detection with negative delay.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_phase4_detectors.py::test_a_pre_onset_alarm_is_not_a_detection_with_negative_delay",
+   "first_failure_is_test_node": true,
+   "id": "4-07",
+   "new": "        if a[\"first\"] is None:\n            misses += 1\n        else:\n            delays.append(round(a[\"first\"] - r[\"onset_s\"], 6))",
+   "old": "        if a[\"after_onset\"] is None:\n            misses += 1\n        else:\n            delays.append(round(a[\"after_onset\"] - r[\"onset_s\"], 6))",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Reports every detector as never missing, which is the one number that makes a short delay meaningless.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_phase4_detectors.py::test_a_miss_is_reported_and_never_imputed_as_the_horizon",
+   "first_failure_is_test_node": true,
+   "id": "4-08",
+   "new": "        \"miss_rate\": 0.0,",
+   "old": "        \"miss_rate\": round(misses / n, 6) if n else None,",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Hides the count of alarms raised on faulted runs before the fault existed, which is how a reader detects a detector that is simply noisy.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_phase4_detectors.py::test_a_pre_onset_alarm_is_not_a_detection_with_negative_delay",
+   "first_failure_is_test_node": true,
+   "id": "4-09",
+   "new": "        \"pre_onset_alarms_on_faulted_runs\": 0,",
+   "old": "        \"pre_onset_alarms_on_faulted_runs\": pre_onset,",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Pins every lower confidence bound at zero.",
+   "family": "STATS",
+   "first_failure": "tests/test_phase4_detectors.py::test_clopper_pearson_matches_the_exact_interval",
+   "first_failure_is_test_node": true,
+   "id": "4-10",
+   "new": "    low = 0.0",
+   "old": "    low = 0.0 if k == 0 else bisect(lambda p: at_least(p, k), alpha / 2.0)",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Changes the declared quantile definition, so a p90 reported here would not be the p90 a reader reconstructs from the delays.",
+   "family": "STATS",
+   "first_failure": "tests/test_phase4_detectors.py::test_the_quantile_is_the_declared_interpolation[values1-0.5-2.0]",
+   "first_failure_is_test_node": true,
+   "id": "4-11",
+   "new": "    pos = q * len(xs)",
+   "old": "    pos = q * (len(xs) - 1)",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Computes a bootstrap interval from as few as one detection, where the resample is a constant and the interval is a point.",
+   "family": "STATS",
+   "first_failure": "tests/test_phase4_detectors.py::test_no_interval_is_computed_from_too_few_detections",
+   "first_failure_is_test_node": true,
+   "id": "4-12",
+   "new": "    if False:\n        return None",
+   "old": "    if len(values) < MIN_DETECTIONS_FOR_CI:\n        return None",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 0.8,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Unpins the bootstrap seed, so the reported intervals are not reproducible from the committed runs.",
+   "family": "STATS",
+   "first_failure": "tests/test_phase4_pipeline.py::test_build_reproduces_the_sealed_result_from_the_committed_runs",
+   "first_failure_is_test_node": true,
+   "id": "4-13",
+   "new": "    rng = random.Random()",
+   "old": "    rng = random.Random(BOOTSTRAP_SEED)",
+   "path": "research/phase4/evaluate4.py",
+   "seconds": 49.5,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Removes the persistence requirement, which IS the CSIA detector under test. A one-tick alarm is a bare threshold on trust, not trust persistence.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase4_pipeline.py::test_the_settling_window_and_dwell_come_from_the_frozen_failsafe",
+   "first_failure_is_test_node": true,
+   "id": "4-14",
+   "new": "DWELL_TICKS = 1",
+   "old": "DWELL_TICKS = 25                                  # 1.0 s at 25 Hz",
+   "path": "research/phase4/campaign4.py",
+   "seconds": 98.0,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Counts persistence through ticks where the evidence is gated off, so the CSIA detector would alarm on absent evidence rather than on evidence of a fault.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase4_pipeline.py::test_gated_ticks_are_not_evidence_for_the_csia_detector",
+   "first_failure_is_test_node": true,
+   "id": "4-15",
+   "new": "            if False:\n                continue",
+   "old": "            if gate[k] <= GATE_EPS:\n                continue",
+   "path": "research/phase4/campaign4.py",
+   "seconds": 105.6,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Feeds the CUSUM gated-off ticks as if they were live evidence, which changes the baseline detector's statistic and so the comparison.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase4_pipeline.py::test_gated_ticks_are_not_evidence_for_the_cusum_baseline",
+   "first_failure_is_test_node": true,
+   "id": "4-16",
+   "new": "        bank.update(NODE, float(lam[k]), True)",
+   "old": "        bank.update(NODE, float(lam[k]), bool(gate[k] > GATE_EPS))",
+   "path": "research/phase4/campaign4.py",
+   "seconds": 99.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Removes the settling window, so convergence transients at the start of every flight are counted as false alarms for every detector.",
+   "family": "CAMPAIGN",
+   "first_failure": "tests/test_phase4_pipeline.py::test_the_settling_window_and_dwell_come_from_the_frozen_failsafe",
+   "first_failure_is_test_node": true,
+   "id": "4-17",
+   "new": "SETTLE_S = 0.0",
+   "old": "SETTLE_S = float(FailsafeConfig().arm_time)      # 10.0",
+   "path": "research/phase4/campaign4.py",
+   "seconds": 101.6,
+   "verdict": "KILLED"
+  }
+ ],
+ "schema": "csia.phase4.mutation/1",
+ "score": 1.0,
+ "selection": [
+  "tests/test_phase4_detectors.py",
+  "tests/test_phase4_pipeline.py",
+  "--deselect=tests/test_phase4_pipeline.py::test_the_manifest_matches_every_file_it_lists",
+  "--deselect=tests/test_phase4_pipeline.py::test_the_mutation_counts_match_the_write_up"
+ ],
+ "separate_from": "E2M_MUTATION_RESULTS.json (38/36/2), PHASE31_MUTATION_RESULTS.json (11/8) and PHASE32_MUTATION_RESULTS.json (12/12), none of which this runner touches, so none of the five earlier survivors can be killed as a side effect",
+ "survived": 0,
+ "targets": [
+  "research/phase4/campaign4.py",
+  "research/phase4/evaluate4.py"
+ ],
+ "what_this_is_not": "not evidence about hardware, not a consequence measurement, and not a re-measurement of any earlier phase.",
+ "why_deselected": "a sha256 manifest guard fails for every mutant because mutating a file changes its hash, and a test that pins this run's own score breaks the unmutated baseline. See FL-033.",
+ "working_tree_files_synced_into_sandbox": [
+  "research/consequence/phase32/SHA256_MANIFEST32.json",
+  "research/phase4/build_manifest4.py",
+  "research/phase4/campaign4.py",
+  "research/phase4/evaluate4.py",
+  "research/phase4/replay_check4.py",
+  "research/phase4/results/PHASE4_RESULTS_LOCKED.json",
+  "research/phase4/results/PHASE4_RUNS_DEVELOPMENT.json",
+  "research/phase4/results/PHASE4_RUNS_LOCKED.json",
+  "tests/test_phase4_detectors.py",
+  "tests/test_phase4_pipeline.py",
+  "tools/mutation/run_phase4_mutations.py"
+ ]
+}

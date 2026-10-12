@@ -158,9 +158,9 @@ def test_blind_eligibility_contradicting_development_use_is_flagged():
     assert check_tuning_not_heldout(ms)
 
 
-def test_partition_assignment_is_deterministic():
-    a = save_manifests([mk("x")], "/tmp/claude-0/m1.json", "d")
-    b = save_manifests([mk("x")], "/tmp/claude-0/m2.json", "d")
+def test_partition_assignment_is_deterministic(tmp_path):
+    a = save_manifests([mk("x")], str(tmp_path / "m1.json"), "d")
+    b = save_manifests([mk("x")], str(tmp_path / "m2.json"), "d")
     assert a["dataset_aggregate_hash"] == b["dataset_aggregate_hash"]
 
 

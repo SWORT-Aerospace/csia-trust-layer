@@ -1,0 +1,512 @@
+{
+  "determinism": {
+    "identical": true,
+    "output_hashes": [
+      "0535d1efbb1a94e94e43418e5883db43e69e86ce77aa1d2378369d6bb2e5c3c8",
+      "0535d1efbb1a94e94e43418e5883db43e69e86ce77aa1d2378369d6bb2e5c3c8",
+      "0535d1efbb1a94e94e43418e5883db43e69e86ce77aa1d2378369d6bb2e5c3c8"
+    ],
+    "runs": 3,
+    "scope": "SAME PROCESS, REPEATED. This detects iteration-order dependence. It says nothing about cross-host or cross-version stability, which is a portability question and is not being answered here."
+  },
+  "independent_check": {
+    "agrees": true,
+    "capabilities_checked": 13,
+    "method": "transitive closure by repeated expansion, NOT the compiler's topological walk",
+    "problems": [],
+    "products_checked": 5,
+    "schema": "csia.mission.forge_seed_check/1",
+    "transitive_closure_rounds": 2,
+    "what_agreement_does_not_prove": "that the contracts are right. Two routes to the same closure bound implementation error in the compiler, not error in what the contracts say."
+  },
+  "tables": {
+    "capability_dependencies": {
+      "RGB_capture": {
+        "AND": [
+          "camera.rgb.available"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "timing"
+        ],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "absolute_navigation": {
+        "AND": [
+          "gnss.position.supported"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "attitude_hold",
+          "timing"
+        ],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "airspeed_regulation": {
+        "AND": [
+          "airspeed.supported"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "attitude_hold"
+        ],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "altitude_hold": {
+        "AND": [
+          "baro.altitude.supported"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "attitude_hold"
+        ],
+        "compute": [],
+        "does_not_require": [
+          "gnss.position.supported"
+        ],
+        "timing": []
+      },
+      "attitude_hold": {
+        "AND": [
+          "attitude.supported"
+        ],
+        "OR": [
+          [
+            "imu.primary.supported",
+            "imu.reference.supported"
+          ]
+        ],
+        "actuators": [],
+        "capabilities": [
+          "timing"
+        ],
+        "compute": [],
+        "does_not_require": [
+          "gnss.position.supported"
+        ],
+        "timing": []
+      },
+      "controlled_glide": {
+        "AND": [],
+        "OR": [],
+        "actuators": [
+          "elevon_left",
+          "elevon_right"
+        ],
+        "capabilities": [
+          "attitude_hold"
+        ],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "global_mapping": {
+        "AND": [],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "RGB_capture",
+          "absolute_navigation"
+        ],
+        "compute": [
+          "mapping"
+        ],
+        "does_not_require": [],
+        "timing": []
+      },
+      "local_mapping": {
+        "AND": [],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "RGB_capture",
+          "relative_navigation"
+        ],
+        "compute": [
+          "mapping"
+        ],
+        "does_not_require": [
+          "gnss.position.supported"
+        ],
+        "timing": []
+      },
+      "relative_navigation": {
+        "AND": [],
+        "OR": [
+          [
+            "imu.reference.supported",
+            "visual_odometry.supported"
+          ]
+        ],
+        "actuators": [],
+        "capabilities": [
+          "attitude_hold",
+          "timing"
+        ],
+        "compute": [],
+        "does_not_require": [
+          "gnss.position.supported"
+        ],
+        "timing": []
+      },
+      "stable_flight": {
+        "AND": [],
+        "OR": [],
+        "actuators": [
+          "elevon_left",
+          "elevon_right"
+        ],
+        "capabilities": [
+          "altitude_hold",
+          "attitude_hold"
+        ],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "telemetry_downlink": {
+        "AND": [
+          "comms.telemetry_link.supported"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      },
+      "thermal_capture": {
+        "AND": [
+          "camera.thermal.available"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [
+          "timing"
+        ],
+        "compute": [],
+        "does_not_require": [
+          "camera.rgb.available"
+        ],
+        "timing": []
+      },
+      "timing": {
+        "AND": [
+          "timebase.supported"
+        ],
+        "OR": [],
+        "actuators": [],
+        "capabilities": [],
+        "compute": [],
+        "does_not_require": [],
+        "timing": []
+      }
+    },
+    "capability_order": [
+      "telemetry_downlink",
+      "timing",
+      "RGB_capture",
+      "attitude_hold",
+      "absolute_navigation",
+      "airspeed_regulation",
+      "altitude_hold",
+      "controlled_glide",
+      "global_mapping",
+      "relative_navigation",
+      "local_mapping",
+      "stable_flight",
+      "thermal_capture"
+    ],
+    "evidence_consumers": {
+      "airspeed.supported": [
+        "capability:airspeed_regulation"
+      ],
+      "attitude.supported": [
+        "capability:attitude_hold"
+      ],
+      "baro.altitude.supported": [
+        "capability:altitude_hold"
+      ],
+      "camera.rgb.available": [
+        "capability:RGB_capture"
+      ],
+      "camera.rgb.calibration_valid": [
+        "product:bridge_rgb_inspection.imagery_quality",
+        "product:global_rgb_orthomosaic"
+      ],
+      "camera.thermal.available": [
+        "capability:thermal_capture",
+        "product:bridge_thermal_inspection.imagery_quality"
+      ],
+      "camera.thermal.calibration_valid": [
+        "product:bridge_thermal_inspection.radiometric_calibration"
+      ],
+      "camera_navigation_timing.supported": [
+        "product:bridge_thermal_inspection.thermal_alignment",
+        "product:global_rgb_orthomosaic"
+      ],
+      "comms.telemetry_link.supported": [
+        "capability:telemetry_downlink"
+      ],
+      "gnss.position.supported": [
+        "capability:absolute_navigation"
+      ],
+      "gnss.velocity.supported": [
+        "product:global_rgb_orthomosaic.survey_grade"
+      ],
+      "imu.primary.supported": [
+        "capability:attitude_hold"
+      ],
+      "imu.reference.supported": [
+        "capability:attitude_hold",
+        "capability:relative_navigation"
+      ],
+      "timebase.supported": [
+        "capability:timing"
+      ],
+      "visual_odometry.supported": [
+        "capability:relative_navigation"
+      ]
+    },
+    "forms_used": [
+      "AND",
+      "DEGRADING",
+      "OR"
+    ],
+    "output_hash": "0535d1efbb1a94e94e43418e5883db43e69e86ce77aa1d2378369d6bb2e5c3c8",
+    "product_dependencies": {
+      "bridge_rgb_inspection": {
+        "AND": [],
+        "OR": [],
+        "capabilities": [
+          "RGB_capture"
+        ],
+        "product_type": "rgb_visual_inspection",
+        "qualities": {
+          "absolute_geolocation": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "absolute_navigation"
+            ],
+            "permits": [
+              "georeferenced_defect_logging"
+            ],
+            "prohibits_without": [
+              "survey_grade_absolute_measurement"
+            ]
+          },
+          "imagery_quality": {
+            "AND": [
+              "camera.rgb.calibration_valid"
+            ],
+            "OR": [],
+            "capabilities": [
+              "RGB_capture"
+            ],
+            "permits": [
+              "visual_damage_assessment"
+            ],
+            "prohibits_without": [
+              "any_use_of_this_imagery"
+            ]
+          },
+          "relative_geometry": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "relative_navigation"
+            ],
+            "permits": [
+              "relative_crack_width_estimate"
+            ],
+            "prohibits_without": [
+              "relative_dimensional_measurement"
+            ]
+          }
+        }
+      },
+      "bridge_thermal_inspection": {
+        "AND": [],
+        "OR": [],
+        "capabilities": [
+          "thermal_capture"
+        ],
+        "product_type": "thermal_inspection",
+        "qualities": {
+          "imagery_quality": {
+            "AND": [
+              "camera.thermal.available"
+            ],
+            "OR": [],
+            "capabilities": [],
+            "permits": [
+              "thermal_anomaly_screening"
+            ],
+            "prohibits_without": [
+              "any_use_of_this_imagery"
+            ]
+          },
+          "radiometric_calibration": {
+            "AND": [
+              "camera.thermal.calibration_valid"
+            ],
+            "OR": [],
+            "capabilities": [],
+            "permits": [
+              "absolute_temperature_estimate"
+            ],
+            "prohibits_without": [
+              "absolute_temperature_estimate"
+            ]
+          },
+          "thermal_alignment": {
+            "AND": [
+              "camera_navigation_timing.supported"
+            ],
+            "OR": [],
+            "capabilities": [
+              "relative_navigation"
+            ],
+            "permits": [
+              "thermal_to_structure_registration"
+            ],
+            "prohibits_without": [
+              "thermal_to_structure_registration"
+            ]
+          }
+        }
+      },
+      "global_rgb_orthomosaic": {
+        "AND": [
+          "camera.rgb.calibration_valid",
+          "camera_navigation_timing.supported"
+        ],
+        "OR": [],
+        "capabilities": [
+          "global_mapping"
+        ],
+        "product_type": "absolute_georeferenced_map",
+        "qualities": {
+          "absolute_geolocation": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "absolute_navigation"
+            ],
+            "permits": [
+              "georeferenced_asset_mapping"
+            ],
+            "prohibits_without": [
+              "georeferenced_asset_mapping"
+            ]
+          },
+          "survey_grade": {
+            "AND": [
+              "gnss.velocity.supported"
+            ],
+            "OR": [],
+            "capabilities": [
+              "absolute_navigation"
+            ],
+            "permits": [
+              "survey_grade_absolute_measurement"
+            ],
+            "prohibits_without": [
+              "survey_grade_absolute_measurement"
+            ]
+          }
+        }
+      },
+      "raw_evidence_package": {
+        "AND": [],
+        "OR": [],
+        "capabilities": [],
+        "product_type": "raw_evidence_archive",
+        "qualities": {
+          "temporal_consistency": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "timing"
+            ],
+            "permits": [
+              "post_flight_analysis"
+            ],
+            "prohibits_without": [
+              "cross_sensor_correlation"
+            ]
+          }
+        }
+      },
+      "relative_reconstruction": {
+        "AND": [],
+        "OR": [],
+        "capabilities": [
+          "local_mapping"
+        ],
+        "product_type": "relative_3d_reconstruction",
+        "qualities": {
+          "relative_geometry": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "local_mapping"
+            ],
+            "permits": [
+              "relative_structural_comparison"
+            ],
+            "prohibits_without": [
+              "relative_structural_comparison"
+            ]
+          },
+          "temporal_consistency": {
+            "AND": [],
+            "OR": [],
+            "capabilities": [
+              "timing"
+            ],
+            "permits": [
+              "change_detection_between_passes"
+            ],
+            "prohibits_without": [
+              "change_detection_between_passes"
+            ]
+          }
+        }
+      }
+    },
+    "provided_evidence": [
+      "actuator.elevon.command_echo",
+      "airspeed.supported",
+      "attitude.supported",
+      "baro.altitude.supported",
+      "camera.rgb.available",
+      "camera.rgb.calibration_valid",
+      "camera.thermal.available",
+      "camera.thermal.calibration_valid",
+      "camera_navigation_timing.supported",
+      "comms.telemetry_link.supported",
+      "gnss.position.supported",
+      "gnss.velocity.supported",
+      "imu.primary.supported",
+      "imu.reference.supported",
+      "mag.field.supported",
+      "power.telemetry.supported",
+      "timebase.supported",
+      "visual_odometry.supported"
+    ],
+    "schema": "csia.mission.forge_seed/1",
+    "source_hash": "323cf598170ce291934acd3b84ecd3fd5371884c7d2693013815ce2461a501a7"
+  }
+}

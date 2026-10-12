@@ -1,0 +1,149 @@
+{
+ "R13": "FAIL: 9 ticks over budget",
+ "adapter_counters": {
+  "mapped": 80376,
+  "messages": 105855,
+  "rejected_sentinel": 0,
+  "time_reanchors": 0,
+  "unmapped": 67925
+ },
+ "command_authority": {
+  "checked": 21,
+  "mode": "SHADOW",
+  "probes": {
+   "arducopter_arm": "DENIED",
+   "arducopter_disarm": "DENIED",
+   "mav": "DENIED",
+   "mav.command_long_send": "DENIED",
+   "mav.manual_control_send": "DENIED",
+   "mav.param_set_send": "DENIED",
+   "mav.rc_channels_override_send": "DENIED",
+   "mav.set_actuator_control_target_send": "DENIED",
+   "mav.set_mode_send": "DENIED",
+   "motors_armed_wait": "DENIED",
+   "param_set_send": "DENIED",
+   "reboot_autopilot": "DENIED",
+   "send": "DENIED",
+   "send_mavlink": "DENIED",
+   "set_mode": "DENIED",
+   "set_mode_apm": "DENIED",
+   "set_mode_px4": "DENIED",
+   "set_relay": "DENIED",
+   "set_servo": "DENIED",
+   "waypoint_clear_all_send": "DENIED",
+   "write": "DENIED"
+  },
+  "result": "NO_COMMAND_PATH_REACHABLE",
+  "write_half_closed": true,
+  "write_half_state": "CLOSED_ENOTCONN"
+ },
+ "flight_id": "20260824T143558Z-4c6a9c72",
+ "latency": {
+  "budget_us": 2000.0,
+  "max_us": 16332.32,
+  "mean_us": 1327.21,
+  "median_us": 1253.93,
+  "min_us": 111.51,
+  "n": 751,
+  "over_budget": 9,
+  "p95_us": 1714.16,
+  "p99_us": 2118.53,
+  "worst_headroom_x": 0.12
+ },
+ "latency_positive_control": {
+  "messages_ingested": 105855,
+  "rule": "a latency figure from an idle tick measures the loop, not the workload",
+  "satisfied": true,
+  "usable_channels_at_end": 12
+ },
+ "live_transmit_probe": [
+  "command_long_send: denied",
+  "set_mode_send: denied",
+  "rc_channels_override_send: denied"
+ ],
+ "log_dir": "logs/shadow-sitl-ardupilot",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 173.09,
+   "mean_us": 37.1,
+   "median_us": 33.95,
+   "min_us": 17.95,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 50.67,
+   "p99_us": 73.07,
+   "worst_headroom_x": 11.55
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 16186.32,
+   "mean_us": 1162.11,
+   "median_us": 1097.68,
+   "min_us": 0.32,
+   "n": 751,
+   "over_budget": 5,
+   "p95_us": 1507.87,
+   "p99_us": 1775.37,
+   "worst_headroom_x": 0.12
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 802.79,
+   "mean_us": 128.0,
+   "median_us": 118.56,
+   "min_us": 93.18,
+   "n": 751,
+   "over_budget": 0,
+   "p95_us": 171.28,
+   "p99_us": 211.63,
+   "worst_headroom_x": 2.49
+  }
+ },
+ "platform": "ardupilot",
+ "rig_flight": {
+  "armed": true,
+  "climbed_m": 13.24
+ },
+ "seconds": 30.0,
+ "stats": {
+  "max_latency_us": 16332.324999893899,
+  "messages": 105855,
+  "reconnects": 0,
+  "stale_ticks": 1,
+  "ticks": 751,
+  "watchdog_trips": 0
+ },
+ "tee": {
+  "mode": "thread",
+  "out": "127.0.0.1:14561",
+  "profile": "full",
+  "shares_interpreter_with_csia": true,
+  "source": "tcp:127.0.0.1:5760",
+  "types_flowing_before_measurement": 12
+ },
+ "timing_caveat": "phases include GIL contention from the in-process tee thread; NOT a clean core measurement. See W-8 and tools/deploy/profile_core_from_log.py",
+ "unmapped_types": {
+  "AHRS": 1505,
+  "AHRS2": 7527,
+  "ATTITUDE": 7526,
+  "GLOBAL_POSITION_INT": 3010,
+  "LOCAL_POSITION_NED": 3010,
+  "MEMINFO": 3010,
+  "MISSION_CURRENT": 3010,
+  "NAV_CONTROLLER_OUTPUT": 3010,
+  "PARAM_VALUE": 19,
+  "POWER_STATUS": 3010,
+  "SCALED_IMU3": 7526,
+  "SCALED_PRESSURE2": 7526,
+  "SIMSTATE": 7526,
+  "SYSTEM_TIME": 1505,
+  "SYS_STATUS": 3010,
+  "TERRAIN_REPORT": 1505,
+  "TERRAIN_REQUEST": 145,
+  "TIMESYNC": 30,
+  "VFR_HUD": 3010,
+  "WIND": 1505
+ },
+ "wall_s": 30.02
+}

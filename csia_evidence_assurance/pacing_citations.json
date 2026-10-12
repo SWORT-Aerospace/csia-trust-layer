@@ -1,0 +1,26 @@
+{
+ "schema": "csia.pacing_citations/1",
+ "note": "Engineering-audit references for pacing declarations (approval condition 1). Keyed by successor-profile digest; the runtime does not parse the reference, it only checks that every pacing declaration has one that names the same subject, inputs, mode and profile version.",
+ "profiles": {
+  "c834b0356228da273c6d351def4916387815787ad330e6276d908d1042d7d60e": {
+   "profile": "aircraft-successor",
+   "version": "r2",
+   "citations": [
+    {
+     "subject": "state_estimator",
+     "pacing_inputs": ["SENSOR/source.imu0"],
+     "mode": "ALL",
+     "version": "r2",
+     "reference": {
+      "repository": "PX4/PX4-Autopilot",
+      "commit": "547e2ca",
+      "path": "src/modules/ekf2/EKF2.cpp",
+      "lines": "625-767",
+      "statement": "EKF2::Run sets imu_updated from vehicle_imu (multi-EKF, line 635) or sensor_combined (single EKF, line 696); the update and every publication are gated by if (imu_updated) at line 767. GNSS is polled inside that branch.",
+      "verification": "V4: lines read in the PX4 source at 547e2ca"
+     }
+    }
+   ]
+  }
+ }
+}

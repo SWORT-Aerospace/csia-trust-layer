@@ -1,0 +1,26 @@
+{
+  "artifact": "DEVELOPMENT_CASE_MANIFEST",
+  "purpose": "Item 7. These cases were used to design prompts, the schema and the metrics, and to debug extraction. They MUST NOT be presented as blind AI evaluation.",
+  "contaminated_because": "each was analysed in a previously committed research package, or its protocol-schema block was printed to the terminal while designing this package",
+  "cases": [
+    {"case_id": "GPS_RAW_INT.fix_type",
+     "source": "research/evidence_semantics (gnss family) and three packages before it",
+     "what_is_known": "fix_type < 3 is the no-3D-fix condition; the adapter pops the retained position and records MissingReason.NO_3D_FIX; the distinction collapses at to_core_samples"},
+    {"case_id": "BATTERY_STATUS.current_battery",
+     "source": "research/evidence_semantics (battery family)",
+     "what_is_known": "-1 is the documented not-measured sentinel; the adapter records it without popping _latest, so 5.00 A is served for 0.5 s"},
+    {"case_id": "BATTERY_STATUS.voltages",
+     "source": "research/evidence_semantics CROSS_SENSOR_AUDIT.csv",
+     "what_is_known": "65535 means cell not present and is excluded from the pack sum; there is no rejection path"},
+    {"case_id": "SCALED_IMU.xmag",
+     "source": "research/evidence_semantics (mag family)",
+     "what_is_known": "an all-zero triple is treated as absent by both committed decoders; the adapter records nothing at all"},
+    {"case_id": "SCALED_IMU.ymag", "source": "research/evidence_semantics (mag family)", "what_is_known": "as xmag"},
+    {"case_id": "SCALED_IMU.zmag", "source": "research/evidence_semantics (mag family)", "what_is_known": "as xmag"},
+    {"case_id": "BATTERY_STATUS.*",
+     "source": "THIS package. The full common.xml <message id=147> block, including every `invalid=` attribute on all 14 fields, was printed to the terminal while checking whether the MAVLink schema carries machine-readable sentinels.",
+     "what_is_known": "every BATTERY_STATUS field's invalid= attribute and description",
+     "note": "This contaminated 14 fields at once and is recorded rather than quietly excluded. All 14 are marked DEVELOPMENT in BENCHMARK_SPLIT.json."}
+  ],
+  "consequence": "18 of 106 cases are DEVELOPMENT. No extraction number computed on them is evidence about blind performance, and none is reported as such."
+}

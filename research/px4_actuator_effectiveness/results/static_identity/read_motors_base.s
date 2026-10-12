@@ -1,0 +1,64 @@
+<addr>:
+endbr64
+push   %rbp
+push   %rbx
+mov    %rdi,%rbx
+add    $0x490,%rdi
+sub    $0x78,%rsp
+lea    OFF(%rsp),%rbp
+movss  %xmm0,OFF(%rsp)
+mov    %fs:0x28,%rax
+mov    %rax,OFF(%rsp)
+xor    %eax,%eax
+mov    %rbp,%rsi
+call   <addr>
+test   %al,%al
+je     <addr>
+mov    OFF(%rbx),%edx
+mov    OFF(%rsp),%rax
+movss  OFF(%rsp),%xmm0
+cmp    $0x2,%edx
+mov    %rax,OFF(%rbx)
+sete   %cl
+xor    %eax,%eax
+nopl   OFF(%rax,%rax,1)
+cmp    $0x1,%edx
+je     <addr>
+cmp    $0x3,%eax
+jle    <addr>
+test   %cl,%cl
+je     <addr>
+movss  OFF(%rbp,%rax,4),%xmm1
+movss  %xmm1,OFF(%rbx,%rax,4)
+add    $0x1,%rax
+cmp    $0x9,%rax
+jne    <addr>
+mov    %rbx,%rdi
+call   <addr>
+mov    OFF(%rsp),%rax
+sub    %fs:0x28,%rax
+jne    <addr>
+add    $0x78,%rsp
+pop    %rbx
+pop    %rbp
+ret
+cs nopw OFF(%rax,%rax,1)
+movss  OFF(%rbp,%rax,4),%xmm1
+movss  %xmm1,OFF(%rbx,%rax,4)
+add    $0x1,%rax
+cmp    $0x2,%eax
+jle    <addr>
+movss  OFF(%rbx,%rax,4),%xmm3
+movss  OFF(%rbp,%rax,4),%xmm2
+movaps %xmm0,%xmm1
+divss  OFF(%rbx),%xmm1
+subss  %xmm3,%xmm2
+mulss  %xmm2,%xmm1
+addss  %xmm3,%xmm1
+movss  %xmm1,OFF(%rbx,%rax,4)
+add    $0x1,%rax
+cmp    $0x9,%rax
+jne    <addr>
+jmp    <addr>
+call   <addr>
+

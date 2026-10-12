@@ -1,0 +1,298 @@
+{
+ "cases": {
+  "1_all_three_agree": {
+   "alarms": [
+    "A",
+    "B",
+    "C"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    }
+   },
+   "extra": {},
+   "nominal": [],
+   "support_count": {
+    "CURRENT_2_1": 2,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 1,
+    "NAIVE": 3
+   },
+   "true_independent": 1,
+   "what_is_true": "one source (IMU1) is anomalous; nothing independent corroborates it"
+  },
+  "2_AB_agree_C_differs": {
+   "alarms": [
+    "A",
+    "B"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": [
+      "NO_DECLARED_ALTERNATIVE_WAS_EXCLUDED"
+     ]
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": [
+      "NO_DECLARED_ALTERNATIVE_WAS_EXCLUDED"
+     ]
+    }
+   },
+   "extra": {},
+   "nominal": [
+    "C"
+   ],
+   "support_count": {
+    "CURRENT_2_1": 1,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 1,
+    "NAIVE": 2
+   },
+   "true_independent": 1,
+   "what_is_true": "IMU1 shows a rate the GNSS-aided estimator agrees with: real motion, one source"
+  },
+  "3_imu1_biased": {
+   "alarms": [
+    "A",
+    "B",
+    "C"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    }
+   },
+   "extra": {},
+   "nominal": [],
+   "support_count": {
+    "CURRENT_2_1": 2,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 1,
+    "NAIVE": 3
+   },
+   "true_independent": 1,
+   "what_is_true": "IMU1 bias; every alarm descends from it"
+  },
+  "4_estimator_model_wrong": {
+   "alarms": [
+    "C"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": [
+      "NO_DECLARED_ALTERNATIVE_WAS_EXCLUDED"
+     ]
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "COMPUTE/state_estimator"
+     ],
+     "common_cause": null,
+     "verdict": "UNIQUE",
+     "withheld_because": []
+    }
+   },
+   "extra": {},
+   "nominal": [
+    "A",
+    "B"
+   ],
+   "support_count": {
+    "CURRENT_2_1": 1,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 1,
+    "NAIVE": 1
+   },
+   "true_independent": 1,
+   "what_is_true": "the estimator's model is wrong; IMU1 is fine"
+  },
+  "5_duplicated_output": {
+   "alarms": [
+    "A",
+    "B",
+    "C"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "COMPUTE/state_estimator",
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    }
+   },
+   "extra": {
+    "duplicate_of": "A"
+   },
+   "nominal": [],
+   "support_count": {
+    "CURRENT_2_1": 2,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 1,
+    "NAIVE": 4
+   },
+   "true_independent": 1,
+   "what_is_true": "as case 3, with A republished under a new identity"
+  },
+  "6_one_monitor_stale": {
+   "alarms": [
+    "B"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": [
+      "NO_DECLARED_ALTERNATIVE_WAS_EXCLUDED"
+     ]
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "SENSOR/imu1"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": [
+      "NO_DECLARED_ALTERNATIVE_WAS_EXCLUDED"
+     ]
+    }
+   },
+   "extra": {
+    "stale": "B"
+   },
+   "nominal": [
+    "A",
+    "C"
+   ],
+   "support_count": {
+    "CURRENT_2_1": 1,
+    "DEP_AWARE": 1,
+    "DEP_AWARE+VAL": 0,
+    "NAIVE": 1
+   },
+   "true_independent": 0,
+   "what_is_true": "the anomaly ended; B's CUSUM output is latched from before"
+  },
+  "7_control_two_imus": {
+   "alarms": [
+    "A",
+    "D"
+   ],
+   "attribution_2_1": {
+    "C_dependency_undeclared": {
+     "candidates": [
+      "SENSOR/imu1",
+      "SENSOR/imu2"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    },
+    "C_depends_on_imu1_declared": {
+     "candidates": [
+      "SENSOR/imu1",
+      "SENSOR/imu2"
+     ],
+     "common_cause": null,
+     "verdict": "AMBIGUOUS",
+     "withheld_because": []
+    }
+   },
+   "extra": {},
+   "nominal": [
+    "B"
+   ],
+   "support_count": {
+    "CURRENT_2_1": 1,
+    "DEP_AWARE": 2,
+    "DEP_AWARE+VAL": 2,
+    "NAIVE": 2
+   },
+   "true_independent": 2,
+   "what_is_true": "two independent IMUs both see the rate: genuine corroboration"
+  }
+ },
+ "harness": "semantic_core_2_1_imu_dependency_preview",
+ "totals": {
+  "CURRENT_2_1": {
+   "false_corroboration": 3,
+   "lost_corroboration": 1,
+   "over_count": 4
+  },
+  "DEP_AWARE": {
+   "false_corroboration": 0,
+   "lost_corroboration": 0,
+   "over_count": 1
+  },
+  "DEP_AWARE+VAL": {
+   "false_corroboration": 0,
+   "lost_corroboration": 0,
+   "over_count": 0
+  },
+  "NAIVE": {
+   "false_corroboration": 4,
+   "lost_corroboration": 0,
+   "over_count": 9
+  }
+ }
+}

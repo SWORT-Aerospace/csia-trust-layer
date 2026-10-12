@@ -1,0 +1,177 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1
+input: CAL1.ulg (stock producers and PX4 monitors; PX4 547e2ca default logging intervals)
+
+WHAT HAPPENED?
+  - no event was discovered
+
+WHEN?
+  nothing
+
+WHAT DID CSIA OBSERVE? (adverse outputs, with their magnitudes)
+  nothing
+
+WHAT COULD CSIA NOT OBSERVE?
+  - 0 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+WHAT EXPLANATIONS REMAIN?
+  nothing
+
+WHAT WAS ELIMINATED, AND WHY?
+  nothing
+
+WHICH MONITORS AGREED?
+  nothing
+
+WERE THEY INDEPENDENT?
+  nothing
+
+WHAT WOULD RESOLVE THE REMAINING AMBIGUITY?
+  nothing
+
+IS ATTRIBUTION JUSTIFIED?
+  - no: NO_EVIDENCE; NOTHING_ADVERSE
+
+========================================================================
+DETAIL
+
+EVENTS (discovered; a trigger says something may have started, not what failed)
+  none
+
+EVIDENCE VALUES (every stock output)
+
+COVERAGE (0 of 29 profile records observed; unobserved is not healthy)
+  NOT OBSERVED ACTUATION/motor_0:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_0:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_0:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_0:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_1:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_1:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_1:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_1:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_2:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_2:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_2:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_2:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED ACTUATION/motor_3:actuation.command_path: whether each motor's ESC received its command (no stock topic shows delivery; actuator_outputs is only what the FMU computed)
+  NOT OBSERVED ACTUATION/motor_3:actuation.electrical_response: motor current per command (ESC current absent or zero)
+  NOT OBSERVED ACTUATION/motor_3:actuation.mechanical_response: the stall check: current with no rotor speed (needs ESC current)
+  NOT OBSERVED ACTUATION/motor_3:actuation.physical_response: each motor's physical effect, from the closed loop's compensation
+  NOT OBSERVED COMPUTE/control_allocator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/control_allocator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED COMPUTE/cpu:compute.resource_headroom: CPU headroom (cpuload exists, but nothing pairs it with a deadline; in SITL it measures the host)
+  NOT OBSERVED COMPUTE/state_estimator:compute.deadline_met: process deadlines (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_alive: process liveness (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.process_producing: process output (no stock topic)
+  NOT OBSERVED COMPUTE/state_estimator:compute.stability: process stability (no stock topic)
+  NOT OBSERVED POWER/battery:power.cell_balance: cell balance (needs cell voltages)
+  NOT OBSERVED POWER/battery:power.droop_vs_current: voltage sag under load (needs measured current)
+  NOT OBSERVED POWER/battery:power.p_equals_vi: power balance P = V I (needs an independent power measurement)
+  NOT OBSERVED POWER/battery:power.source_health: battery voltage and current both present (v2: current must be measured)
+  topic battery_status: fields that never vary: connected (constant), current_a (constant), faults (all_zero), warning (all_zero)
+  topic control_allocator_status: fields that never vary: handled_motor_failure_mask (all_zero), thrust_setpoint_achieved (constant), unallocated_thrust[0] (all_zero), unallocated_thrust[1] (all_zero)
+  topic esc_status: fields that never vary: esc[0].esc_current (all_zero), esc[0].esc_errorcount (all_zero), esc[0].esc_voltage (all_zero), esc[0].failures (all_zero), esc[1].esc_current (all_zero), esc[1].esc_errorcount (all_zero), esc[1].esc_voltage (all_zero), esc[1].failures (all_zero), esc[2].esc_current (all_zero), esc[2].esc_errorcount (all_zero), esc[2].esc_voltage (all_zero), esc[2].failures (all_zero), esc[3].esc_current (all_zero), esc[3].esc_errorcount (all_zero), esc[3].esc_voltage (all_zero), esc[3].failures (all_zero), esc_count (constant), esc_online_flags (constant)
+  topic failure_detector_status: fields that never vary: fd_alt (all_zero), fd_arm_escs (all_zero), fd_battery (all_zero), fd_ext (all_zero), fd_imbalanced_prop (all_zero), fd_motor (all_zero), fd_pitch (all_zero), fd_roll (all_zero), motor_failure_mask (all_zero)
+  topic vehicle_status: fields that never vary: failsafe (all_zero)
+
+DIAGNOSABILITY (with the evidence this log can supply)
+  OUTPUT_STALE: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+  COMMAND_NO_RESPONSE: cannot be raised (no observable record can raise it (reads actuation.electrical_response))
+  MULTIPLE_SENSORS_DEGRADED: cannot be raised (no observable record can raise it (reads v1_1.source_health))
+  POSITION_UNAVAILABLE: cannot be raised (no observable record can raise it (reads v1_1.function_eligibility))
+  VOLTAGE_RAIL_LOW: cannot be raised (no observable record can raise it (reads power.rail_tolerance))
+  PROCESS_OUTPUT_LATE: cannot be raised (no observable record can raise it (reads compute.deadline_met))
+  HIGH_CURRENT_LOW_RPM: cannot be raised (no observable record can raise it (reads actuation.mechanical_response))
+  OUTPUT_MISSING: cannot be raised (no observable record can raise it (reads compute.process_producing))
+  FUNCTION_DEADLINE_MISS: cannot be raised (no observable record can raise it (reads timing.end_to_end))
+
+========================================================================
+
+INPUTS
+  calibration_sha256: 7f69910a43197b97fff668895ef7861134c4f247e2ca2bf5a453d9893d58231e
+  configuration: stock producers and PX4 monitors
+  events_source: discovered
+  kind: px4_ulog_stock
+  rates: PX4 547e2ca default logging intervals
+  tick_s: 1.0
+  ulog: {'file': 'CAL1.ulg', 'sha256': 'd76e1563e7729fc06a8bc34c71b977aee2fe8c48dcd00cf1dd4982dadecb8178'}
+
+PROFILE  multirotor-quad (ACCEPTED)
+
+TIMELINE  121 ticks in 6 intervals
+  0.000s: no symptom; attribution NO_EVIDENCE; 2 used, 4 rejected; changed: start
+  1.000s: no symptom; attribution NO_EVIDENCE; 2 used, 4 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 0 -> 2 (hgt aiding fused: none -> barometer height, GNSS height (control_mode_flags))
+      configuration: ekf2.reset.reset_count_pod_d 0 -> 1 (EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1))
+      configuration: ekf2.reset.reset_count_pos_ne 0 -> 3 (EKF2 horizontal position reset (reset_count_pos_ne +3, unwrapped total 3))
+      configuration: ekf2.reset.reset_count_vel_ne 0 -> 2 (EKF2 horizontal velocity reset (reset_count_vel_ne +2, unwrapped total 2))
+  2.000s: no symptom; attribution NO_EVIDENCE; 2 used, 4 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 2 -> 3 (hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags))
+  3.000s .. 25.000s (23 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: admissibility, epochs, producer_health
+      configuration: ekf2.aiding.hdg 0 -> 1 (hdg aiding fused: none -> magnetic heading (control_mode_flags))
+      configuration: ekf2.aiding.pos 0 -> 1 (pos aiding fused: none -> GNSS position (control_mode_flags))
+      configuration: ekf2.aiding.vel 0 -> 1 (vel aiding fused: none -> GNSS velocity (control_mode_flags))
+      configuration: ekf2.reset.reset_count_quat 0 -> 1 (EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1))
+  26.000s .. 28.000s (3 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hdg 1 -> 2 (hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags))
+  29.000s .. 120.000s (92 ticks): no symptom; attribution NO_EVIDENCE; 6 used, 0 rejected; changed: epochs
+      configuration: ekf2.aiding.hgt 3 -> 4 (hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags))
+
+KEY MOMENTS (in time order)
+  nothing abnormal observed at any tick (see PROFILE COVERAGE for what was observed)
+  0.000s  producer px4:ekf2.estimator_status health None -> ['UNAVAILABLE']
+  1.000s  configuration: hgt aiding fused: none -> barometer height, GNSS height (control_mode_flags)
+  1.000s  configuration: EKF2 vertical position reset (reset_count_pod_d +1, unwrapped total 1)
+  1.000s  configuration: EKF2 horizontal position reset (reset_count_pos_ne +3, unwrapped total 3)
+  1.000s  configuration: EKF2 horizontal velocity reset (reset_count_vel_ne +2, unwrapped total 2)
+  2.000s  configuration: hgt aiding fused: barometer height, GNSS height -> barometer height, range-finder height, GNSS height (control_mode_flags)
+  3.000s  producer px4:ekf2.estimator_status health ['UNAVAILABLE'] -> ['VALID']
+  3.000s  configuration: hdg aiding fused: none -> magnetic heading (control_mode_flags)
+  3.000s  configuration: pos aiding fused: none -> GNSS position (control_mode_flags)
+  3.000s  configuration: vel aiding fused: none -> GNSS velocity (control_mode_flags)
+  3.000s  configuration: EKF2 attitude (quaternion) reset (reset_count_quat +1, unwrapped total 1)
+  26.000s  configuration: hdg aiding fused: magnetic heading -> 3-axis magnetometer (control_mode_flags)
+  29.000s  configuration: hgt aiding fused: barometer height, range-finder height, GNSS height -> barometer height, GNSS height (control_mode_flags)
+
+FINAL STATE at 120.000s: no symptom; attribution NO_EVIDENCE
+  what appears abnormal: no symptom detected
+  scope: the run observed 0 of the profile's 29 records; nothing is concluded about the other 29 (PROFILE COVERAGE)
+  attribution: NO_EVIDENCE (NOTHING_ADVERSE)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:battery.status: health VALID; 2 of 2 admitted
+  px4:ekf2.estimator_status: health VALID; 4 of 4 admitted
+  coverage: cusum:v1_1_sequential has no evidence for event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  coverage: px4:battery.status has no evidence for POWER/battery:power.droop_vs_current: battery current not measured (battery_status.current_a = -1)
+  coverage: px4:esc.telemetry_response has no evidence for ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  cusum:v1_1_sequential: event discovery: NO_COVERAGE 121
+  px4:battery.status: POWER/battery:power.droop_vs_current: NO_COVERAGE 121
+  px4:battery.status: POWER/battery:power.source_health [SOURCE_TELEMETRY]: UNAVAILABLE 121
+  px4:battery.status: POWER/battery:power.battery_warning [WARNING]: NO_ANOMALY 121
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hdg [INNOVATION_HDG]: NOMINAL 118, UNAVAILABLE 3
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.hgt [INNOVATION_HGT]: NOMINAL 118, UNAVAILABLE 3
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.pos [INNOVATION_POS]: NOMINAL 118, UNAVAILABLE 3
+  px4:ekf2.estimator_status: COMPUTE/state_estimator:estimator.innovation.vel [INNOVATION_VEL]: NOMINAL 118, UNAVAILABLE 3
+  px4:esc.telemetry_response: ACTUATION/motor_*:actuation.electrical_response: NO_COVERAGE 121
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 0 of 29
+  outputs held, never admitted: 2: POWER/battery (2)
+  NO PRODUCER in this run: 27: ACTUATION/motor_0 (4), ACTUATION/motor_1 (4), ACTUATION/motor_2 (4), ACTUATION/motor_3 (4), COMPUTE/control_allocator (4), COMPUTE/cpu (1), COMPUTE/state_estimator (4), POWER/battery (2)
+  carried, outside the profile (no 2.1.1 symptom or hypothesis reads them): 5: COMPUTE/state_estimator (4), POWER/battery (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  no adverse evidence admitted
+
+CONFIGURATION
+  epochs: ekf2.aiding.hdg=2, ekf2.aiding.hgt=4, ekf2.aiding.pos=1, ekf2.aiding.vel=1, ekf2.imu.change_count=0, ekf2.reset.reset_count_pod_d=1, ekf2.reset.reset_count_pos_ne=3, ekf2.reset.reset_count_quat=1, ekf2.reset.reset_count_vel_d=0, ekf2.reset.reset_count_vel_ne=2, ekf2.selector.instance_changed_count=0

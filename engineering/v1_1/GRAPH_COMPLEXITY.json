@@ -1,0 +1,14 @@
+{
+  "artifact": "GRAPH_COMPLEXITY",
+  "edges": 11,
+  "extra_runtime_state_bytes": "one float per node carried between ticks (self.trust), 64 bytes",
+  "graph_specific_coupling": {
+    "expression": "w = float(gate_e) * self.trust[other]",
+    "flat_replacement": "w = float(gate_e)",
+    "site": "csia/trust_engine/engine.py:110",
+    "what_it_is": "the neighbour's trust weights each incident edge, so trust propagates between nodes"
+  },
+  "nodes": 8,
+  "note": "The graph is SMALL. Its complexity cost is genuinely low, which matters for the verdict: a cheap component needs less benefit to justify keeping than an expensive one.",
+  "per_tick_extra_operations": "one dict lookup and one multiply per incident edge per node; 22 lookups per tick at this graph size"
+}

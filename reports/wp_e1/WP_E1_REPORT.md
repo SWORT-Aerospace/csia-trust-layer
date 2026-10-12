@@ -1,6 +1,6 @@
 # WP-E1 — Empirical Gate Study, executed as Option C-plus
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **Not merged to main**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **Not merged to main**
 **Standing constraint honoured:** no production file modified. No trust
 engine, diagnosis algorithm, gate predicate, signature matrix, hypothesis
 bank, failsafe, threshold or prior was edited. Nothing found here was "fixed";

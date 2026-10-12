@@ -1,0 +1,104 @@
+{
+  "alphabet": {
+    "I": "GPS_RAW_INT with fix_type < 3",
+    "N": "no message delivered",
+    "V": "GPS_RAW_INT with fix_type >= 3"
+  },
+  "artifact": "COUNTEREXAMPLE_SEARCH_RESULTS",
+  "collapse_by_arm": {
+    "S0": {
+      "collapse_found": true,
+      "shortest_collapsing_pair": [
+        "I",
+        "N"
+      ],
+      "words_examined": 2
+    },
+    "S1": {
+      "collapse_found": true,
+      "shortest_collapsing_pair": [
+        "VV",
+        "IV"
+      ],
+      "words_examined": 6
+    },
+    "S2c2": {
+      "collapse_found": true,
+      "shortest_collapsing_pair": [
+        "III",
+        "INI"
+      ],
+      "words_examined": 28
+    }
+  },
+  "divergence_note": "the v1.1 adapter never marks the GPS slot invalid; csia/runtime/plugins.py does, for the same raw condition and into the same frozen core. A tick-count difference alone is not evidence of a semantic one: the two paths also stamp samples differently.",
+  "gnss_hz": 5.0,
+  "ingest_path_semantic_divergences": 79,
+  "ingest_path_tick_count_divergences": 106,
+  "max_word_length": 6,
+  "method": "the real ArduPilotAdapter, OnlineTrustLayer and DiagArm are driven over a GNSS-only stream; nothing is modelled",
+  "shortest_semantically_divergent_word": "I",
+  "targeted_invalid_versus_absent": {
+    "S0": {
+      "downstream_identical": true,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S1": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S1D": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S1Da": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S1Db": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S2a": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S2b": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S2b2": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S2c": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    },
+    "S2c2": {
+      "downstream_identical": false,
+      "n_ticks_compared": 46,
+      "no_message_word": "NNNN",
+      "receiver_invalid_word": "IIII"
+    }
+  },
+  "warmup_s": 6.0
+}

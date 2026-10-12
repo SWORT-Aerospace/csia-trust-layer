@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "What a product's data may and may not be used for, right now.",
+  "properties": {
+    "configuration_hash": {},
+    "detail": {},
+    "evidence_hash": {},
+    "expired_dependencies": {
+      "type": "array"
+    },
+    "missing_dependencies": {
+      "type": "array"
+    },
+    "permitted_uses": {
+      "type": "array"
+    },
+    "product_id": {},
+    "prohibited_uses": {
+      "type": "array"
+    },
+    "property_reasons": {
+      "type": "object"
+    },
+    "property_states": {
+      "type": "object"
+    },
+    "state": {
+      "enum": [
+        "PRODUCT_SUPPORTED",
+        "PRODUCT_DEGRADED",
+        "PRODUCT_NOT_SUPPORTED",
+        "PRODUCT_NOT_EVALUABLE"
+      ],
+      "type": "string"
+    },
+    "supported_properties": {
+      "type": "array"
+    },
+    "unknown_properties": {
+      "type": "array"
+    },
+    "unsupported_properties": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "expired_dependencies",
+    "missing_dependencies",
+    "permitted_uses",
+    "product_id",
+    "prohibited_uses",
+    "property_reasons",
+    "property_states",
+    "state",
+    "supported_properties",
+    "unknown_properties",
+    "unsupported_properties"
+  ],
+  "title": "MissionProductAssuranceResult",
+  "type": "object",
+  "x-generated-from": "csia_mission.product.ProductAssuranceResult",
+  "x-implementation-neutral": "Nothing here requires a trust coefficient, a Bayesian update, a graph, or this repository. CSIA-specific fields, where any, carry x-csia-specific with the reason they are kept."
+}

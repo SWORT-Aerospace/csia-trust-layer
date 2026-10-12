@@ -1,6 +1,6 @@
 # WP-C8 — Response Surface, Four-Quantity Metrics, Paper Structure
 
-**Date:** 2026-08-23 · **Branch:** `research/wp-e1` · **PR #13**
+**Date:** 2026-08-23 · **Branch:** `research/wp_e1` · **PR #13**
 **Suite: 482 → 482, all passing.** No production changes. The escalation defect
 is characterised, not fixed.
 **Deliverables:** `research/wp_c8/`, restructured `papers/csia_systems/`,

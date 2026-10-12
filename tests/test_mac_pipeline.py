@@ -506,10 +506,14 @@ RUNBOOK = os.path.join(REPO_ROOT, "docs", "runbooks",
                        "UAV_SEAD_MAC_ACQUISITION.md")
 
 
-def test_runbook_exists_and_uses_the_real_mac_paths():
+def test_runbook_exists_and_uses_portable_paths():
     body = open(RUNBOOK).read()
     assert MAC_DATA_ROOT in body
-    assert "/Users/ZINTRAX-5/swort/csia-trust-layer" in body
+    # The volume path above is a fixed mount point and stays. The code folder
+    # is addressed through $HOME instead of an absolute home directory, so no
+    # operator's username is written into a file that goes out for review.
+    assert "$HOME/swort/csia-trust-layer" in body
+    assert "/Users/" not in body, "operator username leaked back into runbook"
     assert "--confirm-download UAV-SEAD" in body
     for placeholder in ("<RESOLVED_HF_COMMIT>", "<AGGREGATE_MANIFEST_HASH>"):
         assert placeholder in body

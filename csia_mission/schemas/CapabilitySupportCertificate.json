@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "EXPERIMENTAL. Not certified, not certification-grade.",
+  "properties": {
+    "actuator_state": {
+      "type": "object"
+    },
+    "alternative_path_selected": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "capability_id": {},
+    "certificate_hash": {},
+    "compute_state": {
+      "type": "object"
+    },
+    "expires_at": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "issued_at": {},
+    "load_bearing_evidence": {
+      "type": "array"
+    },
+    "operating_envelope": {
+      "type": "object"
+    },
+    "payload_configuration_hash": {},
+    "reason_codes": {
+      "items": {
+        "enum": [
+          "ALL_REQUIREMENTS_MET",
+          "EVIDENCE_NOT_SUPPORTED",
+          "EVIDENCE_EXPIRED",
+          "EVIDENCE_UNKNOWN",
+          "EVIDENCE_ABSENT",
+          "SUBORDINATE_CAPABILITY_NOT_SUPPORTED",
+          "SUBORDINATE_CAPABILITY_UNKNOWN",
+          "NO_ALTERNATIVE_PATH_AVAILABLE",
+          "K_OF_N_NOT_MET",
+          "ALTERNATIVE_PATH_IN_USE",
+          "COMPUTE_NOT_SUPPORTED",
+          "COMPUTE_UNKNOWN",
+          "TIMING_NOT_SUPPORTED",
+          "TIMING_UNKNOWN",
+          "ACTUATOR_NOT_SUPPORTED",
+          "ACTUATOR_UNKNOWN",
+          "OUTSIDE_OPERATING_ENVELOPE",
+          "AWAITING_RECERTIFICATION",
+          "CONTRACT_MALFORMED",
+          "DEPENDENCY_CYCLE",
+          "CONFIGURATION_CHANGED"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "semantics_version": {
+      "x-csia-specific": "identifies the evaluator that issued the record. A certificate carrying a different semantics version than the evaluator asked to honour it is stale by definition, so the field is load-bearing and is kept rather than disguised."
+    },
+    "software_hashes": {
+      "type": "object"
+    },
+    "status": {},
+    "support_status": {
+      "enum": [
+        "SUPPORTED",
+        "DEGRADED_SUPPORTED",
+        "NOT_SUPPORTED",
+        "NOT_EVALUABLE",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "support_witnesses": {
+      "type": "object"
+    },
+    "timing_state": {
+      "type": "object"
+    },
+    "vehicle_configuration_hash": {}
+  },
+  "required": [
+    "actuator_state",
+    "alternative_path_selected",
+    "capability_id",
+    "compute_state",
+    "expires_at",
+    "issued_at",
+    "load_bearing_evidence",
+    "operating_envelope",
+    "payload_configuration_hash",
+    "reason_codes",
+    "semantics_version",
+    "software_hashes",
+    "status",
+    "support_status",
+    "support_witnesses",
+    "timing_state",
+    "vehicle_configuration_hash"
+  ],
+  "title": "CapabilitySupportCertificate",
+  "type": "object",
+  "x-generated-from": "csia_mission.capability.CapabilitySupportCertificate",
+  "x-implementation-neutral": "Nothing here requires a trust coefficient, a Bayesian update, a graph, or this repository. CSIA-specific fields, where any, carry x-csia-specific with the reason they are kept."
+}

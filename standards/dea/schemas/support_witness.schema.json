@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://csia.invalid/dea/support_witness.schema.json",
+  "title": "DEA support witness",
+  "description": "Produced at the moment of an attribution (DEA-8). Names, for every competitor hypothesis the implementation admits, the active evidence item that separated it from the asserted one. A witness that does not name a separating item for some competitor is a witness that the attribution was not entitled to be made -- which is the point: the schema makes the omission structural rather than a matter of prose.",
+  "type": "object",
+  "required": ["schema", "t", "asserted", "hypothesis_set_size", "separations"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "dea.support_witness/1"},
+    "t": {"type": "number", "description": "the time of the attribution, in the implementation's own clock"},
+    "asserted": {"type": "string", "description": "the hypothesis being attributed"},
+    "hypothesis_set_size": {
+      "type": "integer", "minimum": 1,
+      "description": "how many hypotheses the implementation admits. Recorded because conformance is relative to this number (DEA_PROFILE section 6) and certificates from different sets are not comparable."
+    },
+    "separations": {
+      "type": "array",
+      "description": "one entry per competitor. Must cover every admitted hypothesis except the asserted one.",
+      "items": {
+        "type": "object",
+        "required": ["competitor", "separated_by"],
+        "additionalProperties": false,
+        "properties": {
+          "competitor": {"type": "string"},
+          "separated_by": {
+            "type": "array", "minItems": 1,
+            "description": "active evidence items whose observed outcome differs between the asserted hypothesis and this competitor, under the implementation's declared model. An empty array is not permitted: the absence of a separator is DEA-6 failing, and it must be reported as unassessable rather than as an attribution with an empty witness.",
+            "items": {
+              "type": "object",
+              "required": ["evidence_id", "observed", "predicted_for_asserted", "predicted_for_competitor"],
+              "additionalProperties": false,
+              "properties": {
+                "evidence_id": {"type": "string"},
+                "observed": {},
+                "predicted_for_asserted": {},
+                "predicted_for_competitor": {},
+                "active_because": {
+                  "type": "object",
+                  "description": "the freshness and applicability facts that made this item active (DEA-3, DEA-4)",
+                  "properties": {
+                    "fresh": {"type": "boolean"},
+                    "applicable": {"type": "boolean"},
+                    "age_s": {"type": "number"},
+                    "freshness_limit_s": {"type": "number"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "notes": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,1340 @@
+{
+ "analyzer_version": "2.2.1",
+ "contracts": {
+  "px4:ekf2.estimator_status": {
+   "contract_version": "px4-ekf2-status-1",
+   "digest": "0d26289422aa33bb7b3f8a155e76a348be6ba4fd97e586a51262c3b7d670a77c",
+   "producer_version": "547e2ca"
+  },
+  "xsys:w_ctrl": {
+   "contract_version": "xsys-witness-1",
+   "digest": "aef66fb68f0064713f916821e90c32e0955d4afc454e0f4e25f803fa1dc77690",
+   "producer_version": "xsys001-a2-d86e857d000d"
+  },
+  "xsys:w_dyn": {
+   "contract_version": "xsys-witness-1",
+   "digest": "7faea7ec93cef85a1c53f8dfed814e8ac01293373d7b038af38ed93a20070dd0",
+   "producer_version": "xsys001-a2-d86e857d000d"
+  },
+  "xsys:w_rpm": {
+   "contract_version": "xsys-witness-1",
+   "digest": "b99221faf900132d5a13993133eae9f69dae29c9d0a04620afc10d376f0f4d28",
+   "producer_version": "xsys001-a2-d86e857d000d"
+  }
+ },
+ "coverage": [
+  {
+   "claim": "INNOVATION_HDG",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+   "ticks_by_state": {
+    "NOMINAL": 161
+   }
+  },
+  {
+   "claim": "INNOVATION_HGT",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+   "ticks_by_state": {
+    "NOMINAL": 161
+   }
+  },
+  {
+   "claim": "INNOVATION_POS",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+   "ticks_by_state": {
+    "NOMINAL": 161
+   }
+  },
+  {
+   "claim": "INNOVATION_VEL",
+   "producer_id": "px4:ekf2.estimator_status",
+   "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+   "ticks_by_state": {
+    "NOMINAL": 161
+   }
+  },
+  {
+   "claim": "DYN_RESPONSE",
+   "producer_id": "xsys:w_dyn",
+   "record": "NAVIGATION/motor_0:xsys.dynamics_T1",
+   "ticks_by_state": {
+    "REJECTED:REGIME_INVALID": 1
+   }
+  },
+  {
+   "claim": "DYN_RESPONSE",
+   "producer_id": "xsys:w_dyn",
+   "record": "NAVIGATION/motor_1:xsys.dynamics_T1",
+   "ticks_by_state": {
+    "REJECTED:REGIME_INVALID": 1
+   }
+  },
+  {
+   "claim": "DYN_RESPONSE",
+   "producer_id": "xsys:w_dyn",
+   "record": "NAVIGATION/motor_2:xsys.dynamics_T1",
+   "ticks_by_state": {
+    "REJECTED:REGIME_INVALID": 1
+   }
+  },
+  {
+   "claim": "DYN_RESPONSE",
+   "producer_id": "xsys:w_dyn",
+   "record": "NAVIGATION/motor_3:xsys.dynamics_T1",
+   "ticks_by_state": {
+    "REJECTED:REGIME_INVALID": 1
+   }
+  },
+  {
+   "claim": "RPM_DEFICIT",
+   "producer_id": "xsys:w_rpm",
+   "record": "ACTUATION/motor_0:xsys.rpm_response",
+   "ticks_by_state": {
+    "ANOMALY": 149
+   }
+  },
+  {
+   "claim": "RPM_DEFICIT",
+   "producer_id": "xsys:w_rpm",
+   "record": "ACTUATION/motor_1:xsys.rpm_response",
+   "ticks_by_state": {
+    "NOMINAL": 149
+   }
+  },
+  {
+   "claim": "RPM_DEFICIT",
+   "producer_id": "xsys:w_rpm",
+   "record": "ACTUATION/motor_2:xsys.rpm_response",
+   "ticks_by_state": {
+    "NOMINAL": 149
+   }
+  },
+  {
+   "claim": "RPM_DEFICIT",
+   "producer_id": "xsys:w_rpm",
+   "record": "ACTUATION/motor_3:xsys.rpm_response",
+   "ticks_by_state": {
+    "NOMINAL": 149
+   }
+  }
+ ],
+ "final": {
+  "analyzer_version": "2.2.1",
+  "attribution": {
+   "candidates": [],
+   "relevant_discriminators": [],
+   "retained_by_localization": [],
+   "unexcluded_alternatives": [],
+   "unique": null,
+   "verdict": "NO_EVIDENCE",
+   "why": "NOTHING_ADVERSE",
+   "withheld_unique_because": []
+  },
+  "configuration": {
+   "changes": [],
+   "epochs": {
+    "ekf2.aiding.hdg": [
+     2
+    ],
+    "ekf2.aiding.hgt": [
+     4
+    ],
+    "ekf2.aiding.pos": [
+     1
+    ],
+    "ekf2.aiding.vel": [
+     1
+    ],
+    "ekf2.imu.change_count": [
+     0
+    ],
+    "ekf2.reset.reset_count_pod_d": [
+     1
+    ],
+    "ekf2.reset.reset_count_pos_ne": [
+     3
+    ],
+    "ekf2.reset.reset_count_quat": [
+     1
+    ],
+    "ekf2.reset.reset_count_vel_d": [
+     0
+    ],
+    "ekf2.reset.reset_count_vel_ne": [
+     2
+    ],
+    "ekf2.selector.instance_changed_count": [
+     0
+    ]
+   },
+   "keys_with_context_behind": [],
+   "not_admitted_by_epoch": [],
+   "transition_events": {}
+  },
+  "corroboration": {
+   "by_component": [
+    {
+     "adverse_evidence": [
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+     ],
+     "component": "ACTUATION/motor_0",
+     "independent_lines": 1,
+     "independent_lines_exact": true,
+     "lineage_groups": [
+      [
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+      ]
+     ],
+     "producers": [
+      "xsys:w_rpm"
+     ]
+    }
+   ],
+   "overall": {
+    "adverse_evidence": 1,
+    "group_links": [
+     []
+    ],
+    "group_shared_roots": [
+     []
+    ],
+    "independent_lines": 1,
+    "independent_lines_exact": true,
+    "lineage_groups": [
+     [
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+     ]
+    ]
+   }
+  },
+  "event_time": 15.0,
+  "evidence": {
+   "admitted_with_warnings": [],
+   "rejected": [
+    {
+     "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_0:xsys.dynamics_T1|15.000000",
+     "producer_id": "xsys:w_dyn",
+     "reasons": [
+      "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+     ],
+     "status": "REGIME_INVALID",
+     "warnings": []
+    },
+    {
+     "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_1:xsys.dynamics_T1|15.000000",
+     "producer_id": "xsys:w_dyn",
+     "reasons": [
+      "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+     ],
+     "status": "REGIME_INVALID",
+     "warnings": []
+    },
+    {
+     "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_2:xsys.dynamics_T1|15.000000",
+     "producer_id": "xsys:w_dyn",
+     "reasons": [
+      "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+     ],
+     "status": "REGIME_INVALID",
+     "warnings": []
+    },
+    {
+     "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_3:xsys.dynamics_T1|15.000000",
+     "producer_id": "xsys:w_dyn",
+     "reasons": [
+      "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+     ],
+     "status": "REGIME_INVALID",
+     "warnings": []
+    }
+   ],
+   "used": [
+    "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|14.840000",
+    "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|14.840000",
+    "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|14.840000",
+    "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|14.840000",
+    "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000",
+    "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_1:xsys.rpm_response|15.000000",
+    "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_2:xsys.rpm_response|15.000000",
+    "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_3:xsys.rpm_response|15.000000"
+   ]
+  },
+  "localizations": [
+   {
+    "candidates": [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ],
+    "eliminated": [],
+    "evaluation": "EVIDENCE_UNAVAILABLE",
+    "evidence_basis": {
+     "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000": [
+      "channel:esc_rpm.motor_0",
+      "channel:motor_command.motor_0"
+     ]
+    },
+    "evidence_unavailable": [
+     "CTRL_T3_NOMINAL",
+     "CTRL_T3_NOMINAL_FALSE",
+     "DYN_T1_NOMINAL",
+     "DYN_T1_NOMINAL_FALSE"
+    ],
+    "fault_impact": [],
+    "key": "COMMAND_NO_RESPONSE|motor_0",
+    "outcome": "AMBIGUOUS",
+    "outcome_reason": null,
+    "predicate_faults": [],
+    "refuting_evidence": [],
+    "scope_gaps": [],
+    "subject": "motor_0",
+    "supported": [
+     "ACTUATION/mechanical",
+     "SENSOR/response_sensor"
+    ],
+    "supporting_evidence": [
+     "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+    ],
+    "symptom": "COMMAND_NO_RESPONSE",
+    "unresolved": [],
+    "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+    "withheld_because": [],
+    "would_discriminate": [
+     {
+      "description": "in T3 the controller shows no compensation on the motor, although the local symptom implies one a genuine loss would make detectable",
+      "predicate": "CTRL_T3_NOMINAL"
+     },
+     {
+      "description": "in T1 the body rates show no response along the motor's thrust-loss axis, although the local symptom implies one a genuine loss would make detectable",
+      "predicate": "DYN_T1_NOMINAL"
+     }
+    ]
+   }
+  ],
+  "producers": {
+   "by_producer": {
+    "px4:ekf2.estimator_status": {
+     "admitted": 4,
+     "evidence": 4,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    },
+    "xsys:w_dyn": {
+     "admitted": 0,
+     "evidence": 4,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {
+      "REGIME_INVALID": 4
+     }
+    },
+    "xsys:w_rpm": {
+     "admitted": 4,
+     "evidence": 4,
+     "faults": [],
+     "health": [
+      "VALID"
+     ],
+     "rejected": {}
+    }
+   },
+   "coverage": [
+    {
+     "claim": "INNOVATION_HDG",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "INNOVATION_HGT",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "INNOVATION_POS",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "INNOVATION_VEL",
+     "producer_id": "px4:ekf2.estimator_status",
+     "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "DYN_RESPONSE",
+     "producer_id": "xsys:w_dyn",
+     "record": "NAVIGATION/motor_0:xsys.dynamics_T1",
+     "state": "REJECTED:REGIME_INVALID"
+    },
+    {
+     "claim": "DYN_RESPONSE",
+     "producer_id": "xsys:w_dyn",
+     "record": "NAVIGATION/motor_1:xsys.dynamics_T1",
+     "state": "REJECTED:REGIME_INVALID"
+    },
+    {
+     "claim": "DYN_RESPONSE",
+     "producer_id": "xsys:w_dyn",
+     "record": "NAVIGATION/motor_2:xsys.dynamics_T1",
+     "state": "REJECTED:REGIME_INVALID"
+    },
+    {
+     "claim": "DYN_RESPONSE",
+     "producer_id": "xsys:w_dyn",
+     "record": "NAVIGATION/motor_3:xsys.dynamics_T1",
+     "state": "REJECTED:REGIME_INVALID"
+    },
+    {
+     "claim": "RPM_DEFICIT",
+     "producer_id": "xsys:w_rpm",
+     "record": "ACTUATION/motor_0:xsys.rpm_response",
+     "state": "ANOMALY"
+    },
+    {
+     "claim": "RPM_DEFICIT",
+     "producer_id": "xsys:w_rpm",
+     "record": "ACTUATION/motor_1:xsys.rpm_response",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "RPM_DEFICIT",
+     "producer_id": "xsys:w_rpm",
+     "record": "ACTUATION/motor_2:xsys.rpm_response",
+     "state": "NOMINAL"
+    },
+    {
+     "claim": "RPM_DEFICIT",
+     "producer_id": "xsys:w_rpm",
+     "record": "ACTUATION/motor_3:xsys.rpm_response",
+     "state": "NOMINAL"
+    }
+   ],
+   "coverage_gaps": []
+  },
+  "profile": {
+   "base_profile": "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py",
+   "digest": null,
+   "gate": "NOT_APPLICABLE",
+   "name": "xsys001_research_spec",
+   "pacing_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+   "version": null
+  },
+  "profile_warnings": [
+   "INFO:PG0_NOT_VALIDATED:xsys001_research_spec"
+  ],
+  "reason_trace": {
+   "attribution": "NOTHING_ADVERSE",
+   "localizations": {
+    "COMMAND_NO_RESPONSE|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+   }
+  },
+  "semantic_version": "2.1.1",
+  "state": {
+   "abnormal": {
+    "adverse_evidence": [
+     "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+    ],
+    "symptoms": [
+     "COMMAND_NO_RESPONSE|motor_0"
+    ]
+   },
+   "attribution": "NO_EVIDENCE",
+   "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution NO_EVIDENCE",
+   "localization_outcomes": {
+    "AMBIGUOUS": 1
+   }
+  }
+ },
+ "inputs": {
+  "analysis_id": "XS1A1-C00-A-E055",
+  "kind": "xsys_trial",
+  "onset_s_in_log": 154.752,
+  "opaque_id": "da058c7a8bbc86eb",
+  "stage1_sha256": "ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3",
+  "truth": "PHYSICAL_ACTUATOR_DEGRADATION",
+  "ulog": {
+   "file": "XS1A1-C00-A-E055.ulg",
+   "sha256": "3ddc250773b7ccf6881d3842d29d443fe435d864ac78b33dbe452fbdc5073d59"
+  },
+  "variant": "V4_INVALID_WINDOW"
+ },
+ "intervals": 3,
+ "key_moments": {
+  "adverse_evidence_changes": [
+   {
+    "appeared": [
+     "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response"
+    ],
+    "cleared": [],
+    "t": 0.2
+   }
+  ],
+  "candidate_changes": [
+   {
+    "from": null,
+    "t": 0.2,
+    "to": [
+     "AMBIGUOUS",
+     [
+      "ACTUATION/mechanical",
+      "SENSOR/response_sensor"
+     ]
+    ],
+    "what": "COMMAND_NO_RESPONSE|motor_0"
+   }
+  ],
+  "certainty": [],
+  "configuration_changes": [],
+  "evidence_invalidated": [
+   {
+    "evidence": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_0:xsys.dynamics_T1",
+    "reason": "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s",
+    "status": "REGIME_INVALID",
+    "t": 15.0
+   },
+   {
+    "evidence": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_1:xsys.dynamics_T1",
+    "reason": "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s",
+    "status": "REGIME_INVALID",
+    "t": 15.0
+   },
+   {
+    "evidence": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_2:xsys.dynamics_T1",
+    "reason": "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s",
+    "status": "REGIME_INVALID",
+    "t": 15.0
+   },
+   {
+    "evidence": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_3:xsys.dynamics_T1",
+    "reason": "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s",
+    "status": "REGIME_INVALID",
+    "t": 15.0
+   }
+  ],
+  "first_abnormal": {
+   "adverse_evidence": [
+    "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+   ],
+   "observed_by": [
+    "xsys:w_rpm"
+   ],
+   "symptoms": [
+    "COMMAND_NO_RESPONSE|motor_0"
+   ],
+   "t": 0.2
+  },
+  "first_observation_by_producer": {
+   "xsys:w_rpm": 0.2
+  },
+  "predicate_faults": [],
+  "producer_health_changes": []
+ },
+ "profile_coverage": {
+  "enumerable": false,
+  "never_admitted": [],
+  "no_output": [],
+  "observed": [],
+  "outside_profile": [],
+  "profile_records": 0
+ },
+ "profile_gate": {
+  "findings": [
+   {
+    "detail": "the XSYS-001 symptom specification has no function table",
+    "rule": "PG0_NOT_VALIDATED",
+    "severity": "INFO",
+    "subject": "xsys001_research_spec"
+   }
+  ],
+  "profile": {
+   "base_profile": "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py",
+   "digest": null,
+   "name": "xsys001_research_spec",
+   "version": null
+  },
+  "status": "NOT_APPLICABLE"
+ },
+ "schema": "csia.flight_assurance_report/3",
+ "semantic_version": "2.1.1",
+ "ticks": 161,
+ "timeline": [
+  {
+   "changed": [
+    "start"
+   ],
+   "configuration_changes": [],
+   "from": -1.0,
+   "result": {
+    "analyzer_version": "2.2.1",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "changes": [],
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       2
+      ],
+      "ekf2.aiding.hgt": [
+       4
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       2
+      ],
+      "ekf2.selector.instance_changed_count": [
+       0
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [],
+     "overall": {
+      "adverse_evidence": 0,
+      "group_links": [],
+      "group_shared_roots": [],
+      "independent_lines": 0,
+      "independent_lines_exact": true,
+      "lineage_groups": []
+     }
+    },
+    "event_time": -1.0,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|-1.160000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|-1.160000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|-1.160000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|-1.160000"
+     ]
+    },
+    "localizations": [],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      }
+     ],
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py",
+     "digest": null,
+     "gate": "NOT_APPLICABLE",
+     "name": "xsys001_research_spec",
+     "pacing_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+     "version": null
+    },
+    "profile_warnings": [
+     "INFO:PG0_NOT_VALIDATED:xsys001_research_spec"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {}
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [],
+      "symptoms": []
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "no symptom; attribution NO_EVIDENCE",
+     "localization_outcomes": {}
+    }
+   },
+   "ticks": 12,
+   "to": 0.1
+  },
+  {
+   "changed": [
+    "abnormal",
+    "admissibility",
+    "localizations",
+    "producer_health"
+   ],
+   "configuration_changes": [],
+   "from": 0.2,
+   "result": {
+    "analyzer_version": "2.2.1",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "changes": [],
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       2
+      ],
+      "ekf2.aiding.hgt": [
+       4
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       2
+      ],
+      "ekf2.selector.instance_changed_count": [
+       0
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [
+      {
+       "adverse_evidence": [
+        "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+       ],
+       "component": "ACTUATION/motor_0",
+       "independent_lines": 1,
+       "independent_lines_exact": true,
+       "lineage_groups": [
+        [
+         "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+        ]
+       ],
+       "producers": [
+        "xsys:w_rpm"
+       ]
+      }
+     ],
+     "overall": {
+      "adverse_evidence": 1,
+      "group_links": [
+       []
+      ],
+      "group_shared_roots": [
+       []
+      ],
+      "independent_lines": 1,
+      "independent_lines_exact": true,
+      "lineage_groups": [
+       [
+        "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+       ]
+      ]
+     }
+    },
+    "event_time": 0.2,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|0.040000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|0.040000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|0.040000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|0.040000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_1:xsys.rpm_response|0.200000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_2:xsys.rpm_response|0.200000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_3:xsys.rpm_response|0.200000"
+     ]
+    },
+    "localizations": [
+     {
+      "candidates": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "eliminated": [],
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence_basis": {
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000": [
+        "channel:esc_rpm.motor_0",
+        "channel:motor_command.motor_0"
+       ]
+      },
+      "evidence_unavailable": [
+       "CTRL_T3_NOMINAL",
+       "CTRL_T3_NOMINAL_FALSE",
+       "DYN_T1_NOMINAL",
+       "DYN_T1_NOMINAL_FALSE"
+      ],
+      "fault_impact": [],
+      "key": "COMMAND_NO_RESPONSE|motor_0",
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_faults": [],
+      "refuting_evidence": [],
+      "scope_gaps": [],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "supporting_evidence": [
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+      ],
+      "symptom": "COMMAND_NO_RESPONSE",
+      "unresolved": [],
+      "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+      "withheld_because": [],
+      "would_discriminate": [
+       {
+        "description": "in T3 the controller shows no compensation on the motor, although the local symptom implies one a genuine loss would make detectable",
+        "predicate": "CTRL_T3_NOMINAL"
+       },
+       {
+        "description": "in T1 the body rates show no response along the motor's thrust-loss axis, although the local symptom implies one a genuine loss would make detectable",
+        "predicate": "DYN_T1_NOMINAL"
+       }
+      ]
+     }
+    ],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "xsys:w_rpm": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_0:xsys.rpm_response",
+       "state": "ANOMALY"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_1:xsys.rpm_response",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_2:xsys.rpm_response",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_3:xsys.rpm_response",
+       "state": "NOMINAL"
+      }
+     ],
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py",
+     "digest": null,
+     "gate": "NOT_APPLICABLE",
+     "name": "xsys001_research_spec",
+     "pacing_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+     "version": null
+    },
+    "profile_warnings": [
+     "INFO:PG0_NOT_VALIDATED:xsys001_research_spec"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {
+      "COMMAND_NO_RESPONSE|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+     }
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|0.200000"
+      ],
+      "symptoms": [
+       "COMMAND_NO_RESPONSE|motor_0"
+      ]
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution NO_EVIDENCE",
+     "localization_outcomes": {
+      "AMBIGUOUS": 1
+     }
+    }
+   },
+   "ticks": 148,
+   "to": 14.9
+  },
+  {
+   "changed": [
+    "admissibility",
+    "producer_health"
+   ],
+   "configuration_changes": [],
+   "from": 15.0,
+   "result": {
+    "analyzer_version": "2.2.1",
+    "attribution": {
+     "candidates": [],
+     "relevant_discriminators": [],
+     "retained_by_localization": [],
+     "unexcluded_alternatives": [],
+     "unique": null,
+     "verdict": "NO_EVIDENCE",
+     "why": "NOTHING_ADVERSE",
+     "withheld_unique_because": []
+    },
+    "configuration": {
+     "changes": [],
+     "epochs": {
+      "ekf2.aiding.hdg": [
+       2
+      ],
+      "ekf2.aiding.hgt": [
+       4
+      ],
+      "ekf2.aiding.pos": [
+       1
+      ],
+      "ekf2.aiding.vel": [
+       1
+      ],
+      "ekf2.imu.change_count": [
+       0
+      ],
+      "ekf2.reset.reset_count_pod_d": [
+       1
+      ],
+      "ekf2.reset.reset_count_pos_ne": [
+       3
+      ],
+      "ekf2.reset.reset_count_quat": [
+       1
+      ],
+      "ekf2.reset.reset_count_vel_d": [
+       0
+      ],
+      "ekf2.reset.reset_count_vel_ne": [
+       2
+      ],
+      "ekf2.selector.instance_changed_count": [
+       0
+      ]
+     },
+     "keys_with_context_behind": [],
+     "not_admitted_by_epoch": [],
+     "transition_events": {}
+    },
+    "corroboration": {
+     "by_component": [
+      {
+       "adverse_evidence": [
+        "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+       ],
+       "component": "ACTUATION/motor_0",
+       "independent_lines": 1,
+       "independent_lines_exact": true,
+       "lineage_groups": [
+        [
+         "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+        ]
+       ],
+       "producers": [
+        "xsys:w_rpm"
+       ]
+      }
+     ],
+     "overall": {
+      "adverse_evidence": 1,
+      "group_links": [
+       []
+      ],
+      "group_shared_roots": [
+       []
+      ],
+      "independent_lines": 1,
+      "independent_lines_exact": true,
+      "lineage_groups": [
+       [
+        "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+       ]
+      ]
+     }
+    },
+    "event_time": 15.0,
+    "evidence": {
+     "admitted_with_warnings": [],
+     "rejected": [
+      {
+       "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_0:xsys.dynamics_T1|15.000000",
+       "producer_id": "xsys:w_dyn",
+       "reasons": [
+        "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+       ],
+       "status": "REGIME_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_1:xsys.dynamics_T1|15.000000",
+       "producer_id": "xsys:w_dyn",
+       "reasons": [
+        "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+       ],
+       "status": "REGIME_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_2:xsys.dynamics_T1|15.000000",
+       "producer_id": "xsys:w_dyn",
+       "reasons": [
+        "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+       ],
+       "status": "REGIME_INVALID",
+       "warnings": []
+      },
+      {
+       "evidence_id": "xsys:w_dyn|DYN_RESPONSE|NAVIGATION/motor_3:xsys.dynamics_T1|15.000000",
+       "producer_id": "xsys:w_dyn",
+       "reasons": [
+        "CONTENT_OUTSIDE_VALIDATED_WINDOW:xsys.onset+[0.0,0.2]s"
+       ],
+       "status": "REGIME_INVALID",
+       "warnings": []
+      }
+     ],
+     "used": [
+      "px4:ekf2.estimator_status|INNOVATION_HDG|COMPUTE/state_estimator:estimator.innovation.hdg|14.840000",
+      "px4:ekf2.estimator_status|INNOVATION_HGT|COMPUTE/state_estimator:estimator.innovation.hgt|14.840000",
+      "px4:ekf2.estimator_status|INNOVATION_POS|COMPUTE/state_estimator:estimator.innovation.pos|14.840000",
+      "px4:ekf2.estimator_status|INNOVATION_VEL|COMPUTE/state_estimator:estimator.innovation.vel|14.840000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_1:xsys.rpm_response|15.000000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_2:xsys.rpm_response|15.000000",
+      "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_3:xsys.rpm_response|15.000000"
+     ]
+    },
+    "localizations": [
+     {
+      "candidates": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "eliminated": [],
+      "evaluation": "EVIDENCE_UNAVAILABLE",
+      "evidence_basis": {
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000": [
+        "channel:esc_rpm.motor_0",
+        "channel:motor_command.motor_0"
+       ]
+      },
+      "evidence_unavailable": [
+       "CTRL_T3_NOMINAL",
+       "CTRL_T3_NOMINAL_FALSE",
+       "DYN_T1_NOMINAL",
+       "DYN_T1_NOMINAL_FALSE"
+      ],
+      "fault_impact": [],
+      "key": "COMMAND_NO_RESPONSE|motor_0",
+      "outcome": "AMBIGUOUS",
+      "outcome_reason": null,
+      "predicate_faults": [],
+      "refuting_evidence": [],
+      "scope_gaps": [],
+      "subject": "motor_0",
+      "supported": [
+       "ACTUATION/mechanical",
+       "SENSOR/response_sensor"
+      ],
+      "supporting_evidence": [
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+      ],
+      "symptom": "COMMAND_NO_RESPONSE",
+      "unresolved": [],
+      "why": "SEVERAL_SURVIVORS_SOME_CONFIRMED",
+      "withheld_because": [],
+      "would_discriminate": [
+       {
+        "description": "in T3 the controller shows no compensation on the motor, although the local symptom implies one a genuine loss would make detectable",
+        "predicate": "CTRL_T3_NOMINAL"
+       },
+       {
+        "description": "in T1 the body rates show no response along the motor's thrust-loss axis, although the local symptom implies one a genuine loss would make detectable",
+        "predicate": "DYN_T1_NOMINAL"
+       }
+      ]
+     }
+    ],
+    "producers": {
+     "by_producer": {
+      "px4:ekf2.estimator_status": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      },
+      "xsys:w_dyn": {
+       "admitted": 0,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {
+        "REGIME_INVALID": 4
+       }
+      },
+      "xsys:w_rpm": {
+       "admitted": 4,
+       "evidence": 4,
+       "faults": [],
+       "health": [
+        "VALID"
+       ],
+       "rejected": {}
+      }
+     },
+     "coverage": [
+      {
+       "claim": "INNOVATION_HDG",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hdg",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_HGT",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.hgt",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_POS",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.pos",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "INNOVATION_VEL",
+       "producer_id": "px4:ekf2.estimator_status",
+       "record": "COMPUTE/state_estimator:estimator.innovation.vel",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "DYN_RESPONSE",
+       "producer_id": "xsys:w_dyn",
+       "record": "NAVIGATION/motor_0:xsys.dynamics_T1",
+       "state": "REJECTED:REGIME_INVALID"
+      },
+      {
+       "claim": "DYN_RESPONSE",
+       "producer_id": "xsys:w_dyn",
+       "record": "NAVIGATION/motor_1:xsys.dynamics_T1",
+       "state": "REJECTED:REGIME_INVALID"
+      },
+      {
+       "claim": "DYN_RESPONSE",
+       "producer_id": "xsys:w_dyn",
+       "record": "NAVIGATION/motor_2:xsys.dynamics_T1",
+       "state": "REJECTED:REGIME_INVALID"
+      },
+      {
+       "claim": "DYN_RESPONSE",
+       "producer_id": "xsys:w_dyn",
+       "record": "NAVIGATION/motor_3:xsys.dynamics_T1",
+       "state": "REJECTED:REGIME_INVALID"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_0:xsys.rpm_response",
+       "state": "ANOMALY"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_1:xsys.rpm_response",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_2:xsys.rpm_response",
+       "state": "NOMINAL"
+      },
+      {
+       "claim": "RPM_DEFICIT",
+       "producer_id": "xsys:w_rpm",
+       "record": "ACTUATION/motor_3:xsys.rpm_response",
+       "state": "NOMINAL"
+      }
+     ],
+     "coverage_gaps": []
+    },
+    "profile": {
+     "base_profile": "research/xsys_confirmatory_001/pipeline/xsys_v2_adapter.py",
+     "digest": null,
+     "gate": "NOT_APPLICABLE",
+     "name": "xsys001_research_spec",
+     "pacing_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+     "version": null
+    },
+    "profile_warnings": [
+     "INFO:PG0_NOT_VALIDATED:xsys001_research_spec"
+    ],
+    "reason_trace": {
+     "attribution": "NOTHING_ADVERSE",
+     "localizations": {
+      "COMMAND_NO_RESPONSE|motor_0": "SEVERAL_SURVIVORS_SOME_CONFIRMED"
+     }
+    },
+    "semantic_version": "2.1.1",
+    "state": {
+     "abnormal": {
+      "adverse_evidence": [
+       "xsys:w_rpm|RPM_DEFICIT|ACTUATION/motor_0:xsys.rpm_response|15.000000"
+      ],
+      "symptoms": [
+       "COMMAND_NO_RESPONSE|motor_0"
+      ]
+     },
+     "attribution": "NO_EVIDENCE",
+     "headline": "COMMAND_NO_RESPONSE|motor_0 AMBIGUOUS: ACTUATION/mechanical, SENSOR/response_sensor; attribution NO_EVIDENCE",
+     "localization_outcomes": {
+      "AMBIGUOUS": 1
+     }
+    }
+   },
+   "ticks": 1,
+   "to": 15.0
+  }
+ ]
+}

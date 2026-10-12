@@ -1,0 +1,183 @@
+{
+ "calibration": {
+  "h_ctrl": 0.12042735427635343,
+  "h_tel": 0.11807592282883084,
+  "k_ctrl": 0.04014245142545114,
+  "k_tel": 0.03935864094294361,
+  "theta_ctrl": 0.006881424935098357,
+  "theta_dyn": 0.02882144985008057,
+  "theta_steady": 0.09889434104510486,
+  "theta_tel": 0.0068798851916218595
+ },
+ "label": "CSIA 2.3 stock calibration; apparatus data only; frozen before XSYS-001 evaluation",
+ "limit": "SIH carries almost no noise on these signals; the thresholds do not transfer to hardware",
+ "null_flights": 32,
+ "null_max_abs": {
+  "C": 0.0034407124675491785,
+  "D": 0.014410724925040285,
+  "L": 0.0034399425958109298,
+  "R_steady": 0.04944717052255243,
+  "d_ctrl": 0.02007122571272557,
+  "d_tel": 0.019679320471471806
+ },
+ "null_pseudo_onsets": 160,
+ "null_steady": {
+  "flights": 32,
+  "pseudo_onsets": 160,
+  "statistic": "largest |omega| (rad/s) in the BEFORE and AFTER windows"
+ },
+ "rates": "PX4 547e2ca default logging intervals (stock_log.STOCK_INTERVAL_MS)",
+ "revision": 3,
+ "revision_history": [
+  "r1 (67bc92f): q and kappa normalized by the mean of the OTHER motors",
+  "r2: normalized by the median of ALL motors. Found on a development run of one XSYS-001 flight (XS1A1-C00-A-E055) through the full pipeline: with the mean of the others, motor 0's deficit appeared as an 'excess' on motors 1-3. A definition fix, not a threshold choice; every threshold re-derived from apparatus data by the same rule. No systematic XSYS-001 evaluation had been run",
+  "r3: adds theta_steady for the compensation claim's assumption 'near-steady flight in both windows' (claim register), which r2 did not implement; found missing by validation flights V5 and V6, whose maneuvers raised false COMMAND_NO_RESPONSE symptoms. Same rule, same 32 apparatus nominal flights; every r2 threshold unchanged; no XSYS-001 or validation flight sets it"
+ ],
+ "rule": "threshold = 2 x the largest |value| of the statistic under the null (pseudo-onsets every 0.5 s in hover); CUSUM h = 3k",
+ "sweep_validation": {
+  "0.0": {
+   "C_AFTER": [
+    2.811,
+    2.8261,
+    2.8296
+   ],
+   "L_tel_AFTER": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "detected": 3,
+   "median_delay_s": 0.1,
+   "median_onset_error_s": -0.104,
+   "n": 3
+  },
+  "0.25": {
+   "C_AFTER": [
+    1.2914,
+    1.2913,
+    1.28
+   ],
+   "L_tel_AFTER": [
+    0.7447,
+    0.7441,
+    0.7448
+   ],
+   "detected": 3,
+   "median_delay_s": 0.096,
+   "median_onset_error_s": -0.092,
+   "n": 3
+  },
+  "0.4": {
+   "C_AFTER": [
+    1.4987,
+    1.4938,
+    1.4912
+   ],
+   "L_tel_AFTER": [
+    0.5999,
+    0.5988,
+    0.5984
+   ],
+   "detected": 3,
+   "median_delay_s": 0.096,
+   "median_onset_error_s": -0.104,
+   "n": 3
+  },
+  "0.5": {
+   "C_AFTER": [
+    0.9932,
+    0.9953,
+    0.993
+   ],
+   "L_tel_AFTER": [
+    0.4985,
+    0.4991,
+    0.4987
+   ],
+   "detected": 3,
+   "median_delay_s": 0.1,
+   "median_onset_error_s": -0.092,
+   "n": 3
+  },
+  "0.6": {
+   "C_AFTER": [
+    0.6629,
+    0.6637,
+    0.6629
+   ],
+   "L_tel_AFTER": [
+    0.3984,
+    0.3988,
+    0.3986
+   ],
+   "detected": 3,
+   "median_delay_s": 0.104,
+   "median_onset_error_s": -0.084,
+   "n": 3
+  },
+  "0.7": {
+   "C_AFTER": [
+    0.426,
+    0.4252,
+    0.4253
+   ],
+   "L_tel_AFTER": [
+    0.2987,
+    0.2988,
+    0.2984
+   ],
+   "detected": 3,
+   "median_delay_s": 0.104,
+   "median_onset_error_s": -0.084,
+   "n": 3
+  },
+  "0.8": {
+   "C_AFTER": [
+    0.2481,
+    0.2476,
+    0.2476
+   ],
+   "L_tel_AFTER": [
+    0.1987,
+    0.1987,
+    0.1985
+   ],
+   "detected": 3,
+   "median_delay_s": 0.124,
+   "median_onset_error_s": -0.012,
+   "n": 3
+  },
+  "0.9": {
+   "C_AFTER": [
+    0.1082,
+    0.1087,
+    0.1083
+   ],
+   "L_tel_AFTER": [
+    0.0971,
+    0.0975,
+    0.0973
+   ],
+   "detected": 3,
+   "median_delay_s": 0.308,
+   "median_onset_error_s": 0.0,
+   "n": 3
+  },
+  "1.0": {
+   "C_AFTER": [
+    0.0012,
+    -0.0016,
+    -0.0004
+   ],
+   "L_tel_AFTER": [
+    0.0003,
+    -0.0011,
+    -0.0003
+   ],
+   "detected": 0,
+   "median_delay_s": null,
+   "median_onset_error_s": null,
+   "n": 3
+  }
+ }
+}

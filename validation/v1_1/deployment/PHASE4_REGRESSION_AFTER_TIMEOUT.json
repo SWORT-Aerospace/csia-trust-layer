@@ -1,0 +1,88 @@
+{
+  "artifact": "PHASE4_REGRESSION_AFTER_TIMEOUT",
+  "artifacts": [
+    {
+      "artifact": "engineering/v1_1/FUNCTION_ELIGIBILITY_RESULTS.csv",
+      "bytes_identical": true,
+      "comparison": "byte-for-byte",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/FUNCTION_TRANSITIONS.json",
+      "bytes_identical": false,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/PHASE4_CLEAN_RESULT.json",
+      "bytes_identical": true,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/PHASE4_FIXLOSS_RESULT.json",
+      "bytes_identical": true,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/PHASE4_DUAL_IMU_RESULT.json",
+      "bytes_identical": true,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/ASSURANCE_LEDGER_EXAMPLE.json",
+      "bytes_identical": false,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/ASSURANCE_LEDGER_REPRODUCTION.json",
+      "bytes_identical": false,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/PHASE4_API_VALIDATION.json",
+      "bytes_identical": true,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/csia_output_example.json",
+      "bytes_identical": false,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    },
+    {
+      "artifact": "engineering/v1_1/csia_output_fixloss_example.json",
+      "bytes_identical": false,
+      "comparison": "json, provenance fields excluded by name",
+      "identical": true
+    }
+  ],
+  "artifacts_differing_behaviourally": [],
+  "behavioural_change": false,
+  "generation_command": "python validation/v1_1/deployment/verify_phase4_unaffected.py",
+  "provenance_keys_excluded": [
+    "configuration_hash",
+    "content_sha256",
+    "csia_sha",
+    "event_id",
+    "final_chain_hash",
+    "previous_event_hash",
+    "software_sha"
+  ],
+  "question": "Did the Phase 4.5 runtime stale-timeout change move any Phase 4 result?",
+  "structural_check": {
+    "banned_symbols_found": {
+      "engineering/v1_1/phase4/run_p4b.py": [],
+      "engineering/v1_1/phase4/run_p4c.py": [],
+      "engineering/v1_1/phase4/run_p4d.py": []
+    },
+    "claim": "the Phase 4 runners never construct an adapter or an OnlineTrustLayer, so a runtime watchdog timeout cannot reach the nine scenarios; freshness comes from the deterministic simulator's td.fresh",
+    "pass": true
+  },
+  "verdict": "NO_BEHAVIOURAL_CHANGE"
+}

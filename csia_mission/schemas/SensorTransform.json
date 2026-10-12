@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Mount datum, device package, measurement origin and measurement axes, each with its own provenance status.",
+  "properties": {
+    "basis": {},
+    "mount_datum": {},
+    "package_extent_m": {
+      "type": "array"
+    },
+    "rotation_quat": {
+      "type": "array"
+    },
+    "rotation_status": {
+      "enum": [
+        "DEFINED",
+        "MEASURED",
+        "PROVISIONAL",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    },
+    "sensor_id": {},
+    "transform_id": {},
+    "translation_m": {
+      "type": "array"
+    },
+    "translation_status": {
+      "enum": [
+        "DEFINED",
+        "MEASURED",
+        "PROVISIONAL",
+        "UNKNOWN"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "mount_datum",
+    "sensor_id",
+    "transform_id"
+  ],
+  "title": "SensorTransform",
+  "type": "object",
+  "x-generated-from": "csia_mission.registry.SensorTransform",
+  "x-implementation-neutral": "Nothing here requires a trust coefficient, a Bayesian update, a graph, or this repository. CSIA-specific fields, where any, carry x-csia-specific with the reason they are kept."
+}

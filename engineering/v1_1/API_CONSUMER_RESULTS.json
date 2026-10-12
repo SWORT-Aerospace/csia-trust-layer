@@ -1,0 +1,155 @@
+{
+  "all_negative_tests_rejected": true,
+  "artifact": "API_CONSUMER_RESULTS",
+  "compatibility": {
+    "projection_accepted": true,
+    "projection_carries_trust_mode": true,
+    "projection_fields": [
+      "_v1_compat_note",
+      "leader",
+      "level",
+      "posterior",
+      "t",
+      "trust",
+      "trust_mode"
+    ],
+    "raw_v1_1_accepted_by_v1_consumer": false,
+    "raw_v1_1_refusal": "v1 consumer: payload does not carry the v1 field set ['leader', 'level', 'posterior', 't', 'trust']; refusing rather than guessing",
+    "v1_consumer_on_projection": {
+      "leader": "nominal",
+      "level": "NORMAL",
+      "t": 30.0
+    },
+    "version_mismatch_refused": true
+  },
+  "consumer": "csia/v1_1/monitor.py",
+  "csia_sha": "5490ccef8985e34201d2b0c7dfa81ad67ca77be4",
+  "firewall": {
+    "all_control_denied": true,
+    "denied": [
+      {
+        "denied": true,
+        "error": "SET_FLIGHT_MODE (flight mode change) is denied in SHADOW mode. CSIA has no command authority: it reports and logs. Grant",
+        "operation": "SET_FLIGHT_MODE"
+      },
+      {
+        "denied": true,
+        "error": "WRITE_PARAMETER (parameter write) is denied in SHADOW mode. CSIA has no command authority: it reports and logs. Granting",
+        "operation": "WRITE_PARAMETER"
+      },
+      {
+        "denied": true,
+        "error": "RTL (return-to-launch) is denied in SHADOW mode. CSIA has no command authority: it reports and logs. Granting one is a s",
+        "operation": "RTL"
+      },
+      {
+        "denied": true,
+        "error": "LAND (land) is denied in SHADOW mode. CSIA has no command authority: it reports and logs. Granting one is a separate saf",
+        "operation": "LAND"
+      },
+      {
+        "denied": true,
+        "error": "SOMETHING_NOBODY_HAS_WRITTEN_YET (unrecognised operation) is denied in SHADOW mode. CSIA has no command authority: it re",
+        "operation": "SOMETHING_NOBODY_HAS_WRITTEN_YET"
+      }
+    ],
+    "evidence": {
+      "denied_attempts": [
+        "SET_FLIGHT_MODE",
+        "WRITE_PARAMETER",
+        "RTL",
+        "LAND",
+        "SOMETHING_NOBODY_HAS_WRITTEN_YET"
+      ],
+      "mode": "SHADOW",
+      "permitted_operations": [
+        "EMIT_OUTPUT",
+        "EMIT_RECOMMENDATION",
+        "READ_LOG",
+        "READ_PARAMETERS",
+        "READ_TELEMETRY",
+        "WRITE_LOG"
+      ],
+      "policy": "DEFAULT_DENY",
+      "transport_guard": "csia.deploy.guard.ReadOnlyMavlinkConnection"
+    },
+    "permitted": [
+      {
+        "allowed": true,
+        "operation": "READ_TELEMETRY"
+      },
+      {
+        "allowed": true,
+        "operation": "WRITE_LOG"
+      },
+      {
+        "allowed": true,
+        "operation": "EMIT_OUTPUT"
+      }
+    ]
+  },
+  "fix_loss_interpretation": {
+    "discriminating_evidence_count": 0,
+    "functions_unavailable": [
+      "COARSE_NAVIGATION",
+      "GEOFENCE_SUPPORT",
+      "POSITION_HOLD",
+      "PRECISION_NAVIGATION"
+    ],
+    "gps_trust_in_payload": 0.987273596,
+    "leader": "nominal",
+    "leader_rendering": "nominal p=0.9925 [NON_IDENTIFIABLE, 0 discriminating, AMBIGUOUS]",
+    "posterior": 0.992496432,
+    "posterior_never_rendered_bare": true,
+    "primary_status": "4 OF 5 FUNCTIONS UNAVAILABLE \u2014 support NON_IDENTIFIABLE",
+    "primary_status_mentions_healthy": false,
+    "primary_status_mentions_posterior": false,
+    "recommendations": [
+      "RESTRICT_PRECISION_NAV",
+      "INHIBIT_GPS_MODES",
+      "SWITCH_NAV_INERTIAL"
+    ],
+    "rendered": "t=   26.00  4 OF 5 FUNCTIONS UNAVAILABLE \u2014 support NON_IDENTIFIABLE\n  assurance          CAUTION\n  diagnosis          nominal p=0.9925 [NON_IDENTIFIABLE, 0 discriminating, AMBIGUOUS]\n  evidence           16 active, 0 discriminating\n  sequential alarms  none\n  COARSE_NAVIGATION      INELIGIBLE  REQUIRED_SOURCE_NOT_FRESH, REQUIRED_RELATION_NOT_APPLICABLE, SUPPORT_LOST_FOR_REQUIRED_INFORMATION\n  GEOFENCE_SUPPORT       INELIGIBLE  REQUIRED_SOURCE_NOT_FRESH, REQUIRED_RELATION_NOT_APPLICABLE, SUPPORT_LOST_FOR_REQUIRED_INFORMATION\n  INERTIAL_CONTINUATION  ELIGIBLE    ALL_REQUIREMENTS_MET\n  POSITION_HOLD          INELIGIBLE  REQUIRED_SOURCE_NOT_FRESH, REQUIRED_RELATION_NOT_APPLICABLE, SUPPORT_LOST_FOR_REQUIRED_INFORMATION\n  PRECISION_NAVIGATION   INELIGIBLE  REQUIRED_SOURCE_NOT_FRESH, REQUIRED_RELATION_NOT_APPLICABLE, SUPPORT_LOST_FOR_REQUIRED_INFORMATION\n  advisory           RESTRICT_PRECISION_NAV, INHIBIT_GPS_MODES, SWITCH_NAV_INERTIAL\n  ledger             ASSURANCE_STATE_CHANGED assurance NORMAL->CAUTION",
+    "support_state": "NON_IDENTIFIABLE",
+    "timestamp": 26.0
+  },
+  "gate_E_consumer_pass": true,
+  "gate_F_firewall_pass": true,
+  "generation_command": "python engineering/v1_1/phase4_5/run_gate_c.py",
+  "negative_tests": [
+    {
+      "case": "unknown_schema_version",
+      "reason": "unsupported schema_version '2.0.0'; this consumer understands ('1.1',). Refusing rather than reinterpreting fields whose meaning may have changed.",
+      "rejected": true
+    },
+    {
+      "case": "malformed_payload",
+      "reason": "payload is str, not an object",
+      "rejected": true
+    },
+    {
+      "case": "missing_required_field",
+      "reason": "schema validation failed: 'posterior' is a required property\n\nFailed validating 'required' in schema['properties']['diagnosis']:\n    {'description': 'Section 21. The field is `posterior`, NOT '\n      ",
+      "rejected": true
+    },
+    {
+      "case": "sequential_kh_mismatch",
+      "reason": "schema validation failed: 500.0 was expected\n\nFailed validating 'const' in schema['properties']['sequential']['properties']['h']:\n    {'const': 500.0}\n\nOn instance['sequential']['h']:\n    5.0",
+      "rejected": true
+    },
+    {
+      "case": "unknown_trust_mode",
+      "reason": "schema validation failed: 'FLAT_V2_EXPERIMENTAL' is not one of ['FLAT_V1_1', 'LEGACY_NEIGHBOR_PROPAGATION']\n\nFailed validating 'enum' in schema['properties']['trust']['properties']['mode']:\n    {'desc",
+      "rejected": true
+    },
+    {
+      "case": "unknown_function_state",
+      "reason": "schema validation failed: 'PROBABLY_FINE' is not one of ['ELIGIBLE', 'DEGRADED', 'INELIGIBLE', 'UNKNOWN']\n\nFailed validating 'enum' in schema['properties']['function_eligibility']['additionalPropertie",
+      "rejected": true
+    }
+  ],
+  "payloads_accepted": 2,
+  "payloads_rejected": 0,
+  "schema_version_consumed": "1.1.0",
+  "stream": "engineering/v1_1/api_consumer_stream.jsonl"
+}

@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.1.0",
+  "timestamp": 30.0,
+  "platform": "ardupilot-derived deterministic simulator",
+  "assurance": {
+    "level": "NORMAL",
+    "level_value": 0,
+    "armed": true,
+    "transition_time": null
+  },
+  "trust": {
+    "mode": "FLAT_V1_1",
+    "nodes": {
+      "baro": 0.996417872,
+      "battery": 0.995903453,
+      "gps": 0.980513397,
+      "imu0": 0.979272542,
+      "imu1": 0.998594909,
+      "mag": 0.967614265,
+      "motor_esc": 0.995372641,
+      "vibration": 0.998862803
+    }
+  },
+  "sequential": {
+    "k": 0.5,
+    "h": 500.0,
+    "covered_nodes": [
+      "battery",
+      "gps",
+      "mag",
+      "motor_esc",
+      "vibration"
+    ],
+    "nodes_without_residual": {
+      "baro": "clean-arm sigma0 is degenerate (0.0 over 1500 ticks)",
+      "imu0": "no per-IMU physics chi-square exists in this construction",
+      "imu1": "no per-IMU physics chi-square exists in this construction"
+    },
+    "alarming": [],
+    "S": {}
+  },
+  "diagnosis": {
+    "leader": "nominal",
+    "posterior": 0.995876948,
+    "runner_up": "unexpected_maneuver",
+    "score_margin": 5.502617918,
+    "active_evidence_count": 21,
+    "discriminating_evidence_count": 1,
+    "identifiable": true,
+    "ambiguity": "UNIQUE",
+    "prior_sensitive": false,
+    "support_state": "EVIDENCE_BACKED",
+    "unknown_fault_model": "NOT_IMPLEMENTED",
+    "non_identifiable_against": []
+  },
+  "support": {
+    "state": "EVIDENCE_BACKED",
+    "leader_identifiable": true,
+    "non_identifiable_against": [],
+    "discriminating_evidence": {
+      "gps_fault": 1,
+      "imu0_bias_drift": 3,
+      "imu1_bias_drift": 2,
+      "mag_interference": 4,
+      "power_fault": 5,
+      "unexpected_maneuver": 1,
+      "vibration_anomaly": 3
+    }
+  },
+  "ambiguity": "UNIQUE",
+  "evidence": {
+    "fresh": {
+      "baro": true,
+      "battery": true,
+      "gps": true,
+      "imu0": true,
+      "imu1": true,
+      "mag": true,
+      "motor_esc": true,
+      "vibration": true
+    },
+    "missing_reason": {},
+    "current_valid": null,
+    "active_relations": [
+      "accel_esc_rpm",
+      "accel_motor_current",
+      "altitude_baro",
+      "attitude_gravity_mag",
+      "heading_course",
+      "power_thrust",
+      "redundant_imu",
+      "temp_bias_drift",
+      "velocity_gps_doppler",
+      "vibration_prop_freq"
+    ],
+    "suppressed_relations": [],
+    "suppression_reasons": {},
+    "active_evidence_count": 21
+  },
+  "function_eligibility": {
+    "COARSE_NAVIGATION": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "GEOFENCE_SUPPORT": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "INERTIAL_CONTINUATION": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": null
+    },
+    "POSITION_HOLD": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": 8.04
+    },
+    "PRECISION_NAVIGATION": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": 8.04
+    }
+  },
+  "recommendations": [],
+  "provenance_summary": {
+    "software_sha": "bf6a19eaa0f04014150e95acc7c1b8353716cbe5",
+    "configuration_hash": "47c62639d672ba660b5afcf7c92b3317737a99d9d25fe08765c2d09630f08b4c",
+    "input_trace_hash": "80edd87b76b5c816ab03523d3cf49f25fa786dcf50b99632ce33b507b62b2d5c",
+    "trust_mode": "FLAT_V1_1",
+    "frozen_core_tag": "csia-v1.0-research-final",
+    "authority": "READ_ONLY"
+  }
+}

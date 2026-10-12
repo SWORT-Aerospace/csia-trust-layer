@@ -1,0 +1,77 @@
+{
+ "classes": [
+  {
+   "also": "REQUIRES_NEW_VALIDITY_CONDITION in forward flight (inflow) and if THR_MDL_FAC is wrong",
+   "class": "TRANSFERS_AFTER_RECALIBRATION",
+   "producer": "px4:esc.telemetry_response",
+   "why": "noise, quantization and per-motor offsets are recalibration problems; position-dependent inflow is not"
+  },
+  {
+   "also": "steadiness must be redefined (RR-06); payload/mass changes have no calibration answer",
+   "class": "REQUIRES_NEW_VALIDITY_CONDITION",
+   "producer": "px4:allocator.compensation",
+   "why": "the statistic is sound in a symmetric, constant-mass hover; the conditions that make it sound are what reality breaks"
+  },
+  {
+   "also": "as defined (a maximum against an SIH threshold); needs a new definition",
+   "class": "DOES_NOT_TRANSFER",
+   "producer": "2.3 steadiness condition (theta_steady)",
+   "why": "RB0: rest-state real boards exceed it"
+  },
+  {
+   "also": "as evidence; stays context",
+   "class": "DOES_NOT_TRANSFER",
+   "producer": "px4:vehicle.rate_transient",
+   "why": "a 0.2 s window needs onset accuracy that real timing and noise do not give (2.3 UNKNOWN_ONSET.md)"
+  },
+  {
+   "also": null,
+   "class": "TRANSFERS_DIRECTLY",
+   "producer": "px4:allocator.status",
+   "why": "PX4's own flags; nothing calibrated by CSIA"
+  },
+  {
+   "also": "gains reach with a power module (source health NOMINAL)",
+   "class": "TRANSFERS_DIRECTLY",
+   "producer": "px4:battery.status",
+   "why": "presence semantics, no threshold"
+  },
+  {
+   "also": "only on the contract's PX4 schema; DOES_NOT_TRANSFER across versions until per-version contracts exist (RR-01)",
+   "class": "TRANSFERS_DIRECTLY",
+   "producer": "px4:ekf2.estimator_status (2.2)",
+   "why": "EKF2's own gates"
+  },
+  {
+   "also": "and the maneuvering false-event rate needs maneuver-aware discovery",
+   "class": "TRANSFERS_AFTER_RECALIBRATION",
+   "producer": "event discovery: telemetry and compensation CUSUMs",
+   "why": "k and h are SIH's"
+  },
+  {
+   "also": "real warnings will add candidate events",
+   "class": "TRANSFERS_DIRECTLY",
+   "producer": "event discovery: PX4 monitor triggers",
+   "why": "PX4's own"
+  },
+  {
+   "also": "dropout detection transfers (RR-03); the gap rule's reference interval does not (RR-04, RR-05)",
+   "class": "REQUIRES_NEW_VALIDITY_CONDITION",
+   "producer": "log completeness",
+   "why": "real jitter and logging rates"
+  },
+  {
+   "also": null,
+   "class": "DOES_NOT_TRANSFER",
+   "producer": "frozen v1.1 CUSUM",
+   "why": "no input in a PX4 log (2.3)"
+  },
+  {
+   "also": "the plant model (g, c, mixing) must be identified on each vehicle from its own nominal flights",
+   "class": "REQUIRES_NEW_MODEL",
+   "producer": "maneuver-study B3/B4 (research candidate, not in the product)",
+   "why": "it is model-based; the model is SIH's until identified on hardware"
+  }
+ ],
+ "label": "RB-001 Part 28: predictions and RB0 observations; NONE is a physical validation"
+}

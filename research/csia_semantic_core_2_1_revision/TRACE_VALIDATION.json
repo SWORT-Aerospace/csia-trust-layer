@@ -1,0 +1,121 @@
+{
+ "Q1_Q2_Q5_predicate_faults": {
+  "every_failed_id_has_impact_entry": 1344,
+  "localizations_with_fault": 1344,
+  "material_entries": 1932,
+  "not_material_entries": 840,
+  "withheld": 252,
+  "withheld_keeps_survivors": 252,
+  "withheld_names_predicate_hypothesis_role": 252
+ },
+ "Q1_Q2_example": {
+  "fault_impact": [
+   {
+    "action": "SUPPORTED_WITHHELD",
+    "dependency": "MATERIAL",
+    "evaluated_as": "NO_TIMING_SEGMENT_OVER_BUDGET_FALSE",
+    "hypothesis": "TIMING/deadline_violation",
+    "predicate": "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "predicate_fault": true,
+    "role": "REFUTER",
+    "why": "HAD_IT_BEEN_TRUE_IT_WOULD_HAVE_REJECTED_THE_SUPPORTED_HYPOTHESIS"
+   }
+  ],
+  "outcome": "WITHHELD_PREDICATE_FAULT",
+  "outcome_reason": "FAILED_REFUTER_OF_SUPPORTED_HYPOTHESIS",
+  "predicate_errors": [
+   {
+    "context": {
+     "hypotheses": [
+      "TIMING/deadline_violation"
+     ],
+     "symptom": "POSITION_UNAVAILABLE"
+    },
+    "error_class": "RAISED:InjectedFault",
+    "evaluated_as": [
+     "NO_TIMING_SEGMENT_OVER_BUDGET_FALSE"
+    ],
+    "predicate": "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "subject": "COARSE_NAVIGATION"
+   }
+  ],
+  "scenario": "MS_A1_SENSOR_DELAY",
+  "survivors": [
+   "TIMING/deadline_violation"
+  ],
+  "unit": "POSITION_UNAVAILABLE|COARSE_NAVIGATION",
+  "v2_0_view_verdict": "AMBIGUOUS",
+  "withheld_because": [
+   {
+    "evaluated_as": "NO_TIMING_SEGMENT_OVER_BUDGET_FALSE",
+    "hypothesis": "TIMING/deadline_violation",
+    "predicate": "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "role": "REFUTER"
+   }
+  ]
+ },
+ "Q1_withheld_unique": {
+  "named_gate": 281,
+  "names_alternative": 281,
+  "withheld_unique": 281
+ },
+ "Q3_example": {
+  "PACING_INPUTS_NOMINAL": {
+   "ignored": {
+    "COMPUTE/cpu:compute.resource_headroom": "DECLARED_DEPENDENCY_NOT_PACING"
+   },
+   "read": {
+    "SENSOR/source.imu0:v1_1.source_health": "NOMINAL"
+   },
+   "value": true
+  },
+  "declaration_source": "PX4 547e2ca src/modules/ekf2/EKF2.cpp lines 625-767 (imu_updated set at 635/696, the update and publications gated at 767); csia/v2/profiles/aircraft.py ProcessSpec state_estimator depends_on (COMPUTE/cpu, SENSOR/source.imu0)",
+  "outcome": "SUPPORTED",
+  "pacing_declarations_digest": "0b48730ddc95e5b199b763126bbbd2943be7e5a01d2fd925edda20c56b0e01b3",
+  "rejected": [
+   [
+    "COMMUNICATION/input_starvation",
+    "PACING_INPUTS_NOMINAL"
+   ]
+  ],
+  "unit": "OUTPUT_MISSING|state_estimator"
+ },
+ "Q3_pacing": {
+  "non_pacing_dependencies_named": 123,
+  "output_missing_localizations": 123,
+  "pacing_read_named": 123,
+  "result_has_pacing_digest": 123
+ },
+ "Q4_example": {
+  "action": "MADE_UNAVAILABLE",
+  "current_epoch": [
+   1
+  ],
+  "evidence_epoch": [
+   0
+  ],
+  "key": "ekf2.selector.instance_changed_count",
+  "reason": "STALE_CONFIGURATION_EPOCH",
+  "record": "COMPUTE/state_estimator:compute.deadline_met",
+  "source": "compute",
+  "transition_event": "instance_changed_count -> 1"
+ },
+ "Q4_stale_evidence": {
+  "complete_fields": 269,
+  "inadmissible_entries": 269,
+  "with_transition_event": 110,
+  "without_event_by_reason": {
+   "CONTEXT_BEHIND_PRODUCER": 11,
+   "EPOCH_AHEAD_OF_CONTEXT": 88,
+   "MALFORMED_EPOCH": 60
+  }
+ },
+ "harness": "semantic_core_2_1_revision_trace_validation",
+ "trace_size_bytes": {
+  "2_1_0_max": 22947,
+  "2_1_0_median": 5955,
+  "2_1_1_r2_max": 29037,
+  "2_1_1_r2_median": 6278,
+  "sampled_ticks": 264
+ }
+}

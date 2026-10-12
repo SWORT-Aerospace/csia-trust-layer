@@ -1,0 +1,59 @@
+# E2M bench sensor inventory.
+#
+# EMPTY BY DESIGN. Gate 2 of research/bus_provenance/E2M_GATE_STATUS.md.
+#
+# The repository contains no E2M bench sensor inventory, and the owner's
+# decision forbids inventing one from photographs, memory, breakout-board
+# appearance or an assumed starter kit. Nothing has been guessed, so the list
+# below is empty rather than plausible.
+#
+# Fill one block per sensor the owner physically holds, then run:
+#     python tools/hardware/validate_inventory.py
+#
+# States, in the owner's order. Each is a different claim:
+#   PLANNED                 intended, not bought
+#   ORDERED                 bought, not arrived
+#   OWNER_REPORTED_ON_HAND  the owner says it is on the bench
+#   VISUALLY_IDENTIFIED     somebody read the part marking
+#   DATASHEET_VERIFIED      its datasheet is in the repository and hashed
+#   ELECTRICALLY_VERIFIED   voltages and pull-ups checked against that document
+#   DISCOVERED_ON_BUS       it answered its address in a recorded run
+#   MEASUREMENT_VERIFIED    it produced a plausible measurement in a recorded run
+#
+# The last two are claims about a physical event. The validator refuses them
+# unless `evidence_run` names a run manifest that exists.
+
+schema: csia.e2m.sensor_inventory/1
+bus: e2m_bench_0
+mux_part: TCA9548A
+mux_address: null          # BLOCKED: gate 1, datasheet not retrieved
+mux_datasheet: null        # BLOCKED: gate 1
+
+sensors: []
+
+# Template. Copy into `sensors:` and fill. Do not leave a field guessed --
+# `null` is an honest answer and a wrong value is not.
+#
+# - logical_id: null            # the name CSIA will use
+#   manufacturer: null
+#   part_number: null
+#   breakout_vendor: null
+#   breakout_revision: null
+#   datasheet_path: null        # repository path to the hashed PDF
+#   datasheet_sha256: null
+#   i2c_address: null
+#   supply_voltage_v: null
+#   logic_voltage_v: null
+#   pullups_on_breakout: null   # true / false / unknown
+#   pullup_rail_v: null
+#   register_map_ref: null      # page or section of the datasheet
+#   measurement_units: null
+#   conversion_time_ms: null
+#   reset_behaviour: null
+#   identity_register: null     # native ID or serial, if the part has one
+#   expected_identity_value: null
+#   channel: null               # TCA9548A channel 0..7
+#   owner_reported_on_hand: false
+#   physically_verified_by_operator: false
+#   state: PLANNED
+#   evidence_run: null          # run manifest, required for the last two states

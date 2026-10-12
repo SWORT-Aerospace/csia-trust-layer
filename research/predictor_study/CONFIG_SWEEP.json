@@ -1,0 +1,1834 @@
+{
+  "clean_profiles": [
+    "hover_circle",
+    "fast_cruise"
+  ],
+  "configurations_run": 16,
+  "faults": {
+    "baro_bias_drift": {
+      "kind": "bias_drift",
+      "params": {
+        "rate": 0.5
+      },
+      "target": "baro"
+    },
+    "battery_power_sag": {
+      "kind": "power_sag",
+      "params": {
+        "depth_v": 1.3
+      },
+      "target": "battery"
+    },
+    "gps_spoof": {
+      "kind": "gps_spoof",
+      "params": {
+        "drift": [
+          4.0,
+          4.0,
+          0.0
+        ]
+      },
+      "target": "gps"
+    }
+  },
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "rho is the forgetting factor in alpha <- rho*alpha + E; changing it from 0.998 to 0.95 shortens the evidence memory from ~500 ticks to ~20, which cannot leave the trace identical",
+        "control": "a different rho reaches the trust math",
+        "kind": "POSITIVE",
+        "observed": "0.025094771935640914",
+        "status": "PASS"
+      },
+      {
+        "basis": "csia/scenarios.py make_sensors() is the authority on the seeds every other measurement in this repository used",
+        "control": "seed offset 0 is the frozen simulator, exactly",
+        "kind": "NEGATIVE",
+        "observed": "{'baro': True, 'battery': True, 'gps': True, 'imu0': True, 'imu1': True, 'mag': True, 'motor_esc': True, 'vibration': True}",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.research.config_sweep",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "metric": "separation = clean_floor - fault_floor, and headroom = clean_floor, both post-arm, both reported, never collapsed into one score",
+  "question": "Is there detection headroom in the six retention and fusion constants, beyond what a single noise realisation would show?",
+  "results": [
+    {
+      "config": "SHIPPED",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9838952923361649,
+            "battery": 0.9620853657639006,
+            "gps": 0.886114534466071
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26279489799261996,
+              "sensor": "baro",
+              "separation": 0.721100394343545
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6447289409932323,
+              "sensor": "battery",
+              "separation": 0.3173564247706683
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5905011523312569,
+              "sensor": "gps",
+              "separation": 0.29561338213481414
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9731624061106822,
+            "battery": 0.9614586892260493,
+            "gps": 0.8925855169015007
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.256505695492827,
+              "sensor": "baro",
+              "separation": 0.7166567106178552
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6438834480111988,
+              "sensor": "battery",
+              "separation": 0.3175752412148505
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5883459322453598,
+              "sensor": "gps",
+              "separation": 0.30423958465614087
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.746488956951792,
+            "battery": 0.9616025621183355,
+            "gps": 0.787682015432112
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2592097293794903,
+              "sensor": "baro",
+              "separation": 0.4872792275723017
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6432409619499818,
+              "sensor": "battery",
+              "separation": 0.3183616001683537
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5541312460306195,
+              "sensor": "gps",
+              "separation": 0.23355076940149255
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.901182218466213,
+          "headroom_min": 0.746488956951792,
+          "separation_mean": 0.6416787775112339,
+          "separation_spread": 0.23382116677124332
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9617155390360951,
+          "headroom_min": 0.9614586892260493,
+          "separation_mean": 0.3177644220512908,
+          "separation_spread": 0.0010051753976854094
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.855460688933228,
+          "headroom_min": 0.787682015432112,
+          "separation_mean": 0.2778012453974825,
+          "separation_spread": 0.07068881525464832
+        }
+      }
+    },
+    {
+      "config": "rho_max=0.99",
+      "config_values": {
+        "rho_max": 0.99,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9844561493178677,
+            "battery": 0.9729608565785793,
+            "gps": 0.8718586337244418
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.23885236678525582,
+              "sensor": "baro",
+              "separation": 0.745603782532612
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6447054001924648,
+              "sensor": "battery",
+              "separation": 0.32825545638611453
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5905009902645655,
+              "sensor": "gps",
+              "separation": 0.28135764345987635
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.951627646647415,
+            "battery": 0.9723608051631172,
+            "gps": 0.8735302014023265
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.23270128830379716,
+              "sensor": "baro",
+              "separation": 0.7189263583436178
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6438631154095444,
+              "sensor": "battery",
+              "separation": 0.32849768975357274
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5883456030290821,
+              "sensor": "gps",
+              "separation": 0.2851845983732444
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7457904440263916,
+            "battery": 0.97252057396211,
+            "gps": 0.7804079059209419
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.23563580440406262,
+              "sensor": "baro",
+              "separation": 0.510154639622329
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.643219425358096,
+              "sensor": "battery",
+              "separation": 0.32930114860401405
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5539082078265041,
+              "sensor": "gps",
+              "separation": 0.22649969809443782
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8939580799972248,
+          "headroom_min": 0.7457904440263916,
+          "separation_mean": 0.6582282601661863,
+          "separation_spread": 0.23544914291028296
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9726140785679355,
+          "headroom_min": 0.9723608051631172,
+          "separation_mean": 0.3286847649145671,
+          "separation_spread": 0.0010456922178995187
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8419322470159033,
+          "headroom_min": 0.7804079059209419,
+          "separation_mean": 0.2643473133091862,
+          "separation_spread": 0.05868490027880657
+        }
+      }
+    },
+    {
+      "config": "rho_max=0.994",
+      "config_values": {
+        "rho_max": 0.994,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9847719804916638,
+            "battery": 0.9676700980569489,
+            "gps": 0.876983409439798
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25063106330175283,
+              "sensor": "baro",
+              "separation": 0.7341409171899109
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.644715017545935,
+              "sensor": "battery",
+              "separation": 0.32295508051101396
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5905010394035806,
+              "sensor": "gps",
+              "separation": 0.28648237003621746
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9626624762581657,
+            "battery": 0.9670500153497071,
+            "gps": 0.880270316024745
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.24439011625709783,
+              "sensor": "baro",
+              "separation": 0.7182723600010679
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6438714171150106,
+              "sensor": "battery",
+              "separation": 0.3231785982346965
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5883456994899419,
+              "sensor": "gps",
+              "separation": 0.29192461653480317
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7461703923018692,
+            "battery": 0.9672008614036713,
+            "gps": 0.7833169614486042
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.24731495794096195,
+              "sensor": "baro",
+              "separation": 0.4988554343609073
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.643228192934355,
+              "sensor": "battery",
+              "separation": 0.3239726684693164
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5539965821716363,
+              "sensor": "gps",
+              "separation": 0.2293203792769679
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.897868283017233,
+          "headroom_min": 0.7461703923018692,
+          "separation_mean": 0.6504229038506287,
+          "separation_spread": 0.23528548282900363
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9673069916034424,
+          "headroom_min": 0.9670500153497071,
+          "separation_mean": 0.32336878240500894,
+          "separation_spread": 0.0010175879583024239
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8468568956377158,
+          "headroom_min": 0.7833169614486042,
+          "separation_mean": 0.26924245528266283,
+          "separation_spread": 0.06260423725783526
+        }
+      }
+    },
+    {
+      "config": "rho_max=0.999",
+      "config_values": {
+        "rho_max": 0.999,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9834244599797521,
+            "battery": 0.9606747020193692,
+            "gps": 0.8893576114590847
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26579572078642305,
+              "sensor": "baro",
+              "separation": 0.7176287391933291
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6447333563454704,
+              "sensor": "battery",
+              "separation": 0.31594134567389887
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5905012033373411,
+              "sensor": "gps",
+              "separation": 0.2988564081217435
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9778940417328749,
+            "battery": 0.9600485212045956,
+            "gps": 0.8957557216506694
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25950485419717556,
+              "sensor": "baro",
+              "separation": 0.7183891875356994
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6438872648799773,
+              "sensor": "battery",
+              "separation": 0.31616125632461833
+            },
+            "gps_spoof": {
+              "fault_floor": 0.588346040493408,
+              "sensor": "gps",
+              "separation": 0.3074096811572614
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7465552411163964,
+            "battery": 0.960191608608527,
+            "gps": 0.7890679894896394
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2622176845514554,
+              "sensor": "baro",
+              "separation": 0.484337556564941
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6432450237569837,
+              "sensor": "battery",
+              "separation": 0.31694658485154337
+            },
+            "gps_spoof": {
+              "fault_floor": 0.554172753247286,
+              "sensor": "gps",
+              "separation": 0.23489523624235342
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9026245809430078,
+          "headroom_min": 0.7465552411163964,
+          "separation_mean": 0.6401184944313232,
+          "separation_spread": 0.23405163097075837
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.960304943944164,
+          "headroom_min": 0.9600485212045956,
+          "separation_mean": 0.31634972895002017,
+          "separation_spread": 0.0010052391776445013
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8580604408664646,
+          "headroom_min": 0.7890679894896394,
+          "separation_mean": 0.28038710850711945,
+          "separation_spread": 0.072514444914908
+        }
+      }
+    },
+    {
+      "config": "rho_max=0.9995",
+      "config_values": {
+        "rho_max": 0.9995,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9831472024507832,
+            "battery": 0.9599707194855824,
+            "gps": 0.8909883833579234
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2672929938290304,
+              "sensor": "baro",
+              "separation": 0.7158542086217529
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6447357358950567,
+              "sensor": "battery",
+              "separation": 0.3152349835905257
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5905012347270665,
+              "sensor": "gps",
+              "separation": 0.3004871486308569
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9803969879931997,
+            "battery": 0.9593451064618552,
+            "gps": 0.8966385881147327
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2610027118629945,
+              "sensor": "baro",
+              "separation": 0.7193942761302052
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6438893221124845,
+              "sensor": "battery",
+              "separation": 0.3154557843493707
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5883461077660743,
+              "sensor": "gps",
+              "separation": 0.3082924803486584
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7465865364896448,
+            "battery": 0.9594880128806107,
+            "gps": 0.7897714488260489
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.263719804651516,
+              "sensor": "baro",
+              "separation": 0.4828667318381288
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6432472147129759,
+              "sensor": "battery",
+              "separation": 0.31624079816763484
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5541937915554802,
+              "sensor": "gps",
+              "separation": 0.23557765727056867
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9033769089778759,
+          "headroom_min": 0.7465865364896448,
+          "separation_mean": 0.6393717388633623,
+          "separation_spread": 0.23652754429207645
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9596012796093495,
+          "headroom_min": 0.9593451064618552,
+          "separation_mean": 0.3156438553691771,
+          "separation_spread": 0.001005814577109132
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8591328067662349,
+          "headroom_min": 0.7897714488260489,
+          "separation_mean": 0.281452428750028,
+          "separation_spread": 0.07271482307808974
+        }
+      }
+    },
+    {
+      "config": "rho_min=0.85",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.85,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.984765373535332,
+            "battery": 0.985901504010069,
+            "gps": 0.8557442098582908
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.12655457834452064,
+              "sensor": "baro",
+              "separation": 0.8582107951908113
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6246385198297432,
+              "sensor": "battery",
+              "separation": 0.3612629841803259
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5873726450744776,
+              "sensor": "gps",
+              "separation": 0.2683715647838132
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.958054647716435,
+            "battery": 0.9854935039879781,
+            "gps": 0.855321952141988
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.1241985532372179,
+              "sensor": "baro",
+              "separation": 0.833856094479217
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6264042657536883,
+              "sensor": "battery",
+              "separation": 0.35908923823428973
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5839721618186057,
+              "sensor": "gps",
+              "separation": 0.27134979032338236
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7396656581214058,
+            "battery": 0.9856473272993875,
+            "gps": 0.7522528982965636
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.1256072331017831,
+              "sensor": "baro",
+              "separation": 0.6140584250196227
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6248496867004265,
+              "sensor": "battery",
+              "separation": 0.360797640598961
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5468028372951488,
+              "sensor": "gps",
+              "separation": 0.20545006100141483
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8941618931243909,
+          "headroom_min": 0.7396656581214058,
+          "separation_mean": 0.7687084382298837,
+          "separation_spread": 0.24415237017118863
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9856807784324783,
+          "headroom_min": 0.9854935039879781,
+          "separation_mean": 0.36038328767119215,
+          "separation_spread": 0.002173745946036143
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8211063534322808,
+          "headroom_min": 0.7522528982965636,
+          "separation_mean": 0.24839047203620346,
+          "separation_spread": 0.06589972932196753
+        }
+      }
+    },
+    {
+      "config": "rho_min=0.9",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.9,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9844690470792503,
+            "battery": 0.9782732208479179,
+            "gps": 0.8633508935389946
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.16796540275944272,
+              "sensor": "baro",
+              "separation": 0.8165036443198076
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6299903485122103,
+              "sensor": "battery",
+              "separation": 0.34828287233570765
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5879476914799375,
+              "sensor": "gps",
+              "separation": 0.2754032020590571
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9645057455905869,
+            "battery": 0.9777467227040785,
+            "gps": 0.8636292766759551
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.1640071443305699,
+              "sensor": "baro",
+              "separation": 0.800498601260017
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6329210632729787,
+              "sensor": "battery",
+              "separation": 0.3448256594310998
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5849226717835876,
+              "sensor": "gps",
+              "separation": 0.27870660489236754
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7412747798784599,
+            "battery": 0.9778997014274176,
+            "gps": 0.7629069421689686
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.16602059942847472,
+              "sensor": "baro",
+              "separation": 0.5752541804499852
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6316710336956988,
+              "sensor": "battery",
+              "separation": 0.3462286677317188
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5482461076096755,
+              "sensor": "gps",
+              "separation": 0.21466083455929308
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8967498575160991,
+          "headroom_min": 0.7412747798784599,
+          "separation_mean": 0.7307521420099367,
+          "separation_spread": 0.24124946386982238
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9779732149931379,
+          "headroom_min": 0.9777467227040785,
+          "separation_mean": 0.34644573316617544,
+          "separation_spread": 0.003457212904607876
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8299623707946395,
+          "headroom_min": 0.7629069421689686,
+          "separation_mean": 0.2562568805035726,
+          "separation_spread": 0.06404577033307446
+        }
+      }
+    },
+    {
+      "config": "rho_min=0.97",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.97,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9835809151248718,
+            "battery": 0.9528402210420386,
+            "gps": 0.89984626738275
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.345831805865917,
+              "sensor": "baro",
+              "separation": 0.6377491092589548
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6585301970324832,
+              "sensor": "battery",
+              "separation": 0.2943100240095554
+            },
+            "gps_spoof": {
+              "fault_floor": 0.595063797601256,
+              "sensor": "gps",
+              "separation": 0.3047824697814939
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9768816434674227,
+            "battery": 0.9522319948078559,
+            "gps": 0.904552271761591
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.338048522784699,
+              "sensor": "baro",
+              "separation": 0.6388331206827237
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6579196176895007,
+              "sensor": "battery",
+              "separation": 0.29431237711835523
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5944786305821057,
+              "sensor": "gps",
+              "separation": 0.3100736411794853
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7573620163650853,
+            "battery": 0.9524000774626072,
+            "gps": 0.815385092633916
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.3413699382357423,
+              "sensor": "baro",
+              "separation": 0.41599207812934297
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6574749617040933,
+              "sensor": "battery",
+              "separation": 0.294925115758514
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5628034380869645,
+              "sensor": "gps",
+              "separation": 0.2525816545469515
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9059415249857933,
+          "headroom_min": 0.7573620163650853,
+          "separation_mean": 0.5641914360236738,
+          "separation_spread": 0.22284104255338072
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9524907644375006,
+          "headroom_min": 0.9522319948078559,
+          "separation_mean": 0.29451583896214156,
+          "separation_spread": 0.0006150917489585739
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8732612105927524,
+          "headroom_min": 0.815385092633916,
+          "separation_mean": 0.2891459218359769,
+          "separation_spread": 0.057491986632533854
+        }
+      }
+    },
+    {
+      "config": "w_nbr=0.25",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.24999999999999997,
+        "w_phys": 0.3461538461538461,
+        "w_stat": 0.17307692307692304,
+        "w_temp": 0.23076923076923075
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9870118630166032,
+            "battery": 0.9580117587696556,
+            "gps": 0.8986471420182127
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26693970611232537,
+              "sensor": "baro",
+              "separation": 0.7200721569042778
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.5900718549921915,
+              "sensor": "battery",
+              "separation": 0.3679399037774641
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5275013302171101,
+              "sensor": "gps",
+              "separation": 0.3711458118011026
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9803844531007507,
+            "battery": 0.9571776334192329,
+            "gps": 0.8767509022730776
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26025172998592894,
+              "sensor": "baro",
+              "separation": 0.7201327231148218
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.589096286166768,
+              "sensor": "battery",
+              "separation": 0.3680813472524649
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5250145381767582,
+              "sensor": "gps",
+              "separation": 0.35173636409631936
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.8183175609940372,
+            "battery": 0.9574224937806217,
+            "gps": 0.8313514206132051
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2628749354903822,
+              "sensor": "baro",
+              "separation": 0.555442625503655
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.5883549560961334,
+              "sensor": "battery",
+              "separation": 0.3690675376844883
+            },
+            "gps_spoof": {
+              "fault_floor": 0.500380872989859,
+              "sensor": "gps",
+              "separation": 0.3309705476233461
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9285712923704637,
+          "headroom_min": 0.8183175609940372,
+          "separation_mean": 0.6652158351742515,
+          "separation_spread": 0.16469009761116682
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9575372953231701,
+          "headroom_min": 0.9571776334192329,
+          "separation_mean": 0.3683629295714724,
+          "separation_spread": 0.0011276339070241947
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8689164883014985,
+          "headroom_min": 0.8313514206132051,
+          "separation_mean": 0.3512842411735894,
+          "separation_spread": 0.04017526417775652
+        }
+      }
+    },
+    {
+      "config": "w_nbr=0.45",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.44999999999999996,
+        "w_phys": 0.25384615384615383,
+        "w_stat": 0.12692307692307692,
+        "w_temp": 0.16923076923076924
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.980782150309162,
+            "battery": 0.9661564049252914,
+            "gps": 0.8592802957793717
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25630580635349376,
+              "sensor": "baro",
+              "separation": 0.7244763439556683
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6993860269942733,
+              "sensor": "battery",
+              "separation": 0.2667703779310181
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6535009744609389,
+              "sensor": "gps",
+              "separation": 0.2057793213184328
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9659385997429251,
+            "battery": 0.9657382631238796,
+            "gps": 0.8656857066751105
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25095666345120654,
+              "sensor": "baro",
+              "separation": 0.7149819362917185
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6986706098556296,
+              "sensor": "battery",
+              "separation": 0.26706765326825
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6516773263142003,
+              "sensor": "gps",
+              "separation": 0.2140083803609102
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.6750041783838412,
+            "battery": 0.9657766507936291,
+            "gps": 0.7453537263224853
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25353017596707716,
+              "sensor": "baro",
+              "separation": 0.421474002416764
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6981269678038309,
+              "sensor": "battery",
+              "separation": 0.2676496829897982
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6083729112430588,
+              "sensor": "gps",
+              "separation": 0.1369808150794265
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8739083094786428,
+          "headroom_min": 0.6750041783838412,
+          "separation_mean": 0.6203107608880503,
+          "separation_spread": 0.30300234153890426
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9658904396142667,
+          "headroom_min": 0.9657382631238796,
+          "separation_mean": 0.2671625713963554,
+          "separation_spread": 0.0008793050587800888
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8234399095923225,
+          "headroom_min": 0.7453537263224853,
+          "separation_mean": 0.1855895055862565,
+          "separation_spread": 0.07702756528148369
+        }
+      }
+    },
+    {
+      "config": "w_phys=0.20",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.4,
+        "w_phys": 0.19999999999999998,
+        "w_stat": 0.17142857142857146,
+        "w_temp": 0.22857142857142862
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.982197579858901,
+            "battery": 0.9568826373061274,
+            "gps": 0.8748883600585041
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25976188938250866,
+              "sensor": "baro",
+              "separation": 0.7224356904763923
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.736803883529361,
+              "sensor": "battery",
+              "separation": 0.22007875377676644
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6748583661527476,
+              "sensor": "gps",
+              "separation": 0.2000299939057565
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9693438446723206,
+            "battery": 0.956164131677053,
+            "gps": 0.8787766157686062
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2539432677647182,
+              "sensor": "baro",
+              "separation": 0.7154005769076024
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.7358418358642449,
+              "sensor": "battery",
+              "separation": 0.22032229581280816
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6723951702255462,
+              "sensor": "gps",
+              "separation": 0.20638144554306004
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7105406700440371,
+            "battery": 0.9563286717277859,
+            "gps": 0.774783528090454
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2568343207246423,
+              "sensor": "baro",
+              "separation": 0.4537063493193948
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.7351072072156458,
+              "sensor": "battery",
+              "separation": 0.2212214645121401
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6338598851267171,
+              "sensor": "gps",
+              "separation": 0.14092364296373694
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8873606981917529,
+          "headroom_min": 0.7105406700440371,
+          "separation_mean": 0.6305142055677965,
+          "separation_spread": 0.26872934115699754
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9564584802369888,
+          "headroom_min": 0.956164131677053,
+          "separation_mean": 0.2205408380339049,
+          "separation_spread": 0.001142710735373642
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8428161679725216,
+          "headroom_min": 0.774783528090454,
+          "separation_mean": 0.18244502747085115,
+          "separation_spread": 0.0654578025793231
+        }
+      }
+    },
+    {
+      "config": "w_phys=0.40",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.3,
+        "w_phys": 0.4,
+        "w_stat": 0.1285714285714286,
+        "w_temp": 0.17142857142857146
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9855902092547085,
+            "battery": 0.9672897736297653,
+            "gps": 0.896397476161567
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26490103869449,
+              "sensor": "baro",
+              "separation": 0.7206891705602185
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.552653998457104,
+              "sensor": "battery",
+              "separation": 0.41463577517266137
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5061439385082138,
+              "sensor": "gps",
+              "separation": 0.39025353765335313
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9769790103917817,
+            "battery": 0.9667551270918442,
+            "gps": 0.9058441491138418
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2580210605506785,
+              "sensor": "baro",
+              "separation": 0.7189579498411032
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.5519250601581531,
+              "sensor": "battery",
+              "separation": 0.41483006693369107
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5042966942651972,
+              "sensor": "gps",
+              "separation": 0.4015474548486446
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7824853221500985,
+            "battery": 0.9668772117256217,
+            "gps": 0.800721316548759
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26076678184023816,
+              "sensor": "baro",
+              "separation": 0.5217185403098603
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.5513747166843181,
+              "sensor": "battery",
+              "separation": 0.41550249504130354
+            },
+            "gps_spoof": {
+              "fault_floor": 0.47455865219872356,
+              "sensor": "gps",
+              "separation": 0.32616266435003544
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9150181805988629,
+          "headroom_min": 0.7824853221500985,
+          "separation_mean": 0.653788553570394,
+          "separation_spread": 0.19897063025035822
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9669740374824104,
+          "headroom_min": 0.9667551270918442,
+          "separation_mean": 0.41498944571588536,
+          "separation_spread": 0.000866719868642174
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8676543139413893,
+          "headroom_min": 0.800721316548759,
+          "separation_mean": 0.37265455228401106,
+          "separation_spread": 0.07538479049860919
+        }
+      }
+    },
+    {
+      "config": "w_temp=0.10",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.39375000000000004,
+        "w_phys": 0.3375000000000001,
+        "w_stat": 0.16875000000000004,
+        "w_temp": 0.1
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9827879484813209,
+            "battery": 0.9671160968145475,
+            "gps": 0.8726072439789292
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2600929671110053,
+              "sensor": "baro",
+              "separation": 0.7226949813703156
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6320859348245906,
+              "sensor": "battery",
+              "separation": 0.33503016198995683
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5804760007566399,
+              "sensor": "gps",
+              "separation": 0.29213124322228934
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9704040082968061,
+            "battery": 0.9667495211117088,
+            "gps": 0.882017252483134
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2535974878292869,
+              "sensor": "baro",
+              "separation": 0.7168065204675191
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6313932271473128,
+              "sensor": "battery",
+              "separation": 0.3353562939643959
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5796647626617003,
+              "sensor": "gps",
+              "separation": 0.3023524898214337
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7153004476050856,
+            "battery": 0.9667990208086934,
+            "gps": 0.7626718471289745
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2565065413981951,
+              "sensor": "baro",
+              "separation": 0.4587939062068905
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6312319027527761,
+              "sensor": "battery",
+              "separation": 0.3355671180559173
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5409484074159429,
+              "sensor": "gps",
+              "separation": 0.22172343971303166
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8894974681277376,
+          "headroom_min": 0.7153004476050856,
+          "separation_mean": 0.6327651360149084,
+          "separation_spread": 0.26390107516342515
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.96688821291165,
+          "headroom_min": 0.9667495211117088,
+          "separation_mean": 0.33531785800342334,
+          "separation_spread": 0.0005369560659604922
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8390987811970126,
+          "headroom_min": 0.7626718471289745,
+          "separation_mean": 0.2720690575855849,
+          "separation_spread": 0.08062905010840205
+        }
+      }
+    },
+    {
+      "config": "w_temp=0.30",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.30624999999999997,
+        "w_phys": 0.2625,
+        "w_stat": 0.13125,
+        "w_temp": 0.30000000000000004
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.985005475699953,
+            "battery": 0.9570529516189815,
+            "gps": 0.8919141048369027
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26523855191849377,
+              "sensor": "baro",
+              "separation": 0.7197669237814592
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6571422747464495,
+              "sensor": "battery",
+              "separation": 0.29991067687253203
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6000510109646442,
+              "sensor": "gps",
+              "separation": 0.2918630938722585
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.975922006995886,
+            "battery": 0.9561665071443167,
+            "gps": 0.8674970602362172
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2594799701956628,
+              "sensor": "baro",
+              "separation": 0.7164420368002232
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6563139902670918,
+              "sensor": "battery",
+              "separation": 0.2998525168772249
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5969501237117737,
+              "sensor": "gps",
+              "separation": 0.2705469365244435
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7777623320117993,
+            "battery": 0.9564037693584243,
+            "gps": 0.8130683829935254
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2620033502105804,
+              "sensor": "baro",
+              "separation": 0.5157589818012189
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.655250021147188,
+              "sensor": "battery",
+              "separation": 0.3011537482112363
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5673650151539139,
+              "sensor": "gps",
+              "separation": 0.24570336783961144
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9128966049025461,
+          "headroom_min": 0.7777623320117993,
+          "separation_mean": 0.6506559807943004,
+          "separation_spread": 0.2040079419802403
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9565410760405743,
+          "headroom_min": 0.9561665071443167,
+          "separation_mean": 0.3003056473203311,
+          "separation_spread": 0.001301231334011388
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8574931826888817,
+          "headroom_min": 0.8130683829935254,
+          "separation_mean": 0.26937113274543784,
+          "separation_spread": 0.046159726032647064
+        }
+      }
+    },
+    {
+      "config": "w_stat=0.05",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.3911764705882353,
+        "w_phys": 0.3352941176470588,
+        "w_stat": 0.04999999999999999,
+        "w_temp": 0.2235294117647059
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9825262118518052,
+            "battery": 0.971607441008454,
+            "gps": 0.8733785228713132
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26052129601215057,
+              "sensor": "baro",
+              "separation": 0.7220049158396546
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6060087509611675,
+              "sensor": "battery",
+              "separation": 0.3655986900472865
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5759345275264488,
+              "sensor": "gps",
+              "separation": 0.29744399534486443
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9700245202656118,
+            "battery": 0.9711771718847595,
+            "gps": 0.8827263094744526
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2548958903358709,
+              "sensor": "baro",
+              "separation": 0.7151286299297409
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6057791706105023,
+              "sensor": "battery",
+              "separation": 0.36539800127425714
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5736229321600306,
+              "sensor": "gps",
+              "separation": 0.30910337731442206
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7171338396155944,
+            "battery": 0.9712193038710056,
+            "gps": 0.7641337550265177
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.25750971123393607,
+              "sensor": "baro",
+              "separation": 0.45962412838165834
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6049358976167597,
+              "sensor": "battery",
+              "separation": 0.36628340625424594
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5357710509999014,
+              "sensor": "gps",
+              "separation": 0.2283627040266163
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.8898948572443371,
+          "headroom_min": 0.7171338396155944,
+          "separation_mean": 0.6322525580503513,
+          "separation_spread": 0.2623807874579963
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9713346389214065,
+          "headroom_min": 0.9711771718847595,
+          "separation_mean": 0.36576003252526323,
+          "separation_spread": 0.0008854049799887909
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8400795291240946,
+          "headroom_min": 0.7641337550265177,
+          "separation_mean": 0.27830335889530095,
+          "separation_spread": 0.08074067328780576
+        }
+      }
+    },
+    {
+      "config": "w_stat=0.25",
+      "config_values": {
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.30882352941176466,
+        "w_phys": 0.2647058823529412,
+        "w_stat": 0.25,
+        "w_temp": 0.17647058823529413
+      },
+      "per_seed": [
+        {
+          "clean_floor": {
+            "baro": 0.9852688919299687,
+            "battery": 0.9525618894841632,
+            "gps": 0.8946367677220899
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2644368574341283,
+              "sensor": "baro",
+              "separation": 0.7208320344958403
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6831956639884136,
+              "sensor": "battery",
+              "separation": 0.2693662254957496
+            },
+            "gps_spoof": {
+              "fault_floor": 0.604659921086653,
+              "sensor": "gps",
+              "separation": 0.2899768466354369
+            }
+          },
+          "seed_offset": 0
+        },
+        {
+          "clean_floor": {
+            "baro": 0.9763003019498958,
+            "battery": 0.9517389287438262,
+            "gps": 0.87255233452329
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.2572730635177601,
+              "sensor": "baro",
+              "separation": 0.7190272384321357
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.6819877254118953,
+              "sensor": "battery",
+              "separation": 0.2697512033319308
+            },
+            "gps_spoof": {
+              "fault_floor": 0.6029568041390656,
+              "sensor": "gps",
+              "separation": 0.26959553038422435
+            }
+          },
+          "seed_offset": 100
+        },
+        {
+          "clean_floor": {
+            "baro": 0.7759345748249248,
+            "battery": 0.9519837884400741,
+            "gps": 0.8115635971419298
+          },
+          "faults": {
+            "baro_bias_drift": {
+              "fault_floor": 0.26032343463331753,
+              "sensor": "baro",
+              "separation": 0.5156111401916073
+            },
+            "battery_power_sag": {
+              "fault_floor": 0.681546026283204,
+              "sensor": "battery",
+              "separation": 0.2704377621568701
+            },
+            "gps_spoof": {
+              "fault_floor": 0.5723411914046759,
+              "sensor": "gps",
+              "separation": 0.23922240573725395
+            }
+          },
+          "seed_offset": 200
+        }
+      ],
+      "summary": {
+        "baro_bias_drift": {
+          "headroom_mean": 0.9125012562349298,
+          "headroom_min": 0.7759345748249248,
+          "separation_mean": 0.651823471039861,
+          "separation_spread": 0.20522089430423307
+        },
+        "battery_power_sag": {
+          "headroom_mean": 0.9520948688893545,
+          "headroom_min": 0.9517389287438262,
+          "separation_mean": 0.2698517303281835,
+          "separation_spread": 0.0010715366611204757
+        },
+        "gps_spoof": {
+          "headroom_mean": 0.8595842331291031,
+          "headroom_min": 0.8115635971419298,
+          "separation_mean": 0.2662649275856384,
+          "separation_spread": 0.05075444089818293
+        }
+      }
+    }
+  ],
+  "schema": "csia.research.config_sweep/1",
+  "seed_offsets": [
+    0,
+    100,
+    200
+  ],
+  "verdict": {
+    "baro_bias_drift": {
+      "best_config": "rho_min=0.85",
+      "best_headroom": 0.7396656581214058,
+      "best_separation": 0.7687084382298837,
+      "gain_exceeds_seed_noise": false,
+      "gain_over_shipped": 0.12702966071864974,
+      "ratio_configs_over_seeds": 0.8746727468274806,
+      "seed_spread_at_shipped": 0.23382116677124332,
+      "shipped_headroom": 0.746488956951792,
+      "shipped_separation": 0.6416787775112339,
+      "spread_across_configs": 0.20451700220620983
+    },
+    "battery_power_sag": {
+      "best_config": "w_phys=0.40",
+      "best_headroom": 0.9667551270918442,
+      "best_separation": 0.41498944571588536,
+      "gain_exceeds_seed_noise": true,
+      "gain_over_shipped": 0.09722502366459457,
+      "ratio_configs_over_seeds": 193.4474402474753,
+      "seed_spread_at_shipped": 0.0010051753976854094,
+      "shipped_headroom": 0.9614586892260493,
+      "shipped_separation": 0.3177644220512908,
+      "spread_across_configs": 0.19444860768198047
+    },
+    "gps_spoof": {
+      "best_config": "w_phys=0.40",
+      "best_headroom": 0.800721316548759,
+      "best_separation": 0.37265455228401106,
+      "gain_exceeds_seed_noise": true,
+      "gain_over_shipped": 0.09485330688652854,
+      "ratio_configs_over_seeds": 2.690800859060263,
+      "seed_spread_at_shipped": 0.07068881525464832,
+      "shipped_headroom": 0.787682015432112,
+      "shipped_separation": 0.2778012453974825,
+      "spread_across_configs": 0.19020952481315992
+    }
+  },
+  "what_this_is_not": "This is a coordinate sweep from the shipped configuration on a simulator, not an optimum and not a recommendation. It changes nothing: every configuration was passed to OnlineTrustLayer at construction and no frozen file was touched. A gain that does not exceed the seed-to-seed spread is noise, and is reported as such rather than as a finding."
+}

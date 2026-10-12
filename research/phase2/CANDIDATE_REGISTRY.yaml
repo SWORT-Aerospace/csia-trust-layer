@@ -1,0 +1,445 @@
+%YAML 1.2
+---
+# Phase-II candidate registry and evaluation contract.
+#
+# Section 6 of the brief: the metrics and thresholds below are fixed BEFORE any
+# candidate is measured. The false-alert budget is not moved after seeing
+# results. Every candidate ever evaluated stays in this file, including the
+# ones that fail — section 14 forbids hiding negative results.
+
+schema: csia.phase2.candidate_registry/1
+baseline_commit: 848f556
+baseline_manifest: research/phase2/BASELINE_MANIFEST.json
+
+# ---------------------------------------------------------------------------
+# FIXED EVALUATION CONTRACT — declared before measurement
+# ---------------------------------------------------------------------------
+evaluation_contract:
+
+  hard_constraints:
+    # Violating any of these fails the candidate outright, whatever it gains.
+    false_alerts_clean_nominal:
+      budget: 0
+      units: failsafe transitions
+      derived_from: docs/REQUIREMENTS.md R10
+      requirement_text: >-
+        Clean nominal flight shall produce zero failsafe transitions.
+      verified_by: [test_failsafe_clean_no_false_alarms, campaigns/bench.json]
+      note: >-
+        Pre-existing requirement, not a number chosen after seeing candidate
+        results. Fixed for the duration of Phase II.
+      # ---- MEASURED ON THE MODERN RIG, 2026-08-23 ----
+      status_on_modern_target_unmodified: VIOLATED_BY_THE_FROZEN_BASELINE
+      observed_on_modern: 1 transition on each of 4 nominal flights
+      driver: >-
+        The power_thrust edge (online.py:546), a pack-versus-ESC current
+        balance at 0.5 A scale. Pack 29.33 A, ESCs 3.20 A combined, residual
+        50 sigma. See research/phase2/results/r10_modern.json and claim C4.
+      budget_is_NOT_moved: >-
+        The budget stays at 0. Section 6 fixes it and a baseline failing it is
+        a finding about the baseline and about R10's verification evidence,
+        not a reason to relax the constraint. Rule 7.
+
+      # ---- P0.5 RESOLUTION ----
+      p05_classification: SIMULATOR_ARTIFACT
+      p05_finding: >-
+        ESC_TELEMETRY_1_TO_4 carries no information on this build. `current`
+        is a hard-coded 0.8 A liveness stub (AP_ESC_Telem_SITL.cpp:72) and
+        `rpm` is identically 0 (SIM_Frame.cpp:901 with SIM_VIB_MOT_MAX
+        defaulting to 0.0). See INFORMATION_CONTRACT_POWER_THRUST.md and
+        claim C11.
+      p05_finding_preserved: >-
+        The R10 breach on the UNMODIFIED modern rig stands as a committed
+        finding. It is not withdrawn.
+
+      scoring_rig_configuration:
+        name: legacy_information_architecture
+        what: ESC_TELEMETRY_1_TO_4 suppressed at ingestion, research-only
+        why: >-
+          restores exactly the information architecture of ArduCopter 3.3, on
+          which the motor_esc node was unavailable. This removes a channel
+          proven at source and by intervention to carry no information. It is
+          a RIG CONTROL, not a CSIA change and not a threshold move.
+        declared_before_any_candidate_is_run: true
+        evidence: research/phase2/results/r10_attribution.json
+        measured_R10_in_this_configuration:
+          arm_A_unmodified_transitions: 1
+          arm_B_esc_suppressed_transitions: 0
+          arm_C_battery_suppressed_transitions: 0
+          trust_battery_trough_arm_B: 0.997
+          B1_satisfies_R10_in_this_configuration: true
+        does_not_license: >-
+          suppressing the channel in production. On real hardware ESC
+          telemetry may carry genuine current and power_thrust has never been
+          tested against data that could falsify it (claim C14).
+
+      blocks: []
+      previously_blocked: [B2, B3, B4]
+      unblocked_by: P0.5
+
+    latency_budget_per_tick:
+      budget: 2.0
+      units: ms
+      derived_from: docs/REQUIREMENTS.md R13
+      requirement_text: >-
+        Trust-core latency shall be <2 ms/tick (Python reference).
+      measured_baseline_us: 85.5
+      note: >-
+        Baseline measured by `csia report`. A candidate has ~23x headroom;
+        this constraint exists to catch a candidate that spends it all.
+
+    determinism:
+      required: true
+      derived_from: docs/REQUIREMENTS.md R3
+      note: identical inputs must produce identical outputs.
+
+    causality:
+      required: true
+      derived_from: docs/REQUIREMENTS.md R2
+      note: strictly causal, no future samples.
+
+  primary_objective:
+    # NOT "higher detection". A candidate improves the problem only if it
+    # reduces safety-relevant joint misses inside the hard constraints.
+    metric: significant_cells_not_escalated
+    definition: >-
+      Count of tested conditions with total induced position error >= 48 m
+      (the project's own gps_spoof reference displacement) that the candidate
+      fails to escalate.
+    baseline_b1_value: 6
+    of_total: 9
+    direction: minimise
+
+  reported_metrics:
+    - joint_blind_region_cells          # neither monitor detects
+    - joint_blind_region_significant    # ... restricted to >= 48 m
+    - miss_rate_on_fault_grid
+    - false_alerts_on_nominal           # hard constraint above
+    - detection_delay_s
+    - escalation_delay_s
+    - wrong_isolation                   # top cause != injected cause
+    - abstention_rate                   # where the candidate supports it
+    - cpu_cost_us_per_tick
+    - memory_cost_bytes
+    - additional_sensor_inputs          # count; 0 preferred
+    - additional_dependencies
+    - additional_gates
+    - implementation_complexity_loc
+
+  partitions:
+    # AUDITED 2026-08-23, see research/phase2/PARTITION_AUDIT.md.
+    # The declaration below was written for the ArduCopter 3.3 rig and its
+    # `status: UNTOUCHED` was FALSE by the time P1 began.
+    as_declared_phase1:
+      development:
+        flight_specs: [0, 1, 2]
+        slews_s: [0, 4, 20]
+      protected:
+        flight_specs: [3, 4, 5]
+        slews_s: [0, 4, 20, 60, 120]
+        status_as_declared: UNTOUCHED
+        status_as_measured: CONTAMINATED_ON_THE_SLEW_AXIS
+        contamination: >-
+          slews 60 s and 120 s are declared protected-only and were flown and
+          inspected in E1 run 1, E1 run 2 and the V6 diagnosis. Slew 240 s was
+          flown and appears in neither declared list.
+    as_used_by_P1:
+      # Declared in PARTITION_AUDIT.md BEFORE any candidate was tuned.
+      development:
+        flight_specs: [0]
+        rule: all B2/B3/B4 parameter search here and nowhere else
+      validation:
+        flight_specs: [3, 4]
+        rule: >-
+          never flown on the modern target before P1. Touched with parameters
+          already frozen; no parameter changed between the two touches. Two
+          were spent because a third instrument defect required a re-fly.
+      reserved_untouched:
+        flight_specs: [1, 2, 5]
+
+  search_objective:
+    # Declared before any protected-partition run.
+    form: constrained
+    minimise: significant_cells_not_escalated
+    subject_to:
+      - false_alerts_clean_nominal == 0
+      - cpu_us_per_tick <= 2000
+      - determinism == true
+    note: >-
+      A weighted scalar J(phi) is deliberately NOT used as the primary form.
+      Weights would let a candidate buy misses with false alerts, and R10 is a
+      requirement rather than a term to be traded.
+
+# ---------------------------------------------------------------------------
+# CANDIDATES
+# ---------------------------------------------------------------------------
+candidates:
+
+  - candidate_id: B0
+    class: established
+    name: Native autopilot behaviour
+    status: MEASURED
+    mechanism: >-
+      No CSIA in the escalation path. The autopilot estimator's own innovation
+      test ratio against its own FS_EKF_THRESH default.
+    required_inputs: []
+    additional_sensor_inputs: 0
+    result:
+      significant_cells_detected: 9
+      of_total: 9
+      source: research/wp_c8/results/response_surface.json
+    note: >-
+      Not a strawman. The estimator detected every operationally significant
+      cell in the tested grid. If this covers what the others cover, verdict A.
+
+  - candidate_id: B1
+    class: frozen_baseline
+    name: CSIA v1
+    status: MEASURED
+    mechanism: gated naive-Bayes diagnosis + Beta trust recursion + failsafe dwell
+    required_inputs: []
+    additional_sensor_inputs: 0
+    result:
+      significant_cells_not_escalated: 6
+      of_total: 9
+      grid_cells_escalated: 3
+      of_grid: 21
+      escalation_boundary_ticks: 118.31
+      source: research/wp_c8/results/response_surface.json
+
+  - candidate_id: B2
+    class: established
+    name: Direct saturated-residual counter
+    status: MEASURED
+    result:
+      selected_k: 5
+      searched_on: development flight spec 0 only
+      R10: {spec0: 0, spec3: 0, spec4: 0}
+      ledger_B: {spec0: "1/4/0/2", spec3: "1/4/0/2", spec4: "1/4/0/2"}
+      incremental_csia_coverage: 0
+      cpu_us_per_tick: 0.18
+      taxonomy: "A - duplicates autopilot coverage, and covers LESS than B1"
+      verdict: does not solve
+    mechanism: >-
+      Alarm when the GPS physics residual stays below the saturation floor for
+      k consecutive ticks, bypassing the trust recursion.
+    parameters: [k]
+    search_partition: development (flight spec 0)
+    required_inputs: []
+    additional_sensor_inputs: 0
+    expected_advantage: >-
+      Recovers the detection the residual already performs but the accumulator
+      discards.
+    expected_failure_mode: >-
+      Clean-flight residual excursions breach the R10 zero budget. B2 is the
+      experiment that prices the smoothing.
+
+  - candidate_id: B3
+    class: established
+    name: Concentration-cap correction
+    status: MEASURED_AND_REFUTED
+    result:
+      R10_by_rho_max: {0.99: 2, 0.98: 4, 0.96: 4}
+      budget: 0
+      wrong_isolation: 6 at every setting, against 3 for B1
+      taxonomy: "D unacceptable false alerts, and E attribution damage"
+      verdict: >-
+        REFUTED. Fails the R10 hard constraint at every setting tried and
+        simultaneously degrades attribution. The budget was not relaxed.
+    mechanism: >-
+      Cap accumulated Beta mass at S_max < 1/(1-rho_max) = 500, which the
+      Phase-I algebra identifies as the dominant term in the escalation delay.
+    parameters: [S_max]
+    search_partition: development
+    required_inputs: []
+    additional_sensor_inputs: 0
+    scope: >-
+      Addresses escalation only. Deliberately does NOT address F1 applicability
+      loss; conflating them was a Phase-I error.
+    expected_failure_mode: >-
+      Shorter memory raises clean-flight sensitivity; R10 is the binding
+      constraint.
+    note: if this closes the gap inside budget, verdict B and no invention.
+
+  - candidate_id: B4
+    class: established
+    name: CUSUM on the per-node residual sequence
+    status: MEASURED_AND_SELECTED
+    result:
+      drift_k: 0.5
+      drift_set_by: design (Page 1954)
+      decision_h: 500
+      decision_h_rule: >-
+        smallest value from a fixed grid for which the clean nominal arm
+        produces zero alarms; reads the clean arm only, never a fault outcome
+      R10: {spec0: 0, spec3: 0, spec4: 0}
+      ledger_B: {spec0: "2/3/2/0", spec3: "1/4/2/0", spec4: "1/4/2/0"}
+      incremental_csia_coverage: 2 at every flight spec
+      joint_miss: 0 at every flight spec
+      wrong_isolation: 0
+      cpu_us_per_tick: 0.62
+      additional_sensor_inputs: 0
+      taxonomy: "B genuine incremental coverage, and C converts JOINT_MISS"
+      blind_on: >-
+        both IMU families; the layer publishes no per-IMU physics residual.
+        B1 and B4 are COMPLEMENTARY, not ordered.
+      committed_negative_result: >-
+        the textbook h = 5.0 gives 4 clean-flight alarms and fails R10
+      verdict: >-
+        SOLVES the fault-suite coverage problem inside every hard constraint
+    mechanism: >-
+      Two-sided cumulative sum change detector with drift parameter set from
+      the clean-flight residual distribution and decision interval set by
+      design.
+    parameters: [drift_k, decision_h]
+    search_partition: development
+    required_inputs: []
+    additional_sensor_inputs: 0
+    literature:
+      - "Page, E.S. (1954), Continuous inspection schemes, Biometrika 41(1)."
+      - "Gustafsson, F., Adaptive Filtering and Change Detection — standard
+         treatment of CUSUM in model-based FDI."
+      - "docs/REQUIREMENTS.md R16 — the repository already names
+         'dual-timescale CUSUM' as the tracked remedy for its known blind spot
+         (issue #1). This applies the project's own identified method to a
+         second phenomenon."
+    why_appropriate: >-
+      The measured phenomenon is a small persistent shift in a residual
+      sequence of unknown onset, which is the problem CUSUM is the standard
+      sequential test for. It is duration-aware by construction, which is the
+      property B1 lacks.
+    note: if this closes the gap inside budget, verdict A and the invention is
+      abandoned.
+
+# ---------------------------------------------------------------------------
+# INVENTION GATE — no entries permitted until the challenge above reports
+# ---------------------------------------------------------------------------
+invention_gate:
+  status: CLOSED
+  conditions:
+    1_modern_measurement_contract_valid: MET      # P0.5
+    2_R10_semantics_resolved: MET                 # claim C16
+    3_B0_to_B4_fairly_evaluated: NOT_MET
+    4_safety_relevant_residual_gap_remains: UNKNOWN_UNTIL_3
+    5_gap_not_closable_by_simple_established_method: UNKNOWN_UNTIL_3
+  binding_condition: 3
+  why: >-
+    B2, B3 and B4 have not been measured. Conditions 4 and 5 are not
+    answerable until they are. E1 producing a favourable F3 verdict does not
+    open the gate; it only makes the target worth measuring against.
+  when_it_opens: >-
+    the exact unresolved capability must be written down at that point, and
+    not before.
+  required_fields_for_any_new_candidate:
+    - candidate_id
+    - technical_uncertainty_addressed
+    - mechanism
+    - why_existing_baselines_are_insufficient
+    - required_inputs
+    - new_assumptions
+    - expected_advantage
+    - expected_failure_mode
+    - simplest_counterexample
+    - kill_criterion
+  permitted_initial_status: [PROVISIONAL]
+  forbidden_status_words: [NOVEL, BREAKTHROUGH, PROVED]
+
+# ---------------------------------------------------------------------------
+# OPEN EXPERIMENTS
+# ---------------------------------------------------------------------------
+experiments:
+  - id: E1
+    name: Slow-slew extension — does a real joint blind region exist?
+    status: COMPLETE
+    target: ArduCopter V4.8.0-dev SITL, built from source in this session
+    rationale: >-
+      The tested grid's slowest ramp is 20 s and the blind wedge widened
+      monotonically with slew. At significant magnitudes the joint blind region
+      is currently empty, so F3 may be a curiosity. This decides it.
+    grid:
+      amplitudes_m: [55.7, 556.6]
+      slews_s: [20, 60, 120, 240]
+    decides:
+      estimator_still_detects_all: "F3 refuted at significant magnitude; verdict D for F3"
+      estimator_fails_on_slow: "F3 confirmed and bounded; Phase II has a target"
+    result:
+      verdict: SURVIVES_BOUNDED
+      valid_trials: 8
+      of: 8
+      joint_miss_cells: [a55.7_s60, a55.7_s120, a55.7_s240]
+      R_incremental_csia_only: 0.0
+      R_autopilot_dependence: 0.5
+      R_joint_miss: 0.375
+      excess_airframe_excursion_on_joint_miss_m: [48.8, 48.5, 48.0]
+      see: [research/phase2/E1_FINDINGS.md, research/phase2/results/e1_modern.json]
+    runs:
+      - run: 1
+        status: WITHDRAWN
+        verdict_reported: REFUTED_AS_TESTED_SAFETY_RELEVANT_PHENOMENON
+        artifact: research/phase2/results/e1_modern_run1_defective_instrument.json
+        withdrawn_because: >-
+          The displacement instrument measured the injected offset and the
+          airframe's own motion added together, and read 38.89 m on a
+          zero-injection nominal arm. It invalidated exactly the three cells
+          that decide the question; their injections were correct to within
+          2.2%. Grid, tolerances and decision rule unchanged; only the
+          estimator was corrected, and all eight cells were re-flown.
+        see: research/phase2/V6_INSTRUMENT_DEFECT.md
+      - run: 2
+        status: AUTHORITATIVE
+        artifact: research/phase2/results/e1_modern.json
+        instrument_control: >-
+          PASS. The corrected instrument reads 0.81-0.91 m on the four
+          zero-injection arms; run 1's read 38.8-39.6 m.
+    bound: >-
+      Three cells, one amplitude, one flight each, one autopilot, one flight
+      profile. Rule 3 applies. NO wider grid is launched to explore this
+      without a distinct preregistered hypothesis.
+
+  - id: E0
+    name: Modern-stack replication feasibility
+    status: COMPLETE
+    target: ArduCopter 4.8.0-dev SITL, built from source at this session
+    see: research/phase2/results/modern_replication.json
+    id_note: >-
+      recorded as "E2" in commits up to bb1c280. Renamed to E0 because the
+      Phase-II brief assigns E2 to the confirmatory replication below. The
+      artifact and its contents are unchanged.
+
+  - id: E3
+    name: R10 breach on the modern rig — power_thrust current balance
+    status: COMPLETE
+    question: >-
+      Is the pack-versus-ESC current mismatch a simulator artifact or a real
+      condition the power_thrust edge mismodels? R10 cannot be used to score
+      candidates until this is answered.
+    verdict: SIMULATOR_ARTIFACT
+    result:
+      esc_current_raw_distinct_values_cA: [80]
+      samples: 3659
+      pack_current_range_A: 41.25
+      arithmetic_closure: stub accounts for the residual to within 0.01 A
+      intervention: >-
+        suppressing ESC_TELEMETRY_1_TO_4 at ingestion returns R10 transitions
+        to 0 and trust_battery to 0.997
+    see:
+      - research/phase2/INFORMATION_CONTRACT_POWER_THRUST.md
+      - research/phase2/results/power_thrust_contract.json
+      - research/phase2/results/r10_attribution.json
+    residual_open_question: C14, whether real ESC telemetry satisfies the
+      conservation model
+
+  - id: E2
+    name: Confirmatory replication of the three modern joint-miss cells
+    status: PREREGISTERED_FROZEN_NOT_EXECUTED
+    see: research/phase2/E2_PREREGISTRATION.md
+    design: 3 slews x 2 glitch axes x 3 repeats, plus 6 nominal arms
+    replication_criteria_fixed_before_execution:
+      REPLICATED: k >= 7 of 9 X-axis cells JOINT_MISS
+      PARTIALLY_REPLICATED: 3 <= k <= 6
+      NOT_REPLICATED: k <= 2, F3 downgraded to
+        SINGLE_OBSERVATION_NOT_REPRODUCED
+    does_not_block: P0.5 or the established-method challenge
+    note: >-
+      E1's grid is NOT enlarged. E2 is a separate campaign and its four-way
+      decomposition is reported separately, never pooled with E1's.

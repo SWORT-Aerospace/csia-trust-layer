@@ -1,0 +1,36 @@
+{
+  "S0": {
+    "n_ticks": 1175,
+    "us_per_tick_mean": 1095.01,
+    "wall_s": 1.287
+  },
+  "S1": {
+    "n_ticks": 1175,
+    "us_per_tick_mean": 1093.03,
+    "wall_s": 1.284
+  },
+  "S2c": {
+    "n_ticks": 1175,
+    "us_per_tick_mean": 1069.39,
+    "wall_s": 1.257
+  },
+  "additional_features_per_tick": {
+    "S0": 0,
+    "S1": 0,
+    "S2a": 1,
+    "S2b": 1,
+    "S2c": 2
+  },
+  "additional_state_per_sensor": {
+    "bytes_estimate": 160,
+    "fields": [
+      "_hacc",
+      "_msg",
+      "hacc_freshness"
+    ],
+    "n_fields": 3,
+    "note": "five scalars and a mode string per monitored source; the cost is not in the state, it is in one extra feature per tick in an already-linear likelihood loop"
+  },
+  "artifact": "COMPUTE_COST",
+  "caveat": "wall time here includes MAVLink decoding and the whole adapter path, so the per-tick figures are an upper bound on the arm's own cost, not a measurement of it"
+}

@@ -1,0 +1,140 @@
+{
+  "artifact": "V2_BASELINE_V1_1",
+  "claim": "with only the SENSOR domain registered, every v2 function state equals the v1.1 payload's function_eligibility exactly; and adding the other five domains can only hold or restrict a function, never relax one",
+  "exact": true,
+  "full_engine_ticks_checked": 1350,
+  "generation_command": "python engineering/v2/run_v2.py",
+  "mechanisms": [
+    "CLEAN",
+    "DUAL_IMU_FAILURE",
+    "GNSS_FIX_LOSS",
+    "GNSS_RAMP_FAST",
+    "GNSS_RAMP_SLOW",
+    "IMU0_BIAS_DRIFT",
+    "MAG_DEGRADED",
+    "POWER_SAG",
+    "VIBRATION_ANOMALY"
+  ],
+  "mismatches": 0,
+  "monotonic": true,
+  "monotonicity_stride": 10,
+  "payload_source": "regenerated per tick by engineering/v1_1/phase4/run_p4d.py:_payloads, the same function that produced the committed example payloads",
+  "payloads_checked": 13500,
+  "per_mechanism": {
+    "CLEAN": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "DUAL_IMU_FAILURE": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "GNSS_FIX_LOSS": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "GNSS_RAMP_FAST": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "GNSS_RAMP_SLOW": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "IMU0_BIAS_DRIFT": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "MAG_DEGRADED": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "POWER_SAG": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    },
+    "VIBRATION_ANOMALY": {
+      "full_engine_ticks_checked": 150,
+      "mismatches": 0,
+      "payloads": 1500,
+      "relaxations": 0
+    }
+  },
+  "relaxations": 0,
+  "scope_note": "exactness was checked on ALL 13500 payloads; monotonicity and the SENSOR-column identity on every 10th (1350 ticks), because each full-engine pass re-validates the payload against the v1.1 JSON Schema",
+  "section": "36",
+  "shared_rail_search": {
+    "adverse_definition": "not fresh, or named in sequential.alarming -- the same test csia/v2/domains/navigation.py applies, with no trust floor declared",
+    "adverse_source_readings_by_reason": {
+      "NOT_FRESH": 200,
+      "SEQUENTIAL_ALARM": 5131
+    },
+    "examples": [
+      {
+        "mechanism": "POWER_SAG",
+        "rail": "POWER/battery",
+        "sources": [
+          "battery",
+          "motor_esc"
+        ],
+        "t": 30.2
+      },
+      {
+        "mechanism": "POWER_SAG",
+        "rail": "POWER/battery",
+        "sources": [
+          "battery",
+          "motor_esc"
+        ],
+        "t": 30.24
+      },
+      {
+        "mechanism": "POWER_SAG",
+        "rail": "POWER/battery",
+        "sources": [
+          "battery",
+          "motor_esc"
+        ],
+        "t": 30.28
+      },
+      {
+        "mechanism": "POWER_SAG",
+        "rail": "POWER/battery",
+        "sources": [
+          "battery",
+          "motor_esc"
+        ],
+        "t": 30.32
+      },
+      {
+        "mechanism": "POWER_SAG",
+        "rail": "POWER/battery",
+        "sources": [
+          "battery",
+          "motor_esc"
+        ],
+        "t": 30.36
+      }
+    ],
+    "note": "if this is zero, no real v1.1 payload in the corpus has two sources on one declared rail adverse at the same tick, and the SHARED_RAIL scenario demonstrates the common-cause mechanism with one source plus two links instead. That is stated rather than worked around: no payload was edited to manufacture the literal two-sensor form, and tests/test_v2_framework.py exercises it directly on constructed records.",
+    "searched": 13500,
+    "ticks_with_at_least_one_adverse_source": 4479,
+    "ticks_with_two_or_more_sources_adverse_on_one_rail": 745
+  }
+}
