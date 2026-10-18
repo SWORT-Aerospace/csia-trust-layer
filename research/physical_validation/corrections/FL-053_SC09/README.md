@@ -196,11 +196,13 @@ Also re-run today on a clean archive: `mechanism_b.py` reproduces
 **Adoption rehearsal.** In a throwaway clone of `3a12efa`, `adopt.py --apply`
 was run with placeholder decision fields; the repository itself was not
 touched. It changed the eight files, and in each manifest only the two lines
-it should. The ledger then had 125 entries ending at FL-053. Across the 18 test
-files that read the changed files, 533 tests passed, 3 were skipped and **4
-failed**: the three Semantic Core ledger-pin tests and
-`test_evidence_assurance_2_2.py::test_no_frozen_artifact_changed_since_the_2_1_1_baseline`.
-That finding is decision (f) above. The clone was deleted afterwards.
+it should. The ledger then had 125 entries ending at FL-053. The full suite
+in the adopted clone (without `tests/test_hf_acquisition.py`, for disk space)
+gave 4652 passed, 44 skipped, 2 xfailed and **4 failed**. The four failures are
+the three Semantic Core ledger-pin tests and
+`test_evidence_assurance_2_2.py::test_no_frozen_artifact_changed_since_the_2_1_1_baseline`,
+and nothing else failed. That finding is decision (f) above. The clone was
+deleted afterwards.
 
 ## 8. Contents
 
