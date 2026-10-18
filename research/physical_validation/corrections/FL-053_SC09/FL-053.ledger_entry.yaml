@@ -1,0 +1,77 @@
+  - id: FL-053
+    date: 2026-09-26
+    phase: Cross-system research reconnaissance (read-only audit of sealed evidence); successor review 2026-10-18
+    kind: MEASUREMENT_DEFECT
+    what_happened: >-
+      Mechanism B's CUSUM-versus-trust comparison subtracted the failsafe's
+      1.0 s dwell_up from a trust latency that never contained it. The
+      generator research/systems-paper/mechanism_b.py takes its trust series
+      from run_pipeline, which is PredictionComparator -> TrustEngine ->
+      CausalDiagnosis and runs no FailsafePolicy at all (csia/scenarios.py
+      run_pipeline). The trust latency is the first crossing of that raw
+      series below nav_caution = 0.75. A raw series crossing cannot contain a
+      dwell: the dwell is applied by FailsafePolicy.update AFTER the crossing,
+      between the crossing and the alert. Yet the generator records
+      trust_latency_includes_dwell: True and computes
+      trust_detector_only_latency_s = trust_latency - dwell_up. The committed
+      "detector only" values 7.72 / 2.36 / 2.24 s are therefore 1.0 s too
+      favourable to the trust path; the raw values 8.72 / 3.36 / 3.24 s
+      against CUSUM 2.96 / 1.16 / 0.72 s were ALREADY detector-to-detector.
+      Red-team objection 2.3's premise does not hold for this measurement, and
+      the "correction" that closed it on 2026-09-03 (4e3ed38) introduced the
+      error rather than removing one.
+    found_by: >-
+      Cross-checking three independent sources during reconnaissance for the
+      cross-system research direction, not by inspecting Mechanism B for
+      defects: docs/audit/CSIA_LATENCY_PATH_AUDIT.md section 3 (gps_spoof
+      trust crosses 0.75 at 3.36 s and the alert fires at 4.40 s in the online
+      runtime); a fresh run of that catalogue scenario through
+      TrustLayerRuntime and csia/metrics/latency.py; and reading the generator
+      and run_pipeline, which show no policy is ever run.
+    verified: >-
+      2026-10-18, research/physical_validation/corrections/FL-053_SC09/. The
+      generator re-run on a clean git archive reproduces mechanism_b.json with
+      0 of 194 keys differing, so the error is in the committed logic and is
+      deterministic. An AST check confirms run_pipeline references no
+      FailsafePolicy and mechanism_b.py uses FailsafeConfig only to read
+      nav_caution and dwell_up. The shipped FailsafePolicy, stepped per tick
+      over the exact three arms, escalates to CAUTION exactly 1.00 s after the
+      trust crossing on every faulted arm (9.72 / 4.36 / 4.24 s after onset)
+      and never on the clean arm. verification/verify_correction.py: 42 of 42
+      checks pass.
+    honest_limit: >-
+      The SC-09 statement ("the CUSUM alarms earlier than the trust threshold
+      in every faulted arm and never in the clean window") is unaffected, and
+      correcting the figures WIDENS the CUSUM's lead: 5.76 / 2.20 / 2.52 s,
+      not 4.76 / 1.20 / 1.52 s. The draft of this entry (2026-09-26) DERIVED
+      detector-plus-policy times of 9.76 / 4.40 / 4.28 s as crossing + 1.04 s,
+      transferring the online runtime's offset from a different scenario; on
+      these arms, in batch replay, the measured offset is 1.00 s. The draft
+      also said the systems-paper manuscript does not quote the net-of-dwell
+      figures. That is true of papers/csia_systems/main.tex, but handoff V1,
+      handoff V2 and DUAL_PAPER_COORDINATION_SUMMARY.md gave them to the
+      writing agent as verified detector-to-detector values, so a manuscript
+      drafted from those handoffs may quote them. The generator is NOT fixed:
+      re-running it would write the same erroneous block, and correcting it
+      would force regenerating a frozen artifact
+      (research/systems-paper/results is forbidden_without_tier_completion).
+    verdict: CORRECTED_BY_SUCCESSOR_RECORD
+    consequence: >-
+      No sealed or historical artifact was modified. mechanism_b.json,
+      mechanism_b.py, MECHANISM_B.md, REVIEWER_RED_TEAM.md, CLAIMS.csv,
+      CUSUM_FAIRNESS.yaml, CUSUM_FAIRNESS_TABLE.csv and the handoffs stay
+      byte-identical as the record of what was asserted; CORRECTION_RECORD.yaml
+      pins each of them. The authoritative statement of the comparison is the
+      successor record research/physical_validation/corrections/FL-053_SC09/
+      CORRECTION_RECORD.yaml, adopted with this entry. Paper-facing effect is
+      governed by PAPER_IMPACT_LEDGER.yaml PI-006. Correcting does NOT reverse
+      SC-09.
+    artifact: >-
+      research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml;
+      research/physical_validation/corrections/FL-053_SC09/verification/policy_alerts.json;
+      research/physical_validation/corrections/FL-053_SC09/verification/verify_correction.py;
+      research/systems-paper/results/mechanism_b.json;
+      research/systems-paper/mechanism_b.py;
+      csia/scenarios.py;
+      docs/research/MECHANISM_B_DWELL_DISCREPANCY.md (the 2026-09-26 draft);
+      docs/audit/CSIA_LATENCY_PATH_AUDIT.md
