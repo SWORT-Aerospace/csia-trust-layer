@@ -54,7 +54,7 @@ def test_every_verification_check_passes(record):
     res = v.checks(record)
     failed = [(c, d) for c, ok, d in res if not ok]
     assert failed == []
-    assert {c for c, _, _ in res} == {"C1", "C2", "C3", "C4", "C5", "C6", "C7"}
+    assert {c for c, _, _ in res} == {"C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"}
 
 
 def test_status_matches_the_ledger_and_is_never_assumed(record, adopted):
@@ -96,6 +96,22 @@ def test_the_adoption_preview_writes_nothing_and_apply_needs_a_decision(adopted,
     assert _snapshot() == before
     out = capsys.readouterr().out
     assert "PREVIEW ONLY: 8 files would change" in out and "REFUSED" in out
+
+
+def test_apply_with_a_decision_is_still_refused_while_guards_pin_the_ledger_hash(record, adopted, capsys):
+    # Found by the adoption rehearsal: later programs pin the ledger's exact
+    # hash, and an append fails them. adopt.py must not proceed past them silently.
+    if adopted:
+        pytest.skip("adopted")
+    adopt = _load("adopt_fl053_pins", PKG / "adopt.py")
+    pins = adopt.ledger_code_pins(hashlib.sha256(LEDGER.read_bytes()).hexdigest())
+    assert pins == sorted(p["path"] for p in record["ledger_hash_pinned_in_code"]["pins"])
+    if not pins:
+        pytest.skip("no guard pins the ledger hash any more")
+    before = _snapshot()
+    assert adopt.main(["--apply", "--decided-by", "X", "--decision-reference", "Y"]) == 2
+    assert _snapshot() == before
+    assert "--guard-pins-decision" in capsys.readouterr().out
 
 
 def test_the_committed_patch_matches_the_ledger_it_would_change(adopted):

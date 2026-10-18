@@ -36,6 +36,7 @@ adoption:
   decided_on: null
   decision_reference: null
   adopted_at_commit: null
+  guard_pins_decision: null
 
 identifier_check:
   ledger: research/physical_validation/FAILURE_LEDGER.yaml
@@ -260,6 +261,52 @@ adoption_touches_before_adoption:
   docs/FIELD_INTEGRATION_RUNBOOK.md: {sha256_before_adoption: 2ec6735f08fa8f46f718525b84f71ec23696e7e192bc9957359749ebaedadd68, last_commit: b75ad0c}
   research/physical_validation/PAPER_IMPACT_LEDGER.yaml: {sha256_before_adoption: 936ff22223ad60b86659feafeb0589df1d359397a5aa19966705bfb6162eab62, last_commit: bb5a5e5}
   docs/CURRENT_PROGRAM_STATE.md: {sha256_before_adoption: 3f5f5d7e92a9a5bdbd161ec2814482229a5bd943a139d23005a39e83aaa31b91, last_commit: b409abe}
+
+# Found by the 2026-10-18 adoption rehearsal (README section 7), not by reading:
+# seven later programs pin the ledger's exact SHA-256 as a baseline invariant.
+# An append changes that hash, so adoption also needs the owner's decision (f)
+# on these guards. adopt.py does not edit them (they belong to Semantic Core,
+# CSIA 2.2 and the programs built on them) and refuses --apply without
+# --guard-pins-decision. verification check C8 keeps this list equal to the
+# pins that exist while PROPOSED, and requires none of them to remain once ADOPTED.
+ledger_hash_pinned_in_code:
+  pinned_sha256: 6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f
+  pins:
+    - path: tests/test_semantic_core_2_1.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1
+      fails_on_append: tests/test_semantic_core_2_1.py::test_the_failure_ledger_is_untouched_and_the_entries_are_proposed
+    - path: tests/test_semantic_core_2_1_revision.py
+      constant: LEDGER_SHA256
+      program: Semantic Core 2.1.1
+      fails_on_append: tests/test_semantic_core_2_1_revision.py::test_the_failure_ledger_is_untouched_and_the_new_entries_are_only_drafted
+    - path: tests/test_semantic_core_2_1_shadow.py
+      constant: LEDGER_SHA256
+      program: Semantic Core 2.1 shadow
+      fails_on_append: tests/test_semantic_core_2_1_shadow.py::test_the_failure_ledger_is_untouched
+    - path: research/csia_2_2_evidence_assurance/common_2_2.py
+      constant: LEDGER_PINNED
+      program: CSIA 2.2 evidence assurance
+      fails_on_append: tests/test_evidence_assurance_2_2.py::test_no_frozen_artifact_changed_since_the_2_1_1_baseline
+    - path: research/csia_2_2_offboard_pilot/common_pilot.py
+      constant: LEDGER_PINNED
+      program: CSIA 2.2 offboard pilot, imported by the 2.3, PRIME and RB-001 baseline verifiers
+      fails_on_append: baseline verifiers verify_pilot_baseline.py, csia_2_3_stock_bridge/verify_2_3_baseline.py, csia_prime/verify_prime_baseline.py, rb001_reality_bridge/verify_rb001_baseline.py
+    - path: research/csia_semantic_core_2_1_revision/revision_common.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1.1
+      fails_on_append: baseline verifier research/csia_semantic_core_2_1_revision/verify_baseline.py
+    - path: research/csia_semantic_core_2_1_shadow/verify_state.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1 shadow
+      fails_on_append: its own baseline check
+  narrative_mentions_not_pins:
+    - research/csia_semantic_core_2_1/PROPOSED_LEDGER_ENTRIES.md
+    - docs/research/MECHANISM_B_DWELL_DISCREPANCY.md
+  owner_options:
+    - re-pin the seven constants to the post-adoption hash in the adoption commit
+    - make those guards append-only (the first N pinned bytes unchanged) instead of exact
+    - adopt FL-053 together with the Semantic Core ledger promotion (FL-054 onward), which breaks the same pins
 
 informational_hashes_at_writing:
   research/PROSE_NUMERIC_BINDINGS.yaml: {sha256_at_writing: b4af7ca165b256c2249f4334d000f463c6c48bba4002447507308706d6580cee, last_commit: 3470cfc}

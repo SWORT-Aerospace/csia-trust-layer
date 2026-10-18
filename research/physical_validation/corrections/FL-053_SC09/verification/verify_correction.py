@@ -14,6 +14,9 @@ Read-only. Exits 1 if any check fails. Checks:
   C6  identifier and status consistency: FL-053 absent from the ledger while the
       record says PROPOSED, present only if it says ADOPTED
   C7  the ledger hash the three sealed manifests pin equals the ledger on disk
+  C8  while PROPOSED, the record lists exactly the tracked Python files that pin
+      the ledger's exact hash; once ADOPTED, the record names the owner's
+      decision about them (found by the adoption rehearsal; README section 7)
 
     python research/physical_validation/corrections/FL-053_SC09/verification/verify_correction.py [--json]
 """
@@ -25,6 +28,7 @@ import hashlib
 import json
 import math
 import os
+import subprocess
 import sys
 
 import yaml
@@ -131,6 +135,22 @@ def checks(record: dict) -> list[tuple[str, bool, str]]:
         pinned = next((v for k, v in _walk(load_json(m))
                        if k == LEDGER and isinstance(v, str) and len(v) == 64), None)
         res.append(("C7", pinned == led, f"{m} pins the ledger at {str(pinned)[:16]}"))
+
+    # C8 -------------------------------------------------------------------
+    pins = record.get("ledger_hash_pinned_in_code") or {}
+    old = pins.get("pinned_sha256")
+    listed = sorted(p["path"] for p in pins.get("pins") or [])
+    pkg = os.path.relpath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ROOT).replace(os.sep, "/")
+    found = sorted(f for f in subprocess.run(["git", "grep", "-l", old or "<none>", "--", "*.py"], cwd=ROOT,
+                                             capture_output=True, text=True).stdout.split()
+                   if not f.startswith(pkg + "/")) if old else None
+    if status == "PROPOSED":
+        res.append(("C8", bool(old) and old == led and found == listed,
+                    f"{len(listed)} code pins of the ledger hash listed; {len(found or [])} found"))
+    else:
+        decision = (record.get("adoption") or {}).get("guard_pins_decision")
+        res.append(("C8", bool(decision) or not listed,
+                    f"guard-pins decision recorded: {decision!r}"))
     return res
 
 

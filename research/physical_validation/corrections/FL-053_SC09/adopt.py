@@ -9,7 +9,8 @@
 
     # adopt: the owner only, under rule R8
     python research/physical_validation/corrections/FL-053_SC09/adopt.py --apply \\
-        --decided-by "NAME" --decision-reference "WHERE THE DECISION IS RECORDED"
+        --decided-by "NAME" --decision-reference "WHERE THE DECISION IS RECORDED" \\
+        --guard-pins-decision "HOW THE PINNED LEDGER-HASH GUARDS ARE HANDLED"
 
 What --apply changes, and nothing else:
   1. appends FL-053.ledger_entry.yaml to research/physical_validation/FAILURE_LEDGER.yaml
@@ -31,6 +32,12 @@ separate decision described in README.md section 5.
 It refuses if FL-053 is already used, if the ledger's FL series no longer ends
 at FL-052 (the id must then be reassigned by the owner), if the record is not
 PROPOSED, or if any pinned historical file has changed.
+
+IT ALSO REFUSES --apply WHILE OTHER CODE PINS THE LEDGER'S EXACT HASH, unless
+--guard-pins-decision names the owner's decision about them. The adoption
+rehearsal found seven such pins (Semantic Core 2.1, 2.1.1 and shadow, CSIA 2.2
+and the baseline verifiers built on it); an append changes the hash, so those
+guards fail. This tool does not edit them. The preview lists them.
 """
 
 from __future__ import annotations
@@ -75,6 +82,13 @@ def git(*a):
     return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
 
+def ledger_code_pins(ledger_sha):
+    """Tracked Python files outside this package that contain the ledger's hash."""
+    out = subprocess.run(["git", "grep", "-l", ledger_sha, "--", "*.py"], cwd=ROOT,
+                         capture_output=True, text=True).stdout.split()
+    return sorted(p for p in out if not p.startswith(REL_PKG.replace(os.sep, "/") + "/"))
+
+
 def preflight(record):
     errs = []
     if record["status"] != "PROPOSED":
@@ -95,7 +109,7 @@ def preflight(record):
     return errs
 
 
-def build(record, decided_by, reference, head, today):
+def build(record, decided_by, reference, head, today, pins_decision=None):
     """Return {path: (old_text, new_text)} for every file tier A changes."""
     out = {}
     led_old = read(LEDGER)
@@ -148,6 +162,9 @@ def build(record, decided_by, reference, head, today):
     rec2 = rec2.replace("  decided_on: null\n", f"  decided_on: {today}\n", 1)
     rec2 = rec2.replace("  decision_reference: null\n",
                         f"  decision_reference: {json.dumps(reference)}\n", 1)
+    if pins_decision is not None:
+        rec2 = rec2.replace("  guard_pins_decision: null\n",
+                            f"  guard_pins_decision: {json.dumps(pins_decision)}\n", 1)
     rec2 = rec2.replace("  fl_053_in_ledger: false\n", "  fl_053_in_ledger: true\n", 1)
     rec2 = rec2.replace("\nadoption:\n",
                         f"\n  - date: {today}\n    status: ADOPTED\n    by: adopt.py --apply, "
@@ -170,6 +187,7 @@ def main(argv=None) -> int:
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--decided-by")
     ap.add_argument("--decision-reference")
+    ap.add_argument("--guard-pins-decision")
     ap.add_argument("--patch-out")
     args = ap.parse_args(argv)
 
@@ -181,10 +199,17 @@ def main(argv=None) -> int:
     if args.apply and not (args.decided_by and args.decision_reference):
         print("REFUSED: --apply needs --decided-by and --decision-reference (rule R8: the owner's decision)")
         return 2
+    pins = ledger_code_pins(sha_text(read(LEDGER)))
+    if args.apply and pins and not args.guard_pins_decision:
+        print("REFUSED: these files pin the ledger's exact SHA-256 and fail on any append:\n  "
+              + "\n  ".join(pins) + "\n--guard-pins-decision must name the owner's decision about them "
+              "(README section 5, item f). This tool does not edit them.")
+        return 2
     head = git("rev-parse", "HEAD")
     today = dt.date.today().isoformat()
+    pins_decision = args.guard_pins_decision or ("<GUARD-PINS-DECISION>" if pins else None)
     changes = build(record, args.decided_by or "<OWNER>", args.decision_reference or "<DECISION-REFERENCE>",
-                    head, today)
+                    head, today, pins_decision)
     diff = unified(changes)
     if args.patch_out:
         with open(args.patch_out, "w", encoding="utf-8", newline="") as fh:
@@ -194,11 +219,17 @@ def main(argv=None) -> int:
         if not args.patch_out:
             sys.stdout.write(diff)
         print(f"\nPREVIEW ONLY: {len(changes)} files would change; nothing was written.")
+        if pins:
+            print(f"ALSO REQUIRED (decision f): {len(pins)} files pin the ledger's exact SHA-256 and "
+                  "would fail after the append; this tool does not edit them:\n  " + "\n  ".join(pins))
         return 0
     for rel, (_a, b) in changes.items():
         with open(os.path.join(ROOT, rel), "w", encoding="utf-8", newline="") as fh:
             fh.write(b)
     print(f"ADOPTED in the working tree: {len(changes)} files changed. Review, run the suite, and commit.")
+    if pins:
+        print("NOT YET HANDLED: the ledger-hash guards below must be dealt with under the recorded "
+              "guard-pins decision before the suite can pass:\n  " + "\n  ".join(pins))
     return 0
 
 

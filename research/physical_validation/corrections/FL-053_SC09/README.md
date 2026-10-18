@@ -97,6 +97,24 @@ changes exactly eight files:
 7. `docs/CURRENT_PROGRAM_STATE.md`: a pointer note after the systems-paper gate table; the gate-9 row is not rewritten
 8. `CORRECTION_RECORD.yaml`: status ADOPTED, with the decision fields
 
+**Those eight files are not enough.** The rehearsal (section 7) found that
+seven later programs pin the ledger's exact SHA-256 as a baseline invariant.
+The pins are in `tests/test_semantic_core_2_1.py`,
+`tests/test_semantic_core_2_1_revision.py`,
+`tests/test_semantic_core_2_1_shadow.py`,
+`research/csia_2_2_evidence_assurance/common_2_2.py`,
+`research/csia_2_2_offboard_pilot/common_pilot.py` (imported by the 2.3, PRIME
+and RB-001 baseline verifiers),
+`research/csia_semantic_core_2_1_revision/revision_common.py` and
+`research/csia_semantic_core_2_1_shadow/verify_state.py`. They were added from
+2026-09-30 on, after the last ledger append on 2026-09-22, so the manifest
+precedent does not cover them. Any append, this one or the Semantic Core
+proposals, changes the hash and fails four tests. They belong to Semantic Core,
+CSIA 2.2 and the programs built on them, so `adopt.py` does not edit them.
+Instead it lists them in the preview and refuses `--apply` without
+`--guard-pins-decision`. `CORRECTION_RECORD.yaml` lists them under
+`ledger_hash_pinned_in_code`.
+
 **Tier B, propagation into the paper package.** A separate decision. Add this
 as row 15 of `publication/system_paper_i/_static/10_CORRECTIONS_LEDGER.md`,
 change "Fourteen" to "Fifteen" there and "fourteen" to "fifteen" in
@@ -112,9 +130,17 @@ covering:
   sealed-phase manifests, under the R4 precedent;
 - (c) appending PI-006;
 - (d) the program-state pointer note;
-- (e) tier B, or not.
+- (e) tier B, or not;
+- (f) how the seven ledger-hash guards are handled. The options are:
+  - re-pin them to the post-adoption hash in the adoption commit;
+  - make them append-only, so the pinned bytes are a prefix of the ledger;
+  - adopt FL-053 together with the Semantic Core ledger promotion, which breaks
+    the same pins.
 
-The owner then runs `adopt.py --apply --decided-by "<name>" --decision-reference "<where the decision is recorded>"`, runs the suite, and commits. The PRIME-1 draft ids are renumbered at their own promotion and are not part of this decision.
+  Each option edits Semantic Core or CSIA 2.2 guard files, which this session
+  may not do.
+
+The owner then runs `adopt.py --apply --decided-by "<name>" --decision-reference "<where the decision is recorded>" --guard-pins-decision "<the decision on (f)>"`, applies (f), runs the suite, and commits. The PRIME-1 draft ids are renumbered at their own promotion and are not part of this decision.
 
 ## 6. Instruction for the paper-writing session
 
@@ -152,7 +178,7 @@ The owner then runs `adopt.py --apply --decided-by "<name>" --decision-reference
 
 ## 7. Verification, 2026-10-18
 
-`python research/physical_validation/corrections/FL-053_SC09/verification/verify_correction.py`: **42 of 42 checks pass.**
+`python research/physical_validation/corrections/FL-053_SC09/verification/verify_correction.py`: **43 of 43 checks pass.**
 
 - **C1:** 15 historical files byte-identical to their pinned hashes.
 - **C2 and C3:** the committed values; the subtraction is exactly crossing minus 1.0; the CUSUM is earlier on raw and subtracted figures alike.
@@ -160,9 +186,21 @@ The owner then runs `adopt.py --apply --decided-by "<name>" --decision-reference
 - **C5:** the shipped `FailsafePolicy` stepped over the exact arms escalates exactly 1.00 s after each crossing (9.72 / 4.36 / 4.24 s), and never on the clean arm. The 2026-09-26 draft inferred 1.04 s from a different scenario.
 - **C6:** status and identifier are consistent.
 - **C7:** all three manifests pin the ledger on disk.
+- **C8:** `ledger_hash_pinned_in_code` lists exactly the 7 tracked Python files
+  that pin the ledger's hash. After adoption, the check requires a recorded
+  guard-pins decision instead.
 
 Also re-run today on a clean archive: `mechanism_b.py` reproduces
 `mechanism_b.json` with 0 of 194 keys differing.
+
+**Adoption rehearsal.** In a throwaway clone of `3a12efa`, `adopt.py --apply`
+was run with placeholder decision fields; the repository itself was not
+touched. It changed the eight files, and in each manifest only the two lines
+it should. The ledger then had 125 entries ending at FL-053. Across the 18 test
+files that read the changed files, 533 tests passed, 3 were skipped and **4
+failed**: the three Semantic Core ledger-pin tests and
+`test_evidence_assurance_2_2.py::test_no_frozen_artifact_changed_since_the_2_1_1_baseline`.
+That finding is decision (f) above. The clone was deleted afterwards.
 
 ## 8. Contents
 
