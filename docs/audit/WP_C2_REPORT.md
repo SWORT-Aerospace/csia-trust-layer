@@ -1,6 +1,6 @@
 # WP-C2 — Criticality-Weighted Exposure, the Free Repair, and the GPS Problem
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **Not merged to main**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **Not merged to main**
 **Suite:** 448 before → **463** after (15 added by `tests/test_wp_c2_repair_flag.py`); 463 both with and without
 `PYTHONPATH=.`, verified to confirm the file collects on a clean runner
 **Production behaviour:** unchanged. The repair ships behind a research flag,

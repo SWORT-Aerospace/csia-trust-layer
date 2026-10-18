@@ -1,0 +1,63 @@
+{
+ "count_with_withdrawal": 8,
+ "evidence_level": "SOURCE_ANALYSIS",
+ "expressions": {
+  "accel_esc_rpm": "armed_gate",
+  "accel_motor_current": "armed_gate",
+  "altitude_baro": "gvalid",
+  "attitude_gravity_mag": "1.0",
+  "heading_course": "speed_gate * gvalid",
+  "phys_baro": "1.0",
+  "phys_battery": "1.0",
+  "phys_gps": "gvalid * (1.0 if tau > 3.0 else 0.0",
+  "phys_mag": "1.0 if mag_ref_ready else 0.0",
+  "phys_motor_esc": "1.0",
+  "phys_vibration": "P[\"vibration\"][1] * float(fresh[\"motor_esc\"]",
+  "power_thrust": "1.0",
+  "redundant_imu": "1.0",
+  "temp_bias_drift": "0.2",
+  "vibration_prop_freq": "1.0"
+ },
+ "freshness_independent": [
+  "accel_esc_rpm",
+  "accel_motor_current",
+  "heading_course",
+  "phys_gps",
+  "phys_mag",
+  "phys_vibration",
+  "temp_bias_drift"
+ ],
+ "freshness_independent_count": 7,
+ "imports": [
+  "json",
+  "pathlib",
+  "re",
+  "sys"
+ ],
+ "known_limitations": [
+  "Two edge terms are assigned through a loop variable (`E[key] = ...` for velocity_gps_doppler_0 and _1) and are NOT matched by a literal-key pattern. They are absent from this evaluation rather than silently defaulted, and the inventory records them as gvalid-gated. An evaluator that guessed at them would be inventing evidence.",
+  "This evaluator classifies gate EXPRESSIONS. It does not model control flow, so a gate that is unreachable in practice would still be classified by what it depends on."
+ ],
+ "schema": "csia.consequence.independent_gate_evaluation/1",
+ "source": "csia/runtime/online.py",
+ "terms_found": 15,
+ "verdicts": {
+  "accel_esc_rpm": "FRESHNESS_INDEPENDENT",
+  "accel_motor_current": "FRESHNESS_INDEPENDENT",
+  "altitude_baro": "FRESHNESS_COUPLED",
+  "attitude_gravity_mag": "ALWAYS_OPEN",
+  "heading_course": "FRESHNESS_INDEPENDENT",
+  "phys_baro": "ALWAYS_OPEN",
+  "phys_battery": "ALWAYS_OPEN",
+  "phys_gps": "FRESHNESS_INDEPENDENT",
+  "phys_mag": "FRESHNESS_INDEPENDENT",
+  "phys_motor_esc": "ALWAYS_OPEN",
+  "phys_vibration": "FRESHNESS_INDEPENDENT",
+  "power_thrust": "ALWAYS_OPEN",
+  "redundant_imu": "ALWAYS_OPEN",
+  "temp_bias_drift": "FRESHNESS_INDEPENDENT",
+  "vibration_prop_freq": "ALWAYS_OPEN"
+ },
+ "what_this_does_not_do": "It does not decide whether a closure matters, or whether a fault can cause one. It classifies what each gate expression depends on. Consequence is a separate question at a higher evidence level.",
+ "withdrawal_path_present": true
+}

@@ -1,6 +1,6 @@
 # WP-C1 — Assurance Observability Certificate for CSIA
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **Not merged to main**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **Not merged to main**
 **Suite:** 448 passed before and after. No production file modified.
 **Artifacts:** `research/wp_c1/results/`, `figures/wp_c1_*.png`
 

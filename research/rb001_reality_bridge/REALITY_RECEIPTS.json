@@ -1,0 +1,109 @@
+{
+ "label": "RB-001 Part 27: observed SITL-vs-real differences only",
+ "receipts": [
+  {
+   "assumption": "every PX4 log has PX4 547e2ca's estimator_status schema",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json (before the fix)",
+   "evidence_definition_fix": false,
+   "id": "RR-01",
+   "impact_on_csia": "no report at all on other PX4 versions",
+   "model_limitation": "one contract per PX4 schema version",
+   "physical_behavior": "6/6 reachable real/older logs lack fields (accel_device_id, hdg_test_ratio): the stock path CRASHED (KeyError)",
+   "product_consequence": "FIXED narrowly: a schema mismatch is a coverage notice and the estimator producer is not run (runs.stock_flight); test in tests/test_rb001_reality_bridge.py; historical outputs unchanged",
+   "sitl_behavior": "all 2.2/2.3 logs had it; the stock path ran",
+   "status": "fixed"
+  },
+  {
+   "assumption": "an ordinary PX4 log carries actuator_motors and esc_status at 547e2ca's default rates",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json topics_absent; timing",
+   "evidence_definition_fix": false,
+   "id": "RR-02",
+   "impact_on_csia": "no propulsion evidence on older vehicles; 0-1 of 29 profile records observed",
+   "model_limitation": "the stock bridge needs PX4 >= control allocation and ESC telemetry",
+   "physical_behavior": "absent on all 4 real boards (pre-control-allocation PX4); a newer SITL log logs esc_status at 4 Hz",
+   "product_consequence": "reported honestly (coverage notices); state the supported PX4 range in the product documentation",
+   "sitl_behavior": "present at 10 Hz",
+   "status": "documented"
+  },
+  {
+   "assumption": "logs have no dropouts",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json logger_dropouts",
+   "evidence_definition_fix": false,
+   "id": "RR-03",
+   "impact_on_csia": "windows over a dropout must be refused",
+   "model_limitation": null,
+   "physical_behavior": "3 of 4 real logs have dropouts: 4 (119 ms), 1 (10 ms), 1 (30 ms)",
+   "product_consequence": "already handled: LOG_COMPLETENESS flagged 6/6 real dropouts",
+   "sitl_behavior": "0 logger dropouts in 79 SITL flights",
+   "status": "transfers"
+  },
+  {
+   "assumption": "sample spacing is regular at the default interval",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json timing; LOG_COMPLETENESS_STRESS.json V4/real_jitter",
+   "evidence_definition_fix": true,
+   "id": "RR-04",
+   "impact_on_csia": "real faults may go unreported on real, jittery logs (an honest refusal, but a miss)",
+   "model_limitation": null,
+   "physical_behavior": "real boards: 1.4-16 ms jitter at 100 ms, gaps up to 164 ms; applied to a SITL loss log, the product's default-rate re-decimation creates gaps above the 3-interval rule and the motor loss (C = 0.664) is refused",
+   "product_consequence": "SPECIFIED, NOT APPLIED: re-decimate only topics logged faster than their default; measure gaps against the log's own median interval. Gate: the first real propulsion log",
+   "sitl_behavior": "actuator_outputs jitter about 0-9 ms; largest gaps 4-16 ms",
+   "status": "open"
+  },
+  {
+   "assumption": "the logging rate is PX4 547e2ca's default",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json; LOG_COMPLETENESS_STRESS.json rate_reduced_2Hz",
+   "evidence_definition_fix": true,
+   "id": "RR-05",
+   "impact_on_csia": "total refusal on slower-logged vehicles",
+   "model_limitation": null,
+   "physical_behavior": "rates differ by version and by logging profile (esc_status 4 Hz in a newer SITL log; CubeOrange's reduced profile logs actuator_outputs at about 9 Hz with 16 ms jitter); at 2 Hz (stress) every propulsion window is refused",
+   "product_consequence": "same fix as RR-04",
+   "sitl_behavior": "it is",
+   "status": "open"
+  },
+  {
+   "assumption": "the peak body rate measures maneuvering only",
+   "calibration_fix": "partly",
+   "evidence": "RB0_REAL_LOGS.json gyro",
+   "evidence_definition_fix": true,
+   "id": "RR-06",
+   "impact_on_csia": "on a real vehicle the compensation may never be assessable (NOT_STEADY_FLIGHT everywhere)",
+   "model_limitation": "a maximum is the wrong statistic under noise; remove the window median or use PX4's bias-corrected rate",
+   "physical_behavior": "real boards at rest: 5 s peaks above 0.0989 rad/s in some windows on all three disarmed boards; a 0.067 rad/s uncorrected yaw bias on a CubeOrange at rest",
+   "product_consequence": "recalibrate and redefine on RB3/RB5 data before relying on the compensation outside SITL",
+   "sitl_behavior": "SIH hover nulls max 0.049 rad/s; theta_steady 0.0989",
+   "status": "open"
+  },
+  {
+   "assumption": "one IMU, one EKF2 lane",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json (sample_log_small topics)",
+   "evidence_definition_fix": false,
+   "id": "RR-07",
+   "impact_on_csia": "lane switches and IMU-instance lineage changes happen on hardware; the frozen lane-switch design becomes runnable without a simulator change",
+   "model_limitation": null,
+   "physical_behavior": "a real CubeOrange logs three gyro, three accelerometer and two magnetometer instances",
+   "product_consequence": "lineage roots must name the selected IMU instance (2.2 already does); run the lane-switch design on a multi-IMU board (HIL_AND_LANE_SWITCH.md)",
+   "sitl_behavior": "SIH: one IMU, one magnetometer, no lane switch possible",
+   "status": "documented"
+  },
+  {
+   "assumption": "publication time equals acquisition time",
+   "calibration_fix": false,
+   "evidence": "RB0_REAL_LOGS.json timing",
+   "evidence_definition_fix": false,
+   "id": "RR-08",
+   "impact_on_csia": "none for IMU-derived evidence (windows 0.2-15 s)",
+   "model_limitation": "ESC telemetry latency is still unmeasured (no sample time in esc_status)",
+   "physical_behavior": "0.40 ms median, 0.44 ms p99 on a real CubeOrange (vehicle_angular_velocity)",
+   "product_consequence": "keep 2.2 content time for IMU-derived outputs; measure ESC latency at RB2-0",
+   "sitl_behavior": "timestamp minus timestamp_sample = 0",
+   "status": "transfers (IMU); open (ESC)"
+  }
+ ]
+}

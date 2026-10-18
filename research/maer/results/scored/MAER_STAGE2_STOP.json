@@ -1,0 +1,57 @@
+{
+ "blocking_finding": {
+  "contrast_committed_mechanism_a": {
+   "gvalid_at_onset": 1.0,
+   "gvalid_late": 0.0,
+   "gvalid_post": 0.0,
+   "injection": "SIM_GPS1_ENABLE=0",
+   "sustained_zero_ticks": 450
+  },
+  "gvalid_definition": "online.py:482  gvalid = 1.0 if s['gps'].valid and s['gps'].seen else 0.0",
+  "measured_on_non_scored_fixture": {
+   "distinct_h_acc_on_invalid_fix": 278,
+   "fix_type_counts_post_onset": {
+    "1": 582,
+    "6": 1422
+   },
+   "gps_raw_int_post_onset": 2004,
+   "invalid_fix_messages": 582,
+   "onset_s": 7.0,
+   "post_onset_ticks": 999,
+   "post_onset_ticks_with_gvalid_zero": 0,
+   "tag": "NON_SCORED_TEST_FIXTURE_M1",
+   "total_ticks_with_gvalid_zero": 1
+  },
+  "what": "the preregistered M1 condition cannot exercise the gate-placement manipulation, because gvalid never falls under SIM_GPS1_JAM=1",
+  "why": "under jamming GPS_RAW_INT keeps arriving and interleaves valid and invalid fixes, so the core's gps slot is continually refreshed. The adapter WITHHOLDS the gps sensor on an invalid fix rather than marking it invalid, so the slot never goes not-valid"
+ },
+ "discovered_on": "a NON_SCORED_TEST_FIXTURE at onset 7 s, which is in neither the preregistered onset set nor the extension list",
+ "freeze_verification": {
+  "ardupilot": "ArduCopter V4.8.0-dev@01a504b",
+  "frozen_core_tag": "csia-v1.0-research-final",
+  "frozen_core_test": "tests/test_v1_frozen.py PASS",
+  "preregistration_commit": "d34c629",
+  "preregistration_sha256": "39780e9f09b44545ca0426909ee1849c2e0307308420e3290f9fc95f07196623",
+  "scored_artifacts_predating_prereg": 0,
+  "working_tree_matches_commit": true
+ },
+ "harness_state": {
+  "a0_fidelity": "tests/test_maer_arms.py asserts A0 reproduces the stock DiagnosisCore exactly",
+  "built_and_verified": true,
+  "determinism": "two replays of one recording byte-identical",
+  "mc1_mechanics": "on the single gvalid==0 tick A1 contributed and A1G did not, with identical consistency",
+  "note": "the harness is sound; the CONDITION cannot exercise it",
+  "pairing": "A1 and A1G share input_sha256"
+ },
+ "scored_trials_executed": 0,
+ "status": "CAMPAIGN_NOT_RUN__MC1_CANNOT_FIRE",
+ "the_tension": "the two properties the experiment needs are mutually exclusive in this simulator: SIM_GPS1_ENABLE=0 drives gvalid to zero but FREEZES h_acc (Stage 0.5), while SIM_GPS1_JAM=1 keeps h_acc live but never drives gvalid to zero. A live receiver-health residual and a closed validity gate do not co-occur under either available ArduPilot GNSS fault model",
+ "what_was_NOT_done": [
+  "no scored trial was run (0 of 100)",
+  "M1 was NOT switched back to SIM_GPS1_ENABLE=0",
+  "the gate definition was NOT changed",
+  "MC1 was NOT redefined",
+  "no arm, constant or threshold was tuned"
+ ],
+ "why_this_is_a_stop": "MC1 is the preregistered manipulation check and its failure invalidates the experiment (MAER_PREREGISTRATION.md section 8). With gvalid==1 on every post-onset tick, A1 and A1G are identical by construction -- contribution(1.0) is the same object for both arms -- so the causal comparison has no ticks to act on"
+}

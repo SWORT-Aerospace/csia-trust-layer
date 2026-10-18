@@ -1,0 +1,52 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.0, semantics 2.1.1
+
+INPUTS
+  analysis_id: XS1A1-C00-A-E055
+  kind: xsys_trial
+  onset_s_in_log: 154.752
+  opaque_id: da058c7a8bbc86eb
+  stage1_sha256: ccbc10f5aecde43bbfe7297e2073907089ece1562190383c57e0682c11a0e8e3
+  truth: PHYSICAL_ACTUATOR_DEGRADATION
+  ulog: {'file': 'XS1A1-C00-A-E055.ulg', 'sha256': '3ddc250773b7ccf6881d3842d29d443fe435d864ac78b33dbe452fbdc5073d59'}
+  variant: V3_TEMPORAL
+
+PROFILE  xsys001_research_spec (NOT_APPLICABLE)
+  INFO PG0_NOT_VALIDATED xsys001_research_spec: the XSYS-001 symptom specification has no function table
+
+TIMELINE  161 ticks in 3 intervals
+  -1.000s .. 0.100s (12 ticks): no symptom; attribution NO_EVIDENCE; 4 used, 0 rejected; changed: start
+  0.200s .. 14.900s (148 ticks): COMMAND_NO_RESPONSE|motor_0 SUPPORTED: ACTUATION/mechanical; attribution NO_EVIDENCE; 12 used, 0 rejected; changed: abnormal, admissibility, localizations, producer_health
+  15.000s: COMMAND_NO_RESPONSE|motor_0 SUPPORTED: ACTUATION/mechanical; attribution NO_EVIDENCE; 16 used, 0 rejected; changed: abnormal, admissibility, producer_health
+
+FINAL STATE at 15.000s: COMMAND_NO_RESPONSE|motor_0 SUPPORTED: ACTUATION/mechanical; attribution NO_EVIDENCE
+  what appears abnormal: COMMAND_NO_RESPONSE|motor_0
+  adverse evidence: CONTROL/motor_0:xsys.compensation_T3@15s [xsys:w_ctrl], NAVIGATION/motor_0:xsys.dynamics_T1@0.2s [xsys:w_dyn], ACTUATION/motor_0:xsys.rpm_response@15s [xsys:w_rpm]
+  COMMAND_NO_RESPONSE on motor_0: SUPPORTED
+    remaining explanations: ACTUATION/mechanical
+    eliminated: SENSOR/response_sensor by DYN_T1_NOMINAL_FALSE
+    supporting evidence: ACTUATION/motor_0:xsys.rpm_response@15s [xsys:w_rpm]
+    refuting evidence: NAVIGATION/motor_0:xsys.dynamics_T1@0.2s [xsys:w_dyn]
+  attribution: NO_EVIDENCE
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  px4:ekf2.estimator_status: health VALID; 4 of 4 admitted
+  xsys:w_ctrl: health VALID; 4 of 4 admitted
+  xsys:w_dyn: health VALID; 4 of 4 admitted
+  xsys:w_rpm: health VALID; 4 of 4 admitted
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 3 outputs in 1 lineage group(s), 2 independent line(s)
+    one group: CONTROL/motor_0:xsys.compensation_T3@15s [xsys:w_ctrl], NAVIGATION/motor_0:xsys.dynamics_T1@0.2s [xsys:w_dyn], ACTUATION/motor_0:xsys.rpm_response@15s [xsys:w_rpm]
+  ACTUATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+  CONTROL/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+  NAVIGATION/motor_0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: ekf2.aiding.hdg=2, ekf2.aiding.hgt=4, ekf2.aiding.pos=1, ekf2.aiding.vel=1, ekf2.imu.change_count=0, ekf2.reset.reset_count_pod_d=1, ekf2.reset.reset_count_pos_ne=3, ekf2.reset.reset_count_quat=1, ekf2.reset.reset_count_vel_d=0, ekf2.reset.reset_count_vel_ne=2, ekf2.selector.instance_changed_count=0
+
+PROFILE WARNINGS
+  INFO:PG0_NOT_VALIDATED:xsys001_research_spec

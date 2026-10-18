@@ -1,0 +1,157 @@
+# CSIA v1.1 — FUNCTION REQUIREMENTS
+#
+# Phase 4 sections 6, 7 and 12. WRITTEN AND HASHED BEFORE ANY SCENARIO WAS
+# EVALUATED (gate C). The recorded hash is in FUNCTION_ELIGIBILITY_SPEC.md and
+# a test fails if this file changes without that hash being reissued, so a
+# requirement cannot be quietly adjusted after seeing an outcome.
+#
+# THERE IS NOT ONE NEW NUMBER IN THIS FILE.
+#
+# Every trust requirement names a field of the FROZEN `FailsafeConfig`
+# (csia/runtime/failsafe.py) and inherits its value. Those are declared v1
+# engineering requirements already carrying the safety path. Section 12 permits
+# a threshold only when it "already comes from a declared engineering
+# requirement"; inheriting by NAME rather than copying a value means the two
+# cannot drift apart, and a test asserts every `inherits` resolves.
+#
+# Requirements are stated as REQUIREMENTS, never as sensor-health shortcuts.
+# There is no `if gps_trust > 0.8` anywhere: a function says which information
+# it needs, which relations must be checkable, which hypotheses would
+# invalidate it, and how far the assurance state may go before it stops.
+
+version: "1.1.0"
+
+# ---------------------------------------------------------------------------
+# Functions deliberately NOT specified. Section 6: "If a function cannot be
+# specified honestly: omit it."
+# ---------------------------------------------------------------------------
+omitted:
+  PRECISION_LANDING:
+    reason: >
+      Requires a landing-reference sensor -- rangefinder, optical flow, or a
+      landing beacon. None exists in the node set (imu0, imu1, baro, mag, gps,
+      motor_esc, battery, vibration), in any of the 11 relations, or in any
+      adapter channel. A requirement written from the available signals would
+      describe a different function and call it precision landing. Omitted
+      until such a source exists.
+
+# ---------------------------------------------------------------------------
+# Evaluation contract, restated here so the table is readable on its own.
+# Full definition in FUNCTION_ELIGIBILITY_SPEC.md.
+#
+#   required_sources          ALL must be present and fresh
+#   required_source_groups    at least one member of EACH group, ANY-OF
+#   required_relations        at least one must be gated in (evidence exists)
+#   trust_requirements        node (or group max) >= inherited threshold
+#   sensitive_hypotheses      causes whose truth would invalidate the function
+#   support_policy            REQUIRE_IDENTIFIABLE | TOLERATE_AMBIGUITY
+#   max_assurance_level       highest level at which the function may be
+#                             ELIGIBLE; above it the function is INELIGIBLE
+# ---------------------------------------------------------------------------
+functions:
+
+  COARSE_NAVIGATION:
+    summary: Know approximately where the vehicle is.
+    required_sources: [gps]
+    required_source_groups: []
+    required_relations: [velocity_gps_doppler]
+    trust_requirements:
+      - node: gps
+        inherits: nav_caution
+    sensitive_hypotheses: [gps_fault]
+    support_policy: TOLERATE_AMBIGUITY
+    max_assurance_level: CRITICAL
+    rationale: >
+      A position estimate that is only approximately right is still useful for
+      returning home and for reporting. An unresolved GNSS hypothesis degrades
+      it rather than removing it, because the alternative -- discarding
+      position entirely on an ambiguity -- is worse for this function.
+
+  POSITION_HOLD:
+    summary: Hold a commanded position.
+    required_sources: [gps, baro]
+    required_source_groups:
+      - [imu0, imu1]
+    required_relations: [velocity_gps_doppler, altitude_baro]
+    trust_requirements:
+      - node: gps
+        inherits: nav_caution
+      - group: [imu0, imu1]
+        reduce: max
+        inherits: att_caution
+    sensitive_hypotheses: [gps_fault]
+    support_policy: TOLERATE_AMBIGUITY
+    max_assurance_level: CRITICAL
+    rationale: >
+      Needs horizontal position, altitude and an attitude reference. The
+      attitude requirement is on max(imu0, imu1) and inherits att_caution,
+      matching the frozen failsafe policy exactly: losing ONE IMU is
+      redundancy working, not loss of attitude.
+
+  PRECISION_NAVIGATION:
+    summary: Navigate to a tolerance that assumes the position is correct.
+    required_sources: [gps, mag]
+    required_source_groups:
+      - [imu0, imu1]
+    required_relations: [velocity_gps_doppler, heading_course]
+    trust_requirements:
+      - node: gps
+        inherits: nav_caution
+      - node: mag
+        inherits: heading_caution
+      - group: [imu0, imu1]
+        reduce: max
+        inherits: att_caution
+    sensitive_hypotheses: [gps_fault, mag_interference]
+    support_policy: REQUIRE_IDENTIFIABLE
+    max_assurance_level: CAUTION
+    rationale: >
+      This is the function section 10 is about. It assumes the position and
+      heading are not merely available but CORRECT, so an unresolved GNSS or
+      magnetometer hypothesis removes its justification even while the
+      posterior on `nominal` is high. REQUIRE_IDENTIFIABLE encodes exactly
+      that: a leader that cannot be separated from `gps_fault` is not evidence
+      that the position is good.
+
+  GEOFENCE_SUPPORT:
+    summary: Decide whether the vehicle is inside a declared boundary.
+    required_sources: [gps]
+    required_source_groups: []
+    required_relations: [velocity_gps_doppler]
+    trust_requirements:
+      - node: gps
+        inherits: nav_caution
+    sensitive_hypotheses: [gps_fault]
+    support_policy: REQUIRE_IDENTIFIABLE
+    max_assurance_level: CRITICAL
+    rationale: >
+      Stricter than COARSE_NAVIGATION on the SAME inputs, and deliberately so.
+      A boundary decision made on a spoofed position is worse than no boundary
+      decision: it reports "inside" with authority while the vehicle leaves.
+      An unresolved GNSS hypothesis therefore removes the function rather than
+      degrading it.
+
+  INERTIAL_CONTINUATION:
+    summary: Continue on inertial and barometric reference with no GNSS.
+    required_sources: [baro]
+    required_source_groups:
+      - [imu0, imu1]
+    required_relations: [redundant_imu, altitude_baro]
+    trust_requirements:
+      - group: [imu0, imu1]
+        reduce: max
+        inherits: att_emergency
+    sensitive_hypotheses: [imu0_bias_drift, imu1_bias_drift]
+    support_policy: TOLERATE_AMBIGUITY
+    max_assurance_level: EMERGENCY
+    rationale: >
+      The fallback, so it must stay evaluable when everything else has
+      stopped: it does NOT require GNSS, and its assurance boundary is
+      EMERGENCY so the assurance state alone never removes it. The attitude
+      requirement inherits att_emergency rather than att_caution because this
+      is the last-resort function -- a single degraded IMU must not remove the
+      fallback, while losing both must.
+      NO TRUST REQUIREMENT IS STATED FOR `baro`: `FailsafeConfig` declares no
+      barometer threshold, and inventing one here is exactly the forbidden
+      tuned number. Barometer freshness is required; barometer trust is
+      reported but not gated on.

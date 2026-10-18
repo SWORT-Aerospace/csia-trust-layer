@@ -1,0 +1,10 @@
+authority,case,declared_and_effective_agree,declared_meaning,declared_semantics,effective_token_at_core,effective_value_at_core,path
+C_consumer_A,battery.current_not_measured,True,"record a sentinel, then keep serving the last value",RETAIN_PREVIOUS,V,"(5.0,)",v1_1_adapter
+C_consumer_B,battery.current_not_measured,True,clamp the sentinel to zero and mark the sample valid,SUBSTITUTE_ZERO,M,"(0.0,)",plugins_py
+C_consumer_C,battery.current_not_measured,True,pass the number through as a measurement,LITERAL_MINUS_ONE,V,"(-1.0,)",ulog_source_py
+C_consumer_A,gnss.no_3d_fix,True,discard the retained fix and record NO_3D_FIX,DROP_AND_RECORD_REASON,NOTHING_EMITTED,,v1_1_adapter
+C_consumer_B,gnss.no_3d_fix,True,emit a zero position with valid=False,SUBSTITUTE_ZERO_MARK_INVALID,I,"(0.0, 0.0, 0.0)",plugins_py
+C_consumer_C,gnss.no_3d_fix,True,emit the real position with valid=(fix>=3),PASS_THROUGH_MARK_INVALID,I,"(0.0, -0.0, 0.0)",ulog_source_py
+C_consumer_A,mag.all_zero_triple,True,an all-zero triple is absence; nothing is stored and nothing is recorded,TREAT_AS_ABSENT_SILENTLY,NOTHING_EMITTED,,v1_1_adapter
+C_consumer_B,mag.all_zero_triple,True,"same test, same silence",TREAT_AS_ABSENT_SILENTLY,NOTHING_EMITTED,,plugins_py
+C_consumer_C,mag.all_zero_triple,True,emit the zero vector as a valid magnetic field,LITERAL_ZERO_FIELD,V,"(0.0, -0.0, -0.0)",ulog_source_py

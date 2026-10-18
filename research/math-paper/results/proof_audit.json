@@ -1,0 +1,70 @@
+{
+  "artifact": "PROOF_AUDIT",
+  "commit": "d1ba2d3735c99efa11acbd17ce236587664d4429",
+  "generation_command": "python research/math-paper/proof_audit.py",
+  "novelty": "NONE CLAIMED FOR THE IDENTITIES. P1-P3 are one line of algebra each; P4 is a standard perturbation-of-argmax bound; P5-P6 follow from Jensen. See PRIOR_ART_MATRIX.csv.",
+  "numeric": {
+    "P4": {
+      "argmax_agreed_when_condition_met": 2721,
+      "argmax_moved_when_condition_violated": 6877,
+      "condition_Delta_gt_R_met": 2721,
+      "instances": 20000,
+      "note": "the last row is ALLOWED: the condition is sufficient, not necessary. It is reported so the bound is not mistaken for a characterisation."
+    },
+    "P8": {
+      "note": "a NEGATIVE result about P4. For a pinned pair carrying equal prior mass the margin Delta never exceeds R, so P4's sufficient condition can never certify the pair the systems paper measures. Max slack is reported in bound_max_slack.",
+      "pinned_pairs_that_were_the_top_two_under_q": 2282
+    },
+    "P8_escape": {
+      "P4_condition_fired_anyway": 1224,
+      "draws": 200000,
+      "fired_fraction": 0.060804769001490316,
+      "note": "P8's equal-prior hypothesis is load-bearing. When the condition fires here the prior log-odds supplied the whole margin, so the certificate was bought with prior mass rather than evidence.",
+      "pinned_pairs_that_were_the_top_two_under_q": 20130,
+      "prior": "Dirichlet(0.3), deliberately lopsided"
+    },
+    "bound_max_slack": {
+      "P6a_log_ratio_bounded_by_R": 1.7763568394002505e-15,
+      "P6b_TV_bound": -8.381251191391659e-05,
+      "P8_pinned_pair_margin_never_exceeds_R": 8.881784197001252e-16
+    },
+    "bound_violations_beyond_1e-9": {
+      "P6a_log_ratio_bounded_by_R": 0,
+      "P6b_TV_bound": 0,
+      "P8_pinned_pair_margin_never_exceeds_R": 0
+    },
+    "hypotheses_per_instance": 5,
+    "seed": 20260903,
+    "trials": 20000,
+    "worst_deviation": {
+      "P1_reweighting_identity": 4.440892098500626e-16,
+      "P2_log_ratio_identity": 1.7763568394002505e-15,
+      "P3_pinned_to_prior": 8.881784197001252e-16,
+      "P5a_KL_q_p_is_jensen_gap": 1.3322676295501878e-15,
+      "P5b_KL_p_q_identity": 1.5334955527634975e-15,
+      "P6c_TV_bound_is_attained_at_the_uniform_two_point_witness": 5.551115123125783e-17,
+      "P7_gated_score_is_a_reweighting": 5.551115123125783e-16,
+      "P7b_shift_is_the_withheld_contribution": 3.552713678800501e-15,
+      "P7c_pinned_when_all_distinguishing_gated": 1.7763568394002505e-15
+    }
+  },
+  "paper": "Posterior Distortion from Hypothesis-Dependent Validity Gating in Runtime Diagnosis",
+  "symbolic": {
+    "available": true,
+    "results": {
+      "C2_constant_w_implies_p_equals_q": true,
+      "P1_reweighting_identity": true,
+      "P2_log_ratio_identity": true,
+      "P3_pinned_to_prior": true,
+      "P5a_KL_q_p_is_jensen_gap": true,
+      "P5b_KL_p_q_identity": true
+    },
+    "sympy_version": "1.14.0"
+  },
+  "verdict": {
+    "P4_sufficient_condition_never_violated": true,
+    "bounds_hold_numerically": true,
+    "identities_hold_numerically": true,
+    "tolerance": 1e-09
+  }
+}

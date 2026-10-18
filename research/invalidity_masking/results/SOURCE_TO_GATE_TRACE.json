@@ -1,0 +1,271 @@
+{
+  "artifact": "SOURCE_TO_GATE_TRACE",
+  "every_gvalid_relation_has_gps_as_an_endpoint": true,
+  "facts": [
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:240",
+      "establishes": "the adapter reads GPS_RAW_INT.fix_type",
+      "fact_id": "P1_FIX_TYPE_READ",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 240,
+      "source": "        fix = g(\"fix_type\", 0)"
+    },
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:241",
+      "establishes": "fix_type < 3 (or absent) is the invalidity predicate",
+      "fact_id": "P2_INVALID_PREDICATE",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 241,
+      "source": "        if fix is None or fix < 3:"
+    },
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:245",
+      "establishes": "the previously accepted position is DELETED, not marked invalid",
+      "fact_id": "A1_FORGET_POSITION",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 245,
+      "source": "            self._latest.pop(\"gnss.position\", None)"
+    },
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:246",
+      "establishes": "the previously accepted velocity is DELETED, not marked invalid",
+      "fact_id": "A2_FORGET_VELOCITY",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 246,
+      "source": "            self._latest.pop(\"gnss.velocity\", None)"
+    },
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:248",
+      "establishes": "the adapter records the DISTINCT reason NO_3D_FIX for the rejection",
+      "fact_id": "A3_REJECT_REASON",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 248,
+      "source": "                                  reason=MissingReason.NO_3D_FIX)"
+    },
+    {
+      "cite": "csia/aircraft/adapters/ardupilot.py:248",
+      "establishes": "no channel value of any kind is produced from an invalid fix",
+      "fact_id": "A4_EARLY_RETURN",
+      "file": "csia/aircraft/adapters/ardupilot.py",
+      "line": 248,
+      "source": "                                  reason=MissingReason.NO_3D_FIX)\n            return"
+    },
+    {
+      "cite": "csia/aircraft/adapters/base.py:339",
+      "establishes": "a sensor with any unusable channel is withheld entirely",
+      "fact_id": "H1_ALL_CHANNELS_REQUIRED",
+      "file": "csia/aircraft/adapters/base.py",
+      "line": 339,
+      "source": "                    complete = False"
+    },
+    {
+      "cite": "csia/aircraft/adapters/base.py:357",
+      "establishes": "EVERY emitted core sample carries valid=True unconditionally: this hand-off has no way to express OBSERVED_INVALID",
+      "fact_id": "H2_VALID_IS_HARDCODED_TRUE",
+      "file": "csia/aircraft/adapters/base.py",
+      "line": 357,
+      "source": "                chans[\"valid\"] = True"
+    },
+    {
+      "cite": "csia/aircraft/adapters/base.py:292",
+      "establishes": "both gps core channels come from the two channels the reject deletes, so an invalid fix withholds the whole gps sensor",
+      "fact_id": "H3_GPS_CORE_MAP",
+      "file": "csia/aircraft/adapters/base.py",
+      "line": 292,
+      "source": "        \"gps\": {\"pos\": \"gnss.position\", \"vel\": \"gnss.velocity\"},"
+    },
+    {
+      "cite": "csia/runtime/online.py:132",
+      "establishes": "a slot starts invalid",
+      "fact_id": "C1_SLOT_DEFAULT_INVALID",
+      "file": "csia/runtime/online.py",
+      "line": 132,
+      "source": "    valid: bool = False"
+    },
+    {
+      "cite": "csia/runtime/online.py:134",
+      "establishes": "a slot starts infinitely stale",
+      "fact_id": "C2_SLOT_DEFAULT_LAST_T",
+      "file": "csia/runtime/online.py",
+      "line": 134,
+      "source": "    last_t: float = -1e9"
+    },
+    {
+      "cite": "csia/runtime/online.py:200",
+      "establishes": "slots are built once in __init__ and never rebuilt",
+      "fact_id": "C3_SLOTS_CONSTRUCTED_ONCE",
+      "file": "csia/runtime/online.py",
+      "line": 200,
+      "source": "        self.slots = {n: _SensorSlot() for n in SENSORS}"
+    },
+    {
+      "cite": "csia/runtime/online.py:314",
+      "establishes": "seen is set on every accepted sample and cleared nowhere",
+      "fact_id": "C4_APPLY_SETS_SEEN",
+      "file": "csia/runtime/online.py",
+      "line": 314,
+      "source": "        slot.seen = True"
+    },
+    {
+      "cite": "csia/runtime/online.py:315",
+      "establishes": "last_t advances ONLY on an accepted sample",
+      "fact_id": "C5_APPLY_SETS_LAST_T",
+      "file": "csia/runtime/online.py",
+      "line": 315,
+      "source": "        slot.last_t = t"
+    },
+    {
+      "cite": "csia/runtime/online.py:316",
+      "establishes": "valid is written ONLY here, from the sample's own flag, defaulting True; no sample means no write, so the previous value persists",
+      "fact_id": "C6_APPLY_SETS_VALID",
+      "file": "csia/runtime/online.py",
+      "line": 316,
+      "source": "        slot.valid = bool(ch.get(\"valid\", True))"
+    },
+    {
+      "cite": "csia/runtime/online.py:482",
+      "establishes": "gvalid is a pure retained-state predicate: no time term at all",
+      "fact_id": "G1_GVALID_HAS_NO_STALENESS",
+      "file": "csia/runtime/online.py",
+      "line": 482,
+      "source": "        gvalid = 1.0 if s[\"gps\"].valid and s[\"gps\"].seen else 0.0"
+    },
+    {
+      "cite": "csia/runtime/online.py:603",
+      "establishes": "fresh is gvalid's predicate PLUS a timeout against last_t",
+      "fact_id": "G2_FRESH_HAS_STALENESS",
+      "file": "csia/runtime/online.py",
+      "line": 603,
+      "source": "        fresh = {n: s[n].valid and s[n].seen\n                 and (tau - s[n].last_t) <= self._stale[n]"
+    },
+    {
+      "cite": "csia/runtime/online.py:610",
+      "establishes": "every edge gate is multiplied by BOTH endpoints' freshness",
+      "fact_id": "G3_EDGES_MULTIPLIED_BY_FRESH",
+      "file": "csia/runtime/online.py",
+      "line": 610,
+      "source": "        E = {key: (lam, gate * float(fresh[self._edge_meta[key][0]])"
+    },
+    {
+      "cite": "csia/runtime/online.py:613",
+      "establishes": "every physics gate is multiplied by its own sensor's freshness",
+      "fact_id": "G4_PHYS_MULTIPLIED_BY_FRESH",
+      "file": "csia/runtime/online.py",
+      "line": 613,
+      "source": "        P = {n: (lam, gate * float(fresh[n])) for n, (lam, gate) in P.items()}"
+    },
+    {
+      "cite": "csia/runtime/online.py:48",
+      "establishes": "the gps staleness timeout is 0.5 s",
+      "fact_id": "G5_GPS_TIMEOUT_VALUE",
+      "file": "csia/runtime/online.py",
+      "line": 48,
+      "source": "    \"imu0\": 0.05, \"imu1\": 0.05, \"baro\": 0.1, \"mag\": 0.1, \"gps\": 0.5,"
+    },
+    {
+      "cite": "csia/trust_engine/engine.py:146",
+      "establishes": "the node's Beta belief updates only while that node is fresh",
+      "fact_id": "G6_TRUST_UPDATE_GATED_ON_FRESH",
+      "file": "csia/trust_engine/engine.py",
+      "line": 146,
+      "source": "            if avail and fresh.get(n, True):"
+    },
+    {
+      "cite": "csia/runtime/plugins.py:159",
+      "establishes": "the v1 live-MAVLink path EMITS a gps sample carrying valid=False on fix_type < 3 instead of withholding it",
+      "fact_id": "X1_V1_MAVLINK_PROPAGATES_INVALID",
+      "file": "csia/runtime/plugins.py",
+      "line": 159,
+      "source": "                                   \"vz_valid\": False, \"valid\": False}))"
+    },
+    {
+      "cite": "csia/runtime/plugins.py:157",
+      "establishes": "same raw predicate as the v1.1 adapter, opposite handling",
+      "fact_id": "X2_V1_MAVLINK_INVALID_PREDICATE",
+      "file": "csia/runtime/plugins.py",
+      "line": 157,
+      "source": "        if msg.fix_type < 3:"
+    },
+    {
+      "cite": "csia/runtime/plugins.py:158",
+      "establishes": "the propagated invalid sample carries ZEROS, which still reach the step detector and the Holt filters (see DIAGNOSTIC_CONSEQUENCES)",
+      "fact_id": "X3_V1_MAVLINK_ZERO_PAYLOAD",
+      "file": "csia/runtime/plugins.py",
+      "line": 158,
+      "source": "            out.append((\"gps\", t, {\"pos\": _np.zeros(3), \"vel\": _np.zeros(3),"
+    },
+    {
+      "cite": "csia/runtime/ulog_source.py:188",
+      "establishes": "the ULog replay path also emits the sample and propagates validity",
+      "fact_id": "X4_ULOG_PROPAGATES_INVALID",
+      "file": "csia/runtime/ulog_source.py",
+      "line": 188,
+      "source": "                    \"pos\": pos, \"vel\": vel, \"valid\": bool(fix[i] >= 3)}))"
+    },
+    {
+      "cite": "csia/runtime/online.py:371",
+      "establishes": "the step detector is fed by EVERY emitted gps sample regardless of its valid flag",
+      "fact_id": "S1_STEP_PEAK_UNCONDITIONAL",
+      "file": "csia/runtime/online.py",
+      "line": 371,
+      "source": "                self._gps_step_peak = max(self._gps_step_peak,"
+    },
+    {
+      "cite": "csia/runtime/online.py:401",
+      "establishes": "the historical predictor is fed by EVERY emitted sample regardless of its valid flag",
+      "fact_id": "S2_HIST_FED_UNCONDITIONAL",
+      "file": "csia/runtime/online.py",
+      "line": 401,
+      "source": "            lams.append((h.innovation(float(x)) / sigma) ** 2)"
+    },
+    {
+      "cite": "csia/prediction/predictors.py:56",
+      "establishes": "gps has historical channels, so an emitted invalid sample is not inert inside the core",
+      "fact_id": "S3_GPS_IN_HIST_CHANNELS",
+      "file": "csia/prediction/predictors.py",
+      "line": 56,
+      "source": "    \"gps\":       [(\"pos\", 2, 0.60), (\"vel\", 0, 0.50), (\"vel\", 1, 0.50),"
+    }
+  ],
+  "file_sha256": {
+    "csia/aircraft/adapters/ardupilot.py": "8f74ca08efcc9ce67532cff3b6c90ba6dca5f7dae8ac2f633e873a5cb5a20fb4",
+    "csia/aircraft/adapters/base.py": "f648c6125674b36e1a647f2c9f4a2d4d7602299813887b7194ff52f5ef9b4d15",
+    "csia/prediction/predictors.py": "8f279e5f02590ff434b14ea874d31563906fcc862d0370c26543cfe8c0c6a5b4",
+    "csia/runtime/online.py": "d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa",
+    "csia/runtime/plugins.py": "40af026b974b64b8cfeaebc78a3347cdbd3cd47492485ba74f1dacd6b4b285f4",
+    "csia/runtime/ulog_source.py": "224b46aa7bb7a8af4a35e22d622c643332346679dd324120f218c01bef310336",
+    "csia/trust_engine/engine.py": "4bd01311ab07fd0d508f10be6f9c25f751f9c167e2ecfed88226238b2436f2b6"
+  },
+  "gvalid_relations": {
+    "altitude_baro": {
+      "endpoints": [
+        "baro",
+        "gps"
+      ],
+      "gps_is_endpoint": true
+    },
+    "heading_course": {
+      "endpoints": [
+        "mag",
+        "gps"
+      ],
+      "gps_is_endpoint": true
+    },
+    "velocity_gps_doppler_0": {
+      "endpoints": [
+        "imu0",
+        "gps"
+      ],
+      "gps_is_endpoint": true
+    },
+    "velocity_gps_doppler_1": {
+      "endpoints": [
+        "imu1",
+        "gps"
+      ],
+      "gps_is_endpoint": true
+    }
+  },
+  "n_facts_verified": 28,
+  "question": "GPS_RAW_INT.fix_type -> adapter -> to_core_samples -> slot -> freshness -> gvalid"
+}

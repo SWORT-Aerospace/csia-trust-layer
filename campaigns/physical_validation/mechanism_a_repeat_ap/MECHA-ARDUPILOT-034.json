@@ -1,0 +1,288 @@
+{
+  "adjudication": {
+    "evaluations": [
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the trial was planned and never run",
+        "state": "NOT_ATTEMPTED"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the trial as run differs from the preregistration",
+        "state": "PREREG_VIOLATION"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "a human stopped the run",
+        "state": "ABORTED_BY_OPERATOR"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the rig itself faulted, as distinct from the vehicle",
+        "state": "HARDWARE_FAULT"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "RULE A: a null control moved, so no arm may be read",
+        "state": "INSTRUMENT_DEAD"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the evidence chain broke; the intervention is unproven",
+        "state": "INVALID_SCENARIO"
+      },
+      {
+        "holds": null,
+        "missing": [],
+        "reason": "the timing budget cannot support the metric claimed",
+        "state": "TIMING_INSUFFICIENT"
+      }
+    ],
+    "fired_predicate": null,
+    "scorable": true,
+    "state": "VALID",
+    "undecidable": [
+      {
+        "holds": null,
+        "missing": [],
+        "reason": "the timing budget cannot support the metric claimed",
+        "state": "TIMING_INSUFFICIENT"
+      }
+    ]
+  },
+  "campaign": "MECHA-ARDUPILOT",
+  "manifest_sha256": "afb65e8a2dfd38a0a5aff8ebe02dcb2cdbb0e35ce11c240dd992d22457ef47ee",
+  "notes": [],
+  "prereg_path": "research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md",
+  "prereg_sha256": "f08e3dde2f5d2fcb42a651d5fd5b6e19a8ac251170945431e8f889e34fef540a",
+  "provenance": {
+    "adapter": null,
+    "deployment_config_hash": null,
+    "deployment_path": null,
+    "dirty": true,
+    "frozen_core_diff_empty": true,
+    "frozen_core_tag": "csia-v1.0-research-final",
+    "frozen_core_tag_resolves": true,
+    "head": "bfc16f5d791b091185d1c9b0cbf3f37d42a9c42d",
+    "profile_path": null,
+    "profile_sha256": null
+  },
+  "record": {
+    "admissible_as_evidence": true,
+    "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+    "arm": "CONTROL",
+    "attempted": true,
+    "backend": "ardupilot_sitl",
+    "evidence_tier": "E1",
+    "first_break": null,
+    "flight_seconds": 42.7,
+    "latency_note": "Measured on a contended host shared with other work in the same container. NO LATENCY OR TIMING CLAIM MAY BE MADE FROM THIS CAMPAIGN.",
+    "latency_recorded_not_adjudicated": {
+      "budget_us": 2000.0,
+      "max_us": 9431.43,
+      "mean_us": 972.0,
+      "median_us": 939.35,
+      "min_us": 114.55,
+      "n": 751,
+      "over_budget": 1,
+      "p95_us": 1197.34,
+      "p99_us": 1347.14,
+      "worst_headroom_x": 0.21
+    },
+    "measured_R13": "FAIL: 1 ticks over budget",
+    "measured_command_authority": {
+      "checked": 21,
+      "mode": "SHADOW",
+      "probes": {
+        "arducopter_arm": "DENIED",
+        "arducopter_disarm": "DENIED",
+        "mav": "DENIED",
+        "mav.command_long_send": "DENIED",
+        "mav.manual_control_send": "DENIED",
+        "mav.param_set_send": "DENIED",
+        "mav.rc_channels_override_send": "DENIED",
+        "mav.set_actuator_control_target_send": "DENIED",
+        "mav.set_mode_send": "DENIED",
+        "motors_armed_wait": "DENIED",
+        "param_set_send": "DENIED",
+        "reboot_autopilot": "DENIED",
+        "send": "DENIED",
+        "send_mavlink": "DENIED",
+        "set_mode": "DENIED",
+        "set_mode_apm": "DENIED",
+        "set_mode_px4": "DENIED",
+        "set_relay": "DENIED",
+        "set_servo": "DENIED",
+        "waypoint_clear_all_send": "DENIED",
+        "write": "DENIED"
+      },
+      "result": "NO_COMMAND_PATH_REACHABLE",
+      "write_half_closed": true,
+      "write_half_state": "CLOSED_ENOTCONN"
+    },
+    "measured_flight_id": "20260906T044136Z-99db73ac",
+    "measured_host_noise_control": {
+      "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+      "concurrent_with_measurement": false,
+      "iterations_per_tick": 13184,
+      "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+      "tail_is_measurable_on_this_host": true,
+      "target_us": 939.35,
+      "trials": [
+        {
+          "budget_us": 2000.0,
+          "max_us": 1303.6,
+          "median_us": 880.9,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 940.9,
+          "p99_us": 1048.3
+        },
+        {
+          "budget_us": 2000.0,
+          "max_us": 1486.0,
+          "median_us": 916.3,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 980.7,
+          "p99_us": 1100.9
+        },
+        {
+          "budget_us": 2000.0,
+          "max_us": 1595.1,
+          "median_us": 907.2,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 986.2,
+          "p99_us": 1248.0
+        }
+      ],
+      "worst_trial": {
+        "budget_us": 2000.0,
+        "max_us": 1303.6,
+        "median_us": 880.9,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 940.9,
+        "p99_us": 1048.3
+      }
+    },
+    "measured_injection": {
+      "kind": null,
+      "role": "CONTROL: fix preserved"
+    },
+    "measured_live_transmit_probe": [
+      "command_long_send: denied",
+      "set_mode_send: denied",
+      "rc_channels_override_send: denied"
+    ],
+    "measured_phases": {
+      "convert": {
+        "budget_us": 2000.0,
+        "max_us": 81.39,
+        "mean_us": 31.42,
+        "median_us": 29.42,
+        "min_us": 15.52,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 41.8,
+        "p99_us": 63.94,
+        "worst_headroom_x": 24.57
+      },
+      "core": {
+        "budget_us": 2000.0,
+        "max_us": 9304.58,
+        "mean_us": 828.06,
+        "median_us": 798.99,
+        "min_us": 1.51,
+        "n": 751,
+        "over_budget": 1,
+        "p95_us": 1024.07,
+        "p99_us": 1148.81,
+        "worst_headroom_x": 0.21
+      },
+      "sample": {
+        "budget_us": 2000.0,
+        "max_us": 259.13,
+        "mean_us": 112.52,
+        "median_us": 106.03,
+        "min_us": 90.89,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 148.65,
+        "p99_us": 187.4,
+        "worst_headroom_x": 7.72
+      }
+    },
+    "measured_rig_flight": {
+      "armed": true,
+      "climbed_m": 13.27,
+      "failsafe_params": {
+        "BATT_FS_LOW_ACT": {
+          "commanded": 0.0,
+          "confirmed": true,
+          "readback": 0.0
+        },
+        "FS_GCS_ENABLE": {
+          "commanded": 0.0,
+          "confirmed": true,
+          "readback": 0.0
+        },
+        "FS_OPTIONS": {
+          "commanded": 0.0,
+          "confirmed": true,
+          "readback": 0.0
+        },
+        "FS_THR_ENABLE": {
+          "commanded": 0.0,
+          "confirmed": true,
+          "readback": 0.0
+        },
+        "SIM_SPEEDUP": {
+          "commanded": 10.0,
+          "confirmed": true,
+          "readback": 10.0
+        }
+      }
+    },
+    "measured_stats": {
+      "max_latency_us": 9431.429999494867,
+      "messages": 105817,
+      "reconnects": 0,
+      "stale_ticks": 1,
+      "ticks": 751,
+      "watchdog_trips": 0
+    },
+    "null_controls": [
+      {
+        "basis": "a control flight must write no injection parameter; `kind` is null and no `param` key is present when none was written",
+        "measured": 0.0,
+        "name": "no_parameter_written",
+        "observed_injection_block": {
+          "kind": null,
+          "role": "CONTROL: fix preserved"
+        },
+        "quiet": true,
+        "tolerance": 0.0
+      }
+    ],
+    "operator_abort": false,
+    "prereg": "research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md",
+    "prereg_deviations": [],
+    "r13_verdict_recorded_not_adjudicated": "FAIL: 1 ticks over budget",
+    "rig_faults": [],
+    "stages": {
+      "driver_returncode": 1
+    },
+    "support_state": "NOT_RECORDED"
+  },
+  "scenario": "gps_fix_loss",
+  "schema": "csia.research.trial_manifest/1",
+  "trial_id": "MECHA-ARDUPILOT-034"
+}

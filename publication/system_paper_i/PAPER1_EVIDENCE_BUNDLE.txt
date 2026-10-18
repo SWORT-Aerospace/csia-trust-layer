@@ -1,0 +1,2626 @@
+============================================================
+BEGIN FILE: 00_README.md
+============================================================
+# 00 — README: Systems Paper I evidence export
+
+**You are a writing agent with no repository access. This package is your
+repository.** Everything needed to write CSIA Systems Paper I is here. If a
+value is not in this package, do not invent it: it is marked
+`UNRECOVERABLE` and the reason is stated.
+
+**Generated:** 2026-08-24T00:25:31+00:00
+**Generator:** `publication/system_paper_i/build_evidence_export.py`
+**Every number was read from a committed artifact at build time.** No value
+was transcribed from a manuscript draft or from conversational memory.
+
+---
+
+## Read in this order
+
+| # | file | why |
+|---|---|---|
+| 1 | `01_PHASE1_SCOPE.md` | **read first.** What may and may not be claimed, and the prohibited wording list |
+| 2 | `02_FROZEN_DEFINITIONS.md` | **BLOCKING.** The four exposure quantities and SOI, verbatim from source. No exposure number means anything without it |
+| 3 | `03_SELF_OCCLUSION_RESULT.md` | the primary run |
+| 4 | `04_REPAIR_EXPERIMENT.md` | the fix-preserving contrast, then the repair candidate table |
+| 5 | `05_ESCALATION_RESULT.md` | step sweep, ramp contrast, the recursion, the closed form |
+| 6 | `06_EXPOSURE_RESULTS.md` | the four quantities, per arm |
+| 7 | `07_HARNESS_CONTRACT.md` | what the harness records, and the validity rule |
+| 8 | `08_REAL_LOG_RESULTS.md` | the corpus, and the five things it cannot establish |
+| 9 | `09_STRUCTURAL_RESULTS.md` | enumeration results, separated from runtime results |
+| 10 | `10_CORRECTIONS_LEDGER.md` | fourteen corrections the paper must carry |
+| 11 | `11_CLAIM_LEDGER.yaml` | every claim with status, scope and eligibility |
+| 12 | `12_ARTIFACT_MAP.yaml` | figure/table/scalar to artifact, with SHA256 |
+| 13 | `13_REFERENCE_AUDIT.md` | **no reference is verified.** What remains to do |
+| 14 | `14_REPRODUCTION_COMMANDS.md` | exact commands per result |
+| 15 | `15_REPOSITORY_STATE.json` | full commit hashes, versions, build identification |
+
+---
+
+## The four things this paper says
+
+1. A deployed diagnostic layer emits **health** when it holds no evidence it
+   is entitled to assert health from, and this is measurable.
+2. The mechanism is **structural**: every feature that would name a GPS fault
+   is behind a gate a GPS fault closes. `SOI(gps_fault) = 1.0`.
+3. It is **observed for tested fix-loss faults**, not for GNSS faults in
+   general. A fix-preserving fault in the same artifact is diagnosed correctly
+   in 1.44 s.
+4. Escalation is **duration-limited**, and a closed form for the shipping
+   recursion predicts the boundary with zero numerical error over the verified
+   horizon.
+
+---
+
+## Four rules for the writing agent
+
+1. **Never invent a number.** If it is not here, it is `UNRECOVERABLE`.
+2. **Never widen a scope.** `01_PHASE1_SCOPE.md` section 3 gives the exact
+   sentences.
+3. **Never label anything a theorem.** The monotonicity result is
+   monotonicity; the repair result is a design rule; the escalation result is
+   an analytical implementation result.
+4. **Never cite a reference as verified.** `13_REFERENCE_AUDIT.md` shows zero
+   verified entries.
+
+---
+
+## Phase-II is excluded
+
+Ongoing Phase-II work runs on ArduCopter 4.8 and appears nowhere in this
+package except one clearly labelled reproducibility note in `07` section 4
+about a MAVLink parameter rename. No Phase-II number is here. Do not ask for
+one and do not import one.
+
+---
+
+## Package contents
+
+| file | size | sha256 |
+|---|---|---|
+| `01_PHASE1_SCOPE.md` | 5,247 B | 64b93bc84ce68f5c... |
+| `02_FROZEN_DEFINITIONS.md` | 9,660 B | 24b9f78d358b701f... |
+| `03_SELF_OCCLUSION_RESULT.md` | 5,101 B | dae76cbca9623c0d... |
+| `04_REPAIR_EXPERIMENT.md` | 6,939 B | ba423bf1d3a24991... |
+| `05_ESCALATION_RESULT.md` | 6,914 B | ac5ac06dca680222... |
+| `06_EXPOSURE_RESULTS.md` | 4,765 B | 6f3cdb59274030a0... |
+| `07_HARNESS_CONTRACT.md` | 5,122 B | 51adfad188c9d8a2... |
+| `08_REAL_LOG_RESULTS.md` | 4,400 B | 1129d5a2f214711b... |
+| `09_STRUCTURAL_RESULTS.md` | 6,810 B | 81154e86a1dac3a3... |
+| `10_CORRECTIONS_LEDGER.md` | 6,206 B | 815d68dd8435a3b5... |
+| `11_CLAIM_LEDGER.yaml` | 9,624 B | 2761c26f45e0f837... |
+| `12_ARTIFACT_MAP.yaml` | 20,697 B | 3dc3215f4646e1d0... |
+| `13_REFERENCE_AUDIT.md` | 5,397 B | 0c508d0ce73b38eb... |
+| `14_REPRODUCTION_COMMANDS.md` | 7,159 B | 31242fc1fe096249... |
+| `15_REPOSITORY_STATE.json` | 7,667 B | 9ce7e85adc4bb5ac... |
+============================================================
+END FILE: 00_README.md
+============================================================
+
+============================================================
+BEGIN FILE: 01_PHASE1_SCOPE.md
+============================================================
+# 01 — Phase-I scope
+
+**Read this before writing a single sentence of the paper.** It states what
+the evidence in this export can and cannot carry.
+
+---
+
+## 1. What the paper is about
+
+A deployed cross-sensor diagnostic layer for small uncrewed aircraft emits
+**health** when it holds no evidence it is entitled to assert health from.
+Under a fault that removes the GNSS fix, the layer's diagnosis reports
+`nominal` for the entire fault window and never names `gps_fault`, while the
+GPS trust coefficient stays high. The vehicle is not blind: an independent
+data-freshness path still reaches CAUTION and reconfigures navigation. It
+cannot name the cause.
+
+The structural reason is that every feature that would name a GPS fault is
+gated by a gate that a GPS fault closes.
+
+---
+
+## 2. The evidence base, exactly
+
+| lane | what it is | what it can support |
+|---|---|---|
+| **bench pipeline** | `csia/scenarios.py` scripted scenarios, fixed seeds 1-8, deterministic | the self-occlusion arms (`03`, `04` part 1) |
+| **ArduCopter 3.3 SITL** | dronekit-assets prebuilt, binary dated 2015-10-22, driven by `research/wp_c6/q_gvalid_campaign.py` | gate-closure campaign, exposure measurement, escalation sweeps (`05`, `06`, `07`) |
+| **structural enumeration** | computed over the declared 8-node / 11-relation structure, 1232 reachable configurations | signature, coarsening, cut sets, repair candidates (`04` part 2, `09`) |
+| **real-log replay** | 26 public PX4 logs, unannotated | exposure denominators and an alert-episode rate only (`08`) |
+
+**One autopilot.** Every SITL number in this paper comes from ArduCopter 3.3.
+No result is measured on any other autopilot.
+
+---
+
+## 3. Scope statements the paper must make, verbatim
+
+### 3.1 Self-occlusion
+
+> **Self-occlusion is observed for tested fix-loss faults.**
+
+**Not** "GNSS faults self-occlude". Arm A in the same artifact is a GNSS fault
+that preserves the fix; its gate never closes, its evidence survives, and the
+diagnosis names `gps_fault` in 1.44 s. See `04` part 1.
+
+### 3.2 The design rule
+
+> For a hypothesis whose evidence is entirely behind gates it closes,
+> effective undetectability is removed by adding at least one relation not
+> behind such a gate.
+
+Scope: computed over 1232 reachable configurations of the declared structure,
+for `gps_fault`, at full instrumentation and at one-channel loss. **It is not
+a theorem and must not be labelled one.**
+
+### 3.3 The escalation result
+
+> Escalation is duration-limited, with a boundary the implemented recursion
+> predicts with zero numerical error over the verified horizon.
+
+It is an **analytical implementation result**: a closed form for the shipping
+code, verified against it. It is not a theorem about a class of systems.
+
+### 3.4 The real logs
+
+> The corpus is unannotated. It yields an exposure denominator and an alert
+> episode rate, and nothing else.
+
+It cannot give a false-alarm rate, recall, `P(G=0 | H_fault)`, field
+validation, or fault-specific endogeneity. See `08` section 4.
+
+---
+
+## 4. Prohibited wording
+
+From `docs/audit/WP_A2_CLAIM_PROVENANCE_MATRIX.csv`, which audited outward
+prose for scope inflation:
+
+| do not write | why | write instead |
+|---|---|---|
+| "flight-proven", "flight-validated" | the system has never flown in the loop | "validated in simulation, on unannotated real-flight-log replay, and in live SITL" |
+| any description of the 26-log corpus as healthy or validated | it is unannotated; enforced by `tests/test_datasets.py` | "unannotated public corpus" |
+| an unscoped suite-level test count | every count this project published was stale by the time it was read; enforced by `tests/test_doc_counts.py` | cite a count only with its commit, or omit |
+| "novel" | forbidden by the manuscript's own hard-rule check `papers/csia_systems/check.py` | say what is measured |
+| "theorem" as a label | the monotonicity result is monotonicity | "monotonicity", "design rule", "analytical implementation result" |
+
+---
+
+## 5. Phase-II is out of scope, entirely
+
+Ongoing Phase-II work runs on **ArduCopter 4.8** and is excluded from this
+paper. Specifically excluded: the E1 slow-slew grid and its `F3` verdict, the
+`P0.5` information-contract result, the `P1` established-method challenge, any
+CUSUM comparison, and every modern-ArduPilot numerical result.
+
+**One Phase-II item appears in this export and only as a methodology note:**
+the `SIM_GPS_*` to `SIM_GPS1_*` parameter rename, in `07` section 4. It is
+labelled as discovered in later work and no Phase-I number depends on it.
+
+Enforced mechanically by `tools/publication/phase_guard.py`.
+
+---
+
+## 6. Known corrections the paper must carry
+
+Six claims were withdrawn, refuted or narrowed during Phase I, and the paper
+is stronger for reporting them. Full ledger in `10_CORRECTIONS_LEDGER.md`. The
+ones that change what a sentence may say:
+
+- the single false-healthy quantity was refuted and split four ways;
+- the first escalation derivation was wrong and is superseded;
+- the general coarsening argument was retracted;
+- GNSS-wide self-occlusion was narrowed to tested fix-loss faults;
+- super-additive interaction was refuted; the artifact reports sub-additivity;
+- threshold provenance is permanently indeterminate for some thresholds.
+============================================================
+END FILE: 01_PHASE1_SCOPE.md
+============================================================
+
+============================================================
+BEGIN FILE: 02_FROZEN_DEFINITIONS.md
+============================================================
+# 02 — Frozen definitions
+
+**BLOCKING FILE.** Every exposure number in this export is meaningless
+without these. They are quoted verbatim from source first; plain English
+follows separately.
+
+---
+
+## 1. The four exposure quantities
+
+### 1.1 Verbatim, from source
+
+`research/wp_c8/four_quantity_metrics.py`, commit `3597f18c953e52111978f09af17c9432c6b794c9`:
+
+```
+so the quantity splits four ways. Let A_h = 1 mean the test for hypothesis h is
+applicable at this tick, and F_h = 1 mean the injection schedule says h is
+truly present.
+
+    T_NA    = time{ A_h = 0 }                              inapplicable
+    T_UH    = time{ A_h = 0  AND  healthy }                unsupported healthy
+    T_FH    = time{ F_h = 1  AND  healthy }                false healthy
+    T_SOFH  = time{ F_h = 1  AND  A_h = 0  AND  healthy }  self-occluded
+                                                           false healthy
+
+```
+
+### 1.2 As re-emitted into the result artifact
+
+`research/wp_c8/results/four_quantity_metrics.json`, key `decomposition`:
+
+```json
+{
+ "T_FH": "time{ F_h = 1 AND healthy } false healthy",
+ "T_NA": "time{ A_h = 0 } inapplicable",
+ "T_SOFH": "time{ F_h = 1 AND A_h = 0 AND healthy } self-occluded false healthy",
+ "T_UH": "time{ A_h = 0 AND healthy } unsupported healthy"
+}
+```
+
+### 1.3 Field-by-field contract
+
+| item | T_NA | T_UH | T_FH | T_SOFH |
+|---|---|---|---|---|
+| **indicator** | `A_h = 0` | `A_h = 0 AND healthy` | `F_h = 1 AND healthy` | `F_h = 1 AND A_h = 0 AND healthy` |
+| **units** | seconds (also emitted as a fraction) | seconds / fraction | seconds / fraction | seconds / fraction |
+| **denominator** | `window_ticks` | `window_ticks` | `window_ticks` | `window_ticks` |
+| **needs ground truth** | no | no | **yes** | **yes** |
+| **estimable from an unannotated corpus** | yes | yes | **no** | **no** |
+
+**The denominator, exactly.** `window_ticks` counts ticks satisfying all of:
+
+```
+    if not (st.armed and st.t >= PREREG["arm_time_s"]):
+        return
+    if not (INJECT_S <= st.t < INJECT_S + WINDOW_S):
+        return
+    acc["window"] += 1
+
+```
+
+so: armed, layer time at or past `arm_time_s`, and inside
+`[INJECT_S, INJECT_S + WINDOW_S)`. With `TICK_S = 1/tick_hz`:
+
+- `tick_hz` = 25.0
+- `WINDOW_S` = 25.0 s
+- `arm_time_s` = 20.0 s (`research/wp_c6/q_gvalid_campaign.py` `PREREG`)
+
+Seconds are `count * TICK_S`; fractions are `count / window_ticks`.
+
+### 1.4 How A_h and F_h are computed
+
+```
+    silenced = support_state(st)
+    # A_h = 1 means the test for h is applicable at this tick.
+    a_h = not silenced.get(TARGET, False)
+    if not a_h:
+        acc["na"] += 1
+    # F_h = 1 comes from the injection schedule, never from the layer.
+    f_h = ARM_GROUND_TRUTH.get(arm_name, False)
+    if f_h and recovery_at is not None and st.t >= recovery_at:
+        f_h = False
+```
+
+`A_h` inverts `support_state`, `research/wp_c7/false_healthy.py`, commit
+`9daa084926dbee1e76179cbc7d8e60f34bb7ac0a`:
+
+```
+def support_state(st):
+    """Per hypothesis: is its entire evidence support silenced at this tick?"""
+    out = {}
+    for h, feats in CAUSES.items():
+        if not feats:                       # `nominal` has no support
+            continue
+        avail = [feature_available(st, f) for f in feats]
+        known = [a for a in avail if a is not None]
+        out[h] = bool(known) and not any(known)
+    return out
+```
+
+**`F_h` never comes from the layer.** It is the injection schedule, declared
+per arm in `ARM_GROUND_TRUTH`, and it is switched off after a recovery time
+where one is scheduled.
+
+### 1.5 `healthy` depends on which channel is scored
+
+Three status channels are scored from the same tick stream. Each defines
+`healthy` differently, and the four quantities are reported per channel.
+
+```
+def deployed_status(st, level_name):
+    """What the shipping system reports overall, in four-state vocabulary.
+
+    This folds in the failsafe level, which means the freshness disjunct
+    rescues it: under denial the level leaves NORMAL about 1.5 s after onset
+    without the diagnosis contributing anything. Reporting only this number
+    would understate the attribution failure, which is why
+    `attribution_status` below is measured alongside it.
+    """
+    top = st.top_causes(1)[0]
+    if level_name != "NORMAL":
+        return "FAULT"
+    return "HEALTHY" if top[0] == "nominal" else "FAULT"
+
+
+def attribution_status(st):
+    """What the DIAGNOSIS says, with the failsafe excluded.
+
+    This is the channel the paper's claim is about: naming the cause. The
+    freshness disjunct does not consult it and cannot rescue it.
+    """
+    return "HEALTHY" if st.top_causes(1)[0][0] == "nominal" else "FAULT"
+
+
+def abstaining_status(st, level_name, silenced):
+    """The counterfactual. Research code only; nothing in production changes.
+
+    If any hypothesis's entire support is silenced, the system cannot assert
+    health with respect to that hypothesis and says so, EVEN IF the failsafe
+    is otherwise quiet. A fault signalled by another channel still wins,
+    because a known fault is more actionable than an abstention.
+    """
+    if level_name != "NORMAL":
+        return "FAULT"
+    if any(silenced.values()):
+        return "NOT_APPLICABLE"
+    top = st.top_causes(1)[0]
+    return "HEALTHY" if top[0] == "nominal" else "FAULT"
+```
+
+### 1.6 Relations between the four
+
+Directly from the indicators, for a fixed channel and window:
+
+- `T_SOFH = time{ F_h = 1 AND A_h = 0 AND healthy } <= min(T_UH, T_FH)`
+- `T_UH <= T_NA` (both require `A_h = 0`; `T_UH` adds `healthy`)
+- `T_FH` and `T_UH` are **not** ordered in general: one conditions on ground
+  truth, the other on applicability.
+- `T_SOFH = 0` while `T_FH > 0` is the signature of a fault that is missed
+  **while its evidence remained applicable** — a sensitivity failure, not
+  self-occlusion.
+
+### 1.7 Plain English
+
+- **T_NA** — time the system held no applicable test for `h`. Says nothing
+  about whether `h` was present.
+- **T_UH** — time the system said "healthy" while holding no applicable test.
+  The verdict may still be right by luck; it is unsupported, not false.
+- **T_FH** — time the system said "healthy" while `h` was actually present.
+  This is the false one, and it requires injected ground truth.
+- **T_SOFH** — time the system said "healthy" while `h` was present **and**
+  `h` had removed its own applicability. This is self-occlusion.
+
+### 1.8 Superseded version
+
+An earlier single quantity named `T_FH` measured `A_h = 0 AND healthy`, i.e.
+what is now `T_UH`. It was **refuted and split** because it called an
+unsupported verdict a false one. Recorded in `10_CORRECTIONS_LEDGER.md`. The
+four definitions above are the final frozen set; no other definition of these
+symbols is current anywhere in the repository.
+
+---
+
+## 2. Self-Occlusion Index (SOI)
+
+### 2.1 Verbatim
+
+`research/wp_c3/effective_signature.py`, commit `8464417e9e377d8a2886fe405e85a0ee27998569`:
+
+```
+def soi(low, unknown_as=False):
+    out = {}
+    for h, feats in low.items():
+        if not feats:
+            out[h] = {"soi": None, "n_features": 0, "silenced": [],
+                      "note": "empty LOW set; SOI undefined"}
+            continue
+        sil = sorted(f for f in feats if silences(h, f, unknown_as))
+        out[h] = {"soi": round(len(sil) / len(feats), 4),
+                  "n_features": len(feats), "silenced": sil}
+    return out
+```
+
+### 2.2 Normalization
+
+**SOI is RELATION-NORMALIZED (feature-normalized).** It is not
+duration-normalized, not channel-normalized and not event-normalized.
+
+```
+SOI(h) = |{ f in LOW(h) : h silences f }| / |LOW(h)|
+```
+
+- **numerator** — features in `h`'s LOW set that `h` itself silences, via
+  `silences(h, f)`: `f` is gated by some gate `g` and `closes(h, g)` is true.
+- **denominator** — `|LOW(h)|`, the number of features in `h`'s LOW signature
+  set. Undefined (`None`) when that set is empty.
+- **range** — [0, 1]. Dimensionless.
+
+### 2.3 The effective signature matrix it rests on
+
+```
+S_eff[f,h] = S[f,h] AND NOT (exists g in gate(f): closes(h,g))
+```
+
+Computed against the **post-promotion** matrix:
+`computed against the POST-PROMOTION signature matrix, i.e. with attitude_gravity_mag already in imu0_bias_drift (WP-C3 promotion)`
+
+### 2.4 Derivation of SOI(gps_fault) = 1.0
+
+Two settings differ only in how the 3 `UNKNOWN` cells of the `closes` table
+are read. `gps_fault` is 1.0 in both.
+
+| reading | SOI(gps_fault) | features in LOW(gps_fault) | silenced |
+|---|---|---|---|
+| unknown as open | 1.0 | 1 | `phys_gps` |
+| unknown as closed | 1.0 | 1 | `phys_gps` |
+
+So `1` of
+`1` features that would name a GPS fault
+are gated by a gate that a GPS fault closes. The ratio is 1.0 by construction
+of the numerator equalling the denominator, not by rounding.
+
+**Closure coverage.** `closes` is derived from source for
+29 of 32 cells
+(0.9062); the
+3 `UNKNOWN` cells are
+`gps_fault/speed_gate`, `power_fault/speed_gate`, `unexpected_maneuver/speed_gate` and are reported both
+ways above.
+
+### 2.5 Full SOI ranking (unknown as open)
+
+| hypothesis | SOI | features | silenced |
+|---|---|---|---|
+| `gps_fault` | 1.0 | 1 | `phys_gps` |
+| `imu0_bias_drift` | 0.0 | 3 | none |
+| `imu1_bias_drift` | 0.0 | 2 | none |
+| `mag_interference` | 0.0 | 4 | none |
+| `nominal` | undefined | 0 | none |
+| `power_fault` | 0.0 | 5 | none |
+| `unexpected_maneuver` | 0.0 | 1 | none |
+| `vibration_anomaly` | 0.0 | 3 | none |
+
+**Artifact:** `research/wp_c3/results/effective_signature.json`
+**Script:** `research/wp_c3/effective_signature.py`
+**Commit:** `8464417e9e377d8a2886fe405e85a0ee27998569`
+**SHA256 of artifact:** `8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667`
+============================================================
+END FILE: 02_FROZEN_DEFINITIONS.md
+============================================================
+
+============================================================
+BEGIN FILE: 03_SELF_OCCLUSION_RESULT.md
+============================================================
+# 03 — Self-occlusion, the primary run
+
+**Arm B, `B_denial_only`.** This is the run behind the paper's headline
+result.
+
+**Artifact:** `research/wp_c4/results/self_occlusion.json`
+**SHA256:** `f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160`
+**Script:** `research/wp_c4/self_occlusion_experiment.py`
+**Commit:** `3f41e5558468b181caa1c4d94238815b1ed5cc14`
+
+---
+
+## 1. Configuration, from the artifact
+
+| item | value | source |
+|---|---|---|
+| arm label | `B_denial_only` | `arms.B_denial_only` |
+| arm description | fix INVALID — the self-occlusion case | `arms.B_denial_only` |
+| onset | 20.0 s | `onset_s` |
+| ticks scored after onset | 1000 | `results.B_denial_only.n_ticks_after_onset` |
+| tick rate | 25.0 Hz | `escalation_algebra.json.constants_from_source.tick_hz` |
+| **scored duration after onset** | **40 s** | derived: ticks / tick_hz |
+| actionable trust threshold | 0.85 | `actionable_trust_threshold` |
+| failsafe driver | shipping FailsafePolicy, driven as dashboard/export.py drives it | `failsafe` |
+
+**Seed.** Not recorded per run in this artifact. The pipeline is deterministic
+by construction: `csia/scenarios.py:make_sensors()` fixes seeds 1-8 for the
+eight sensor nodes, and `docs/REQUIREMENTS.md` R3 requires identical inputs to
+give identical outputs. Per-run seed field: **UNRECOVERABLE** (never emitted).
+
+**Fault mechanism.** Denial of the GNSS fix: the arm drives the receiver to an
+invalid-fix state, so `gvalid` closes. Contrast arm A drives a position spoof
+that leaves the fix valid. See `04` for the contrast.
+
+---
+
+## 2. Downstream injection verification
+
+The gate is the observable that proves the injection reached the layer, not
+merely that a command was issued.
+
+| quantity | value | meaning |
+|---|---|---|
+| `gvalid_min_after_onset` | **0.0** | the gate reached fully closed |
+| `gvalid_frac_closed_after_onset` | **0.625** | fraction of post-onset ticks with the gate closed |
+
+Compare arm A, where the same field reads `1.0` and
+`0.0`: the gate never closes. The two arms
+are distinguished by a measured gate state, not by an intent.
+
+---
+
+## 3. What the layer did
+
+| quantity | arm B value | artifact key |
+|---|---|---|
+| top-cause occupancy after onset | `{"nominal": 1.0}` | `top_cause_occupancy_after_onset` |
+| time to first `gps_fault` lead | **None** (never) | `time_to_first_gps_fault_lead_s` |
+| seconds `nominal` on top while faulted | **40.0** | `seconds_nominal_on_top_while_faulted` |
+| seconds confident-wrong above actionable trust | **40.0** | `seconds_confident_wrong_nominal_above_actionable_trust` |
+| **GPS trust minimum after onset** | **0.9767** | `gps_trust_min_after_onset` |
+| max failsafe level | **1** | `max_failsafe_level` |
+| failsafe actions | 3 | `n_failsafe_actions` |
+
+**Failsafe trajectory, verbatim:**
+
+```json
+[
+ {
+  "action": "SWITCH_NAV_INERTIAL",
+  "params": {},
+  "t": 21.0
+ },
+ {
+  "action": "INHIBIT_GPS_MODES",
+  "params": {},
+  "t": 21.0
+ },
+ {
+  "action": "RESUME_NORMAL",
+  "params": {},
+  "t": 50.0
+ }
+]
+```
+
+`max_failsafe_level = 1`. In
+`csia/runtime/failsafe.py` the levels are ordered NORMAL, CAUTION, CRITICAL,
+EMERGENCY, so level 1 is **CAUTION**. The actions are
+`SWITCH_NAV_INERTIAL` and `INHIBIT_GPS_MODES`, i.e. the navigation
+reconfiguration, followed by `RESUME_NORMAL`.
+
+**The freshness path is what produced them.** The failsafe reaches CAUTION
+through a data-freshness disjunct that does not consult the diagnosis. That is
+why `deployed_status` and `attribution_status` are scored separately: see
+`02` section 1.5.
+
+---
+
+## 4. Verification of the four values carried in conversation
+
+| claimed in conversation | repository value | verdict |
+|---|---|---|
+| 40 s denial duration | 40 s scored after onset (1000 ticks at 25.0 Hz); `seconds_nominal_on_top_while_faulted` = 40.0 | **CONFIRMED** as the scored post-onset window. Note it is the scoring window, not a separately recorded injection duration |
+| GPS trust approximately 0.9767 | **0.9767** exactly, as the post-onset **minimum** | **CONFIRMED**, and it is a minimum, not an average |
+| diagnosis nominal throughout | `top_cause_occupancy_after_onset` = `{"nominal": 1.0}`, and `time_to_first_gps_fault_lead_s` = `None` | **CONFIRMED**: 100% nominal occupancy, `gps_fault` never leads |
+| maximum failsafe = CAUTION | `max_failsafe_level` = 1 | **CONFIRMED** |
+
+---
+
+## 5. Exposure and SOI for this run
+
+`T_NA`, `T_UH`, `T_FH`, `T_SOFH` are **not** emitted by this artifact. They
+are measured by a different experiment against ArduCopter SITL, reported in
+`06_EXPOSURE_RESULTS.md`. Do not read exposure numbers off this run.
+
+`SOI(gps_fault) = 1.0` is a property of the effective signature matrix, not of
+this run; derivation in `02` section 2.4. This run is what turns that matrix
+property into an observed behaviour, which is the claim the paper can make.
+
+---
+
+## 6. Scope, exactly
+
+This run establishes self-occlusion **for a tested fix-loss fault**. It does
+not establish it for GNSS faults in general; arm A is the counterexample
+inside the same artifact. See `04_REPAIR_EXPERIMENT.md` and `01_PHASE1_SCOPE.md`.
+============================================================
+END FILE: 03_SELF_OCCLUSION_RESULT.md
+============================================================
+
+============================================================
+BEGIN FILE: 04_REPAIR_EXPERIMENT.md
+============================================================
+# 04 — The repair experiment, and the fix-preserving contrast
+
+Two distinct experiments live here because the paper needs both: a **contrast**
+showing the mechanism does not fire when the fix survives, and a **candidate
+table** showing what would repair it.
+
+---
+
+## PART 1 — Fix-preserving contrast
+
+Same artifact, same script, same onset, three arms.
+**Artifact:** `research/wp_c4/results/self_occlusion.json`
+
+| quantity | arm A `A_spoof_only` | arm B `B_denial_only` |
+|---|---|---|
+| description | fix stays VALID — control, evidence survives | fix INVALID — the self-occlusion case |
+| **`gvalid_min_after_onset`** | **1.0** (gate never closes) | **0.0** (gate fully closes) |
+| `gvalid_frac_closed_after_onset` | 0.0 | 0.625 |
+| top-cause occupancy | `{"gps_fault": 0.665, "nominal": 0.335}` | `{"nominal": 1.0}` |
+| time to first `gps_fault` lead | **1.44 s** | **None** (never) |
+| GPS trust minimum | 0.5905 | 0.9767 |
+| seconds nominal-on-top while faulted | 13.4 | 40.0 |
+| max failsafe level | 1 | 1 |
+
+**Third arm, for completeness.** `C_spoof_then_denial`
+(spoof for 5 s, then denial): gate closes
+0.5 of the
+window, `gps_fault` leads
+0.156
+of it, first lead at
+1.44 s,
+trust minimum 0.7003.
+
+### What this licenses
+
+> **SELF-OCCLUSION OBSERVED FOR TESTED FIX-LOSS FAULTS.**
+
+and **not**:
+
+> ~~GNSS FAULTS SELF-OCCLUDE.~~
+
+Arm A is a GNSS fault. It keeps the fix, the gate stays open, the evidence
+survives, and the diagnosis names `gps_fault` in
+1.44 s. A general claim over GNSS faults is
+refuted by a run inside the same artifact as the positive result.
+
+---
+
+## PART 2 — The candidate relation table
+
+**Artifact:** `research/wp_c6/results/minimum_repair.json`
+**SHA256:** `d2eb52f02d2a7d2e17c95c0d52942828fa200596606b385a66a2a6d4587c4657`
+**Script:** `research/wp_c6/minimum_repair.py` · **Commit:** `1ee0662acffb84472aad3f19f49b6b259c855747`
+**Implements nothing:** `implements_nothing = True`
+**Reachable configurations quantified over:** 1232
+
+| candidate | channels | gated by | survives `gvalid` | crit. exposed k=8 before | after | kappa_max k=8 before | after | crit. exposed k=7 before | after | repairs target at k=8 | telemetry |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `gps_cn0_stats` | gps | **none** | **yes** | 1 | 0 | 0.142857 | 0.0 | 11 | 7 | yes | needs plumbing: noise_per_ms |
+| `gps_sat_geometry` | gps | **none** | **yes** | 1 | 0 | 0.142857 | 0.0 | 11 | 7 | yes | needs plumbing: satellites_used, hdop |
+| `gps_jamming_flag` | gps | **none** | **yes** | 1 | 0 | 0.142857 | 0.0 | 11 | 7 | yes | needs plumbing: jamming_indicator |
+| `gps_accuracy_report` | gps | **none** | **yes** | 1 | 0 | 0.142857 | 0.0 | 11 | 7 | yes | needs plumbing: eph, epv, s_variance_m_s |
+| `phys_gps_inertial` | gps, imu0 | **none** | **yes** | 1 | 0 | 0.142857 | 0.0 | 11 | 9 | yes | no new fields: position derivative vs inertial |
+| `CONTROL_gated_cn0` | gps | `gvalid` | **no** | 1 | 1 | 0.142857 | 0.142857 | 11 | 11 | **NO** | control: same relation, gated by gvalid |
+
+**Candidates that repair cleanly:** `gps_cn0_stats`, `gps_sat_geometry`, `gps_jamming_flag`, `gps_accuracy_report`, `phys_gps_inertial`
+**Recommended:** `gps_cn0_stats`
+**Basis:** repairs the target at full instrumentation, creates no new collision anywhere in the lattice, and leaves the fewest critical pairs exposed at k=7 (one channel already lost)
+**Why size one:** The partial-containment sweep shows a knife edge: a single feature outside C_h removes absorption entirely at every density. So the minimum repair is one relation, and the question is only which.
+
+### The control that carries the argument
+
+`CONTROL_gated_cn0` is deliberately the **same relation** as `gps_cn0_stats`,
+placed **behind `gvalid`**. Its row is the comparison the design rule rests on:
+
+| | `gps_cn0_stats` (ungated) | `CONTROL_gated_cn0` (behind `gvalid`) |
+|---|---|---|
+| repairs target at k=8 | **yes** | **NO** |
+| critical exposed k=8 after | 0 | 1 |
+| kappa_max k=8 after | 0.0 | 0.142857 |
+| critical exposed k=7 after | 7 | 11 |
+
+An otherwise comparable relation gated by the same gate the fault closes
+repairs nothing. Adding evidence does not help; adding evidence **outside the
+fault's own gate** does.
+
+**Runtime behaviour:** not tested for these six candidates.
+`implements_nothing = true`; the table is computed over the declared structure.
+Runtime column: **UNRECOVERABLE** for all six, by design.
+
+---
+
+## PART 3 — The IMU repair, which was implemented and measured
+
+Distinct from part 2: this one was executed behind a flag and measured at
+runtime.
+
+**Artifact:** `research/wp_c2/results/repair_experiment.json`
+**SHA256:** `f97b201887ebecc854a0c49ae12f28fe2d351eebc76e6533feb2f361d5417c43`
+**Script:** `research/wp_c2/repair_experiment.py` · **Commit:** `cf58075e46cfda421e738cd0a0e1e69aec0a0bbe`
+
+| item | value |
+|---|---|
+| feature added | `attitude_gravity_mag` |
+| into hypothesis | `imu0_bias_drift` |
+| channels spanned | imu0, mag |
+| gated by | **none** |
+| new hardware | False |
+| physical justification | attitude_gravity_mag compares mag heading against imu0-integrated yaw. An imu0 bias corrupts that comparison; an imu1 bias does not. The asymmetry is what breaks the tie. |
+| research flag | `CSIA_WP_C2_IMU_REPAIR` |
+| default | OFF — production behaviour unchanged; asserted by tests/test_wp_c2_repair_flag.py |
+
+**Certificate diff:** exposed pairs
+28 before, 28 after, over
+1232 reachable configurations;
+`no_new_collisions = True`.
+Whole-lattice caveat, verbatim: *the union over ALL configurations includes the zero-channel case, where every pair merges; use diff_by_min_channels*
+
+**The GPS case and the IMU case are different problems.** The IMU repair
+breaks a **tie between two hypotheses** by adding an asymmetric feature; both
+IMU hypotheses keep their evidence. The GPS case is a hypothesis **destroying
+its own evidence**. A repair for one is not a repair for the other, and the
+paper must not present them as instances of one fix.
+
+**CI/build guard:** the flag defaults OFF and that is asserted by
+`tests/test_wp_c2_repair_flag.py`. The IMU repair was later promoted to
+default in commit `081cca3b83fe098385648b9a0b7e26a0f5bd11c3`.
+
+---
+
+## PART 4 — The design rule
+
+> **DESIGN RULE.** For a hypothesis `h` whose evidence set is entirely gated
+> by gates that `h` itself closes, effective undetectability is removed by
+> adding at least one relation for `h` that is **not** behind any gate `h`
+> closes. Adding a relation behind such a gate does not remove it.
+
+**Scope, exactly.** Computed over the 1232
+reachable channel configurations of the declared eight-node structure, for the
+target `gps_fault`, at full instrumentation (k=8) and at one-channel-loss
+(k=7). It is a statement about the declared structure, verified by
+enumeration.
+
+**It is not a theorem and is not labelled one.** No proof of a general claim
+over arbitrary structures is offered, and none should be written.
+============================================================
+END FILE: 04_REPAIR_EXPERIMENT.md
+============================================================
+
+============================================================
+BEGIN FILE: 05_ESCALATION_RESULT.md
+============================================================
+# 05 — Duration-limited escalation
+
+**Artifacts:**
+`research/wp_c8/results/escalation_algebra.json` (SHA256 `89c0324517c0cbd26e80bccdcb56350aeeef5b19b82a5f355b8239457e22b1de`)
+`research/wp_c8/results/response_surface.json` (SHA256 `510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8`)
+`research/wp_c7/results/glitch_mechanism.json` (SHA256 `69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3`)
+
+**Scripts / commits:** `research/wp_c8/escalation_algebra.py` `83b7f62708567bb58029a67e359c613a50e2c997` ·
+`research/wp_c8/response_surface.py` `1ad2513d071830a906555193829cf2b8dbcf5980` ·
+`research/wp_c7/glitch_mechanism.py` `57c7c13daa5fa7899f183319c2ce95ad6ad8a955`
+
+`characterisation_only = True` ·
+`no_fix_implemented = True`
+
+---
+
+## 1. Step sweep
+
+**The exact maximum tested displacement is 5566.0 m.** Write `5566.0 m`, not
+"about 5.6 km". The value is `position_error_m` in the last row below.
+
+| requested/realized position error (m) | implied peak (m/s) | measured floor ticks | measured min trust | predicted floor ticks | predicted min trust | floor tick error | trust error | escalates |
+|---|---|---|---|---|---|---|---|---|
+| 5.6 | 28.0 | 26 | 0.9237 | 0.0 | 0.9998 | -26.0 | 0.0761 | no |
+| 22.3 | 111.5 | 32 | 0.9089 | 5.3 | 0.9959 | -26.7 | 0.087 | no |
+| 55.7 | 278.5 | 33 | 0.9063 | 10.9 | 0.9906 | -22.1 | 0.0843 | no |
+| 222.6 | 1113.0 | 33 | 0.9061 | 19.4 | 0.9797 | -13.6 | 0.0736 | no |
+| 1113.2 | 5566.0 | 33 | 0.9061 | 29.3 | 0.9613 | -3.7 | 0.0552 | no |
+| 5566.0 | 27830.0 | 40 | 0.8881 | 39.2 | 0.9356 | -0.8 | 0.0475 | no |
+
+**"Realized" versus "requested".** This artifact records a single
+`position_error_m` per row and does not separate commanded from realized.
+Separate fields: **UNRECOVERABLE**. The Phase-I harness did verify the injection
+reached the receiver (see `07`), but the realized displacement was not stored
+as its own field.
+
+**Raw residual response.** The `measured_floor_ticks` column is the count of
+ticks with the GPS physics residual at its saturation floor. It is non-zero at
+every magnitude including the smallest: the detector fires everywhere and the
+loss is downstream.
+
+---
+
+## 2. Ramp contrast, and the classification table
+
+Nine runs flown **before** the derivation existed.
+`separates_every_wp_c7_run = True` ·
+`n_misclassified = 0` ·
+boundary `N* = 93.31` ticks.
+
+| run | measured floor ticks | escalated | predicted | verdict |
+|---|---|---|---|---|
+| `step 5.6 m` | 26 | no | no | correct |
+| `step 22.3 m` | 32 | no | no | correct |
+| `step 55.7 m` | 33 | no | no | correct |
+| `step 222.6 m` | 33 | no | no | correct |
+| `step 1113.2 m` | 33 | no | no | correct |
+| `step 5566.0 m` | 40 | no | no | correct |
+| `ramp 5 s` | 104 | yes | yes | correct |
+| `ramp 20 s` | 168 | yes | yes | correct |
+| `ramp 60 s` | 139 | yes | yes | correct |
+
+**What differs.** Steps reach the floor for
+26
+to 40
+ticks and none escalate. Ramps reach it for
+104
+to 168
+ticks and all do. `N* = 93.31` lies in the gap.
+
+Verbatim from the artifact: *the nine runs were flown before the derivation existed and the boundary has no free parameters: N* comes from the fusion weights, the forgetting bounds and the threshold, all read from source. Steps range 26 to 40 floor ticks and none escalated; ramps range 104 to 168 and all did; N* = 93 lies in the gap.*
+
+**Magnitude buys only logarithmic time:**
+N_floor grows as ln(amplitude), and every tick of it is spent on a residual already saturated at zero, so it adds no further evidence. A detector that saturates while its decay runs cannot escalate on magnitude alone.
+(`extra_ticks_per_1000x_amplitude` =
+42.5)
+
+---
+
+## 3. The implemented recursion, from source
+
+| constant | value | source |
+|---|---|---|
+| `w_nbr` | 0.35 | `csia/trust_engine/engine.py` |
+| `w_phys` | 0.3 | `csia/trust_engine/engine.py` |
+| `w_temp` | 0.2 | `csia/trust_engine/engine.py` |
+| `w_stat` | 0.15 | `csia/trust_engine/engine.py` |
+| `rho_max` | 0.998 | `csia/trust_engine/engine.py` |
+| `rho_min` | 0.95 | `csia/trust_engine/engine.py` |
+| `nav_caution` (threshold `T*`) | 0.75 | `csia/runtime/failsafe.py` |
+| `tick_hz` | 25.0 | `research/wp_c6/q_gvalid_campaign.py` PREREG |
+| `step_sigma_m_s` | 20.0 | `csia/runtime/online.py` |
+| `step_decay_per_tick` | 0.85 | `csia/runtime/online.py` |
+
+**State variable and mass recursion**, verbatim from the artifact:
+
+> S_{k+1} = rho*S_k + 1 regardless of evidence, fixed point 1/(1-rho). The Beta denominator is constant once settled.
+
+- **Forgetting factor** switches between `rho_max` and `rho_min`; under full
+  predictor disagreement `rho = 0.95`.
+- **Concentration cap** `1/(1 - rho_max)` =
+  500.0.
+- **Fault-phase mass** `M = 1/(1 - rho)` = 20.0.
+- **Banked state at fault onset**, measured: `S_0` = 475.6775,
+  `T_0` = 0.999791.
+- **Dwell** 25 ticks
+  (`csia/runtime/failsafe.py`).
+- **Units**: `S` is Beta pseudo-count mass, dimensionless; `T` is a
+  probability in [0,1]; `N` is ticks at 25.0 Hz.
+
+**Clipping.** Not represented as a separate term in the closed form.
+Per-tick clipping behaviour: **UNRECOVERABLE** from this artifact; read
+`csia/trust_engine/engine.py` directly if the paper needs it.
+
+---
+
+## 4. Closed form, corrected
+
+```
+equation 1:  T_N = (x S_0 T_0 + (1-x) M e_f) / (x S_0 + (1-x) M), x = rho^N, M = 1/(1-rho)
+equation 2:  N* = ln(M(T*-e_f) / (S_0(T_0-T*) + M(T*-e_f))) / ln(rho)
+equation 3:  N_floor(peak) = ln(peak / (20*sqrt(1 - 2 ln f))) / ln(1/0.85)
+```
+
+**Evidence asymptote** `e_f` = 0.7.
+Why: *a fault that destroys only the physics residual removes weight w_phys = 0.30 of a unit weight sum, so evidence cannot fall below 0.70 however bad the residual is. The nav_caution threshold is 0.75, leaving a margin of 0.05.*
+
+**What dominates:** the accumulated mass term is two orders of magnitude larger than the evidence-margin term, so the escalation delay is set by how much agreement the calm period banked, not by how bad the fault is. Halving the concentration cap nearly halves the delay; doubling the threshold margin barely moves it.
+mass term `S_0(T_0 - T*)` = 118.82,
+margin term `M(T* - e_f)` = 1.0.
+
+### Verification against the shipping TrustCore
+
+| quantity | value |
+|---|---|
+| closed form matches shipping code | **True** |
+| **maximum absolute error vs equation 1** | **0.0** |
+| predicted crossing `N*` | **93.31** ticks = 3.732 s |
+| **actual first tick at or below threshold** | **94** |
+| evidence predicted / observed | 0.7 / 0.7 |
+| rho observed | 0.95 |
+| verification horizon | k = 1..200 ticks, 67 sampled points |
+| escalation boundary incl. dwell | **118.31** ticks |
+
+**Crossing-detector correction, verbatim:** *scanned over every tick, not over the sampled trace below. An earlier version scanned the sample and reported 100 because 94 was not in it.*
+
+**The first derivation was wrong and is not current theory.** It is retained
+in `10_CORRECTIONS_LEDGER.md`. Do not present it as the result.
+============================================================
+END FILE: 05_ESCALATION_RESULT.md
+============================================================
+
+============================================================
+BEGIN FILE: 06_EXPOSURE_RESULTS.md
+============================================================
+# 06 — Four-quantity exposure results
+
+Definitions are frozen in `02`. Do not read these numbers without it.
+
+**Artifact:** `research/wp_c8/results/four_quantity_metrics.json`
+**SHA256:** `2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39`
+**Script:** `research/wp_c8/four_quantity_metrics.py` · **Commit:** `3597f18c953e52111978f09af17c9432c6b794c9`
+**Target hypothesis:** `gps_fault`
+**Window:** 60.0 s to 85.0 s, i.e.
+25 s at 25.0 Hz
+**Denominator:** `window_ticks` inside that window, armed and past arm time
+
+---
+
+## 1. Headline table, attribution channel
+
+The attribution channel is the one the paper's claim is about: it scores what
+the **diagnosis** says, with the failsafe excluded.
+
+| arm | F_h (ground truth) | flights | T_NA (s) | T_UH (s) | T_FH (s) | T_SOFH (s) |
+|---|---|---|---|---|---|---|
+| `denial` | True | 3 | 24.56 | 23.973 | 24.373 | 23.973 |
+| `denial_recovered` | True | 3 | 15.2 | 14.613 | 14.373 | 13.973 |
+| `glitch` | True | 3 | 0.0 | 0.0 | 24.64 | 0.0 |
+| `link_loss` | True | 3 | 24.48 | 24.48 | 24.96 | 24.48 |
+| `nominal` | False | 3 | 0.0 | 0.0 | 0.0 | 0.0 |
+
+## 2. All three channels
+
+| arm | channel | T_UH (s) | T_FH (s) | T_SOFH (s) |
+|---|---|---|---|---|
+| `denial` | attribution | 23.973 | 24.373 | 23.973 |
+| `denial` | status | 1.04 | 1.44 | 1.04 |
+| `denial` | abstaining | 0.0 | 0.4 | 0.0 |
+| `denial_recovered` | attribution | 14.613 | 14.373 | 13.973 |
+| `denial_recovered` | status | 1.04 | 1.44 | 1.04 |
+| `denial_recovered` | abstaining | 0.0 | 0.4 | 0.0 |
+| `glitch` | attribution | 0.0 | 24.64 | 0.0 |
+| `glitch` | status | 0.0 | 24.64 | 0.0 |
+| `glitch` | abstaining | 0.0 | 24.64 | 0.0 |
+| `link_loss` | attribution | 24.48 | 24.96 | 24.48 |
+| `link_loss` | status | 1.04 | 1.52 | 1.04 |
+| `link_loss` | abstaining | 0.0 | 0.48 | 0.0 |
+| `nominal` | attribution | 0.0 | 0.0 | 0.0 |
+| `nominal` | status | 0.0 | 0.0 | 0.0 |
+| `nominal` | abstaining | 0.0 | 0.0 | 0.0 |
+
+---
+
+## 3. The case that refuted the single quantity
+
+Verbatim from the artifact:
+
+> it measured an unsupported healthy verdict, not a false one. Without ground truth a healthy verdict with no applicable evidence may be correct by accident.
+
+**The glitch row.** `T_NA_s` = 0.0,
+`T_SOFH_s` = 0.0 on the attribution channel,
+while `T_FH_s` = **24.64**.
+
+> A_gps_fault = 1 for every tick of the glitch arm: the fix is retained, gvalid stays open and phys_gps keeps contributing. The hypothesis is applicable throughout, so no part of the glitch arm's exposure can be self-occlusion. Its exposure is T_FH only, and its cause is detector sensitivity and the escalation interface, which WP-C8 Part 3 characterises separately.
+
+**Verification of the claim carried in conversation.** "The glitch arm had the
+largest false-healthy-style exposure while `T_SOFH = 0`":
+
+| arm | attribution `T_FH_s` | attribution `T_SOFH_s` |
+|---|---|---|
+| `denial` | 24.373 | 23.973 |
+| `denial_recovered` | 14.373 | 13.973 |
+| `glitch` | 24.64 | 0.0 |
+| `link_loss` | 24.96 | 24.48 |
+| `nominal` | 0.0 | 0.0 |
+
+Ranked by attribution `T_FH_s`, the glitch arm is **rank 2 of 5** overall at 24.64 s. The single larger arm is `link_loss` at 24.96 s, which carries `T_SOFH_s` = 24.48 s and is therefore self-occlusion, not the contrast case.
+
+Restricted to arms with **`T_SOFH_s` = 0**, the glitch arm is the largest at 24.64 s (the only other such arm is `nominal` at 0.0 s).
+
+**Verdict on the conversational claim: SUPPORTED AS STATED, with the ranking made explicit.** The glitch arm carries the largest false-healthy exposure of any arm whose exposure is not self-occlusion (24.64 s), while `T_SOFH_s` = 0.0. It is not the largest `T_FH_s` overall. Both facts are in the table above and the paper should state the restricted version, because the restriction is the point: substantial false-healthy time with zero self-occlusion is what forces the four-way split.
+
+---
+
+## 4. Corpus limit
+
+> F_h does not exist in unannotated telemetry, so T_FH and T_SOFH are permanently unavailable from the 26-log corpus. T_NA and T_UH are estimable from it. This is a limit of the data, not of the method.
+
+## 5. Verdict vocabulary
+
+| item | value |
+|---|---|
+| standard | ISO/IEC 9646-1 conformance verdicts |
+| mapping | `{"FAULT": "FAIL", "HEALTHY": "PASS", "NOT_APPLICABLE": "INAPPLICABLE", "UNKNOWN": "INCONCLUSIVE"}` |
+| field-level precedent | ARINC 429 Sign/Status Matrix distinguishes Failure Warning and No Computed Data from Normal Operation; OPC UA StatusCode Bad severity means the value must not be used. Both establish that unusable data is not normal data. |
+| explicitly **not** precedent | LTL3 and conformal prediction were checked and are different conditions; neither is claimed here. |
+| no standard term for the exposure quantity | True |
+============================================================
+END FILE: 06_EXPOSURE_RESULTS.md
+============================================================
+
+============================================================
+BEGIN FILE: 07_HARNESS_CONTRACT.md
+============================================================
+# 07 — Harness contract
+
+**Primary harness:** `research/wp_c6/q_gvalid_campaign.py`
+**Commit:** `700e898b603b20d5c4b9aab244be768fadd3e949`
+**Reused by:** `research/wp_c7/*.py` and `research/wp_c8/*.py`, which import
+`ARMS`, `DEFAULT_BINARY`, `DEFAULT_EEPROM`, `FLIGHT_SPECS`, `PREREG`, `_Shim`,
+`_pilot`, `_set`, `locate_sitl` from it.
+**Release package description:** `research/wp_c8/HARNESS_RELEASE.md`
+(status: PREPARED, NOT PUBLISHED; see `HARNESS_RELEASE_AUDIT.md` at the
+repository root).
+
+---
+
+## 1. Recorded streams, per tick
+
+From `research/wp_c8/HARNESS_RELEASE.md`, verbatim:
+
+| Layer | Quantity |
+|---|---|
+| injected | commanded offset, applied schedule, slew rate, hold duration |
+| receiver | `fix_type`, `satellites_visible`, raw position |
+| estimator | EKF `pos_horiz_variance` (normalised innovation test ratio), status flags |
+| estimator | fused position, and fused-minus-truth against `SIMSTATE` |
+| diagnostic | per-component residuals `nbr`, `phys`, `temp`, `stat`, pre-smoothing |
+| diagnostic | fused evidence, forgetting factor, trust pre- and post-recursion |
+| gating | per-feature gate state, applicability `A_h` per hypothesis |
+| verdict | failsafe level, transitions with reasons, posterior over causes |
+
+**Units, rates and timestamp semantics.** The harness records on a single
+timebase: the CSIA layer's own tick clock at
+25.0 Hz,
+derived from MAVLink message time via `csia/runtime/plugins.py:map_mavlink`.
+Per-stream unit and rate metadata is **not** emitted as a machine-readable
+schema by the Phase-I harness: **UNRECOVERABLE** as a single file. It is recoverable
+by reading `csia/runtime/plugins.py`, whose `MAVLINK_MESSAGE_MAP` documents the
+message-to-channel mapping and unit conversions.
+
+**Two documented adaptations** (`_Shim`): ArduPilot publishes the primary IMU
+as `RAW_IMU` rather than `SCALED_IMU`, in the same mG / mrad-s / mgauss units,
+so the shim relabels it; and `GPS_RAW_INT.time_usec` is suppressed because on
+3.3 it is last-fix time and freezes on fix loss.
+
+---
+
+## 2. Preregistered measurement contract, verbatim
+
+```python
+PREREG = {
+    "tick_hz": 25.0,
+    "arm_time_s": 20.0,
+    "monitored_tick": "armed is True AND layer time >= arm_time_s",
+    "conditioning_window_s": 25.0,
+    "conditioning_window": (
+        "[injection_time_s, injection_time_s + 25 s]. The hypothesis label is "
+        "the injection state, so the window over which q_gvalid|h is "
+        "estimated must be the window in which h holds. In the nominal arm "
+        "the same instant passes with no parameter applied, so the window is "
+        "[60 s, 85 s] in every arm and the design is matched. 25 s is chosen "
+        "because ArduPilot's own EKF failsafe switches to LAND under GNSS "
+        "loss and the vehicle eventually disarms; the window is sized to sit "
+        "inside the armed segment that leaves, in every arm."),
+    "min_window_coverage": 0.95,
+    "gvalid_closed_at_tick": "TrustState.edges['altitude_baro'][1] == 0.0 "
+                             "(online.py:517-518 gates that edge on gvalid "
+                             "alone, so it is a direct readout of the gate)",
+    "per_flight_statistic": "closed monitored ticks in the conditioning "
+                            "window / monitored ticks in the conditioning "
+                            "window",
+    "secondary_statistic": "the same ratio over the whole monitored window, "
+                           "which dilutes the fault arms with their own "
+                           "pre-injection nominal segment and is reported "
+                           "only for completeness",
+    "arm_statistic": "mean over flights (flight is the independence unit, "
+```
+
+---
+
+## 3. Permanent validity rule
+
+> **COMMAND ISSUED != FAULT INJECTED.**
+
+A parameter write that the autopilot silently ignores produces a clean flight
+labelled as a fault arm. The Phase-I harness satisfies this by recording a
+**downstream** observable for every arm: the gate state
+(`TrustState.edges['altitude_baro'][1]`) is a direct readout of `gvalid`, and
+`injection_effect` records the receiver-side change (satellite counts, fix
+state). No Phase-I result rests on the command alone.
+
+`min_window_coverage = 0.95` in `PREREG` is the coverage floor a flight must
+meet for its window to count.
+
+---
+
+## 4. Reproducibility warning, DISCOVERED IN LATER WORK
+
+**This is not Phase-I evidence and no Phase-I number depends on it.** It is
+recorded here because anyone re-running the Phase-I harness on a modern
+autopilot will hit it.
+
+The SIM GPS parameters were renamed between ArduCopter 3.3 and 4.x:
+`SIM_GPS_GLITCH_X`, `SIM_GPS_DISABLE`, `SIM_GPS_NUMSATS`, `SIM_GPS_BYTELOSS`
+became `SIM_GPS1_GLTCH_X`, `SIM_GPS1_ENABLE`, `SIM_GPS1_NUMSATS`,
+`SIM_GPS1_BYTELOSS`. **A `param_set` to a name that does not exist is a silent
+no-op.** Running the Phase-I scripts unchanged against a 4.x build therefore
+produces clean flights labelled as fault arms.
+
+Source of this warning: Phase-II work under `research/phase2/`. It is a
+methodology and reproducibility note only. **Phase-II numerical results are
+excluded from this export.**
+============================================================
+END FILE: 07_HARNESS_CONTRACT.md
+============================================================
+
+============================================================
+BEGIN FILE: 08_REAL_LOG_RESULTS.md
+============================================================
+# 08 — Real-log results
+
+**Artifact:** `datasets/reports/exposure_v2.json`
+**SHA256 of that file:** `114e1f827328dedc5292b104e49a0da24ba1cfc5c4765a232b82c7af8ea9d714`
+**Dataset aggregate hash (from the artifact):** `4c7a696981a4b8f19200e2a8d37ab147c18da08218d000801d634e8acd43e411`
+**Deduplication report hash field:** `4c7a696981a4b8f19200e2a8d37ab147c18da08218d000801d634e8acd43e411`
+**Commit:** `86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84`
+**Historical artifact retained unmodified:** `data/real_logs_report.json`
+
+---
+
+## 1. Verified values
+
+| quantity | value | source |
+|---|---|---|
+| logs counted | **26** | `exposure.counted_logs` |
+| raw hours | **0.6627** | `exposure.total_raw_hours` |
+| **monitored hours** | **0.5183** | `exposure.total_monitored_hours` |
+| unmonitored hours | 0.1444 | `exposure.unmonitored_hours` |
+| `arm_time_s` excluded per log | 20.0 | `arm_time_s` |
+| logs excluded | 0 | `exposure.excluded_logs` |
+| duplicate hours excluded | 0.0 | `exposure.excluded_duplicate_hours` |
+| **alert episodes** | **2** | `rates_by_health_category.UNANNOTATED.alert_episodes` |
+| **rate** | **3.859** per monitored hour | `rates_by_health_category.UNANNOTATED.rate_per_hour` |
+| exposure basis | monitored (0.5183 h) | same |
+| flights with 0 / 1 / >1 episodes | 24 / 2 / 0 | same |
+| interpretation, verbatim | 2 alert episode(s) in 0.518 h of UNANNOTATED replay; interval is wide at this count | same |
+| **95% CI** | **[0.467, 13.939]** | `ci95_per_hour` |
+| health annotation | `['UNANNOTATED']` | `exposure.by_health` |
+| **VERIFIED_HEALTHY exposure** | **0.0 h**, 0 logs, rate `None` | `rates_by_health_category.VERIFIED_HEALTHY` |
+| exact duplicates found | 0 | deduplication report |
+| leakage / contamination | `[]` / `[]` | artifact |
+
+**Historical figure retained:** `{"logs": 26, "note": "historical artifact retained unmodified", "raw_hours": 0.663, "source": "data/real_logs_report.json"}`
+and `data/real_logs_report.json` reports
+`total_hours = 0.663`, `total_transitions = 3`
+over 26 flights.
+
+**The exclusion arithmetic.** 0.6627 raw hours
+minus 0.1444 unmonitored =
+0.5183 monitored. The unmonitored part is
+`arm_time` at 20.0 s per log across
+26 logs = 520.0 s,
+which `docs/audit/CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md` records as 520.0 s
+= 21.8% of recorded time.
+
+**Transitions versus episodes.** The historical artifact counts
+3 raw transitions; the corrected artifact counts
+2 alert **episodes**. The merging rule is not stated as a
+machine-readable field in either artifact: **UNRECOVERABLE**. The paper must either
+cite the audit prose or re-derive it. Do not present 3
+and 2 as the same quantity.
+
+## 2. Sensor-configuration distribution
+
+| configuration | monitored hours |
+|---|---|
+| `baro+battery+gps+imu0+mag` | 0.2908 |
+| `baro+battery+imu0` | 0.0782 |
+| `baro+battery+imu0+mag` | 0.0513 |
+| `baro+imu0` | 0.0434 |
+| `battery+gps+imu0` | 0.0399 |
+| `baro+battery+gps+imu0` | 0.0147 |
+
+**Per-flight distribution:** `data/real_logs_report.json` carries a
+per-flight list of 26 entries with `log`, `duration_s`,
+`sensors` and per-flight trust minima.
+
+## 3. Acquisition status
+
+`datasets/reports/deduplication_report.json` records
+`not_yet_acquired` for 26 log ids and
+`verified` for 0. Note verbatim:
+*nothing is deleted or auto-excluded; near-duplicates are review candidates only*
+Fetch mechanism: `tools/fetch_real_logs.py` and
+`tools/acquire_public_datasets.py`; acquisition is refused on this host by
+`csia/data/paths.py`.
+
+---
+
+## 4. What these logs CANNOT establish
+
+State all of these in the paper:
+
+- **not** an operational false-alarm rate: the corpus is
+  `['UNANNOTATED']`, so no alert can be scored as false;
+- **not** fault recall: no fault is annotated, so there is no denominator;
+- **not** `P(G = 0 | H_fault)`: that requires `F_h`, which does not exist here;
+- **not** field validation: replay of unannotated logs is not a flight test,
+  and the system has never flown in the loop;
+- **not** fault-specific endogeneity: the coarsening measurable here is
+  **exogenous** (a channel is absent from the record), not endogenous (a gate
+  closed because of the fault). `docs/research/PAPER1_EMPIRICAL_SECTION.md`
+  makes that distinction binding.
+
+**Prohibited wording** for this section, per
+`docs/audit/WP_A2_CLAIM_PROVENANCE_MATRIX.csv`: "flight-proven",
+"flight-validated", and any description of the corpus as healthy or validated.
+============================================================
+END FILE: 08_REAL_LOG_RESULTS.md
+============================================================
+
+============================================================
+BEGIN FILE: 09_STRUCTURAL_RESULTS.md
+============================================================
+# 09 — Structural results
+
+**Every number in this file is COMPUTED FROM THE DECLARED STRUCTURE by
+enumeration.** None of it is a runtime measurement. The separation is stated
+per row.
+
+---
+
+## 1. Reachable configuration count
+
+| quantity | value | source |
+|---|---|---|
+| hypotheses | 8 | `wp_c1/results/certificate.json` |
+| hypothesis pairs | 28 | same |
+| **reachable channel configurations** | **1232** | `wp_c6/results/minimum_repair.json`, `wp_c2/results/repair_experiment.json` |
+| naive 2^12 = 4096 | **UNRECOVERABLE as a committed field** | no artifact states 4096; see below |
+
+**On "4096 naive to 1232 admissible".** The value **1232**
+is committed and appears in two independent artifacts. The figure 4096 does
+**not** appear in any committed artifact. If the paper wants the contrast it
+must state the enumeration basis explicitly and derive it; otherwise cite
+1232 alone. Marked **UNRECOVERABLE**.
+
+**Evidence class: COMPUTED FROM DECLARED STRUCTURE.**
+
+---
+
+## 2. Coarsening index, final values
+
+| reading of the 3 UNKNOWN cells | classes under S | kappa(S) | classes under S_eff | kappa(S_eff) | gap |
+|---|---|---|---|---|---|
+| unknown as open | 8 | 0.0 | 7 | **0.142857** | 0.142857 |
+| unknown as closed | 8 | 0.0 | 7 | **0.142857** | 0.142857 |
+
+Pairs merged only in S_eff: `['gps_fault+nominal']` (open),
+`['gps_fault+nominal']` (closed).
+Monotonicity holds in both readings:
+`theorem_holds = True / True`.
+**It is monotonicity, not a theorem, and the artifact's key name should not be
+copied into the paper as a claim.**
+
+**Stale kappa values.** The figure 0.286 does not appear in this artifact.
+Any kappa other than those in the table above is **stale** and must not be
+used; the reason is the WP-C3 promotion, which changed the signature matrix
+(`computed against the POST-PROMOTION signature matrix, i.e. with attitude_gravity_mag already in imu0_bias_drift (WP-C3 promotion)`).
+
+**Post-promotion gate-closure ceiling.** The maximum kappa reachable under
+gate closure at full instrumentation is
+0.142857 before any repair and
+0.0 after the recommended addition
+(`wp_c6/results/minimum_repair.json`).
+
+**Evidence class: COMPUTED FROM DECLARED STRUCTURE.**
+
+---
+
+## 3. Exposed pairs and the certificate
+
+| quantity | value | source |
+|---|---|---|
+| exposure-set critical pairs enumerated | 27 | `certificate.json.exposure_set_critical_pairs` |
+| critical pairs in D_critical | 27 | `d_critical` |
+| response-equivalent pairs | 1 | `d_critical` |
+| certificate curve points | 8 | `certificate_curve_min_channels` |
+| corpus-admissible configurations | 19 | `corpus_admissible_set` |
+| corpus logs behind that set | 26 | `corpus_admissible_set` |
+| guaranteed pairs | 0 | `corpus_admissible_set` |
+| critical exposed in that set | 27 | `corpus_admissible_set` |
+
+**Additivity.** `certificate.json.subadditivity` carries three levels:
+`{
+ "feature_level": {
+  "examples": [],
+  "superadditive_configurations": 0,
+  "verdict": "ADDITIVE BY CONSTRUCTION \u2014 a feature dies if its channel is absent OR a controlling gate is closed, so joint feature loss is exactly the union of the marginals. No configuration can exceed it."
+ },
+ "pair_level_raw_union": {
+  "caveat": "THIS TEST IS WRONG and is retained only to document the error. It compares joint merges against the raw union of marginal merges, ignoring that merging is an equivalence relation. It reports interaction wherever transitivity alone links two classes.",
+  "examples": [
+   {
+    "channels": [
+     "gps"
+    ],
+    "gates_closed": [
+     "gps_warmup"
+    ],
+    "novel_merges": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+power_fault",
+     "gps_fault+vibration_anomaly"
+    ]
+   },
+   {
+    "channels": [
+     "gps"
+    ],
+    "gates_closed": [
+     "gvalid"
+    ],
+    "novel_merges": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+power_fault",
+     "gps_fault+vibration_anomaly"
+    ]
+   },
+   {
+    "channels": [
+     "gps"
+    ],
+    "gates_closed": [
+     "armed_gate",
+     "gps_warmup"
+    ],
+    "novel_merges": [
+     "gps_fault+imu0_bias_drift",
+     "gps_fault+imu1_bias_drift",
+     "gps_fault+mag_interference",
+     "gps_fault+power_fault",
+     "gps_fault+vibration_anomaly"
+    ]
+   }
+  ],
+  "superadditive_configurations": 1784
+ },
+ "pair_level_transitive_closure": {
+  "examples": [],
+  "superadditive_configurations": 0,
+  "verdict": "SUB-ADDITIVE \u2014 no configuration merges a pair beyond the transitive closure of the two marginal merge relations. Gate closure and channel absence destroy OVERLAPPING feature sets; their effects compose by union and transitivity, not by interaction."
+ }
+}`
+
+**Super-additive interaction was REFUTED**; see `10_CORRECTIONS_LEDGER.md`.
+The artifact reports sub-additivity, and the paper must use that word.
+
+`not_novel` field, verbatim: *see research/wp_c1/NOVELTY_ATTACK.md*
+
+---
+
+## 4. Cut sets, before and after the IMU promotion
+
+| quantity | pre-promotion | post-promotion |
+|---|---|---|
+| pairs with an order-one cut set | **7** | **6** |
+| components in any order-one cut | 9 | 7 |
+| new mag order-one pairs | — | `none` |
+
+Question asked: *did promoting the IMU repair create a new order-one cut set at channel:mag?* Answer: **NO**
+
+Pairs losing their order-one cut: `imu0_bias_drift+imu1_bias_drift` is present
+pre and absent post, which is the promotion working.
+
+**Evidence class: COMPUTED FROM DECLARED STRUCTURE.**
+
+---
+
+## 5. Channel absence and the field-set universe
+
+`research/wp_c6/results/field_set_universe.json` bounds the universe of
+GPS-spanning relations over the currently ingested field set.
+
+| key | value |
+|---|---|
+| `containment_complete_over_ingested_field_set` | false |
+| `escape_route` | "Every GPS-spanning relation buildable from the CURRENTLY INGESTED fields depends on position, velocity or altitude, all |
+| `n_inside` | 5 |
+| `n_outside` | 1 |
+| `purpose` | "bound the admissible evidence universe for gps_fault over the FINITE, ENUMERABLE set of telemetry fields the ingestion  |
+| `why_this_is_not_the_universal_claim` | "U_h subset C_h over ALL physically admissible relations is not established and is not claimed. This enumerates U_h rest |
+
+Full lists are in the artifact; the paper's Table 6 is built from it.
+
+---
+
+## 6. "One in seven effective collision"
+
+**Not located as a committed field.** No artifact in `research/wp_c*/results/`
+contains a field expressing a one-in-seven ratio. Marked **UNRECOVERABLE**. If the
+paper wants it, derive it explicitly from `kappa_S_eff` = 0.142857
+(= 1/7 to four places) and say so; do not cite it as a separate measurement.
+
+---
+
+## 7. "5 of 11 edges inert"
+
+**REFUTED.** See `10_CORRECTIONS_LEDGER.md`. Do not use.
+============================================================
+END FILE: 09_STRUCTURAL_RESULTS.md
+============================================================
+
+============================================================
+BEGIN FILE: 10_CORRECTIONS_LEDGER.md
+============================================================
+# 10 — Corrections ledger, paper-eligible
+
+Fourteen corrections that change what a sentence may say. Each row points at
+the repository record. **The full internal ledgers are in
+`docs/audit/`**; this is the compact version a paper can carry.
+
+**Every one of these is a strength, not an embarrassment.** Several were found
+by the project's own instruments against the project's own claims, and the
+paper should say so.
+
+Full ledgers:
+`docs/audit/WP_A2_CORRECTION_PACKAGE.md` ·
+`docs/audit/CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md` ·
+`docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md` ·
+`docs/audit/VERSION_BOUNDARY.md` ·
+`docs/audit/WP_A2_CLAIM_PROVENANCE_MATRIX.csv` ·
+`docs/audit/WP_C1_CERTIFICATE.md` through `docs/audit/WP_C8_REPORT.md`
+
+---
+
+| # | OLD_CLAIM | FINAL_STATUS | REASON | ARTIFACT | COMMIT |
+|---|---|---|---|---|---|
+| 1 | reciprocal weighting is used in the fusion | **NOT_LOCATED_IN_SOURCE** | no reciprocal-weighting term exists in `csia/trust_engine/engine.py`; the fusion is a fixed weighted mean over available sub-scores, renormalised. The claim has no source basis | `csia/trust_engine/engine.py` `EngineConfig` | see `15_REPOSITORY_STATE.json` `artifact_last_touched` |
+| 2 | unrestricted irreparability of `gps_fault` | **WITHDRAWN** | irreparability would follow from `U_h ⊆ C_h`, and `U_h` is only definable relative to `(M, S, R)`. The containment that does hold is `E_h ⊆ C_h` | `docs/audit/WP_C7_REPORT.md` §284; `research/wp_c6/results/` | WP-C6/C7 |
+| 3 | super-additive interaction between channel losses | **REFUTED** | the first version of the test reported 1784 super-additive configurations and was wrong; the corrected enumeration reports sub-additivity | `docs/audit/WP_C1_CERTIFICATE.md` §87; `research/wp_c1/results/certificate.json` key `subadditivity` | WP-C1 |
+| 4 | a general coarsening argument covering both mechanisms | **RETRACTED / NARROWED** | `κ` is agnostic to *why* a feature is unobservable, but results turning on the cause apply only to endogenous coarsening. The real-log section measures the exogenous mechanism only | `docs/research/PAPER1_EMPIRICAL_SECTION.md` §N.1 | — |
+| 5 | GNSS faults self-occlude | **NARROWED** | arm A is a GNSS fault that preserves the fix; its gate never closes and the diagnosis names `gps_fault` in 1.44 s. Final wording: **self-occlusion observed for tested fix-loss faults** | `research/wp_c4/results/self_occlusion.json` `results.A_spoof_only` | WP-C4 |
+| 6 | satellite loss drives the gate closure | **CORRECTED** | WP-C7's satellite ladder showed the satellite count contributes nothing; the closure came from byte loss. The arm was renamed `degraded` to `link_loss` | `research/wp_c7/results/campaign_expanded.json`; rename in `research/wp_c8/four_quantity_metrics.py` `ARM_PARAMS` | WP-C7 |
+| 7 | the campaign varied two axes (home site and wind) | **CORRECTED** | `SIM_WIND_SPD` applies no force in the ArduCopter 3.3 build. The campaign varied one axis | `docs/audit/WP_C7_REPORT.md`; `research/wp_c7/results/variance_investigation.json` | WP-C7 |
+| 8 | a single false-healthy quantity `T_FH` | **REFUTED AND SPLIT** | it measured an *unsupported* healthy verdict, not a *false* one. Without ground truth a healthy verdict with no applicable evidence may be right by accident. Split into `T_NA`, `T_UH`, `T_FH`, `T_SOFH` | `research/wp_c8/results/four_quantity_metrics.json` key `why_the_old_single_quantity_was_wrong` | WP-C8 |
+| 9 | the first escalation derivation | **SUPERSEDED** | the mass-invariance argument assumed constant `ρ`. The corrected closed form matches the shipping code with `max_abs_error_vs_equation_1 = 0.0` | `research/wp_c8/results/escalation_algebra.json` | WP-C8 |
+| 10 | the crossing occurs at tick 100 | **CORRECTED to 94** | the detector scanned the *sampled* trace, and 94 was not in the sample. Corrected to scan every tick | `escalation_algebra.json` `verification_against_shipping_trustcore.note_on_crossing` | WP-C8 |
+| 11 | threshold provenance for the failsafe thresholds | **PERMANENTLY INDETERMINATE** | the only thing that could close it is pre-import design notes or history, which do not exist in this repository | `docs/audit/WP_A2_REPORT.md` §271; `docs/audit/WP_A2_THRESHOLD_PROVENANCE.md` | WP-A2 |
+| 12 | "5 of 11 edges are inert" | **REFUTED** | measured: 6 of 11 vary with state, 5 are constant, and exactly one (`temp_bias_drift`) is genuinely inert in both directions | `reports/wp_a2/e1_inert_gates.json` | `cb0ef62` |
+| 13 | gate-closure ceiling κ = 0.286 | **SUPERSEDED by κ = 0.143** | 0.286 is the **pre-promotion** value. After the WP-C3 promotion of `attitude_gravity_mag` into `imu0_bias_drift` the ceiling is 0.143. 15 occurrences of the stale value were found and tracked | `docs/audit/VERSION_BOUNDARY.md` §38-39; `docs/audit/WP_C5_REPORT.md` §138-144; `research/wp_c3/results/effective_signature.json` | WP-C3 promotion `081cca3` |
+| 14 | real-log alert rate 4.52/h, then 3.02/h | **CORRECTED to 3.859/h, 95% CI [0.467, 13.939]** | 4.52/h over-counted transitions by 1.50x; 3.02/h used the raw denominator including `arm_time`, during which no alert can be raised. 21.8% of recorded duration (520.0 s over 26 logs) lies inside it | `datasets/reports/exposure_v2.json`; `docs/audit/CSIA_DATASET_PROVENANCE_AUDIT.md` D-02; `docs/audit/CSIA_REPOSITORY_AUDIT.md` §120 | dataset audit |
+
+---
+
+## The two that most change the paper
+
+**#8, the four-quantity split.** The paper cannot report "false healthy" as a
+single number. It must report four, and the glitch arm is the case that forces
+it: substantial `T_FH` with `T_SOFH = 0`. See `06`.
+
+**#13, κ 0.286 to 0.143.** `docs/audit/VERSION_BOUNDARY.md` records this as
+**flagged, not yet edited** in `docs/research/PAPER1_EMPIRICAL_SECTION.md`.
+That is a live editing action, not a resolved one. The argument is unchanged
+(the ceiling still sits far below the corpus's 1.000) but the number must be
+updated before submission.
+
+---
+
+## Preserved, not deleted
+
+The superseded derivation in #9, the wrong crossing tick in #10, the 1784
+super-additive configurations in #3 and the stale κ in #13 all remain in the
+repository as history. Nothing in this ledger licenses removing them.
+============================================================
+END FILE: 10_CORRECTIONS_LEDGER.md
+============================================================
+
+============================================================
+BEGIN FILE: 11_CLAIM_LEDGER.yaml
+============================================================
+schema: csia.publication.claim_ledger/1
+paper: CSIA Systems Paper I
+generated_from: committed artifacts, not manuscript prose
+phase: 1
+status_vocabulary:
+- EMPIRICAL
+- STRUCTURAL
+- IMPLEMENTATION_VERIFIED
+- ANALYTICAL_IMPLEMENTATION_RESULT
+- DESIGN_RULE
+- UNSUPPORTED
+- WITHDRAWN
+- REFUTED
+- INDETERMINATE
+forbidden_status:
+- NOVEL
+counts:
+  EMPIRICAL: 6
+  STRUCTURAL: 3
+  DESIGN_RULE: 1
+  IMPLEMENTATION_VERIFIED: 1
+  ANALYTICAL_IMPLEMENTATION_RESULT: 1
+  WITHDRAWN: 1
+  REFUTED: 3
+  INDETERMINATE: 1
+  UNSUPPORTED: 1
+  paper_eligible_true: 13
+claims:
+- claim_id: P1-C01
+  statement: 'Under a tested fix-loss GNSS fault the diagnosis reports nominal for
+    100% of the post-onset window ({''nominal'': 1.0}) and never names gps_fault,
+    while the GPS trust minimum is 0.9767.'
+  status: EMPIRICAL
+  scope: one arm, bench pipeline, fixed seeds; 1000 post-onset ticks at 25 Hz
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: single arm, single seed set; not a rate
+  paper_eligible: true
+- claim_id: P1-C02
+  statement: 'A GNSS fault that preserves the fix does NOT instantiate the mechanism:
+    the gate never closes (gvalid_min 1.0) and gps_fault leads within 1.44 s.'
+  status: EMPIRICAL
+  scope: arm A of the same artifact
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: this is what narrows C01 to fix-loss faults; the general GNSS claim
+    is REFUTED by it
+  paper_eligible: true
+- claim_id: P1-C03
+  statement: 'SOI(gps_fault) = 1.0: all 1 features in the LOW set of gps_fault are
+    gated by a gate that gps_fault closes.'
+  status: STRUCTURAL
+  scope: the declared post-promotion signature matrix; both readings of the 3 UNKNOWN
+    closure cells give 1.0
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  limitations: a property of the declared matrix, not a measurement; C01 is what
+    makes it observable
+  paper_eligible: true
+- claim_id: P1-C04
+  statement: kappa(S_eff) = 0.142857 against kappa(S) = 0.0; the coarsening gap
+    is 0.142857.
+  status: STRUCTURAL
+  scope: post-promotion matrix, unknown-as-open reading
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  limitations: SUPERSEDES the pre-promotion ceiling 0.286; see corrections ledger
+    row 13
+  paper_eligible: true
+- claim_id: P1-C05
+  statement: Adding one relation outside the fault's own gate removes effective
+    undetectability; the same relation placed behind gvalid does not.
+  status: DESIGN_RULE
+  scope: 1232 reachable configurations of the declared structure, target gps_fault,
+    at k=8 and k=7
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c6/results/minimum_repair.json
+  script: research/wp_c6/minimum_repair.py
+  commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  limitations: NOT a theorem and must not be labelled one; implements_nothing=true,
+    so no runtime evidence
+  paper_eligible: true
+- claim_id: P1-C06
+  statement: The IMU tie is broken by promoting attitude_gravity_mag into imu0_bias_drift,
+    with no new hardware and no new collisions.
+  status: IMPLEMENTATION_VERIFIED
+  scope: executed behind flag CSIA_WP_C2_IMU_REPAIR, later promoted to default
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c2/results/repair_experiment.json
+  script: research/wp_c2/repair_experiment.py
+  commit: 081cca3b83fe098385648b9a0b7e26a0f5bd11c3
+  limitations: 'a different problem from the GPS case: a tie between hypotheses,
+    not a hypothesis destroying its own evidence'
+  paper_eligible: true
+- claim_id: P1-C07
+  statement: Escalation is duration-limited. The closed form predicts N* = 93.31
+    ticks; the shipping code crosses at tick 94, with max_abs_error = 0.0.
+  status: ANALYTICAL_IMPLEMENTATION_RESULT
+  scope: the shipping TrustCore under the measured banked state S_0=475.6775, T_0=0.999791,
+    rho=0.95
+  evidence_class: COMPUTED_AND_VERIFIED_AGAINST_IMPLEMENTATION
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/escalation_algebra.py
+  commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  limitations: a closed form for THIS implementation, not a theorem about a class;
+    the first derivation was wrong, see corrections ledger row 9
+  paper_eligible: true
+- claim_id: P1-C08
+  statement: The boundary separates all nine prior runs with zero misclassifications,
+    and the runs were flown before the derivation existed.
+  status: EMPIRICAL
+  scope: '9 WP-C7 runs: 6 steps, 3 ramps'
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/escalation_algebra.py
+  commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  limitations: 9 runs, one autopilot; retrospective, not preregistered
+  paper_eligible: true
+- claim_id: P1-C09
+  statement: The single false-healthy quantity was refuted and split four ways.
+    The glitch arm carries T_FH = 24.64 s with T_SOFH = 0.0 s.
+  status: EMPIRICAL
+  scope: ArduCopter 3.3 SITL, 5 arms, 25 s window, gps_fault
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/four_quantity_metrics.py
+  commit: 3597f18c953e52111978f09af17c9432c6b794c9
+  limitations: T_FH and T_SOFH require injected ground truth and are permanently
+    unavailable from the 26-log corpus
+  paper_eligible: true
+- claim_id: P1-C10
+  statement: 'Alert episodes on unannotated real-log replay: 2 episodes in 0.5183
+    monitored hours = 3.859/h, 95% CI [0.467, 13.939].'
+  status: EMPIRICAL
+  scope: 26 public PX4 logs, UNANNOTATED, monitored basis excluding arm_time
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: datasets/reports/exposure_v2.json
+  script: tools/build_dataset_manifest.py
+  commit: 86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84
+  limitations: NOT a false-alarm rate, NOT recall, NOT field validation, NOT endogeneity.
+    Interval is wide at this count
+  paper_eligible: true
+- claim_id: P1-C11
+  statement: Verified-healthy exposure is 0.0 hours.
+  status: EMPIRICAL
+  scope: the same corpus
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: datasets/reports/exposure_v2.json
+  script: tools/build_dataset_manifest.py
+  commit: 86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84
+  limitations: enforced by tests/test_datasets.py; the corpus may never be described
+    as healthy
+  paper_eligible: true
+- claim_id: P1-C12
+  statement: Channel-loss interaction is SUB-additive.
+  status: STRUCTURAL
+  scope: enumeration over the declared structure
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c1/results/certificate.json
+  script: research/wp_c1/certificate.py
+  commit: cda681db8a6ed0132a241b9e8b47dcef8a621ecd
+  limitations: an earlier version reported 1784 super-additive configurations and
+    was WRONG; see corrections ledger row 3
+  paper_eligible: true
+- claim_id: P1-X01
+  statement: U_h is contained in C_h, giving unrestricted irreparability of gps_fault.
+  status: WITHDRAWN
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_C7_REPORT.md
+  script: null
+  commit: 0a0182e6b3780924ad00debc4613407bc15ae864
+  limitations: U_h is only definable relative to (M, S, R). The containment that
+    holds is E_h subset of C_h
+  paper_eligible: false
+- claim_id: P1-X02
+  statement: GNSS faults self-occlude.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: refuted by arm A inside the same artifact. Superseded by P1-C01 and
+    P1-C02
+  paper_eligible: false
+- claim_id: P1-X03
+  statement: Channel-loss interaction is super-additive.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_C1_CERTIFICATE.md
+  script: research/wp_c1/certificate.py
+  commit: cda681db8a6ed0132a241b9e8b47dcef8a621ecd
+  limitations: superseded by P1-C12
+  paper_eligible: false
+- claim_id: P1-X04
+  statement: 5 of 11 edges are inert.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: reports/wp_a2/e1_inert_gates.json
+  script: null
+  commit: cb0ef62
+  limitations: 'measured: 6 of 11 vary with state, 5 are constant, exactly one is
+    genuinely inert'
+  paper_eligible: false
+- claim_id: P1-I01
+  statement: Provenance of the failsafe thresholds.
+  status: INDETERMINATE
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_A2_THRESHOLD_PROVENANCE.md
+  script: null
+  commit: 5a5d986e50092e3097dc5c39d13329cec83d523d
+  limitations: only pre-import design notes could close it and they do not exist
+    in this repository. PERMANENTLY indeterminate
+  paper_eligible: true
+- claim_id: P1-U01
+  statement: The fusion uses reciprocal weighting.
+  status: UNSUPPORTED
+  scope: —
+  evidence_class: NONE
+  artifact: csia/trust_engine/engine.py
+  script: null
+  commit: 8b94b09de010dcfdad4096be1a4943e3fe821b5d
+  limitations: no such term exists in source; the fusion is a fixed weighted mean
+    renormalised over available sub-scores
+  paper_eligible: false
+============================================================
+END FILE: 11_CLAIM_LEDGER.yaml
+============================================================
+
+============================================================
+BEGIN FILE: 12_ARTIFACT_MAP.yaml
+============================================================
+schema: csia.publication.artifact_map/1
+paper: CSIA Systems Paper I
+short_name: csia_systems
+manuscript: main.tex
+phase: 1
+frozen_baseline:
+  commit: 848f556
+  meaning: The Phase-I frozen baseline. Every result below was produced by the pipeline
+    as it stood at or before this commit. Reproducing the paper means checking out
+    this commit, not HEAD.
+  benchmark_artifact: campaigns/bench.json
+  benchmark_gate: CI asserts campaigns/bench.json regenerates bit-identically; that
+    is the reproducibility anchor for the frozen layer.
+  commit_full: 848f5563a528ae5ca3c2d3883c86d7287d6a4585
+environment:
+  python: 3.12 and 3.13, both gated in CI
+  determinism: Every scenario in csia/scenarios.py fixes its seeds (make_sensors
+    uses seeds 1-8). SITL campaigns fix the home site and the injection schedule.
+    docs/REQUIREMENTS.md R3 requires identical inputs to give identical outputs
+    and tests enforce it.
+  sitl_target: 'ArduCopter 3.3 SITL, dronekit-assets prebuilt, 2015-10-22. This
+    is the ONLY autopilot behind any number in this paper. The ArduCopter 4.8 work
+    is Phase II and is excluded by the `phase: 1` guard above.'
+regeneration:
+  all_results: Each script below writes its own results/*.json. They are independent
+    and can be run in any order.
+  all_figures: 'PYTHONPATH=. python research/wp_c4/figures.py
+
+    PYTHONPATH=. python research/wp_c6/figures.py
+
+    PYTHONPATH=. python research/wp_c7/figures.py
+
+    PYTHONPATH=. python research/wp_c8/figures.py
+
+    python tools/publication/sync_paper_figures.py
+
+    '
+  manuscript: make paper-systems
+  note: figures.py writes to the repository-root figures/ directory. The copies
+    under papers/csia_systems/figures/ exist so the submission bundle is self-contained;
+    sync_paper_figures.py refreshes them and artifact_map_check.py fails if they
+    drift.
+figures:
+- id: F01
+  file: figures/wp_c4_self_occlusion.png
+  caption_starts: 'Left: share of post-onset ticks by leading hypothesis'
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/self_occlusion_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: F02
+  file: figures/wp_c4_sparsity_probe.png
+  caption_starts: The density sweep
+  artifact: research/wp_c4/results/sparsity_probe.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/sparsity_probe.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: cb5e8469c8583354294f80389c50a128f395a6a8510d6412f804700cec8117e8
+  artifact_commit_full: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+- id: F03
+  file: figures/wp_c6_gap_surface.png
+  caption_starts: The interior of the containment sweep
+  artifact: research/wp_c6/results/partial_containment_sweep.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/partial_containment_sweep.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: 5b65708542a175c8fe21b841ffa6f319cd09e10302842c2056ef31ac47e629d3
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: F04
+  file: figures/wp_c6_field_set_universe.png
+  caption_starts: 'Left: the six GPS-spanning relations'
+  artifact: research/wp_c6/results/field_set_universe.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/field_set_universe.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: 61a7b544829410920f1fa6f0c19eac3b4d9b1c340b50075b13e6f3613160497c
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: F05
+  file: figures/wp_c6_q_gvalid_campaign.png
+  caption_starts: 'Left: per-flight closure rate by arm'
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/q_gvalid_campaign.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: F06
+  file: figures/wp_c7_satellite_ladder.png
+  caption_starts: 'Left: gate closure against commanded satellite count'
+  artifact: research/wp_c7/results/campaign_expanded.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/campaign_expanded.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: ca57edb0cc109a67a3d74a0fb228b16ee84e999bb1c72297253e406f9a57b01c
+  artifact_commit_full: 192057c0e146d41aa31aeaa1bb0e73d10c5fbc53
+- id: F07
+  file: figures/wp_c8_escalation_boundary.png
+  caption_starts: 'Left: escalation against time at the floor'
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/escalation_algebra.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 89c0324517c0cbd26e80bccdcb56350aeeef5b19b82a5f355b8239457e22b1de
+  artifact_commit_full: 83b7f62708567bb58029a67e359c613a50e2c997
+- id: F08
+  file: figures/wp_c8_coverage_map.png
+  caption_starts: Two-detector coverage by detection and by escalation
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/response_surface.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: F09
+  file: figures/wp_c7_glitch_mechanism.png
+  caption_starts: 'Left: the residual detector floors at every magnitude'
+  artifact: research/wp_c7/results/glitch_mechanism.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/glitch_mechanism.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: 69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3
+  artifact_commit_full: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+- id: F10
+  file: figures/wp_c8_four_quantities.png
+  caption_starts: 'Left: the four quantities by arm'
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/four_quantity_metrics.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: F11
+  file: figures/wp_c7_false_healthy.png
+  caption_starts: 'Left: false-healthy exposure by channel and policy'
+  artifact: research/wp_c7/results/false_healthy.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/false_healthy.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: 74b0dd344ad85c49e73325efaf270e3c98194372c6295b6dc6a6f56553bc3d47
+  artifact_commit_full: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+- id: F12
+  file: figures/wp_c4_chatter_resonance.png
+  caption_starts: Top-label changes against gate closure duration
+  artifact: research/wp_c4/results/adversarial_search.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/adversarial_search.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: 9c72b96083f9abd1a68d48ae7cc8629d103e61204cf77743d20e0a28e8a48dde
+  artifact_commit_full: d95aab40212879b306eda01ff75f7799de0174de
+tables:
+- id: T01
+  label: tab:taxonomy
+  what: fault taxonomy and the applicability column
+  artifact: csia/scenarios.py
+  script: csia/scenarios.py
+  derivation: read from the frozen scenario catalogue; not a measurement
+  artifact_sha256: 043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557
+  artifact_commit_full: 576142a023c62dbba24033d0196497ee22c61404
+- id: T02
+  label: eq:seff
+  what: the four actuating gates and their closure attribution
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  regenerate: PYTHONPATH=. python research/wp_c3/effective_signature.py
+  artifact_sha256: 8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667
+  artifact_commit_full: 8464417e9e377d8a2886fe405e85a0ee27998569
+- id: T03
+  label: tab:signatures
+  what: S and S_eff side by side
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  regenerate: PYTHONPATH=. python research/wp_c3/effective_signature.py
+  artifact_sha256: 8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667
+  artifact_commit_full: 8464417e9e377d8a2886fe405e85a0ee27998569
+- id: T04
+  label: tab:arms
+  what: self-occlusion measured on the deployed pipeline, arms A and B
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c4/self_occlusion_experiment.py
+  values:
+  - 0.9767
+  - 1.44
+  - 13.4
+  - 40.0
+  - 0.85
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: T05
+  label: tab:density
+  what: the kappa gap against signature density
+  artifact: research/wp_c4/results/sparsity_probe.json
+  script: research/wp_c4/sparsity_probe.py
+  regenerate: PYTHONPATH=. python research/wp_c4/sparsity_probe.py
+  artifact_sha256: cb5e8469c8583354294f80389c50a128f395a6a8510d6412f804700cec8117e8
+  artifact_commit_full: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+- id: T06
+  label: tab:fieldset
+  what: GPS-spanning relations over the ingested field set
+  artifact: research/wp_c6/results/field_set_universe.json
+  script: research/wp_c6/field_set_universe.py
+  regenerate: PYTHONPATH=. python research/wp_c6/field_set_universe.py
+  artifact_sha256: 61a7b544829410920f1fa6f0c19eac3b4d9b1c340b50075b13e6f3613160497c
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: T07
+  label: tab:qgvalid
+  what: gate closure by fault class, 6 flights per arm
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/q_gvalid_campaign.py
+  regenerate: PYTHONPATH=. python research/wp_c6/q_gvalid_campaign.py
+  values:
+  - 3744
+  - 0.984
+  - 0.0
+  - 9.93
+  - 3.05
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: T08
+  label: tab:glitchsweep
+  what: the residual detector floors at every magnitude
+  artifact: research/wp_c7/results/glitch_mechanism.json
+  script: research/wp_c7/glitch_mechanism.py
+  regenerate: PYTHONPATH=. python research/wp_c7/glitch_mechanism.py
+  values:
+  - 5.6
+  - 5566
+  artifact_sha256: 69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3
+  artifact_commit_full: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+- id: T09
+  label: tab:coverage
+  what: two-detector coverage over the amplitude-slew grid
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/response_surface.py
+  regenerate: PYTHONPATH=. python research/wp_c8/response_surface.py
+  values:
+  - 21
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: T10
+  label: tab:fourstate
+  what: the four states and what this system emits for each
+  artifact: csia/runtime/online.py
+  script: csia/runtime/online.py
+  derivation: read from source; the two absent states are the finding, not a measurement
+  artifact_sha256: d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa
+  artifact_commit_full: c13889fb87b4d29af3ff22337a55352ff86f9bff
+- id: T11
+  label: tab:fourq
+  what: measured exposure, seconds in a 25 s window
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/four_quantity_metrics.py
+  regenerate: PYTHONPATH=. python research/wp_c8/four_quantity_metrics.py
+  values:
+  - 24.64
+  - 23.97
+  - 1.44
+  - 24.48
+  - 24.56
+  - 24.96
+  - 24.37
+  - 1.52
+  - 0.48
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: T12
+  label: sec:limits
+  what: the repair, and the cut-set analysis that follows
+  artifact: research/wp_c2/results/repair_experiment.json
+  script: research/wp_c2/repair_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c2/repair_experiment.py
+  artifact_sha256: f97b201887ebecc854a0c49ae12f28fe2d351eebc76e6533feb2f361d5417c43
+  artifact_commit_full: cf58075e46cfda421e738cd0a0e1e69aec0a0bbe
+scalars:
+- id: S01
+  value: '0.9767'
+  statement: GPS trust coefficient during sustained GNSS denial, while the diagnosis
+    reports nominal for the entire fault window
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.B_denial_only.gps_trust_min_after_onset
+  script: research/wp_c4/self_occlusion_experiment.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S02
+  value: '1.44'
+  statement: seconds to the first correct gps_fault lead in the spoof arm; the denial
+    arm never produces one
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.A_spoof_only.time_to_first_gps_fault_lead_s
+  script: research/wp_c4/self_occlusion_experiment.py
+  also_appears_as: T_FH on the status channel of the denial arm in research/wp_c8/results/four_quantity_metrics.json
+    (.per_arm.denial.channels.status.T_FH_s), numerically equal by coincidence of
+    the same onset
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S03
+  value: '13.4'
+  statement: seconds with nominal on top while faulted, spoof arm
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.A_spoof_only.seconds_nominal_on_top_while_faulted
+  script: research/wp_c4/self_occlusion_experiment.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S04
+  value: '24.64'
+  statement: false-healthy exposure T_FH in seconds, glitch arm, abstaining channel
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  json_pointer: .per_arm.glitch.channels.abstaining.T_FH_s
+  script: research/wp_c8/four_quantity_metrics.py
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: S05
+  value: '23.97'
+  statement: false-healthy exposure, denial arm
+  artifact: research/wp_c7/results/false_healthy.json
+  script: research/wp_c7/false_healthy.py
+  artifact_sha256: 74b0dd344ad85c49e73325efaf270e3c98194372c6295b6dc6a6f56553bc3d47
+  artifact_commit_full: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+- id: S06
+  value: '3744'
+  statement: monitored ticks per arm in the q_gvalid campaign
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .cell_counts.denial.monitored_ticks
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S07
+  value: '0.984'
+  statement: q_gvalid, the gate-closure rate under GNSS denial
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .cell_counts.denial.per_flight_p[0]
+  stored_precision: 0.983974
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S08
+  value: '9.93'
+  statement: mean satellites before injection, denial arm
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .per_flight[0].injection_effect.mean_satellites_pre
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S09
+  value: '0.1429'
+  statement: the containment gap kappa(S_eff) - kappa(S) at its plateau in the density
+    sweep
+  artifact: research/wp_c6/results/partial_containment_sweep.json
+  json_pointer: .grid[9].mean_gap
+  stored_precision: 0.142857
+  script: research/wp_c6/partial_containment_sweep.py
+  artifact_sha256: 5b65708542a175c8fe21b841ffa6f319cd09e10302842c2056ef31ac47e629d3
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: S10
+  value: '5.6'
+  statement: the smallest injected position error in the magnitude sweep; the residual
+    detector floors at every magnitude from here to 5.6 km
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/response_surface.py
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: S11
+  value: '0.44'
+  statement: seconds from injection to first gate closure, deterministic across
+    every denial flight
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/q_gvalid_campaign.py
+  note: reported in the manuscript as a derived latency; the per-flight closure
+    onsets are in the artifact, the subtraction is in the prose
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S12
+  value: '0.998'
+  statement: rho_max, the upper adaptive-forgetting bound
+  artifact: csia/trust_engine/engine.py
+  script: csia/trust_engine/engine.py
+  note: a source constant, not a measurement
+  artifact_sha256: 4bd01311ab07fd0d508f10be6f9c25f751f9c167e2ecfed88226238b2436f2b6
+  artifact_commit_full: 8b94b09de010dcfdad4096be1a4943e3fe821b5d
+non_empirical:
+- 0\.[0-9]{2}
+- 0\.[0-9]
+- '1'
+- '[2-9]'
+- 1[0-9]
+- '[2-9][0-9]'
+- 19[0-9]{2}|20[0-9]{2}
+- '[0-9]{3,4}'
+open_items:
+- id: OI-1
+  what: refs.bib carries 37 unresolved provenance markers (12 VERIFY, 20 FROM-BRIEF-UNVERIFIED,
+    5 RECONSTRUCTED). No entry is marked verified.
+  blocker: true
+  owner: human
+  resolution: each entry checked against the publisher record, marker removed only
+    after verification. tools/publication/bib_guard.py fails until then. Fabricating
+    a citation to clear this is not an acceptable resolution.
+- id: OI-2
+  what: S11 (0.44 s) is derived in prose from per-flight closure onsets rather than
+    stored as a single field in the artifact.
+  blocker: false
+  owner: manuscript author
+  resolution: either emit the derived latency into q_gvalid_campaign.json or cite
+    the per-flight fields explicitly in the caption.
+derived_from: papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml
+completed_by: publication/system_paper_i/build_evidence_export.py
+unrecoverable_register:
+- item: per-run RNG seed for the self-occlusion arms
+  status: UNRECOVERABLE
+  why: never emitted into the artifact. Determinism rests on csia/scenarios.py:make_sensors()
+    fixing seeds 1-8 and on docs/REQUIREMENTS.md R3.
+- item: ArduCopter 3.3 binary checksum
+  status: UNRECOVERABLE
+  why: the prebuilt binary is not committed and no checksum was recorded at campaign
+    time. Identified by provenance and date (dronekit-assets, 2015-10-22) only.
+- item: commanded versus realized displacement, step sweep
+  status: UNRECOVERABLE
+  why: one position_error_m field per row; the two were not stored separately.
+- item: alert-episode merging rule for the real-log corpus
+  status: UNRECOVERABLE
+  why: 3 raw transitions become 2 episodes, and the rule is prose in docs/audit/,
+    not a machine-readable field.
+- item: the figure 4096 for naive channel configurations
+  status: UNRECOVERABLE
+  why: 1232 reachable is committed in two artifacts; 4096 appears in none. Derive
+    and state the basis, or cite 1232 alone.
+- item: one-in-seven effective collision, as a separate field
+  status: UNRECOVERABLE
+  why: no artifact contains such a field. It equals kappa_S_eff = 0.142857 to four
+    places; derive it explicitly or drop it.
+- item: per-stream unit and rate schema for the harness
+  status: UNRECOVERABLE
+  why: not emitted as one machine-readable file; recoverable by reading csia/runtime/plugins.py
+    MAVLINK_MESSAGE_MAP.
+- item: runtime behaviour of the six GPS repair candidates
+  status: UNRECOVERABLE
+  why: implements_nothing = true by design; the table is computed over the declared
+    structure only.
+- item: per-run interpreter version for historical campaigns
+  status: UNRECOVERABLE
+  why: not recorded per run. CI gates 3.12 and 3.13.
+============================================================
+END FILE: 12_ARTIFACT_MAP.yaml
+============================================================
+
+============================================================
+BEGIN FILE: 13_REFERENCE_AUDIT.md
+============================================================
+# 13 — Reference audit
+
+**No bibliography metadata was fabricated to produce this file.** Every row is
+read from `papers/csia_systems/refs.bib` at commit
+`e95b0ea7c7f078a1acc372daa33948751b77cdad`.
+
+**Classification counts:** VERIFIED_EXISTENCE **0** · VERIFIED_CONTENT **0** ·
+RELEVANCE_CONFIRMED **0** · FROM_PRIOR_BRIEF_ONLY **9** ·
+REMOVE **2**.
+
+**Not one entry has been verified against a publisher record.** That is the
+state of the bibliography, not a limitation of this audit.
+
+| key | cited in main.tex | title | carries VERIFY | reconstructed | class | why |
+|---|---|---|---|---|---|---|
+| `dong2024statedependent` | yes | Verification of diagnosability for discrete- | yes | no | **FROM_PRIOR_BRIEF_ONLY** | metadata supplied by a brief, not checked against the publisher record |
+| `carvalho2012intermittent` | yes | Robust diagnosis of discrete event systems a | no | no | **FROM_PRIOR_BRIEF_ONLY** | metadata supplied by a brief, not checked against the publisher record |
+| `carvalho2013permanent` | yes | Robust diagnosis of discrete-event systems a | no | no | **FROM_PRIOR_BRIEF_ONLY** | metadata supplied by a brief, not checked against the publisher record |
+| `takai2021diagnosability` | **no** | **VERIFY: title not supplied by the brief** | yes | no | **REMOVE** | not cited anywhere in main.tex |
+| `yin_phidiagnosability` | yes | Uniform $\varphi$-diagnosability of discrete | yes | yes | **FROM_PRIOR_BRIEF_ONLY** | reconstructed from brief prose |
+| `krysander2024multimode` | yes | **VERIFY: title not supplied by the brief** | yes | no | **FROM_PRIOR_BRIEF_ONLY** | title itself unverified |
+| `krysander2008sensorplacement` | yes | Sensor placement for fault diagnosis | no | no | **FROM_PRIOR_BRIEF_ONLY** | metadata supplied by a brief, not checked against the publisher record |
+| `hurdle2007faulttree` | yes | Fault diagnostics of dynamic system operatio | yes | no | **FROM_PRIOR_BRIEF_ONLY** | metadata supplied by a brief, not checked against the publisher record |
+| `reeves2019sensorselection` | yes | **VERIFY: title not supplied by the brief** | yes | no | **FROM_PRIOR_BRIEF_ONLY** | title itself unverified |
+| `kang2024gnss` | **no** | **VERIFY: title not supplied by the brief** | yes | no | **REMOVE** | not cited anywhere in main.tex |
+| `blanke2003ftc` | yes | Diagnosis and Fault-Tolerant Control | yes | yes | **FROM_PRIOR_BRIEF_ONLY** | reconstructed from brief prose |
+
+---
+
+## What each proposed source is being asked to support
+
+The claim attributed to each source was read from `main.tex`. Where the
+attributed claim is broader than what a title alone can support, that is
+stated.
+
+| source | claim attributed in main.tex | what is verified here |
+|---|---|---|
+| Carvalho / Basilio / Moreira, intermittent and permanent | robust diagnosis of discrete-event systems against intermittent and permanent loss of observations | **titles only, from a brief.** The paper cites them for the existence of a treatment of observation loss. That is consistent with the titles. Nothing about their specific results has been checked. |
+| Yin / Gao / Li, phi-diagnosability | diagnosability under state-dependent observation | **RECONSTRUCTED from brief prose.** Author list, title, venue and year all require verification. The paper must not attribute a specific theorem to this entry until it is resolved. |
+| Dong / state-dependent | verification of diagnosability for DES with state-dependent observation | title rendered from a brief; volume, number and pages unverified |
+| Krysander / Hashemniya, multimode; Krysander / Frisk, sensor placement | structural isolability with mode-dependent behaviour; sensor placement for fault diagnosis | one entry's **title is itself `VERIFY`**. Sensor-placement relevance is plausible from the title but unconfirmed |
+| Hurdle / Reeves, fault tree and sensor selection | fault-tree and sensor-selection background | Hurdle's title was reconstructed from WP-C5 brief prose; Reeves' title is `VERIFY` |
+| Antonante / Spivak / Carlone | **NOT PRESENT in refs.bib** | this source is proposed in prior discussion but has no bib entry and is cited nowhere. If the paper wants it, it must be added and verified from scratch |
+| Gertler | **NOT PRESENT in refs.bib** | same |
+| Little & Rubin | **NOT PRESENT in refs.bib** | same. Note: a missing-data citation would attach to the *mathematical* paper's coarsening argument, not to this systems paper |
+| Blanke et al., Diagnosis and Fault-Tolerant Control | standard FTC reference | RECONSTRUCTED; edition, year and publisher location all `VERIFY`, and a later edition exists |
+
+---
+
+## What remains for a human or a literature session
+
+1. **Resolve every entry against the publisher record** (DOI, title, authors,
+   venue, year, pages). 9 entries.
+2. **Delete or cite** the 2 uncited entries.
+3. **Decide on the three sources with no bib entry at all**
+   (Antonante/Spivak/Carlone, Gertler, Little & Rubin): add and verify, or
+   drop from the plan.
+4. **Re-read each source enough to confirm the attributed claim**, not just
+   that the paper exists. No entry currently has VERIFIED_CONTENT.
+
+**This environment cannot do steps 1 and 4.** There is no local full text for
+any of these works and no verified external lookup is available here. The
+export states this rather than guessing.
+
+`tools/publication/bib_guard.py` fails the build until step 1 is done.
+============================================================
+END FILE: 13_REFERENCE_AUDIT.md
+============================================================
+
+============================================================
+BEGIN FILE: 14_REPRODUCTION_COMMANDS.md
+============================================================
+# 14 — Reproduction commands
+
+Every command is run from the repository root at the Phase-I freeze commit.
+Commit hashes are in `15_REPOSITORY_STATE.json`.
+
+```bash
+git clone https://github.com/SWORT-Aerospace/csia-trust-layer
+cd csia-trust-layer
+git checkout <phase1_scientific_reference.freeze_commit_full>
+python -m venv .venv && . .venv/bin/activate
+pip install -e ".[dev,data,logs,mavlink]"
+bash csia/native/build.sh          # so the C-vs-Python parity tests run
+```
+
+---
+
+## 1. Results that need no autopilot
+
+These run from the checkout alone.
+
+| result | command | writes |
+|---|---|---|
+| **self-occlusion arms A / B / C** | `PYTHONPATH=. python research/wp_c4/self_occlusion_experiment.py` | `research/wp_c4/results/self_occlusion.json` |
+| **fix-preserving contrast** | same command; arm A is in the same artifact | same |
+| **structural enumeration, signature and SOI** | `PYTHONPATH=. python research/wp_c3/effective_signature.py` | `research/wp_c3/results/effective_signature.json` |
+| reliability structure | `PYTHONPATH=. python research/wp_c3/reliability_structure.py` | `research/wp_c3/results/reliability_structure.json` |
+| design-rule audit | `PYTHONPATH=. python research/wp_c3/design_rule_audit.py` | `research/wp_c3/results/design_rule_audit.json` |
+| certificate and exposure set | `PYTHONPATH=. python research/wp_c1/certificate.py` | `research/wp_c1/results/certificate.json` |
+| joint lattice | `PYTHONPATH=. python research/wp_c1/lattice.py` | `research/wp_c1/results/joint_lattice.json` |
+| design inverse | `PYTHONPATH=. python research/wp_c1/design_inverse.py` | `research/wp_c1/results/design_inverse.json` |
+| criticality | `PYTHONPATH=. python research/wp_c2/criticality.py` | `research/wp_c2/results/criticality.json` |
+| **repair comparison (IMU, behind a flag)** | `PYTHONPATH=. python research/wp_c2/repair_experiment.py` | `research/wp_c2/results/repair_experiment.json` |
+| **repair candidate table (GPS)** | `PYTHONPATH=. python research/wp_c6/minimum_repair.py` | `research/wp_c6/results/minimum_repair.json` |
+| cut sets | `PYTHONPATH=. python research/wp_c4/cutsets_post_promotion.py` | `research/wp_c4/results/cutsets_post_promotion.json` |
+| sparsity probe | `PYTHONPATH=. python research/wp_c4/sparsity_probe.py` | `research/wp_c4/results/sparsity_probe.json` |
+| adversarial search | `PYTHONPATH=. python research/wp_c4/adversarial_search.py` | `research/wp_c4/results/adversarial_search.json` |
+| boundary inputs | `PYTHONPATH=. python research/wp_c4/boundary_inputs.py` | `research/wp_c4/results/boundary_inputs.json` |
+| field-set universe | `PYTHONPATH=. python research/wp_c6/field_set_universe.py` | `research/wp_c6/results/field_set_universe.json` |
+| partial-containment sweep | `PYTHONPATH=. python research/wp_c6/partial_containment_sweep.py` | `research/wp_c6/results/partial_containment_sweep.json` |
+| `gvalid` unconditional check | `PYTHONPATH=. python research/wp_c6/gvalid_unconditional.py` | `research/wp_c6/results/gvalid_unconditional.json` |
+| **closed-form escalation verification** | `PYTHONPATH=. python research/wp_c8/escalation_algebra.py` | `research/wp_c8/results/escalation_algebra.json` |
+
+**The closed-form verification is the one to run first if you only run one.**
+It reads its constants from `csia/trust_engine/engine.py` and
+`csia/runtime/failsafe.py` and re-derives the boundary against the shipping
+`TrustCore`. It needs no autopilot.
+
+---
+
+## 2. Results that need ArduCopter 3.3 SITL
+
+The prebuilt binary is **not** in this repository. Obtain the dronekit-assets
+ArduCopter 3.3 SITL tarball (binary dated 2015-10-22), then:
+
+```bash
+export CSIA_SITL_BINARY=/path/to/arducopter
+export CSIA_SITL_EEPROM=/path/to/eeprom.bin
+```
+
+`research/wp_c6/q_gvalid_campaign.py:locate_sitl()` prints exactly what is
+missing if either is unset.
+
+| result | command | writes |
+|---|---|---|
+| **gate-closure campaign** | `PYTHONPATH=. python research/wp_c6/q_gvalid_campaign.py` | `research/wp_c6/results/q_gvalid_campaign.json` |
+| satellite ladder / expanded campaign | `PYTHONPATH=. python research/wp_c7/campaign_expanded.py` | `research/wp_c7/results/campaign_expanded.json` |
+| **step sweep and glitch mechanism** | `PYTHONPATH=. python research/wp_c7/glitch_mechanism.py` | `research/wp_c7/results/glitch_mechanism.json` |
+| false-healthy exposure | `PYTHONPATH=. python research/wp_c7/false_healthy.py` | `research/wp_c7/results/false_healthy.json` |
+| variance investigation | `PYTHONPATH=. python research/wp_c7/variance_investigation.py` | `research/wp_c7/results/variance_investigation.json` |
+| **ramp contrast / response surface** | `PYTHONPATH=. python research/wp_c8/response_surface.py` | `research/wp_c8/results/response_surface.json` |
+| **four-quantity exposure calculation** | `PYTHONPATH=. python research/wp_c8/four_quantity_metrics.py` | `research/wp_c8/results/four_quantity_metrics.json` |
+
+Useful flags on the SITL scripts: `--speedup N` (default 10), `--flights N`
+(default from `PREREG`), `--workdir PATH`, `--quiet`.
+
+**`COMMAND ISSUED != FAULT INJECTED`.** Every SITL arm records a downstream
+observable. If `gvalid_frac_closed_after_onset` is 0 in a denial arm, the
+injection did not reach the receiver and the run is invalid regardless of what
+was commanded.
+
+**Do not run these against ArduCopter 4.x** without renaming the SIM
+parameters; see `07` section 4.
+
+---
+
+## 3. Real-log aggregation
+
+```bash
+python tools/fetch_real_logs.py            # acquisition; refused on some hosts
+python tools/build_dataset_manifest.py     # content-addressed manifest
+```
+
+The exposure artifact `datasets/reports/exposure_v2.json` is committed. CI
+asserts the manifest regenerates byte-identically and validates the exposure
+report against `datasets/schemas/result_v1.schema.json`.
+
+Acquisition is deliberately refused on non-permitted hosts by
+`csia/data/paths.py`; `datasets/reports/acquisition_backlog.json` records what
+is pending and where it can be reproduced.
+
+---
+
+## 4. Figures
+
+```bash
+PYTHONPATH=. python research/wp_c4/figures.py
+PYTHONPATH=. python research/wp_c6/figures.py
+PYTHONPATH=. python research/wp_c7/figures.py
+PYTHONPATH=. python research/wp_c8/figures.py
+python tools/publication/sync_paper_figures.py
+```
+
+All four write to the repository-root `figures/` directory. The last command
+refreshes the self-contained copies inside `papers/csia_systems/figures/`.
+
+Or, in one step: `make figures`.
+
+---
+
+## 5. Manuscript and guards
+
+```bash
+make tex-deps          # pinned TeX Live set
+make paper-systems     # -> build/papers/csia_systems/main.pdf
+make check             # every publication guard
+make test              # full pytest suite
+```
+
+`make check` currently **fails on the bibliography guard by design**: 37
+unresolved provenance markers in `papers/csia_systems/refs.bib`. See `13`.
+
+---
+
+## 6. Regenerating this evidence export
+
+```bash
+PYTHONPATH=. python publication/system_paper_i/build_evidence_export.py
+```
+
+It reads only committed artifacts and rewrites
+`publication/system_paper_i/evidence_export/` plus the tarball. If a number in
+the export disagrees with an artifact, the artifact wins and the generator is
+the thing to fix.
+============================================================
+END FILE: 14_REPRODUCTION_COMMANDS.md
+============================================================
+
+============================================================
+BEGIN FILE: 15_REPOSITORY_STATE.json
+============================================================
+{
+ "ardupilot_sitl_phase1": {
+  "binary_default_in_source": {
+   "file": "research/wp_c6/q_gvalid_campaign.py",
+   "line": 159,
+   "text": "DEFAULT_BINARY = os.environ.get(\"CSIA_SITL_BINARY\", \"\")"
+  },
+  "build_hash": "UNRECOVERABLE",
+  "build_hash_why": "the prebuilt binary is not committed to this repository and no checksum of it was recorded at campaign time. It is identified by provenance and date only.",
+  "eeprom_default_in_source": {
+   "file": "research/wp_c6/q_gvalid_campaign.py",
+   "line": 160,
+   "text": "DEFAULT_EEPROM = os.environ.get(\"CSIA_SITL_EEPROM\", \"\")"
+  },
+  "firmware": "ArduCopter 3.3",
+  "locator": {
+   "file": "research/wp_c6/q_gvalid_campaign.py",
+   "line": 163,
+   "text": "def locate_sitl(binary, eeprom):"
+  },
+  "provenance": "dronekit-assets prebuilt tarball, binary dated 2015-10-22"
+ },
+ "artifact_last_touched": {
+  "campaigns/bench.json": {
+   "commit_full": "df622fa3afddb253a2a946d4a97b0f1aefa56684",
+   "date": "2026-07-16T18:19:22-04:00"
+  },
+  "csia/diagnosis/bayes.py": {
+   "commit_full": "244e3ebe7e000e5d17593b6f58dc0c695cbbbab8",
+   "date": "2026-08-22T23:47:26+00:00"
+  },
+  "csia/runtime/failsafe.py": {
+   "commit_full": "8f36241808b79595e642c6c4865ea0832d498d29",
+   "date": "2026-07-22T22:57:41+00:00"
+  },
+  "csia/runtime/online.py": {
+   "commit_full": "c13889fb87b4d29af3ff22337a55352ff86f9bff",
+   "date": "2026-07-22T23:50:19+00:00"
+  },
+  "csia/scenarios.py": {
+   "commit_full": "576142a023c62dbba24033d0196497ee22c61404",
+   "date": "2026-07-23T23:44:57+00:00"
+  },
+  "csia/trust_engine/engine.py": {
+   "commit_full": "8b94b09de010dcfdad4096be1a4943e3fe821b5d",
+   "date": "2026-07-22T22:40:43+00:00"
+  },
+  "research/wp_a2": {
+   "commit_full": "79c42c3fcfff9538394a7b58de450dd4cd531a65",
+   "date": "2026-08-22T21:03:35+00:00"
+  },
+  "research/wp_c1": {
+   "commit_full": "962d2a2654181e22ee5ca0e7e7d7aff88874d033",
+   "date": "2026-08-22T21:50:33+00:00"
+  },
+  "research/wp_c2": {
+   "commit_full": "95e950242f6903d37712f4886dd53ae618dedc60",
+   "date": "2026-08-22T22:35:28+00:00"
+  },
+  "research/wp_c3": {
+   "commit_full": "80ba181753163560d45684adb00dc17e492295dc",
+   "date": "2026-08-22T22:53:45+00:00"
+  },
+  "research/wp_c4": {
+   "commit_full": "244e3ebe7e000e5d17593b6f58dc0c695cbbbab8",
+   "date": "2026-08-22T23:47:26+00:00"
+  },
+  "research/wp_c6": {
+   "commit_full": "700e898b603b20d5c4b9aab244be768fadd3e949",
+   "date": "2026-08-23T02:17:12+00:00"
+  },
+  "research/wp_c7": {
+   "commit_full": "1298e11f2c0c056d892ae83cb5a4063ff5ebef9a",
+   "date": "2026-08-23T02:17:51+00:00"
+  },
+  "research/wp_c8": {
+   "commit_full": "2b1737ea6a123f3284c2c8e95dc9abc93f002ad6",
+   "date": "2026-08-23T03:01:42+00:00"
+  },
+  "research/wp_e1": {
+   "commit_full": "dc6bdeb71540641bdb27a935521344c22783ee45",
+   "date": "2026-08-22T21:20:57+00:00"
+  }
+ },
+ "generated_utc": "2026-08-24T00:25:31+00:00",
+ "package": {
+  "name": "csia-trust-layer",
+  "requires_python": ">=3.11",
+  "runtime_python_note": "the version this export was generated with. Phase-I results were produced under a 3.12/3.13 CI matrix; the exact interpreter per historical run is UNRECOVERABLE (not recorded per run).",
+  "runtime_python_this_build": "3.12.3",
+  "version": "0.8.0"
+ },
+ "phase1_scientific_reference": {
+  "DO_NOT_SUBSTITUTE": "the Phase-II HEAD is NOT the Phase-I scientific reference. Phase-II work lives under research/phase2/ and is excluded.",
+  "freeze_commit_abbrev": "848f556",
+  "freeze_commit_full": "848f5563a528ae5ca3c2d3883c86d7287d6a4585",
+  "what_it_is": "the tip of `main`. Every Phase-I artifact referenced by this export is byte-identical at this commit and at the export HEAD; verified by tools/publication/phase_guard.py."
+ },
+ "phase_separation": {
+  "enforced_by": "tools/publication/phase_guard.py",
+  "rule": "a Phase-I paper may not reference research/phase2/, and Phase-I artifacts may not drift from the freeze commit"
+ },
+ "repository": {
+  "default_branch": "main",
+  "default_branch_head_full": "848f5563a528ae5ca3c2d3883c86d7287d6a4585",
+  "export_built_at_head_full": "b5e5f172ca46a2641cc8aeb620d4f117a39e68de",
+  "export_built_on_branch": "claude/code-reviewer-repo-export-zicovg",
+  "url": "https://github.com/SWORT-Aerospace/csia-trust-layer"
+ },
+ "resolved_commits": {
+  "consistency_input_guard": {
+   "abbrev_as_written": "244e3eb",
+   "date": "2026-08-22T23:47:26+00:00",
+   "full": "244e3ebe7e000e5d17593b6f58dc0c695cbbbab8",
+   "subject": "fix(diagnosis): reject out-of-domain consistency instead of returning NaN"
+  },
+  "external_claim_provenance_audit": {
+   "abbrev_as_written": "e938bac",
+   "date": "2026-08-22T20:30:20+00:00",
+   "full": "e938bac8a4f92f1e9f18b165b9ad18be1a662f2d",
+   "subject": "docs(audit): trace the external white-paper claims to their evidence"
+  },
+  "handoff_note": {
+   "abbrev_as_written": "0df8d56",
+   "date": "2026-08-23T12:31:31-04:00",
+   "full": "0df8d560c6c66d4f078332a1a3921d41f9bec07c",
+   "subject": "docs: add HANDOFF.md \u2014 shared-branch state for the other CSIA agent"
+  },
+  "historical_dashboard_fix": {
+   "abbrev_as_written": "3ecd788",
+   "date": "2026-07-24T17:33:29+00:00",
+   "full": "3ecd78815721ec1f586840f0d4d15fa3699df41e",
+   "subject": "Fix Retina (dpr>1) canvas runaway: heights doubled every re-render"
+  },
+  "imu_repair_promotion": {
+   "abbrev_as_written": "081cca3",
+   "date": "2026-08-22T22:46:32+00:00",
+   "full": "081cca3b83fe098385648b9a0b7e26a0f5bd11c3",
+   "subject": "feat(diagnosis): promote the IMU repair to default \u2014 repairs WP1 F-D1"
+  },
+  "merge_pr13_assurance_observability": {
+   "abbrev_as_written": "c3016ca",
+   "date": "2026-08-23T12:12:26-04:00",
+   "full": "c3016cae01ab40af3d0a85de7451ab6594f18890",
+   "subject": "Merge PR #13: assurance observability, identifiability repair, SITL-measured detection limits"
+  },
+  "phase1_freeze_main_head": {
+   "abbrev_as_written": "848f556",
+   "date": "2026-08-23T12:38:53-04:00",
+   "full": "848f5563a528ae5ca3c2d3883c86d7287d6a4585",
+   "subject": "docs(readme): repair the anomaly-output sentence (#14)"
+  },
+  "v0_8_0_release": {
+   "abbrev_as_written": "c13889f",
+   "date": "2026-07-22T23:50:19+00:00",
+   "full": "c13889fb87b4d29af3ff22337a55352ff86f9bff",
+   "subject": "v0.8.0: deployment-grade runtime \u2014 reconnect, self-health, deploy package"
+  },
+  "wp1_formalization": {
+   "abbrev_as_written": "5b67a390d673",
+   "date": "2026-08-04T00:05:47+00:00",
+   "full": "5b67a390d6733711bbc7ec1045389cc2a89b64f8",
+   "subject": "research(wp1): recover the implemented system and audit the README"
+  },
+  "wp_c8_report": {
+   "abbrev_as_written": "290fcc9",
+   "date": "2026-08-23T03:01:42+00:00",
+   "full": "290fcc9a1e808a575c69f18b09931c7d02aafd2b",
+   "subject": "docs(wp-c8): report"
+  }
+ },
+ "schema": "csia.publication.repository_state/1",
+ "test_policy": {
+  "enforced_by": "tests/test_doc_counts.py",
+  "exemptions": "historical records under docs/audit/ and research/, lines naming a commit sha or ISO date, and lines carrying <!-- doc-count-ok -->",
+  "rule": "no unscoped suite-level test count in live prose",
+  "why": "39, 48, 62 and 77 were each the true collected count at some commit and each was stale by the time a reader saw it. See docs/audit/CSIA_EXTERNAL_CLAIM_PROVENANCE_AUDIT.md section 1.3."
+ },
+ "test_status_at_export_head": {
+  "collected": "UNRECOVERABLE",
+  "measured_at_commit_full": "b5e5f172ca46a2641cc8aeb620d4f117a39e68de",
+  "note": "collected at the export HEAD, which includes Phase-II research files. The suite gates csia/ production code, which is byte-identical to the Phase-I freeze commit.",
+  "policy": "cite this only with its commit, per the test-count rule"
+ }
+}
+============================================================
+END FILE: 15_REPOSITORY_STATE.json
+============================================================
+

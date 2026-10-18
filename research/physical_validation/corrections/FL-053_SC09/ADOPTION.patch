@@ -1,0 +1,269 @@
+--- a/research/physical_validation/FAILURE_LEDGER.yaml
++++ b/research/physical_validation/FAILURE_LEDGER.yaml
+@@ -6035,3 +6035,80 @@
+       research/assurance/CLAIM_ARTIFACT_REMEDIATION.md;
+       tools/assurance/claim_artifact_verify.py;
+       tests/test_claim_artifact_verify.py
++  - id: FL-053
++    date: 2026-09-26
++    phase: Cross-system research reconnaissance (read-only audit of sealed evidence); successor review 2026-10-18
++    kind: MEASUREMENT_DEFECT
++    what_happened: >-
++      Mechanism B's CUSUM-versus-trust comparison subtracted the failsafe's
++      1.0 s dwell_up from a trust latency that never contained it. The
++      generator research/systems-paper/mechanism_b.py takes its trust series
++      from run_pipeline, which is PredictionComparator -> TrustEngine ->
++      CausalDiagnosis and runs no FailsafePolicy at all (csia/scenarios.py
++      run_pipeline). The trust latency is the first crossing of that raw
++      series below nav_caution = 0.75. A raw series crossing cannot contain a
++      dwell: the dwell is applied by FailsafePolicy.update AFTER the crossing,
++      between the crossing and the alert. Yet the generator records
++      trust_latency_includes_dwell: True and computes
++      trust_detector_only_latency_s = trust_latency - dwell_up. The committed
++      "detector only" values 7.72 / 2.36 / 2.24 s are therefore 1.0 s too
++      favourable to the trust path; the raw values 8.72 / 3.36 / 3.24 s
++      against CUSUM 2.96 / 1.16 / 0.72 s were ALREADY detector-to-detector.
++      Red-team objection 2.3's premise does not hold for this measurement, and
++      the "correction" that closed it on 2026-09-03 (4e3ed38) introduced the
++      error rather than removing one.
++    found_by: >-
++      Cross-checking three independent sources during reconnaissance for the
++      cross-system research direction, not by inspecting Mechanism B for
++      defects: docs/audit/CSIA_LATENCY_PATH_AUDIT.md section 3 (gps_spoof
++      trust crosses 0.75 at 3.36 s and the alert fires at 4.40 s in the online
++      runtime); a fresh run of that catalogue scenario through
++      TrustLayerRuntime and csia/metrics/latency.py; and reading the generator
++      and run_pipeline, which show no policy is ever run.
++    verified: >-
++      2026-10-18, research/physical_validation/corrections/FL-053_SC09/. The
++      generator re-run on a clean git archive reproduces mechanism_b.json with
++      0 of 194 keys differing, so the error is in the committed logic and is
++      deterministic. An AST check confirms run_pipeline references no
++      FailsafePolicy and mechanism_b.py uses FailsafeConfig only to read
++      nav_caution and dwell_up. The shipped FailsafePolicy, stepped per tick
++      over the exact three arms, escalates to CAUTION exactly 1.00 s after the
++      trust crossing on every faulted arm (9.72 / 4.36 / 4.24 s after onset)
++      and never on the clean arm. verification/verify_correction.py: 42 of 42
++      checks pass.
++    honest_limit: >-
++      The SC-09 statement ("the CUSUM alarms earlier than the trust threshold
++      in every faulted arm and never in the clean window") is unaffected, and
++      correcting the figures WIDENS the CUSUM's lead: 5.76 / 2.20 / 2.52 s,
++      not 4.76 / 1.20 / 1.52 s. The draft of this entry (2026-09-26) DERIVED
++      detector-plus-policy times of 9.76 / 4.40 / 4.28 s as crossing + 1.04 s,
++      transferring the online runtime's offset from a different scenario; on
++      these arms, in batch replay, the measured offset is 1.00 s. The draft
++      also said the systems-paper manuscript does not quote the net-of-dwell
++      figures. That is true of papers/csia_systems/main.tex, but handoff V1,
++      handoff V2 and DUAL_PAPER_COORDINATION_SUMMARY.md gave them to the
++      writing agent as verified detector-to-detector values, so a manuscript
++      drafted from those handoffs may quote them. The generator is NOT fixed:
++      re-running it would write the same erroneous block, and correcting it
++      would force regenerating a frozen artifact
++      (research/systems-paper/results is forbidden_without_tier_completion).
++    verdict: CORRECTED_BY_SUCCESSOR_RECORD
++    consequence: >-
++      No sealed or historical artifact was modified. mechanism_b.json,
++      mechanism_b.py, MECHANISM_B.md, REVIEWER_RED_TEAM.md, CLAIMS.csv,
++      CUSUM_FAIRNESS.yaml, CUSUM_FAIRNESS_TABLE.csv and the handoffs stay
++      byte-identical as the record of what was asserted; CORRECTION_RECORD.yaml
++      pins each of them. The authoritative statement of the comparison is the
++      successor record research/physical_validation/corrections/FL-053_SC09/
++      CORRECTION_RECORD.yaml, adopted with this entry. Paper-facing effect is
++      governed by PAPER_IMPACT_LEDGER.yaml PI-006. Correcting does NOT reverse
++      SC-09.
++    artifact: >-
++      research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml;
++      research/physical_validation/corrections/FL-053_SC09/verification/policy_alerts.json;
++      research/physical_validation/corrections/FL-053_SC09/verification/verify_correction.py;
++      research/systems-paper/results/mechanism_b.json;
++      research/systems-paper/mechanism_b.py;
++      csia/scenarios.py;
++      docs/research/MECHANISM_B_DWELL_DISCREPANCY.md (the 2026-09-26 draft);
++      docs/audit/CSIA_LATENCY_PATH_AUDIT.md
+--- a/research/consequence/phase32/SHA256_MANIFEST32.json
++++ b/research/consequence/phase32/SHA256_MANIFEST32.json
+@@ -20,7 +20,7 @@
+   "research/consequence/phase32/results/PHASE32_TRACES_DEVELOPMENT.json": "ff26b4c8cc1f13ef29e688f3e94849fd66f29c6bad3130111dd82232c547dbad",
+   "research/consequence/phase32/results/PHASE32_TRACES_LOCKED.json": "f9a198b9cf70507733f95a4093941ac256bcdbc34a6fd7c9b35c072255a83e7b",
+   "research/consequence/results/GATE_INVENTORY.json": "fa09d82c321b31e3766e93534380de1d72bdc96a0bb426bc7633bc7254a85059",
+-  "research/physical_validation/FAILURE_LEDGER.yaml": "6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f",
++  "research/physical_validation/FAILURE_LEDGER.yaml": "bf92f45d44d356319f97185ff4ced3ec38c9b6fb7768e3d8126b62d933191fa3",
+   "tests/test_consequence_phase32.py": "ffb9b838001d219bd982dc4a258ee11a6b03066a683d9b814e830ea5ed958a6c",
+   "tools/mutation/run_phase32_mutations.py": "ad737f3a53ae0b4e2a02d1427b54562ad50580c6d2f136238648acedc8838171"
+  },
+@@ -67,7 +67,7 @@
+    "research/consequence/phase32/REPRODUCE32.md"
+   ]
+  },
+- "head_at_build": "c2aac2921624f89a48c30bcf5afdee32ebaba4ca",
++ "head_at_build": "3a12efa6bb7b8da3637210babedb6ec23006791e",
+  "note": "A manifest says a document and the artifact it quotes were committed together. It says nothing about whether either is right.",
+  "phase3_is_unchanged": "the four Phase-3 artifacts above are listed so this manifest records that Phase 3.1 ran against them unmodified",
+  "schema": "csia.consequence.phase32_manifest/1"
+--- a/research/phase4/SHA256_MANIFEST4.json
++++ b/research/phase4/SHA256_MANIFEST4.json
+@@ -15,7 +15,7 @@
+   "research/phase4/results/PHASE4_RESULTS_LOCKED.json": "6fff064168090336ec64e453c5f03d3bdc6402752f859f047b974768e2926812",
+   "research/phase4/results/PHASE4_RUNS_DEVELOPMENT.json": "90307571c6a6dcad7f7707e6fd0fcb73c518f0308b9bea6e72dc0589f6f33820",
+   "research/phase4/results/PHASE4_RUNS_LOCKED.json": "c8f3f94b7eefb1e005ac6fd86c3e624f47d083ef18fc48b766351210cdda57f7",
+-  "research/physical_validation/FAILURE_LEDGER.yaml": "6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f",
++  "research/physical_validation/FAILURE_LEDGER.yaml": "bf92f45d44d356319f97185ff4ced3ec38c9b6fb7768e3d8126b62d933191fa3",
+   "tests/test_phase4_detectors.py": "431ed37fd0fe5a6122e7391ee7b3f2ea6eec77bf1715696a9c027962152e5aa6",
+   "tests/test_phase4_pipeline.py": "63d37413f345cd119e52f3d6513f8ffd6ff093b7d5d3449e6a4bf611a5ae67c1",
+   "tools/mutation/run_phase4_mutations.py": "3618273ac9ca5c9a92a247bd9698665fb911afca6404db4d6f4e23153a9f0633"
+@@ -57,7 +57,7 @@
+    "research/phase4/REPRODUCE4.md"
+   ]
+  },
+- "head_at_build": "c2aac2921624f89a48c30bcf5afdee32ebaba4ca",
++ "head_at_build": "3a12efa6bb7b8da3637210babedb6ec23006791e",
+  "note": "A manifest says a document and the artifact it quotes were committed together. It says nothing about whether either is right.",
+  "pooled_with_consequence_phases": false,
+  "schema": "csia.phase4.manifest/1"
+--- a/research/phase5/SHA256_MANIFEST5.json
++++ b/research/phase5/SHA256_MANIFEST5.json
+@@ -26,7 +26,7 @@
+   "research/phase5/results/PHASE5_RUNS_DEVELOPMENT.json": "d2b8793ef2bf7c19e2ff4e983bbc2c0e28e49aaac6f8d7eeb1fce480fed5e500",
+   "research/phase5/results/PHASE5_RUNS_LOCKED.json": "a792aa297a5501289a913d2b1206d5a7c7ffd4117a476982e74f25206b305058",
+   "research/phase5/results/PHASE5_RUNS_VALIDATION.json": "3118a034673b9e43e09728af836a09dc8b3c16b156be10f89b4a82a9bc585d65",
+-  "research/physical_validation/FAILURE_LEDGER.yaml": "6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f",
++  "research/physical_validation/FAILURE_LEDGER.yaml": "bf92f45d44d356319f97185ff4ced3ec38c9b6fb7768e3d8126b62d933191fa3",
+   "tests/test_phase5_hybrid.py": "e7153051e1aa6258972222c9354506cb09187d5d9f0ea883c0a5e9dfd3a71460",
+   "tests/test_phase5_pipeline.py": "5ca0e1373fa4243b976b55cc8b78e748e9bb95540734e010104e824034b1f48a",
+   "tools/mutation/run_phase5_mutations.py": "91c4c05908e38f7f23881572fb9a0db3a173d2a6e69b098ba7ef0a623985fc83"
+@@ -81,7 +81,7 @@
+    "research/phase5/REPRODUCE5.md"
+   ]
+  },
+- "head_at_build": "c2aac2921624f89a48c30bcf5afdee32ebaba4ca",
++ "head_at_build": "3a12efa6bb7b8da3637210babedb6ec23006791e",
+  "is_experimental": true,
+  "missing_at_build": [],
+  "note": "A manifest says a document and the artifact it quotes were committed together. It says nothing about whether either is right.",
+--- a/docs/FIELD_INTEGRATION_RUNBOOK.md
++++ b/docs/FIELD_INTEGRATION_RUNBOOK.md
+@@ -320,7 +320,7 @@
+ ### What a negative result is worth
+ 
+ A negative result that is recorded is worth more than a positive one that is
+-not. The ledger has 124 entries and the majority are things that did not work,
++not. The ledger has 125 entries and the majority are things that did not work,
+ including several where the *instrument* was wrong rather than the system.
+ That is the point of keeping it.
+ 
+--- a/research/physical_validation/PAPER_IMPACT_LEDGER.yaml
++++ b/research/physical_validation/PAPER_IMPACT_LEDGER.yaml
+@@ -390,3 +390,55 @@
+       result must be WORDED, and those edits belong to the writing agents,
+       deliberately, not to the repository agent. The evidence is ready; the
+       prose decision is not the repository agent's to make.
++  - id: PI-006
++    date: 2026-10-18
++    result: >-
++      Correction of a supporting figure, not new evidence: the Mechanism-B
++      CUSUM-versus-trust comparison (SC-09). The raw trust crossings 8.72 /
++      3.36 / 3.24 s are already detector-only; the "detector only" figures
++      7.72 / 2.36 / 2.24 s subtracted a 1.0 s failsafe dwell the raw series
++      never contained (FL-053). The SC-09 statement is unchanged and holds by a
++      wider margin.
++    evidence_tier: E0
++    artifact: >-
++      research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml;
++      research/physical_validation/corrections/FL-053_SC09/verification/policy_alerts.json;
++      research/systems-paper/results/mechanism_b.json (unchanged)
++    current_claim: >-
++      "The CUSUM alarms earlier than the trust threshold in every faulted arm
++      and never in the clean window", supported in the historical record by
++      "detector-to-detector: 2.96 vs 7.72, 1.16 vs 2.36 and 0.72 vs 2.24".
++    new_evidence: >-
++      FL-053 and its successor record: source and AST checks that the trust
++      latency is a raw-series crossing with no policy applied; a clean-archive
++      re-run reproducing mechanism_b.json exactly; the shipped FailsafePolicy
++      escalating exactly 1.00 s after the crossing on each faulted arm.
++    old_limitation: >-
++      The comparison was stated net of a dwell that was never in the series,
++      and red-team objection 2.3 was recorded as closed by that subtraction.
++    new_limitation: >-
++      Unchanged in scope: bench simulator, one node, one profile, one arm per
++      drift rate, CUSUM h chosen on the same simulator's clean arm, no IMU
++      coverage for the CUSUM bank.
++    claim_impact: >-
++      Replaces the supporting figures, not the claim. The CUSUM lead becomes
++      5.76 / 2.20 / 2.52 s instead of 4.76 / 1.20 / 1.52 s. Adds one entry
++      (FL-053) to the corrections the paper may report.
++    supported_upgrade: >-
++      "Against the trust path's first crossing of 0.75, the CUSUM alarms 5.76 s
++      earlier on the 1 m/s ramp (2.96 s against 8.72 s), 2.20 s earlier on the
++      3 m/s spoof and 2.52 s earlier on the 6 m/s ramp, and never in the clean
++      window; both figures are detector-only."
++    unsupported_upgrade: >-
++      "The CUSUM is faster in general" or "on real flights": FALSE, bench only.
++      "The trust path is 1 s slower than previously reported because of the
++      dwell": FALSE, the dwell was never in the reported figure. Any use of
++      7.72 / 2.36 / 2.24 s as detector-only latencies. Any detector-plus-policy
++      comparison: the policy alert times in the successor record are
++      verification, and no CUSUM-with-dwell arm exists.
++    paper_section: Mechanism B; Table 9 (CUSUM against trust); corrections
++    ready_to_integrate: true
++    ready_reason: >-
++      Adopted 2026-10-18 by <OWNER> (<DECISION-REFERENCE>) under FL-053. The
++      figures are committed, re-derived and verified; the wording is the
++      writing agents'.
+--- a/docs/CURRENT_PROGRAM_STATE.md
++++ b/docs/CURRENT_PROGRAM_STATE.md
+@@ -176,6 +176,13 @@
+ with publisher access) and gate 5 (public-log study — needs a host with egress
+ to `review.px4.io`). Neither is a research problem.
+ 
++> **Gate 9, objection 2.3 -- superseded by FL-053 (adopted 2026-10-18).** The dwell subtraction that closed 2.3 was itself the error:
++> the raw trust crossing is already detector-only, so the comparison is
++> 2.96 vs 8.72, 1.16 vs 3.36 and 0.72 vs 3.24 s, and SC-09 holds by a wider
++> margin. Authoritative statement:
++> `research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml`.
++> The gate-9 row above is kept as written, as the record of what was asserted.
++
+ ## 4. Submission gate — MATHEMATICAL PAPER
+ 
+ | # | gate | status |
+--- a/research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml
++++ b/research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml
+@@ -22,7 +22,7 @@
+ 
+ schema: csia.research.correction_record/1
+ identifier: FL-053
+-status: PROPOSED
++status: ADOPTED
+ status_history:
+   - date: 2026-09-26
+     status: PROPOSED
+@@ -31,12 +31,16 @@
+   - date: 2026-10-18
+     status: PROPOSED
+     by: this record (successor review package; adds verification, the identifier audit and the adoption tooling)
++  - date: 2026-10-18
++    status: ADOPTED
++    by: adopt.py --apply, HEAD before adoption 3a12efa6bb7b8da3637210babedb6ec23006791e
++
+ adoption:
+-  decided_by: null
+-  decided_on: null
+-  decision_reference: null
++  decided_by: "<OWNER>"
++  decided_on: 2026-10-18
++  decision_reference: "<DECISION-REFERENCE>"
+   adopted_at_commit: null
+-  guard_pins_decision: null
++  guard_pins_decision: "<GUARD-PINS-DECISION>"
+ 
+ identifier_check:
+   ledger: research/physical_validation/FAILURE_LEDGER.yaml
+@@ -44,7 +48,7 @@
+   ledger_entries: 124
+   by_series: {FL: 52, HF: 18, MX: 43, SR: 11}
+   fl_series: FL-001 to FL-052, contiguous; next free FL id is FL-053
+-  fl_053_in_ledger: false
++  fl_053_in_ledger: true
+   reservations_outside_the_ledger:
+     - ids: FL-053
+       holder: this correction (Mechanism B dwell discrepancy)

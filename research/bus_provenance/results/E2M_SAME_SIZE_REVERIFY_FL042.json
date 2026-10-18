@@ -1,0 +1,190 @@
+{
+ "all_kills_name_a_test_node": true,
+ "baseline_unmutated": {
+  "returncode": 0,
+  "seconds": 6.0
+ },
+ "canary": {
+  "first_failure": "tests/test_e2m_acquisition.py::test_a_wrong_field_count_is_refused",
+  "verdict": "KILLED"
+ },
+ "changed": [],
+ "collection_errors": 0,
+ "contamination_signature_analysis": {
+  "distinct_first_failure_nodes": 34,
+  "evidence_is_not_proof": "No signature means the published run looks uncontaminated. It does not re-measure the 35 mutants that were not rerun, and no claim about them rests on it.",
+  "kills": 36,
+  "kills_attributed_to_a_bare_file": [],
+  "runs_of_length_3_or_more": [],
+  "same_size_followers": [
+   {
+    "follower": "SUP-02",
+    "follower_first_failure": "tests/test_consequence_support.py::test_a_single_hypothesis_is_not_an_identification",
+    "follower_repeated_predecessors_node": false,
+    "follower_target": "csia_consequence/support.py",
+    "follower_verdict": "KILLED",
+    "mutant": "SUP-01",
+    "mutant_first_failure": "tests/test_consequence_support.py::test_a_feature_in_both_low_sets_cannot_separate_them"
+   },
+   {
+    "follower": "SUP-06",
+    "follower_first_failure": "tests/test_consequence_support.py::test_unknown_status_or_reason_is_refused",
+    "follower_repeated_predecessors_node": false,
+    "follower_target": "csia_consequence/support.py",
+    "follower_verdict": "KILLED",
+    "mutant": "SUP-05",
+    "mutant_first_failure": "tests/test_consequence_gates.py::test_both_uncovered_counts_are_reported"
+   },
+   {
+    "follower": "P3-08",
+    "follower_first_failure": "tests/test_consequence_phase3.py::test_the_evaluator_on_hand_built_controls[positive: the FAULTY unit is selected, with support present]",
+    "follower_repeated_predecessors_node": false,
+    "follower_target": "research/consequence/phase3/independent_consequence_evaluator.py",
+    "follower_verdict": "KILLED",
+    "mutant": "P3-07",
+    "mutant_first_failure": "tests/test_consequence_phase3.py::test_the_correct_response_under_latent_truth_is_ground_truth_not_policy"
+   }
+  ],
+  "signature_found": false,
+  "what_this_asks": "whether the PUBLISHED 38-mutant run carries FL-042's fingerprint, which the three isolated reruns cannot show"
+ },
+ "elapsed_s": 32.3,
+ "hardening": {
+  "a_kill_without_a_named_test_node_is_a_collection_error": true,
+  "baseline_in_its_own_fresh_sandbox": true,
+  "canary_in_its_own_fresh_sandbox": true,
+  "fresh_sandbox_per_mutant": true,
+  "no_restore_step_exists": true,
+  "outcomes_distinguished": [
+   "KILLED",
+   "SURVIVED",
+   "INVALID_MUTANT",
+   "COLLECTION_ERROR",
+   "TIMEOUT"
+  ],
+  "pycache_purged_before_every_run": true,
+  "pythondontwritebytecode": true
+ },
+ "interpreter": {
+  "executable": ".venv/bin/python",
+  "note": "The published E2M artifact does not record the interpreter it ran on, so this field states what THIS re-measurement used and claims nothing about the original run's interpreter.",
+  "original_artifact_records_no_interpreter": true,
+  "reverification_ran_on": "3.12.3"
+ },
+ "invalid": 0,
+ "is_a_rerun_not_a_replacement": true,
+ "original_artifact": "research/bus_provenance/results/E2M_MUTATION_RESULTS.json",
+ "original_is_unmodified": true,
+ "original_result": {
+  "evaluated": 38,
+  "killed": 36,
+  "survived": 2
+ },
+ "results": [
+  {
+   "breaks": "Replaces symmetric difference with union, so a feature present in BOTH LOW-sets counts as separating. That feature contributes an identical term to both log-likelihoods and cancels exactly; treating it as a witness manufactures support that does not exist.",
+   "family": "SUPPORT",
+   "id": "SUP-01",
+   "node_changed": false,
+   "path": "csia_consequence/support.py",
+   "published_first_failure": "tests/test_consequence_support.py::test_a_feature_in_both_low_sets_cannot_separate_them",
+   "published_verdict": "KILLED",
+   "reverified_first_failure": "tests/test_consequence_support.py::test_a_feature_in_both_low_sets_cannot_separate_them",
+   "reverified_verdict": "KILLED",
+   "same_size": true,
+   "sandbox_was_fresh": true,
+   "seconds": 6.4,
+   "verdict_changed": false
+  },
+  {
+   "breaks": "Inverts the uncovered-candidate test, so freshness-coupled gates are reported as uncovered and the eight become the wrong eight.",
+   "family": "SUPPORT",
+   "id": "SUP-05",
+   "node_changed": false,
+   "path": "csia_consequence/gates.py",
+   "published_first_failure": "tests/test_consequence_gates.py::test_both_uncovered_counts_are_reported",
+   "published_verdict": "KILLED",
+   "reverified_first_failure": "tests/test_consequence_gates.py::test_both_uncovered_counts_are_reported",
+   "reverified_verdict": "KILLED",
+   "same_size": true,
+   "sandbox_was_fresh": true,
+   "seconds": 5.7,
+   "verdict_changed": false
+  },
+  {
+   "breaks": "Inverts ground truth: the correct response becomes selecting the faulty unit. Every CORRECT_ACTIONABLE and INCORRECT_ACTIONABLE verdict flips.",
+   "family": "PHASE3",
+   "id": "P3-07",
+   "node_changed": false,
+   "path": "csia_consequence/consequence_model.py",
+   "published_first_failure": "tests/test_consequence_phase3.py::test_the_correct_response_under_latent_truth_is_ground_truth_not_policy",
+   "published_verdict": "KILLED",
+   "reverified_first_failure": "tests/test_consequence_phase3.py::test_the_correct_response_under_latent_truth_is_ground_truth_not_policy",
+   "reverified_verdict": "KILLED",
+   "same_size": true,
+   "sandbox_was_fresh": true,
+   "seconds": 5.9,
+   "verdict_changed": false
+  }
+ ],
+ "schema": "csia.e2m.same_size_reverification/1",
+ "scope": {
+  "claims_nothing_about_the_others": true,
+  "not_re_measured": [
+   "CH-01",
+   "CH-02",
+   "CRC-01",
+   "CRC-02",
+   "CRC-03",
+   "CRC-04",
+   "CRC-05",
+   "ID-01",
+   "ID-02",
+   "ID-03",
+   "ID-04",
+   "ID-05",
+   "MISS-01",
+   "MISS-02",
+   "MISS-03",
+   "P3-01",
+   "P3-02",
+   "P3-03",
+   "P3-04",
+   "P3-05",
+   "P3-06",
+   "P3-08",
+   "P3-09",
+   "P3-10",
+   "P3-11",
+   "P3-12",
+   "P3-13",
+   "SEQ-01",
+   "SUP-02",
+   "SUP-03",
+   "SUP-04",
+   "SUP-06",
+   "TIME-01",
+   "TOPO-01",
+   "TOPO-02"
+  ],
+  "re_measured": [
+   "SUP-01",
+   "SUP-05",
+   "P3-07"
+  ]
+ },
+ "selection": [
+  "tests/test_e2m_acquisition.py",
+  "tests/test_bus_provenance.py",
+  "tests/test_e2m_properties.py",
+  "tests/test_e2m_schemas.py",
+  "tests/test_e2m_transport.py",
+  "tests/test_consequence_gates.py",
+  "tests/test_consequence_support.py",
+  "tests/test_consequence_phase3.py"
+ ],
+ "timeouts": 0,
+ "verdicts_changed": 0,
+ "what_this_is_not": "not a re-measurement of the other 35 mutants, not a new score, and not a replacement for the published 38/36/2.",
+ "why": "FL-042: a same-length replacement restored inside one mtime tick can leave CPython reusing the MUTATED .pyc. Only same-size mutants can trigger it; these are E2M's three."
+}

@@ -1,0 +1,16 @@
+mechanism,status,scenario_or_fault,platform,injection_supported,trust_relation_available,diagnosis_relation_available,support_analysis_available,sequential_residual_available,sequential_node,note
+CLEAN,APPLICABLE,clean,ardupilot-derived deterministic simulator,True,True,True,True,False,,
+GNSS_STEP_SMALL,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,"no step/offset injector exists. KNOWN_KINDS = {bias_drift, dropout, emi_spike, gps_spoof, vibration_anomaly, power_sag}; gps_spoof takes a DRIFT velocity and is therefore a ramp. Section 5/28 forbid building new injection machinery in this phase."
+GNSS_STEP_LARGE,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,as GNSS_STEP_SMALL
+GNSS_RAMP_SLOW,APPLICABLE,constructed,ardupilot-derived deterministic simulator,True,True,True,True,True,gps,declared parameter variation of the frozen gps_spoof kind; slower drift than the catalogue scenario
+GNSS_RAMP_FAST,APPLICABLE,gps_spoof,ardupilot-derived deterministic simulator,True,True,True,True,True,gps,the catalogue scenario: ~3.2 m/s position walk
+GNSS_FIX_LOSS,APPLICABLE,gps_dropout,ardupilot-derived deterministic simulator,True,True,True,True,True,gps,"absence, not a nameable sensor fault; truth is None on purpose (section 13)"
+GNSS_TRANSPORT_STARVATION,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,in this simulator the `dropout` kind IS transport starvation at the CSIA boundary -- no samples arrive and freshness lapses. It is the same injection as GNSS_FIX_LOSS and is not counted twice.
+IMU0_BIAS_DRIFT,APPLICABLE,imu0_bias_drift,ardupilot-derived deterministic simulator,True,True,True,True,False,,
+DUAL_IMU_FAILURE,APPLICABLE,dual_imu_failure,ardupilot-derived deterministic simulator,True,True,True,True,False,,two simultaneous faults against a single-fault model; truth is None because no modeled hypothesis is correct
+MAG_DEGRADED,APPLICABLE,mag_emi,ardupilot-derived deterministic simulator,True,True,True,True,True,mag,
+MAG_INVALID,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,the all-zero magnetometer sentinel is an INGEST-layer condition fixed in Phase 1 and regression-tested there (tests/test_v1_1_canonical_ingest.py). No invalid-mag fault kind exists in KNOWN_KINDS.
+BATTERY_SENTINEL,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,"as MAG_INVALID: ingest-layer, fixed and regression-tested in Phase 1. It reaches diagnosis only as gate -> 0."
+POWER_SAG,APPLICABLE,power_sag,ardupilot-derived deterministic simulator,True,True,True,True,True,battery,
+VIBRATION_ANOMALY,APPLICABLE,vibration_anomaly,ardupilot-derived deterministic simulator,True,True,True,True,True,vibration,
+BARO_FAULT,INAPPLICABLE,NONE,ardupilot-derived deterministic simulator,False,False,False,False,False,,"no baro fault kind in KNOWN_KINDS, and baro's clean-arm sigma0 is degenerate so it carries no sequential residual either (B4_CONSTANT_VERIFICATION.json)."

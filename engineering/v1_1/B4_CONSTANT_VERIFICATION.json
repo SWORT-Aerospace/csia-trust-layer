@@ -1,0 +1,169 @@
+{
+  "artifact": "B4_CONSTANT_VERIFICATION",
+  "clean_arm": "clean",
+  "degenerate_nodes_excluded": [
+    "baro"
+  ],
+  "fault_arm_response_at_historical_h": {
+    "dual_imu_failure": {},
+    "gps_dropout": {},
+    "gps_spoof": {
+      "gps": {
+        "alarm_ticks": 971,
+        "first_t": 21.16
+      }
+    },
+    "imu0_bias_drift": {},
+    "mag_emi": {
+      "mag": {
+        "alarm_ticks": 873,
+        "first_t": 25.08
+      }
+    },
+    "power_sag": {
+      "battery": {
+        "alarm_ticks": 745,
+        "first_t": 30.2
+      },
+      "motor_esc": {
+        "alarm_ticks": 747,
+        "first_t": 30.12
+      },
+      "vibration": {
+        "alarm_ticks": 107,
+        "first_t": 35.36
+      }
+    },
+    "vibration_anomaly": {
+      "vibration": {
+        "alarm_ticks": 798,
+        "first_t": 28.08
+      }
+    }
+  },
+  "grid": {
+    "10.0": {
+      "clean_alarm_ticks": 2067,
+      "per_node": {
+        "battery": 430,
+        "gps": 476,
+        "mag": 570,
+        "motor_esc": 295,
+        "vibration": 296
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "100.0": {
+      "clean_alarm_ticks": 274,
+      "per_node": {
+        "battery": 0,
+        "gps": 0,
+        "mag": 274,
+        "motor_esc": 0,
+        "vibration": 0
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "1000.0": {
+      "clean_alarm_ticks": 0,
+      "per_node": {
+        "battery": 0,
+        "gps": 0,
+        "mag": 0,
+        "motor_esc": 0,
+        "vibration": 0
+      },
+      "satisfies_zero_clean_alarms": true
+    },
+    "20.0": {
+      "clean_alarm_ticks": 1343,
+      "per_node": {
+        "battery": 208,
+        "gps": 305,
+        "mag": 504,
+        "motor_esc": 154,
+        "vibration": 172
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "200.0": {
+      "clean_alarm_ticks": 132,
+      "per_node": {
+        "battery": 0,
+        "gps": 0,
+        "mag": 132,
+        "motor_esc": 0,
+        "vibration": 0
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "5.0": {
+      "clean_alarm_ticks": 2681,
+      "per_node": {
+        "battery": 581,
+        "gps": 555,
+        "mag": 629,
+        "motor_esc": 456,
+        "vibration": 460
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "50.0": {
+      "clean_alarm_ticks": 503,
+      "per_node": {
+        "battery": 18,
+        "gps": 51,
+        "mag": 428,
+        "motor_esc": 6,
+        "vibration": 0
+      },
+      "satisfies_zero_clean_alarms": false
+    },
+    "500.0": {
+      "clean_alarm_ticks": 0,
+      "per_node": {
+        "battery": 0,
+        "gps": 0,
+        "mag": 0,
+        "motor_esc": 0,
+        "vibration": 0
+      },
+      "satisfies_zero_clean_alarms": true
+    }
+  },
+  "historical_h": 500.0,
+  "historical_h_still_valid": true,
+  "historical_h_textbook_rejected": {
+    "h": 5.0,
+    "why": "4 alarms on the clean nominal arm; failed R10. Retained in the historical record as a committed negative result."
+  },
+  "historical_k": 0.5,
+  "historical_source": "research/phase2/p1_offline_baselines.py (B4_K, B4_H_GRID) and research/phase2/results/baseline_comparison.json",
+  "in_control_stats": {
+    "battery": {
+      "mu0": 0.037772,
+      "sigma0": 0.023591
+    },
+    "gps": {
+      "mu0": 0.636752,
+      "sigma0": 0.391676
+    },
+    "mag": {
+      "mu0": 0.003894,
+      "sigma0": 0.002566
+    },
+    "motor_esc": {
+      "mu0": 0.128594,
+      "sigma0": 0.033151
+    },
+    "vibration": {
+      "mu0": 0.025427,
+      "sigma0": 0.013756
+    }
+  },
+  "residual": "z_t = (lam_t - mu0)/sigma0 on the PRE-TRANSFORM smoothed chi-square, gated as production gates it. NOT the rejected z = max(0, 1-c)*10.",
+  "section": "23",
+  "selection_rule": "smallest h on the fixed grid for which the CLEAN NOMINAL arm produces zero alarms; evaluated only on the clean arm, never on a fault outcome",
+  "smallest_h_with_zero_clean_alarms": 500.0,
+  "verdict": "REUSABLE"
+}

@@ -1,0 +1,92 @@
+{
+ "$id": "csia.e2m.raw_bus_observation/1",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "description": "Two clocks are carried separately and never merged: controller_us is the acquisition controller's own counter, host_monotonic_ns is the host's monotonic receive time. Their difference is acquisition latency.",
+ "properties": {
+  "commanded_channel": {
+   "maximum": 7,
+   "minimum": 0,
+   "type": "integer"
+  },
+  "controller_us": {
+   "type": "integer"
+  },
+  "has_measurement": {
+   "description": "false means missing. Missing is never zero.",
+   "type": "boolean"
+  },
+  "host_monotonic_ns": {
+   "type": "integer"
+  },
+  "i2c_error": {
+   "type": "integer"
+  },
+  "milli": {
+   "description": "meaningless unless has_measurement is true",
+   "type": "integer"
+  },
+  "raw": {
+   "description": "the frame exactly as received",
+   "type": "string"
+  },
+  "readback_channel": {
+   "description": "-1 means the register was NOT read back, which is a different fact from reading it and getting another value",
+   "maximum": 7,
+   "minimum": -1,
+   "type": "integer"
+  },
+  "readback_taken": {
+   "type": "boolean"
+  },
+  "retries": {
+   "minimum": 0,
+   "type": "integer"
+  },
+  "sensor": {
+   "type": "string"
+  },
+  "seq": {
+   "minimum": 0,
+   "type": "integer"
+  },
+  "status": {
+   "enum": [
+    "OK",
+    "ERR_MUX_WRITE",
+    "ERR_MUX_READBACK",
+    "ERR_READBACK_MISMATCH",
+    "ERR_SENSOR_NACK",
+    "ERR_TIMEOUT",
+    "ERR_NO_DRIVER",
+    "SAFE_IDLE"
+   ]
+  },
+  "sweep": {
+   "minimum": 0,
+   "type": "integer"
+  },
+  "type": {
+   "const": "record"
+  },
+  "unit": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "type",
+  "host_monotonic_ns",
+  "controller_us",
+  "seq",
+  "sweep",
+  "commanded_channel",
+  "readback_channel",
+  "readback_taken",
+  "sensor",
+  "status",
+  "has_measurement",
+  "raw"
+ ],
+ "title": "One attempted sensor read, as recorded by the host",
+ "type": "object"
+}

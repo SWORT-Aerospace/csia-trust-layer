@@ -1,0 +1,150 @@
+{
+ "ardupilot": {
+  "branch_predicate": "none -- values are drawn from distributions",
+  "chain": "SIM_GPS1_JAM -> GPS::simulate_jamming() -> GPS_Data -> SIM_GPS_UBLOX -> GPS_RAW_INT",
+  "fields": {
+   "eph": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": false,
+    "notes": "the jamming model does not drive hdop, so this field carries no information under this fault",
+    "producing_function": "NOT touched by simulate_jamming",
+    "raw_source_variable": "hdop",
+    "wire_mapping": "constant 121 throughout"
+   },
+   "epv": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": false,
+    "notes": "as eph",
+    "producing_function": "NOT touched by simulate_jamming",
+    "raw_source_variable": "vdop",
+    "wire_mapping": "constant"
+   },
+   "h_acc": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": false,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": true,
+    "notes": "continuous draw, independent of lock state",
+    "producing_function": "simulate_jamming line 341: horizontal_acc = fabsf(rand_float()) * 300, refreshed at ~3 Hz, NOT conditioned on have_lock",
+    "raw_source_variable": "GPS_Data.horizontal_acc",
+    "wire_mapping": "pvt.h_acc = horizontal_acc * 1000 (mm); nominal = SIM_GPS1_ACC * 1000 = 300"
+   },
+   "satellites_visible": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": false,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": true,
+    "notes": "stochastically DECOUPLED from have_lock, so sats and validity are not the same bit",
+    "producing_function": "simulate_jamming line 313: num_sats = 2 + (get_random16() % 15); have_lock then set by an INDEPENDENT coin flip when num_sats >= 4",
+    "raw_source_variable": "GPS_Data.num_sats",
+    "wire_mapping": "msg.satellites_visible = d.num_sats"
+   },
+   "v_acc": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": false,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": true,
+    "notes": "as h_acc",
+    "producing_function": "simulate_jamming line 340: vertical_acc = fabsf(rand_float())*300",
+    "raw_source_variable": "GPS_Data.vertical_acc",
+    "wire_mapping": "vertical_acc * 1000 (mm)"
+   },
+   "vel_acc": {
+    "classification": "MODEL_GENERATED_HEALTH",
+    "constant_under_fault": false,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": false,
+    "independent_dynamic_state": true,
+    "notes": "as h_acc",
+    "producing_function": "simulate_jamming line 342: speed_acc = fabsf(rand_float())*50",
+    "raw_source_variable": "GPS_Data.speed_acc",
+    "wire_mapping": "speed_acc * 1000 (mm/s)"
+   }
+  },
+  "intervention": "SIM_GPS1_JAM",
+  "source": "ArduCopter V4.8.0-dev@01a504b libraries/SITL/SIM_GPS.cpp:288-345, libraries/SITL/SIM_GPS_UBLOX.cpp:305"
+ },
+ "px4": {
+  "branch_predicate": "_sim_gps_used.get() >= 4",
+  "chain": "SIM_GPS_USED -> SensorGpsSim::Run() if/else -> sensor_gps -> MavlinkStreamGPSRawInt -> GPS_RAW_INT",
+  "fields": {
+   "eph": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": true,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "assigned in the same branch as fix_type, so it is the validity bit re-encoded as a float",
+    "producing_function": "hard-coded 0.7f / 100.f in the same if/else that sets fix_type",
+    "raw_source_variable": "sensor_gps.hdop",
+    "wire_mapping": "msg.eph = gps.hdop * 100  -> 70 / 10000"
+   },
+   "epv": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": true,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "as eph",
+    "producing_function": "hard-coded 1.1f / 100.f, same branch",
+    "raw_source_variable": "sensor_gps.vdop",
+    "wire_mapping": "msg.epv = gps.vdop * 100 -> 110 / 10000"
+   },
+   "h_acc": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": true,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "as eph",
+    "producing_function": "hard-coded 0.9f / 100.f, same branch",
+    "raw_source_variable": "sensor_gps.eph",
+    "wire_mapping": "msg.h_acc = gps.eph * 1e3 -> 900 / 100000 mm"
+   },
+   "satellites_visible": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": false,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "the field IS the injected parameter, echoed back verbatim. Detecting it is reading the command.",
+    "producing_function": "SensorGpsSim::Run() line 199: satellites_used = _sim_gps_used.get()",
+    "raw_source_variable": "sensor_gps.satellites_used",
+    "wire_mapping": "msg.satellites_visible = gps.satellites_used"
+   },
+   "v_acc": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": true,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "as eph",
+    "producing_function": "hard-coded 1.78f / 100.f, same branch",
+    "raw_source_variable": "sensor_gps.epv",
+    "wire_mapping": "msg.v_acc = gps.epv * 1e3 -> 1780 / 100000"
+   },
+   "vel_acc": {
+    "classification": "DIRECT_ORACLE",
+    "constant_under_fault": true,
+    "direct_dependency_on_fix_type": true,
+    "direct_dependency_on_intervention": true,
+    "independent_dynamic_state": false,
+    "notes": "as eph",
+    "producing_function": "hard-coded 0.4f / 100.f, same branch",
+    "raw_source_variable": "sensor_gps.s_variance_m_s",
+    "wire_mapping": "msg.vel_acc = s_variance_m_s * 1e3 -> 400 / 100000"
+   }
+  },
+  "intervention": "SIM_GPS_USED",
+  "source": "PX4-Autopilot@547e2ca src/modules/simulation/sensor_gps_sim/SensorGpsSim.cpp:155-172, src/modules/mavlink/streams/GPS_RAW_INT.hpp:92-107"
+ }
+}

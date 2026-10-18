@@ -1,0 +1,664 @@
+{
+ "A_repository_identity": {
+  "blocking_guard_command": "make check-blocking",
+  "blocking_guard_result": "PASS",
+  "branch": "claude/code-reviewer-repo-export-zicovg",
+  "ending_commit": "d87f97491f7425110be83324007d779c1db21f12",
+  "frozen_core": {
+   "digest": "b0b011c61426a70ead42e170855a2650d5c62feb640c7a50fffc27bb915ba5a8",
+   "files": 12,
+   "identical": true,
+   "paths_that_differ": []
+  },
+  "starting_commit": "d87f97491f7425110be83324007d779c1db21f12",
+  "test_command": "python -m pytest -q -rs",
+  "test_result": {
+   "exit_code": 0,
+   "failed": 0,
+   "failures": [],
+   "passed": 3733,
+   "skip_reasons": [
+    "SKIPPED [1] tests/test_e2m_acquisition.py:612: E2M gate 4: NO_HARDWARE_ACCESS. No /dev/ttyACM*, /dev/ttyUSB* or COM* port is present. This test is NOT evidence about hardware and a skip must not be reported as physical validation.",
+    "SKIPPED [1] tests/test_e2m_acquisition.py:618: E2M gate 4: NO_HARDWARE_ACCESS. No /dev/ttyACM*, /dev/ttyUSB* or COM* port is present. This test is NOT evidence about hardware and a skip must not be reported as physical validation."
+   ],
+   "skipped": 2
+  },
+  "working_tree_dirty_at_generation": true
+ },
+ "B_software_assurance": {
+  "coverage": {
+   "by_file": {
+    "csia_bus_provenance/__init__.py": 100.0,
+    "csia_bus_provenance/datasheet.py": 92.59,
+    "csia_bus_provenance/provenance.py": 94.79,
+    "csia_bus_provenance/simulator.py": 98.36,
+    "csia_bus_provenance/topology.py": 90.91,
+    "csia_e2m/__init__.py": 100.0,
+    "csia_e2m/ancestry.py": 92.31,
+    "csia_e2m/fake_controller.py": 98.21,
+    "csia_e2m/faults.py": 95.08,
+    "csia_e2m/identity.py": 97.1,
+    "csia_e2m/logging.py": 93.41,
+    "csia_e2m/protocol.py": 93.1,
+    "csia_e2m/replay.py": 95.89,
+    "csia_e2m/transport.py": 90.0
+   },
+   "command": "python -m coverage run --source=csia_bus_provenance,csia_e2m -m pytest tests/test_bus_provenance.py tests/test_e2m_*.py -q && python -m coverage report",
+   "floor_source": "research/mission/results/QUALITY_FLOOR.json",
+   "repository_floor": 86.86,
+   "scope": "csia_bus_provenance and csia_e2m only",
+   "total_percent": 94.49
+  },
+  "mutation": {
+   "by_family": {
+    "CHANNEL": {
+     "evaluated": 2,
+     "killed": 2,
+     "score": 1.0
+    },
+    "CRC": {
+     "evaluated": 4,
+     "killed": 4,
+     "score": 1.0
+    },
+    "IDENTITY": {
+     "evaluated": 5,
+     "killed": 5,
+     "score": 1.0
+    },
+    "MISSING": {
+     "evaluated": 3,
+     "killed": 3,
+     "score": 1.0
+    },
+    "SEQUENCE": {
+     "evaluated": 1,
+     "killed": 1,
+     "score": 1.0
+    },
+    "TIME": {
+     "evaluated": 1,
+     "killed": 1,
+     "score": 1.0
+    },
+    "TOPOLOGY": {
+     "evaluated": 2,
+     "killed": 2,
+     "score": 1.0
+    }
+   },
+   "command": "python tools/mutation/run_e2m_mutations.py",
+   "evaluated": 18,
+   "evidence": "research/bus_provenance/results/E2M_MUTATION_RESULTS.json",
+   "evidence_sha256": "7abb3e29b481cf26421c9b8ed16ad93dd1746bd5feed72807082a96b90f35489",
+   "killed": 18,
+   "score": 1.0,
+   "survived": 0,
+   "targets": [
+    "csia_bus_provenance/provenance.py",
+    "csia_e2m/identity.py",
+    "csia_e2m/logging.py",
+    "csia_e2m/protocol.py",
+    "csia_e2m/replay.py"
+   ]
+  },
+  "suite": {
+   "command": "python -m pytest -q -rs",
+   "evidence": "recorded pytest output",
+   "failed": 0,
+   "passed": 3733,
+   "skipped": 2
+  }
+ },
+ "C_mandatory_qualifications": [
+  "The mutation score is for a SELF-AUTHORED, DECLARED mutant set. The same person wrote the mutants and the tests that kill them.",
+  "The mutation score is NOT comparable to another project's score, or to this repository's other scores, without matching mutant definitions. Different mutant lists are different measurements.",
+  "No live hardware was operated.",
+  "No physical sensor was tested.",
+  "No TCA9548A timing was measured.",
+  "No UART timing was measured.",
+  "No brownout was observed.",
+  "No flight, HIL, propulsion, actuator or autopilot validation occurred.",
+  "Fake-driver and fake-port results are not hardware validation.",
+  "Replay is not acquisition.",
+  "Authorized is not executed.",
+  "Skipped hardware tests are not passes."
+ ],
+ "D_claim_audit": {
+  "claims": [
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-01",
+    "claim_text": "Under sustained GNSS denial the diagnosis reports nominal for the entire fault window and never names gps_fault, while the GPS trust coefficient reads 0.9767.",
+    "evidence_artifact": "research/wp_c4/results/self_occlusion.json",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-02",
+    "claim_text": "The mechanism is structural: with the GPS physics feature gated out, no active feature distinguishes nominal from gps_fault, so their log posterior ratio equals the log prior ratio exactly.",
+    "evidence_artifact": "research/math-paper/results/proof_audit.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "ANALYTIC_OR_STRUCTURAL",
+    "packet_status": "SUPPORTED (proved)",
+    "register_status": "PROVED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-03",
+    "claim_text": "An independent structural checker, importing no CSIA module and no part of the support-aware implementation, agrees with the production discriminating-term analysis on 378,000 of 378,000 tick-by-pair comparisons.",
+    "evidence_artifact": "research/systems-paper/results/checker_agreement.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "ANALYTIC_OR_STRUCTURAL",
+    "packet_status": "SUPPORTED (proved)",
+    "register_status": "PROVED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-04",
+    "claim_text": "gps_fault|nominal is the only hypothesis pair in the deterministic scenario catalogue that ever becomes structurally indistinguishable.",
+    "evidence_artifact": "research/systems-paper/results/checker_verdicts.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-05",
+    "claim_text": "The pair is also structurally indistinguishable for 76 ticks at the start of EVERY scenario, including clean flight, before the GPS physics gate opens.",
+    "evidence_artifact": "research/systems-paper/results/checker_verdicts.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-06",
+    "claim_text": "Under GNSS fix loss the pair is additionally indistinguishable for 200 consecutive ticks (8.0 s at 25 Hz) starting at tick 625.",
+    "evidence_artifact": "research/systems-paper/results/checker_verdicts.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-07",
+    "claim_text": "Smoothing changes threshold-crossing behaviour, and the direction and size of the change depend on the arm.",
+    "evidence_artifact": "research/systems-paper/results/mechanism_b.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-08",
+    "claim_text": "In the pre-onset window smoothing cuts threshold crossings from 36 to 9 out of 374 ticks, a 4x reduction in false crossings.",
+    "evidence_artifact": "research/systems-paper/results/mechanism_b.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-09",
+    "claim_text": "The CUSUM alarms earlier than the trust threshold in every faulted arm and never in the clean window.",
+    "evidence_artifact": "research/systems-paper/results/mechanism_b.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-10",
+    "claim_text": "No CUSUM novelty is claimed.",
+    "evidence_artifact": "csia/v1_1/sequential.py",
+    "evidence_commit": "ec5acd18",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (scope statement, prior art)",
+    "register_status": "KNOWN_SUBSUMED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-11",
+    "claim_text": "The general mechanism of fault-state-dependent observation loss is prior art and CSIA asserts no priority over it.",
+    "evidence_artifact": "papers/csia_systems/main.tex section 'Related work'",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (scope statement, prior art)",
+    "register_status": "KNOWN_SUBSUMED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-12",
+    "claim_text": "The behaviour is specific to faults that remove the GNSS fix; a position glitch that leaves the fix valid does not close the gate.",
+    "evidence_artifact": "research/wp_c6/results/q_gvalid_campaign.json",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-13",
+    "claim_text": "The residual detector saturates at the floor for every injected step from 5.6 m to 5.6 km and no step magnitude produces an alarm; the same total error as a ramp does.",
+    "evidence_artifact": "research/wp_c7/results/glitch_mechanism.json",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-14",
+    "claim_text": "q_gvalid = 0.984 over 3744 monitored ticks per arm; first gate closure 0.44 s after injection in every denial flight.",
+    "evidence_artifact": "research/wp_c6/results/q_gvalid_campaign.json",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-15",
+    "claim_text": "E_h subset-of C_h containment holds for gps_fault by inspection.",
+    "evidence_artifact": "research/wp_c6/",
+    "evidence_commit": "848f556",
+    "evidence_level": "ANALYTIC_OR_STRUCTURAL",
+    "packet_status": "SUPPORTED (proved)",
+    "register_status": "PROVED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-16",
+    "claim_text": "U_h subset-of C_h containment.",
+    "evidence_artifact": "n/a",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "WITHDRAWN",
+    "register_status": "WITHDRAWN",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-17",
+    "claim_text": "The WP-C8 mass-invariance 'theorem'.",
+    "evidence_artifact": "research/wp_c8/",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "WITHDRAWN (refuted)",
+    "register_status": "REFUTED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-18",
+    "claim_text": "R16, slow IMU bias detection.",
+    "evidence_artifact": "docs/REQUIREMENTS.md",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "WITHDRAWN (refuted)",
+    "register_status": "REFUTED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-19",
+    "claim_text": "'The campaign varied two axes.'",
+    "evidence_artifact": "research/wp_c6/",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "WITHDRAWN (refuted)",
+    "register_status": "REFUTED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-20",
+    "claim_text": "The normalized hypothesis weight is not confidence: a leader at high weight with zero discriminating evidence is reported as SUPPORT_LOST_FOR_REQUIRED_INFORMATION, not as eligibility. (Wording aligned 2026-09-04 with research/PAPER_CROSS_CONSISTENCY.md section A; the claim itself is unchanged.)",
+    "evidence_artifact": "engineering/v1_1/support/support.py",
+    "evidence_commit": "HEAD",
+    "evidence_level": "ANALYTIC_OR_STRUCTURAL",
+    "packet_status": "SUPPORTED (proved)",
+    "register_status": "PROVED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-21",
+    "claim_text": "No observability claim is made. Receiver observables detect GNSS denial well; the failure measured is one of evidence routing and applicability semantics.",
+    "evidence_artifact": "papers/csia_systems/main.tex abstract",
+    "evidence_commit": "848f556",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (proved)",
+    "register_status": "PROVED",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-22",
+    "claim_text": "A public-log exposure study over PX4 Flight Review logs.",
+    "evidence_artifact": "NONE - NOT RUN",
+    "evidence_commit": "n/a",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "NEEDS QUALIFICATION (provisional)",
+    "register_status": "PROVISIONAL",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-23",
+    "claim_text": "Mechanism A reproduced on the CURRENT ArduPilot 4.8 stack and on PX4 SIH, at N=1 fix-loss trial plus 1 matched fix-preserving control per platform, with the intervention validated by its downstream effect (RULE B) before scoring.",
+    "evidence_artifact": "research/v1_1/results/mechanism_a_ardupilot.json; research/v1_1/results/mechanism_a_px4.json; research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json; audited in research/systems-paper/CURRENT_STACK_MECH_A_EVIDENCE_AUDIT.md",
+    "evidence_commit": "n/a",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "NEEDS QUALIFICATION (provisional)",
+    "register_status": "PROVISIONAL",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-24",
+    "claim_text": "Mechanism B replicates on ArduPilot 4.8: given the platform's own measured banked state and measured per-tick evidence and forgetting factor, the source recursion reproduces the runtime trust trajectory and predicts the observed threshold crossing.",
+    "evidence_artifact": "research/v1_1/results/current_stack_replication.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-25",
+    "claim_text": "Mechanism B is INAPPLICABLE on PX4 SIH and was not tested there.",
+    "evidence_artifact": "research/v1_1/results/current_stack_replication.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "NEEDS QUALIFICATION (provisional)",
+    "register_status": "PROVISIONAL",
+    "required_replacement_wording": "none required by this work"
+   },
+   {
+    "affected_by_this_work": false,
+    "claim_id": "SC-26",
+    "claim_text": "On 15,595 ticks from 20 real ArduPilot 4.8 SITL trials in which the GNSS fix was never lost, the structural predicate reports the nominal|gps_fault pair DISTINGUISHABLE at every tick and never collapses.",
+    "evidence_artifact": "research/systems-paper/results/current_stack_structural.json",
+    "evidence_commit": "HEAD",
+    "evidence_level": "SIMULATION_OR_SITL",
+    "packet_status": "SUPPORTED (empirical, in its declared scope)",
+    "register_status": "EMPIRICAL_ONLY",
+    "required_replacement_wording": "none required by this work"
+   }
+  ],
+  "claims_affected_by_this_work": 0,
+  "claims_total": 26,
+  "register": "research/systems-paper/CLAIMS.csv",
+  "register_sha256": "0def29ebd7366f90716f7960573565e07be75f556fe0d2f5be9a4eb5a06ce2ff",
+  "stale_number_scan": {
+   "certification_claims_found": 0,
+   "coverage_word_collision": "CRITICAL FOR THE PAPER AGENT. 'Coverage' in main.tex Section 'Two detectors, and what neither sees' means DETECTOR coverage over a 21-cell amplitude-slew grid (38% and 43% uncovered). It does NOT mean code coverage. The 94.49% figure in this packet is CODE coverage of two new packages and must never be placed near those numbers.",
+   "hardware_validation_claims_found": 0,
+   "method": "grep over papers/csia_systems/main.tex for numeric literals adjacent to test/suite/coverage/mutation vocabulary",
+   "mutation_claims_found": 0,
+   "novelty_claims_found": 0,
+   "novelty_note": "SC-10 and SC-11 are explicit non-novelty scope statements and are correct as written.",
+   "test_count_claims_found": 0,
+   "test_count_note": "main.tex refers to 'the project's test suite' qualitatively at lines 457, 1217, 1316 and 1544 and never quotes a test count, so no test-count claim is stale. The suite has since grown; that is not a correction to the paper because the paper never stated a figure."
+  },
+  "why_none_are_affected": "Every SC-claim concerns the frozen diagnostic core evaluated in simulation or ArduPilot/PX4 SITL. The E2M work is an acquisition layer for a bench that has never been powered, plus software assurance over it. It produces no measurement of any quantity any SC-claim is about, so it neither supports nor weakens one. Folding it into an existing claim would be the error this packet exists to prevent."
+ },
+ "E_recommended_changes": {
+  "appendix": [
+   {
+    "change": "OPTIONAL: a short reproducibility note",
+    "reason": "Keeps the paper free of a number that changes every commit. The paper's existing practice already does this and should not be abandoned.",
+    "wording": "The diagnostic core's test suite, the acquisition layer's tests and the publication guards run on every commit; counts are recorded in the repository rather than in this paper."
+   }
+  ],
+  "claims_that_must_not_be_added": [
+   "Any statement that CSIA was validated on hardware.",
+   "Any statement that a TCA9548A, a sensor or a UART was tested, timed or characterised.",
+   "Any statement that a brownout, dropout or misattribution was OBSERVED on a bench. The misattribution demonstration is in a simulator and is labelled as one.",
+   "Any statement that the acquisition layer is flight-ready, deployment-ready, production-ready, fault-tolerant or certified.",
+   "Any novelty claim for the identity model, the mutation set, the CRC differential or the multiplexer failure taxonomy. An I2C switch is a commodity part and its failure modes are folklore.",
+   "Any comparison of the 1.0 mutation score to another project's score, or to this repository's other mutation scores.",
+   "Any use of the 94.49% code-coverage figure near the paper's detector-coverage percentages."
+  ],
+  "main_paper": [
+   {
+    "change": "NONE REQUIRED",
+    "reason": "No E2M result bears on any claim the main paper makes. The main paper is about a diagnostic core evaluated in simulation and SITL; this work is acquisition-layer preparation for a bench that has not been powered."
+   }
+  ],
+  "supplement_only": [
+   {
+    "change": "E2M acquisition-layer software assurance may be described in a supplement",
+    "permitted_framing": "A sensor-bus acquisition layer and its software assurance were prepared in advance of any hardware. Device identity behind an I2C multiplexer is modelled explicitly, and the layer refuses to treat a commanded channel or a control-register readback as proof of which physical device answered. No hardware has been operated.",
+    "reason": "This is engineering preparation, not a scientific result about the paper's subject.",
+    "required_adjacent_sentence": "No sensor, multiplexer, bus or board was powered; all results are from a deterministic fake controller, recorded fixtures and a compiled host copy of the firmware CRC."
+   }
+  ]
+ },
+ "F_reproducibility_map": [
+  {
+   "artifact_sha256": null,
+   "command": "python -m pytest -q -rs",
+   "expected": "PYTEST_EXIT=0; two skips, both gate-4 hardware",
+   "number": "3733 passed, 2 skipped, 0 failed",
+   "source_path": "tests/"
+  },
+  {
+   "artifact_sha256": null,
+   "command": "python -m coverage run --source=csia_bus_provenance,csia_e2m -m pytest tests/test_bus_provenance.py tests/test_e2m_*.py -q && python -m coverage report",
+   "expected": "TOTAL 94.49%",
+   "number": "94.49% code coverage",
+   "source_path": "csia_bus_provenance/, csia_e2m/"
+  },
+  {
+   "artifact_sha256": "7abb3e29b481cf26421c9b8ed16ad93dd1746bd5feed72807082a96b90f35489",
+   "command": "python tools/mutation/run_e2m_mutations.py",
+   "expected": "evaluated 18  killed 18  survived 0  score 1.0",
+   "number": "mutation 18/18 = 1.0",
+   "source_path": "tools/mutation/run_e2m_mutations.py"
+  },
+  {
+   "artifact_sha256": "b02b4c9cc8d2b1df201069f6e2ff40e74ebb5bc8d4a3ea136a6545179ee6a9f7",
+   "command": "python -m pytest tests/test_e2m_crc_differential.py -q",
+   "expected": "8 passed",
+   "number": "CRC host/firmware differential: agreement on all vectors",
+   "source_path": "hardware/host_tests/crc_harness.c, csia_e2m/protocol.py"
+  },
+  {
+   "artifact_sha256": null,
+   "command": "make check-blocking",
+   "expected": "BLOCKING GUARDS: PASS",
+   "number": "blocking guards PASS",
+   "source_path": "Makefile"
+  },
+  {
+   "artifact_sha256": "4261f96095dade5018e9eb2080a628401f6e13c8e799bee5174b553864227e0e",
+   "command": "python -m pytest tests/test_v1_frozen.py -q",
+   "expected": "b0b011c61426a70ead42e170855a2650d5c62feb640c7a50fffc27bb915ba5a8",
+   "number": "frozen-core digest",
+   "source_path": "docs/v1/FROZEN_BASELINE.json"
+  }
+ ],
+ "G_machine_readable_status": [
+  {
+   "claim_id": "E2M-A1",
+   "claim_text": "The repository test suite passes with two hardware tests skipped.",
+   "evidence_level": "SOFTWARE_ONLY",
+   "numeric_values": {
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 3733,
+    "skipped": 2
+   },
+   "permitted_paper_wording": "The project's test suite passes on every commit; two hardware-dependent tests are skipped for want of hardware and are not counted as passes.",
+   "prohibited_wording": [
+    "... was tested on hardware",
+    "... was validated in flight",
+    "... is flight-ready",
+    "... is certified",
+    "... is novel",
+    "the suite validates the system"
+   ],
+   "source_path": "tests/",
+   "status": "SUPPORTED",
+   "verification_command": "python -m pytest -q -rs"
+  },
+  {
+   "claim_id": "E2M-A2",
+   "claim_text": "Statement coverage of the two new packages.",
+   "evidence_level": "SOFTWARE_ONLY",
+   "numeric_values": {
+    "repository_floor": 86.86,
+    "total_percent": 94.49
+   },
+   "permitted_paper_wording": "Statement coverage of the acquisition layer is 94.49%.",
+   "prohibited_wording": [
+    "coverage of the system",
+    "detector coverage",
+    "any placement adjacent to the paper's 38%/43% detector-coverage figures"
+   ],
+   "source_path": "csia_bus_provenance/, csia_e2m/",
+   "status": "SUPPORTED",
+   "verification_command": "python -m coverage run --source=csia_bus_provenance,csia_e2m -m pytest tests/test_bus_provenance.py tests/test_e2m_*.py -q && python -m coverage report"
+  },
+  {
+   "claim_id": "E2M-A3",
+   "claim_text": "Mutation score over the declared E2M mutant set.",
+   "evidence_level": "SOFTWARE_ONLY",
+   "numeric_values": {
+    "baseline_before_new_tests": 0.8889,
+    "baseline_survivors": 2,
+    "evaluated": 18,
+    "killed": 18,
+    "score": 1.0,
+    "survived": 0
+   },
+   "permitted_paper_wording": "Every mutant in a declared 18-mutant set, each encoding a specific way the identity or integrity rules could be violated silently, is detected by the test suite. The mutant set is self-authored and the score is not comparable across different mutant definitions.",
+   "prohibited_wording": [
+    "the code is 100% correct",
+    "the tests catch every bug",
+    "a mutation score higher than <other project>",
+    "comparable to the frozen-core or mission mutation scores"
+   ],
+   "source_path": "tools/mutation/run_e2m_mutations.py",
+   "status": "SUPPORTED_WITH_MANDATORY_QUALIFICATION",
+   "verification_command": "python tools/mutation/run_e2m_mutations.py"
+  },
+  {
+   "claim_id": "E2M-A4",
+   "claim_text": "The firmware CRC and the host CRC agree on all tested vectors.",
+   "evidence_level": "SOFTWARE_ONLY_COMPILED_C",
+   "numeric_values": {
+    "frame_lengths_probed": 4,
+    "payload_categories": 8,
+    "random_payloads": 400,
+    "random_seed": 20260918,
+    "single_bit_positions_per_byte": 3,
+    "test_functions": 8
+   },
+   "permitted_paper_wording": "A host-compiled copy of the firmware's CRC routine agrees with the host implementation on every tested payload, including every single-bit mutation and every truncation of a real frame, and a test diffs the copy against the firmware source so it cannot drift.",
+   "prohibited_wording": [
+    "the firmware was tested",
+    "the board was tested",
+    "timing was verified"
+   ],
+   "source_path": "hardware/host_tests/crc_harness.c, csia_e2m/protocol.py",
+   "status": "SUPPORTED",
+   "verification_command": "python -m pytest tests/test_e2m_crc_differential.py -q"
+  },
+  {
+   "claim_id": "E2M-A5",
+   "claim_text": "Identity attribution invariants hold over generated input.",
+   "evidence_level": "SOFTWARE_ONLY",
+   "numeric_values": {
+    "property_tests": 21
+   },
+   "permitted_paper_wording": "The layer never reports an identity as physically verified without an operator attestation or a matching device identity register, and neither a commanded channel nor a control-register readback establishes which physical device answered.",
+   "prohibited_wording": [
+    "device identity is guaranteed",
+    "misattribution is prevented",
+    "misattribution was observed on hardware"
+   ],
+   "source_path": "csia_e2m/identity.py, csia_bus_provenance/provenance.py",
+   "status": "SUPPORTED",
+   "verification_command": "python -m pytest tests/test_e2m_properties.py -q"
+  },
+  {
+   "claim_id": "E2M-A6",
+   "claim_text": "E2M physical campaign status.",
+   "evidence_level": "NONE",
+   "numeric_values": {
+    "gates_open": 4,
+    "hardware_runs": 0
+   },
+   "permitted_paper_wording": "Owner authorization for a sensor-bus bench exists; the campaign has not been run and four independent gates remain open.",
+   "prohibited_wording": [
+    "E2M was run",
+    "E2M-1 completed",
+    "bench results",
+    "authorized therefore executed"
+   ],
+   "source_path": "research/bus_provenance/E2M_GATE_STATUS.md",
+   "status": "NOT_RUN",
+   "verification_command": "cat research/bus_provenance/E2M_GATE_STATUS.md"
+  }
+ ],
+ "G_per_file_test_counts": {
+  "tests/test_bus_provenance.py": 34,
+  "tests/test_e2m_acquisition.py": 52,
+  "tests/test_e2m_crc_differential.py": 8,
+  "tests/test_e2m_properties.py": 21,
+  "tests/test_e2m_schemas.py": 57,
+  "tests/test_e2m_transport.py": 17
+ },
+ "corrections_to_the_request": [
+  {
+   "action": "measured value written",
+   "explanation": "21 is the count of PROPERTY tests in tests/test_e2m_properties.py, not CRC categories. The CRC differential file contains 8 test functions covering 8 named edge-payload categories plus the check vector, real frames, four frame lengths, single-bit mutations, truncations and 400 seeded random payloads. No 21-category CRC grouping exists and none was invented.",
+   "measured": "8 CRC differential test functions",
+   "requested": "21 CRC differential test categories"
+  },
+  {
+   "action": "actual commit written",
+   "explanation": "HEAD at the start of this task was d87f974. An earlier instruction named 913113c, which was one commit behind.",
+   "measured": "d87f97491f7425110be83324007d779c1db21f12",
+   "requested": "starting commit 913113c / d87f974"
+  },
+  {
+   "action": "repository source audited; limitation recorded",
+   "explanation": "No attachment reached this session. The audit is against the manuscript source in the repository. If the attached file differs, this audit does not cover it and must be re-run.",
+   "measured": "papers/csia_systems/main.tex at this commit",
+   "requested": "audit of the attached manuscript"
+  }
+ ],
+ "for": "CSIA Systems Paper I (E1) -- paper-writing agent",
+ "instruction_to_the_paper_agent": "This packet does not edit the manuscript and does not create a scientific claim. It reports what is currently measurable, what existing claims say, and which wording is permitted. Where a number requested for this packet disagreed with the measured one, the measured one is here and the disagreement is listed under 'corrections_to_the_request'.",
+ "schema": "csia.paper_update_packet/1"
+}

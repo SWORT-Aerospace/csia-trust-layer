@@ -1,0 +1,598 @@
+%YAML 1.2
+---
+# Machine-readable claim objects for Phase II.
+#
+# Every claim carries the artifact it is computed from, the build it is bound
+# to, and what would refute it. Claims that were withdrawn or corrected stay in
+# this file: rule 8, negative results remain committed, and rule 7, no claim is
+# resurrected by renaming it.
+#
+# Permitted status values:
+#   MEASURED    computed from a committed artifact on a stated target
+#   BOUNDED     measured, with the bound stated in `bound`
+#   OPEN        posed, not answered
+#   WITHDRAWN   was asserted, is now refuted; kept as history
+#   PROVISIONAL a candidate mechanism, not yet evaluated
+# Forbidden anywhere in this file: NOVEL, BREAKTHROUGH, PROVED.
+
+schema: csia.phase2.claims/1
+baseline_commit: 848f556
+
+targets:
+  legacy:
+    firmware: ArduCopter 3.3
+    provenance: dronekit-assets prebuilt, 2015-10-22
+    scope: every Phase-I result
+  modern:
+    firmware: ArduCopter V4.8.0-dev
+    git_head: 01a504b
+    provenance: built from source in this session
+    scope: every Phase-II E1 result
+
+claims:
+
+  - id: C1
+    status: BOUNDED
+    statement: >-
+      A joint miss exists. Three validated GNSS position faults above the
+      project's own 48 m significance threshold are escalated by neither the
+      autopilot estimator nor CSIA.
+    cells: [a55.7_s60, a55.7_s120, a55.7_s240]
+    quantities:
+      injected_sensor_offset_m: [56.4, 56.5, 56.5]
+      ekf_pos_horiz_variance_post: [0.525, 0.262, 0.139]
+      ekf_threshold: 0.8
+      csia_escalates_for_gps: [false, false, false]
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    bound: >-
+      Three cells at one amplitude, one flight each, one autopilot, one flight
+      profile, one simulator. Rule 3: these are not independent replicates.
+      This licenses "a joint miss exists in the tested grid", NOT "a blind
+      region has been characterised".
+    refuted_by: >-
+      Any of the three cells escalating on a re-fly, or the injection failing
+      the validity contract under a further-corrected instrument.
+    supersedes: C1_WITHDRAWN
+
+  - id: C1_WITHDRAWN
+    status: WITHDRAWN
+    statement: >-
+      F3 is refuted at operationally significant magnitude: every validated
+      significant cell is caught by at least one monitor.
+    target: modern
+    artifact: research/phase2/results/e1_modern_run1_defective_instrument.json
+    withdrawn_because: >-
+      The displacement instrument measured the injected offset and the
+      airframe's own motion added together, and read 38.89 m on a
+      zero-injection nominal arm. It invalidated the three cells that decide
+      the question. Their injections were in fact correct to within 2.2%.
+    withdrawal_record: research/phase2/V6_INSTRUMENT_DEFECT.md
+    kept_because: rule 8, negative and withdrawn results remain committed
+
+  - id: C2
+    status: MEASURED
+    statement: >-
+      CSIA contributes no incremental escalation coverage on this fault class.
+      In eight validated significant cells there is no cell that CSIA escalates
+      for GPS and the autopilot estimator misses.
+    quantities:
+      N_total: 8
+      N_both: 1
+      N_autopilot_only: 4
+      N_csia_only: 0
+      N_joint_miss: 3
+      R_incremental_csia_only: 0.0
+      R_autopilot_dependence: 0.5
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    relation_to_phase1: >-
+      Restates F2, measured independently on a different autopilot. Phase I
+      reported 6 of 9 significant cells detected by the estimator and not
+      escalated by CSIA.
+    refuted_by: any validated significant cell in CSIA_ONLY
+
+  - id: C3
+    status: MEASURED
+    statement: >-
+      Detection and airframe consequence are inversely ordered at 55.7 m. The
+      one cell the estimator detects produces no excursion beyond the nominal
+      control; the three it does not detect displace the airframe 48.0-48.8 m
+      past that control.
+    quantities:
+      nominal_control_excursion_m: [39.2, 39.1, 39.5, 39.6]
+      excess_excursion_m: {a55.7_s20: -0.2, a55.7_s60: 48.8,
+                           a55.7_s120: 48.5, a55.7_s240: 48.0}
+    mechanism: >-
+      A slow ramp presents as a small constant velocity bias. The velocity
+      controller cancels the bias it believes in, so the airframe flies the
+      other way. A fast ramp is rejected by the innovation test and is not
+      flown.
+    counterexample_within_the_claim: >-
+      a556.6_s240 is detected (EKF variance 5.296) and still produces the
+      largest excess excursion in the grid, 68.8 m. Detection does not imply
+      prevention. The claim is about ordering at 55.7 m, not a general law.
+    target: modern
+    artifact: research/phase2/results/e1_modern.json
+    bound: >-
+      The control is a matched-window nominal arm, not the same flight
+      counterfactually un-injected. The four nominal arms agree to within
+      0.5 m.
+
+  - id: C4
+    status: MEASURED
+    statement: >-
+      The frozen baseline CSIA v1 violates R10 on ArduCopter 4.8. Every clean
+      nominal flight produces one failsafe transition out of NORMAL, against a
+      budget of zero.
+    p05_resolution: >-
+      CAUSE ESTABLISHED, see C11. The finding is PRESERVED, not withdrawn: on
+      the unmodified modern rig the frozen baseline does breach R10. What
+      changed is that the cause is now known to be a simulator stub rather
+      than a property of CSIA or of the vehicle.
+    quantities:
+      nominal_flights: 4
+      transitions_observed: 4
+      budget: 0
+      onset_s: [46.8, 46.7, 46.7, 46.0]
+    driver: >-
+      The power_thrust edge (online.py:546), a current balance between pack
+      and ESC telemetry at a scale of 0.5 A. Pack reports 29.33 A, the four
+      ESCs report 3.20 A combined; residual 25.15 A = 50 sigma. Edge
+      consistency 3.5e-07, battery neighbour evidence 0.171, against the
+      failsafe's power_critical = 0.70.
+    not_driven_by: >-
+      The phys_battery voltage residual. components['battery']['phys'] reads
+      1.000 for the entire flight; field-mode normalisation maps anything
+      below 1.0 to consistency exactly 1.0.
+    target: modern
+    artifact: research/phase2/results/r10_modern.json
+    blocks: [B2, B3, B4]
+    consequence: >-
+      Candidate scoring cannot proceed against a hard constraint the frozen
+      baseline itself fails.
+
+  - id: C5
+    status: MEASURED
+    statement: >-
+      R10's verification evidence does not cover an independent plant. The
+      channels feeding the power_thrust edge are absent on ArduCopter 3.3, and
+      on the bench both sides of the balance are generated from one equation
+      in csia/sensors/truth.py:140, so the edge is satisfied by construction.
+    target: [legacy, bench]
+    artifacts:
+      - research/phase2/results/r10_modern.json
+      - research/phase2/results/modern_replication.json
+    consequence: >-
+      A zero-false-alert requirement verified only against the monitor's own
+      plant model is a weaker guarantee than it reads as.
+
+  - id: C6
+    status: MEASURED
+    statement: >-
+      The pack internal resistance compiled into CSIA (0.0120 ohm) differs
+      from this plant's (0.0100 ohm regressed). At 29.3 A hover current that
+      is a 0.058 V residual against a 0.06 V scale.
+    target: modern
+    artifact: research/phase2/results/r10_modern.json
+    why_not_an_alarm: >-
+      Field-mode normalisation keeps it off the trust recursion. It is a
+      latent near-miss, not an active fault, and it is recorded because it
+      was the wrong answer to C4 and would otherwise look like a fit.
+
+  - id: C7
+    status: OPEN
+    question: >-
+      Why does CSIA's GPS physics residual saturate on ArduCopter 3.3 and not
+      on 4.8, at the same injected amplitude (55.7 m) and slew (20 s), in a
+      cell whose top-line coverage otherwise replicates?
+    candidates:
+      - the field-mode adaptive normaliser measures against a different
+        running level when two further nodes are live
+      - the flight profiles differ (Phase-I cruise, modern square pattern)
+    artifacts:
+      - research/wp_c8/results/response_surface.json
+      - research/phase2/results/e1_modern.json
+    matters_because: >-
+      A component-level replication failure inside a cell whose coverage
+      category replicates is exactly what a coverage table hides.
+
+  - id: C8
+    status: RESOLVED
+    question: >-
+      Is the ESC-versus-pack current mismatch a simulator artifact or a
+      real-hardware condition?
+    answer: >-
+      SIMULATOR ARTIFACT, established at source and by intervention. See C11.
+      The real-hardware half of the question remains open as C14.
+    resolved_by: research/phase2/INFORMATION_CONTRACT_POWER_THRUST.md
+
+  - id: C11
+    status: MEASURED
+    statement: >-
+      The modern R10 breach is caused by ESC_TELEMETRY_1_TO_4 carrying no
+      information on ArduCopter 4.8 SITL. Its `current` field is a hard-coded
+      0.8 A liveness stub and its `rpm` field is identically zero.
+    p05_classification: SIMULATOR_ARTIFACT
+    source_evidence:
+      - "libraries/AP_ESC_Telem/AP_ESC_Telem_SITL.cpp:72  .current = 0.8f,
+         under the comment 'some fake values so that is_telemetry_active()
+         returns true'"
+      - "libraries/SITL/SIM_Frame.cpp:901  rpm[i] = motors[i].get_command() *
+         AP::sitl()->vibe_motor * 60.0f"
+      - "libraries/SITL/SITL.cpp:512  SIM_VIB_MOT_MAX defaults to 0.0"
+      - "libraries/SITL/SIM_Multicopter.cpp:102  battery_current =
+         frame->get_current_amp(), which SIM_Frame.cpp:942 computes as the sum
+         of per-motor currents. The BATTERY side is genuinely modelled."
+    runtime_evidence:
+      raw_esc_current_cA_distinct_values: [80]
+      samples: 3659
+      pack_current_range_A: 41.25
+      pack_current_distinct_values: 375
+      null_control: >-
+        the intended control (rpm, same message) FAILED, being constant too.
+        It was replaced with BATTERY_STATUS.current_battery on the same ticks,
+        which is live. The failed control is retained in the artifact.
+      arithmetic_closure: >-
+        pack_mean - stub - avionics = 16.82 A against an observed residual of
+        16.83 A. Nothing is left over for a second cause.
+    intervention_evidence:
+      artifact: research/phase2/results/r10_attribution.json
+      arm_A_baseline_transitions: 1
+      arm_B_esc_suppressed_transitions: 0
+      arm_C_battery_suppressed_transitions: 0
+      discriminator: >-
+        both B and C silence the alarm because power_thrust needs both
+        endpoints fresh. trust_battery discriminates: 0.997 in B (channel live
+        and healthy once the stub is gone) versus the untouched 0.800 prior in
+        C. The battery telemetry is good; the ESC telemetry is the fault.
+    ruled_out_with_evidence:
+      UNIT_OR_SCALE_INVALID: >-
+        AP_ESC_Telem.cpp:451 encodes A x 100; plugins.py:207 decodes / 100.
+        common.xml:6431 specifies cA; plugins.py:194 decodes / 100. Correct.
+      AGGREGATION_SEMANTICS_INVALID: >-
+        per-ESC summed against a pack aggregate is the correct pairing, and is
+        the same aggregation SIM_Frame.cpp:942 performs.
+      INTERFACE_MAPPING_INVALID: >-
+        message and field selection are right. Two real mapping defects exist
+        (C12, C13) but neither is active on this build.
+      RELATION_MODEL_INVALID: >-
+        the conservation model is what SITL itself uses on the battery side.
+        The AVIONICS_CURRENT term is a real model gap (C13) but is 1.2 sigma
+        against a 50 sigma residual.
+      REAL_INCONSISTENCY: >-
+        the simulated vehicle's power balance is internally consistent; only
+        its published telemetry is not.
+      MULTIPLE_CAUSES: >-
+        not claimed. The stub accounts for the residual to within 0.01 A.
+
+  - id: C12
+    status: MEASURED
+    statement: >-
+      csia/runtime/plugins.py:194 collapses the BATTERY_STATUS.current_battery
+      MAVLink sentinel -1 ("autopilot does not measure the current") to 0.0 A,
+      indistinguishable from a genuine zero.
+    evidence: >-
+      deterministic offline probe, sentinel_probe in
+      research/phase2/results/power_thrust_contract.json, ingested_value_A 0.0
+    active_on_this_build: false
+    why_not: BATT_MONITOR = 4, so current is genuinely measured
+    consequence: >-
+      an autopilot that does not measure pack current would be read by
+      power_thrust as a pack drawing nothing while the ESCs draw current, i.e.
+      a guaranteed 100 percent conservation violation. Latent, not active.
+    also: >-
+      ESC_TELEMETRY_1_TO_4 defines no invalid sentinel at all;
+      AP_ESC_Telem.cpp zero-initialises the struct, so an absent ESC is
+      indistinguishable from one drawing 0 A.
+    no_production_change_proposed: true
+
+  - id: C13
+    status: MEASURED
+    statement: >-
+      AVIONICS_CURRENT (0.6 A, csia/sensors/truth.py:25) has no counterpart in
+      the SITL plant, whose battery_current is purely the motor-current sum.
+      Even a perfect ESC channel would leave a permanent 1.2 sigma offset.
+    magnitude_relative_to_observed: 1.2 sigma against 50 sigma
+    consequence: >-
+      power_thrust could never be exactly satisfied on this plant. Too small
+      to explain the alarm; recorded so it is not rediscovered later.
+
+  - id: C14
+    status: OPEN
+    question: >-
+      Does real ESC telemetry satisfy the conservation model
+      sum(esc_i) == batt_i - avionics?
+    note: >-
+      Protocol-dependent. Some ESC telemetry reports phase current rather than
+      DC input current, in which case the sum does not equal pack current at
+      all. Also open: whether 0.5 A is a defensible scale for a cross-source
+      current balance at ~29 A hover, a 1.7 percent tolerance across
+      independent shunts.
+    not_startable_here: requires hardware
+    blocks: production validity of power_thrust
+
+  - id: C15
+    status: MEASURED
+    statement: >-
+      Seven CSIA relations became active on ArduCopter 4.8 that had never
+      evaluated on any stack, and none of the seven has validation evidence.
+      Five of the seven depend on motor_esc, whose telemetry is a stub in both
+      fields.
+    counts:
+      ACTIVE_BOTH: 11
+      MODERN_ONLY: 7
+      LEGACY_ONLY: 0
+      newly_active_without_validation_evidence: 7
+      newly_active_fed_real_data: 2      # phys_battery, temp_bias_drift
+    artifact: research/phase2/results/information_architecture_diff.json
+    answers_the_brief_question: >-
+      Yes for the activation, partly no for the information. The modern stack
+      added a channel that is present, fresh, well-formed, correctly scaled
+      and empty. CSIA has no gate distinguishing "present" from
+      "informative", so four relations began scoring a constant as evidence
+      and one escalated to a LAND_NOW recommendation on every flight.
+    legacy_column_provenance: >-
+      the 3.3 binary could not be re-measured here (dronekit/assets is outside
+      this session's repository allowlist; add_repo refuses cross-owner adds).
+      Corroborated by 101 committed Phase-I run records containing zero
+      power-integrity, structural and magnetometer alarms against 12 of 12
+      modern flights. Reported as INFERRED, not MEASURED.
+
+  - id: C16
+    status: MEASURED
+    statement: >-
+      R10 constrains CSIA's own FailsafePolicy transitions, and the modern
+      baseline genuinely violates it. No conflation of an internal diagnostic
+      state with a failsafe transition occurred.
+    requirement_text: >-
+      docs/REQUIREMENTS.md R10 — "Clean nominal flight shall produce zero
+      failsafe transitions"
+    verification_test: >-
+      tests/test_runtime.py:73 test_failsafe_clean_no_false_alarms asserts
+      `not s.transitions` on csia.runtime.failsafe.FailsafePolicy — the same
+      object measured in E1, r10_modern and r10_attribution.
+    ladder:
+      internal_trust_or_residual_degradation: >-
+        trust_battery 0.463, edge consistency 3.06e-03. NOT what R10
+        constrains.
+      diagnostic_alert: >-
+        NONE RAISED. The naive-Bayes posterior reports nominal p=0.98
+        throughout.
+      csia_final_verdict: >-
+        FailsafeLevel NORMAL -> CRITICAL. THIS is what R10 constrains, and it
+        is what was violated.
+      bounded_response_recommendation: >-
+        Action REDUCE_POWER and Action LAND_NOW (failsafe.py:157-159),
+        advisory by default per the module docstring.
+      autopilot_failsafe_transition: >-
+        none observed, BUT the harness sets FS_THR_ENABLE=0, FS_GCS_ENABLE=0,
+        BATT_FS_LOW_ACT=0 and BATT_FS_CRT_ACT=0 (modern_rig.connect) to stop
+        the autopilot RTL-ing mid-experiment. This level is therefore
+        SUPPRESSED BY THE HARNESS and no claim is made about it.
+    internal_inconsistency_recorded: >-
+      CSIA recommends LAND_NOW while its own diagnosis reports the vehicle
+      nominal at p=0.98. The failsafe reads trust; the diagnosis reads the
+      signature matrix and finds no matching cause. They disagree and nothing
+      in the layer notices.
+    requirement_not_relaxed: >-
+      the budget stays at 0. Rule 7.
+
+  - id: C9
+    status: OPEN
+    question: >-
+      Would the Phase-I displacement figures survive re-measurement against
+      ArduCopter 3.3's SIMSTATE truth?
+    current_evidence: >-
+      Phase-I reported displacements track the requested amplitudes closely
+      and the run-1 contamination only bites at slews of 60 s and above, which
+      Phase I never ran. That is evidence of absence of a problem, not a check.
+    blocks: nothing
+
+  - id: C10
+    status: OPEN
+    question: >-
+      Does any of this hold on a second independent autopilot stack?
+    note: PX4 not attempted; needs a Gazebo or jMAVSim backend, neither
+      installed.
+
+  - id: C17
+    status: MEASURED
+    statement: >-
+      CSIA v1 produces nonzero INCREMENTAL coverage on the fault families it
+      was designed for, on the safety-response ledger. The general claim
+      "CSIA provides zero incremental coverage" is refuted.
+    verdict: "F4-ZERO-COVERAGE: REFUTED_AS_GENERAL_CLAIM"
+    measurement:
+      rig: LEGACY_COMPAT_CONTROL
+      families: 7 valid of 7, all passing per-family validity contracts
+      ledger_A_CSIA_ONLY: {spec0: 1, spec3: 1, spec4: 1}
+      cell: vibration_anomaly
+      why: >-
+        vibration rms rose 478x, the autopilot did not respond (velocity
+        variance 0.67 against a 0.8 threshold), and CSIA escalated to CRITICAL
+        with PREPARE_LANDING and LIMIT_MANEUVERS.
+    immediate_qualification: >-
+      On the CORRECT-DIAGNOSTIC ledger CSIA_ONLY is 0 at all three flight
+      specs. The one incremental cell is misattributed: CSIA blamed the
+      magnetometer, then the IMUs, never the vibration node. See C18.
+    e1_result_unchanged: >-
+      E1's BOTH=1 AUTOPILOT_ONLY=4 CSIA_ONLY=0 JOINT_MISS=3 remains valid
+      locally and is not merged with, pooled into, or restated by this result.
+    artifacts:
+      - research/phase2/results/fault_suite_lambda_spec0.json
+      - research/phase2/results/fault_suite_validation_spec3.json
+      - research/phase2/results/fault_suite_validation_spec4.json
+
+  - id: C18
+    status: MEASURED
+    statement: >-
+      On LEGACY_COMPAT_CONTROL, CSIA cannot attribute a vibration fault even
+      in principle: online.py:617-618 gates P["vibration"] by
+      fresh["motor_esc"], and suppressing the ESC stub makes motor_esc
+      unavailable.
+    evidence: >-
+      components["vibration"]["phys"] is None on every tick of every arm.
+    consequence: >-
+      There is no configuration of this simulator in which the
+      motor_esc-dependent relations are both live and informative. On
+      FULL_MODERN the ESC stub makes power_thrust fire falsely; on
+      LEGACY_COMPAT it makes phys_vibration unavailable.
+
+  - id: C19
+    status: MEASURED
+    statement: >-
+      On CSIA's flagship fault family, a 49.01 m GPS spoof against the
+      project's own 48 m anchor, CSIA escalated by blaming the MAGNETOMETER.
+    mechanism: >-
+      the spoof corrupts GPS course-over-ground, which breaks the
+      heading_course edge joining mag and gps, and the magnetometer takes the
+      blame. The autopilot attributed correctly (pos_horiz_variance 12.84,
+      STATUSTEXT "GPS Glitch or Compass error").
+    wrong_isolation_count: {spec0: 3, spec3: 2, spec4: 2}
+    why_it_matters: >-
+      this is the case the two-ledger decomposition exists to catch. Ledger A
+      scores the cell BOTH; ledger B scores it AUTOPILOT_ONLY.
+
+  - id: C20
+    status: MEASURED
+    statement: >-
+      B3, the minimum credible correction to the banked-confidence delay,
+      fails the R10 hard constraint at every setting tried and simultaneously
+      degrades attribution.
+    measurements:
+      rho_0.99_S100: {R10: 2, ledger_B: "0/5/0/2", wrong_isolation: 6}
+      rho_0.98_S50: {R10: 4, ledger_B: "1/4/0/2", wrong_isolation: 6}
+      rho_0.96_S25: {R10: 4, ledger_B: "1/4/0/2", wrong_isolation: 6}
+      B1_reference: {R10: 0, ledger_B: "2/3/0/2", wrong_isolation: 3}
+    taxonomy: "D (unacceptable false alerts) and E (changes attribution, not
+      safety coverage)"
+    budget_not_relaxed: >-
+      R10 stays at 0. Rule 7. B3 is refuted, not accommodated.
+
+  - id: C21
+    status: MEASURED
+    statement: >-
+      B4, a textbook CUSUM on the residual sequence CSIA already computes,
+      satisfies R10 and converts every joint miss in the fault suite into a
+      correctly attributed detection, at 0.62 microseconds per tick with no
+      new sensor inputs.
+    parameters:
+      drift_k: 0.5
+      drift_set_by: design, half the one-sigma shift (Page 1954)
+      decision_h: 500
+      decision_h_rule: >-
+        smallest value from a fixed grid for which the CLEAN NOMINAL ARM
+        produces zero alarms. Reads the clean arm only, never a fault outcome.
+      in_control_stats_from: the clean nominal arm only
+    results_ledger_B:
+      spec0_development: "BOTH 2 / AUTOPILOT_ONLY 3 / CSIA_ONLY 2 / JOINT_MISS 0"
+      spec3_heldout: "BOTH 1 / AUTOPILOT_ONLY 4 / CSIA_ONLY 2 / JOINT_MISS 0"
+      spec4_heldout: "BOTH 1 / AUTOPILOT_ONLY 4 / CSIA_ONLY 2 / JOINT_MISS 0"
+    R10: {spec0: 0, spec3: 0, spec4: 0}
+    taxonomy: "B (genuine incremental coverage) and C (converts JOINT_MISS)"
+    what_it_does_not_do: >-
+      B4 is blind on both IMU families because the layer publishes no per-IMU
+      physics residual. Those are exactly the families B1 handles best and
+      attributes correctly. B1 and B4 are COMPLEMENTARY, not ordered.
+    committed_negative_result: >-
+      the textbook decision interval h = 5.0 gives 4 clean-flight alarms and
+      fails R10. At k = 0.5 its in-control ARL is about 465 samples and the
+      layer ticks at ~25 Hz, so a 110 s flight predicts about five false
+      alarms. The mis-specification was the analyst's, not the method's.
+    threats: >-
+      n = 1 flight per family per spec; R10 measured on three clean flights
+      total; h = 500 is far from the textbook value.
+
+  - id: C22
+    status: MEASURED
+    statement: >-
+      Modern ArduPilot already implements a cumulative GPS position-drift
+      monitor relevant to the E1 regime, and it is gated off in flight.
+    source: >-
+      AP_NavEKF3_VehicleStatus.cpp:58-66. gpsDriftNE is a leaky integrator of
+      successive GPS position movement, clamped at 10 m, failing above 3 m,
+      enabled by default (EK3_GPS_CHECK = 31 includes MASK_GPS_POS_DRIFT).
+      The trip condition carries `&& onGround`.
+    why_it_did_not_activate_in_E1: the vehicle was airborne throughout
+    is_E1_a_tuning_result: >-
+      NO, and it is not a missing-capability result either. It is a SCOPE
+      result: no operator-accessible parameter extends the check to flight;
+      the onGround conjunct is compiled in. EK3_GPS_CHECK can only disable it.
+    consequence_for_any_invention_argument: >-
+      no invention argument may be built on the premise that this mechanism is
+      absent from the autopilot.
+    caveat: source reading only; not instrumented at runtime
+    artifact: research/phase2/ARDUPILOT_SLOW_FAULT_MONITOR_TRACE.md
+
+  - id: C23
+    status: MEASURED
+    statement: >-
+      The declared protected partition was contaminated before P1 began.
+      Slews 60 s and 120 s are declared protected-only and were flown and
+      inspected in E1 run 1, E1 run 2 and the V6 diagnosis. Slew 240 s was
+      flown and appears in neither declared list.
+    registry_said: "status: UNTOUCHED"
+    measured: CONTAMINATED_ON_THE_SLEW_AXIS
+    new_partition_declared_before_tuning:
+      development: flight spec 0
+      validation: [flight spec 3, flight spec 4]
+      reserved_untouched: [1, 2, 5]
+    artifact: research/phase2/PARTITION_AUDIT.md
+
+  - id: C24
+    status: MEASURED
+    statement: >-
+      The flight-spec partition's wind factor is active on ArduCopter 4.8,
+      where WP-C7 measured it as cosmetic on 3.3.
+    evidence: >-
+      mean attitude lean 0.183 rad at 0 m/s, 0.471 rad at 15 m/s, 0.189 rad in
+      the null stage, 0.522 rad at 25 m/s, with altitude held at 18.4 m.
+    first_probe_was_wrong: >-
+      an earlier probe reported wind as not reaching the airframe. It ran the
+      wind stage straight after a violent vibration injection that left the
+      vehicle at 3.4 m, and SIM_WIND_T defaults to WIND_TYPE_SQRT which scales
+      wind by sqrt(alt/60). The confounded probe is preserved.
+    artifact: research/phase2/results/p1_wind_isolated.json
+
+  - id: C25
+    status: PROVISIONAL
+    name: INFORMATIVE_VALIDITY
+    class: systems_research_candidate
+    statement: >-
+      A telemetry channel can be present, fresh, syntactically valid and
+      correctly decoded while carrying no meaningful physical information.
+      CSIA's watchdog and gating do not distinguish this case from an
+      informative channel.
+    observed_in: [C11 ESC current stub, C11 ESC rpm stub]
+    not_implemented: true
+    not_claimed_novel: true
+    status_note: >-
+      recorded as a research candidate only. Search and implementation belong
+      after P1 unless it becomes necessary for validity. The invention gate is
+      CLOSED and this entry does not open it.
+
+invention_gate:
+  status: CLOSED
+  conditions:
+    1_modern_measurement_contract_valid: MET          # P0.5
+    2_R10_semantics_resolved: MET                     # C16
+    3_B0_to_B4_fairly_evaluated: MET_ON_THE_FAULT_SUITE
+    4_safety_relevant_residual_gap_remains: NO_ON_THE_FAULT_SUITE
+    5_gap_not_closable_by_a_simple_established_method: REFUTED
+  verdict: ESTABLISHED_METHOD_SOLVES
+  reason: >-
+    B4, a textbook CUSUM on residuals CSIA already computes, satisfies every
+    hard constraint and converts every joint miss in the fault suite into a
+    correctly attributed detection, replicated on two held-out flight specs
+    with frozen parameters (C21). Separately, the mechanism that would own the
+    E1 regime already exists in ArduPilot and is merely scoped to the ground
+    (C22). On every problem P1 could measure, an established method either
+    solves it or already exists upstream. Condition 5 is therefore refuted and
+    the gate STAYS CLOSED.
+  remaining_measurement_gap_that_does_not_open_the_gate: >-
+    B2/B3/B4 have NOT been evaluated on the E1 slow-slew regime; no per-tick
+    streams exist for those cells. That is a measurement still to make, not a
+    justification to invent.
+  exact_unresolved_capability_if_it_ever_opens: >-
+    to be written down only if condition 5 is ever satisfied, and not before.

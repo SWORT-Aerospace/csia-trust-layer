@@ -1,0 +1,268 @@
+{
+ "R13": "FAIL: 4 ticks over budget",
+ "adapter_counters": {
+  "mapped": 160642,
+  "messages": 211556,
+  "rejected_sentinel": 0,
+  "time_reanchors": 0,
+  "unmapped": 135748
+ },
+ "command_authority": {
+  "checked": 21,
+  "mode": "SHADOW",
+  "probes": {
+   "arducopter_arm": "DENIED",
+   "arducopter_disarm": "DENIED",
+   "mav": "DENIED",
+   "mav.command_long_send": "DENIED",
+   "mav.manual_control_send": "DENIED",
+   "mav.param_set_send": "DENIED",
+   "mav.rc_channels_override_send": "DENIED",
+   "mav.set_actuator_control_target_send": "DENIED",
+   "mav.set_mode_send": "DENIED",
+   "motors_armed_wait": "DENIED",
+   "param_set_send": "DENIED",
+   "reboot_autopilot": "DENIED",
+   "send": "DENIED",
+   "send_mavlink": "DENIED",
+   "set_mode": "DENIED",
+   "set_mode_apm": "DENIED",
+   "set_mode_px4": "DENIED",
+   "set_relay": "DENIED",
+   "set_servo": "DENIED",
+   "waypoint_clear_all_send": "DENIED",
+   "write": "DENIED"
+  },
+  "result": "NO_COMMAND_PATH_REACHABLE",
+  "write_half_closed": true,
+  "write_half_state": "CLOSED_ENOTCONN"
+ },
+ "flight_id": "20260825T025259Z-f5ff4bb0",
+ "host_noise_control": {
+  "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+  "concurrent_with_measurement": false,
+  "iterations_per_tick": 16355,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 1024.46,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1988.4,
+    "median_us": 970.7,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1204.6,
+    "p99_us": 1464.4
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1619.1,
+    "median_us": 965.1,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1085.5,
+    "p99_us": 1433.7
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1445.7,
+    "median_us": 956.9,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1033.8,
+    "p99_us": 1139.3
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 1988.4,
+   "median_us": 970.7,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 1204.6,
+   "p99_us": 1464.4
+  }
+ },
+ "injection": {
+  "arm": "STEP",
+  "at_s": 20.0,
+  "before": 0.0,
+  "commanded_final": 4.496608029593653e-05,
+  "confirmed": true,
+  "kind": "gps_glitch",
+  "metres": 5.0,
+  "metres_per_deg_lat": 111194.92664455873,
+  "param": "SIM_GPS1_GLTCH_X",
+  "param_type": "REAL32",
+  "prereg": "research/v1_1/CURRENT_STACK_REPLICATION.md",
+  "prereg_blob": "0e186117e2dcc014862872934768e06e0a195592",
+  "ramp_s": 0.0,
+  "readback": 4.496608016779646e-05,
+  "rule": "RULE B -- the intermediate quantity is the reported gnss.position offset with fix type and satellite count unchanged and gvalid still 1, not the write",
+  "schedule": [
+   {
+    "metres": 5.0,
+    "param_value": 4.496608029593653e-05,
+    "t_rel": 22.3736
+   }
+  ],
+  "sent_by": "rig",
+  "wrote_at_rel_s": 22.3736
+ },
+ "latency": {
+  "budget_us": 2000.0,
+  "max_us": 9050.9,
+  "mean_us": 1046.8,
+  "median_us": 1024.46,
+  "min_us": 119.48,
+  "n": 1501,
+  "over_budget": 4,
+  "p95_us": 1217.63,
+  "p99_us": 1400.86,
+  "worst_headroom_x": 0.22
+ },
+ "latency_positive_control": {
+  "messages_ingested": 211556,
+  "rule": "a latency figure from an idle tick measures the loop, not the workload",
+  "satisfied": true,
+  "usable_channels_at_end": 12
+ },
+ "live_transmit_probe": [
+  "command_long_send: denied",
+  "set_mode_send: denied",
+  "rc_channels_override_send: denied"
+ ],
+ "log_dir": "logs/shadow-sitl-ardupilot",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 86.18,
+   "mean_us": 32.12,
+   "median_us": 30.8,
+   "min_us": 17.1,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 40.83,
+   "p99_us": 67.41,
+   "worst_headroom_x": 23.21
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 8889.76,
+   "mean_us": 894.86,
+   "median_us": 874.18,
+   "min_us": 0.94,
+   "n": 1501,
+   "over_budget": 3,
+   "p95_us": 1059.48,
+   "p99_us": 1213.0,
+   "worst_headroom_x": 0.22
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 1077.84,
+   "mean_us": 119.83,
+   "median_us": 116.07,
+   "min_us": 91.13,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 153.9,
+   "p99_us": 173.77,
+   "worst_headroom_x": 1.86
+  }
+ },
+ "platform": "ardupilot",
+ "rig_flight": {
+  "armed": true,
+  "climbed_m": 13.26,
+  "hold_mode": "ALT_HOLD",
+  "hold_mode_confirmed": true
+ },
+ "seconds": 60.0,
+ "stats": {
+  "max_latency_us": 9050.8969997245,
+  "messages": 211556,
+  "reconnects": 0,
+  "stale_ticks": 1,
+  "ticks": 1501,
+  "watchdog_trips": 0
+ },
+ "tee": {
+  "final_status": {
+   "by_type": {
+    "AHRS": 3671,
+    "AHRS2": 18354,
+    "ATTITUDE": 18354,
+    "BAD_DATA": 4,
+    "BATTERY_STATUS": 3671,
+    "EKF_STATUS_REPORT": 3665,
+    "ESC_TELEMETRY_1_TO_4": 18264,
+    "GLOBAL_POSITION_INT": 7342,
+    "GPS_GLOBAL_ORIGIN": 2,
+    "GPS_RAW_INT": 7342,
+    "HEARTBEAT": 739,
+    "HOME_POSITION": 2,
+    "LOCAL_POSITION_NED": 6950,
+    "MEMINFO": 7342,
+    "MISSION_CURRENT": 7342,
+    "NAV_CONTROLLER_OUTPUT": 7342,
+    "PARAM_VALUE": 63,
+    "POWER_STATUS": 7342,
+    "RAW_IMU": 18354,
+    "SCALED_IMU2": 18354,
+    "SCALED_IMU3": 18354,
+    "SCALED_PRESSURE": 18354,
+    "SCALED_PRESSURE2": 18354,
+    "SIMSTATE": 18354,
+    "STATUSTEXT": 25,
+    "SYSTEM_TIME": 3671,
+    "SYS_STATUS": 7342,
+    "TERRAIN_REPORT": 3671,
+    "TERRAIN_REQUEST": 386,
+    "TIMESYNC": 73,
+    "VFR_HUD": 7342,
+    "VIBRATION": 3671,
+    "WIND": 3475
+   },
+   "bytes": 9411544,
+   "errors": 0,
+   "forwarded": 257571,
+   "pid": 19605,
+   "t": 1787626443.9320862
+  },
+  "mode": "process",
+  "out": "127.0.0.1:14561",
+  "profile": "full",
+  "shares_interpreter_with_csia": false,
+  "source": "tcp:127.0.0.1:5760",
+  "types_flowing_before_measurement": 25
+ },
+ "timing_caveat": "tee ran in a SEPARATE interpreter, so no GIL contention from it. Remaining contention is the host: this container also runs SITL, and run-to-run spread on the same command exceeds the tee effect. An R13 verdict from shared cloud infrastructure is a statement about the host as much as about CSIA.",
+ "trust_trace": "logs/mechanism_b_gps/ardupilot_STEP_SMALL_1.trace.jsonl",
+ "trust_trace_steps": 1501,
+ "unmapped_types": {
+  "AHRS": 3008,
+  "AHRS2": 15042,
+  "ATTITUDE": 15042,
+  "GLOBAL_POSITION_INT": 6016,
+  "LOCAL_POSITION_NED": 6016,
+  "MEMINFO": 6016,
+  "MISSION_CURRENT": 6016,
+  "NAV_CONTROLLER_OUTPUT": 6016,
+  "PARAM_VALUE": 26,
+  "POWER_STATUS": 6016,
+  "SCALED_IMU3": 15042,
+  "SCALED_PRESSURE2": 15042,
+  "SIMSTATE": 15041,
+  "STATUSTEXT": 4,
+  "SYSTEM_TIME": 3008,
+  "SYS_STATUS": 6016,
+  "TERRAIN_REPORT": 3008,
+  "TERRAIN_REQUEST": 289,
+  "TIMESYNC": 60,
+  "VFR_HUD": 6016,
+  "WIND": 3008
+ },
+ "wall_s": 60.02
+}

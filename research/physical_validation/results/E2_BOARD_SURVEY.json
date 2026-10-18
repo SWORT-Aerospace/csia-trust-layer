@@ -1,0 +1,292 @@
+{
+  "alias_note": "The two projects name the same board differently, so the intersection is computed over a hand-written alias table. Each row prints the MCU read from BOTH trees so a wrong pairing shows up as an MCU mismatch instead of passing silently.",
+  "ardupilot_sim_on_hardware_boards": [
+    "CubeOrange-SimOnHardWare",
+    "CubeOrangePlus-SimOnHardWare"
+  ],
+  "generated_by": "tools/csia_experiment/e2_board_survey.py",
+  "limits": [
+    "This says a board is in each project's tree at the surveyed commit. It does NOT say the firmware is currently built and published for it, nor that any retail listing is the revision the tree describes.",
+    "It says nothing about availability or price.",
+    "The alias table is hand-written. A board supported by both under names not in the table will be missed -- a false negative, not a false positive."
+  ],
+  "method": "Board support is read from each project's OWN tree: ArduPilot from libraries/AP_HAL_ChibiOS/hwdef/<board>/hwdef.dat, PX4 from boards/<vendor>/<board>/*.px4board. Nothing here comes from a vendor page or from reputation.",
+  "px4_sih_board_count": 49,
+  "schema": "csia.research.e2_board_survey/1",
+  "sources": {
+    "ardupilot": {
+      "boards_found": 450,
+      "head": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "root": "/tmp/ap-probe"
+    },
+    "px4": {
+      "boards_found": 120,
+      "head": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+      "root": "/tmp/px4"
+    }
+  },
+  "supported_by_both": [
+    {
+      "ardupilot_hwdef": "CUAV-Nora",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "cuav/nora",
+      "px4_mcu": "STM32H743XI",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "CUAV-X7",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "cuav/x7pro",
+      "px4_mcu": "STM32H743XI",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default",
+        "test"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "CubeOrange",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": true,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "cubepilot/cubeorange",
+      "px4_mcu": "STM32H743ZI",
+      "px4_sih_targets": [],
+      "px4_targets": [
+        "bootloader",
+        "console",
+        "default",
+        "test"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "CubeOrangePlus",
+      "ardupilot_mcu": "STM32H7xx STM32H757xx",
+      "ardupilot_sim_on_hardware": true,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "cubepilot/cubeorangeplus",
+      "px4_mcu": "STM32H747XI",
+      "px4_sih_targets": [],
+      "px4_targets": [
+        "bootloader",
+        "console",
+        "default",
+        "test"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "CubeYellow",
+      "ardupilot_mcu": "STM32F7xx STM32F777xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "cubepilot/cubeyellow",
+      "px4_mcu": "STM32F777VI",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "Durandal",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "holybro/durandal-v1",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "KakuteH7",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "holybro/kakuteh7",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "KakuteH7v2",
+      "ardupilot_mcu": null,
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": false,
+      "px4_board": "holybro/kakuteh7v2",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "MatekH743",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "matek/h743",
+      "px4_mcu": "STM32H743VI",
+      "px4_sih_targets": [],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "Pixhawk5X",
+      "ardupilot_mcu": "STM32F7xx STM32F767xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "px4/fmu-v5x",
+      "px4_mcu": "STM32F765II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "default",
+        "flash-analysis",
+        "performance-test",
+        "rover",
+        "test"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "Pixhawk6C",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "px4/fmu-v6c",
+      "px4_mcu": "STM32H743VI",
+      "px4_sih_targets": [
+        "default",
+        "raptor",
+        "visionTargetEstMoving",
+        "visionTargetEstStatic"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default",
+        "neural",
+        "raptor",
+        "rover",
+        "visionTargetEstMoving",
+        "visionTargetEstStatic"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "Pixhawk6X",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "px4/fmu-v6x",
+      "px4_mcu": "STM32H753II",
+      "px4_sih_targets": [
+        "multicopter"
+      ],
+      "px4_targets": [
+        "airship",
+        "bootloader",
+        "bootloader_secureboot",
+        "default",
+        "flash-analysis",
+        "mavlink-dev",
+        "multicopter",
+        "performance-test",
+        "rover",
+        "secureboot",
+        "spacecraft",
+        "test",
+        "uuv",
+        "zenoh"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "mRoControlZeroH7",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "mro/ctrl-zero-h7",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "mRoControlZeroH7-bdshot",
+      "ardupilot_mcu": null,
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": false,
+      "px4_board": "mro/ctrl-zero-h7",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default"
+      ]
+    },
+    {
+      "ardupilot_hwdef": "mRoPixracerPro",
+      "ardupilot_mcu": "STM32H7xx STM32H743xx",
+      "ardupilot_sim_on_hardware": false,
+      "both_support_simulation_on_hardware": false,
+      "mcu_family_agrees": true,
+      "px4_board": "mro/pixracerpro",
+      "px4_mcu": "STM32H743II",
+      "px4_sih_targets": [
+        "default"
+      ],
+      "px4_targets": [
+        "bootloader",
+        "default",
+        "neural"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,339 @@
+%YAML 1.2
+---
+# FL-053 / SC-09 -- CORRECTION RECORD (successor record; nothing regenerated)
+#
+# STATUS: PROPOSED. Drafting this record does not adopt it. It becomes the
+# authoritative statement of the CUSUM-versus-trust comparison only when
+# `adopt.py --apply` is run with an owner decision reference, which appends
+# FL-053 to the failure ledger (rule R8) and flips `status` to ADOPTED.
+# Until then the historical record below is the record, and this file is a
+# proposal about it.
+#
+# This is a SUCCESSOR record, the mechanism the repository already uses for
+# stale or wrong committed evidence (research/physical_validation/results/
+# s0_rederivation.json beside the unedited escalation_algebra.json): the
+# frozen artifact stays byte-identical and the correction is written beside it.
+# research/systems-paper/results is `forbidden_without_tier_completion` in
+# research/physical_validation/EVIDENCE_EXTENSION.yaml, so it is NOT
+# regenerated, here or on adoption.
+#
+# verification/verify_correction.py checks every statement below that can be
+# checked mechanically; tests/test_fl053_sc09_correction.py runs it.
+
+schema: csia.research.correction_record/1
+identifier: FL-053
+status: PROPOSED
+status_history:
+  - date: 2026-09-26
+    status: PROPOSED
+    by: docs/research/MECHANISM_B_DWELL_DISCREPANCY.md and docs/research/SC09_PROPOSED_CORRECTION.md
+    commit: b75ad0c
+  - date: 2026-10-18
+    status: PROPOSED
+    by: this record (successor review package; adds verification, the identifier audit and the adoption tooling)
+adoption:
+  decided_by: null
+  decided_on: null
+  decision_reference: null
+  adopted_at_commit: null
+  guard_pins_decision: null
+
+identifier_check:
+  ledger: research/physical_validation/FAILURE_LEDGER.yaml
+  ledger_sha256_at_writing: 6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f
+  ledger_entries: 124
+  by_series: {FL: 52, HF: 18, MX: 43, SR: 11}
+  fl_series: FL-001 to FL-052, contiguous; next free FL id is FL-053
+  fl_053_in_ledger: false
+  reservations_outside_the_ledger:
+    - ids: FL-053
+      holder: this correction (Mechanism B dwell discrepancy)
+      first_reserved: 2026-09-26, commit b75ad0c
+    - ids: FL-054 to FL-060
+      holder: Semantic Core 2.1 proposed entries (research/csia_semantic_core_2_1/PROPOSED_LEDGER_ENTRIES.md)
+      first_reserved: 2026-09-30, commit b409abe
+      dependency: numbered on the stated assumption that FL-053 is promoted first; renumber otherwise
+    - ids: FL-061, FL-062
+      holder: Semantic Core 2.1.1 revision (research/csia_semantic_core_2_1_revision/FAILURE_LEDGER_RECOMMENDATIONS.md)
+      first_reserved: 2026-10-01, commit a970b5c
+      dependency: assumes FL-053 to FL-060 promoted first
+    - ids: FL-053 to FL-057
+      holder: PRIME-1 drafts, research/csia_prime1/FAILURE_LEDGER_DRAFTS.yaml, on branch claude/csia-prime-pilot only
+      first_reserved: 2026-10-03, commit 231fa61
+      conflict: COLLIDES with every reservation above. The drafts state "the owner assigns the final ids". PRIME-1 is frozen and is not edited here; at promotion they need new ids (FL-063 onward if everything above is promoted first)
+  conclusion: >-
+    FL-053 is unassigned in the ledger and its earliest reservation is this
+    correction, which two later proposal sets already depend on. Assigning it
+    here is consistent with every reservation except the PRIME-1 drafts, which
+    must be renumbered by the owner when they are promoted.
+
+claim:
+  id: SC-09
+  source: research/systems-paper/CLAIMS.csv
+  statement_verbatim: >-
+    The CUSUM alarms earlier than the trust threshold in every faulted arm and
+    never in the clean window.
+
+historical_record:
+  what_it_says: >-
+    Commit 4e3ed38 (2026-09-03, "Finish the systems-paper red team") added a
+    `policy_dwell` block to mechanism_b.json and its generator, recording for
+    each arm `trust_latency_includes_dwell: true` and
+    `trust_detector_only_latency_s = trust_latency_s - dwell_up`, and closed
+    red-team objection 2.3 ("NONE -- this objection is CLOSED. It was correct,
+    the decomposition was computed, and the conclusion survived it"), recorded
+    elsewhere as "CLOSED by correction" (docs/CURRENT_PROGRAM_STATE.md gate 9;
+    handoff V1). Its premise was that the raw trust latency included the
+    failsafe's 1.0 s dwell and so flattered the CUSUM. The prose that rests on it is in MECHANISM_B.md sections 5 and 6,
+    REVIEWER_RED_TEAM.md objection 2.3, the SC-09 rationale column of
+    CLAIMS.csv, CUSUM_FAIRNESS.yaml and CUSUM_FAIRNESS_TABLE.csv, and the
+    systems-paper handoffs given to the writing agent.
+  stays: >-
+    Every one of those files stays byte-identical, before and after adoption.
+    They are the true record of what was asserted on 2026-09-03 and of the
+    reasoning that produced it. Adoption adds a ledger entry and this record
+    beside them; it rewrites none of them.
+  pinned_files:
+    research/systems-paper/results/mechanism_b.json: 8237458edfb3b55750df99394f17237723d9712ed367975222aac131aa8eb1fc
+    research/systems-paper/mechanism_b.py: 2c254877f7db3e1491710b6de1c68074f5e49de2d3fa544b1f4ef5fa7ad7adc2
+    research/systems-paper/MECHANISM_B.md: 351c04589e92d05c39b1ccb68f28158ed142ecdd783e47fb00f53a23c434aac4
+    research/systems-paper/REVIEWER_RED_TEAM.md: 1090e9d7ec9344f3ec4f2627655755fc1ea9fb83425b80493e870c4db029c790
+    research/systems-paper/CLAIMS.csv: 0def29ebd7366f90716f7960573565e07be75f556fe0d2f5be9a4eb5a06ce2ff
+    research/physical_validation/CUSUM_FAIRNESS.yaml: d8868ff8a620b15f26fdf263335ee64ec4562498629a713b94185c4236166f62
+    research/physical_validation/CUSUM_FAIRNESS_TABLE.csv: 5ef9c66691b3aadce83364fa04f30908abd9e35605a80b67dbc435ca6a3f9fcb
+    docs/research/SC09_PROPOSED_CORRECTION.md: 971726c216e37d456b91ed48874ffc2e88cbae79303774a49f5369c9ee495b61
+    docs/research/MECHANISM_B_DWELL_DISCREPANCY.md: 8ce2a5640f07051e4c808497bf1461c386657038ffb74b3ef405235b8145165d
+    handoff/SYSTEMS_PAPER_FINAL_HANDOFF.md: 0613721951c8f15cafda47a62b32d4c8327f1aa32e1b9032af6038d9f61629a3
+    handoff/SYSTEMS_PAPER_FINAL_HANDOFF_V2.md: 6480ef8911d5103d2cf12a1d238ec67307b4a6142bd353641393afa7f575c103
+    handoff/DUAL_PAPER_COORDINATION_SUMMARY.md: 4d155d87aa6dc2f912ad310da07c663b1db4f044865377c141f61467918c9204
+    csia/scenarios.py: 043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557
+    csia/runtime/failsafe.py: 0a8d1f5fc8b29ab4b1fb89ffb09eca614fd6d3c183bbb4616f16147606acf2ef
+    docs/audit/CSIA_LATENCY_PATH_AUDIT.md: 01c96eaf2d78db510e212e9e2f55c9f0daf1712afc26232c51ba98ce2bf23c19
+
+valid_values:
+  source: research/systems-paper/results/mechanism_b.json
+  source_sha256: 8237458edfb3b55750df99394f17237723d9712ed367975222aac131aa8eb1fc
+  definition: >-
+    trust_first_crossing_s is `arms/<arm>/crossing/trust_latency_s`: the first
+    time after onset that the raw gps trust series from run_pipeline falls
+    below FailsafeConfig.nav_caution = 0.75. cusum_first_alarm_s is
+    `arms/<arm>/crossing/cusum_latency_s`. Both are seconds after the 20 s
+    onset. Both are correct as committed and are reproduced exactly by
+    re-running the generator on a clean archive.
+  slow_ramp:  {drift_m_per_s: 1.0, trust_first_crossing_s: 8.72, cusum_first_alarm_s: 2.96, cusum_lead_raw_s: 5.76}
+  spoof_3ms:  {drift_m_per_s: 3.0, trust_first_crossing_s: 3.36, cusum_first_alarm_s: 1.16, cusum_lead_raw_s: 2.20}
+  fast_ramp:  {drift_m_per_s: 6.0, trust_first_crossing_s: 3.24, cusum_first_alarm_s: 0.72, cusum_lead_raw_s: 2.52}
+  clean:      {trust_first_crossing_s: null, cusum_first_alarm_s: null, note: no crossing and no alarm in the clean window}
+
+erroneous_items:
+  - id: E1
+    kind: metadata
+    where: research/systems-paper/results/mechanism_b.json arms/*/policy_dwell/trust_latency_includes_dwell, and research/systems-paper/mechanism_b.py where the block is written
+    recorded: true
+    correct: false
+    why: >-
+      The trust series comes from csia/scenarios.py run_pipeline, which runs
+      PredictionComparator, TrustEngine and CausalDiagnosis and never steps
+      FailsafePolicy; mechanism_b.py imports FailsafeConfig only to read
+      nav_caution and dwell_up. The dwell is applied by FailsafePolicy.update
+      after a crossing. A crossing of the raw series cannot contain it.
+  - id: E2
+    kind: subtraction
+    where: research/systems-paper/results/mechanism_b.json arms/*/policy_dwell/trust_detector_only_latency_s
+    recorded: {slow_ramp: 7.72, spoof_3ms: 2.36, fast_ramp: 2.24}
+    correct: {slow_ramp: 8.72, spoof_3ms: 3.36, fast_ramp: 3.24}
+    why: >-
+      Computed as trust_latency_s - dwell_up from a latency that already was
+      detector-only, so each figure is 1.0 s too favourable to the trust path.
+  - id: E3
+    kind: prose and closure
+    where: >-
+      MECHANISM_B.md sections 5-6 ("The raw comparison flattered the CUSUM by
+      one dwell period"; "The detector-only figure is the one to quote");
+      REVIEWER_RED_TEAM.md objection 2.3 ("this objection is CLOSED"; "quoting
+      8.72 against 2.96 is named as the error this objection identified");
+      CLAIMS.csv
+      SC-09 rationale; CUSUM_FAIRNESS.yaml header; CUSUM_FAIRNESS_TABLE.csv,
+      whose fair_comparison and forbidden_comparison columns are inverted;
+      PROSE_NUMERIC_BINDINGS.yaml PB-26 to PB-29 descriptions;
+      docs/CURRENT_PROGRAM_STATE.md section 3 gate 9; handoff V1, handoff V2
+      and DUAL_PAPER_COORDINATION_SUMMARY.md ("detector-to-detector, VERIFIED:
+      7.72 vs 2.96")
+    correct: >-
+      Objection 2.3's premise does not hold for this measurement: the raw
+      comparison is already detector against detector. The figures to quote
+      are the raw crossings.
+
+substantive_conclusion:
+  sc_09: UNCHANGED
+  statement: >-
+    The CUSUM alarms earlier than the trust threshold in every faulted arm and
+    never in the clean window. True on the raw figures, as it was on the
+    subtracted ones; correcting the figures widens the lead on every arm.
+  cusum_lead_s:
+    slow_ramp: {raw: 5.76, as_previously_stated: 4.76}
+    spoof_3ms: {raw: 2.20, as_previously_stated: 1.20}
+    fast_ramp: {raw: 2.52, as_previously_stated: 1.52}
+  scope_unchanged: >-
+    Bench simulator only; one node (gps); one flight profile; one arm per drift
+    rate; CUSUM h = 500 chosen on the same simulator's clean arm; the CUSUM bank
+    cannot see either IMU. None of that is altered by this correction.
+
+proposed_authoritative_statement:
+  effective: only when status is ADOPTED
+  text: >-
+    Against the trust path's first crossing of nav_caution = 0.75, the CUSUM
+    alarms 5.76 s earlier on the 1 m/s ramp (2.96 s against 8.72 s), 2.20 s
+    earlier on the 3 m/s spoof (1.16 s against 3.36 s) and 2.52 s earlier on
+    the 6 m/s ramp (0.72 s against 3.24 s), and never in the clean window.
+    Both figures are detector-only: the trust figure is a crossing of the raw
+    trust series, which no failsafe policy has acted on. The figures previously
+    labelled detector-only (7.72 / 2.36 / 2.24 s) subtracted a 1.0 s dwell
+    that the raw series never contained (FL-053).
+
+supplementary_measurement:
+  artifact: research/physical_validation/corrections/FL-053_SC09/verification/policy_alerts.json
+  status: verification inside a proposed record; not an adopted result and not for quotation
+  what: >-
+    The shipped FailsafePolicy stepped per tick over the same three arms. The
+    first escalation (CAUTION, reason "GPS trust ...") comes exactly dwell_up
+    = 1.00 s after the trust crossing on every faulted arm: 9.72 / 4.36 /
+    4.24 s after onset. The clean arm never escalates. This places the dwell
+    after the crossing on the exact arms, which the 2026-09-26 draft could only
+    infer.
+  supersedes_in_the_draft: >-
+    The draft's DERIVED detector-plus-policy times 9.76 / 4.40 / 4.28 s
+    (crossing + 1.04 s, transferred from the online-runtime audit of a
+    different scenario). On these arms, in batch replay, the measured offset
+    is 1.00 s, not 1.04 s.
+
+affected_references:
+  - path: research/systems-paper/results/mechanism_b.json
+    location: arms/*/policy_dwell
+    disposition: HISTORICAL, unchanged, not regenerated. Superseded by this record on adoption.
+  - path: research/systems-paper/mechanism_b.py
+    location: the policy_dwell block in run_arm
+    disposition: HISTORICAL, unchanged. A generator fix would force regenerating a frozen artifact and is not proposed.
+  - path: research/systems-paper/MECHANISM_B.md
+    location: sections 5 and 6
+    disposition: HISTORICAL, unchanged. Superseded on adoption.
+  - path: research/systems-paper/REVIEWER_RED_TEAM.md
+    location: objection 2.3
+    disposition: HISTORICAL, unchanged. On adoption, 2.3 reads as examined and found not to apply, per this record.
+  - path: research/systems-paper/CLAIMS.csv
+    location: SC-09 rationale column
+    disposition: HISTORICAL, unchanged. The SC-09 statement itself needs no change.
+  - path: research/physical_validation/CUSUM_FAIRNESS.yaml
+    location: header comment and policy_dwell block
+    disposition: HISTORICAL, unchanged. Superseded on adoption.
+  - path: research/physical_validation/CUSUM_FAIRNESS_TABLE.csv
+    location: fair_comparison and forbidden_comparison columns
+    disposition: HISTORICAL, unchanged. The two columns are inverted; superseded on adoption.
+  - path: research/PROSE_NUMERIC_BINDINGS.yaml
+    location: PB-26 to PB-29
+    disposition: UNCHANGED. They bind historical prose to the historical artifact and stay true as statements about those files. They do not certify the figures as authoritative after adoption.
+  - path: docs/CURRENT_PROGRAM_STATE.md
+    location: section 3, gate 9
+    disposition: on adoption, a pointer note is added after the gate table (adopt.py); the table row is not rewritten.
+  - path: research/physical_validation/FAILURE_LEDGER.yaml and its three pinning manifests; docs/FIELD_INTEGRATION_RUNBOOK.md
+    location: entries; ledger hash and head_at_build; "ledger has 124 entries"
+    disposition: on adoption, FL-053 appended and the pins and count updated exactly as commits b7f1816, d69919d, c2aac29 and 39dc509 did.
+  - path: research/physical_validation/PAPER_IMPACT_LEDGER.yaml
+    location: entries
+    disposition: on adoption, PI-006 appended (PI-006.paper_impact_entry.yaml); that row is what licenses the manuscript change.
+  - path: publication/system_paper_i/_static/10_CORRECTIONS_LEDGER.md and evidence_export/10_CORRECTIONS_LEDGER.md
+    location: the 14-row table
+    disposition: UNCHANGED now and by adoption tier A. Adding row 15 is tier B, a separate owner decision that also requires rebuilding the evidence export (its README pins the file's hash); the exact row is in README.md.
+  - path: handoff/SYSTEMS_PAPER_FINAL_HANDOFF.md, handoff/SYSTEMS_PAPER_FINAL_HANDOFF_V2.md, handoff/DUAL_PAPER_COORDINATION_SUMMARY.md
+    location: Mechanism B detector-to-detector figures; objection 2.3
+    disposition: HISTORICAL handoffs, unchanged. The writing session is instructed by README.md section 6 instead.
+  - path: docs/research/SC09_PROPOSED_CORRECTION.md and docs/research/MECHANISM_B_DWELL_DISCREPANCY.md
+    location: whole files
+    disposition: PREDECESSOR proposals, unchanged. This package supersedes them as the review package; the draft entry is revised in FL-053.ledger_entry.yaml.
+  - path: publication/system_paper_i/final_update/VALUE_BINDINGS.yaml and MANUSCRIPT_FINDINGS.md
+    location: T9 rows, forbidden list, finding F-01
+    disposition: ALREADY CONSISTENT with this record (raw values bound, net-of-dwell values forbidden, FL-053 described as proposed). No change.
+adoption_touches_before_adoption:
+  research/physical_validation/FAILURE_LEDGER.yaml: {sha256_before_adoption: 6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f, last_commit: b75ad0c}
+  research/consequence/phase32/SHA256_MANIFEST32.json: {sha256_before_adoption: daa2181ae7424c515850545ea86d99fbcd0ef51b95b1a4ae1be3636a37210426, last_commit: 39dc509}
+  research/phase4/SHA256_MANIFEST4.json: {sha256_before_adoption: 89758a38d2b59445d153b309aab1c3f74bfad3a1c21f596b2df350aa7fb37c57, last_commit: 39dc509}
+  research/phase5/SHA256_MANIFEST5.json: {sha256_before_adoption: 379ab6625a5e0084a35dd3b14bdd3cf9e67a2f9c53dcc973a1a8ce0c284cad44, last_commit: 39dc509}
+  docs/FIELD_INTEGRATION_RUNBOOK.md: {sha256_before_adoption: 2ec6735f08fa8f46f718525b84f71ec23696e7e192bc9957359749ebaedadd68, last_commit: b75ad0c}
+  research/physical_validation/PAPER_IMPACT_LEDGER.yaml: {sha256_before_adoption: 936ff22223ad60b86659feafeb0589df1d359397a5aa19966705bfb6162eab62, last_commit: bb5a5e5}
+  docs/CURRENT_PROGRAM_STATE.md: {sha256_before_adoption: 3f5f5d7e92a9a5bdbd161ec2814482229a5bd943a139d23005a39e83aaa31b91, last_commit: b409abe}
+
+# Found by the 2026-10-18 adoption rehearsal (README section 7), not by reading:
+# seven later programs pin the ledger's exact SHA-256 as a baseline invariant.
+# An append changes that hash, so adoption also needs the owner's decision (f)
+# on these guards. adopt.py does not edit them (they belong to Semantic Core,
+# CSIA 2.2 and the programs built on them) and refuses --apply without
+# --guard-pins-decision. verification check C8 keeps this list equal to the
+# pins that exist while PROPOSED, and requires none of them to remain once ADOPTED.
+ledger_hash_pinned_in_code:
+  pinned_sha256: 6c7e6cf3b8bde3cbac050a67b0bc9cb6fef5aeba587eabca142c823879f5b58f
+  pins:
+    - path: tests/test_semantic_core_2_1.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1
+      fails_on_append: tests/test_semantic_core_2_1.py::test_the_failure_ledger_is_untouched_and_the_entries_are_proposed
+    - path: tests/test_semantic_core_2_1_revision.py
+      constant: LEDGER_SHA256
+      program: Semantic Core 2.1.1
+      fails_on_append: tests/test_semantic_core_2_1_revision.py::test_the_failure_ledger_is_untouched_and_the_new_entries_are_only_drafted
+    - path: tests/test_semantic_core_2_1_shadow.py
+      constant: LEDGER_SHA256
+      program: Semantic Core 2.1 shadow
+      fails_on_append: tests/test_semantic_core_2_1_shadow.py::test_the_failure_ledger_is_untouched
+    - path: research/csia_2_2_evidence_assurance/common_2_2.py
+      constant: LEDGER_PINNED
+      program: CSIA 2.2 evidence assurance
+      fails_on_append: tests/test_evidence_assurance_2_2.py::test_no_frozen_artifact_changed_since_the_2_1_1_baseline
+    - path: research/csia_2_2_offboard_pilot/common_pilot.py
+      constant: LEDGER_PINNED
+      program: CSIA 2.2 offboard pilot, imported by the 2.3, PRIME and RB-001 baseline verifiers
+      fails_on_append: baseline verifiers verify_pilot_baseline.py, csia_2_3_stock_bridge/verify_2_3_baseline.py, csia_prime/verify_prime_baseline.py, rb001_reality_bridge/verify_rb001_baseline.py
+    - path: research/csia_semantic_core_2_1_revision/revision_common.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1.1
+      fails_on_append: baseline verifier research/csia_semantic_core_2_1_revision/verify_baseline.py
+    - path: research/csia_semantic_core_2_1_shadow/verify_state.py
+      constant: LEDGER_PINNED
+      program: Semantic Core 2.1 shadow
+      fails_on_append: its own baseline check
+  narrative_mentions_not_pins:
+    - research/csia_semantic_core_2_1/PROPOSED_LEDGER_ENTRIES.md
+    - docs/research/MECHANISM_B_DWELL_DISCREPANCY.md
+  owner_options:
+    - re-pin the seven constants to the post-adoption hash in the adoption commit
+    - make those guards append-only (the first N pinned bytes unchanged) instead of exact
+    - adopt FL-053 together with the Semantic Core ledger promotion (FL-054 onward), which breaks the same pins
+
+informational_hashes_at_writing:
+  research/PROSE_NUMERIC_BINDINGS.yaml: {sha256_at_writing: b4af7ca165b256c2249f4334d000f463c6c48bba4002447507308706d6580cee, last_commit: 3470cfc}
+  publication/system_paper_i/_static/10_CORRECTIONS_LEDGER.md: {sha256_at_writing: 815d68dd8435a3b5611fbd722aa47ccd76e6cb03a0c9ae1d90a326898b1789d6, last_commit: 8c1d3b6}
+  publication/system_paper_i/evidence_export/10_CORRECTIONS_LEDGER.md: {sha256_at_writing: 815d68dd8435a3b5611fbd722aa47ccd76e6cb03a0c9ae1d90a326898b1789d6, last_commit: 8c1d3b6}
+  publication/system_paper_i/final_update/VALUE_BINDINGS.yaml: {sha256_at_writing: af2d8cab174bc4c8f069a7f762fd8bdade12127de41e3dd53d91be0078e07b3f, last_commit: 32ff4fc}
+  publication/system_paper_i/final_update/MANUSCRIPT_FINDINGS.md: {sha256_at_writing: a23d0f6d958e8316a0ed21cf0f1e1fdbdf79819312e8ff53ad63f7e61ea53e69, last_commit: 32ff4fc}
+
+correction_inventory:
+  canonical_paper_i_corrections:
+    source: publication/system_paper_i/evidence_export/10_CORRECTIONS_LEDGER.md (identical to _static/10_CORRECTIONS_LEDGER.md)
+    count: 14
+    note: the only repository list of corrections that "change what a sentence may say" in Paper I
+  failure_ledger:
+    entries: 124
+    is_a_corrections_list: false
+    note: >-
+      It records every failure, guard, negative result and own error of the
+      evidence-extension program (52 FL, 18 HF, 43 MX, 11 SR). Its row count is
+      not a correction count.
+    ledgered_current_stack_entries_relevant_to_paper_i: [FL-014, FL-016, FL-017, FL-018, FL-019]
+  proposed_not_adopted:
+    - FL-053 (this record)
+  not_paper_i: [FL-054 to FL-062 (Semantic Core 2.1 and 2.1.1, proposed), PRIME-1 drafts on claude/csia-prime-pilot]
+  manuscript_count_reported: >-
+    The writing session reports nineteen, of which eighteen are presented as
+    canonical. The repository cannot confirm eighteen: it holds 14 canonical
+    Paper I corrections, plus ledgered entries a manuscript may cite as further
+    corrections only by their ids. The SC-09 dwell correction is not among the
+    adopted corrections while this record is PROPOSED.

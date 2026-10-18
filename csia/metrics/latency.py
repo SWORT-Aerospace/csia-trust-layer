@@ -69,7 +69,13 @@ ARBITRATION_ACTIONS = frozenset({
 #: still attributed to that fault. Covers dwell_up plus trust-recovery lag.
 DEFAULT_ASSOC_GRACE_S = 15.0
 
-_ISOLATION_OUTCOMES = ("CORRECT", "INCORRECT", "AMBIGUOUS", "NONE")
+# _ISOLATION_OUTCOMES ("CORRECT", "INCORRECT", "AMBIGUOUS", "NONE") was
+# here, unused, and contradicted the vocabulary actually in use:
+# csia.diagnosis.hypothesis.IsolationOutcome has ten members that
+# distinguish CORRECT_SINGLE_SOURCE from CORRECT_COMMON_CAUSE, and
+# OVER_ISOLATION from UNDER_ISOLATION. Two vocabularies for one concept,
+# one of them dead, is how a reader ends up scoring against the wrong
+# one.
 
 
 # --- ground truth ------------------------------------------------------------

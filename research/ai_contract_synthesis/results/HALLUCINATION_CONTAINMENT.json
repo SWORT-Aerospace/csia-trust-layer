@@ -1,0 +1,475 @@
+{
+  "artifact": "HALLUCINATION_CONTAINMENT",
+  "contained": 6,
+  "containment_rate": 1.0,
+  "fixtures": 6,
+  "results": [
+    {
+      "case_id": "FIXTURE_F1.valid",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "result": "NOT_CORROBORATED",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py tests ['0']; the claim rests on a line that does not implement it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "REACHABLE"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "CONSISTENT"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "EFFECT_NOT_IMPLEMENTED",
+              "why": "the clause claims the value is discarded, but no discard appears within three lines of the citation"
+            },
+            "kind": "INVALID_CONDITION"
+          },
+          {
+            "c2": {
+              "check": "C2",
+              "result": "NOT_CORROBORATED",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py tests ['0']; the claim rests on a line that does not implement it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "REACHABLE"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "CONSISTENT"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "EFFECT_NOT_IMPLEMENTED",
+              "why": "the clause claims the value is discarded, but no discard appears within three lines of the citation"
+            },
+            "kind": "RETENTION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 3,
+          "case_id": "FIXTURE_F1.valid",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "weight = 1.0 if msg[\"valid\"] else 0.25",
+                  "locator": "research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py:12",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "INVALID_CONDITION",
+              "reason": "",
+              "support_kind": "CONSUMER_SOURCE"
+            },
+            {
+              "citations": [
+                {
+                  "found": "weight = 1.0 if msg[\"valid\"] else 0.25",
+                  "locator": "research/ai_contract_synthesis/fixtures/f1_valid_means_something_else.py:12",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "RETENTION",
+              "reason": "",
+              "support_kind": "CONSUMER_SOURCE"
+            }
+          ],
+          "clauses_total": 2,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.93,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "WRONG. `valid` is a signal-quality weight, not an admissibility flag. The cited line assigns a weight; it discards nothing.",
+      "hallucination_class": "WRONG_VALIDITY_PREDICATE",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    },
+    {
+      "case_id": "FIXTURE_F2.climb_dm_s",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "result": "NOT_CORROBORATED",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f2_minus_one_is_a_real_value.py tests ['-1']; the claim rests on a line that does not implement it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "NOT_APPLICABLE",
+              "why": "clause names no field"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "NOT_APPLICABLE"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "NOT_APPLICABLE",
+              "why": "clause claims no discard effect"
+            },
+            "kind": "SENTINEL_CONDITION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 3,
+          "case_id": "FIXTURE_F2.climb_dm_s",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "return {\"climb_mps\": msg[\"climb_dm_s\"] / 10.0}",
+                  "locator": "research/ai_contract_synthesis/fixtures/f2_minus_one_is_a_real_value.py:11",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "SENTINEL_CONDITION",
+              "reason": "",
+              "support_kind": "CONSUMER_SOURCE"
+            }
+          ],
+          "clauses_total": 1,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.88,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "WRONG. -1 dm/s is a 0.1 m/s descent. No sentinel exists on this field.",
+      "hallucination_class": "INVENTED_STATE",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    },
+    {
+      "case_id": "FIXTURE_F3.throttle",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "result": "NOT_CORROBORATED",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f3_zero_is_legitimate.py tests ['0']; the claim rests on a line that does not implement it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "NOT_APPLICABLE",
+              "why": "clause names no field"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "NOT_APPLICABLE"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "NOT_APPLICABLE",
+              "why": "clause claims no discard effect"
+            },
+            "kind": "SENTINEL_CONDITION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 3,
+          "case_id": "FIXTURE_F3.throttle",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "return {\"throttle_pct\": float(msg[\"throttle\"])}",
+                  "locator": "research/ai_contract_synthesis/fixtures/f3_zero_is_legitimate.py:10",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "SENTINEL_CONDITION",
+              "reason": "",
+              "support_kind": "CONSUMER_SOURCE"
+            }
+          ],
+          "clauses_total": 1,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.71,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "WRONG. Zero throttle is a normal idle state.",
+      "hallucination_class": "INVENTED_STATE",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    },
+    {
+      "case_id": "FIXTURE_F4.quality",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "lines": [
+                "research/ai_contract_synthesis/fixtures/f4_stale_comment.py:6"
+              ],
+              "result": "DEFINED_NOT_TESTED",
+              "why": "the literal appears only in a constant definition; no executable branch tests it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "NOT_APPLICABLE",
+              "why": "clause names no field"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "NOT_APPLICABLE"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "EFFECT_NOT_IMPLEMENTED",
+              "why": "the clause claims the value is discarded, but no discard appears within three lines of the citation"
+            },
+            "kind": "SENTINEL_CONDITION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 6,
+          "case_id": "FIXTURE_F4.quality",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "# NOTE: quality == 255 means the sensor could not compute a quality",
+                  "locator": "research/ai_contract_synthesis/fixtures/f4_stale_comment.py:10",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "SENTINEL_CONDITION",
+              "reason": "",
+              "support_kind": "COMMENT"
+            }
+          ],
+          "clauses_total": 1,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.9,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "WRONG, AND THE CITATION IS GENUINE. The comment says exactly this. The executable source tests `quality == 0`, not 255. This is the item-25 dangerous case: a hallucination that survives a bare grounding check.",
+      "hallucination_class": "WRONG_SENTINEL",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    },
+    {
+      "case_id": "FIXTURE_F5.fault",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "result": "NOT_CORROBORATED",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f5_inverted_flag.py tests ['1']; the claim rests on a line that does not implement it"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "REACHABLE"
+            },
+            "c5": {
+              "check": "C5",
+              "lines": [
+                "research/ai_contract_synthesis/fixtures/f5_inverted_flag.py:14",
+                "research/ai_contract_synthesis/fixtures/f5_inverted_flag.py:9"
+              ],
+              "result": "CONTRADICTORY_READERS"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "EFFECT_NOT_IMPLEMENTED",
+              "why": "the clause claims the value is discarded, but no discard appears within three lines of the citation"
+            },
+            "kind": "INVALID_CONDITION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 3,
+          "case_id": "FIXTURE_F5.fault",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "return {\"usable\": not msg[\"fault\"]}",
+                  "locator": "research/ai_contract_synthesis/fixtures/f5_inverted_flag.py:9",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "INVALID_CONDITION",
+              "reason": "",
+              "support_kind": "CONSUMER_SOURCE"
+            }
+          ],
+          "clauses_total": 1,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.86,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "UNDERDETERMINED, ASSERTED ANYWAY. Two decoders in the same file read the same bit in opposite senses. The correct output is CONTRACT_AMBIGUOUS, not a confident clause.",
+      "hallucination_class": "FAILURE_TO_ABSTAIN",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    },
+    {
+      "case_id": "FIXTURE_F6.wind_speed_accuracy",
+      "contained": true,
+      "detail": {
+        "checks": [
+          {
+            "c2": {
+              "check": "C2",
+              "result": "CONTRADICTED_BY_EXECUTABLE",
+              "why": "no executable line in research/ai_contract_synthesis/fixtures/f6_documented_but_never_received.py tests ['65535']; the claim rests on a comment"
+            },
+            "c3": {
+              "check": "C3",
+              "result": "NOT_APPLICABLE",
+              "why": "field not in any searched protocol dialect"
+            },
+            "c4": {
+              "check": "C4",
+              "result": "NOT_APPLICABLE",
+              "why": "clause names no field"
+            },
+            "c5": {
+              "check": "C5",
+              "result": "NOT_APPLICABLE"
+            },
+            "c6": {
+              "check": "C6",
+              "result": "NOT_APPLICABLE",
+              "why": "clause claims no discard effect"
+            },
+            "kind": "SENTINEL_CONDITION"
+          }
+        ],
+        "grounding": {
+          "best_support_kind": 7,
+          "case_id": "FIXTURE_F6.wind_speed_accuracy",
+          "clauses": [
+            {
+              "citations": [
+                {
+                  "found": "# The protocol defines wind_speed_accuracy with UINT16_MAX meaning",
+                  "locator": "research/ai_contract_synthesis/fixtures/f6_documented_but_never_received.py:8",
+                  "ok": true,
+                  "reason": ""
+                }
+              ],
+              "grounded": true,
+              "kind": "SENTINEL_CONDITION",
+              "reason": "",
+              "support_kind": "PROSE_DOC"
+            }
+          ],
+          "clauses_total": 1,
+          "clauses_unsupported": 0,
+          "condition": "B1_CODE_ONLY",
+          "confidence": 0.8,
+          "high_confidence_unsupported": false,
+          "self_report_agrees_with_validator": true,
+          "self_reported_status": "AI_INFERRED",
+          "validator_status": "SOURCE_SUPPORTED"
+        }
+      },
+      "final": "SOURCE_AMBIGUOUS",
+      "fixture_truth": "The RULE may well be right; the CONFORMANCE QUESTION is unanswerable. The decoder never reads the field, so no trace exercises it and no violation can be established either way.",
+      "hallucination_class": "WRONG_CONSUMER",
+      "phase1": "SOURCE_AMBIGUOUS",
+      "phase2": "NOT_RUN",
+      "promoted_as_defect": false,
+      "stopped_at_phase1": true
+    }
+  ],
+  "status": "NON-SCORED TOOL-VALIDATION FIXTURES",
+  "stopped_before_phase2": 6
+}

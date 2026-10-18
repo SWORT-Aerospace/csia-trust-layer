@@ -1,0 +1,3184 @@
+{
+  "campaign_id": "CAMPAIGN_A2",
+  "platform": "ardupilot",
+  "prereg": "research/physical_validation/prereg/MECHANISM_A_ARDUPILOT_TRUST_COMPLETION_PREREG.md",
+  "primary_question_A_does_trust_increase": {
+    "answer_is_not_a_success_criterion": "the preregistration states success is NOT 'trust must rise'; a contradiction of the n=1 observation is a result",
+    "fault_trials_total": 20,
+    "fault_trials_with_positive_delta": 20
+  },
+  "question_B_fault_delta_distribution": {
+    "iqr": 1.2874076683155877e-05,
+    "max": 0.007145460476676857,
+    "median": 0.007006942734442356,
+    "min": 0.0069960030152779185,
+    "n": 20,
+    "q1": 0.007003801702953727,
+    "q3": 0.007016675779636883
+  },
+  "question_C_control_delta_distribution": {
+    "iqr": 2.2051737803452376e-05,
+    "max": 0.02080397817859181,
+    "median": 0.020593760759566926,
+    "min": 0.02057205187596589,
+    "n": 20,
+    "q1": 0.020588545149963944,
+    "q3": 0.020610596887767396
+  },
+  "question_D_original_n1": {
+    "delta": 0.0087,
+    "fault_range": [
+      0.0069960030152779185,
+      0.007145460476676857
+    ],
+    "inside_repeated_fault_range": false,
+    "trust_post": 0.93,
+    "trust_pre": 0.9213
+  },
+  "raw_traces": {
+    "archive": "research/physical_validation/results/a2_traces_raw",
+    "note": "RAW FIRST. The full per-step traces are archived gzipped, with SHA256SUMS.uncompressed.txt, BEFORE this reduction. This file is derived and can be deleted and regenerated; the archive cannot."
+  },
+  "schema": "csia.research.mechanism_a_repeat_trust/1",
+  "statistics_policy": "N, median, min, max and IQR at the TRIAL level. No p-values and no confidence intervals: these are runs of a deterministic simulator, not draws from a population.",
+  "trials": [
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T200301Z-87ccde39.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977085,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-001_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-001",
+      "trust_delta": 0.0070044153294804845,
+      "trust_post": 0.931820031689933,
+      "trust_pre": 0.9248156163604525,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62034234015611,
+          "evidence": 0.9421482198566762,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301159774930758
+        },
+        "LATE": {
+          "S": 87.46333609374692,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.931820031689933
+        },
+        "POST": {
+          "S": 87.46333609374692,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.931820031689933
+        },
+        "PRE": {
+          "S": 80.24836297792822,
+          "evidence": 0.9358384252098714,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248156163604525
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T200343Z-acda7fe6.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-002_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-002",
+      "trust_delta": 0.020588276603018874,
+      "trust_post": 0.9454087574224134,
+      "trust_pre": 0.9248204808193945,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62653235137414,
+          "evidence": 0.9421540612278904,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301216221317462
+        },
+        "LATE": {
+          "S": 151.9996738919445,
+          "evidence": 0.9798827759042283,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666543824294953
+        },
+        "POST": {
+          "S": 105.08988978647258,
+          "evidence": 0.9585668911468745,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454087574224134
+        },
+        "PRE": {
+          "S": 80.2534028607127,
+          "evidence": 0.935849101393227,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248204808193945
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T200426Z-3471a04e.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977087,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-003_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-003",
+      "trust_delta": 0.007004691197124213,
+      "trust_post": 0.9318262986963021,
+      "trust_pre": 0.9248216074991779,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62632931936062,
+          "evidence": 0.9421557816997859,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301222395492539
+        },
+        "LATE": {
+          "S": 87.46962443752575,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318262986963021
+        },
+        "POST": {
+          "S": 87.46962443752575,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318262986963021
+        },
+        "PRE": {
+          "S": 80.25325589094459,
+          "evidence": 0.9358471942290777,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248216074991779
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T200509Z-50111d6d.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-004_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-004",
+      "trust_delta": 0.020579162074896074,
+      "trust_post": 0.9454112052120677,
+      "trust_pre": 0.9248320431371716,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.6320750581585,
+          "evidence": 0.9421552681260775,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301289402794543
+        },
+        "LATE": {
+          "S": 152.0012848017344,
+          "evidence": 0.9798830936084105,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666550051647564
+        },
+        "POST": {
+          "S": 105.09275217655203,
+          "evidence": 0.9585677860158227,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454112052120677
+        },
+        "PRE": {
+          "S": 80.26113674649878,
+          "evidence": 0.935849564949451,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248320431371716
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T200552Z-9f1e67cf.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977086,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-005_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-005",
+      "trust_delta": 0.007006907434235599,
+      "trust_post": 0.9318229202970958,
+      "trust_pre": 0.9248160128628602,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62385307804111,
+          "evidence": 0.9421537828252469,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301186173569942
+        },
+        "LATE": {
+          "S": 87.46714052457638,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318229202970958
+        },
+        "POST": {
+          "S": 87.46714052457638,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318229202970958
+        },
+        "PRE": {
+          "S": 80.24991359717939,
+          "evidence": 0.9358473042245872,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248160128628602
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T200635Z-3863a669.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-006_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-006",
+      "trust_delta": 0.020594198936419117,
+      "trust_post": 0.9454045906579485,
+      "trust_pre": 0.9248103917215293,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.61788264117247,
+          "evidence": 0.9421482430116391,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301128857197387
+        },
+        "LATE": {
+          "S": 151.99623618983287,
+          "evidence": 0.9798823736430604,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666532825240534
+        },
+        "POST": {
+          "S": 105.08367094575297,
+          "evidence": 0.9585648255460462,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454045906579485
+        },
+        "PRE": {
+          "S": 80.24463079022357,
+          "evidence": 0.9358388873086602,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248103917215293
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.12,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T200718Z-3dc85642.part000.jsonl",
+      "gate_collapse_t": 13.08,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977091,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-007_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-007",
+      "trust_delta": 0.007145460476676857,
+      "trust_post": 0.9319575333801041,
+      "trust_pre": 0.9248120729034273,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.61168038691699,
+          "evidence": 0.9421438075688905,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301115143914541
+        },
+        "LATE": {
+          "S": 87.61134746864765,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9319575333801041
+        },
+        "POST": {
+          "S": 87.61134746864765,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9319575333801041
+        },
+        "PRE": {
+          "S": 80.23940478235866,
+          "evidence": 0.9358282936890056,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248120729034273
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T200801Z-404ba371.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-008_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-008",
+      "trust_delta": 0.02061123925305197,
+      "trust_post": 0.9454064327003925,
+      "trust_pre": 0.9247951934473405,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.6202881665722,
+          "evidence": 0.9421576003753014,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301071319781842
+        },
+        "LATE": {
+          "S": 152.0020711291153,
+          "evidence": 0.9798833925453909,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666546299804057
+        },
+        "POST": {
+          "S": 105.09017806895619,
+          "evidence": 0.9585691877590536,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454064327003925
+        },
+        "PRE": {
+          "S": 80.24255078406796,
+          "evidence": 0.9358516654508252,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247951934473405
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T200844Z-5f5928e1.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.97709,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-009_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-009",
+      "trust_delta": 0.007003597160778141,
+      "trust_post": 0.9318356729577221,
+      "trust_pre": 0.9248320757969439,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.6368658788371,
+          "evidence": 0.9421641361365175,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.930132108111308
+        },
+        "LATE": {
+          "S": 87.48000690603195,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318356729577221
+        },
+        "POST": {
+          "S": 87.48000690603195,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318356729577221
+        },
+        "PRE": {
+          "S": 80.26340719348492,
+          "evidence": 0.9358603384673589,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248320757969439
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T200927Z-a5a2e8c4.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-010_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-010",
+      "trust_delta": 0.02067095580745626,
+      "trust_post": 0.9453900541451432,
+      "trust_pre": 0.924719098337687,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.58111663098794,
+          "evidence": 0.9421487162096661,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300574166333487
+        },
+        "LATE": {
+          "S": 151.99244288186196,
+          "evidence": 0.9798824789228391,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666509092647653
+        },
+        "POST": {
+          "S": 105.07041253989797,
+          "evidence": 0.9585651817553901,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9453900541451432
+        },
+        "PRE": {
+          "S": 80.19009609076122,
+          "evidence": 0.9358391879492318,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.924719098337687
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201010Z-9bca9ad0.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977087,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-011_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-011",
+      "trust_delta": 0.0070048517626110085,
+      "trust_post": 0.9318226507392223,
+      "trust_pre": 0.9248177989766113,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62213395868336,
+          "evidence": 0.9421521429631718,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301184638475744
+        },
+        "LATE": {
+          "S": 87.46543900135343,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318226507392223
+        },
+        "POST": {
+          "S": 87.46543900135343,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318226507392223
+        },
+        "PRE": {
+          "S": 80.24931764734242,
+          "evidence": 0.9358420420397888,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248177989766113
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201054Z-93725557.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-012_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-012",
+      "trust_delta": 0.02080397817859181,
+      "trust_post": 0.9453622959989593,
+      "trust_pre": 0.9245583178203675,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.51541068773716,
+          "evidence": 0.9421450318065159,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9299578028187274
+        },
+        "LATE": {
+          "S": 151.98399658256068,
+          "evidence": 0.9798823213605246,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666461170038508
+        },
+        "POST": {
+          "S": 105.04421196448389,
+          "evidence": 0.9585641045791946,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9453622959989593
+        },
+        "PRE": {
+          "S": 80.09550665086206,
+          "evidence": 0.935832788187808,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9245583178203675
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201136Z-4e69543c.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977091,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-013_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-013",
+      "trust_delta": 0.007049845130754018,
+      "trust_post": 0.9317754788885754,
+      "trust_pre": 0.9247256337578214,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.58757430671787,
+          "evidence": 0.9421534816414587,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300633974668036
+        },
+        "LATE": {
+          "S": 87.43486425310358,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9317754788885754
+        },
+        "POST": {
+          "S": 87.43486425310358,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9317754788885754
+        },
+        "PRE": {
+          "S": 80.19651647635243,
+          "evidence": 0.9358467266996275,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247256337578214
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201219Z-56a80643.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-014_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-014",
+      "trust_delta": 0.020608132443865057,
+      "trust_post": 0.945399438359715,
+      "trust_pre": 0.9247913059158499,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.60736758218319,
+          "evidence": 0.9421438600801796,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300994754363949
+        },
+        "LATE": {
+          "S": 151.99279432086314,
+          "evidence": 0.9798821059118588,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666520079146617
+        },
+        "POST": {
+          "S": 105.07725534885503,
+          "evidence": 0.9585633019893256,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.945399438359715
+        },
+        "PRE": {
+          "S": 80.23182217705025,
+          "evidence": 0.9358327228043957,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247913059158499
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201302Z-5d673191.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.97709,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-015_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-015",
+      "trust_delta": 0.0069960030152779185,
+      "trust_post": 0.9318395912335335,
+      "trust_pre": 0.9248435882182556,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.63857438807314,
+          "evidence": 0.9421596403110795,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301372274344759
+        },
+        "LATE": {
+          "S": 87.48099475974534,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318395912335335
+        },
+        "POST": {
+          "S": 87.48099475974534,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318395912335335
+        },
+        "PRE": {
+          "S": 80.26883391604856,
+          "evidence": 0.9358535135111484,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248435882182556
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201345Z-5049ab9c.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-016_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-016",
+      "trust_delta": 0.020592411527875276,
+      "trust_post": 0.9454139992661292,
+      "trust_pre": 0.924821587738254,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.63637526742586,
+          "evidence": 0.9421649185184826,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301262251531437
+        },
+        "LATE": {
+          "S": 152.00765613525732,
+          "evidence": 0.9798840689740278,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666565937110334
+        },
+        "POST": {
+          "S": 105.10016737825194,
+          "evidence": 0.9585717096614524,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454139992661292
+        },
+        "PRE": {
+          "S": 80.26164784269557,
+          "evidence": 0.9358626516079185,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.924821587738254
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201428Z-ec03d73e.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977085,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-017_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-017",
+      "trust_delta": 0.007006978034649114,
+      "trust_post": 0.9318200294541343,
+      "trust_pre": 0.9248130514194852,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62113922778676,
+          "evidence": 0.9421510092875524,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301156291987772
+        },
+        "LATE": {
+          "S": 87.46437405126036,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318200294541343
+        },
+        "POST": {
+          "S": 87.46437405126036,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318200294541343
+        },
+        "PRE": {
+          "S": 80.24768690175713,
+          "evidence": 0.935843217360669,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248130514194852
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201511Z-29c176f7.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-018_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-018",
+      "trust_delta": 0.02057205187596589,
+      "trust_post": 0.9454142828779455,
+      "trust_pre": 0.9248422310019796,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.63861066672428,
+          "evidence": 0.9421584303035185,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301364711737707
+        },
+        "LATE": {
+          "S": 152.00354021121882,
+          "evidence": 0.9798832907951258,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666557849739915
+        },
+        "POST": {
+          "S": 105.09691856458264,
+          "evidence": 0.958568766368106,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454142828779455
+        },
+        "PRE": {
+          "S": 80.26873830894965,
+          "evidence": 0.9358546765756266,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248422310019796
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201554Z-9fae58d2.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977088,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-019_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-019",
+      "trust_delta": 0.007047835740427777,
+      "trust_post": 0.9317726164980562,
+      "trust_pre": 0.9247247807576284,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.58295839253867,
+          "evidence": 0.9421493188213241,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300605473333244
+        },
+        "LATE": {
+          "S": 87.43027673299495,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9317726164980562
+        },
+        "POST": {
+          "S": 87.43027673299495,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9317726164980562
+        },
+        "PRE": {
+          "S": 80.19331649154171,
+          "evidence": 0.9358374388769675,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247247807576284
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201637Z-4ae79c26.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-020_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-020",
+      "trust_delta": 0.02069521569750843,
+      "trust_post": 0.9453891679228661,
+      "trust_pre": 0.9246939522253577,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.57929736957779,
+          "evidence": 0.9421563516519328,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300449800829768
+        },
+        "LATE": {
+          "S": 151.99592991788995,
+          "evidence": 0.9798828578207666,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666513603980351
+        },
+        "POST": {
+          "S": 105.07393672035982,
+          "evidence": 0.9585680753777297,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9453891679228661
+        },
+        "PRE": {
+          "S": 80.18267167647261,
+          "evidence": 0.9358499549080097,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9246939522253577
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201720Z-1b7c5fe3.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.97709,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-021_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-021",
+      "trust_delta": 0.007011782640436892,
+      "trust_post": 0.9318218418709862,
+      "trust_pre": 0.9248100592305493,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62510277919127,
+          "evidence": 0.9421587255788182,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301166954498926
+        },
+        "LATE": {
+          "S": 87.46889613423603,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318218418709862
+        },
+        "POST": {
+          "S": 87.46889613423603,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318218418709862
+        },
+        "PRE": {
+          "S": 80.2490624462629,
+          "evidence": 0.935852814291958,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248100592305493
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201802Z-20cfac77.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-022_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-022",
+      "trust_delta": 0.02058683355293467,
+      "trust_post": 0.9454089768983793,
+      "trust_pre": 0.9248221433454447,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62733924908025,
+          "evidence": 0.9421540248370166,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301224631164354
+        },
+        "LATE": {
+          "S": 151.9999885707573,
+          "evidence": 0.9798829557492956,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666544845549575
+        },
+        "POST": {
+          "S": 105.09020247327058,
+          "evidence": 0.9585671394182471,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454089768983793
+        },
+        "PRE": {
+          "S": 80.25482339738227,
+          "evidence": 0.9358482465513602,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248221433454447
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T201845Z-29601019.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977085,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-023_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-023",
+      "trust_delta": 0.0070158247815287345,
+      "trust_post": 0.9318134441572105,
+      "trust_pre": 0.9247976193756817,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.61677651883554,
+          "evidence": 0.9421550071244864,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301073941182122
+        },
+        "LATE": {
+          "S": 87.46102448066038,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318134441572105
+        },
+        "POST": {
+          "S": 87.46102448066038,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318134441572105
+        },
+        "PRE": {
+          "S": 80.239448764656,
+          "evidence": 0.9358473719195658,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247976193756817
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T201928Z-97306024.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-024_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-024",
+      "trust_delta": 0.020590680532967642,
+      "trust_post": 0.9454077071772584,
+      "trust_pre": 0.9248170266442908,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62372157624301,
+          "evidence": 0.9421525165895623,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301186132474999
+        },
+        "LATE": {
+          "S": 151.9994100431939,
+          "evidence": 0.9798826944760342,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666542844108735
+        },
+        "POST": {
+          "S": 105.08840606387349,
+          "evidence": 0.9585670175291522,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454077071772584
+        },
+        "PRE": {
+          "S": 80.25063374117381,
+          "evidence": 0.9358446489396552,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248170266442908
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202011Z-bcbdba8d.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977086,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-025_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-025",
+      "trust_delta": 0.007003186535514572,
+      "trust_post": 0.9318313100095524,
+      "trust_pre": 0.9248281234740379,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.63168890761287,
+          "evidence": 0.9421592233311937,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301276435571117
+        },
+        "LATE": {
+          "S": 87.47480988247727,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318313100095524
+        },
+        "POST": {
+          "S": 87.47480988247727,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318313100095524
+        },
+        "PRE": {
+          "S": 80.25893818889202,
+          "evidence": 0.9358526604455073,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248281234740379
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202053Z-b40349fa.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-026_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-026",
+      "trust_delta": 0.020595136209980325,
+      "trust_post": 0.9454093662281051,
+      "trust_pre": 0.9248142300181248,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62554512646342,
+          "evidence": 0.9421571247693924,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301187766631037
+        },
+        "LATE": {
+          "S": 152.0023687994265,
+          "evidence": 0.9798834081643573,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666551200996967
+        },
+        "POST": {
+          "S": 105.09166461588495,
+          "evidence": 0.9585687155934017,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454093662281051
+        },
+        "PRE": {
+          "S": 80.2504660659821,
+          "evidence": 0.9358516154076377,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248142300181248
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202136Z-48833e26.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977089,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-027_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-027",
+      "trust_delta": 0.007016959445672932,
+      "trust_post": 0.9318161181857502,
+      "trust_pre": 0.9247991587400772,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.61985842324691,
+          "evidence": 0.9421593643735047,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.930109898337268
+        },
+        "LATE": {
+          "S": 87.46433886291086,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318161181857502
+        },
+        "POST": {
+          "S": 87.46433886291086,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318161181857502
+        },
+        "PRE": {
+          "S": 80.24160335203851,
+          "evidence": 0.93585195942435,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247991587400772
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202219Z-85ac56cc.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-028_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-028",
+      "trust_delta": 0.020591503038571823,
+      "trust_post": 0.9454072744192291,
+      "trust_pre": 0.9248157713806573,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62194311737032,
+          "evidence": 0.9421515158906657,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301173410879148
+        },
+        "LATE": {
+          "S": 151.9993888319037,
+          "evidence": 0.9798830522972161,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666543072575733
+        },
+        "POST": {
+          "S": 105.08752818920752,
+          "evidence": 0.958566790420706,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454072744192291
+        },
+        "PRE": {
+          "S": 80.24882390474308,
+          "evidence": 0.9358424227848399,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248157713806573
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202302Z-3b2ac491.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977087,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-029_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-029",
+      "trust_delta": 0.007005637753903282,
+      "trust_post": 0.9318235515875725,
+      "trust_pre": 0.9248179138336692,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62468248157033,
+          "evidence": 0.9421531887863744,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301194218954895
+        },
+        "LATE": {
+          "S": 87.46782070386931,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318235515875725
+        },
+        "POST": {
+          "S": 87.46782070386931,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318235515875725
+        },
+        "PRE": {
+          "S": 80.25162741984539,
+          "evidence": 0.9358460387717824,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248179138336692
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202345Z-0ee736c2.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-030_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-030",
+      "trust_delta": 0.02060866979191367,
+      "trust_post": 0.9453981477344335,
+      "trust_pre": 0.9247894779425199,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.60386892497951,
+          "evidence": 0.9421410051992019,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9300971422764625
+        },
+        "LATE": {
+          "S": 151.99139025831005,
+          "evidence": 0.9798817434368119,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666516325259844
+        },
+        "POST": {
+          "S": 105.07478711519246,
+          "evidence": 0.9585626944634891,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9453981477344335
+        },
+        "PRE": {
+          "S": 80.22859280440815,
+          "evidence": 0.9358278569210761,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247894779425199
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.12,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202427Z-9cbef12f.part000.jsonl",
+      "gate_collapse_t": 13.08,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.97709,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-031_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-031",
+      "trust_delta": 0.007142754633855386,
+      "trust_post": 0.9319664517475086,
+      "trust_pre": 0.9248236971136532,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62428556158778,
+          "evidence": 0.9421492396013659,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301213958859645
+        },
+        "LATE": {
+          "S": 87.62312907722196,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9319664517475086
+        },
+        "POST": {
+          "S": 87.62312907722196,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9319664517475086
+        },
+        "PRE": {
+          "S": 80.2534410479623,
+          "evidence": 0.9358405517901685,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248236971136532
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202511Z-d429f5d2.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-032_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-032",
+      "trust_delta": 0.020602897400639142,
+      "trust_post": 0.9454093822869294,
+      "trust_pre": 0.9248064848862902,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62468286579472,
+          "evidence": 0.9421601935919215,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301153002387206
+        },
+        "LATE": {
+          "S": 152.00321331397083,
+          "evidence": 0.9798833858288505,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666552266467443
+        },
+        "POST": {
+          "S": 105.09288871766594,
+          "evidence": 0.9585697323169706,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454093822869294
+        },
+        "PRE": {
+          "S": 80.2472611359012,
+          "evidence": 0.9358562285779705,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248064848862902
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202553Z-3401f1cb.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977085,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-033_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-033",
+      "trust_delta": 0.007001212976229354,
+      "trust_post": 0.9318319275621904,
+      "trust_pre": 0.924830714585961,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.6319902048876,
+          "evidence": 0.94215770997986,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301285621736997
+        },
+        "LATE": {
+          "S": 87.47489265532573,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318319275621904
+        },
+        "POST": {
+          "S": 87.47489265532573,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318319275621904
+        },
+        "PRE": {
+          "S": 80.26036963401666,
+          "evidence": 0.9358502227572116,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.924830714585961
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202636Z-3a44ce63.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-034_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-034",
+      "trust_delta": 0.020589350790799155,
+      "trust_post": 0.9454077445522638,
+      "trust_pre": 0.9248183937614647,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62304178497652,
+          "evidence": 0.9421515975189676,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.930118988165802
+        },
+        "LATE": {
+          "S": 151.999524609125,
+          "evidence": 0.9798829090401111,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666543846970608
+        },
+        "POST": {
+          "S": 105.0879829803612,
+          "evidence": 0.9585668931981413,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454077445522638
+        },
+        "PRE": {
+          "S": 80.2503753236177,
+          "evidence": 0.9358426132631544,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248183937614647
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202719Z-1f19993d.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977085,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-035_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-035",
+      "trust_delta": 0.007010008903411968,
+      "trust_post": 0.9318187705318148,
+      "trust_pre": 0.9248087616284029,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62418241300036,
+          "evidence": 0.9421543755550364,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301137649131486
+        },
+        "LATE": {
+          "S": 87.46751413842377,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318187705318148
+        },
+        "POST": {
+          "S": 87.46751413842377,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318187705318148
+        },
+        "PRE": {
+          "S": 80.25072265677451,
+          "evidence": 0.935846735361568,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248087616284029
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202802Z-b055b777.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-036_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-036",
+      "trust_delta": 0.020670591991799214,
+      "trust_post": 0.9453922930868675,
+      "trust_pre": 0.9247217010950682,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.58580849211013,
+          "evidence": 0.9421531059362235,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.930060815481699
+        },
+        "LATE": {
+          "S": 151.99510370501704,
+          "evidence": 0.9798825779486255,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666516751383663
+        },
+        "POST": {
+          "S": 105.07436803873492,
+          "evidence": 0.958566680920671,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9453922930868675
+        },
+        "PRE": {
+          "S": 80.19418335615927,
+          "evidence": 0.9358460742204802,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9247217010950682
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T202845Z-8529c2ff.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.97709,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-037_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-037",
+      "trust_delta": 0.007003070612653262,
+      "trust_post": 0.9318244291053707,
+      "trust_pre": 0.9248213584927174,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.62480079575091,
+          "evidence": 0.9421510642932253,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.930120746843038
+        },
+        "LATE": {
+          "S": 87.46763952916068,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318244291053707
+        },
+        "POST": {
+          "S": 87.46763952916068,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318244291053707
+        },
+        "PRE": {
+          "S": 80.25299289173442,
+          "evidence": 0.9358433353103333,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248213584927174
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T202928Z-2a474c24.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-038_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-038",
+      "trust_delta": 0.0205785439826639,
+      "trust_post": 0.9454110331276417,
+      "trust_pre": 0.9248324891449778,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.63210471939577,
+          "evidence": 0.9421548410829697,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301290208704479
+        },
+        "LATE": {
+          "S": 152.00097129700288,
+          "evidence": 0.9798827880548872,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666549090630332
+        },
+        "POST": {
+          "S": 105.09246874627635,
+          "evidence": 0.9585672508791636,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454110331276417
+        },
+        "PRE": {
+          "S": 80.26146044353588,
+          "evidence": 0.9358488187180413,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248324891449778
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "FAULT",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ],
+        [
+          14.08,
+          "CAUTION"
+        ]
+      ],
+      "fix_loss_confirmed": true,
+      "flight_log": "20260906T203011Z-b7572ea0.part000.jsonl",
+      "gate_collapse_t": 13.04,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 0.02272,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.977087,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 3.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-039_FAULT.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-039",
+      "trust_delta": 0.0070088437970080575,
+      "trust_post": 0.9318167454108374,
+      "trust_pre": 0.9248079016138293,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.6166496103224,
+          "evidence": 0.9421507635494749,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301117550764572
+        },
+        "LATE": {
+          "S": 87.46039314179288,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 250,
+          "trust": 0.9318167454108374
+        },
+        "POST": {
+          "S": 87.46039314179288,
+          "evidence": 1.0,
+          "fresh_share": 0.0,
+          "gate_weight_sum": 0.0,
+          "n_steps": 150,
+          "trust": 0.9318167454108374
+        },
+        "PRE": {
+          "S": 80.24228868946469,
+          "evidence": 0.9358388662545092,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248079016138293
+        }
+      }
+    },
+    {
+      "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+      "arm": "CONTROL",
+      "engine_config": {
+        "alpha0": 8.0,
+        "beta0": 2.0,
+        "rho_max": 0.998,
+        "rho_min": 0.95,
+        "w_nbr": 0.35,
+        "w_phys": 0.3,
+        "w_stat": 0.15,
+        "w_temp": 0.2
+      },
+      "failsafe_transitions": [
+        [
+          0.04,
+          "NORMAL"
+        ]
+      ],
+      "fix_loss_confirmed": null,
+      "flight_log": "20260906T203054Z-d488197e.part000.jsonl",
+      "gate_collapse_t": null,
+      "gps_fault_rank_post": 2,
+      "gps_fault_rank_pre": 2,
+      "gps_fault_weight_post": 6.4e-05,
+      "gps_fault_weight_pre": 6.4e-05,
+      "n_steps": 751,
+      "nominal_rank_post": 1,
+      "nominal_rank_pre": 1,
+      "nominal_weight_post": 0.999744,
+      "nominal_weight_pre": 0.999744,
+      "post_live_relations": 6.0,
+      "pre_live_relations": 6.0,
+      "tick_hz": 25.0,
+      "trace": "MECHA2-ARDUPILOT-040_CONTROL.trace.jsonl.gz",
+      "trial_id": "MECHA2-ARDUPILOT-040",
+      "trust_delta": 0.020593322582714735,
+      "trust_post": 0.9454055609415943,
+      "trust_pre": 0.9248122383588796,
+      "trust_trajectory": "CAPTURED",
+      "validity": "VALID",
+      "windows": {
+        "AT": {
+          "S": 85.61970209862238,
+          "evidence": 0.9421496865809157,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 25,
+          "trust": 0.9301145626938275
+        },
+        "LATE": {
+          "S": 151.99708536345747,
+          "evidence": 0.9798825911753191,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 250,
+          "trust": 0.9666535439966828
+        },
+        "POST": {
+          "S": 105.08519442094723,
+          "evidence": 0.9585654865608563,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 150,
+          "trust": 0.9454055609415943
+        },
+        "PRE": {
+          "S": 80.24645622584691,
+          "evidence": 0.9358408211265006,
+          "fresh_share": 1.0,
+          "gate_weight_sum": 3.0,
+          "n_steps": 50,
+          "trust": 0.9248122383588796
+        }
+      }
+    }
+  ],
+  "windows": {
+    "AT": [
+      12.0,
+      13.0
+    ],
+    "LATE": [
+      20.0,
+      Infinity
+    ],
+    "POST": [
+      14.0,
+      20.0
+    ],
+    "PRE": [
+      10.0,
+      12.0
+    ]
+  }
+}

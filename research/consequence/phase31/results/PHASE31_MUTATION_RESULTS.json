@@ -1,0 +1,182 @@
+{
+ "baseline_unmutated": {
+  "returncode": 0,
+  "seconds": 2.0
+ },
+ "canary": {
+  "first_failure": "tests/test_consequence_phase31.py::test_phase3s_headline_zero_survives_the_new_span_rule",
+  "verdict": "KILLED"
+ },
+ "elapsed_s": 15.9,
+ "evaluated": 11,
+ "invalid": 0,
+ "killed": 8,
+ "kills_attributed_to_a_bare_file": 0,
+ "kills_attributed_to_a_test_node": 8,
+ "phase": "3.1 -- actionability precondition",
+ "results": [
+  {
+   "breaks": "Reverts to Phase 3's span rule. A single-tick segment then measures zero, and since the frozen failsafe issues each action exactly once, every attributing action measures zero -- so an unsupported confident attribution becomes invisible. This is the defect Phase 3.1 exists to correct; if no test objects, the correction is not pinned.",
+   "family": "SPAN",
+   "first_failure": "tests/test_consequence_phase31.py::test_a_single_tick_segment_has_a_nonzero_duration",
+   "first_failure_is_test_node": true,
+   "id": "31-01",
+   "new": "    return segment[\"t_end\"] - segment[\"t_start\"]",
+   "old": "    return float(segment[\"ticks\"]) / TICK_HZ",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops counting a confident attribution issued while its separating evidence is gated off.",
+   "family": "SPAN",
+   "first_failure": "tests/test_consequence_phase31.py::test_an_attribution_issued_while_unidentifiable_is_counted",
+   "first_failure_is_test_node": true,
+   "id": "31-02",
+   "new": "        if False:\n                unsupported_s += d",
+   "old": "        if response in ATTRIBUTING:\n                unsupported_s += d",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Declares no two responses materially different, so no action conflict can ever be recorded.",
+   "family": "MATERIALITY",
+   "first_failure": null,
+   "first_failure_is_test_node": false,
+   "id": "31-03",
+   "new": "    return False",
+   "old": "    return RESPONSE_CLASS[a] != RESPONSE_CLASS[b]",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 1.5,
+   "verdict": "SURVIVED"
+  },
+  {
+   "breaks": "Decides the conflict on response LABELS rather than classes, so CONTROLLED_DESCENT where PREPARE_LANDING was correct -- the same class -- would be reported as a conflict.",
+   "family": "MATERIALITY",
+   "first_failure": "tests/test_consequence_phase31.py::test_the_action_conflict_criterion_is_on_classes_not_labels",
+   "first_failure_is_test_node": true,
+   "id": "31-04",
+   "new": "    conflict = bool(kinds) and correct_response not in kinds",
+   "old": "    conflict = bool(kinds) and RESPONSE_CLASS[correct_response] not in classes",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Pins the lower confidence bound at zero. A rate of 12/12 would then be reported as consistent with zero.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase31.py::test_clopper_pearson_matches_the_exact_interval[12-12-0.735352-1.0]",
+   "first_failure_is_test_node": true,
+   "id": "31-05",
+   "new": "    low = 0.0",
+   "old": "    low = 0.0 if k == 0 else bisect(lambda p: cdf_at_least(p, k), alpha / 2.0)",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 0.7,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Turns the exact McNemar test one-sided, halving every p-value in the study.",
+   "family": "STATS",
+   "first_failure": "tests/test_consequence_phase31.py::test_the_mcnemar_p_value_is_phase_3s_unchanged",
+   "first_failure_is_test_node": true,
+   "id": "31-06",
+   "new": "    return tail",
+   "old": "    return min(1.0, 2.0 * tail)",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 1.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Drops the declared correct response for a sagging pack, so a power fault falls through to Phase 3's table and is scored against the wrong ground truth.",
+   "family": "TRUTH",
+   "first_failure": null,
+   "first_failure_is_test_node": false,
+   "id": "31-07",
+   "new": "    if False:",
+   "old": "    if fault_family == \"power_sag\":",
+   "path": "csia_consequence/consequence_model31.py",
+   "seconds": 1.4,
+   "verdict": "SURVIVED"
+  },
+  {
+   "breaks": "Invents a horizontal drift for a fault that causes no attitude error -- the precise thing the amendment declares zero in order not to do.",
+   "family": "TRUTH",
+   "first_failure": "tests/test_consequence_phase31.py::test_the_energy_column_is_declared_not_meaningful",
+   "first_failure_is_test_node": true,
+   "id": "31-08",
+   "new": "DRIFT_POWER_MPS = 1.20",
+   "old": "DRIFT_POWER_MPS = 0.0",
+   "path": "csia_consequence/consequence_model31.py",
+   "seconds": 1.5,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Leaves Phase 3.1's fault table installed in Phase 3's module after the call, so Phase 3's model would silently change underneath it.",
+   "family": "TRUTH",
+   "first_failure": "tests/test_consequence_phase31.py::test_phase3s_consequence_model_is_not_mutated_by_the_extension",
+   "first_failure_is_test_node": true,
+   "id": "31-09",
+   "new": "        pass",
+   "old": "        base.FAULT_DRIFT = original",
+   "path": "csia_consequence/consequence_model31.py",
+   "seconds": 1.5,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Restores the false-refusal definition that a development run exposed: keyed on P0's outcome LABEL, it reported zero false refusals while twelve were happening, because P0's label in those scenarios is UNSUPPORTED_CONFIDENCE.",
+   "family": "DEFINITION",
+   "first_failure": "tests/test_consequence_phase31.py::test_the_false_refusal_definition_is_on_responses_not_on_labels",
+   "first_failure_is_test_node": true,
+   "id": "31-10",
+   "new": "        if r[\"policies\"][\"P0\"][\"outcome\"] == \"CORRECT_ACTIONABLE\"]",
+   "old": "        if r[\"correct_response\"] in r[\"policies\"][\"P0\"][\"responses_issued\"]\n        and r[\"correct_response\"] not in r[\"policies\"][\"P2\"][\"responses_issued\"]]",
+   "path": "research/consequence/phase31/evaluate31.py",
+   "seconds": 1.4,
+   "verdict": "KILLED"
+  },
+  {
+   "breaks": "Stops gating the evidence in the gated condition, so EG becomes EA and the study compares a condition against itself.",
+   "family": "DEFINITION",
+   "first_failure": null,
+   "first_failure_is_test_node": false,
+   "id": "31-11",
+   "new": "    drop = ()",
+   "old": "    drop = (GATING_SENSOR,) if condition == \"EG\" else ()",
+   "path": "research/consequence/phase31/campaign31.py",
+   "seconds": 1.3,
+   "verdict": "SURVIVED"
+  }
+ ],
+ "schema": "csia.consequence.phase31_mutation/1",
+ "score": 0.7272727272727273,
+ "selection": [
+  "tests/test_consequence_phase31.py"
+ ],
+ "separate_from": "research/bus_provenance/results/E2M_MUTATION_RESULTS.json, which stays at 38 evaluated / 36 killed / 2 survived and is not touched by this runner",
+ "survived": 3,
+ "targets": [
+  "csia_consequence/consequence_model31.py",
+  "research/consequence/phase31/campaign31.py",
+  "research/consequence/phase31/evaluate31.py"
+ ],
+ "what_this_is_not": "not evidence about hardware, and not a second measurement of Phase 3. A high score means the tests would notice a change in the Phase-3.1 measurement code.",
+ "working_tree_files_synced_into_sandbox": [
+  "csia_consequence/__init__.py",
+  "csia_consequence/action_adapter.py",
+  "csia_consequence/consequence_model.py",
+  "csia_consequence/consequence_model31.py",
+  "csia_consequence/gates.py",
+  "csia_consequence/partitions.py",
+  "csia_consequence/phase31_partitions.py",
+  "csia_consequence/phase3_partitions.py",
+  "csia_consequence/support.py",
+  "research/consequence/phase31/campaign31.py",
+  "research/consequence/phase31/evaluate31.py",
+  "research/consequence/phase31/results/PHASE31_RESULTS_DEVELOPMENT.json",
+  "research/consequence/phase31/results/PHASE31_RESULTS_LOCKED.json",
+  "research/consequence/phase31/results/PHASE31_TRACES_LOCKED.json",
+  "tests/test_consequence_phase31.py",
+  "tools/mutation/run_phase31_mutations.py"
+ ]
+}

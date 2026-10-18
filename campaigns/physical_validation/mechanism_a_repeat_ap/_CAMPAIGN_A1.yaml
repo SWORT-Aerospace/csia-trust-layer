@@ -1,0 +1,77 @@
+%YAML 1.2
+---
+# CAMPAIGN A1 -- SEALED. This directory is historical evidence.
+#
+# WHAT MAY NOT HAPPEN TO IT
+#   - no rerun into this directory
+#   - no replacement of its logs
+#   - no amendment of any manifest
+#   - no change to its preregistration
+#   - no regeneration of any value in place
+#
+# A later campaign that measures the same thing is a DIFFERENT campaign with
+# its own identifier, plan and preregistration. That is the same rule the
+# failure ledger applies to reruns: "we reran it and it worked" is a different
+# fact from "it worked".
+
+schema: csia.research.campaign_seal/1
+campaign_id: CAMPAIGN_A1
+directory: campaigns/physical_validation/mechanism_a_repeat_ap
+sealed_at_commit: c87a325e8ab0714538d842dec440a95668f62645
+sealed_date: 2026-09-06
+status: SEALED
+
+preregistration: >-
+  research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md
+status_document: >-
+  research/physical_validation/prereg/MECHANISM_A_REPEATED_STATUS.md
+derived_quantities: >-
+  research/physical_validation/results/mechanism_a_repeat_ardupilot.json
+
+platform: ardupilot
+autopilot_build: ArduCopter V4.8.0-dev @ 01a504b472259602e13df4cf07df7c0cdbb35993
+frozen_core_tag: csia-v1.0-research-final
+
+reconciliation:
+  planned: 40
+  attempted: 40
+  valid: 40
+  invalid: 0
+  not_attempted: 0
+  fault_trials: 20
+  control_trials: 20
+
+purpose: >-
+  Repeatability of the CONFIRMED fix-loss intervention, and of every quantity
+  this campaign actually captured. Nothing more.
+
+# ---------------------------------------------------------------------------
+# THE OMISSION, NAMED IN THE VOCABULARY THAT MATTERS
+# ---------------------------------------------------------------------------
+# NOT_CAPTURED is not FAIL, not ZERO, and not UNCHANGED. The instrument was
+# never switched on: tools/deploy/shadow_sitl_check.py writes a per-tick trust
+# series only when given --trust-trace, and this campaign was run without it.
+# There is no trust data in these logs to re-read, at any confidence.
+trust_trajectory: NOT_CAPTURED
+trust_trajectory_reason: >-
+  The campaign runner did not pass --trust-trace. Recorded as FL-014.
+trust_trajectory_is_not:
+  - FAIL           # nothing was measured and found wanting
+  - ZERO           # no value was observed to be zero
+  - UNCHANGED      # no before/after comparison was possible
+  - INCONCLUSIVE   # a test was not run and returned nothing; none was run
+
+captured_quantities:
+  - gps_gate_weight_sum before and after onset
+  - gnss.position MISSING with NO_3D_FIX (the original artifact's quantity)
+  - first_t for both of the above
+  - RULE-B tick counts
+  - nominal and gps_fault hypothesis ranks
+  - failsafe transitions
+  - latency distribution (RECORDED, NOT ADJUDICATED -- contended host)
+
+superseded_by: nothing
+completion_campaign: >-
+  CAMPAIGN_A2 recovers the trust quantities under a separate preregistration.
+  A2 does not supersede A1 and does not amend it; the two are reported
+  separately.

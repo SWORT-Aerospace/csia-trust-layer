@@ -1,6 +1,6 @@
 # WP-C4 — Full Algorithm Exposition and Non-Invasive Stress Testing
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **PR #13**
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **PR #13**
 **Suite: 467 → 467.** No production file touched. No test added — WP-C4
 records findings rather than pinning them.
 **Artifacts:** `research/wp_c4/results/`, `figures/wp_c4_*.png`,

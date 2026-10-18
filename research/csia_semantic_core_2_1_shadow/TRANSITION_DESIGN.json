@@ -1,0 +1,53 @@
+{
+ "id": "CSIA-2.1-SHADOW-TRANSITION-E1",
+ "status": "FROZEN before any run. Non-confirmatory shadow experiment. Changing anything below after the first run requires a new id.",
+ "frozen_on": "2026-09-30",
+ "question": "When the estimator switches lanes after an IMU failure, which evidence stays admissible, and does a fixed age window or a configuration-epoch (state) rule decide admissibility better than no validity management?",
+ "modelled_on": {
+  "lane_switch": "PX4 547e2ca src/modules/ekf2/EKF2Selector.cpp: on a primary-instance change it increments instance_changed_count and resets the relative test ratios (lines 106-136); estimator_selector_status carries primary_instance and instance_changed_count (msg/EstimatorSelectorStatus.msg)",
+  "latched_producer": "a windowed deadline-miss counter: the frozen aircraft profile's compute.deadline_met record carries reported_misses; PX4 estimator_status test ratios are documented as low-pass filtered (msg/EstimatorStatus.msg pos_test_ratio), i.e. producers with memory exist",
+  "slow_producer": "sensor health published at a lower rate than the reasoning tick"
+ },
+ "infrastructure": "the frozen aircraft profile's NOMINAL run (csia.v2 scenario harness, 60 ticks) supplies every record; the transition is applied as record edits, as the shadow study's other counterfactuals are. No simulator, profile or frozen file is modified.",
+ "schedule": {
+  "ticks": 60,
+  "imu0_fails_at": 20,
+  "lane_switch_at": 25,
+  "estimator_lane0_degraded": [20, 24],
+  "latched_miss_window_ticks": 10,
+  "imu0_health_update_period_ticks": 5
+ },
+ "records": {
+  "SENSOR/source.imu0": "VIOLATED from tick 20 on, published every 5 ticks (content tick = last publication); no configuration epoch (it describes the sensor, not the estimator)",
+  "COMPUTE/state_estimator compute.deadline_met": "VIOLATED while a deadline miss lies within the last 10 ticks: misses occur on lane 0 at ticks 20-24, so the record stays VIOLATED to tick 33 and returns NOMINAL at tick 34; content tick = last miss; epoch = lane on which that miss occurred",
+  "COMPUTE/state_estimator compute.stability": "DEGRADED at ticks 20-24 (lane 0), NOMINAL from 25 (lane 1); content tick = current; epoch = current lane",
+  "COMPUTE/state_estimator compute.process_alive, compute.process_producing": "NOMINAL throughout (the estimator runs on both lanes)",
+  "everything else": "as in the NOMINAL run"
+ },
+ "truth": {
+  "0-19": {"attribution": "NO_EVIDENCE", "position_unavailable_on_navigation": false},
+  "20-24": {"attribution": "cause SENSOR/source.imu0; AMBIGUOUS containing it, or UNIQUE SENSOR/source.imu0, is correct; UNIQUE COMPUTE/state_estimator is wrong", "position_unavailable_on_navigation": true},
+  "25-59": {"attribution": "UNIQUE SENSOR/source.imu0 is correct; AMBIGUOUS containing it is correct but weaker; any UNIQUE naming another component is wrong", "position_unavailable_on_navigation": false}
+ },
+ "record_validity_truth": "a record is VALID at tick t iff its content describes the configuration in force at t and it is the producer's latest publication. The latched deadline record at ticks 25-33 is INVALID (lane 0 content after the switch to lane 1). The imu0 record is VALID at every tick from 20 on, whatever its age within its publication period.",
+ "policies": {
+  "C_NONE": "2.1 as it is: every record admitted",
+  "A_FIXED_AGE_W3": "a record is admitted iff (t - content tick) <= 3",
+  "A_FIXED_AGE_W12": "a record is admitted iff (t - content tick) <= 12",
+  "B_STATE_EPOCH": "a record carrying an estimator epoch is admitted iff that epoch is the current lane; a record with no epoch is admitted"
+ },
+ "inadmissible_records_become": "observation_state UNAVAILABLE (could not look), never deleted, so 2.1's C2 treats them as unknown",
+ "reasoner": "SemanticCore21.from_engine(frozen aircraft engine), all corrections on, no successor profile",
+ "metrics_per_policy": [
+  "ticks whose attribution is graded CORRECT_UNIQUE / CORRECT_AMBIGUOUS / WRONG_UNIQUE / NO_EVIDENCE_WHEN_CAUSE_PRESENT",
+  "ticks with POSITION_UNAVAILABLE raised on a navigation function when truth says false (stale symptom), and not raised when truth says true (missed)",
+  "record-ticks admitted although INVALID (stale admitted)",
+  "record-ticks made UNAVAILABLE although VALID (over-invalidation)",
+  "first tick after the switch from which every later tick's attribution is CORRECT_UNIQUE (recovery tick)"
+ ],
+ "not_executed_here_and_why": {
+  "B_GNSS_loss_and_recovery_with_position_reset": "needs an estimator-innovation relation the frozen aircraft profile does not have, and an adapter from PX4 estimator topics to it: new infrastructure. Stopped at design (CONFIGURATION_TRANSITION_STUDY.md section 5).",
+  "C_controller_mode_change": "the frozen profiles model no controller mode; stopped at design.",
+  "D_control_allocation_change": "not simulated; examined on the sealed XSYS-001 data instead (XSYS_STATE_CONDITIONED_EXPLORATION.md), which is real PX4 SITL allocator behaviour after an effectiveness loss."
+ }
+}

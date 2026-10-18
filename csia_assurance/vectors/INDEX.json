@@ -1,0 +1,96 @@
+{
+  "note": "Conformance suite for a SECOND implementation built from docs/ASSURANCE_REFERENCE_SEMANTICS.md alone. Expected values were produced by this implementation, so they are a conformance target, NOT an independent oracle -- stated because the distinction matters.",
+  "schema": "csia.assurance.vectors/1",
+  "vectors": [
+    {
+      "expected_state": "SUPPORTED_UNIQUE",
+      "file": "V01_supported_unique.json",
+      "id": "V01_supported_unique",
+      "why": "every competitor separated by an active term"
+    },
+    {
+      "expected_state": "AMBIGUOUS",
+      "file": "V02_ambiguous_one_gate_closed.json",
+      "id": "V02_ambiguous_one_gate_closed",
+      "why": "the self-occlusion shape: leader nominal, GNSS gate collapsed"
+    },
+    {
+      "expected_state": "NON_IDENTIFIABLE",
+      "file": "V03_non_identifiable_no_active_evidence.json",
+      "id": "V03_non_identifiable_no_active_evidence",
+      "why": "nothing active separates anything"
+    },
+    {
+      "expected_state": "AMBIGUOUS",
+      "file": "V04_stale_state_withdraws_witness.json",
+      "id": "V04_stale_state_withdraws_witness",
+      "why": "weight 1.0 but state STALE is NOT active"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V05_single_hypothesis_not_evaluable.json",
+      "id": "V05_single_hypothesis_not_evaluable",
+      "why": "|H|<2 is NOT_EVALUABLE, never supported"
+    },
+    {
+      "expected_state": "UNKNOWN",
+      "file": "V06_no_leader_unknown.json",
+      "id": "V06_no_leader_unknown",
+      "why": "no leader asserted"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V07_invalid_gate_nan.json",
+      "id": "V07_invalid_gate_nan",
+      "why": "NaN fails every comparison; only not(0<=w<=1) catches it"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V08_invalid_gate_subnormal.json",
+      "id": "V08_invalid_gate_subnormal",
+      "why": "5e-324 is >0 but uninterpretable; HF-001"
+    },
+    {
+      "expected_state": "AMBIGUOUS",
+      "file": "V09_negative_zero_valid_and_inactive.json",
+      "id": "V09_negative_zero_valid_and_inactive",
+      "why": "-0.0 is valid and means inactive"
+    },
+    {
+      "expected_state": "SUPPORTED_UNIQUE",
+      "file": "V10_smallest_normal_is_valid.json",
+      "id": "V10_smallest_normal_is_valid",
+      "why": "sys.float_info.min is valid and active"
+    },
+    {
+      "expected_state": "SUPPORTED_UNIQUE",
+      "file": "V11_ranking_is_not_read.json",
+      "id": "V11_ranking_is_not_read",
+      "why": "a huge leader weight changes nothing"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V12_config_hash_mismatch.json",
+      "id": "V12_config_hash_mismatch",
+      "why": "prior config differs -> fail closed"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V13_timestamp_regression.json",
+      "id": "V13_timestamp_regression",
+      "why": "time went backwards"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V14_topology_changed.json",
+      "id": "V14_topology_changed",
+      "why": "the evidence topology is not the one the prior saw"
+    },
+    {
+      "expected_state": "NOT_EVALUABLE",
+      "file": "V15_unsupported_schema.json",
+      "id": "V15_unsupported_schema",
+      "why": "an input declaring a schema this evaluator does not implement"
+    }
+  ]
+}

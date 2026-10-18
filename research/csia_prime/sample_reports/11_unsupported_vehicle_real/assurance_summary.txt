@@ -1,0 +1,42 @@
+CSIA FLIGHT ASSURANCE: ASSURANCE SUMMARY (offboard; no flight-control authority)
+log: sample_log_boat_testing_2022-7-28-13-31-16.ulg   analyzer 2.2.1, semantics 2.1.1, profile multirotor-quad r1, view prime-view-1
+SUPPORT: UNSUPPORTED: vehicle type rover or boat: outside the multirotor-quad profile; estimator_status lacks the field 'hdg_test_ratio' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+
+WHAT HAPPENED?
+  - UNCONFIRMED: POWER/battery:power.battery_warning DEGRADED 14.17 V (threshold n/a; ); context only: no symptom reads this output
+  - attribution: NO_EVIDENCE (not justified: NOTHING_ADVERSE)
+WHEN DID IT START?
+  - E1: onset estimate 236.492 s, first alarm 236.492 s
+  - E2: onset estimate 248.712 s, first alarm 248.712 s
+  - E3: onset estimate 265.435 s, first alarm 265.435 s
+  - E4: onset estimate 312.546 s, first alarm 312.546 s
+WHICH SUBSYSTEM IS AFFECTED?
+  - none confirmed (unconfirmed observations on POWER/battery)
+WHAT CAUSES REMAIN POSSIBLE?
+  - none (no symptom)
+WHAT WAS ELIMINATED, AND WHY?
+  - nothing
+WHAT EVIDENCE SUPPORTS THIS?
+  - no confirmed conclusion
+WHAT EVIDENCE WAS REJECTED, AND WHY?
+  - none
+WHICH MONITORS SHARE THE SAME SOURCE?
+  - 0 adverse output(s) in 0 lineage group(s): 0 independent line(s)
+WHAT WAS NOT OBSERVABLE?
+  - coverage rows (record x producer) by class: OBSERVED 1, NO_ANOMALY 1, NO_COVERAGE 32
+  - 1 of the profile's 29 records observed
+  - event discovery: the frozen v1.1 CUSUM reads the v1 simulation's physics chi-square; a PX4 log has none, so it cannot trigger here
+  - ACTUATION/motor_*: actuator_motors or esc_status missing, or CA_ROTOR_COUNT < 2
+  - estimator_status: estimator_status lacks the field 'hdg_test_ratio' the contract reads (PX4 547e2ca schema); the estimator producer is not run
+  - ACTUATION/motor_*:actuation.electrical_response: esc_status carries no ESC current: the electrical response and the stall signature cannot be judged (SB-1)
+WHAT ADDITIONAL MEASUREMENT WOULD RESOLVE THE AMBIGUITY?
+  - nothing is ambiguous
+WHAT CHANGED IN THE CONFIGURATION? (EKF2 aiding, resets, sensor selection)
+  - none recorded (or no estimator evidence in this log)
+ALERTS (re-raised identical PX4 conditions grouped)
+  - 236.49-236.49 s px4.log_message: [commander] Low battery level, return advised (raised 1x; E1)
+  - 236.51-249.31 s px4.battery_warning (raised 8x; E1, E2)
+  - 265.44-315.20 s px4.log_message: [commander] Kill-switch engaged (raised 3x; E3, E4)
+  - 386.75-386.75 s px4.log_message: [commander] Low battery level, return advised (raised 1x; E5)
+  - 387.30-439.91 s px4.battery_warning (raised 17x; E5, E6, E7, E8, E9, E10, E11)
+  - 447.11-447.11 s px4.log_message: [commander] Kill-switch engaged (raised 1x; E12)

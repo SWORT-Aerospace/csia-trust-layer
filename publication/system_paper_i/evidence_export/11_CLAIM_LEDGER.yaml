@@ -1,0 +1,237 @@
+schema: csia.publication.claim_ledger/1
+paper: CSIA Systems Paper I
+generated_from: committed artifacts, not manuscript prose
+phase: 1
+status_vocabulary:
+- EMPIRICAL
+- STRUCTURAL
+- IMPLEMENTATION_VERIFIED
+- ANALYTICAL_IMPLEMENTATION_RESULT
+- DESIGN_RULE
+- UNSUPPORTED
+- WITHDRAWN
+- REFUTED
+- INDETERMINATE
+forbidden_status:
+- NOVEL
+counts:
+  EMPIRICAL: 6
+  STRUCTURAL: 3
+  DESIGN_RULE: 1
+  IMPLEMENTATION_VERIFIED: 1
+  ANALYTICAL_IMPLEMENTATION_RESULT: 1
+  WITHDRAWN: 1
+  REFUTED: 3
+  INDETERMINATE: 1
+  UNSUPPORTED: 1
+  paper_eligible_true: 13
+claims:
+- claim_id: P1-C01
+  statement: 'Under a tested fix-loss GNSS fault the diagnosis reports nominal for
+    100% of the post-onset window ({''nominal'': 1.0}) and never names gps_fault,
+    while the GPS trust minimum is 0.9767.'
+  status: EMPIRICAL
+  scope: one arm, bench pipeline, fixed seeds; 1000 post-onset ticks at 25 Hz
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: single arm, single seed set; not a rate
+  paper_eligible: true
+- claim_id: P1-C02
+  statement: 'A GNSS fault that preserves the fix does NOT instantiate the mechanism:
+    the gate never closes (gvalid_min 1.0) and gps_fault leads within 1.44 s.'
+  status: EMPIRICAL
+  scope: arm A of the same artifact
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: this is what narrows C01 to fix-loss faults; the general GNSS claim
+    is REFUTED by it
+  paper_eligible: true
+- claim_id: P1-C03
+  statement: 'SOI(gps_fault) = 1.0: all 1 features in the LOW set of gps_fault are
+    gated by a gate that gps_fault closes.'
+  status: STRUCTURAL
+  scope: the declared post-promotion signature matrix; both readings of the 3 UNKNOWN
+    closure cells give 1.0
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  limitations: a property of the declared matrix, not a measurement; C01 is what
+    makes it observable
+  paper_eligible: true
+- claim_id: P1-C04
+  statement: kappa(S_eff) = 0.142857 against kappa(S) = 0.0; the coarsening gap
+    is 0.142857.
+  status: STRUCTURAL
+  scope: post-promotion matrix, unknown-as-open reading
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  commit: 8464417e9e377d8a2886fe405e85a0ee27998569
+  limitations: SUPERSEDES the pre-promotion ceiling 0.286; see corrections ledger
+    row 13
+  paper_eligible: true
+- claim_id: P1-C05
+  statement: Adding one relation outside the fault's own gate removes effective
+    undetectability; the same relation placed behind gvalid does not.
+  status: DESIGN_RULE
+  scope: 1232 reachable configurations of the declared structure, target gps_fault,
+    at k=8 and k=7
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c6/results/minimum_repair.json
+  script: research/wp_c6/minimum_repair.py
+  commit: 1ee0662acffb84472aad3f19f49b6b259c855747
+  limitations: NOT a theorem and must not be labelled one; implements_nothing=true,
+    so no runtime evidence
+  paper_eligible: true
+- claim_id: P1-C06
+  statement: The IMU tie is broken by promoting attitude_gravity_mag into imu0_bias_drift,
+    with no new hardware and no new collisions.
+  status: IMPLEMENTATION_VERIFIED
+  scope: executed behind flag CSIA_WP_C2_IMU_REPAIR, later promoted to default
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c2/results/repair_experiment.json
+  script: research/wp_c2/repair_experiment.py
+  commit: 081cca3b83fe098385648b9a0b7e26a0f5bd11c3
+  limitations: 'a different problem from the GPS case: a tie between hypotheses,
+    not a hypothesis destroying its own evidence'
+  paper_eligible: true
+- claim_id: P1-C07
+  statement: Escalation is duration-limited. The closed form predicts N* = 93.31
+    ticks; the shipping code crosses at tick 94, with max_abs_error = 0.0.
+  status: ANALYTICAL_IMPLEMENTATION_RESULT
+  scope: the shipping TrustCore under the measured banked state S_0=475.6775, T_0=0.999791,
+    rho=0.95
+  evidence_class: COMPUTED_AND_VERIFIED_AGAINST_IMPLEMENTATION
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/escalation_algebra.py
+  commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  limitations: a closed form for THIS implementation, not a theorem about a class;
+    the first derivation was wrong, see corrections ledger row 9
+  paper_eligible: true
+- claim_id: P1-C08
+  statement: The boundary separates all nine prior runs with zero misclassifications,
+    and the runs were flown before the derivation existed.
+  status: EMPIRICAL
+  scope: '9 WP-C7 runs: 6 steps, 3 ramps'
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/escalation_algebra.py
+  commit: 83b7f62708567bb58029a67e359c613a50e2c997
+  limitations: 9 runs, one autopilot; retrospective, not preregistered
+  paper_eligible: true
+- claim_id: P1-C09
+  statement: The single false-healthy quantity was refuted and split four ways.
+    The glitch arm carries T_FH = 24.64 s with T_SOFH = 0.0 s.
+  status: EMPIRICAL
+  scope: ArduCopter 3.3 SITL, 5 arms, 25 s window, gps_fault
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/four_quantity_metrics.py
+  commit: 3597f18c953e52111978f09af17c9432c6b794c9
+  limitations: T_FH and T_SOFH require injected ground truth and are permanently
+    unavailable from the 26-log corpus
+  paper_eligible: true
+- claim_id: P1-C10
+  statement: 'Alert episodes on unannotated real-log replay: 2 episodes in 0.5183
+    monitored hours = 3.859/h, 95% CI [0.467, 13.939].'
+  status: EMPIRICAL
+  scope: 26 public PX4 logs, UNANNOTATED, monitored basis excluding arm_time
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: datasets/reports/exposure_v2.json
+  script: tools/build_dataset_manifest.py
+  commit: 86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84
+  limitations: NOT a false-alarm rate, NOT recall, NOT field validation, NOT endogeneity.
+    Interval is wide at this count
+  paper_eligible: true
+- claim_id: P1-C11
+  statement: Verified-healthy exposure is 0.0 hours.
+  status: EMPIRICAL
+  scope: the same corpus
+  evidence_class: MEASURED_IN_RUNTIME
+  artifact: datasets/reports/exposure_v2.json
+  script: tools/build_dataset_manifest.py
+  commit: 86b19f9a1d0feb54efcefa7f122a5b9fd0b63c84
+  limitations: enforced by tests/test_datasets.py; the corpus may never be described
+    as healthy
+  paper_eligible: true
+- claim_id: P1-C12
+  statement: Channel-loss interaction is SUB-additive.
+  status: STRUCTURAL
+  scope: enumeration over the declared structure
+  evidence_class: COMPUTED_FROM_DECLARED_STRUCTURE
+  artifact: research/wp_c1/results/certificate.json
+  script: research/wp_c1/certificate.py
+  commit: cda681db8a6ed0132a241b9e8b47dcef8a621ecd
+  limitations: an earlier version reported 1784 super-additive configurations and
+    was WRONG; see corrections ledger row 3
+  paper_eligible: true
+- claim_id: P1-X01
+  statement: U_h is contained in C_h, giving unrestricted irreparability of gps_fault.
+  status: WITHDRAWN
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_C7_REPORT.md
+  script: null
+  commit: 0a0182e6b3780924ad00debc4613407bc15ae864
+  limitations: U_h is only definable relative to (M, S, R). The containment that
+    holds is E_h subset of C_h
+  paper_eligible: false
+- claim_id: P1-X02
+  statement: GNSS faults self-occlude.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  commit: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  limitations: refuted by arm A inside the same artifact. Superseded by P1-C01 and
+    P1-C02
+  paper_eligible: false
+- claim_id: P1-X03
+  statement: Channel-loss interaction is super-additive.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_C1_CERTIFICATE.md
+  script: research/wp_c1/certificate.py
+  commit: cda681db8a6ed0132a241b9e8b47dcef8a621ecd
+  limitations: superseded by P1-C12
+  paper_eligible: false
+- claim_id: P1-X04
+  statement: 5 of 11 edges are inert.
+  status: REFUTED
+  scope: —
+  evidence_class: NONE
+  artifact: reports/wp_a2/e1_inert_gates.json
+  script: null
+  commit: cb0ef62
+  limitations: 'measured: 6 of 11 vary with state, 5 are constant, exactly one is
+    genuinely inert'
+  paper_eligible: false
+- claim_id: P1-I01
+  statement: Provenance of the failsafe thresholds.
+  status: INDETERMINATE
+  scope: —
+  evidence_class: NONE
+  artifact: docs/audit/WP_A2_THRESHOLD_PROVENANCE.md
+  script: null
+  commit: 5a5d986e50092e3097dc5c39d13329cec83d523d
+  limitations: only pre-import design notes could close it and they do not exist
+    in this repository. PERMANENTLY indeterminate
+  paper_eligible: true
+- claim_id: P1-U01
+  statement: The fusion uses reciprocal weighting.
+  status: UNSUPPORTED
+  scope: —
+  evidence_class: NONE
+  artifact: csia/trust_engine/engine.py
+  script: null
+  commit: 8b94b09de010dcfdad4096be1a4943e3fe821b5d
+  limitations: no such term exists in source; the fusion is a fixed weighted mean
+    renormalised over available sub-scores
+  paper_eligible: false

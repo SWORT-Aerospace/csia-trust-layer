@@ -1,0 +1,542 @@
+{
+  "arms": [
+    "passive",
+    "opportunistic",
+    "fixed",
+    "random_safe",
+    "selected"
+  ],
+  "comparison_against_passive": {
+    "fixed": {
+      "incremental_energy_as": 3.034113712374582,
+      "pairs_per_amp_second": -0.32958553791887124,
+      "pairs_resolved_over_passive_across_bracket": -1,
+      "pairs_resolved_over_passive_by_magnitude": {
+        "0": -2,
+        "1": 0,
+        "2": 1
+      },
+      "relations_the_action_made_INELIGIBLE": [
+        "effort_drift"
+      ],
+      "relations_the_action_made_eligible": [
+        "source_impedance"
+      ],
+      "worse_than_passive_at_some_magnitude": true
+    },
+    "opportunistic": {
+      "incremental_energy_as": 0.0,
+      "pairs_per_amp_second": null,
+      "pairs_resolved_over_passive_across_bracket": -1,
+      "pairs_resolved_over_passive_by_magnitude": {
+        "0": -2,
+        "1": 0,
+        "2": 1
+      },
+      "relations_the_action_made_INELIGIBLE": [
+        "effort_drift"
+      ],
+      "relations_the_action_made_eligible": [
+        "source_impedance"
+      ],
+      "worse_than_passive_at_some_magnitude": true
+    },
+    "random_safe": {
+      "incremental_energy_as": 4.498410715350743,
+      "pairs_per_amp_second": -0.22230073314282278,
+      "pairs_resolved_over_passive_across_bracket": -1,
+      "pairs_resolved_over_passive_by_magnitude": {
+        "0": -2,
+        "1": 0,
+        "2": 1
+      },
+      "relations_the_action_made_INELIGIBLE": [
+        "effort_drift"
+      ],
+      "relations_the_action_made_eligible": [
+        "source_impedance"
+      ],
+      "worse_than_passive_at_some_magnitude": true
+    },
+    "selected": {
+      "incremental_energy_as": 2.398369999780621,
+      "pairs_per_amp_second": -0.4169498451412709,
+      "pairs_resolved_over_passive_across_bracket": -1,
+      "pairs_resolved_over_passive_by_magnitude": {
+        "0": -2,
+        "1": 0,
+        "2": 1
+      },
+      "relations_the_action_made_INELIGIBLE": [
+        "effort_drift"
+      ],
+      "relations_the_action_made_eligible": [
+        "source_impedance"
+      ],
+      "worse_than_passive_at_some_magnitude": true
+    }
+  },
+  "elapsed_s": 35.63507390022278,
+  "falsifiers": {
+    "a_free_mission_manoeuvre_matches_the_selected_probe": true,
+    "any_arm_falsely_attributed_an_unmodelled_fault": false,
+    "selected_does_not_beat_fixed": true,
+    "selected_does_not_beat_random_safe": true,
+    "the_selected_probe_is_worse_than_passive_somewhere": true
+  },
+  "falsifiers_fired": [
+    "a_free_mission_manoeuvre_matches_the_selected_probe",
+    "selected_does_not_beat_fixed",
+    "selected_does_not_beat_random_safe",
+    "the_selected_probe_is_worse_than_passive_somewhere"
+  ],
+  "hypothesis_bank": [
+    {
+      "basis": "no fault injected",
+      "kind": "nominal",
+      "magnitudes": [
+        0.0
+      ],
+      "name": "nominal",
+      "target": "-",
+      "units": "-"
+    },
+    {
+      "basis": "the MX-036 anchor: undetectable on a steady hover at every magnitude up to 0.25 ohm",
+      "kind": "pack_impedance_rise",
+      "magnitudes": [
+        0.02,
+        0.06,
+        0.12
+      ],
+      "name": "pack_impedance",
+      "target": "pack",
+      "units": "ohm"
+    },
+    {
+      "basis": "a current SENSOR reads wrong while the hardware is fine",
+      "kind": "shunt_bias",
+      "magnitudes": [
+        0.03,
+        0.08,
+        0.15
+      ],
+      "name": "shunt_bias",
+      "target": "current_sensing",
+      "units": "fractional gain error"
+    },
+    {
+      "basis": "more current AND more heat for the same rpm",
+      "kind": "bearing_friction",
+      "magnitudes": [
+        0.5,
+        1.5,
+        3.0
+      ],
+      "name": "bearing_friction",
+      "target": "esc0",
+      "units": "newton of added drag"
+    },
+    {
+      "basis": "MX-036 falsified the prediction that the controller hides this; actuator_response detects it at 2.0x to 299x",
+      "kind": "esc_efficiency_loss",
+      "magnitudes": [
+        0.08,
+        0.18,
+        0.35
+      ],
+      "name": "efficiency_loss",
+      "target": "esc0",
+      "units": "fractional thrust per amp lost"
+    },
+    {
+      "basis": "same dissipation, worse cooling",
+      "kind": "thermal_path_loss",
+      "magnitudes": [
+        0.3,
+        0.8,
+        1.5
+      ],
+      "name": "thermal_path",
+      "target": "esc0",
+      "units": "fractional cooling loss"
+    },
+    {
+      "basis": "a non-physical timing contrast against the power faults",
+      "kind": "cpu_overrun",
+      "magnitudes": [
+        0.002,
+        0.006,
+        0.012
+      ],
+      "name": "cpu_overrun",
+      "target": "cpu",
+      "units": "second of added loop time"
+    },
+    {
+      "basis": "a link fault that must not look like a power fault",
+      "kind": "bus_drops",
+      "magnitudes": [
+        0.05,
+        0.15,
+        0.3
+      ],
+      "name": "bus_drops",
+      "target": "canbus",
+      "units": "fraction of frames lost"
+    }
+  ],
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "csia_components.simulate drops frames by incrementing frames_err and not frames_ok; residuals.error_rate and sequence_continuity read those counters directly, so a 15 percent loss must move them. The expected answer comes from the simulator's link model and the residual definitions, not from this campaign",
+        "control": "15 percent frame loss separates from nominal",
+        "kind": "POSITIVE",
+        "observed": "True",
+        "status": "PASS"
+      },
+      {
+        "basis": "two runs of the SAME fault at the SAME magnitude differ only by the seed of csia_components.simulate's noise draws; there is no physical difference for a residual to find, so any separation reported would be the instrument separating noise",
+        "control": "a hypothesis does not separate from itself",
+        "kind": "NEGATIVE",
+        "observed": "False",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.research.aea_pair_campaign",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "magnitude_indices": [
+    0,
+    1,
+    2
+  ],
+  "metric_definition": "A pair is separated when some residual's observed [min,max] envelopes over the seed set are disjoint AND that residual's gate was open in every seed of both hypotheses. Counted by independent lineage family, so residuals sharing a raw channel count once.",
+  "pairs_total": 28,
+  "preregistration": "research/active_evidence/PREREGISTRATION.md",
+  "reference_seed_held_out": 999,
+  "results": {
+    "fixed": {
+      "arm": "fixed",
+      "by_magnitude": {
+        "0": {
+          "separated_pairs": 23,
+          "unresolved": [
+            "nominal|pack_impedance",
+            "nominal|efficiency_loss",
+            "nominal|thermal_path",
+            "pack_impedance|efficiency_loss",
+            "pack_impedance|thermal_path"
+          ],
+          "unresolved_pairs": 5
+        },
+        "1": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|efficiency_loss"
+          ],
+          "unresolved_pairs": 1
+        },
+        "2": {
+          "separated_pairs": 28,
+          "unresolved": [],
+          "unresolved_pairs": 0
+        }
+      },
+      "duration_s": 6.0,
+      "eligible_count": 10,
+      "eligible_relations": {
+        "actuator_agreement": true,
+        "actuator_response": false,
+        "bus_rate": true,
+        "charge_accounting": true,
+        "clock_agreement": true,
+        "effort_drift": false,
+        "error_rate": true,
+        "loop_rate": true,
+        "power_balance": true,
+        "sequence_continuity": true,
+        "source_impedance": true,
+        "thermal_rise": true
+      },
+      "incremental_energy_as": 3.034113712374582,
+      "open_set": {
+        "false_attribution": false,
+        "hypotheses_still_consistent": [
+          "efficiency_loss",
+          "nominal",
+          "pack_impedance",
+          "thermal_path"
+        ],
+        "injected": "thermal_path_loss on esc2, which no bank entry names",
+        "note": "a single consistent modelled hypothesis means the machinery named a cause for a fault it has no model of, which is the failure H4 exists to detect",
+        "verdict": "AMBIGUOUS_INCLUDING_WRONG_LABELS"
+      },
+      "pairs_total": 28,
+      "probe": "triangle",
+      "total_unresolved_over_bracket": 6,
+      "worst_unresolved": 5
+    },
+    "opportunistic": {
+      "arm": "opportunistic",
+      "by_magnitude": {
+        "0": {
+          "separated_pairs": 23,
+          "unresolved": [
+            "nominal|pack_impedance",
+            "nominal|efficiency_loss",
+            "nominal|thermal_path",
+            "pack_impedance|efficiency_loss",
+            "pack_impedance|thermal_path"
+          ],
+          "unresolved_pairs": 5
+        },
+        "1": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|efficiency_loss"
+          ],
+          "unresolved_pairs": 1
+        },
+        "2": {
+          "separated_pairs": 28,
+          "unresolved": [],
+          "unresolved_pairs": 0
+        }
+      },
+      "duration_s": 0.0,
+      "eligible_count": 10,
+      "eligible_relations": {
+        "actuator_agreement": true,
+        "actuator_response": false,
+        "bus_rate": true,
+        "charge_accounting": true,
+        "clock_agreement": true,
+        "effort_drift": false,
+        "error_rate": true,
+        "loop_rate": true,
+        "power_balance": true,
+        "sequence_continuity": true,
+        "source_impedance": true,
+        "thermal_rise": true
+      },
+      "incremental_energy_as": 0.0,
+      "open_set": {
+        "false_attribution": false,
+        "hypotheses_still_consistent": [
+          "efficiency_loss",
+          "nominal",
+          "pack_impedance",
+          "thermal_path"
+        ],
+        "injected": "thermal_path_loss on esc2, which no bank entry names",
+        "note": "a single consistent modelled hypothesis means the machinery named a cause for a fault it has no model of, which is the failure H4 exists to detect",
+        "verdict": "AMBIGUOUS_INCLUDING_WRONG_LABELS"
+      },
+      "pairs_total": 28,
+      "probe": "hold",
+      "total_unresolved_over_bracket": 6,
+      "worst_unresolved": 5
+    },
+    "passive": {
+      "arm": "passive",
+      "by_magnitude": {
+        "0": {
+          "separated_pairs": 25,
+          "unresolved": [
+            "nominal|pack_impedance",
+            "nominal|thermal_path",
+            "pack_impedance|thermal_path"
+          ],
+          "unresolved_pairs": 3
+        },
+        "1": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|pack_impedance"
+          ],
+          "unresolved_pairs": 1
+        },
+        "2": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|pack_impedance"
+          ],
+          "unresolved_pairs": 1
+        }
+      },
+      "duration_s": 0.0,
+      "eligible_count": 10,
+      "eligible_relations": {
+        "actuator_agreement": true,
+        "actuator_response": false,
+        "bus_rate": true,
+        "charge_accounting": true,
+        "clock_agreement": true,
+        "effort_drift": true,
+        "error_rate": true,
+        "loop_rate": true,
+        "power_balance": true,
+        "sequence_continuity": true,
+        "source_impedance": false,
+        "thermal_rise": true
+      },
+      "incremental_energy_as": 0.0,
+      "open_set": {
+        "false_attribution": false,
+        "hypotheses_still_consistent": [
+          "nominal",
+          "pack_impedance",
+          "thermal_path"
+        ],
+        "injected": "thermal_path_loss on esc2, which no bank entry names",
+        "note": "a single consistent modelled hypothesis means the machinery named a cause for a fault it has no model of, which is the failure H4 exists to detect",
+        "verdict": "AMBIGUOUS_INCLUDING_WRONG_LABELS"
+      },
+      "pairs_total": 28,
+      "probe": "hold",
+      "total_unresolved_over_bracket": 5,
+      "worst_unresolved": 3
+    },
+    "random_safe": {
+      "arm": "random_safe",
+      "by_magnitude": {
+        "0": {
+          "separated_pairs": 23,
+          "unresolved": [
+            "nominal|pack_impedance",
+            "nominal|efficiency_loss",
+            "nominal|thermal_path",
+            "pack_impedance|efficiency_loss",
+            "pack_impedance|thermal_path"
+          ],
+          "unresolved_pairs": 5
+        },
+        "1": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|efficiency_loss"
+          ],
+          "unresolved_pairs": 1
+        },
+        "2": {
+          "separated_pairs": 28,
+          "unresolved": [],
+          "unresolved_pairs": 0
+        }
+      },
+      "duration_s": 8.0,
+      "eligible_count": 10,
+      "eligible_relations": {
+        "actuator_agreement": true,
+        "actuator_response": false,
+        "bus_rate": true,
+        "charge_accounting": true,
+        "clock_agreement": true,
+        "effort_drift": false,
+        "error_rate": true,
+        "loop_rate": true,
+        "power_balance": true,
+        "sequence_continuity": true,
+        "source_impedance": true,
+        "thermal_rise": true
+      },
+      "incremental_energy_as": 4.498410715350743,
+      "open_set": {
+        "false_attribution": false,
+        "hypotheses_still_consistent": [
+          "efficiency_loss",
+          "nominal",
+          "pack_impedance",
+          "thermal_path"
+        ],
+        "injected": "thermal_path_loss on esc2, which no bank entry names",
+        "note": "a single consistent modelled hypothesis means the machinery named a cause for a fault it has no model of, which is the failure H4 exists to detect",
+        "verdict": "AMBIGUOUS_INCLUDING_WRONG_LABELS"
+      },
+      "pairs_total": 28,
+      "probe": "burst_2hz",
+      "total_unresolved_over_bracket": 6,
+      "worst_unresolved": 5
+    },
+    "selected": {
+      "arm": "selected",
+      "by_magnitude": {
+        "0": {
+          "separated_pairs": 23,
+          "unresolved": [
+            "nominal|pack_impedance",
+            "nominal|efficiency_loss",
+            "nominal|thermal_path",
+            "pack_impedance|efficiency_loss",
+            "pack_impedance|thermal_path"
+          ],
+          "unresolved_pairs": 5
+        },
+        "1": {
+          "separated_pairs": 27,
+          "unresolved": [
+            "nominal|efficiency_loss"
+          ],
+          "unresolved_pairs": 1
+        },
+        "2": {
+          "separated_pairs": 28,
+          "unresolved": [],
+          "unresolved_pairs": 0
+        }
+      },
+      "duration_s": 6.0,
+      "eligible_count": 10,
+      "eligible_relations": {
+        "actuator_agreement": true,
+        "actuator_response": false,
+        "bus_rate": true,
+        "charge_accounting": true,
+        "clock_agreement": true,
+        "effort_drift": false,
+        "error_rate": true,
+        "loop_rate": true,
+        "power_balance": true,
+        "sequence_continuity": true,
+        "source_impedance": true,
+        "thermal_rise": true
+      },
+      "incremental_energy_as": 2.398369999780621,
+      "open_set": {
+        "false_attribution": false,
+        "hypotheses_still_consistent": [
+          "efficiency_loss",
+          "nominal",
+          "pack_impedance",
+          "thermal_path"
+        ],
+        "injected": "thermal_path_loss on esc2, which no bank entry names",
+        "note": "a single consistent modelled hypothesis means the machinery named a cause for a fault it has no model of, which is the failure H4 exists to detect",
+        "verdict": "AMBIGUOUS_INCLUDING_WRONG_LABELS"
+      },
+      "pairs_total": 28,
+      "probe": "doublet",
+      "total_unresolved_over_bracket": 6,
+      "worst_unresolved": 5
+    }
+  },
+  "schema": "csia.active_evidence.pair_campaign/1",
+  "seeds": [
+    0,
+    100,
+    200,
+    300,
+    400
+  ],
+  "the_envelope_is_not_a_confidence_interval": "A min-max over five seeds understates the population spread, so this measure is OPTIMISTIC about separation. Every arm is measured the same way, so the comparison between arms is fair; the absolute count is not a bound and must not be quoted as one.",
+  "verdict": "ACTIVE_PROBING_NOT_SUPPORTED_ON_THIS_GRID",
+  "what_this_is_not": "One simulator, one platform, one magnitude per hypothesis, five seeds, E0. No number here measures any real vehicle. Nothing is promoted and no novelty is claimed.",
+  "window_s": [
+    8.0,
+    20.0
+  ]
+}

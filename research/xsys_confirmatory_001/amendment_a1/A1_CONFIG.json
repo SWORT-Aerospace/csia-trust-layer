@@ -1,0 +1,79 @@
+{
+ "amendment_id": "XSYS-001-A1",
+ "amends": "XSYS-001",
+ "parent_manifest_sha256": "868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b",
+ "document": "docs/research/XSYS_001_A1_NUISANCE_INDEPENDENCE.md",
+ "status": "FROZEN - NOT ACCEPTED FOR EXECUTION: the amendment's own frozen acceptance rule failed criterion C4; the A1 executor refuses to fly; a further amendment is required",
+ "when": "2026-09-27, before any confirmatory flight and before any confirmatory outcome existed",
+ "why": "XSYS-001 left nuisance-condition independence unverified and its analysis spans overlap in simulated time; the A1 investigation found that separately launched simulator processes replay one noise stream aligned to simulated time, so the XSYS-001 conditions would share most of their noise draws",
+ "changed": {
+  "nuisance_generation": "condition j = (heading_j, noise segment slot_j) with a pre-arm dwell: arm_j = 10 s + S x slot_j, onset_j = arm_j + 20 s, end_j = onset_j + 16 s; XSYS-001 had arm 10 s and onset 30 + 0.5 rank_j s for every condition",
+  "onset_schedule": "onset 20 s after arm for every flight (the apparatus timeline); simulated onset times 30 s ... 280 s in 25 s steps",
+  "heading_schedule": "UNCHANGED: 360 j / 11 deg",
+  "seed_mapping": "PX4 SIH has no controllable seed (srand(1234) hard-coded); the realization identifier is the noise segment SEGnn = slot",
+  "matrix": "amendment_a1/FLIGHT_MATRIX_A1.csv, ANALYSIS_MATRIX_A1.csv (ids XS1A1-..., same structure and levels)",
+  "randomization_order": "amendment_a1/EXECUTION_ORDER_A1.csv, sorted on SHA-256(SEED_A1/order/flight_id), SEED_A1 = XSYS-001-A1/2026-09-27",
+  "execution_entry_points": "amendment_a1/execution_a1/run_confirmatory_a1.py (matrix paths, manifest chain, acceptance gate); amendment_a1/pipeline_a1/ stage 0 and stage 2 wrappers (manifest path remap only)"
+ },
+ "unchanged": [
+  "hypotheses H_PRIMARY and H1-H6",
+  "eta levels 0.95 0.85 0.75 0.65 0.55 (+ 1.00 nominal)",
+  "evidence definitions W_RPM W_DYN W_CTRL, W_EST exploratory",
+  "thresholds and gates",
+  "temporal windows T0-T3",
+  "matched-pair construction (case B)",
+  "primary endpoint",
+  "one-sided 95% cluster-conservative lower-bound rule",
+  "zero-WRONG requirement",
+  "secondary hypotheses",
+  "one Holm family of eight with gatekeeping",
+  "attribution semantics and outcome taxonomy",
+  "CSIA v2 implementation",
+  "manipulation checks and exclusion logic",
+  "PX4 source, SIH patch, logger configuration, trial driver",
+  "number of conditions (11)"
+ ],
+ "design": {
+  "n_conditions": 11,
+  "heading_deg": "round(360 j / 11, 3)",
+  "slot_rule": "rank of j sorting 0..10 on SHA-256(SEED_A1/slot/j)",
+  "S_s": 25.0,
+  "tau_mem_s": 0.332,
+  "S_min_s": 20.332,
+  "arm_rule": "10 s + S x slot",
+  "arm_to_onset_s": 20.0,
+  "onset_to_end_s": 16.0,
+  "seed": "XSYS-001-A1/2026-09-27"
+ },
+ "hashes": {
+  "old_flight_matrix_sha256": "34ce235f8c9342a8260fd0df80c46b750abb2ffbd8819ae2c3e70290203e6864",
+  "new_flight_matrix_sha256": "4ff2f441538f8798d5a501321f5d90e2f776265a6f201f0f9412e464979437f7",
+  "old_analysis_matrix_sha256": "611e914262d298c1e4ef38f1228f9162dd1a349b2503c4e1013fc673d26d1adb",
+  "new_analysis_matrix_sha256": "0e90b5ab0969b0aec5cc8b8e6a8372726e4cfa524bd49c20e900f34a8ba73a4e",
+  "old_execution_order_sha256": "9b26fd4a802ace2ed7f1de15bd5ffb1d88d3fc881f31d333c19c24024cd2f8d6",
+  "new_execution_order_sha256": "d4916ada4e9f7e192234074c005d31ac4c16d779450beda7e6b7c05e612c627c"
+ },
+ "acceptance": {
+  "spec": "independence/DIAGNOSTIC_SPEC.json (committed d47f339 before any new pilot)",
+  "criteria": {
+   "C1": true,
+   "C2": true,
+   "C3": true,
+   "C4": false,
+   "C5": true
+  },
+  "decision": "XSYS_001_REQUIRES_FURTHER_DESIGN_WORK",
+  "posthoc_exploratory": "independence/C4_POSTHOC_EXPLORATORY.json: C4 as specified is failed; the post-hoc reference suggests the threshold is unattainable for the true body rates even between independent spans; this does not change the decision"
+ },
+ "pilot_flights_added": [
+  "A1P-Q1-LONGHOVER-H016",
+  "A1P-Q2-DESIGN-SLOT00",
+  "A1P-Q3-DESIGN-SLOT01",
+  "A1P-Q4-DESIGN-SLOT02",
+  "A1P-Q5-DESIGN-SLOT10"
+ ],
+ "confirmatory_flights": 0,
+ "confirmatory_analysis_trials": 0,
+ "campaign_data_location_if_ever_accepted": "outside research/xsys_confirmatory_001/, bound to the accepting amendment's manifest",
+ "independence_audit": "independence/audit_campaign_a1.py: report-only, outcome-blind C1 re-check on the campaign's NB flights"
+}

@@ -1,0 +1,50 @@
+{
+  "artifact": "PHASE4_5_COMPUTE",
+  "core_path_changed": false,
+  "csia_sha": "dfedac5f2ade40b82bd8244c6a6f4973dfb393fc",
+  "generation_command": "python engineering/v1_1/phase4_5/run_compute.py",
+  "measured_on": "CPython on a general-purpose host",
+  "note": "STARTUP is paid once at construction. PER-TICK is the only core-path cost the timeout change touches -- one float compare per node, whose VALUE differs and whose COST does not. REPORTING is the consumer and is not core; section 19 forbids folding it into a core figure. NO TARGET-HARDWARE FIGURE EXISTS AND NONE IS CLAIMED.",
+  "per_tick_delta_us": -0.019,
+  "per_tick_us": {
+    "derived_map": {
+      "median_us": 0.692,
+      "min_us": 0.606,
+      "n": 2000
+    },
+    "frozen_defaults": {
+      "median_us": 0.711,
+      "min_us": 0.608,
+      "n": 2000
+    }
+  },
+  "reporting_us": {
+    "consumer_consume": {
+      "median_us": 21028.858,
+      "min_us": 18995.94,
+      "n": 200
+    },
+    "consumer_parse": {
+      "median_us": 22629.079,
+      "min_us": 20343.43,
+      "n": 200
+    },
+    "consumer_render": {
+      "median_us": 5.537,
+      "min_us": 5.179,
+      "n": 2000
+    }
+  },
+  "startup_us": {
+    "ardupilot": {
+      "median_us": 11.159,
+      "min_us": 10.687,
+      "n": 100
+    },
+    "px4": {
+      "median_us": 9.757,
+      "min_us": 9.319,
+      "n": 100
+    }
+  }
+}

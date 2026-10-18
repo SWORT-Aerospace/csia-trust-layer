@@ -1,0 +1,77 @@
+{
+  "adjudications": [
+    {
+      "action": "add the pointer at the next re-freeze",
+      "artifact": "research/wp_c7/results/false_healthy.json",
+      "artifact_value": 23.9733,
+      "classification": "POINTER_CAN_BE_ADDED",
+      "evidence": "exactly one value in the artifact rounds to 23.97 at 2 dp",
+      "id": "S05",
+      "proposed_json_pointer": ".per_arm.denial.T_FH_attribution_only_s",
+      "value": "23.97"
+    },
+    {
+      "action": "add the pointer at the next re-freeze",
+      "artifact": "research/wp_c8/results/response_surface.json",
+      "artifact_value": 5.6,
+      "caveat": "this is a GRID PARAMETER -- an input to the sweep, not a measured output. The pointer is honest; the reader should not take it for a result",
+      "classification": "POINTER_CAN_BE_ADDED",
+      "id": "S10",
+      "proposed_json_pointer": ".neither_region_by_detection.amplitudes_m[2]",
+      "value": "5.6"
+    },
+    {
+      "action": "correct artifact AND add pointer at the next re-freeze",
+      "artifact": "research/wp_c6/results/q_gvalid_campaign.json",
+      "classification": "WRONG_ARTIFACT_ATTRIBUTION",
+      "finding": "THE DECLARED ARTIFACT DOES NOT CONTAIN THIS VALUE. A full numeric scan of q_gvalid_campaign.json finds no value within 5e-3 of 0.44. The number's actual home is research/wp_c7/results/false_healthy.json at .per_arm.denial.onset_to_status_change_abstaining_s = 0.44, which matches the manuscript context exactly ('onset of a non-healthy status moves from 1.48 s to 0.44 s' -- the abstaining policy, which is what false_healthy.json is about).",
+      "id": "S11",
+      "ledger": "HF-003",
+      "proposed_artifact": "research/wp_c7/results/false_healthy.json",
+      "proposed_json_pointer": ".per_arm.denial.onset_to_status_change_abstaining_s",
+      "severity": "The NUMBER is right and its source exists; the MAP pointed at the wrong file. Nothing in the manuscript is wrong. What was wrong is the provenance record, which is the thing this exercise exists to check.",
+      "value": "0.44"
+    },
+    {
+      "action": "no pointer; a source-line locator would be the honest analogue",
+      "artifact": "csia/trust_engine/engine.py",
+      "classification": "SOURCE_CONSTANT",
+      "finding": "rho_max, a declared constant in the frozen core. A JSON pointer is not applicable and inventing one would be worse than none.",
+      "id": "S12",
+      "value": "0.998"
+    },
+    {
+      "action": "extend the map schema with a csv_locator (column + row predicate) at the next re-freeze",
+      "artifact": "engineering/v1_1/SUPPORT_STATE_RESULTS.csv",
+      "classification": "POINTER_KIND_NOT_SUPPORTED",
+      "finding": "the value IS present in the CSV at 4 dp. The map's pointer field is JSON-only, so a CSV cell cannot be addressed by it. This is a limitation of the map schema, not missing provenance.",
+      "id": "GS01",
+      "value": "0.9691"
+    },
+    {
+      "action": "no pointer; classified WHOLE_ARTIFACT_ONLY and left that way",
+      "artifact": "engineering/v1_1/SUPPORT_STATE_RESULTS.csv",
+      "classification": "WHOLE_ARTIFACT_ONLY",
+      "finding": "252 of 540 rows carry a posterior that rounds to 0.9998. The number is a property of the RUN, not of a single cell, so no unique locator exists and pretending otherwise would pick an arbitrary row and call it the source.",
+      "id": "GS02",
+      "value": "0.9998"
+    }
+  ],
+  "honest_status": "All six are ADJUDICATED and none is unresolved. Three would gain a locator at a deliberate re-freeze (S05, S10, and GS01 once the schema supports CSV). One is a source constant. One is genuinely whole-artifact-only. One -- S11 -- was pointing at the wrong file, and that is the finding this exercise produced.",
+  "parent_freeze": "research/physical_validation/E1_FREEZE_MANIFEST.yaml",
+  "schema": "csia.publication.scalar_pointer_adjudication/1",
+  "summary": {
+    "pointer_can_be_added": 2,
+    "pointer_kind_not_supported": 1,
+    "source_constant": 1,
+    "unresolved": 0,
+    "whole_artifact_only": 1,
+    "wrong_artifact_attribution": 1
+  },
+  "totals": {
+    "adjudicated_here": 6,
+    "dereferenceable_pointers": 13,
+    "scalar_entries": 19
+  },
+  "why_the_map_is_not_edited": "PAPER1_ARTIFACT_MAP.yaml is hashed by the E1 freeze manifest, and that manifest is immutable by instruction. Editing the map would break the freeze it is recorded in. So every correction below is SPECIFIED here and applied at a later, deliberate re-freeze -- not slipped in now."
+}

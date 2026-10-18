@@ -21,6 +21,24 @@
 %                          a placeholder
 %   VERIFY                 a literal placeholder standing in for a field
 %                          nobody has supplied
+%
+% HOW TO RETIRE A MARKER. Run `make bib-verify`, which compares every entry
+% against the publisher's own Crossref deposit field by field and prints a
+% diff. Clear a marker only for an entry it reports clean, and only after
+% reading that diff. The tool needs api.crossref.org; where egress blocks it
+% the tool exits 2 and clears nothing, which is the correct outcome. A web
+% search result is NOT a publisher record and must not be used here: it is a
+% second unverified source, and swapping one for another while deleting the
+% warning leaves the risk and removes the notice.
+%
+% Three entries carry no DOI (blanke2003ftc, carvalho2012intermittent,
+% yin_phidiagnosability) and cannot be checked this way. They need a manual
+% lookup against the publisher.
+%
+% Two entries are UNCITED by main.tex (kang2024gnss, takai2021diagnosability)
+% and between them hold 9 of the 33 entry markers. Whether to cite them or
+% drop them is an authorial decision, not a mechanical one, so they are left
+% in place and flagged here.
 
 % --- Fault-state-dependent observation loss --------------------------------
 
@@ -28,18 +46,29 @@
 % observation loss: a state-dependent observation map O: Q x Sigma ->
 % 2^(Delta u {eps}). We assert no priority over it.
 @article{dong2024statedependent,
-  author  = {Dong, Wei and Yin, Xiang and Li, Shaoyuan},
-  title   = {Verification of diagnosability for discrete-event systems under
-             state-dependent observations},
+  author  = {Dong, Weijie and Yin, Xiang and Li, Shaoyuan},
+  title   = {A Uniform Framework for Diagnosis of Discrete-Event Systems with
+             Unreliable Sensors using Linear Temporal Logic},
   journal = {IEEE Transactions on Automatic Control},
   volume  = {69},
   number  = {1},
   pages   = {145--160},
   year    = {2024},
   doi     = {10.1109/TAC.2023.3266021},
-  note    = {FROM-BRIEF-UNVERIFIED. Title as rendered here is
-             VERIFY: not supplied by the brief; volume, number, pages, year
-             and DOI are as supplied.}
+  eprint  = {2204.13057},
+  archivePrefix = {arXiv},
+  note    = {CORROBORATED-NOT-VERIFIED. TITLE CORRECTED 2026-09-04. The
+             brief's title (Verification of diagnosability for discrete-event
+             systems under state-dependent observations) is NOT the title of
+             this DOI. Search-index consensus places this DOI at IEEE TAC
+             69(1), p.145, January 2024, by Weijie Dong, Xiang Yin and
+             Shaoyuan Li, under the title given above, with arXiv preprint
+             2204.13057. NOT READ. The corroborated subject is unreliable
+             sensors described by a temporal-logic formula, which is not
+             obviously the state-dependent observation MAP this repository has
+             been attributing to it, so the REASON for citing it must be
+             re-checked by a human who reads it. Bibliography external
+             verification packet, item B-1.}
 }
 
 % --- Discrete-event diagnosis under unreliable observation -----------------
@@ -76,7 +105,8 @@
 % FROM-BRIEF-UNVERIFIED
 @article{takai2021diagnosability,
   author  = {Takai, Shigemasa},
-  title   = {VERIFY: title not supplied by the brief},
+  title   = {A general framework for diagnosis of discrete event systems
+             subject to sensor failures},
   journal = {Automatica},
   volume  = {129},
   pages   = {109669},
@@ -105,14 +135,18 @@
 % FROM-BRIEF-UNVERIFIED
 @inproceedings{krysander2024multimode,
   author    = {Krysander, Mattias and Hashemniya, Fatemeh},
-  title     = {VERIFY: title not supplied by the brief},
+  title     = {Test Selection for Diagnosing Multimode Systems (Short Paper)},
   booktitle = {International Conference on Principles of Diagnosis and
                Resilient Systems (DX 2024)},
   series    = {OASIcs},
+  volume    = {125},
+  pages     = {28:1--28:14},
+  publisher = {Schloss Dagstuhl -- Leibniz-Zentrum f{\"u}r Informatik},
   year      = {2024},
   doi       = {10.4230/OASIcs.DX.2024.28},
-  note      = {FROM-BRIEF-UNVERIFIED. Author order follows the brief; the
-               DOI resolves the article number 28. Title not supplied.}
+  note      = {CORROBORATED-NOT-VERIFIED. TITLE, VOLUME, PAGES AND PUBLISHER
+               ADDED 2026-09-04 from search-index consensus on the DOI; author
+               order matches the brief. NOT READ.}
 }
 
 % FROM-BRIEF-UNVERIFIED
@@ -150,8 +184,9 @@
 
 % FROM-BRIEF-UNVERIFIED
 @article{reeves2019sensorselection,
-  author  = {Reeves, Adam and Remenyte-Prescott, Rasa and Andrews, John},
-  title   = {VERIFY: title not supplied by the brief},
+  author  = {Reeves, VERIFY: given name disputed and Remenyte-Prescott, Rasa
+             and Andrews, John},
+  title   = {Sensor selection for fault diagnostics using performance metric},
   journal = {Proceedings of the Institution of Mechanical Engineers, Part O:
              Journal of Risk and Reliability},
   volume  = {233},
@@ -159,7 +194,12 @@
   pages   = {537--552},
   year    = {2019},
   doi     = {10.1177/1748006X18804690},
-  note    = {FROM-BRIEF-UNVERIFIED}
+  note    = {CORROBORATED-NOT-VERIFIED. TITLE ADDED 2026-09-04 from
+             search-index consensus on the DOI. The same sources give the
+             first author's initial as J (Jessica Reeves), not Adam, so the
+             given name supplied by the brief is DISPUTED and is left as a
+             VERIFY rather than silently replaced: corroboration is enough to
+             raise a doubt and not enough to settle a name. NOT READ.}
 }
 
 % --- GNSS integrity monitoring --------------------------------------------
@@ -175,7 +215,16 @@
   pages   = {4445},
   year    = {2024},
   doi     = {10.3390/s24144445},
-  note    = {FROM-BRIEF-UNVERIFIED. Only surnames were supplied.}
+  note    = {FROM-BRIEF-UNVERIFIED, AND THE ENTRY IS FILED UNDER THE WRONG
+             SUBJECT. Search-index consensus places this DOI on Sensor Network
+             Attack Synthesis against Fault Diagnosis of Discrete Event
+             Systems, Sensors 24(14):4445, 2024 -- a discrete-event security
+             paper, not GNSS integrity monitoring, which is the heading it
+             sits under here and the reason the key is named gnss. The entry
+             is UNCITED by main.tex, so nothing in the paper depends on it.
+             Drop it or replace it with a real GNSS-integrity reference; do
+             not cite it under this heading. Only surnames were supplied and
+             they are not confirmed. NOT READ.}
 }
 
 % --- Fault-tolerant control, response-granularity isolation ---------------

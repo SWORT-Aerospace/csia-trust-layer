@@ -1,0 +1,1079 @@
+%YAML 1.2
+---
+# PAPER I -- VALUE-LEVEL BINDING LEDGER
+#
+# One row per value the Paper I manuscript is expected to state. Each row
+# names the artifact, the key path inside it, the expected value, the
+# traceability level, and where known the preregistration, results and trial
+# commits. `verify_bindings.py check` recomputes every artifact SHA-256 and
+# re-reads every key; tests/test_paper1_final_update.py runs that check.
+#
+# Key paths use "/" as the separator (JSON-pointer style) because several
+# real keys contain dots ("0.75", "12.0"). An `aggregate` row reduces over a
+# list (or the values of a mapping) after an optional equality filter.
+#
+# This file does not modify, re-seal or re-hash any artifact. It records what
+# the artifacts already say, and a check fails if any of them ever changes.
+#
+# MANUSCRIPT STATUS AT WRITING (2026-10-12): the manuscript named by the
+# owner ("Self-Occlusion and Threshold-Crossing Persistence in a Cross-Sensor
+# Diagnostic Layer") is NOT in this repository. The values below are the
+# values the evidence supports; the manuscript is to be checked against them
+# with `verify_bindings.py scan <manuscript.tex>` once it is provided.
+
+schema: csia.publication.paper1_value_bindings/1
+written_on: 2026-10-12
+branch: claude/code-reviewer-repo-export-zicovg
+
+levels:
+  T1_REEXECUTED: >-
+    the generating script was re-run this session on a clean `git archive`
+    of HEAD (or on the committed raw archive it reads) and every value key
+    reproduced; only the self-recorded `commit` field differed, because the
+    archive carries no .git
+  T2_RECOMPUTED: >-
+    recomputed this session by an independent calculation from committed
+    inputs (artifact fields, committed per-tick logs, or source constants),
+    without running the original generator
+  T3_ARTIFACT_RECORDED: >-
+    the value sits at the named key of a committed artifact whose SHA-256 is
+    pinned here, but its generator reads inputs that are not in the
+    repository (gitignored flight logs or SITL runs), so it was not re-run
+  T4_DOCUMENT_ONLY: >-
+    the value appears only in prose or a hand-built table; no committed
+    machine-readable artifact carries it. The manuscript must qualify it
+    with its source document or remove it
+  NOT_SUPPORTED: >-
+    no evidence exists; the manuscript must not state it
+
+artifacts:
+  checker_agreement:
+    path: research/systems-paper/results/checker_agreement.json
+    sha256: dedca244ca661ccffb6ef57b0cd3c77e878db22df1c7d8d45105805ee0e2ad92
+    generator: research/systems-paper/compare_checker_vs_production.py
+    bytes_introduced_at: ab05d637f7f98dea3add937205ef30372e38790c
+  checker_verdicts:
+    path: research/systems-paper/results/checker_verdicts.json
+    sha256: 8660d6a0a116370fcdb8671cff8128e0eef07f647cb02958395353a6c1b8f8fa
+    generator: research/systems-paper/independent_checker.py
+    bytes_introduced_at: ab05d637f7f98dea3add937205ef30372e38790c
+  active_sets:
+    path: research/systems-paper/results/active_sets.json
+    sha256: e446ff9251c69c4f4dcbc4faa63ec0c96d99bdb91b2a64cc01c701b64568cdb2
+    generator: research/systems-paper/export_active_sets.py
+    bytes_introduced_at: ab05d637f7f98dea3add937205ef30372e38790c
+  current_stack_structural:
+    path: research/systems-paper/results/current_stack_structural.json
+    sha256: c26152d003b2fc7371a9d8dc66b81aa802b6eb0c2187d57fa3203acc3abb818a
+    generator: research/systems-paper/current_stack_structural.py
+    bytes_introduced_at: 2877e755e0ab3fe6548f60c52d9e16342dabb751
+  mechanism_b_bench:
+    path: research/systems-paper/results/mechanism_b.json
+    sha256: 8237458edfb3b55750df99394f17237723d9712ed367975222aac131aa8eb1fc
+    generator: research/systems-paper/mechanism_b.py
+    bytes_introduced_at: 4e3ed3868efb3f0a08398cfa44bb8eb48d14c2c7
+  self_occlusion_wpc4:
+    path: research/wp_c4/results/self_occlusion.json
+    sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+    generator: research/wp_c4/self_occlusion_experiment.py
+    bytes_introduced_at: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+  escalation_algebra:
+    path: research/wp_c8/results/escalation_algebra.json
+    sha256: 89c0324517c0cbd26e80bccdcb56350aeeef5b19b82a5f355b8239457e22b1de
+    generator: research/wp_c8/escalation_algebra.py
+    bytes_introduced_at: 83b7f62708567bb58029a67e359c613a50e2c997
+  response_surface:
+    path: research/wp_c8/results/response_surface.json
+    sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+    generator: research/wp_c8/response_surface.py
+    bytes_introduced_at: 1ad2513d071830a906555193829cf2b8dbcf5980
+  s0_rederivation:
+    path: research/physical_validation/results/s0_rederivation.json
+    sha256: da6ccdd663ce6ad3a19957c1e9af5979a5230667ad16b3ec165fe08371734f06
+    generator: research/physical_validation/derivation/rederive_s0.py
+    bytes_introduced_at: ba9a8f476b0ce2d154422050f9a2234ea48b00f6
+  mech_b_replication:
+    path: research/v1_1/results/current_stack_replication.json
+    sha256: c257898a8f1461d6f6d462487670abb41c523a4208a07e3ca757c7d5676964e1
+    generator: tools/simulation/current_stack_replication.py
+    bytes_introduced_at: 670aa7ad5590895b0cb9ad8636f351f901d28ad7
+    preregistration_commit: b7d3d9e41536f5393b81959ca503eafaee432298
+    preregistration_blob_sha1_cited_by_result: 0e186117e2dcc014862872934768e06e0a195592
+    amendment_commit: 80959bb5469e7183d633f93fb2e8ee1b4ccd0eca
+    first_and_last_trial_start_utc: ["2026-08-25T02:45:12Z", "2026-08-25T03:09:52Z"]
+  s0_sweep:
+    path: research/v1_1/results/s0_sensitivity_posthoc_threshold_sweep.json
+    sha256: 0d07af037127e597cfbd1ede8ee0b2d4dc14625b3e8a1968b43dac6abb5fd9a9
+    generator: tools/simulation/s0_sensitivity_posthoc.py --threshold-sweep
+    bytes_introduced_at: 2622d0fcf881f4372ea815d88d740e70165b874d
+  a1_quantities:
+    path: research/physical_validation/results/mechanism_a_repeat_ardupilot.json
+    sha256: aa79eb64c84061028612b24caa84d6aee86bd3ef7869bce551544b494ac9c04f
+    generator: tools/csia_experiment/extract_mechanism_a.py
+    bytes_introduced_at: c87a325e8ab0714538d842dec440a95668f62645
+  a2_trust:
+    path: research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json
+    sha256: c251c433116b246d6ea51183a36a5fb74d9e7e130590496e95533fd2c1e52f8b
+    generator: tools/csia_experiment/extract_trust_a2.py --campaign-key a2
+    bytes_introduced_at: b93624ea950af481f7d992eb60b02d88d4a0a8f5
+  p1_trust:
+    path: research/physical_validation/results/mechanism_a_p1_trust_px4.json
+    sha256: c4ace83d8ac389d4b66ac932a74856414e9c23583517cea15d4b83f504a426bc
+    generator: tools/csia_experiment/extract_trust_a2.py --campaign-key p1
+    bytes_introduced_at: 77e91f9bc65b32c0c578c300e657a94bc9c9f8f7
+  a2_trace_archive_manifest:
+    path: research/physical_validation/results/a2_traces_raw/SHA256SUMS.uncompressed.txt
+    sha256: 7c7db871958eea59079d7d29ce78d1c8d0f9cac837f52881e45235047d398149
+    generator: campaign runner (raw traces archived gzipped before reduction)
+    bytes_introduced_at: d5c048b95fd13f24e17e36bf4bf89afc72e5b8d4
+  p1_trace_archive_manifest:
+    path: research/physical_validation/results/p1_traces_raw/SHA256SUMS.uncompressed.txt
+    sha256: 0cfc30f3a252d84c1a3169699805461e8d9446823c23495cc5f6b43e96a37e07
+    generator: campaign runner (raw traces archived gzipped before reduction)
+    bytes_introduced_at: 77e91f9bc65b32c0c578c300e657a94bc9c9f8f7
+  n1_ardupilot:
+    path: research/v1_1/results/mechanism_a_ardupilot.json
+    sha256: 8bdbc2c860403dc36f8cb66d508e3c33f1c9c0cdb1dd22d673dd8038924d9c90
+    generator: original n=1 current-stack trial, 2026-08-25
+    bytes_introduced_at: 48a528a011fec1756ee92dba233b7ee221e61690
+  n1_px4:
+    path: research/v1_1/results/mechanism_a_px4.json
+    sha256: d6a748006a641d2a1a3abc9cce9811ec8115e9bee453ddb5fe8926b69e5af33d
+    generator: original n=1 current-stack trial, 2026-08-25
+    bytes_introduced_at: 48a528a011fec1756ee92dba233b7ee221e61690
+  link_confound:
+    path: research/v1_1/results/MECHANISM_A_LINK_CONFOUND_AUDIT.json
+    sha256: 41e0e992d5735434261020cb6341f5c44a6bcbf9fa7f31c2a00f5f740a91fb8e
+    generator: link-confound audit over the n=1 flight logs
+    bytes_introduced_at: 8f141edb6f83f9a0238f57684309ffe31dc3862f
+  exposure_v2:
+    path: datasets/reports/exposure_v2.json
+    sha256: 114e1f827328dedc5292b104e49a0da24ba1cfc5c4765a232b82c7af8ea9d714
+    generator: tools/build_dataset_manifest.py
+    bytes_introduced_at: aca74623b8e96e466b6316d051ebb0a392a961eb
+  report_a1:
+    path: campaigns/physical_validation/mechanism_a_repeat_ap/_report.json
+    sha256: 1b31c286fe70cb09797ba47ff1e2690f59f41885f8a07c94fc720de748d410c9
+    generator: campaign orchestrator
+    bytes_introduced_at: c87a325e8ab0714538d842dec440a95668f62645
+  report_a2:
+    path: campaigns/physical_validation/mechanism_a_trust_completion_a2/_report.json
+    sha256: 186a0b763eda30e8ff60c84372bd039fc0511baa0848e228641a51ad0c505f71
+    generator: campaign orchestrator
+    bytes_introduced_at: d5c048b95fd13f24e17e36bf4bf89afc72e5b8d4
+  report_p1:
+    path: campaigns/physical_validation/mechanism_a_px4_repeat_p1/_report.json
+    sha256: 7a943ec30d809195d2a273e4aa525c26ad2164607d1c62c00bc0abb45ab79cc6
+    generator: campaign orchestrator
+    bytes_introduced_at: 77e91f9bc65b32c0c578c300e657a94bc9c9f8f7
+  p1_trial_records:
+    glob: campaigns/physical_validation/mechanism_a_px4_repeat_p1/MECHP1-*.json
+  a2_trial_records:
+    glob: campaigns/physical_validation/mechanism_a_trust_completion_a2/MECHA2-*.json
+  claims_csv:
+    path: research/systems-paper/CLAIMS.csv
+    sha256: 0def29ebd7366f90716f7960573565e07be75f556fe0d2f5be9a4eb5a06ce2ff
+    generator: hand-maintained claim ledger
+    bytes_introduced_at: ea1018175986178fb560be83a820ec1daf337d10
+
+bindings:
+
+  # ---------------------------------------------------------- Mechanism A, bench
+  - id: MA-01
+    statement: "structural checker against production, comparisons"
+    value: 378000
+    artifact: checker_agreement
+    key: totals/agree
+    expect: 378000
+    level: T1_REEXECUTED
+  - id: MA-02
+    statement: "real disagreements between checker and production"
+    value: 0
+    artifact: checker_agreement
+    key: totals/real_disagreements
+    expect: 0
+    level: T1_REEXECUTED
+  - id: MA-03
+    statement: "predicted degenerate-class cases (c = 0.5), counted separately"
+    value: 0
+    artifact: checker_agreement
+    key: totals/degenerate_only
+    expect: 0
+    level: T1_REEXECUTED
+  - id: MA-04
+    statement: "scenarios in the bench catalogue"
+    value: 9
+    artifact: checker_agreement
+    aggregate: {list: scenarios, op: count}
+    expect: 9
+    level: T1_REEXECUTED
+  - id: MA-05
+    statement: "ticks per scenario"
+    value: 1500
+    artifact: checker_agreement
+    aggregate: {list: scenarios, field: ticks, op: all}
+    expect: 1500
+    level: T1_REEXECUTED
+  - id: MA-06
+    statement: "unordered hypothesis pairs per tick (8 hypotheses, C(8,2) = 28; 28 x 1500 = 42,000 per scenario)"
+    value: 42000
+    artifact: checker_agreement
+    aggregate: {list: scenarios, field: pairs_compared, op: all}
+    expect: 42000
+    level: T1_REEXECUTED
+  - id: MA-07
+    statement: "hypotheses in the signature matrix"
+    value: 8
+    artifact: checker_verdicts
+    aggregate: {list: hypotheses, op: count}
+    expect: 8
+    level: T1_REEXECUTED
+  - id: MA-08
+    statement: "the checker imports no csia module and no support-aware code (re-executed; it reported NONE; its imports are json, os, sys, yaml)"
+    value: independent
+    artifact: checker_verdicts
+    key: checker
+    expect: research/systems-paper/independent_checker.py
+    level: T1_REEXECUTED
+  - id: MA-09
+    statement: "startup window, ticks 0-75 of every scenario including clean (phys_gps gate t > 3.0 s)"
+    value: 76
+    artifact: checker_verdicts
+    key: scenarios/CLEAN/ticks_target_pair_not_distinguishable
+    expect: 76
+    level: T1_REEXECUTED
+  - id: MA-10
+    statement: "fix-loss window start tick (t = 25.00 s)"
+    value: 625
+    artifact: active_sets
+    key: scenarios/GNSS_FIX_LOSS/groups/4/first_tick
+    expect: 625
+    level: T1_REEXECUTED
+  - id: MA-11
+    statement: "fix-loss window length, ticks 625-824, consecutive (contiguity recomputed per tick this session; the artifact stores a count)"
+    value: 200
+    artifact: active_sets
+    key: scenarios/GNSS_FIX_LOSS/groups/4/ticks
+    expect: 200
+    level: T1_REEXECUTED
+  - id: MA-12
+    statement: "GNSS_FIX_LOSS total pinned ticks (76 startup + 200 fault)"
+    value: 276
+    artifact: checker_verdicts
+    key: scenarios/GNSS_FIX_LOSS/ticks_target_pair_not_distinguishable
+    expect: 276
+    level: T1_REEXECUTED
+  - id: MA-13
+    statement: "WP-C4 arm B (denial), nominal top-cause occupancy after onset"
+    value: 1.0
+    artifact: self_occlusion_wpc4
+    key: results/B_denial_only/top_cause_occupancy_after_onset/nominal
+    expect: 1.0
+    level: T1_REEXECUTED
+  - id: MA-14
+    statement: "WP-C4 arm B, seconds nominal on top with GPS trust at or above 0.85 (confident-wrong)"
+    value: 40.0
+    artifact: self_occlusion_wpc4
+    key: results/B_denial_only/seconds_confident_wrong_nominal_above_actionable_trust
+    expect: 40.0
+    level: T1_REEXECUTED
+  - id: MA-15
+    statement: "WP-C4 arm B, minimum GPS trust after onset"
+    value: 0.9767
+    artifact: self_occlusion_wpc4
+    key: results/B_denial_only/gps_trust_min_after_onset
+    expect: 0.9767
+    level: T1_REEXECUTED
+  - id: MA-16
+    statement: "WP-C4 arm B, share of post-onset ticks with gvalid closed (0.625; the WP-C4 report rounds it to 62)"
+    value: 0.625
+    artifact: self_occlusion_wpc4
+    key: results/B_denial_only/gvalid_frac_closed_after_onset
+    expect: 0.625
+    level: T1_REEXECUTED
+  - id: MA-17
+    statement: "WP-C4 arm A (spoof, fix retained), time to first gps_fault lead"
+    value: 1.44
+    artifact: self_occlusion_wpc4
+    key: results/A_spoof_only/time_to_first_gps_fault_lead_s
+    expect: 1.44
+    level: T1_REEXECUTED
+  - id: MA-18
+    statement: "WP-C4 arm B, maximum failsafe level (1 = CAUTION, reached through the freshness disjunct)"
+    value: 1
+    artifact: self_occlusion_wpc4
+    key: results/B_denial_only/max_failsafe_level
+    expect: 1
+    level: T1_REEXECUTED
+
+  # ------------------------------------------------ negative control (SC-26)
+  - id: NC-01
+    statement: "ticks in the fix-preserving negative control"
+    value: 15595
+    artifact: current_stack_structural
+    key: ticks
+    expect: 15595
+    level: T1_REEXECUTED
+  - id: NC-02
+    statement: "trials in the negative control (the 20 Mechanism-B ArduPilot 4.8 trials)"
+    value: 20
+    artifact: current_stack_structural
+    key: trials
+    expect: 20
+    level: T1_REEXECUTED
+  - id: NC-03
+    statement: "CLEAN ticks (5 trials)"
+    value: 5100
+    artifact: current_stack_structural
+    key: per_condition/CLEAN/ticks
+    expect: 5100
+    level: T1_REEXECUTED
+  - id: NC-04
+    statement: "RAMP ticks (5 trials)"
+    value: 887
+    artifact: current_stack_structural
+    key: per_condition/RAMP/ticks
+    expect: 887
+    level: T1_REEXECUTED
+  - id: NC-05
+    statement: "STEP ticks (10 trials)"
+    value: 9608
+    artifact: current_stack_structural
+    key: per_condition/STEP/ticks
+    expect: 9608
+    level: T1_REEXECUTED
+  - id: NC-06
+    statement: "collapses of the nominal|gps_fault pair on fix-preserving ticks"
+    value: 0
+    artifact: current_stack_structural
+    key: pair_not_distinguishable_ticks
+    expect: 0
+    level: T1_REEXECUTED
+  - id: NC-07
+    statement: "gate-closed ticks on fix-preserving ticks"
+    value: 0
+    artifact: current_stack_structural
+    key: gate_closed_ticks
+    expect: 0
+    level: T1_REEXECUTED
+
+  # ---------------------------------------- Mechanism B, bench algebra (Phase I)
+  - id: MB-01
+    statement: "predicted crossing N* (equation 2)"
+    value: 93.31
+    artifact: escalation_algebra
+    key: ticks_required_N_star
+    expect: 93.31
+    level: T1_REEXECUTED
+  - id: MB-02
+    statement: "N* in seconds at 25 Hz"
+    value: 3.732
+    artifact: escalation_algebra
+    key: seconds_required
+    expect: 3.732
+    level: T1_REEXECUTED
+  - id: MB-03
+    statement: "first tick at or below threshold in the shipping TrustCore (scanned every tick)"
+    value: 94
+    artifact: escalation_algebra
+    key: verification_against_shipping_trustcore/first_tick_at_or_below_threshold
+    expect: 94
+    level: T1_REEXECUTED
+  - id: MB-04
+    statement: "S0, Beta mass of the gps node after 1500 healthy steps -- NOT settled (498.79 by 3000 steps, cap 500); quote with n_steps = 1500"
+    value: 475.6775
+    artifact: escalation_algebra
+    key: verification_against_shipping_trustcore/settled_mass_S0
+    expect: 475.6775
+    level: T1_REEXECUTED
+  - id: MB-05
+    statement: "T0 after 1500 healthy steps (settled)"
+    value: 0.999791
+    artifact: escalation_algebra
+    key: verification_against_shipping_trustcore/settled_trust_T0
+    expect: 0.999791
+    level: T1_REEXECUTED
+  - id: MB-06
+    statement: "forgetting factor under full disagreement (rho_min); M = 1/(1-rho) = 20"
+    value: 0.95
+    artifact: escalation_algebra
+    key: verification_against_shipping_trustcore/rho_observed
+    expect: 0.95
+    level: T1_REEXECUTED
+  - id: MB-07
+    statement: "evidence asymptote e_f (1 - w_phys)"
+    value: 0.7
+    artifact: escalation_algebra
+    key: evidence_asymptote_e_f
+    expect: 0.7
+    level: T1_REEXECUTED
+  - id: MB-08
+    statement: "threshold T* = FailsafeConfig.nav_caution"
+    value: 0.75
+    artifact: escalation_algebra
+    key: constants_from_source/nav_caution
+    expect: 0.75
+    level: T1_REEXECUTED
+  - id: MB-09
+    statement: "mass term S0 (T0 - T*)"
+    value: 118.82
+    artifact: escalation_algebra
+    key: what_dominates_N_star/mass_term_S0_times_T0_minus_Tstar
+    expect: 118.82
+    level: T1_REEXECUTED
+  - id: MB-10
+    statement: "margin term M (T* - e_f)"
+    value: 1.0
+    artifact: escalation_algebra
+    key: what_dominates_N_star/margin_term_M_times_Tstar_minus_ef
+    expect: 1.0
+    level: T1_REEXECUTED
+  - id: MB-11
+    statement: "closed form against shipping code, maximum absolute error"
+    value: 0.0
+    artifact: escalation_algebra
+    key: verification_against_shipping_trustcore/max_abs_error_vs_equation_1
+    expect: 0.0
+    level: T1_REEXECUTED
+  - id: MB-12
+    statement: "S0 re-derived independently of escalation_algebra, from the frozen TrustCore"
+    value: 475.6775
+    artifact: s0_rederivation
+    key: published/S0
+    expect: 475.6775
+    level: T1_REEXECUTED
+  - id: MB-13
+    statement: "WP-C7 retro-validation, misclassified runs of 9 (flown before the derivation)"
+    value: 0
+    artifact: escalation_algebra
+    key: retro_validation_against_wp_c7/n_misclassified
+    expect: 0
+    level: T1_REEXECUTED
+  - id: MB-14
+    statement: "WP-C7 retro-validation, runs"
+    value: 9
+    artifact: escalation_algebra
+    aggregate: {list: retro_validation_against_wp_c7/runs, op: count}
+    expect: 9
+    level: T1_REEXECUTED
+  - id: MB-15
+    statement: "WP-C7 step runs, largest floor-tick count (none escalated; steps range 26 to 40)"
+    value: 40
+    artifact: escalation_algebra
+    aggregate: {list: retro_validation_against_wp_c7/runs, where: {measured_escalated: false}, field: measured_floor_ticks, op: max}
+    expect: 40
+    level: T1_REEXECUTED
+  - id: MB-16
+    statement: "WP-C7 ramp runs, smallest floor-tick count (all escalated; ramps range 104 to 168)"
+    value: 104
+    artifact: escalation_algebra
+    aggregate: {list: retro_validation_against_wp_c7/runs, where: {measured_escalated: true}, field: measured_floor_ticks, op: min}
+    expect: 104
+    level: T1_REEXECUTED
+  - id: MB-17
+    statement: "response-surface escalation boundary including the 25-tick dwell (N* + 25); NOT the same boundary as MB-13 -- see MANUSCRIPT_FINDINGS F-09"
+    value: 118.31
+    artifact: response_surface
+    key: escalation_boundary/boundary_ticks
+    expect: 118.31
+    level: T3_ARTIFACT_RECORDED
+  - id: MB-18
+    statement: "response-surface grid cells classified correctly by the dwell-inclusive boundary"
+    value: 19/21
+    artifact: response_surface
+    key: escalation_boundary/grid_correct_of_total
+    expect: 19/21
+    level: T3_ARTIFACT_RECORDED
+
+  # ----------------------------- Mechanism B, current-stack replication (SC-24)
+  - id: MR-01
+    statement: "verdict on ArduPilot 4.8"
+    value: REPLICATED
+    artifact: mech_b_replication
+    key: platforms/ardupilot/verdict
+    expect: REPLICATED
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-02
+    statement: "valid trials of 20 (5 CLEAN, 5 STEP_SMALL, 5 STEP_LARGE, 5 RAMP_20S)"
+    value: 20
+    artifact: mech_b_replication
+    key: platforms/ardupilot/trials_valid
+    expect: 20
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-03
+    statement: "earliest observed RAMP crossing tick after onset"
+    value: 94
+    artifact: mech_b_replication
+    aggregate: {list: trials, where: {condition: RAMP_20S}, field: crossing/observed_tick, op: min}
+    expect: 94
+    level: T2_RECOMPUTED
+  - id: MR-04
+    statement: "latest observed RAMP crossing tick after onset"
+    value: 99
+    artifact: mech_b_replication
+    aggregate: {list: trials, where: {condition: RAMP_20S}, field: crossing/observed_tick, op: max}
+    expect: 99
+    level: T2_RECOMPUTED
+  - id: MR-05
+    statement: "predicted-minus-observed crossing error, every RAMP trial"
+    value: 0
+    artifact: mech_b_replication
+    aggregate: {list: trials, where: {condition: RAMP_20S}, field: crossing/error_ticks, op: all}
+    expect: 0
+    level: T2_RECOMPUTED
+  - id: MR-06
+    statement: "control trials that crossed (CLEAN, STEP_SMALL, STEP_LARGE; 15 predeclared non-crossing)"
+    value: 0
+    artifact: mech_b_replication
+    aggregate: {list: trials, where: {crossing/observed: true, expectation: no crossing}, op: count}
+    expect: 0
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-06a
+    statement: "trials predeclared as non-crossing (guards MR-06 against a filter that matches nothing)"
+    value: 15
+    artifact: mech_b_replication
+    aggregate: {list: trials, where: {expectation: no crossing}, op: count}
+    expect: 15
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-07
+    statement: "maximum reconstruction error of the source recursion against the runtime trajectory"
+    value: 1.9984e-15
+    artifact: mech_b_replication
+    key: platforms/ardupilot/max_reconstruction_error
+    expect: 1.9984e-15
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-08
+    statement: "measured banked S0 on the RAMP arm, minimum (current stack; not the Phase-I 475.68)"
+    value: 133.35
+    artifact: mech_b_replication
+    aggregate: {list: platforms/ardupilot/S0_measured_by_condition/RAMP_20S, op: min}
+    expect: 133.34849854716495
+    tol: 1.0e-6
+    level: T2_RECOMPUTED
+  - id: MR-09
+    statement: "measured banked S0 on the RAMP arm, maximum"
+    value: 136.47
+    artifact: mech_b_replication
+    aggregate: {list: platforms/ardupilot/S0_measured_by_condition/RAMP_20S, op: max}
+    expect: 136.47424865984874
+    tol: 1.0e-6
+    level: T2_RECOMPUTED
+  - id: MR-10
+    statement: "verdict on PX4 SIH (no fix-preserving GNSS offset exists; 0 trials; no substitute run)"
+    value: INAPPLICABLE
+    artifact: mech_b_replication
+    key: platforms/px4/verdict
+    expect: INAPPLICABLE
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-11
+    statement: "preregistered threshold"
+    value: 0.75
+    artifact: mech_b_replication
+    key: threshold
+    expect: 0.75
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-12
+    statement: "preregistration blob cited by the result (the b7d3d9e text, before the 80959bb ALT_HOLD amendment)"
+    value: 0e186117e2dcc014862872934768e06e0a195592
+    artifact: mech_b_replication
+    key: preregistration_blob_sha1
+    expect: 0e186117e2dcc014862872934768e06e0a195592
+    level: T3_ARTIFACT_RECORDED
+  - id: MR-13
+    statement: "POST HOC, history-attributable share of the crossing delay at T* = 0.75"
+    value: 0.440
+    artifact: s0_sweep
+    aggregate: {list: rows, where: {threshold: 0.75}, field: history_attributable_share, op: only}
+    expect: 0.44003280629500435
+    tol: 1.0e-9
+    level: T2_RECOMPUTED
+  - id: MR-14
+    statement: "POST HOC, history-attributable share at T* = 0.80 (above one half: the share is threshold-dependent)"
+    value: 0.520
+    artifact: s0_sweep
+    aggregate: {list: rows, where: {threshold: 0.8}, field: history_attributable_share, op: only}
+    expect: 0.5195232276459365
+    tol: 1.0e-9
+    level: T2_RECOMPUTED
+  - id: MR-15
+    statement: "POST HOC, history-attributable share at T* = 0.85"
+    value: 0.566
+    artifact: s0_sweep
+    aggregate: {list: rows, where: {threshold: 0.85}, field: history_attributable_share, op: only}
+    expect: 0.5658790000078566
+    tol: 1.0e-9
+    level: T2_RECOMPUTED
+  - id: MR-16
+    statement: "POST HOC, crossing ticks with S0 set to zero at T* = 0.75 (52 to 58)"
+    value: [53, 58, 52, 52, 55]
+    artifact: s0_sweep
+    aggregate: {list: rows, where: {threshold: 0.75}, field: crossing_ticks_by_fraction/0.0, op: only}
+    expect: [53, 58, 52, 52, 55]
+    level: T2_RECOMPUTED
+  - id: MR-17
+    statement: "POST HOC, crossing ticks with S0 as measured at T* = 0.75 (94 to 99; equals the observed crossings)"
+    value: [95, 99, 96, 94, 98]
+    artifact: s0_sweep
+    aggregate: {list: rows, where: {threshold: 0.75}, field: crossing_ticks_by_fraction/1.0, op: only}
+    expect: [95, 99, 96, 94, 98]
+    level: T2_RECOMPUTED
+
+  # ------------------------------------------ Table 9: CUSUM against trust (SC-09)
+  - id: T9-01
+    statement: "CUSUM latency, 1 m/s ramp (s after onset)"
+    value: 2.96
+    artifact: mechanism_b_bench
+    key: arms/slow_ramp/crossing/cusum_latency_s
+    expect: 2.96
+    level: T1_REEXECUTED
+  - id: T9-02
+    statement: "CUSUM latency, 3 m/s spoof"
+    value: 1.16
+    artifact: mechanism_b_bench
+    key: arms/spoof_3ms/crossing/cusum_latency_s
+    expect: 1.16
+    level: T1_REEXECUTED
+  - id: T9-03
+    statement: "CUSUM latency, 6 m/s ramp"
+    value: 0.72
+    artifact: mechanism_b_bench
+    key: arms/fast_ramp/crossing/cusum_latency_s
+    expect: 0.72
+    level: T1_REEXECUTED
+  - id: T9-04
+    statement: "trust first crossing below 0.75, 1 m/s ramp -- RAW and ALREADY detector-only (run_pipeline runs no FailsafePolicy; FL-053)"
+    value: 8.72
+    artifact: mechanism_b_bench
+    key: arms/slow_ramp/crossing/trust_latency_s
+    expect: 8.72
+    level: T1_REEXECUTED
+  - id: T9-05
+    statement: "trust first crossing, 3 m/s spoof"
+    value: 3.36
+    artifact: mechanism_b_bench
+    key: arms/spoof_3ms/crossing/trust_latency_s
+    expect: 3.36
+    level: T1_REEXECUTED
+  - id: T9-06
+    statement: "trust first crossing, 6 m/s ramp"
+    value: 3.24
+    artifact: mechanism_b_bench
+    key: arms/fast_ramp/crossing/trust_latency_s
+    expect: 3.24
+    level: T1_REEXECUTED
+  - id: T9-07
+    statement: "CUSUM alarms in the clean window (374 ticks)"
+    value: 0
+    artifact: mechanism_b_bench
+    key: arms/clean/false_alarms_in_clean_window/cusum_alarming
+    expect: 0
+    level: T1_REEXECUTED
+  - id: T9-08
+    statement: "trust ticks below threshold in the clean window"
+    value: 0
+    artifact: mechanism_b_bench
+    key: arms/clean/false_alarms_in_clean_window/trust_below_threshold
+    expect: 0
+    level: T1_REEXECUTED
+  - id: T9-09
+    statement: "CUSUM decision threshold h (smallest grid value with zero alarms on the same simulator's clean arm; textbook h = 5 gave 2681 clean alarm ticks)"
+    value: 500.0
+    artifact: mechanism_b_bench
+    key: arms/slow_ramp/thresholds/cusum_h
+    expect: 500.0
+    level: T1_REEXECUTED
+  - id: T9-10
+    statement: "CUSUM slack k (textbook, set by design)"
+    value: 0.5
+    artifact: mechanism_b_bench
+    key: arms/slow_ramp/thresholds/cusum_k
+    expect: 0.5
+    level: T1_REEXECUTED
+
+  # ------------------------------------- current-stack Mechanism A: A1, A2, P1
+  - id: CA-01
+    statement: "valid trials across A1 + A2 + P1 (40 + 40 + 40)"
+    value: 120
+    compute: {op: sum, terms: [[report_a1, valid], [report_a2, valid], [report_p1, valid]]}
+    expect: 120
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-02
+    statement: "planned trials across A1 + A2 + P1"
+    value: 120
+    compute: {op: sum, terms: [[report_a1, planned], [report_a2, planned], [report_p1, planned]]}
+    expect: 120
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-03
+    statement: "A1 fault arm, first gnss.position MISSING after onset, earliest (s since CSIA started listening)"
+    value: 12.039931
+    artifact: a1_quantities
+    aggregate: {list: trials, where: {arm: FAULT}, field: first_t_gnss_position_missing, op: min}
+    expect: 12.039931
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-04
+    statement: "A1 fault arm, first gnss.position MISSING, latest"
+    value: 12.082686
+    artifact: a1_quantities
+    aggregate: {list: trials, where: {arm: FAULT}, field: first_t_gnss_position_missing, op: max}
+    expect: 12.082686
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-05
+    statement: "A1 fault arm, MISSING tick count, minimum (range 449-450)"
+    value: 449
+    artifact: a1_quantities
+    aggregate: {list: trials, where: {arm: FAULT}, field: gnss_position_missing_ticks, op: min}
+    expect: 449
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-06
+    statement: "A1 fault arm, gate closure (gps_gate_weight_sum == 0), earliest -- a DIFFERENT, later quantity than CA-03"
+    value: 13.040014
+    artifact: a1_quantities
+    aggregate: {list: trials, where: {arm: FAULT}, field: first_t_gate_zero, op: min}
+    expect: 13.040014
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-07
+    statement: "A1 control arm, MISSING ticks, maximum"
+    value: 0
+    artifact: a1_quantities
+    aggregate: {list: trials, where: {arm: CONTROL}, field: gnss_position_missing_ticks, op: max}
+    expect: 0
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-08
+    statement: "A1 trust was not captured (FL-014); no A1 trust value may be stated"
+    value: NOT_CAPTURED
+    artifact: a1_quantities
+    aggregate: {list: trials, field: trust_before, op: all}
+    expect: NOT_CAPTURED
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-09
+    statement: "A1 autopilot build"
+    value: ArduCopter V4.8.0-dev@01a504b
+    artifact: a1_quantities
+    aggregate: {list: trials, field: autopilot_version, op: all}
+    expect: ArduCopter V4.8.0-dev@01a504b
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-10
+    statement: "original ArduPilot n=1 first_t (inside the A1 range)"
+    value: 12.043901
+    artifact: n1_ardupilot
+    key: fault/intermediate_quantity/first_t
+    expect: 12.043901
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-11
+    statement: "original PX4 n=1 first_t"
+    value: 12.121585
+    artifact: n1_px4
+    key: fault/intermediate_quantity/first_t
+    expect: 12.121585
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-12
+    statement: "original ArduPilot n=1, fault trust delta post - pre (single-tick snapshots)"
+    value: 0.008656
+    compute: {op: sub, a: [n1_ardupilot, fault/snapshots/post/trust_gps], b: [n1_ardupilot, fault/snapshots/pre/trust_gps]}
+    expect: 0.008656
+    tol: 5.0e-7
+    level: T2_RECOMPUTED
+  - id: CA-13
+    statement: "original ArduPilot n=1, control trust delta post - pre"
+    value: 0.014020
+    compute: {op: sub, a: [n1_ardupilot, control/snapshots/post/trust_gps], b: [n1_ardupilot, control/snapshots/pre/trust_gps]}
+    expect: 0.014020
+    tol: 5.0e-7
+    level: T2_RECOMPUTED
+  - id: CA-14
+    statement: "original PX4 n=1, fault trust delta post - pre"
+    value: 0.001884
+    compute: {op: sub, a: [n1_px4, fault/snapshots/post/trust_gps], b: [n1_px4, fault/snapshots/pre/trust_gps]}
+    expect: 0.001884
+    tol: 5.0e-7
+    level: T2_RECOMPUTED
+  - id: CA-15
+    statement: "original PX4 n=1, control trust delta post - pre"
+    value: 0.003332
+    compute: {op: sub, a: [n1_px4, control/snapshots/post/trust_gps], b: [n1_px4, control/snapshots/pre/trust_gps]}
+    expect: 0.003332
+    tol: 5.0e-7
+    level: T2_RECOMPUTED
+  - id: CA-16
+    statement: "A2 fault arm, median trust delta (n = 20)"
+    value: 0.007007
+    artifact: a2_trust
+    key: question_B_fault_delta_distribution/median
+    expect: 0.007007
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-17
+    statement: "A2 fault arm, delta minimum"
+    value: 0.006996
+    artifact: a2_trust
+    key: question_B_fault_delta_distribution/min
+    expect: 0.006996
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-18
+    statement: "A2 fault arm, delta maximum"
+    value: 0.007145
+    artifact: a2_trust
+    key: question_B_fault_delta_distribution/max
+    expect: 0.007145
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-19
+    statement: "A2 control arm, median trust delta (n = 20)"
+    value: 0.020594
+    artifact: a2_trust
+    key: question_C_control_delta_distribution/median
+    expect: 0.020594
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-20
+    statement: "A2 control arm, delta minimum (above the fault maximum: ranges disjoint)"
+    value: 0.020572
+    artifact: a2_trust
+    key: question_C_control_delta_distribution/min
+    expect: 0.020572
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-21
+    statement: "A2 control arm, delta maximum"
+    value: 0.020804
+    artifact: a2_trust
+    key: question_C_control_delta_distribution/max
+    expect: 0.020804
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-22
+    statement: "A2 fault arm, median PRE trust"
+    value: 0.924816
+    artifact: a2_trust
+    aggregate: {list: trials, where: {arm: FAULT}, field: trust_pre, op: median}
+    expect: 0.924816
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-23
+    statement: "A2 fault arm, median POST trust"
+    value: 0.931823
+    artifact: a2_trust
+    aggregate: {list: trials, where: {arm: FAULT}, field: trust_post, op: median}
+    expect: 0.931823
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-24
+    statement: "A2 control arm, median PRE trust"
+    value: 0.924813
+    artifact: a2_trust
+    aggregate: {list: trials, where: {arm: CONTROL}, field: trust_pre, op: median}
+    expect: 0.924813
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-25
+    statement: "A2 control arm, median POST trust"
+    value: 0.945407
+    artifact: a2_trust
+    aggregate: {list: trials, where: {arm: CONTROL}, field: trust_post, op: median}
+    expect: 0.945407
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-26
+    statement: "A2 fault trials with a positive delta (trust rose under fix loss in every fault trial)"
+    value: 20
+    artifact: a2_trust
+    key: primary_question_A_does_trust_increase/fault_trials_with_positive_delta
+    expect: 20
+    level: T1_REEXECUTED
+  - id: CA-27
+    statement: "A2 median control/fault delta ratio"
+    value: 2.94
+    compute: {op: div, a: [a2_trust, question_C_control_delta_distribution/median], b: [a2_trust, question_B_fault_delta_distribution/median]}
+    expect: 2.939
+    tol: 5.0e-4
+    level: T2_RECOMPUTED
+  - id: CA-28
+    statement: "P1 fault arm, median trust delta (n = 20)"
+    value: 0.003513
+    artifact: p1_trust
+    key: question_B_fault_delta_distribution/median
+    expect: 0.003513
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-29
+    statement: "P1 fault arm, delta minimum (the original +0.001884 lies OUTSIDE this range; FL-017)"
+    value: 0.002269
+    artifact: p1_trust
+    key: question_B_fault_delta_distribution/min
+    expect: 0.002269
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-30
+    statement: "P1 fault arm, delta maximum"
+    value: 0.003999
+    artifact: p1_trust
+    key: question_B_fault_delta_distribution/max
+    expect: 0.003999
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-31
+    statement: "P1 control arm, median trust delta"
+    value: 0.009499
+    artifact: p1_trust
+    key: question_C_control_delta_distribution/median
+    expect: 0.009499
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-32
+    statement: "P1 control arm, delta minimum (ranges disjoint)"
+    value: 0.009328
+    artifact: p1_trust
+    key: question_C_control_delta_distribution/min
+    expect: 0.009328
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-33
+    statement: "P1 control arm, delta maximum"
+    value: 0.010729
+    artifact: p1_trust
+    key: question_C_control_delta_distribution/max
+    expect: 0.010729
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-34
+    statement: "P1 median control/fault delta ratio (\"about 2.7x\")"
+    value: 2.70
+    compute: {op: div, a: [p1_trust, question_C_control_delta_distribution/median], b: [p1_trust, question_B_fault_delta_distribution/median]}
+    expect: 2.704
+    tol: 5.0e-4
+    level: T2_RECOMPUTED
+  - id: CA-35
+    statement: "P1 fault arm, median PRE trust (0.9522, not the original 0.9856; watchdog 0.5 s -> 1.0 s, FL-017)"
+    value: 0.952172
+    artifact: p1_trust
+    aggregate: {list: trials, where: {arm: FAULT}, field: trust_pre, op: median}
+    expect: 0.952172
+    tol: 5.0e-7
+    level: T1_REEXECUTED
+  - id: CA-36
+    statement: "P1 PX4 build commit, every trial (version string v1.18.0-beta1-395-g547e2caa98, i.e. 395 commits after the beta1 tag)"
+    value: 547e2caa9883bc1609325f02b4914b4e2482fe62
+    artifact: p1_trial_records
+    aggregate: {list: ., field: record/px4_commit, op: all}
+    expect: 547e2caa9883bc1609325f02b4914b4e2482fe62
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-37
+    statement: "A2 ArduPilot build commit, every trial"
+    value: 01a504b472259602e13df4cf07df7c0cdbb35993
+    artifact: a2_trial_records
+    aggregate: {list: ., field: record/ardupilot_commit, op: all}
+    expect: 01a504b472259602e13df4cf07df7c0cdbb35993
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-38
+    statement: "PX4 passive-link confound verdict (1 of 4 gps_fault relations live pre-fault; gate weight 1.0, not 3.0)"
+    value: PARTIALLY_AFFECTED
+    artifact: link_confound
+    key: verdicts/px4
+    expect: PARTIALLY_AFFECTED
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-39
+    statement: "PX4 gps gate weight sum before the fault"
+    value: 1.0
+    artifact: link_confound
+    key: platforms/px4/gps_gate_weight_sum/fault_arm_at_onset
+    expect: 1.0
+    level: T3_ARTIFACT_RECORDED
+  - id: CA-40
+    statement: "P1 first gnss.position MISSING range 12.0005-12.1291 s and tick count 444-451 -- NO artifact key; stated only in PX4_REPEAT_RECONCILIATION.md rows 1-2"
+    value: 12.0005-12.1291 s / 444-451
+    level: T4_DOCUMENT_ONLY
+  - id: CA-41
+    statement: "watchdog replay trusts 0.986420 / 0.952526 / 0.985924 / 0.949056 -- no artifact; script docstring and reconciliation prose only; inputs are gitignored flight logs"
+    value: watchdog replay values
+    level: T4_DOCUMENT_ONLY
+  - id: CA-42
+    statement: "stale-timeout values 0.5 s (frozen csia/runtime/online.py STALE_TIMEOUT_S gps) and 1.0 s (csia/v1_1/staleness.py, both platforms) -- read from source this session"
+    value: 0.5 s / 1.0 s
+    level: T2_RECOMPUTED
+
+  # ---------------------------------------------- 26-log historical replay
+  - id: RL-01
+    statement: "logs counted"
+    value: 26
+    artifact: exposure_v2
+    key: payload/exposure/counted_logs
+    expect: 26
+    level: T3_ARTIFACT_RECORDED
+  - id: RL-02
+    statement: "monitored hours (raw 0.6627 minus 20 s arm_time per log)"
+    value: 0.5183
+    artifact: exposure_v2
+    key: payload/exposure/total_monitored_hours
+    expect: 0.5183
+    level: T2_RECOMPUTED
+  - id: RL-03
+    statement: "alert episodes (2 flights with 1 episode, 24 with none)"
+    value: 2
+    artifact: exposure_v2
+    key: payload/rates_by_health_category/UNANNOTATED/alert_episodes
+    expect: 2
+    level: T3_ARTIFACT_RECORDED
+  - id: RL-04
+    statement: "episode rate per monitored hour, UNANNOTATED flights -- NOT a false-alarm rate (0 h of verified-healthy exposure)"
+    value: 3.859
+    artifact: exposure_v2
+    key: payload/rates_by_health_category/UNANNOTATED/rate_per_hour
+    expect: 3.859
+    level: T2_RECOMPUTED
+  - id: RL-05
+    statement: "exact Poisson 95 percent interval, lower (recomputed, Garwood)"
+    value: 0.467
+    artifact: exposure_v2
+    key: payload/rates_by_health_category/UNANNOTATED/ci95_per_hour/0
+    expect: 0.467
+    level: T2_RECOMPUTED
+  - id: RL-06
+    statement: "exact Poisson 95 percent interval, upper"
+    value: 13.939
+    artifact: exposure_v2
+    key: payload/rates_by_health_category/UNANNOTATED/ci95_per_hour/1
+    expect: 13.939
+    level: T2_RECOMPUTED
+  - id: RL-07
+    statement: "verified-healthy alert episodes (there is no verified-healthy exposure at all)"
+    value: 0
+    artifact: exposure_v2
+    key: payload/rates_by_health_category/VERIFIED_HEALTHY/flights_with_0_episodes
+    expect: 0
+    level: T3_ARTIFACT_RECORDED
+
+  # ---------------------------------------------------------- scope and status
+  - id: SS-01
+    statement: "support-exposure / public-log study SC-22 -- NOT RUN, no data, no result"
+    value: NOT RUN
+    artifact: claims_csv
+    contains: "SC-22,A public-log exposure study over PX4 Flight Review logs.,PROVISIONAL"
+    level: NOT_SUPPORTED
+  - id: SS-02
+    statement: "a five-stage evidence-availability taxonomy -- no repository artifact defines one; EVIDENCE_AVAILABILITY.json is a per-relation live-share matrix (32 ArduPilot, 12 PX4 flights)"
+    value: none
+    level: NOT_SUPPORTED
+  - id: SS-03
+    statement: "escalation timing on the current stack -- the per-tick logs carry an empty dwell_state column and assurance_level NORMAL throughout; only the threshold CROSSING is measured there"
+    value: none
+    level: NOT_SUPPORTED
+
+# Values that must NOT appear in the manuscript as stated. `scan` fails on any.
+forbidden:
+  - pattern: '7\.72'
+    reason: "net-of-dwell trust latency; the dwell was never in the series (FL-053). Use 8.72."
+  - pattern: '2\.36\s*(s|vs|against)'
+    reason: "net-of-dwell trust latency (FL-053). Use 3.36."
+  - pattern: '2\.24\s*(s|vs|against)'
+    reason: "net-of-dwell trust latency (FL-053). Use 3.24."
+  - pattern: 'false[- ]alarm rate'
+    reason: "the 26-log replay has 0 h of verified-healthy exposure; it is an episode rate on unannotated flights."
+  - pattern: '4\.52\s*/\s*h|3\.02\s*/\s*h'
+    reason: "superseded real-log rates (correction 14). Use 3.859 per monitored hour."
+  - pattern: '0\.286'
+    reason: "pre-promotion gate-closure ceiling (correction 13). Use 0.143."
+  - pattern: 'no fix-loss arm exists'
+    reason: "stale; A1, A2 and P1 are fix-loss campaigns on the current stacks."
+  - pattern: 'PX4 v1\.18\.0-beta1(?!-395)'
+    reason: "the build is v1.18.0-beta1-395-g547e2caa98, 395 commits after the tag."

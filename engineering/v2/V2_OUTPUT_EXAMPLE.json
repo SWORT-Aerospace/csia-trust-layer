@@ -1,0 +1,3076 @@
+{
+  "attribution": {
+    "candidate_detail": [
+      {
+        "component": "state_estimator",
+        "domain": "COMPUTE",
+        "id": "COMPUTE/state_estimator",
+        "reason_codes": [
+          "COMPUTE_DEADLINE_MISSED"
+        ],
+        "supporting_relations": [
+          "compute.deadline_met"
+        ]
+      },
+      {
+        "component": "nav_solution",
+        "domain": "TIMING",
+        "id": "TIMING/nav_solution",
+        "reason_codes": [
+          "TIMING_DEADLINE_MISSED"
+        ],
+        "supporting_relations": [
+          "timing.end_to_end"
+        ]
+      },
+      {
+        "component": "nav_solution.processing_delay",
+        "domain": "TIMING",
+        "id": "TIMING/nav_solution.processing_delay",
+        "reason_codes": [
+          "TIMING_SEGMENT_OVER_BUDGET"
+        ],
+        "supporting_relations": [
+          "timing.segment_budget"
+        ]
+      }
+    ],
+    "candidates": [
+      "COMPUTE/state_estimator",
+      "TIMING/nav_solution",
+      "TIMING/nav_solution.processing_delay"
+    ],
+    "common_cause": "COMPUTE/state_estimator",
+    "detail": {
+      "common_cause_note": "a shared dependency that is itself adverse is RETAINED as an alternative explanation, not adopted as the answer: one rail fault and two coincident faults downstream of it produce the same evidence here",
+      "domains_excluded": [
+        "ACTUATION",
+        "COMMUNICATION",
+        "POWER",
+        "SENSOR"
+      ],
+      "domains_excluded_note": "affirmatively NOMINAL, contributing no candidate -- these explanations were looked at and found unsupported by the evidence, which is not the same as not having been considered",
+      "shared_adverse_dependencies": [
+        "COMPUTE/state_estimator"
+      ],
+      "why": "several components carry adverse evidence and nothing separates them"
+    },
+    "discriminators": [
+      "ACTUATION/motor_0:actuation.command_path",
+      "ACTUATION/motor_0:actuation.electrical_response",
+      "ACTUATION/motor_0:actuation.mechanical_response",
+      "COMMUNICATION/esc_can:comm.integrity",
+      "COMMUNICATION/esc_can:comm.link_state",
+      "COMMUNICATION/esc_can:comm.loss",
+      "COMMUNICATION/esc_can:comm.ordering",
+      "COMMUNICATION/esc_can:comm.rate",
+      "COMMUNICATION/gnss_serial:comm.integrity",
+      "COMMUNICATION/gnss_serial:comm.link_state",
+      "COMMUNICATION/gnss_serial:comm.loss",
+      "COMMUNICATION/gnss_serial:comm.ordering",
+      "COMMUNICATION/gnss_serial:comm.queue",
+      "COMMUNICATION/gnss_serial:comm.rate",
+      "COMMUNICATION/telemetry_radio:comm.integrity",
+      "COMMUNICATION/telemetry_radio:comm.link_state",
+      "COMMUNICATION/telemetry_radio:comm.loss",
+      "COMMUNICATION/telemetry_radio:comm.ordering",
+      "COMMUNICATION/telemetry_radio:comm.queue",
+      "COMMUNICATION/telemetry_radio:comm.rate",
+      "POWER/battery:power.cell_balance",
+      "POWER/battery:power.droop_vs_current",
+      "POWER/battery:power.p_equals_vi",
+      "POWER/battery:power.source_health",
+      "POWER/rail_3v3:power.rail_tolerance",
+      "POWER/rail_5v:power.rail_tolerance",
+      "SENSOR/source.baro:v1_1.source_health",
+      "SENSOR/source.battery:v1_1.source_health",
+      "SENSOR/source.gps:v1_1.source_health",
+      "SENSOR/source.imu0:v1_1.source_health",
+      "SENSOR/source.imu1:v1_1.source_health",
+      "SENSOR/source.mag:v1_1.source_health",
+      "SENSOR/source.motor_esc:v1_1.source_health",
+      "SENSOR/source.vibration:v1_1.source_health"
+    ],
+    "unsupported": [
+      "COMPUTE/cpu"
+    ],
+    "verdict": "AMBIGUOUS"
+  },
+  "declarations": {
+    "cross_domain_relations": [
+      {
+        "description": "actuator demand implies an expected current draw; a commanded actuator drawing nothing implicates the power path OR the actuator, and these signals do not separate them",
+        "domains": [
+          "ACTUATION",
+          "POWER"
+        ],
+        "implicates": [
+          "POWER/battery",
+          "ACTUATION/motor_0"
+        ],
+        "relation_id": "actuation_power.demand_vs_current"
+      },
+      {
+        "description": "CPU saturation produces processing latency produces a missed output deadline; the timing finding and the compute finding are one event seen twice",
+        "domains": [
+          "COMPUTE",
+          "TIMING"
+        ],
+        "implicates": [
+          "COMPUTE/cpu",
+          "COMPUTE/state_estimator"
+        ],
+        "relation_id": "compute_timing.saturation_vs_latency"
+      },
+      {
+        "description": "a source that has gone quiet behind a failing link is a communication candidate, not a sensor fault",
+        "domains": [
+          "COMMUNICATION",
+          "SENSOR"
+        ],
+        "implicates": [
+          "COMMUNICATION/gnss_serial"
+        ],
+        "relation_id": "comm_sensor.link_vs_source"
+      },
+      {
+        "description": "sources sharing a rail degrade together when the rail sags; the rail is retained as a common-cause alternative rather than replacing the sensor explanation",
+        "domains": [
+          "POWER",
+          "SENSOR"
+        ],
+        "implicates": [
+          "POWER/rail_5v"
+        ],
+        "relation_id": "power_sensor.shared_rail"
+      }
+    ],
+    "domains": [
+      {
+        "actuators": [
+          {
+            "affected_functions": [
+              "PROPULSION",
+              "AUTONOMOUS_MISSION"
+            ],
+            "depends_on": [
+              "POWER/battery",
+              "COMMUNICATION/esc_can"
+            ],
+            "name": "motor_0"
+          }
+        ],
+        "affected_functions": [
+          "AUTONOMOUS_MISSION",
+          "PROPULSION"
+        ],
+        "domain_id": "ACTUATION",
+        "implementation": "ActuationAssuranceDomain",
+        "optional_inputs": [
+          "command_transmitted",
+          "current_a",
+          "rpm",
+          "<physical_signal>"
+        ],
+        "reason_codes": [
+          "ACT_COMMAND_NOT_TRANSMITTED",
+          "ACT_NO_ELECTRICAL_RESPONSE",
+          "ACT_STALLED",
+          "ACT_RESPONSE_LOW",
+          "ACT_OVERCURRENT",
+          "ACT_NO_PHYSICAL_RESPONSE",
+          "ACT_TELEMETRY_MISSING"
+        ],
+        "relations": [
+          "actuation.command_path",
+          "actuation.electrical_response",
+          "actuation.mechanical_response",
+          "actuation.physical_response"
+        ],
+        "required_inputs": [
+          "ACTUATION/<actuator>/command"
+        ],
+        "schema_version": "2.0.0"
+      },
+      {
+        "affected_functions": [
+          "AUTONOMOUS_MISSION",
+          "PROPULSION",
+          "SENSING",
+          "TELEMETRY"
+        ],
+        "domain_id": "COMMUNICATION",
+        "implementation": "CommunicationAssuranceDomain",
+        "links": [
+          {
+            "affected_functions": [
+              "SENSING"
+            ],
+            "carries": [
+              "gps"
+            ],
+            "depends_on": [
+              "POWER/rail_3v3"
+            ],
+            "name": "gnss_serial",
+            "transport": "UART"
+          },
+          {
+            "affected_functions": [
+              "TELEMETRY"
+            ],
+            "carries": [],
+            "depends_on": [
+              "POWER/rail_5v"
+            ],
+            "name": "telemetry_radio",
+            "transport": "MAVLink"
+          },
+          {
+            "affected_functions": [
+              "PROPULSION",
+              "AUTONOMOUS_MISSION"
+            ],
+            "carries": [
+              "motor_esc"
+            ],
+            "depends_on": [
+              "POWER/battery"
+            ],
+            "name": "esc_can",
+            "transport": "CAN"
+          }
+        ],
+        "optional_inputs": [
+          "observed_rate_hz",
+          "sequence_gaps",
+          "messages_expected",
+          "messages_received",
+          "loss_frac",
+          "duplicates",
+          "reordered",
+          "crc_errors",
+          "bus_off",
+          "reconnects",
+          "queue_delay_s"
+        ],
+        "reason_codes": [
+          "COMM_LINK_DOWN",
+          "COMM_BUS_OFF",
+          "COMM_RATE_LOW",
+          "COMM_RATE_MARGINAL",
+          "COMM_PACKET_LOSS",
+          "COMM_CRC_ERRORS",
+          "COMM_DUPLICATES",
+          "COMM_REORDERING",
+          "COMM_QUEUE_DELAY",
+          "COMM_RECONNECTING",
+          "COMM_TELEMETRY_MISSING"
+        ],
+        "relations": [
+          "comm.link_state",
+          "comm.rate",
+          "comm.loss",
+          "comm.integrity",
+          "comm.ordering",
+          "comm.queue"
+        ],
+        "required_inputs": [
+          "COMMUNICATION/<link>/link_up"
+        ],
+        "schema_version": "2.0.0"
+      },
+      {
+        "affected_functions": [
+          "AUTONOMOUS_MISSION",
+          "LOGGING",
+          "POSITION_HOLD",
+          "PRECISION_NAVIGATION",
+          "SENSING"
+        ],
+        "domain_id": "COMPUTE",
+        "implementation": "ComputeAssuranceDomain",
+        "optional_inputs": [
+          "heartbeat_age_s",
+          "output_age_s",
+          "runtime_s",
+          "deadline_misses",
+          "queue_depth",
+          "restart_count",
+          "COMPUTE/<resource>/cpu_load",
+          "COMPUTE/<resource>/memory_used_frac",
+          "COMPUTE/<resource>/throttled",
+          "COMPUTE/<resource>/reset_reason"
+        ],
+        "processes": [
+          {
+            "affected_functions": [
+              "PRECISION_NAVIGATION",
+              "POSITION_HOLD",
+              "AUTONOMOUS_MISSION"
+            ],
+            "deadline_s": 0.02,
+            "depends_on": [
+              "COMPUTE/cpu",
+              "SENSOR/source.imu0"
+            ],
+            "name": "state_estimator"
+          },
+          {
+            "affected_functions": [
+              "SENSING"
+            ],
+            "deadline_s": 0.01,
+            "depends_on": [
+              "COMPUTE/cpu"
+            ],
+            "name": "csia"
+          },
+          {
+            "affected_functions": [
+              "LOGGING"
+            ],
+            "deadline_s": 0.1,
+            "depends_on": [
+              "COMPUTE/cpu"
+            ],
+            "name": "logger"
+          }
+        ],
+        "reason_codes": [
+          "COMPUTE_PROCESS_DEAD",
+          "COMPUTE_HEARTBEAT_STALE",
+          "COMPUTE_NO_OUTPUT",
+          "COMPUTE_DEADLINE_MISSED",
+          "COMPUTE_DEADLINE_MARGINAL",
+          "COMPUTE_CPU_SATURATED",
+          "COMPUTE_MEMORY_PRESSURE",
+          "COMPUTE_QUEUE_BACKLOG",
+          "COMPUTE_THERMAL_THROTTLED",
+          "COMPUTE_RESTARTED",
+          "COMPUTE_TELEMETRY_MISSING"
+        ],
+        "relations": [
+          "compute.process_alive",
+          "compute.process_producing",
+          "compute.deadline_met",
+          "compute.resource_headroom",
+          "compute.stability"
+        ],
+        "required_inputs": [
+          "COMPUTE/<process>/alive"
+        ],
+        "schema_version": "2.0.0"
+      },
+      {
+        "affected_functions": [
+          "AUTONOMOUS_MISSION",
+          "COARSE_NAVIGATION",
+          "GEOFENCE_SUPPORT",
+          "INERTIAL_CONTINUATION",
+          "LOGGING",
+          "POSITION_HOLD",
+          "PRECISION_NAVIGATION",
+          "PROPULSION",
+          "SENSING",
+          "TELEMETRY"
+        ],
+        "battery": "battery",
+        "domain_id": "POWER",
+        "implementation": "PowerAssuranceDomain",
+        "optional_inputs": [
+          "power_w",
+          "voltage_reference_v",
+          "cell_voltages",
+          "temperature_c",
+          "POWER/<rail>/voltage_v",
+          "POWER/<load>/demand_frac"
+        ],
+        "rails": [
+          {
+            "affected_functions": [
+              "SENSING",
+              "TELEMETRY",
+              "COARSE_NAVIGATION",
+              "POSITION_HOLD",
+              "PRECISION_NAVIGATION",
+              "GEOFENCE_SUPPORT",
+              "AUTONOMOUS_MISSION"
+            ],
+            "depends_on": [
+              "POWER/battery"
+            ],
+            "fail_frac": 0.05,
+            "name": "rail_5v",
+            "nominal_v": 5.0,
+            "warn_frac": 0.02
+          },
+          {
+            "affected_functions": [
+              "SENSING",
+              "COARSE_NAVIGATION",
+              "POSITION_HOLD",
+              "PRECISION_NAVIGATION",
+              "GEOFENCE_SUPPORT",
+              "INERTIAL_CONTINUATION",
+              "AUTONOMOUS_MISSION"
+            ],
+            "depends_on": [
+              "POWER/rail_5v"
+            ],
+            "fail_frac": 0.05,
+            "name": "rail_3v3",
+            "nominal_v": 3.3,
+            "warn_frac": 0.02
+          }
+        ],
+        "reason_codes": [
+          "POWER_TELEMETRY_MISSING",
+          "POWER_RAIL_MARGINAL",
+          "POWER_RAIL_OUT_OF_TOLERANCE",
+          "POWER_RAIL_UNAVAILABLE",
+          "POWER_BALANCE_INCONSISTENT",
+          "POWER_CELL_IMBALANCE",
+          "POWER_EXCESS_DROOP",
+          "POWER_DISTRIBUTION_SUSPECT",
+          "POWER_LOAD_WITHOUT_CURRENT"
+        ],
+        "relations": [
+          "power.source_health",
+          "power.p_equals_vi",
+          "power.droop_vs_current",
+          "power.cell_balance",
+          "power.rail_tolerance",
+          "power.load_current_response"
+        ],
+        "required_inputs": [
+          "POWER/<battery>/voltage_v",
+          "POWER/<battery>/current_a"
+        ],
+        "schema_version": "2.0.0"
+      },
+      {
+        "affected_functions": [
+          "SENSING",
+          "AUTONOMOUS_MISSION"
+        ],
+        "domain_id": "SENSOR",
+        "implementation": "NavigationAssuranceDomain",
+        "note": "consumes csia_output_v1_1 schema 1.1.0; imports no v1.1 producer and computes no v1.1 quantity",
+        "optional_inputs": [],
+        "reason_codes": [
+          "V1_1_PAYLOAD_MISSING",
+          "V1_1_PAYLOAD_REJECTED",
+          "V1_1_FUNCTION_NOT_ELIGIBLE",
+          "SOURCE_NOT_FRESH",
+          "SOURCE_TRUST_LOW",
+          "SUPPORT_NOT_IDENTIFIABLE",
+          "SEQUENTIAL_ALARM"
+        ],
+        "relations": [
+          "v1_1.function_eligibility",
+          "v1_1.source_health",
+          "v1_1.support",
+          "v1_1.sequential",
+          "sensor.aggregate"
+        ],
+        "required_inputs": [
+          "v1_1_payload"
+        ],
+        "schema_version": "2.0.0",
+        "source_dependencies": {
+          "baro": [
+            "POWER/rail_3v3"
+          ],
+          "battery": [
+            "POWER/battery"
+          ],
+          "gps": [
+            "POWER/rail_5v"
+          ],
+          "imu0": [
+            "POWER/rail_3v3"
+          ],
+          "imu1": [
+            "POWER/rail_3v3"
+          ],
+          "mag": [
+            "POWER/rail_3v3"
+          ],
+          "motor_esc": [
+            "POWER/battery"
+          ],
+          "vibration": [
+            "POWER/rail_3v3"
+          ]
+        }
+      },
+      {
+        "affected_functions": [
+          "AUTONOMOUS_MISSION",
+          "POSITION_HOLD",
+          "PRECISION_NAVIGATION",
+          "TELEMETRY",
+          "TIMELINESS"
+        ],
+        "channels": [
+          {
+            "affected_functions": [
+              "PRECISION_NAVIGATION",
+              "POSITION_HOLD",
+              "AUTONOMOUS_MISSION"
+            ],
+            "depends_on": [
+              "COMPUTE/state_estimator",
+              "COMPUTE/cpu"
+            ],
+            "end_to_end_deadline_s": 0.05,
+            "name": "nav_solution"
+          },
+          {
+            "affected_functions": [
+              "TELEMETRY"
+            ],
+            "depends_on": [
+              "COMMUNICATION/telemetry_radio"
+            ],
+            "end_to_end_deadline_s": 1.0,
+            "name": "telemetry_downlink"
+          }
+        ],
+        "domain_id": "TIMING",
+        "implementation": "TimingAssuranceDomain",
+        "optional_inputs": [
+          "t_arrival",
+          "t_processed",
+          "t_decision",
+          "interval_s",
+          "jitter_s"
+        ],
+        "reason_codes": [
+          "TIMING_SEGMENT_OVER_BUDGET",
+          "TIMING_SEGMENT_MARGINAL",
+          "TIMING_DEADLINE_MISSED",
+          "TIMING_DEADLINE_MARGINAL",
+          "TIMING_JITTER_EXCESSIVE",
+          "TIMING_RATE_LOW",
+          "TIMING_CLOCK_INCONSISTENT",
+          "TIMING_STAMPS_MISSING"
+        ],
+        "relations": [
+          "timing.clock_consistency",
+          "timing.segment_budget",
+          "timing.end_to_end",
+          "timing.rate",
+          "timing.jitter"
+        ],
+        "required_inputs": [
+          "TIMING/<channel>/t_validity"
+        ],
+        "schema_version": "2.0.0",
+        "segment_classes": [
+          "SENSOR_SLOW",
+          "TRANSPORT_DELAY",
+          "PROCESSING_DELAY",
+          "DECISION_DELAY"
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "acceptable_degradation": "",
+        "fallback": "operator-supervised flight",
+        "name": "AUTONOMOUS_MISSION",
+        "no_degradation_domains": [
+          "TIMING"
+        ],
+        "required_domains": [
+          "SENSOR",
+          "COMPUTE",
+          "TIMING",
+          "POWER",
+          "ACTUATION"
+        ],
+        "summary": "the vehicle can execute a mission without an operator",
+        "supporting_domains": [
+          "COMMUNICATION"
+        ]
+      },
+      {
+        "acceptable_degradation": "latency and compute pressure degrade but do not remove it",
+        "fallback": "INERTIAL_CONTINUATION",
+        "name": "COARSE_NAVIGATION",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "SENSOR",
+          "POWER"
+        ],
+        "summary": "position good enough to hold a corridor",
+        "supporting_domains": [
+          "COMPUTE",
+          "TIMING"
+        ]
+      },
+      {
+        "acceptable_degradation": "",
+        "fallback": null,
+        "name": "GEOFENCE_SUPPORT",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "SENSOR",
+          "POWER"
+        ],
+        "summary": "boundary enforcement",
+        "supporting_domains": [
+          "COMPUTE"
+        ]
+      },
+      {
+        "acceptable_degradation": "",
+        "fallback": null,
+        "name": "INERTIAL_CONTINUATION",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "SENSOR",
+          "POWER"
+        ],
+        "summary": "dead reckoning through an outage",
+        "supporting_domains": []
+      },
+      {
+        "acceptable_degradation": "a late log entry is still a log entry",
+        "fallback": null,
+        "name": "LOGGING",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "COMPUTE",
+          "POWER"
+        ],
+        "summary": "an assurance record is being written",
+        "supporting_domains": []
+      },
+      {
+        "acceptable_degradation": "",
+        "fallback": "attitude hold",
+        "name": "POSITION_HOLD",
+        "no_degradation_domains": [
+          "TIMING"
+        ],
+        "required_domains": [
+          "SENSOR",
+          "COMPUTE",
+          "TIMING",
+          "POWER"
+        ],
+        "summary": "station keeping against drift",
+        "supporting_domains": []
+      },
+      {
+        "acceptable_degradation": "none: a late position is a wrong position at speed",
+        "fallback": "COARSE_NAVIGATION",
+        "name": "PRECISION_NAVIGATION",
+        "no_degradation_domains": [
+          "TIMING"
+        ],
+        "required_domains": [
+          "SENSOR",
+          "COMPUTE",
+          "TIMING",
+          "POWER"
+        ],
+        "summary": "metre-class positioning for guided flight",
+        "supporting_domains": []
+      },
+      {
+        "acceptable_degradation": "",
+        "fallback": null,
+        "name": "PROPULSION",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "POWER",
+          "ACTUATION"
+        ],
+        "summary": "commanded thrust is being produced",
+        "supporting_domains": [
+          "COMPUTE"
+        ]
+      },
+      {
+        "acceptable_degradation": "a degraded source set still senses",
+        "fallback": null,
+        "name": "SENSING",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "SENSOR",
+          "POWER",
+          "COMMUNICATION"
+        ],
+        "summary": "sources are being received and are usable at all",
+        "supporting_domains": [
+          "COMPUTE"
+        ]
+      },
+      {
+        "acceptable_degradation": "latency and loss degrade telemetry; they do not stop it",
+        "fallback": "onboard log only",
+        "name": "TELEMETRY",
+        "no_degradation_domains": [],
+        "required_domains": [
+          "COMMUNICATION",
+          "POWER"
+        ],
+        "summary": "the ground station is being kept informed",
+        "supporting_domains": [
+          "COMPUTE",
+          "TIMING"
+        ]
+      }
+    ]
+  },
+  "domains": {
+    "ACTUATION": "NOMINAL",
+    "COMMUNICATION": "NOMINAL",
+    "COMPUTE": "VIOLATED",
+    "POWER": "NOMINAL",
+    "SENSOR": "NOMINAL",
+    "TIMING": "VIOLATED"
+  },
+  "evidence": [
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "motor_0",
+      "dependencies": [
+        "POWER/battery",
+        "COMMUNICATION/esc_can"
+      ],
+      "detail": {
+        "candidate": null,
+        "tolerance": 0.02
+      },
+      "domain": "ACTUATION",
+      "expected_relation": "transmitted command matches requested",
+      "expected_value": 0.55,
+      "latencies": {},
+      "measured_value": 0.55,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "actuation.command_path",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "actuation",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "motor_0",
+      "dependencies": [
+        "POWER/battery",
+        "COMMUNICATION/esc_can"
+      ],
+      "detail": {
+        "candidates": null,
+        "note": null,
+        "tolerance_frac": 0.35
+      },
+      "domain": "ACTUATION",
+      "expected_relation": "current ~= command * full-load current",
+      "expected_value": 16.5,
+      "latencies": {},
+      "measured_value": 16.5,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "actuation.electrical_response",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "actuation",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "motor_0",
+      "dependencies": [
+        "POWER/battery",
+        "COMMUNICATION/esc_can"
+      ],
+      "detail": {
+        "current_a": 16.5,
+        "signature": null,
+        "tolerance_frac": 0.2
+      },
+      "domain": "ACTUATION",
+      "expected_relation": "rpm ~= command * full-load rpm",
+      "expected_value": 4950.0,
+      "latencies": {},
+      "measured_value": 4950.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "actuation.mechanical_response",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "actuation",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "bus_off": false,
+        "carries": [
+          "gps"
+        ],
+        "link_up": true,
+        "reconnects": 0,
+        "transport": "UART"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "link up and not in bus-off",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.link_state",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "rate_frac": 1.0,
+        "transport": "UART"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "observed rate within its declared fraction of nominal",
+      "expected_value": 5.0,
+      "latencies": {},
+      "measured_value": 5.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.rate",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "sequence_gaps": null,
+        "warn": 0.02
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "loss fraction within declared limit",
+      "expected_value": 0.1,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.loss",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {},
+      "domain": "COMMUNICATION",
+      "expected_relation": "CRC errors within declared limit",
+      "expected_value": 0.0,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.integrity",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "duplicates": 0,
+        "reordered": 0
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "no duplicated or reordered messages",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.ordering",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "gnss_serial",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "warn_s": 0.1
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "transmit queue delay within limit",
+      "expected_value": 0.5,
+      "latencies": {},
+      "measured_value": 0.01,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.queue",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "bus_off": false,
+        "carries": [],
+        "link_up": true,
+        "reconnects": 0,
+        "transport": "MAVLink"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "link up and not in bus-off",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.link_state",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "rate_frac": 1.0,
+        "transport": "MAVLink"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "observed rate within its declared fraction of nominal",
+      "expected_value": 10.0,
+      "latencies": {},
+      "measured_value": 10.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.rate",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "sequence_gaps": null,
+        "warn": 0.05
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "loss fraction within declared limit",
+      "expected_value": 0.25,
+      "latencies": {},
+      "measured_value": 0.01,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.loss",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {},
+      "domain": "COMMUNICATION",
+      "expected_relation": "CRC errors within declared limit",
+      "expected_value": 5.0,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.integrity",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "duplicates": 0,
+        "reordered": 0
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "no duplicated or reordered messages",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.ordering",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_radio",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "warn_s": 0.3
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "transmit queue delay within limit",
+      "expected_value": 1.0,
+      "latencies": {},
+      "measured_value": 0.05,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.queue",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "esc_can",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "bus_off": false,
+        "carries": [
+          "motor_esc"
+        ],
+        "link_up": true,
+        "reconnects": 0,
+        "transport": "CAN"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "link up and not in bus-off",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.link_state",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "esc_can",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "rate_frac": 1.0,
+        "transport": "CAN"
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "observed rate within its declared fraction of nominal",
+      "expected_value": 50.0,
+      "latencies": {},
+      "measured_value": 50.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.rate",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "esc_can",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "sequence_gaps": null,
+        "warn": 0.01
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "loss fraction within declared limit",
+      "expected_value": 0.05,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.loss",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "esc_can",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {},
+      "domain": "COMMUNICATION",
+      "expected_relation": "CRC errors within declared limit",
+      "expected_value": 0.0,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.integrity",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "esc_can",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "duplicates": 0,
+        "reordered": 0
+      },
+      "domain": "COMMUNICATION",
+      "expected_relation": "no duplicated or reordered messages",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "comm.ordering",
+      "residual": null,
+      "sequential_state": null,
+      "source": "communication",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "state_estimator",
+      "dependencies": [
+        "COMPUTE/cpu",
+        "SENSOR/source.imu0"
+      ],
+      "detail": {
+        "alive_flag": true
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "process alive and heartbeat within limit",
+      "expected_value": 0.1,
+      "latencies": {},
+      "measured_value": 0.01,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_alive",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "state_estimator",
+      "dependencies": [
+        "COMPUTE/cpu",
+        "SENSOR/source.imu0"
+      ],
+      "detail": {},
+      "domain": "COMPUTE",
+      "expected_relation": "time since last output within limit",
+      "expected_value": 0.1,
+      "latencies": {},
+      "measured_value": 0.02,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_producing",
+      "residual": -0.08,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "state_estimator",
+      "dependencies": [
+        "COMPUTE/cpu",
+        "SENSOR/source.imu0"
+      ],
+      "detail": {
+        "deadline_slack_s": -0.024999999999999998,
+        "reported_misses": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "runtime <= deadline",
+      "expected_value": 0.02,
+      "latencies": {},
+      "measured_value": 0.045,
+      "observation_state": "VIOLATED",
+      "provenance": {},
+      "reason_codes": [
+        "COMPUTE_DEADLINE_MISSED"
+      ],
+      "relation": "compute.deadline_met",
+      "residual": 0.024999999999999998,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "state_estimator",
+      "dependencies": [
+        "COMPUTE/cpu",
+        "SENSOR/source.imu0"
+      ],
+      "detail": {
+        "restart_count": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "queue within limit and no restarts",
+      "expected_value": 8.0,
+      "latencies": {},
+      "measured_value": 1.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.stability",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "csia",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "alive_flag": true
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "process alive and heartbeat within limit",
+      "expected_value": 0.2,
+      "latencies": {},
+      "measured_value": 0.02,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_alive",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "csia",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {},
+      "domain": "COMPUTE",
+      "expected_relation": "time since last output within limit",
+      "expected_value": 0.2,
+      "latencies": {},
+      "measured_value": 0.05,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_producing",
+      "residual": -0.15000000000000002,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "csia",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "deadline_slack_s": 0.006,
+        "reported_misses": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "runtime <= deadline",
+      "expected_value": 0.01,
+      "latencies": {},
+      "measured_value": 0.004,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.deadline_met",
+      "residual": -0.006,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "csia",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "restart_count": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "queue within limit and no restarts",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": 0.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.stability",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "LOGGING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "logger",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "alive_flag": true
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "process alive and heartbeat within limit",
+      "expected_value": 1.0,
+      "latencies": {},
+      "measured_value": 0.2,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_alive",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "LOGGING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "logger",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {},
+      "domain": "COMPUTE",
+      "expected_relation": "time since last output within limit",
+      "expected_value": 2.0,
+      "latencies": {},
+      "measured_value": 0.5,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.process_producing",
+      "residual": -1.5,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "LOGGING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "logger",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "deadline_slack_s": 0.08,
+        "reported_misses": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "runtime <= deadline",
+      "expected_value": 0.1,
+      "latencies": {},
+      "measured_value": 0.02,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.deadline_met",
+      "residual": -0.08,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "logger",
+      "dependencies": [
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "restart_count": 0
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "queue within limit and no restarts",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": 2.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.stability",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION",
+        "LOGGING",
+        "SENSING"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "cpu",
+      "dependencies": [],
+      "detail": {
+        "cpu_load": 0.42,
+        "memory_used_frac": 0.55,
+        "reset_reason": "POWER_ON",
+        "throttled": false
+      },
+      "domain": "COMPUTE",
+      "expected_relation": "CPU and memory below their declared limits",
+      "expected_value": 0.97,
+      "latencies": {},
+      "measured_value": 0.42,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "compute.resource_headroom",
+      "residual": null,
+      "sequential_state": null,
+      "source": "compute",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "COARSE_NAVIGATION",
+        "POSITION_HOLD",
+        "GEOFENCE_SUPPORT",
+        "INERTIAL_CONTINUATION",
+        "SENSING",
+        "TELEMETRY",
+        "LOGGING",
+        "PROPULSION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "battery",
+      "dependencies": [],
+      "detail": {
+        "current_a": 15.0
+      },
+      "domain": "POWER",
+      "expected_relation": "battery telemetry present and readable",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": 22.2,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "battery",
+      "dependencies": [],
+      "detail": {
+        "tolerance_w": 16.650000000000002
+      },
+      "domain": "POWER",
+      "expected_relation": "P = V * I",
+      "expected_value": 333.0,
+      "latencies": {},
+      "measured_value": 333.0,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.p_equals_vi",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "battery",
+      "dependencies": [],
+      "detail": {
+        "current_a": 15.0,
+        "esr_ohm": 0.02,
+        "fail_v": 0.6,
+        "warn_v": 0.3
+      },
+      "domain": "POWER",
+      "expected_relation": "V = V_ref - I * ESR",
+      "expected_value": 22.2,
+      "latencies": {},
+      "measured_value": 22.2,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.droop_vs_current",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "battery",
+      "dependencies": [],
+      "detail": {
+        "cells": 6,
+        "fail_v": 0.15,
+        "warn_v": 0.05
+      },
+      "domain": "POWER",
+      "expected_relation": "max(cell) - min(cell) within limit",
+      "expected_value": null,
+      "latencies": {},
+      "measured_value": 0.020000000000000018,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.cell_balance",
+      "residual": null,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING",
+        "TELEMETRY",
+        "COARSE_NAVIGATION",
+        "POSITION_HOLD",
+        "PRECISION_NAVIGATION",
+        "GEOFENCE_SUPPORT",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "rail_5v",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "deviation_frac": 0.004,
+        "fail_frac": 0.05,
+        "warn_frac": 0.02
+      },
+      "domain": "POWER",
+      "expected_relation": "|V - 5.0| / 5.0 <= 0.05",
+      "expected_value": 5.0,
+      "latencies": {},
+      "measured_value": 5.02,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.rail_tolerance",
+      "residual": 0.019999999999999574,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "SENSING",
+        "COARSE_NAVIGATION",
+        "POSITION_HOLD",
+        "PRECISION_NAVIGATION",
+        "GEOFENCE_SUPPORT",
+        "INERTIAL_CONTINUATION",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "rail_3v3",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "deviation_frac": 0.0,
+        "fail_frac": 0.05,
+        "warn_frac": 0.02
+      },
+      "domain": "POWER",
+      "expected_relation": "|V - 3.3| / 3.3 <= 0.05",
+      "expected_value": 3.3,
+      "latencies": {},
+      "measured_value": 3.3,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "power.rail_tolerance",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "power",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "COARSE_NAVIGATION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.COARSE_NAVIGATION",
+      "dependencies": [],
+      "detail": {
+        "v1_1_state": "ELIGIBLE"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 eligibility, unmodified",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {
+        "schema_version": "1.1.0",
+        "trust_mode": "FLAT_V1_1"
+      },
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "relation": "v1_1.function_eligibility",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "GEOFENCE_SUPPORT"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.GEOFENCE_SUPPORT",
+      "dependencies": [],
+      "detail": {
+        "v1_1_state": "ELIGIBLE"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 eligibility, unmodified",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {
+        "schema_version": "1.1.0",
+        "trust_mode": "FLAT_V1_1"
+      },
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "relation": "v1_1.function_eligibility",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "INERTIAL_CONTINUATION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.INERTIAL_CONTINUATION",
+      "dependencies": [],
+      "detail": {
+        "v1_1_state": "ELIGIBLE"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 eligibility, unmodified",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {
+        "schema_version": "1.1.0",
+        "trust_mode": "FLAT_V1_1"
+      },
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "relation": "v1_1.function_eligibility",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "POSITION_HOLD"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.POSITION_HOLD",
+      "dependencies": [],
+      "detail": {
+        "v1_1_state": "ELIGIBLE"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 eligibility, unmodified",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {
+        "schema_version": "1.1.0",
+        "trust_mode": "FLAT_V1_1"
+      },
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "relation": "v1_1.function_eligibility",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.PRECISION_NAVIGATION",
+      "dependencies": [],
+      "detail": {
+        "v1_1_state": "ELIGIBLE"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 eligibility, unmodified",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {
+        "schema_version": "1.1.0",
+        "trust_mode": "FLAT_V1_1"
+      },
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "relation": "v1_1.function_eligibility",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.baro",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.996417872,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.battery",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.995903453,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.gps",
+      "dependencies": [
+        "POWER/rail_5v"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.980513397,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.imu0",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.979272542,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.imu1",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.998594909,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.mag",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.967614265,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.motor_esc",
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.995372641,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "source.vibration",
+      "dependencies": [
+        "POWER/rail_3v3"
+      ],
+      "detail": {
+        "fresh": true,
+        "missing_reason": null
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 trust and freshness for this source",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.998862803,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.source_health",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "v1_1.diagnosis",
+      "dependencies": [],
+      "detail": {
+        "ambiguity": "UNIQUE",
+        "discriminating_evidence_count": 1,
+        "leader": "nominal",
+        "support_state": "EVIDENCE_BACKED",
+        "unknown_fault_model": "NOT_IMPLEMENTED"
+      },
+      "domain": "SENSOR",
+      "expected_relation": "v1.1 leader identifiable against every modeled competitor",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": 0.995876948,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "v1_1.support",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "SENSING",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": false,
+      "component": "sensor.aggregate",
+      "dependencies": [],
+      "detail": {
+        "nodes": 8
+      },
+      "domain": "SENSOR",
+      "expected_relation": "worst source health across the v1.1 nodes",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.0
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "sensor.aggregate",
+      "residual": null,
+      "sequential_state": null,
+      "source": "sensor",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": 9.950000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {},
+      "domain": "TIMING",
+      "expected_relation": "t_validity <= t_arrival <= t_processed <= t_decision",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.049,
+        "processing_latency": 0.045,
+        "transport_latency": 0.004
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.clock_consistency",
+      "residual": null,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.934000000000001,
+      "timestamp_processed": 9.979000000000001,
+      "timestamp_validity": 9.930000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution.transport_delay",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "budget_declared": true,
+        "segment": "TRANSPORT_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_arrival - t_validity <= budget",
+      "expected_value": 0.02,
+      "latencies": {
+        "end_to_end_latency": 0.049,
+        "processing_latency": 0.045,
+        "transport_latency": 0.004
+      },
+      "measured_value": 0.0039999999999995595,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.segment_budget",
+      "residual": -0.01600000000000044,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.934000000000001,
+      "timestamp_processed": 9.979000000000001,
+      "timestamp_validity": 9.930000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution.processing_delay",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "budget_declared": true,
+        "segment": "PROCESSING_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_processed - t_arrival <= budget",
+      "expected_value": 0.02,
+      "latencies": {
+        "end_to_end_latency": 0.049,
+        "processing_latency": 0.045,
+        "transport_latency": 0.004
+      },
+      "measured_value": 0.04499999999999993,
+      "observation_state": "VIOLATED",
+      "provenance": {},
+      "reason_codes": [
+        "TIMING_SEGMENT_OVER_BUDGET"
+      ],
+      "relation": "timing.segment_budget",
+      "residual": 0.02499999999999993,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.934000000000001,
+      "timestamp_processed": 9.979000000000001,
+      "timestamp_validity": 9.930000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution.decision_delay",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "budget_declared": true,
+        "segment": "DECISION_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_decision - t_processed <= budget",
+      "expected_value": 0.01,
+      "latencies": {
+        "end_to_end_latency": 0.049,
+        "processing_latency": 0.045,
+        "transport_latency": 0.004
+      },
+      "measured_value": 0.002000000000000668,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.segment_budget",
+      "residual": -0.007999999999999332,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.934000000000001,
+      "timestamp_processed": 9.979000000000001,
+      "timestamp_validity": 9.930000000000001
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution.sensor_slow",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "limit_s": 0.03,
+        "segment": "SENSOR_SLOW"
+      },
+      "domain": "TIMING",
+      "expected_relation": "sampling interval <= +50% of the declared period",
+      "expected_value": 0.02,
+      "latencies": {},
+      "measured_value": 0.02,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.rate",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {},
+      "domain": "TIMING",
+      "expected_relation": "jitter within declared limit",
+      "expected_value": 0.01,
+      "latencies": {},
+      "measured_value": 0.002,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.jitter",
+      "residual": null,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION",
+        "POSITION_HOLD",
+        "AUTONOMOUS_MISSION"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "nav_solution",
+      "dependencies": [
+        "COMPUTE/state_estimator",
+        "COMPUTE/cpu"
+      ],
+      "detail": {
+        "classification": "PROCESSING_DELAY",
+        "segments_over_budget": [
+          "PROCESSING_DELAY"
+        ],
+        "segments_s": {
+          "DECISION_DELAY": 0.002,
+          "PROCESSING_DELAY": 0.045,
+          "SENSOR_SLOW": 0.02,
+          "TRANSPORT_DELAY": 0.004
+        },
+        "t_decision_present": true
+      },
+      "domain": "TIMING",
+      "expected_relation": "end-to-end latency within the function's declared deadline",
+      "expected_value": 0.05,
+      "latencies": {
+        "end_to_end_latency": 0.049,
+        "processing_latency": 0.045,
+        "transport_latency": 0.004
+      },
+      "measured_value": 0.051000000000000156,
+      "observation_state": "VIOLATED",
+      "provenance": {},
+      "reason_codes": [
+        "TIMING_DEADLINE_MISSED"
+      ],
+      "relation": "timing.end_to_end",
+      "residual": 0.0010000000000001535,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.934000000000001,
+      "timestamp_processed": 9.979000000000001,
+      "timestamp_validity": 9.930000000000001
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {},
+      "domain": "TIMING",
+      "expected_relation": "t_validity <= t_arrival <= t_processed <= t_decision",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.14,
+        "processing_latency": 0.02,
+        "transport_latency": 0.12
+      },
+      "measured_value": null,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.clock_consistency",
+      "residual": null,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.870000000000001,
+      "timestamp_processed": 9.89,
+      "timestamp_validity": 9.750000000000002
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink.transport_delay",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {
+        "budget_declared": true,
+        "segment": "TRANSPORT_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_arrival - t_validity <= budget",
+      "expected_value": 0.5,
+      "latencies": {
+        "end_to_end_latency": 0.14,
+        "processing_latency": 0.02,
+        "transport_latency": 0.12
+      },
+      "measured_value": 0.11999999999999922,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.segment_budget",
+      "residual": -0.3800000000000008,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.870000000000001,
+      "timestamp_processed": 9.89,
+      "timestamp_validity": 9.750000000000002
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink.processing_delay",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {
+        "budget_declared": true,
+        "segment": "PROCESSING_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_processed - t_arrival <= budget",
+      "expected_value": 0.1,
+      "latencies": {
+        "end_to_end_latency": 0.14,
+        "processing_latency": 0.02,
+        "transport_latency": 0.12
+      },
+      "measured_value": 0.019999999999999574,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.segment_budget",
+      "residual": -0.08000000000000043,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.870000000000001,
+      "timestamp_processed": 9.89,
+      "timestamp_validity": 9.750000000000002
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "NOT_APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink.decision_delay",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {
+        "budget_declared": false,
+        "segment": "DECISION_DELAY"
+      },
+      "domain": "TIMING",
+      "expected_relation": "t_decision - t_processed <= budget",
+      "expected_value": null,
+      "latencies": {
+        "end_to_end_latency": 0.14,
+        "processing_latency": 0.02,
+        "transport_latency": 0.12
+      },
+      "measured_value": 0.0,
+      "observation_state": "NOT_APPLICABLE",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.segment_budget",
+      "residual": null,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.870000000000001,
+      "timestamp_processed": 9.89,
+      "timestamp_validity": 9.750000000000002
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink.sensor_slow",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {
+        "limit_s": 0.30000000000000004,
+        "segment": "SENSOR_SLOW"
+      },
+      "domain": "TIMING",
+      "expected_relation": "sampling interval <= +50% of the declared period",
+      "expected_value": 0.2,
+      "latencies": {},
+      "measured_value": 0.2,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.rate",
+      "residual": 0.0,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {},
+      "domain": "TIMING",
+      "expected_relation": "jitter within declared limit",
+      "expected_value": 0.2,
+      "latencies": {},
+      "measured_value": 0.03,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.jitter",
+      "residual": null,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": null,
+      "timestamp_processed": 9.950000000000001,
+      "timestamp_validity": null
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "applicability": "APPLICABLE",
+      "attributable": true,
+      "component": "telemetry_downlink",
+      "dependencies": [
+        "COMMUNICATION/telemetry_radio"
+      ],
+      "detail": {
+        "classification": null,
+        "segments_over_budget": [],
+        "segments_s": {
+          "DECISION_DELAY": 0.0,
+          "PROCESSING_DELAY": 0.02,
+          "SENSOR_SLOW": 0.2,
+          "TRANSPORT_DELAY": 0.12
+        },
+        "t_decision_present": true
+      },
+      "domain": "TIMING",
+      "expected_relation": "end-to-end latency within the function's declared deadline",
+      "expected_value": 1.0,
+      "latencies": {
+        "end_to_end_latency": 0.14,
+        "processing_latency": 0.02,
+        "transport_latency": 0.12
+      },
+      "measured_value": 0.1399999999999988,
+      "observation_state": "NOMINAL",
+      "provenance": {},
+      "reason_codes": [],
+      "relation": "timing.end_to_end",
+      "residual": -0.8600000000000012,
+      "sequential_state": null,
+      "source": "timing",
+      "timestamp_arrival": 9.870000000000001,
+      "timestamp_processed": 9.89,
+      "timestamp_validity": 9.750000000000002
+    }
+  ],
+  "functions": {
+    "AUTONOMOUS_MISSION": {
+      "detail": {},
+      "domain_states": {
+        "ACTUATION": "NOMINAL",
+        "COMMUNICATION": "NOMINAL",
+        "COMPUTE": "VIOLATED",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL",
+        "TIMING": "VIOLATED"
+      },
+      "evidence_count": 20,
+      "fallback": "operator-supervised flight",
+      "function": "AUTONOMOUS_MISSION",
+      "limiting_domain": "COMPUTE",
+      "reason_codes": [
+        "COMPUTE_DEADLINE_MISSED",
+        "TIMING_SEGMENT_OVER_BUDGET",
+        "TIMING_DEADLINE_MISSED"
+      ],
+      "state": "INELIGIBLE"
+    },
+    "COARSE_NAVIGATION": {
+      "detail": {
+        "acceptable_degradation": "latency and compute pressure degrade but do not remove it"
+      },
+      "domain_states": {
+        "COMPUTE": "NOT_APPLICABLE",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL",
+        "TIMING": "NOT_APPLICABLE"
+      },
+      "evidence_count": 4,
+      "fallback": "INERTIAL_CONTINUATION",
+      "function": "COARSE_NAVIGATION",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "GEOFENCE_SUPPORT": {
+      "detail": {},
+      "domain_states": {
+        "COMPUTE": "NOT_APPLICABLE",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL"
+      },
+      "evidence_count": 4,
+      "fallback": null,
+      "function": "GEOFENCE_SUPPORT",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "INERTIAL_CONTINUATION": {
+      "detail": {},
+      "domain_states": {
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL"
+      },
+      "evidence_count": 3,
+      "fallback": null,
+      "function": "INERTIAL_CONTINUATION",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "LOGGING": {
+      "detail": {
+        "acceptable_degradation": "a late log entry is still a log entry"
+      },
+      "domain_states": {
+        "COMPUTE": "NOMINAL",
+        "POWER": "NOMINAL"
+      },
+      "evidence_count": 5,
+      "fallback": null,
+      "function": "LOGGING",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "POSITION_HOLD": {
+      "detail": {},
+      "domain_states": {
+        "COMPUTE": "VIOLATED",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL",
+        "TIMING": "VIOLATED"
+      },
+      "evidence_count": 14,
+      "fallback": "attitude hold",
+      "function": "POSITION_HOLD",
+      "limiting_domain": "COMPUTE",
+      "reason_codes": [
+        "COMPUTE_DEADLINE_MISSED",
+        "TIMING_SEGMENT_OVER_BUDGET",
+        "TIMING_DEADLINE_MISSED"
+      ],
+      "state": "INELIGIBLE"
+    },
+    "PRECISION_NAVIGATION": {
+      "detail": {
+        "acceptable_degradation": "none: a late position is a wrong position at speed"
+      },
+      "domain_states": {
+        "COMPUTE": "VIOLATED",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL",
+        "TIMING": "VIOLATED"
+      },
+      "evidence_count": 14,
+      "fallback": "COARSE_NAVIGATION",
+      "function": "PRECISION_NAVIGATION",
+      "limiting_domain": "COMPUTE",
+      "reason_codes": [
+        "COMPUTE_DEADLINE_MISSED",
+        "TIMING_SEGMENT_OVER_BUDGET",
+        "TIMING_DEADLINE_MISSED"
+      ],
+      "state": "INELIGIBLE"
+    },
+    "PROPULSION": {
+      "detail": {},
+      "domain_states": {
+        "ACTUATION": "NOMINAL",
+        "COMPUTE": "NOT_APPLICABLE",
+        "POWER": "NOMINAL"
+      },
+      "evidence_count": 7,
+      "fallback": null,
+      "function": "PROPULSION",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "SENSING": {
+      "detail": {
+        "acceptable_degradation": "a degraded source set still senses"
+      },
+      "domain_states": {
+        "COMMUNICATION": "NOMINAL",
+        "COMPUTE": "NOMINAL",
+        "POWER": "NOMINAL",
+        "SENSOR": "NOMINAL"
+      },
+      "evidence_count": 12,
+      "fallback": null,
+      "function": "SENSING",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    },
+    "TELEMETRY": {
+      "detail": {
+        "acceptable_degradation": "latency and loss degrade telemetry; they do not stop it"
+      },
+      "domain_states": {
+        "COMMUNICATION": "NOMINAL",
+        "COMPUTE": "NOT_APPLICABLE",
+        "POWER": "NOMINAL",
+        "TIMING": "NOMINAL"
+      },
+      "evidence_count": 12,
+      "fallback": "onboard log only",
+      "function": "TELEMETRY",
+      "limiting_domain": null,
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "state": "ELIGIBLE"
+    }
+  },
+  "ingests": {
+    "csia_output_v1_1": "1.1.0"
+  },
+  "ledger_events": [],
+  "limiting_domains": [
+    "COMPUTE"
+  ],
+  "profile": "aircraft",
+  "provenance": {
+    "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae"
+  },
+  "schema_version": "2.0.0",
+  "system": "RESTRICTED",
+  "t": 9.95,
+  "unevaluated": {
+    "ACTUATION": {
+      "motor_0.physical": "no declared physical response channel"
+    },
+    "COMMUNICATION": {
+      "esc_can.queue": "needs queue_delay_s and a declared queue_delay_fail_s"
+    }
+  }
+}

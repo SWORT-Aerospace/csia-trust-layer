@@ -1,0 +1,838 @@
+{
+ "findings": [
+  {
+   "nodes": [
+    "baro"
+   ],
+   "platform": "px4",
+   "relation": "altitude_baro",
+   "verdict": "STARVED_BY_TRANSPORT"
+  },
+  {
+   "nodes": [
+    "battery"
+   ],
+   "platform": "px4",
+   "relation": "power_thrust",
+   "verdict": "STARVED_BY_TRANSPORT"
+  },
+  {
+   "nodes": [
+    "baro"
+   ],
+   "platform": "px4",
+   "relation": "temp_bias_drift",
+   "verdict": "STARVED_BY_TRANSPORT"
+  },
+  {
+   "nodes": [
+    "vibration"
+   ],
+   "platform": "px4",
+   "relation": "vibration_prop_freq",
+   "verdict": "STARVED_BY_TRANSPORT"
+  }
+ ],
+ "ledger": {
+  "ardupilot": {
+   "flights": 32,
+   "relations": {
+    "accel_esc_rpm": {
+     "endpoints": {
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.519,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "armed_gate",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "accel_motor_current": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.512,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "armed_gate",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "altitude_baro": {
+     "endpoints": {
+      "baro": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "baro.altitude",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 12.522,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 12.828,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.9984,
+     "verdict": "LIVE"
+    },
+    "attitude_gravity_mag": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.512,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "mag": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "mag.field_ut",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.518,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.9983,
+     "verdict": "LIVE"
+    },
+    "heading_course": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 12.828,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "mag": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "mag.field_ut",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.518,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "speed_gate * gvalid",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_BY_GATE"
+    },
+    "power_thrust": {
+     "endpoints": {
+      "battery": {
+       "binding_gate": "channel_max_age",
+       "channel": "battery.voltage",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 13.202,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "redundant_imu": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.512,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.519,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.9983,
+     "verdict": "LIVE"
+    },
+    "temp_bias_drift": {
+     "endpoints": {
+      "baro": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "baro.altitude",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 12.522,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.512,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "0.2",
+     "relation_live_share": 0.9984,
+     "verdict": "LIVE"
+    },
+    "velocity_gps_doppler_0": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 12.828,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.512,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.9983,
+     "verdict": "LIVE"
+    },
+    "velocity_gps_doppler_1": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 12.828,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 12.519,
+       "node_fresh_share": 0.9991,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.9983,
+     "verdict": "LIVE"
+    },
+    "vibration_prop_freq": {
+     "endpoints": {
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "vibration": {
+       "binding_gate": "channel_max_age",
+       "channel": "vibration.rms",
+       "channel_usable_share": 0.9992,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 13.209,
+       "node_fresh_share": 0.9992,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    }
+   },
+   "ticks": 41282
+  },
+  "px4": {
+   "flights": 12,
+   "relations": {
+    "accel_esc_rpm": {
+     "endpoints": {
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 1.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 5.0,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "armed_gate",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "accel_motor_current": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 50.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.1,
+       "measured_hz": 12.982,
+       "node_fresh_share": 0.9989,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 1.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 5.0,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "armed_gate",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "altitude_baro": {
+     "endpoints": {
+      "baro": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "baro.altitude",
+       "channel_usable_share": 0.4943,
+       "declared_exceeds_delivered": true,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.993,
+       "node_fresh_share": 0.0967,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9987,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": true,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 7.867,
+       "node_fresh_share": 0.9987,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.0812,
+     "verdict": "STARVED_BY_TRANSPORT"
+    },
+    "attitude_gravity_mag": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 50.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.1,
+       "measured_hz": 12.982,
+       "node_fresh_share": 0.9989,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "mag": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "mag.field_ut",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 14.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.3571,
+       "measured_hz": 12.978,
+       "node_fresh_share": 0.9956,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.9385,
+     "verdict": "LIVE"
+    },
+    "heading_course": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9987,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": true,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 7.867,
+       "node_fresh_share": 0.9987,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "mag": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "mag.field_ut",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 14.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.3571,
+       "measured_hz": 12.978,
+       "node_fresh_share": 0.9956,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "speed_gate * gvalid",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_BY_GATE"
+    },
+    "power_thrust": {
+     "endpoints": {
+      "battery": {
+       "binding_gate": "channel_max_age",
+       "channel": "battery.voltage",
+       "channel_usable_share": 0.2478,
+       "declared_exceeds_delivered": true,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.484,
+       "node_fresh_share": 0.2478,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 1.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 5.0,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.0,
+     "verdict": "STARVED_BY_TRANSPORT"
+    },
+    "redundant_imu": {
+     "endpoints": {
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 50.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.1,
+       "measured_hz": 12.982,
+       "node_fresh_share": 0.9989,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      },
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "temp_bias_drift": {
+     "endpoints": {
+      "baro": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "baro.altitude",
+       "channel_usable_share": 0.4943,
+       "declared_exceeds_delivered": true,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.993,
+       "node_fresh_share": 0.0967,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 50.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.1,
+       "measured_hz": 12.982,
+       "node_fresh_share": 0.9989,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "0.2",
+     "relation_live_share": 0.0,
+     "verdict": "STARVED_BY_TRANSPORT"
+    },
+    "velocity_gps_doppler_0": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9987,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": true,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 7.867,
+       "node_fresh_share": 0.9987,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "imu0": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu0.accel",
+       "channel_usable_share": 0.9989,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 50.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.1,
+       "measured_hz": 12.982,
+       "node_fresh_share": 0.9989,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": false,
+       "rate_note": "UNMEASURABLE_AT_TICK_RATE: arrivals are counted once per tick, so any rate at or above ~half the tick rate saturates"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.9974,
+     "verdict": "LIVE"
+    },
+    "velocity_gps_doppler_1": {
+     "endpoints": {
+      "gps": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "gnss.position",
+       "channel_usable_share": 0.9987,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 5.0,
+       "delivered_exceeds_declared_conservative": true,
+       "derived_max_age_s": 1.0,
+       "measured_hz": 7.867,
+       "node_fresh_share": 0.9987,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "imu1": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "imu1.accel",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 25.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.2,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.05,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "gvalid",
+     "relation_live_share": 0.0,
+     "verdict": "DARK_STRUCTURAL"
+    },
+    "vibration_prop_freq": {
+     "endpoints": {
+      "motor_esc": {
+       "binding_gate": "node_stale_timeout",
+       "channel": "esc.rpm",
+       "channel_usable_share": 0.0,
+       "declared_exceeds_delivered": false,
+       "declared_hz": 1.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 5.0,
+       "measured_hz": 0.0,
+       "node_fresh_share": 0.0,
+       "node_stale_timeout_s": 0.1,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      },
+      "vibration": {
+       "binding_gate": "channel_max_age",
+       "channel": "vibration.rms",
+       "channel_usable_share": 0.2476,
+       "declared_exceeds_delivered": true,
+       "declared_hz": 10.0,
+       "delivered_exceeds_declared_conservative": false,
+       "derived_max_age_s": 0.5,
+       "measured_hz": 0.484,
+       "node_fresh_share": 0.2476,
+       "node_stale_timeout_s": 0.5,
+       "rate_measurable": true,
+       "rate_note": "below the aliasing ceiling"
+      }
+     },
+     "gate_expression": "1.0",
+     "relation_live_share": 0.0,
+     "verdict": "STARVED_BY_TRANSPORT"
+    }
+   },
+   "ticks": 11262
+  }
+ },
+ "max_age_margin": 5.0,
+ "measurable_ceiling_hz": 10.0,
+ "rate_is_a_link_property": {
+  "artifact": "research/v1_1/results/PX4_LINK_RATE_PROBE.json",
+  "measured_by": "tools/simulation/px4_link_rate_probe.py",
+  "summary": "on PX4, SET_MESSAGE_INTERVAL is per-link runtime state in both directions: requesting on 14550 leaves 14540 untouched and vice versa, so a rate declared per (channel, platform) cannot describe both links at once"
+ },
+ "rate_tolerance": 0.5,
+ "tick_hz": 25.0,
+ "verdict_meanings": {
+  "DARK_BY_GATE": "never carried weight although EVERY endpoint channel was usable: the platform produced the inputs and the gate zeroed the weight. This is a property of the profile flown, not of the vehicle, and a different profile would light it up -- do NOT report it as evidence the platform cannot supply",
+  "DARK_STARVED": "endpoint arrives less often than its derived max_age allows, so it is stale part of every period -- a DEFECT, not a platform fact",
+  "DARK_STRUCTURAL": "never carried weight and at least one endpoint channel was never usable: the platform does not produce the input",
+  "INTERMITTENT": "carried weight sometimes",
+  "LIVE": "carried weight on most ticks",
+  "STARVED_BY_TRANSPORT": "this CONSUMER's LINK delivered the channel more slowly than the freshness contract assumes, beyond tolerance. On PX4 the driven qualification link REQUESTS the stream and receives ~10 Hz while the passive shadow link requests nothing and receives the lower default, so delivery is link/configuration-conditioned. This is NOT evidence that the platform intrinsically supplies the channel at the low rate, and NOT evidence that the declared rate is universally wrong. The fix is to drive the consumer's link, not to edit the contract",
+  "SUPERSEDED_LABEL": "an earlier artifact called this RATE_MISDECLARED. A controlled link-rate experiment falsified that reading; do not propagate the old label"
+ }
+}

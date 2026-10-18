@@ -1,0 +1,210 @@
+%YAML 1.2
+---
+# XR-1 payload module registry and sensor transform registry.
+#
+# ============================================================================
+# EVERY TRANSFORM BELOW IS UNKNOWN. THAT IS THE HONEST STATE, NOT AN OVERSIGHT.
+# ============================================================================
+#
+# The four-level model in csia_mission/registry.py exists because a CAD
+# bounding box gives you the DEVICE PACKAGE and tells you nothing about the
+# MEASUREMENT ORIGIN or the MEASUREMENT AXES:
+#
+#   MOUNT DATUM         a feature on the airframe. Known by construction.
+#   DEVICE PACKAGE      the outside of the part. Calipers. In CAD.
+#   MEASUREMENT ORIGIN  where the sensing element is INSIDE the package.
+#   MEASUREMENT AXES    the die's axis convention on its PCB.
+#
+# An IMU die sits somewhere on a board under a package. A GNSS phase centre
+# is a property of the antenna, not the module outline. Inferring the origin
+# from the package centroid produces a lever arm wrong by millimetres to
+# centimetres -- and an omega-cross-r acceleration error that a residual
+# analysis will attribute to something else entirely.
+#
+# So no transform here is filled in with a plausible number. Filling one in
+# would produce a registry that LOOKS complete and silently poisons the first
+# residual analysis that trusts it.
+
+schema: csia.mission.xr_registry/1
+status: NON_FLIGHT_DRAFT
+
+transforms:
+
+  tf_kakute_imu:
+    sensor_id: imu.primary
+    mount_datum: UNDEFINED
+    translation_m: [0.0, 0.0, 0.0]
+    translation_status: UNKNOWN
+    rotation_quat: [1.0, 0.0, 0.0, 0.0]
+    rotation_status: UNKNOWN
+    package_extent_m: [0.045, 0.030, 0.0135]
+    basis: >-
+      Package extent is the Kakute H743-Wing board outline as supplied. The
+      ICM-42688-P die position on that board is NOT known and is NOT the board
+      centroid. Both statuses stay UNKNOWN until the board is measured.
+
+  tf_reference_imu:
+    sensor_id: imu.reference
+    mount_datum: UNDEFINED
+    translation_m: [0.0, 0.0, 0.0]
+    translation_status: UNKNOWN
+    rotation_quat: [1.0, 0.0, 0.0, 0.0]
+    rotation_status: UNKNOWN
+    package_extent_m: [0.0286, 0.0254, 0.0]
+    basis: >-
+      Mikroe Click board outline as supplied; the third dimension was not
+      supplied and is left at zero rather than guessed. The die position on
+      the Click board is unknown.
+
+  tf_gnss_antenna:
+    sensor_id: gnss.position
+    mount_datum: UNDEFINED
+    translation_m: [0.0, 0.0, 0.0]
+    translation_status: UNKNOWN
+    rotation_quat: [1.0, 0.0, 0.0, 0.0]
+    rotation_status: UNKNOWN
+    package_extent_m: [0.0155, 0.0155, 0.0063]
+    basis: >-
+      SAM-M10Q-class CORE MODULE outline. THE PHASE CENTRE IS NOT THE MODULE
+      CENTROID and is not derivable from this outline; it is a property of
+      the antenna and its ground plane. The carrier envelope is itself
+      PROVISIONAL. Two unknowns stacked, and neither is being resolved by
+      assumption.
+
+  tf_camera_rgb:
+    sensor_id: camera.rgb
+    mount_datum: UNDEFINED
+    translation_m: [0.0, 0.0, 0.0]
+    translation_status: UNKNOWN
+    rotation_quat: [1.0, 0.0, 0.0, 0.0]
+    rotation_status: UNKNOWN
+    basis: >-
+      No RGB payload has been selected. Nothing to measure yet.
+
+  tf_camera_thermal:
+    sensor_id: camera.thermal
+    mount_datum: UNDEFINED
+    translation_m: [0.0, 0.0, 0.0]
+    translation_status: UNKNOWN
+    rotation_quat: [1.0, 0.0, 0.0, 0.0]
+    rotation_status: UNKNOWN
+    basis: >-
+      No thermal payload has been selected.
+
+modules:
+
+  mod_fc_kakute:
+    module_type: flight_computer
+    mass_kg: 0.028
+    mass_status: GIVEN
+    mount_id: fc_bay
+    transform_id: tf_kakute_imu
+    data_interfaces: [uart, i2c, spi, can]
+    provides_evidence:
+      - attitude.supported
+      - imu.primary.supported
+      - baro.altitude.supported
+      - actuator.elevon.command_echo
+    vehicle_profile_ref: hardware/xr1/XR1_DRAFT_PROFILE.yaml#items.autopilot
+    notes: >-
+      See XR_FC_MODULARITY_REQUIREMENT.md. This bay should eventually accept
+      an FMUv6C-class board as well, so the E2 validation article and the XR
+      research article can share a software configuration.
+
+  mod_reference_imu:
+    module_type: reference_sensor
+    mass_kg: null
+    mass_status: UNKNOWN
+    mount_id: reference_spine
+    transform_id: tf_reference_imu
+    data_interfaces: [i2c, spi]
+    provides_evidence: [imu.reference.supported]
+    vehicle_profile_ref: hardware/xr1/XR1_DRAFT_PROFILE.yaml#items.reference_imu
+    notes: >-
+      SAME DEVICE FAMILY as the Kakute IMU. Acquisition-path independence is
+      possible; device-family independence is NO. See XR1_IMU_COMMON_MODE.md.
+
+  mod_gnss:
+    module_type: gnss
+    mass_kg: null
+    mass_status: UNKNOWN
+    mount_id: gnss_mast
+    transform_id: tf_gnss_antenna
+    data_interfaces: [uart]
+    provides_evidence: [gnss.position.supported, gnss.velocity.supported,
+                        mag.field.supported]
+    vehicle_profile_ref: hardware/xr1/XR1_DRAFT_PROFILE.yaml#items.gnss
+
+  mod_research_compute:
+    module_type: companion_compute
+    mass_kg: null
+    mass_status: UNKNOWN
+    mount_id: research_bay
+    data_interfaces: [uart, usb, ethernet]
+    provides_evidence: [timebase.supported]
+    vehicle_profile_ref: >-
+      hardware/xr1/XR1_DRAFT_PROFILE.yaml#items.research_compute
+    notes: >-
+      Hosts the CSIA runtime in SHADOW ONLY. Carrier board does not exist.
+
+  mod_rgb_payload:
+    module_type: payload_camera
+    mass_kg: null
+    mass_status: UNKNOWN
+    mount_id: payload_cassette
+    transform_id: tf_camera_rgb
+    data_interfaces: [csi, usb]
+    provides_evidence: [camera.rgb.available, camera.rgb.calibration_valid,
+                        visual_odometry.supported]
+    provides_products: [bridge_rgb_inspection, relative_reconstruction,
+                        global_rgb_orthomosaic]
+    notes: NOT SELECTED.
+
+  mod_thermal_payload:
+    module_type: payload_camera
+    mass_kg: null
+    mass_status: UNKNOWN
+    mount_id: payload_cassette
+    transform_id: tf_camera_thermal
+    data_interfaces: [spi, usb]
+    provides_evidence: [camera.thermal.available,
+                        camera.thermal.calibration_valid]
+    provides_products: [bridge_thermal_inspection]
+    notes: >-
+      NOT SELECTED. Deliberately in the SAME cassette as RGB but on a
+      SEPARATE evidence path, so an RGB failure does not remove thermal.
+
+  mod_battery:
+    module_type: energy
+    mass_kg: 1.22
+    mass_status: GIVEN
+    mount_id: battery_bay
+    vehicle_profile_ref: hardware/xr1/XR1_DRAFT_PROFILE.yaml#items.battery
+    notes: >-
+      Envelope UNKNOWN and must be measured before CAD freeze. The largest
+      single mass; its position dominates the CG.
+
+# ---------------------------------------------------------------------------
+# THE HONEST SUMMARY
+
+provisional_or_unknown:
+  masses:
+    - mod_reference_imu
+    - mod_gnss
+    - mod_research_compute
+    - mod_rgb_payload
+    - mod_thermal_payload
+  transforms:
+    - tf_kakute_imu
+    - tf_reference_imu
+    - tf_gnss_antenna
+    - tf_camera_rgb
+    - tf_camera_thermal
+
+usable_for_physical_residual_analysis: NONE
+
+why: >-
+  Every transform is UNKNOWN, so the lever arm from any sensor to any other
+  is unknown, so no physical residual can be attributed. This is the correct
+  state for a vehicle that has not been built, and the registry says it
+  plainly instead of carrying zeros that would read as measurements.

@@ -1,0 +1,1731 @@
+{
+  "artifact": "EVIDENCE_SEMANTICS_CHECK",
+  "families": {
+    "battery": {
+      "alphabet": "VXN",
+      "collapse": {
+        "plugins_py": {
+          "distinct_downstream_signatures": 21,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "VNX",
+            "NVX"
+          ],
+          "words_explored": 32
+        },
+        "ulog_source_py": {
+          "distinct_downstream_signatures": 1,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "V",
+            "X"
+          ],
+          "words_explored": 2
+        },
+        "v1_1_adapter": {
+          "distinct_downstream_signatures": 1,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "V",
+            "X"
+          ],
+          "words_explored": 2
+        }
+      },
+      "pairs": {
+        "plugins_py__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 0,
+          "EVIDENCE_divergent_words": 0,
+          "EVIDENCE_shortest_attributable": null,
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "X",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 90,
+          "VALUE_divergent_words": 90,
+          "VALUE_shortest_attributable": "X",
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.034,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__plugins_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 15,
+          "EVIDENCE_divergent_words": 15,
+          "EVIDENCE_shortest_attributable": "XXX",
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "X",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 90,
+          "VALUE_divergent_words": 90,
+          "VALUE_shortest_attributable": "X",
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.034,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 45,
+          "DIAGNOSIS_divergent_words": 45,
+          "DIAGNOSIS_shortest_attributable": "XX",
+          "DIAGNOSIS_status": "ATTRIBUTABLE",
+          "EVIDENCE_attributable_words": 15,
+          "EVIDENCE_divergent_words": 15,
+          "EVIDENCE_shortest_attributable": "XXX",
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 24,
+          "STATE_divergent_words": 24,
+          "STATE_shortest_attributable": "XXX",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 90,
+          "VALUE_divergent_words": 90,
+          "VALUE_shortest_attributable": "X",
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.0,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": true,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        }
+      },
+      "paths": {
+        "plugins_py": {
+          "clause_results": [
+            {
+              "clause": "BATT-F1",
+              "first_collapse_stage": "T6_slot",
+              "first_equivalent_level": "EVIDENCE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T6_slot",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            }
+          ],
+          "contract": "battery.mavlink.battery_status.v0",
+          "emitted_state_vocabulary": [
+            "M",
+            "V"
+          ],
+          "family": "battery",
+          "path": "plugins_py",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "BATT-F1",
+              "downstream_consequence": "STATE_ONLY",
+              "first_collapse_site": "csia/runtime/online.py:312-316 (_apply)",
+              "first_collapse_stage": "T6_slot",
+              "first_equivalent_level": "EVIDENCE",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "M@12 -@12.04",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.52"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.04 1@12.08 1@12.12 1@12.16 1@1...",
+                  "w2": "1@12 1@12.04 1@12.08 1@12.12 1@12.16 1@1..."
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py:155-160 (power_fault)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "M@12 -@12.04",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.32"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.04 1@12.08 1@12.12 1@12.16 1@1...",
+                  "w2": "1@12 1@12.04 1@12.08 1@12.12 1@12.16 1@1..."
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "N"
+              ]
+            }
+          ]
+        },
+        "ulog_source_py": {
+          "clause_results": [
+            {
+              "clause": "BATT-F1",
+              "first_collapse_stage": "T6_slot",
+              "first_equivalent_level": "STATE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T6_slot",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            }
+          ],
+          "contract": "battery.mavlink.battery_status.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "battery",
+          "path": "ulog_source_py",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "BATT-F1",
+              "downstream_consequence": "NONE",
+              "first_collapse_site": "csia/runtime/online.py:312-316 (_apply)",
+              "first_collapse_stage": "T6_slot",
+              "first_equivalent_level": "STATE",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.52"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.16 1@12.36",
+                  "w2": "1@12 1@12.16 1@12.36"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py:155-160 (power_fault)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.32"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.16 1@12.36",
+                  "w2": "1@12 1@12.16"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "N"
+              ]
+            }
+          ]
+        },
+        "v1_1_adapter": {
+          "clause_results": [
+            {
+              "clause": "BATT-F1",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "no_representation_stage": [],
+              "note": "destroyed at T5_core_bridge",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "no_representation_stage": [],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            }
+          ],
+          "contract": "battery.mavlink.battery_status.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "battery",
+          "path": "v1_1_adapter",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "BATT-F1",
+              "downstream_consequence": "NONE",
+              "first_collapse_site": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.32"
+                },
+                "T3_ingest": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "R@12",
+                  "w2": "V@12"
+                },
+                "T4_channel": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "R@12 S@12.32",
+                  "w2": "V@12 S@12.52"
+                },
+                "T5_core_bridge": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.52"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.16 1@12.36",
+                  "w2": "1@12 1@12.16 1@12.36"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "V"
+              ]
+            },
+            {
+              "clause": "BATT-F2",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py:155-160 (power_fault)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [],
+              "shortest_witness": "X",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "X@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T3_ingest": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "R@12",
+                  "w2": "V@12"
+                },
+                "T4_channel": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "R@12 S@12.32",
+                  "w2": "V@12 S@12.32"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.52",
+                  "w2": "A@12 0@12.32"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.16 1@12.36",
+                  "w2": "1@12 1@12.16"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "X",
+                "N"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "gnss": {
+      "alphabet": "VIN",
+      "collapse": {
+        "plugins_py": {
+          "distinct_downstream_signatures": 20,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "II",
+            "INI"
+          ],
+          "words_explored": 29
+        },
+        "ulog_source_py": {
+          "distinct_downstream_signatures": 20,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "II",
+            "INI"
+          ],
+          "words_explored": 29
+        },
+        "v1_1_adapter": {
+          "distinct_downstream_signatures": 2,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "I",
+            "N"
+          ],
+          "words_explored": 3
+        }
+      },
+      "pairs": {
+        "plugins_py__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 0,
+          "EVIDENCE_divergent_words": 0,
+          "EVIDENCE_shortest_attributable": null,
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 54,
+          "STATE_divergent_words": 54,
+          "STATE_shortest_attributable": "VI",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 0,
+          "VALUE_divergent_words": 0,
+          "VALUE_shortest_attributable": null,
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.0001,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__plugins_py": {
+          "ASSURANCE_attributable_words": 53,
+          "ASSURANCE_divergent_words": 53,
+          "ASSURANCE_shortest_attributable": "I",
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 83,
+          "EVIDENCE_divergent_words": 83,
+          "EVIDENCE_shortest_attributable": "I",
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "I",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 90,
+          "VALUE_divergent_words": 90,
+          "VALUE_shortest_attributable": "I",
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.0001,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 53,
+          "ASSURANCE_divergent_words": 53,
+          "ASSURANCE_shortest_attributable": "I",
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 72,
+          "DIAGNOSIS_divergent_words": 72,
+          "DIAGNOSIS_shortest_attributable": "I",
+          "DIAGNOSIS_status": "ATTRIBUTABLE",
+          "EVIDENCE_attributable_words": 83,
+          "EVIDENCE_divergent_words": 83,
+          "EVIDENCE_shortest_attributable": "I",
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "I",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 90,
+          "VALUE_divergent_words": 90,
+          "VALUE_shortest_attributable": "I",
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.0,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": true,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        }
+      },
+      "paths": {
+        "plugins_py": {
+          "clause_results": [
+            {
+              "clause": "GNSS-F1",
+              "first_collapse_stage": null,
+              "first_equivalent_level": null,
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "the distinction survives to the end of the pipeline",
+              "result": "PASS",
+              "states": [
+                "I",
+                "N"
+              ]
+            }
+          ],
+          "contract": "gnss.mavlink.gps_raw_int.v0",
+          "emitted_state_vocabulary": [
+            "I",
+            "V"
+          ],
+          "family": "gnss",
+          "path": "plugins_py",
+          "required_but_unrepresentable": [],
+          "result": "PASS",
+          "violations": []
+        },
+        "ulog_source_py": {
+          "clause_results": [
+            {
+              "clause": "GNSS-F1",
+              "first_collapse_stage": null,
+              "first_equivalent_level": null,
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "the distinction survives to the end of the pipeline",
+              "result": "PASS",
+              "states": [
+                "I",
+                "N"
+              ]
+            }
+          ],
+          "contract": "gnss.mavlink.gps_raw_int.v0",
+          "emitted_state_vocabulary": [
+            "I",
+            "V"
+          ],
+          "family": "gnss",
+          "path": "ulog_source_py",
+          "required_but_unrepresentable": [],
+          "result": "PASS",
+          "violations": []
+        },
+        "v1_1_adapter": {
+          "clause_results": [
+            {
+              "clause": "GNSS-F1",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "no_representation_stage": [],
+              "note": "destroyed at T5_core_bridge",
+              "result": "FAIL",
+              "states": [
+                "I",
+                "N"
+              ]
+            }
+          ],
+          "contract": "gnss.mavlink.gps_raw_int.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "gnss",
+          "path": "v1_1_adapter",
+          "required_but_unrepresentable": [
+            "I"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "GNSS-F1",
+              "downstream_consequence": "NONE",
+              "first_collapse_site": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "must_stay_distinct": [
+                "I",
+                "N"
+              ],
+              "no_representation_stage": [],
+              "shortest_witness": "I",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "I@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "I@12 N@12.32",
+                  "w2": "V@12 N@12.12"
+                },
+                "T3_ingest": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "I@12",
+                  "w2": "V@12"
+                },
+                "T4_channel": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "I@12 N@13.04",
+                  "w2": "V@12 S@12.84"
+                },
+                "T5_core_bridge": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "-@12",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.32",
+                  "w2": "A@12 0@12.32"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.16",
+                  "w2": "1@12 1@12.16"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12 C@13.36 C@13.4",
+                  "w2": "N@12 C@13.36 C@13.4"
+                }
+              },
+              "witness_pair": [
+                "I",
+                "N"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "mag": {
+      "alphabet": "VZN",
+      "collapse": {
+        "plugins_py": {
+          "distinct_downstream_signatures": 2,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "Z",
+            "N"
+          ],
+          "words_explored": 3
+        },
+        "ulog_source_py": {
+          "distinct_downstream_signatures": 6,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "ZV",
+            "ZZ"
+          ],
+          "words_explored": 8
+        },
+        "v1_1_adapter": {
+          "distinct_downstream_signatures": 2,
+          "runtime_s": 0.0,
+          "shortest_collapsing_pair": [
+            "Z",
+            "N"
+          ],
+          "words_explored": 3
+        }
+      },
+      "pairs": {
+        "plugins_py__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 70,
+          "EVIDENCE_divergent_words": 70,
+          "EVIDENCE_shortest_attributable": "Z",
+          "EVIDENCE_status": "ATTRIBUTABLE",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "Z",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 0,
+          "VALUE_divergent_words": 116,
+          "VALUE_shortest_attributable": null,
+          "VALUE_status": "CONFOUNDED_BY_CONTROL",
+          "control_max_trust_delta": 0.025,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": true,
+            "STATE": true,
+            "VALUE": false
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__plugins_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 0,
+          "DIAGNOSIS_divergent_words": 120,
+          "DIAGNOSIS_shortest_attributable": null,
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 18,
+          "EVIDENCE_divergent_words": 21,
+          "EVIDENCE_shortest_attributable": "VVZ",
+          "EVIDENCE_status": "CONFOUNDED_BY_CONTROL",
+          "STATE_attributable_words": 0,
+          "STATE_divergent_words": 0,
+          "STATE_shortest_attributable": null,
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 0,
+          "VALUE_divergent_words": 0,
+          "VALUE_shortest_attributable": null,
+          "VALUE_status": "ATTRIBUTABLE",
+          "control_max_trust_delta": 0.025,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": false,
+            "STATE": true,
+            "VALUE": true
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        },
+        "v1_1_adapter__vs__ulog_source_py": {
+          "ASSURANCE_attributable_words": 0,
+          "ASSURANCE_divergent_words": 0,
+          "ASSURANCE_shortest_attributable": null,
+          "ASSURANCE_status": "ATTRIBUTABLE",
+          "DIAGNOSIS_attributable_words": 89,
+          "DIAGNOSIS_divergent_words": 96,
+          "DIAGNOSIS_shortest_attributable": "Z",
+          "DIAGNOSIS_status": "CONFOUNDED_BY_CONTROL",
+          "EVIDENCE_attributable_words": 72,
+          "EVIDENCE_divergent_words": 79,
+          "EVIDENCE_shortest_attributable": "Z",
+          "EVIDENCE_status": "CONFOUNDED_BY_CONTROL",
+          "STATE_attributable_words": 90,
+          "STATE_divergent_words": 90,
+          "STATE_shortest_attributable": "Z",
+          "STATE_status": "ATTRIBUTABLE",
+          "VALUE_attributable_words": 0,
+          "VALUE_divergent_words": 116,
+          "VALUE_shortest_attributable": null,
+          "VALUE_status": "CONFOUNDED_BY_CONTROL",
+          "control_max_trust_delta": 0.0001,
+          "control_word_equivalent": {
+            "ASSURANCE": true,
+            "DIAGNOSIS": false,
+            "EVIDENCE": false,
+            "STATE": true,
+            "VALUE": false
+          },
+          "verdict": "PATHS_DIVERGE",
+          "words_tested": 120
+        }
+      },
+      "paths": {
+        "plugins_py": {
+          "clause_results": [
+            {
+              "clause": "MAG-F1",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T5_core_bridge",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            }
+          ],
+          "contract": "mag.mavlink.scaled_imu.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "mag",
+          "path": "plugins_py",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "MAG-F1",
+              "downstream_consequence": "NONE",
+              "first_collapse_site": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+              "first_collapse_stage": "T5_core_bridge",
+              "first_equivalent_level": "VALUE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "-@12",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.08",
+                  "w2": "A@12 0@12.08"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.04",
+                  "w2": "1@12 1@12.04"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py (heading_caution)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "-@12",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.08",
+                  "w2": "A@12 0@12.12"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "1@12 1@12.04",
+                  "w2": "1@12 1@12.04 1@12.08"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "V"
+              ]
+            }
+          ]
+        },
+        "ulog_source_py": {
+          "clause_results": [
+            {
+              "clause": "MAG-F1",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "STATE",
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "note": "destroyed at T9_assurance",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            }
+          ],
+          "contract": "mag.mavlink.scaled_imu.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "mag",
+          "path": "ulog_source_py",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "MAG-F1",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py (heading_caution)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "ASSURANCE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.12",
+                  "w2": "A@12 0@12.08"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "0@12 0@12.04 0@12.08 0@12.12",
+                  "w2": "1@12"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "downstream_consequence": "DIAGNOSIS_SCORE",
+              "first_collapse_site": "csia/runtime/failsafe.py (heading_caution)",
+              "first_collapse_stage": "T9_assurance",
+              "first_equivalent_level": "STATE",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [
+                "T3_ingest",
+                "T4_channel"
+              ],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": false,
+                  "w1": "~@12",
+                  "w2": "~@12"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 -@12.04",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.12",
+                  "w2": "A@12 0@12.12"
+                },
+                "T8_evidence": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "0@12 0@12.04 0@12.08 0@12.12",
+                  "w2": "1@12"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "V"
+              ]
+            }
+          ]
+        },
+        "v1_1_adapter": {
+          "clause_results": [
+            {
+              "clause": "MAG-F1",
+              "first_collapse_stage": "T3_ingest",
+              "first_equivalent_level": "VALUE",
+              "no_representation_stage": [],
+              "note": "destroyed at T3_ingest",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "first_collapse_stage": "T8_evidence",
+              "first_equivalent_level": "DIAGNOSIS",
+              "no_representation_stage": [],
+              "note": "destroyed at T8_evidence",
+              "result": "FAIL",
+              "states": [
+                "X",
+                "V"
+              ]
+            }
+          ],
+          "contract": "mag.mavlink.scaled_imu.v0",
+          "emitted_state_vocabulary": [
+            "V"
+          ],
+          "family": "mag",
+          "path": "v1_1_adapter",
+          "required_but_unrepresentable": [
+            "X"
+          ],
+          "result": "FAIL",
+          "violations": [
+            {
+              "clause": "MAG-F1",
+              "downstream_consequence": "NONE",
+              "first_collapse_site": "csia/aircraft/adapters/base.py:140-177 (_put / _reject_sentinel)",
+              "first_collapse_stage": "T3_ingest",
+              "first_equivalent_level": "VALUE",
+              "must_stay_distinct": [
+                "X",
+                "N"
+              ],
+              "no_representation_stage": [],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.04"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T4_channel": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12 S@12.16",
+                  "w2": "V@12 S@12.16"
+                },
+                "T5_core_bridge": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "-@12",
+                  "w2": "-@12"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.08",
+                  "w2": "A@12 0@12.08"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12",
+                  "w2": "1@12"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "N"
+              ]
+            },
+            {
+              "clause": "MAG-F2",
+              "downstream_consequence": "EVIDENCE_AVAILABILITY",
+              "first_collapse_site": "csia/trust_engine/engine.py:146 (update gated on fresh)",
+              "first_collapse_stage": "T8_evidence",
+              "first_equivalent_level": "DIAGNOSIS",
+              "must_stay_distinct": [
+                "X",
+                "V"
+              ],
+              "no_representation_stage": [],
+              "shortest_witness": "Z",
+              "stage_table": {
+                "T1_protocol": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T2_decode": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "Z@12 N@12.08",
+                  "w2": "V@12 N@12.08"
+                },
+                "T3_ingest": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T4_channel": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "V@12 S@12.16",
+                  "w2": "V@12 S@12.2"
+                },
+                "T5_core_bridge": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "-@12",
+                  "w2": "V@12 -@12.04"
+                },
+                "T6_slot": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "V@12",
+                  "w2": "V@12"
+                },
+                "T7_admissible": {
+                  "identical": false,
+                  "stage_present": true,
+                  "w1": "A@12 0@12.08",
+                  "w2": "A@12 0@12.12"
+                },
+                "T8_evidence": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "1@12",
+                  "w2": "1@12"
+                },
+                "T9_assurance": {
+                  "identical": true,
+                  "stage_present": true,
+                  "w1": "N@12",
+                  "w2": "N@12"
+                }
+              },
+              "witness_pair": [
+                "Z",
+                "V"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "max_word_length": 4,
+  "notes": {
+    "search": "exhaustive over lengths 1..N in increasing order, so the first witness found is shortest by construction",
+    "stamp_invariance": "every cross-path projection is either order-only or a duration from word onset; the two stamping conventions can shift a duration by at most one tick (0.040 s), far below the effects reported"
+  },
+  "runtime_s": 191.99
+}

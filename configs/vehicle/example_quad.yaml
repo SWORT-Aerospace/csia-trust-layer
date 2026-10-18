@@ -1,0 +1,73 @@
+# Vehicle configuration — one file per airframe.
+#
+# The SHA-256 of this file goes into every flight-log header, so a log can be
+# tied to the exact configuration that produced it. Change the file, get a new
+# hash, and the change is visible in the record rather than inferred.
+
+vehicle:
+  id: EXAMPLE-QUAD-01
+  airframe: quad-x
+  mass_kg: 1.85
+  notes: >-
+    Replace this file with a real airframe before any bench or flight work.
+    The values below are placeholders and are NOT a calibration.
+
+autopilot:
+  stack: ardupilot            # ardupilot | px4
+  firmware: "ArduCopter V4.8.0-dev"
+  # Fill this in from the vehicle, do not copy it from here.
+  firmware_git_hash: UNSET
+
+link:
+  # A DEDICATED telemetry port. Do not share the port a ground station uses
+  # for command traffic -- a shadow deployment has no reason to sit on a link
+  # that carries commands.
+  transport: serial
+  device: /dev/serial0
+  baud: 921600
+  # For SITL or a UDP bridge instead:
+  # transport: udp
+  # connection: "udp:0.0.0.0:14550"
+
+  # Autopilot-side stream rates. SR2_RAW_SENS is NOT optional: ArduPilot
+  # publishes inertial instance 0 as RAW_IMU on that stream, and without it
+  # imu0 and the magnetometer never arrive at all.
+  required_streams:
+    SR2_RAW_SENS: 25
+    SR2_EXTRA1: 10
+    SR2_EXTRA2: 10
+    SR2_EXTRA3: 5
+    SR2_POSITION: 10
+    SR2_EXT_STAT: 10
+
+csia:
+  mode: SHADOW                # SHADOW | ADVISORY. No mode can command.
+  tick_hz: 25.0
+  field_mode: true            # real-world tolerance package, ON for vehicles
+  profile: FIELD_DERIVED_NOISE
+  watchdog_timeout_s: 5.0
+  log_dir: /var/log/csia
+  log_max_bytes: 67108864     # 64 MiB per part
+  log_keep_parts: 20
+
+# Channel overrides for THIS vehicle.
+#
+# The committed contract is qualified against SIMULATORS. Real ESC telemetry
+# is informative where SITL's is a hard-coded constant, so a bench with real
+# ESCs re-qualifies rather than inheriting the simulator's verdict.
+#
+# Every override needs a reason. An override without one is refused at load:
+# that is how a stub gets quietly re-admitted.
+channel_overrides: []
+  # - channel: esc.current
+  #   quality: INFORMATIVE
+  #   may_use: true
+  #   reason: >-
+  #     bench 2026-09-14: real BLHeli_32 telemetry, current tracked throttle
+  #     over 0-80% with sd 2.1 A; see bench/qualification_2026-09-14.json
+
+calibration:
+  # Recorded into the flight-log header for provenance. Not used by CSIA.
+  compass_last_calibrated: UNSET
+  accel_last_calibrated: UNSET
+  esc_last_calibrated: UNSET

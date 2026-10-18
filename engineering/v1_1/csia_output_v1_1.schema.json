@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swort.aero/csia/csia_output_v1_1.schema.json",
+  "title": "CSIA v1.1 output",
+  "description": "Read-only assurance output. Phase 4 sections 20-24. CSIA reports; it does not command. There is no field in this schema through which a vehicle action can be requested: `recommendations` is an advisory enum and the output firewall denies the transmit surface regardless of its contents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "timestamp", "platform", "assurance", "trust",
+    "sequential", "diagnosis", "support", "ambiguity", "evidence",
+    "function_eligibility", "recommendations", "provenance_summary"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Semantic version of THIS schema. A field whose meaning changes bumps the major, because a silent reinterpretation is the failure mode section 26 exists to prevent.",
+      "type": "string",
+      "pattern": "^1\\.1\\.[0-9]+$"
+    },
+    "timestamp": {
+      "description": "Seconds on the source timeline. Not wall-clock, and not a flight identifier.",
+      "type": "number"
+    },
+    "platform": { "type": "string", "minLength": 1 },
+
+    "assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "level_value", "armed"],
+      "properties": {
+        "level": { "enum": ["NORMAL", "CAUTION", "CRITICAL", "EMERGENCY"] },
+        "level_value": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "armed": { "type": "boolean" },
+        "transition_time": { "type": ["number", "null"] }
+      }
+    },
+
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "nodes"],
+      "properties": {
+        "mode": {
+          "description": "Which neighbour-edge weight produced these values. Carried so a trajectory can never be attributed to the wrong architecture after the fact.",
+          "enum": ["FLAT_V1_1", "LEGACY_NEIGHBOR_PROPAGATION"]
+        },
+        "nodes": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+
+    "sequential": {
+      "description": "CUSUM bank state. An alarm means the sequential evidence CHANGED; it is never a cause (section 11).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["k", "h", "covered_nodes", "alarming", "S"],
+      "properties": {
+        "k": { "const": 0.5 },
+        "h": { "const": 500.0 },
+        "covered_nodes": { "type": "array", "items": { "type": "string" } },
+        "nodes_without_residual": {
+          "type": "object",
+          "description": "node -> why it carries no sequential residual, so 'no alarm' is never read as 'no fault'.",
+          "additionalProperties": { "type": "string" }
+        },
+        "alarming": { "type": "array", "items": { "type": "string" } },
+        "S": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+
+    "diagnosis": {
+      "description": "Section 21. The field is `posterior`, NOT `confidence` (section 22): it is a posterior probability under a stated prior and likelihood, and calling it confidence would assert a calibration nothing here establishes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "leader", "posterior", "runner_up", "score_margin",
+        "active_evidence_count", "discriminating_evidence_count",
+        "identifiable", "ambiguity", "prior_sensitive", "support_state"
+      ],
+      "properties": {
+        "leader": { "type": "string" },
+        "posterior": { "type": "number", "minimum": 0, "maximum": 1 },
+        "runner_up": { "type": "string" },
+        "score_margin": { "type": "number" },
+        "active_evidence_count": { "type": "integer", "minimum": 0 },
+        "discriminating_evidence_count": { "type": "integer", "minimum": 0 },
+        "identifiable": { "type": "boolean" },
+        "ambiguity": { "enum": ["UNIQUE", "AMBIGUOUS"] },
+        "prior_sensitive": { "type": "boolean" },
+        "support_state": {
+          "enum": ["NO_APPLICABLE_EVIDENCE", "NON_IDENTIFIABLE",
+                   "PRIOR_SENSITIVE", "EVIDENCE_BACKED"]
+        },
+        "unknown_fault_model": {
+          "description": "Always this exact string. The unmodeled-fault hypothesis is NOT IMPLEMENTED (section 34), and it is a different thing from the UNKNOWN eligibility state.",
+          "const": "NOT_IMPLEMENTED"
+        },
+        "non_identifiable_against": {
+          "type": "array", "items": { "type": "string" }
+        }
+      }
+    },
+
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "leader_identifiable"],
+      "properties": {
+        "state": {
+          "enum": ["NO_APPLICABLE_EVIDENCE", "NON_IDENTIFIABLE",
+                   "PRIOR_SENSITIVE", "EVIDENCE_BACKED"]
+        },
+        "leader_identifiable": { "type": "boolean" },
+        "non_identifiable_against": {
+          "type": "array", "items": { "type": "string" }
+        },
+        "discriminating_evidence": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+
+    "ambiguity": {
+      "description": "Structural, never a posterior margin.",
+      "enum": ["UNIQUE", "AMBIGUOUS"]
+    },
+
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fresh", "active_relations", "suppressed_relations"],
+      "properties": {
+        "fresh": { "type": "object", "additionalProperties": { "type": "boolean" } },
+        "missing_reason": {
+          "type": "object",
+          "description": "The producer's OWN reason, preserved (section 33).",
+          "additionalProperties": {
+            "enum": ["NOT_RECEIVED", "STALE", "SENTINEL", "NO_3D_FIX"]
+          }
+        },
+        "current_valid": {
+          "description": "Section 28. Explicit validity for the battery current channel, whose semantics Phase 1 changed. Versioned by this schema rather than carried as an unversioned bare field.",
+          "type": ["boolean", "null"]
+        },
+        "active_relations": { "type": "array", "items": { "type": "string" } },
+        "suppressed_relations": { "type": "array", "items": { "type": "string" } },
+        "suppression_reasons": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "active_evidence_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "function_eligibility": {
+      "description": "Section 23.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "reason_codes", "required_inputs_available",
+                     "support_sufficient"],
+        "properties": {
+          "state": {
+            "description": "UNKNOWN here means the POLICY cannot determine eligibility. It is not the unmodeled-fault hypothesis.",
+            "enum": ["ELIGIBLE", "DEGRADED", "INELIGIBLE", "UNKNOWN"]
+          },
+          "reason_codes": { "type": "array", "items": { "type": "string" } },
+          "required_inputs_available": { "type": "boolean" },
+          "support_sufficient": { "type": "boolean" },
+          "transition_time": { "type": ["number", "null"] }
+        }
+      }
+    },
+
+    "recommendations": {
+      "description": "Section 24. ADVISORY ONLY. CSIA has no command authority; these are for an operator or autopilot to act on or ignore.",
+      "type": "array",
+      "items": {
+        "enum": ["RESTRICT_PRECISION_NAV", "INHIBIT_GPS_MODES",
+                 "SWITCH_NAV_INERTIAL", "MANUAL_REVIEW"]
+      }
+    },
+
+    "provenance_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["software_sha", "configuration_hash", "trust_mode",
+                   "frozen_core_tag"],
+      "properties": {
+        "software_sha": { "type": "string" },
+        "configuration_hash": { "type": "string" },
+        "input_trace_hash": { "type": "string" },
+        "trust_mode": {
+          "enum": ["FLAT_V1_1", "LEGACY_NEIGHBOR_PROPAGATION"]
+        },
+        "frozen_core_tag": { "type": "string" },
+        "authority": {
+          "description": "Structural, not aspirational: the output firewall denies every write and control operation.",
+          "const": "READ_ONLY"
+        }
+      }
+    },
+
+    "ledger_event": {
+      "description": "Present only on a tick that opened one. Absent means nothing changed, NOT that the ledger is unavailable.",
+      "type": ["object", "null"],
+      "required": ["event_id", "event_type", "content_sha256"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 32, "maxLength": 32 },
+        "event_type": {
+          "enum": ["ASSURANCE_STATE_CHANGED", "FUNCTION_ELIGIBILITY_CHANGED",
+                   "SUPPORT_STATE_CHANGED", "AMBIGUITY_CHANGED",
+                   "SEQUENTIAL_STATE_CHANGED"]
+        },
+        "subject": { "type": "string" },
+        "previous_state": { "type": "string" },
+        "new_state": { "type": "string" },
+        "reason_codes": { "type": "array", "items": { "type": "string" } },
+        "content_sha256": { "type": "string", "minLength": 64, "maxLength": 64 },
+        "previous_event_hash": { "type": "string", "minLength": 64, "maxLength": 64 }
+      }
+    }
+  }
+}

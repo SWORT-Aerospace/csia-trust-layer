@@ -1,0 +1,154 @@
+# Canonical CSIA scenario suite, migrated to CURRENT ArduPilot parameter names.
+#
+# Verified against ArduCopter V4.8.0-dev @ 01a504b.
+#
+# RULE: do not assume an old SIM_* name is still valid. The Phase-I suite used
+# SIM_GPS_* and those parameters DO NOT EXIST on 4.x -- they were renamed
+# SIM_GPS1_*. A write to a nonexistent parameter succeeds silently at the
+# MAVLink level and injects nothing, which is why every scenario below carries
+# a `verify` block. COMMAND ISSUED != FAULT INJECTED.
+#
+# Each scenario declares the six-stage chain from
+# docs/simulation/SIMULATION_CONTRACT.md. A scenario whose physical effect
+# cannot be verified is INVALID_SCENARIO -- not PASS, not FAIL.
+
+suite_version: 1
+platform: ardupilot
+verified_against: "ArduCopter V4.8.0-dev @ 01a504b"
+parameter_discovery: required   # read names from the live PARAM list, never assume
+
+defaults:
+  home: "-35.363261,149.165230,584,353"
+  model: quad
+  arm_alt_m: 25.0
+  settle_s: 6.0
+  hold_s: 30.0
+
+scenarios:
+
+  # The null control for the entire suite. Nothing is injected; if CSIA
+  # escalates here, no other arm in the suite is interpretable.
+  - name: clean
+    family: none
+    injects: {}
+    ground_truth: {fault_present: false}
+    verify:
+      null_control: true
+      expect_no_csia_transition: true
+
+  - name: gnss_spoof_offset
+    family: gnss_spoof
+    injects:
+      SIM_GPS1_GLITCH_X: 0.00045      # ~50 m north, degrees
+      SIM_GPS1_GLITCH_Y: 0.0
+    ground_truth: {fault_present: true, offset_m: 50.0, node: gps}
+    verify:
+      simulator_state: "SIMSTATE lat/lon unchanged by the glitch"
+      sensor_output: "sep(GPS_RAW_INT, SIMSTATE) grows to the commanded offset"
+      autopilot: "EKF_STATUS_REPORT.pos_horiz_variance rises"
+      csia: "gnss.position usable and displaced"
+      tolerance_m: 5.0
+    notes: >-
+      SIM_GPS.cpp:581 does `d.latitude += glitch_offsets.x`, so the injection
+      reaches the receiver rather than the fused output. Measuring the offset
+      as sep(GPS_RAW_INT, SIMSTATE) rather than absolute displacement is
+      required: the first version measured injected offset and airframe motion
+      together and read 38.89 m on a ZERO-injection arm.
+
+  - name: gnss_dropout
+    family: gnss_loss
+    injects:
+      SIM_GPS1_ENABLE: 0
+    ground_truth: {fault_present: true, node: gps, mode: total_denial}
+    verify:
+      sensor_output: "GPS_RAW_INT.fix_type < 3 for the whole hold"
+      autopilot: "EKF variance: position lost, or a mode change to LAND"
+      csia: "gnss.position MISSING with reason NO_3D_FIX"
+    notes: >-
+      Classification is contested and BOTH readings are recorded rather than
+      one silently adopted. The bench scenario says "trust must HOLD, not
+      false-alarm", which makes a CSIA escalation a false alarm. But the
+      modern injection is TOTAL denial and ArduPilot itself lands the
+      aircraft; calling CSIA's matching GPS-named escalation a false alarm is
+      hard to defend. This is also the arm where W-1 self-occlusion is
+      visible: CSIA escalates while the diagnosis says `nominal p=0.99`.
+
+  - name: imu_bias_drift
+    family: imu_bias
+    injects:
+      SIM_ACC1_BIAS_X: 0.5            # m/s^2
+    ground_truth: {fault_present: true, node: imu0, bias_ms2: 0.5}
+    verify:
+      sensor_output: "RAW_IMU xacc mean shifts by the commanded bias"
+      csia: "imu0.accel usable and its mean moves"
+      tolerance_ms2: 0.1
+    notes: >-
+      W-3 lives here. Detection is present at IDEAL_SIM noise and ABSENT at
+      FIELD_DERIVED_NOISE (min trust 0.99). The result is only interpretable
+      alongside its profile, and the same bias must be run at all three.
+
+  - name: magnetic_interference
+    family: mag_emi
+    injects:
+      SIM_MAG1_OFS_X: 400             # milligauss
+      SIM_MAG1_OFS_Y: 200
+    ground_truth: {fault_present: true, node: mag}
+    verify:
+      sensor_output: "RAW_IMU xmag/ymag shift by the commanded offset"
+      csia: "mag.field_ut usable and displaced"
+    notes: >-
+      In-flight compass learning can absorb an offset applied slowly. Apply it
+      as a step after the settle window, and verify the sensor moved rather
+      than assuming the parameter write was enough.
+
+  - name: power_disturbance
+    family: power_sag
+    injects:
+      SIM_BATT_VOLTAGE: 10.8          # V, down from ~12.6
+    ground_truth: {fault_present: true, node: battery, sag_v: 1.2}
+    verify:
+      sensor_output: "BATTERY_STATUS pack voltage drops by the commanded sag"
+      csia: "battery.voltage usable and dropped"
+      tolerance_v: 0.2
+    notes: >-
+      ONLY THE VOLTAGE HALF OF THIS FAULT EXISTS IN SITL. The bench scenario
+      also injects a 350 rpm ESC sag, and SITL's ESC rpm is a vibration-model
+      term pinned at 0 (W-5). The ESC half is recorded as unreproducible on
+      this build rather than scored as a miss.
+
+  - name: vibration
+    family: vibration
+    injects:
+      SIM_VIB_MOT_MAX: 8.0
+      SIM_ACC1_RND: 3.0               # BOTH are required
+      SIM_ACC2_RND: 3.0
+    ground_truth: {fault_present: true, node: vibration}
+    verify:
+      sensor_output: "VIBRATION vibration_x/y/z rms rises"
+      csia: "vibration.rms usable and elevated"
+    notes: >-
+      Two earlier probes failed because they set SIM_VIB_MOT_MAX alone. The
+      amplitude comes from accel_noise, so a campaign that sets only one of
+      the two parameters produces an INVALID_SCENARIO, not a negative result.
+      Separately: on a rig where ESC telemetry is suppressed, online.py:617
+      gates the vibration PHYSICS term on fresh["motor_esc"], so CSIA cannot
+      ATTRIBUTE a vibration fault even when it detects one.
+
+  - name: dual_imu_degradation
+    family: dual_imu
+    injects:
+      SIM_ACC1_BIAS_X: 0.5
+      SIM_ACC2_BIAS_X: 0.45
+    ground_truth: {fault_present: true, node: imu0, secondary: imu1}
+    verify:
+      sensor_output: "RAW_IMU and SCALED_IMU2 both shift"
+      csia: "imu0.accel and imu1.accel both usable and displaced"
+    notes: >-
+      W-2 lives here: v1 attributes this 100% to imu1_bias_drift when imu0 is
+      the injected target. ALSO NOTE both SITL IMU instances share one
+      dynamics source, so a SITL imu0/imu1 disagreement is a noise-model
+      artifact and not evidence about independent hardware.
+
+# Profiles every scenario must be run at. A result that does not name its
+# profile is uninterpretable (S4).
+profiles: [IDEAL_SIM, REALISTIC_SIM, FIELD_DERIVED_NOISE]

@@ -1,0 +1,108 @@
+{
+  "artifact": "FORMAL_RESULTS",
+  "frozen_constants": {
+    "EPS": 0.02,
+    "EVIDENCE_MULT": 1.5,
+    "PRIOR_NOMINAL": 0.86,
+    "SMOOTH_ALPHA": 0.06,
+    "n_causes": 8,
+    "prior_fault": 0.02,
+    "prior_nominal": 0.86
+  },
+  "minimal_counterexample": [
+    {
+      "D_status": 1.0,
+      "D_value": 1.0,
+      "P_fault_two_hypothesis": 0.0,
+      "c_status": 1.0,
+      "c_value": 1.0,
+      "log_posterior_ratio": -15.556677,
+      "regime": "healthy",
+      "steady_smoothed_delta": -7.863651
+    },
+    {
+      "D_status": 0.0,
+      "D_value": 0.0,
+      "P_fault_two_hypothesis": 0.022727,
+      "c_status": 0.0,
+      "c_value": 0.0,
+      "log_posterior_ratio": -3.7612,
+      "regime": "fault, coupled (D=A=0)",
+      "steady_smoothed_delta": 0.0
+    },
+    {
+      "D_status": 1.0,
+      "D_value": 0.0,
+      "P_fault_two_hypothesis": 0.894404,
+      "c_status": 0.0,
+      "c_value": 0.0,
+      "log_posterior_ratio": 2.136538,
+      "regime": "fault, split (value D=0, status D=1)",
+      "steady_smoothed_delta": 3.931826
+    }
+  ],
+  "prediction_vs_measurement": [
+    {
+      "abs_difference": 4e-06,
+      "arm": "S1D",
+      "measured_eight_hypothesis_final": 0.022723,
+      "note": "the closed form is a two-hypothesis reduction; the measurement runs the full eight-cause softmax, so exact equality is not expected and the gap is the contribution of the other six causes",
+      "predicted_two_hypothesis": 0.022727,
+      "regime": "coupled, sustained fault"
+    },
+    {
+      "abs_difference": 1.8e-05,
+      "arm": "S2a",
+      "measured_eight_hypothesis_final": 0.894386,
+      "note": "the closed form is a two-hypothesis reduction; the measurement runs the full eight-cause softmax, so exact equality is not expected and the gap is the contribution of the other six causes",
+      "predicted_two_hypothesis": 0.894404,
+      "regime": "split, sustained fault"
+    }
+  ],
+  "theorems": [
+    {
+      "id": "T1_EVIDENCE_DELETION",
+      "proof": "ell_{j,a} - ell_{j,b} is log(1-c+eps) - log(c+eps) when j is in LOW(a) only, its negation when in LOW(b) only, and 0 otherwise since both terms are then identical. Multiply by D_j and sum.",
+      "statement": "Delta_ab(t) = sum over j in LOW(a) symmetric-difference LOW(b) of +/- D_j(t) delta(c_j(t)). Every feature in both LOW sets or in neither contributes exactly zero. Therefore if D_j(t) = 0 for every j in that symmetric difference, Delta_ab(t) = 0 and the tick carries no information distinguishing a from b.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "id": "T2_SELF_MASKING_FAULT",
+      "instance_in_this_system": "a = gps_fault, b = nominal. LOW(gps_fault) = ['phys_gps'], LOW(nominal) = []. The symmetric difference is {phys_gps}, whose gate is gvalid * (tau>3) * fresh['gps'] -- and fresh['gps'] is exactly A_gps. A GNSS fault that makes the receiver report no fix therefore satisfies (i) and (ii) simultaneously.",
+      "statement": "Call a fault F self-masking for the pair (a,b) under coupling if (i) F drives A_k -> 0 for a set of relations K, and (ii) LOW(a) symmetric-difference LOW(b) is a subset of K. Under D = A, Delta_ab(t) = 0 for every tick F is active: the hypothesis the fault supports is unidentifiable from its alternative exactly while the fault is happening. Condition (ii) is necessary as well as sufficient for Delta to vanish identically.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "corollary": "If the fault removes the SOURCE rather than the value -- transport loss, a dead receiver, a severed link -- no such j' exists, and the split provably cannot help. This is a PREDICTION, and the transport control tests it.",
+      "id": "T3_WHAT_THE_SPLIT_CAN_AND_CANNOT_RESTORE",
+      "statement": "Splitting D from A restores identifiability for (a,b) during F if and only if there exists an observable j' with j' in LOW(a) symmetric-difference LOW(b) and D_{j'} > 0 while F is active. NECESSARY as well as sufficient: with no such j' every term of Delta_ab is zero regardless of how D is gated.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "id": "T4_STEADY_STATE_POSTERIOR",
+      "numbers": {
+        "delta_at_c0": 3.931826,
+        "delta_at_c1": -3.931826,
+        "log_prior_ratio": -3.7612,
+        "log_ratio_coupled_sustained": -3.7612,
+        "log_ratio_split_sustained": 2.136538,
+        "two_hypothesis_posterior_coupled": 0.022727,
+        "two_hypothesis_posterior_split": 0.894404
+      },
+      "statement": "Under a sustained fault the smoother converges, so log P(a)/P(b) -> log(pi_a/pi_b) + M * delta(c). With D = 0 the second term vanishes and the ratio returns to the PRIOR ratio: the diagnosis reverts to nominal no matter how severe the fault.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    },
+    {
+      "id": "T5_TIME_TO_RANK_REVERSAL",
+      "numbers": {
+        "delta_0_if_previously_saturated": 3.931826,
+        "delta_when_healthy": -3.931826,
+        "seconds_to_reversal_at_25hz": 0.2908,
+        "threshold_smoothed_diff": 2.507467,
+        "ticks_to_reversal": 7.27
+      },
+      "statement": "After D is gated off, S_a - S_b decays as (1-alpha)^n toward zero, so the rank reverses once M * Delta_0 * (1-alpha)^n < -log(pi_a/pi_b). n = log(threshold/Delta_0)/log(1-alpha).",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED"
+    }
+  ]
+}

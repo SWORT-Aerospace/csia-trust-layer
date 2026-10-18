@@ -1,6 +1,6 @@
 # WP-A2 Report — Complete External Claim Audit
 
-**Date:** 2026-08-22 · **Branch:** `research/wp-e1` · **Suite:** 445 before,
+**Date:** 2026-08-22 · **Branch:** `research/wp_e1` · **Suite:** 445 before,
 448 after (the three added tests are the documentation-count guard)
 **Artifacts:** `WP_A2_CLAIM_PROVENANCE_MATRIX.csv`,
 `WP_A2_THRESHOLD_PROVENANCE.md`, `WP_A2_CORRECTION_PACKAGE.md`,
@@ -273,7 +273,7 @@ derivation.
 ### Note on `329bc93`
 
 Reported earlier in this session as unreachable. **That was wrong** — it is
-reachable from `main`, `research/wp-e1` and
+reachable from `main`, `research/wp_e1` and
 `claude/code-reviewer-repo-export-zicovg`, so it was never at risk from
 garbage collection. It is *"Fix Monte Carlo reproducibility (hash-seed bug
 found in sanity re-run)"* (2026-07-20), touching `deliverables/SUMMARY.md`,

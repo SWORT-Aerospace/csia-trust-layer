@@ -1,0 +1,1539 @@
+{
+  "applicability": {
+    "how_it_was_obtained": "By injection against an unfaulted baseline with identical fixed seeds, not by reading the sensor source. A pair is APPLIED only if some channel of the target stream moved.",
+    "inert": 30,
+    "inert_pairs": [
+      [
+        "bias_drift",
+        "battery"
+      ],
+      [
+        "bias_drift",
+        "gps"
+      ],
+      [
+        "bias_drift",
+        "motor_esc"
+      ],
+      [
+        "bias_drift",
+        "vibration"
+      ],
+      [
+        "dropout",
+        "vibration"
+      ],
+      [
+        "emi_spike",
+        "baro"
+      ],
+      [
+        "emi_spike",
+        "battery"
+      ],
+      [
+        "emi_spike",
+        "gps"
+      ],
+      [
+        "emi_spike",
+        "motor_esc"
+      ],
+      [
+        "emi_spike",
+        "vibration"
+      ],
+      [
+        "gps_spoof",
+        "baro"
+      ],
+      [
+        "gps_spoof",
+        "battery"
+      ],
+      [
+        "gps_spoof",
+        "imu0"
+      ],
+      [
+        "gps_spoof",
+        "imu1"
+      ],
+      [
+        "gps_spoof",
+        "mag"
+      ],
+      [
+        "gps_spoof",
+        "motor_esc"
+      ],
+      [
+        "gps_spoof",
+        "vibration"
+      ],
+      [
+        "power_sag",
+        "baro"
+      ],
+      [
+        "power_sag",
+        "gps"
+      ],
+      [
+        "power_sag",
+        "imu0"
+      ],
+      [
+        "power_sag",
+        "imu1"
+      ],
+      [
+        "power_sag",
+        "mag"
+      ],
+      [
+        "power_sag",
+        "vibration"
+      ],
+      [
+        "vibration_anomaly",
+        "baro"
+      ],
+      [
+        "vibration_anomaly",
+        "battery"
+      ],
+      [
+        "vibration_anomaly",
+        "gps"
+      ],
+      [
+        "vibration_anomaly",
+        "imu0"
+      ],
+      [
+        "vibration_anomaly",
+        "imu1"
+      ],
+      [
+        "vibration_anomaly",
+        "mag"
+      ],
+      [
+        "vibration_anomaly",
+        "motor_esc"
+      ]
+    ],
+    "live": 18,
+    "live_pairs": [
+      [
+        "bias_drift",
+        "baro"
+      ],
+      [
+        "bias_drift",
+        "imu0"
+      ],
+      [
+        "bias_drift",
+        "imu1"
+      ],
+      [
+        "bias_drift",
+        "mag"
+      ],
+      [
+        "dropout",
+        "baro"
+      ],
+      [
+        "dropout",
+        "battery"
+      ],
+      [
+        "dropout",
+        "gps"
+      ],
+      [
+        "dropout",
+        "imu0"
+      ],
+      [
+        "dropout",
+        "imu1"
+      ],
+      [
+        "dropout",
+        "mag"
+      ],
+      [
+        "dropout",
+        "motor_esc"
+      ],
+      [
+        "emi_spike",
+        "imu0"
+      ],
+      [
+        "emi_spike",
+        "imu1"
+      ],
+      [
+        "emi_spike",
+        "mag"
+      ],
+      [
+        "gps_spoof",
+        "gps"
+      ],
+      [
+        "power_sag",
+        "battery"
+      ],
+      [
+        "power_sag",
+        "motor_esc"
+      ],
+      [
+        "vibration_anomaly",
+        "vibration"
+      ]
+    ],
+    "lost_in_transport": [
+      [
+        "dropout",
+        "vibration"
+      ]
+    ],
+    "total_combinations": 48,
+    "what_lost_in_transport_means": "the fault DOES perturb the sampled sensor stream, and the event source flattens it before the online layer sees it, so a run cannot exercise it. dropout on the vibration node is the known case: SimulatedFlightSource emits the 10 Hz RMS envelope with a hardcoded valid=True, discarding the invalidity. This is a property of the SIMULATION SOURCE (csia/runtime/plugins.py, which is not frozen), not of the frozen core, and it is recorded rather than worked around.",
+    "what_this_means": "Of the (kind, target) combinations the frozen core will accept, only the live ones perturb any sensor channel. The inert ones are accepted and silently ignored, which is why profiles are validated against this matrix rather than against KNOWN_KINDS."
+  },
+  "crashes": [],
+  "elapsed_s": 11.57,
+  "mode": "catalog",
+  "profiles": [
+    {
+      "classes": [
+        "navigation",
+        "heading"
+      ],
+      "concurrent": true,
+      "does_not_represent": "a high-throttle maneuver: fast_cruise is a kinematic high-speed envelope with no drag or thrust model",
+      "faults": [
+        {
+          "duration": 15.0,
+          "kind": "gps_spoof",
+          "params": {
+            "drift": [
+              3.0,
+              1.0,
+              0.0
+            ]
+          },
+          "start": 20.0,
+          "target": "gps"
+        },
+        {
+          "duration": 18.0,
+          "kind": "bias_drift",
+          "params": {
+            "axis": 2,
+            "rate": 0.05
+          },
+          "start": 22.0,
+          "target": "mag"
+        }
+      ],
+      "flight_profile": "fast_cruise",
+      "id": "msrd_gps_spoof_mag_drift_fast",
+      "represents": "two independent references degrading at once, with overlapping but not identical windows, so attribution cannot be a single-cause answer",
+      "summary": "GPS spoof 20-35 s concurrent with magnetometer bias drift 22-40 s, flown on fast_cruise",
+      "targets": [
+        "gps",
+        "mag"
+      ]
+    },
+    {
+      "classes": [
+        "navigation",
+        "attitude"
+      ],
+      "concurrent": true,
+      "does_not_represent": "",
+      "faults": [
+        {
+          "duration": 20.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 20.0,
+          "target": "gps"
+        },
+        {
+          "duration": 20.0,
+          "kind": "bias_drift",
+          "params": {
+            "axis": 2,
+            "channel": "accel",
+            "rate": 0.05
+          },
+          "start": 25.0,
+          "target": "imu0"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "msrd_gnss_denied_imu_drift",
+      "represents": "loss of the navigation anchor while the dead-reckoning reference is itself degrading -- the case where holding on GPS loss is least safe",
+      "summary": "GNSS denied 20-40 s while imu0 accel-z bias drifts 25-45 s",
+      "targets": [
+        "gps",
+        "imu0"
+      ]
+    },
+    {
+      "classes": [
+        "power",
+        "structure"
+      ],
+      "concurrent": true,
+      "does_not_represent": "control-surface flutter (see UNMODELLED)",
+      "faults": [
+        {
+          "duration": 8.0,
+          "kind": "power_sag",
+          "params": {
+            "depth_v": 1.2
+          },
+          "start": 28.0,
+          "target": "battery"
+        },
+        {
+          "duration": 8.0,
+          "kind": "power_sag",
+          "params": {
+            "rpm_loss": 350.0
+          },
+          "start": 28.0,
+          "target": "motor_esc"
+        },
+        {
+          "duration": 16.0,
+          "kind": "vibration_anomaly",
+          "params": {
+            "gain": 3.0
+          },
+          "start": 26.0,
+          "target": "vibration"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "msrd_power_and_structure",
+      "represents": "a mechanical fault and its electrical consequence presenting together, which is the physically plausible pairing",
+      "summary": "Power sag 28-36 s with a prop-damage vibration signature 26-42 s",
+      "targets": [
+        "battery",
+        "motor_esc",
+        "vibration"
+      ]
+    },
+    {
+      "classes": [
+        "heading",
+        "navigation",
+        "attitude",
+        "power"
+      ],
+      "concurrent": true,
+      "does_not_represent": "",
+      "faults": [
+        {
+          "duration": 24.0,
+          "kind": "emi_spike",
+          "params": {
+            "amplitude": 10.0,
+            "rate_hz": 12.0
+          },
+          "start": 18.0,
+          "target": "mag"
+        },
+        {
+          "duration": 20.0,
+          "kind": "gps_spoof",
+          "params": {
+            "drift": [
+              2.0,
+              2.0,
+              0.0
+            ]
+          },
+          "start": 22.0,
+          "target": "gps"
+        },
+        {
+          "duration": 16.0,
+          "kind": "bias_drift",
+          "params": {
+            "axis": 2,
+            "channel": "accel",
+            "rate": 0.08
+          },
+          "start": 26.0,
+          "target": "imu1"
+        },
+        {
+          "duration": 10.0,
+          "kind": "power_sag",
+          "params": {
+            "depth_v": 1.0
+          },
+          "start": 30.0,
+          "target": "battery"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "msrd_four_class_cascade",
+      "represents": "progressive degradation where each new fault arrives while the previous is unresolved -- the hardest attribution case this sensor suite can express",
+      "summary": "Staggered four-class cascade: heading 18 s, navigation 22 s, attitude 26 s, power 30 s",
+      "targets": [
+        "battery",
+        "gps",
+        "imu1",
+        "mag"
+      ]
+    },
+    {
+      "classes": [
+        "attitude",
+        "navigation"
+      ],
+      "concurrent": true,
+      "does_not_represent": "",
+      "faults": [
+        {
+          "duration": 30.0,
+          "kind": "bias_drift",
+          "params": {
+            "axis": 2,
+            "channel": "accel",
+            "rate": 0.18
+          },
+          "start": 25.0,
+          "target": "imu0"
+        },
+        {
+          "duration": 28.0,
+          "kind": "bias_drift",
+          "params": {
+            "axis": 2,
+            "channel": "accel",
+            "rate": -0.15
+          },
+          "start": 27.0,
+          "target": "imu1"
+        },
+        {
+          "duration": 20.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 24.0,
+          "target": "gps"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "msrd_dual_imu_with_gnss_denied",
+      "represents": "the frozen dual_imu_failure scenario with the navigation anchor removed as well: attitude redundancy is exhausted and there is no position reference to cross-check against",
+      "summary": "Both IMUs drifting in opposite directions while GNSS is denied",
+      "targets": [
+        "gps",
+        "imu0",
+        "imu1"
+      ]
+    },
+    {
+      "classes": [
+        "navigation"
+      ],
+      "concurrent": false,
+      "does_not_represent": "RF jamming as such. There is no RF model; the degraded-but-present regime a real jammer produces first is NOT covered. See UNMODELLED['rf_jamming_as_rf']",
+      "faults": [
+        {
+          "duration": 20.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 20.0,
+          "target": "gps"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "env_gnss_denied",
+      "represents": "complete loss of GNSS fix, however caused -- the observable end state of denial",
+      "summary": "GNSS denied 20-40 s (loss of fix)",
+      "targets": [
+        "gps"
+      ]
+    },
+    {
+      "classes": [
+        "navigation"
+      ],
+      "concurrent": false,
+      "does_not_represent": "urban-canyon multipath: an intermittent FIX is not a systematically WRONG fix. See UNMODELLED['urban_canyon_multipath']",
+      "faults": [
+        {
+          "duration": 3.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 20.0,
+          "target": "gps"
+        },
+        {
+          "duration": 3.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 28.0,
+          "target": "gps"
+        },
+        {
+          "duration": 3.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 36.0,
+          "target": "gps"
+        },
+        {
+          "duration": 3.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 44.0,
+          "target": "gps"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "env_gnss_denied_intermittent",
+      "represents": "repeated acquire/lose cycles, which exercise re-acquisition and the de-escalation dwell rather than a single sustained loss",
+      "summary": "Intermittent GNSS: four 3 s denials between 20 s and 44 s",
+      "targets": [
+        "gps"
+      ]
+    },
+    {
+      "classes": [
+        "power",
+        "propulsion"
+      ],
+      "concurrent": true,
+      "does_not_represent": "an airframe or actuator dynamics failure. CSIA observes sensors; a thrust loss enters only through its telemetry signature",
+      "faults": [
+        {
+          "duration": 12.0,
+          "kind": "power_sag",
+          "params": {
+            "rpm_loss": 500.0
+          },
+          "start": 30.0,
+          "target": "motor_esc"
+        },
+        {
+          "duration": 12.0,
+          "kind": "power_sag",
+          "params": {
+            "depth_v": 1.5
+          },
+          "start": 30.0,
+          "target": "battery"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "env_motor_thrust_loss",
+      "represents": "partial propulsion loss as it appears to the trust layer: ESC RPM sag with correlated pack voltage dip",
+      "summary": "Motor/ESC thrust loss 30-42 s (RPM sag) with pack sag",
+      "targets": [
+        "battery",
+        "motor_esc"
+      ]
+    },
+    {
+      "classes": [
+        "structure"
+      ],
+      "concurrent": false,
+      "does_not_represent": "control-surface flutter, which is a different spectral signature. See UNMODELLED['control_surface_flutter']",
+      "faults": [
+        {
+          "duration": 18.0,
+          "kind": "vibration_anomaly",
+          "params": {
+            "gain": 3.0
+          },
+          "start": 28.0,
+          "target": "vibration"
+        }
+      ],
+      "flight_profile": "hover_circle",
+      "id": "env_prop_damage_vibration",
+      "represents": "the prop/blade damage signature the model implements",
+      "summary": "Prop-damage vibration signature 28-46 s",
+      "targets": [
+        "vibration"
+      ]
+    },
+    {
+      "classes": [
+        "navigation"
+      ],
+      "concurrent": false,
+      "does_not_represent": "high-throttle maneuvering. See UNMODELLED['high_throttle_maneuvering']",
+      "faults": [
+        {
+          "duration": 20.0,
+          "kind": "dropout",
+          "params": {},
+          "start": 20.0,
+          "target": "gps"
+        }
+      ],
+      "flight_profile": "fast_cruise",
+      "id": "env_gnss_denied_fast_cruise",
+      "represents": "the same denial at ~55 m/s, where dead-reckoning error accumulates faster per second of outage",
+      "summary": "GNSS denied 20-40 s flown on fast_cruise",
+      "targets": [
+        "gps"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "gps_fault": 0.812,
+          "nominal": 0.188
+        },
+        "injected_targets": [
+          "gps",
+          "mag"
+        ],
+        "targets_nameable_but_never_named": [
+          "mag"
+        ],
+        "targets_named": [
+          "gps"
+        ],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 2.84,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 40.0,
+      "fault_onset_s": 20.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.5902,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 1,
+      "peak_failsafe_level_name": "CAUTION",
+      "profile_id": "msrd_gps_spoof_mag_drift_fast",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 19.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 2.84
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS trust 0.64 (diagnosis gps_fault p=0.86)"
+          ],
+          "t": 22.84,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 42.84,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 1.0
+        },
+        "injected_targets": [
+          "gps",
+          "imu0"
+        ],
+        "targets_nameable_but_never_named": [
+          "gps",
+          "imu0"
+        ],
+        "targets_named": [],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 1.04,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 45.0,
+      "fault_onset_s": 20.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.8139,
+        "imu0": 0.7723,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 2,
+      "peak_failsafe_level_name": "CRITICAL",
+      "profile_id": "msrd_gnss_denied_imu_drift",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 14.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 1.24
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 21.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "attitude confidence degraded (best 0.80; diagnosis nominal p=0.95)",
+            "GPS data invalid (diagnosis nominal p=0.95)"
+          ],
+          "t": 37.72,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 46.24,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 0.04,
+          "power_fault": 0.08,
+          "vibration_anomaly": 0.88
+        },
+        "injected_targets": [
+          "battery",
+          "motor_esc",
+          "vibration"
+        ],
+        "targets_nameable_but_never_named": [],
+        "targets_named": [
+          "battery",
+          "vibration"
+        ],
+        "targets_structurally_unnameable": [
+          "motor_esc"
+        ],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 6.08,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 42.0,
+      "fault_onset_s": 26.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.4672,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.5125,
+        "vibration": 0.1663
+      },
+      "peak_failsafe_level": 2,
+      "peak_failsafe_level_name": "CRITICAL",
+      "profile_id": "msrd_power_and_structure",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 17.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 8.04
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "structural vibration anomaly (trust 0.42; diagnosis vibration_anomaly p=0.79)"
+          ],
+          "t": 32.08,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 50.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "gps_fault": 0.0417,
+          "imu1_bias_drift": 0.1017,
+          "mag_interference": 0.795,
+          "nominal": 0.0617
+        },
+        "injected_targets": [
+          "battery",
+          "gps",
+          "imu1",
+          "mag"
+        ],
+        "targets_nameable_but_never_named": [
+          "battery"
+        ],
+        "targets_named": [
+          "gps",
+          "imu1",
+          "mag"
+        ],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 4.0,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 42.0,
+      "fault_onset_s": 18.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.5892,
+        "gps": 0.5874,
+        "imu0": 0.8044,
+        "imu1": 0.6108,
+        "mag": 0.0692,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 2,
+      "peak_failsafe_level_name": "CRITICAL",
+      "profile_id": "msrd_four_class_cascade",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 17.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 8.52
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "magnetometer untrusted (mag 0.47; diagnosis mag_interference p=1.00)"
+          ],
+          "t": 22.0,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "GPS trust 0.70 (diagnosis imu1_bias_drift p=0.66)",
+            "power integrity fault (battery 0.59; diagnosis imu1_bias_drift p=0.66)",
+            "magnetometer untrusted (mag 0.21; diagnosis imu1_bias_drift p=0.66)"
+          ],
+          "t": 41.24,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 50.52,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "imu0_bias_drift": 0.329,
+          "imu1_bias_drift": 0.4258,
+          "nominal": 0.2452
+        },
+        "injected_targets": [
+          "gps",
+          "imu0",
+          "imu1"
+        ],
+        "targets_nameable_but_never_named": [
+          "gps"
+        ],
+        "targets_named": [
+          "imu0",
+          "imu1"
+        ],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 1.04,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 55.0,
+      "fault_onset_s": 24.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 89.96,
+      "min_trust_per_node": {
+        "baro": 0.8182,
+        "battery": 0.8182,
+        "gps": 0.8182,
+        "imu0": 0.4506,
+        "imu1": 0.5,
+        "mag": 0.8027,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 3,
+      "peak_failsafe_level_name": "EMERGENCY",
+      "profile_id": "msrd_dual_imu_with_gnss_denied",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 34.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 6.76
+      },
+      "ticks": 2250,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 25.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "attitude confidence degraded (best 0.73; diagnosis imu0_bias_drift p=0.86)",
+            "GPS data invalid (diagnosis imu0_bias_drift p=0.86)"
+          ],
+          "t": 32.52,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "attitude reference integrity lost (imu0=0.61, imu1=0.61; diagnosis imu0_bias_drift p=0.97)",
+            "GPS data invalid (diagnosis imu0_bias_drift p=0.97)"
+          ],
+          "t": 33.96,
+          "to": 3,
+          "to_name": "EMERGENCY"
+        },
+        {
+          "from": 3,
+          "reasons": [
+            "attitude confidence degraded (best 0.73; diagnosis imu1_bias_drift p=1.00)"
+          ],
+          "t": 45.72,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "attitude reference integrity lost (imu0=0.66, imu1=0.66; diagnosis imu1_bias_drift p=0.54)"
+          ],
+          "t": 49.4,
+          "to": 3,
+          "to_name": "EMERGENCY"
+        },
+        {
+          "from": 3,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 61.76,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 1.0
+        },
+        "injected_targets": [
+          "gps"
+        ],
+        "targets_nameable_but_never_named": [
+          "gps"
+        ],
+        "targets_named": [],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 1.04,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 40.0,
+      "fault_onset_s": 20.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 1,
+      "peak_failsafe_level_name": "CAUTION",
+      "profile_id": "env_gnss_denied",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 19.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 5.04
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 21.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 45.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 1.0
+        },
+        "injected_targets": [
+          "gps"
+        ],
+        "targets_nameable_but_never_named": [
+          "gps"
+        ],
+        "targets_named": [],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 1.04,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 47.0,
+      "fault_onset_s": 20.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 1,
+      "peak_failsafe_level_name": "CAUTION",
+      "profile_id": "env_gnss_denied_intermittent",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 12.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 5.04
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 21.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 28.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        },
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 29.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 36.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        },
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 37.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 44.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        },
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 45.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 52.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 0.2467,
+          "power_fault": 0.7533
+        },
+        "injected_targets": [
+          "battery",
+          "motor_esc"
+        ],
+        "targets_nameable_but_never_named": [],
+        "targets_named": [
+          "battery"
+        ],
+        "targets_structurally_unnameable": [
+          "motor_esc"
+        ],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 4.28,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 42.0,
+      "fault_onset_s": 30.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.4804,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.5239,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 2,
+      "peak_failsafe_level_name": "CRITICAL",
+      "profile_id": "env_motor_thrust_loss",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 17.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 12.0
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "power integrity fault (battery 0.68; diagnosis power_fault p=0.90)"
+          ],
+          "t": 34.28,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 54.0,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 0.0356,
+          "vibration_anomaly": 0.9644
+        },
+        "injected_targets": [
+          "vibration"
+        ],
+        "targets_nameable_but_never_named": [],
+        "targets_named": [
+          "vibration"
+        ],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 6.2,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 46.0,
+      "fault_onset_s": 28.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.1661
+      },
+      "peak_failsafe_level": 2,
+      "peak_failsafe_level_name": "CRITICAL",
+      "profile_id": "env_prop_damage_vibration",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 13.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 8.04
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "structural vibration anomaly (trust 0.43; diagnosis vibration_anomaly p=0.91)"
+          ],
+          "t": 34.2,
+          "to": 2,
+          "to_name": "CRITICAL"
+        },
+        {
+          "from": 2,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 54.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "causes_named_during_faults": {
+          "nominal": 1.0
+        },
+        "injected_targets": [
+          "gps"
+        ],
+        "targets_nameable_but_never_named": [
+          "gps"
+        ],
+        "targets_named": [],
+        "targets_structurally_unnameable": [],
+        "what_never_named_means": "a fault was injected on a sensor the vocabulary CAN name, and across the whole fault window the top-1 cause was never that sensor. Under concurrent faults the posterior concentrates on one explanation; the others are not separately accused.",
+        "what_unnameable_means": "the legacy cause vocabulary has no label pointing at this sensor, so it cannot be accused however clearly the trust layer sees the fault. That is a property of the vocabulary, NOT a detection failure -- the failsafe may still act on it."
+      },
+      "detection": {
+        "latency_s": 1.04,
+        "measured_from": "first fault onset to first escalation",
+        "status": "DETECTED"
+      },
+      "escalated": true,
+      "fault_clear_s": 40.0,
+      "fault_onset_s": 20.0,
+      "final_failsafe_level": 0,
+      "flight_end_s": 59.96,
+      "min_trust_per_node": {
+        "baro": 0.8107,
+        "battery": 0.8182,
+        "gps": 0.8139,
+        "imu0": 0.8044,
+        "imu1": 0.7825,
+        "mag": 0.8182,
+        "motor_esc": 0.8182,
+        "vibration": 0.8
+      },
+      "peak_failsafe_level": 1,
+      "peak_failsafe_level_name": "CAUTION",
+      "profile_id": "env_gnss_denied_fast_cruise",
+      "recovery": {
+        "includes_policy_dwell_down_s": 5.0,
+        "measured_from": "last fault window end to failsafe returning to NORMAL",
+        "note": "the policy's own de-escalation dwell is INSIDE this number, not subtracted from it",
+        "observable_window_note": "seconds of flight remaining after the last fault cleared. Shorter than the dwell means a recovery could not have been seen even if it happened, which is reported as RECOVERY_WINDOW_TOO_SHORT rather than as a failure to recover",
+        "observable_window_s": 19.96,
+        "recovered_before_faults_cleared": false,
+        "recovered_before_note": "TRUE means the failsafe was ALREADY back at NORMAL when the last fault window ended, so the reported time is near zero and is NOT a measurement of how long recovery took. It happens when faults are staggered and the trailing one never held a condition. Aggregate recovery statistics should exclude these or they read as instant recoveries.",
+        "status": "RECOVERED",
+        "time_s": 5.04
+      },
+      "ticks": 1500,
+      "transitions": [
+        {
+          "from": 0,
+          "reasons": [
+            "GPS data invalid (diagnosis nominal p=0.99)"
+          ],
+          "t": 21.04,
+          "to": 1,
+          "to_name": "CAUTION"
+        },
+        {
+          "from": 1,
+          "reasons": [
+            "all monitored conditions recovered"
+          ],
+          "t": 45.04,
+          "to": 0,
+          "to_name": "NORMAL"
+        }
+      ]
+    }
+  ],
+  "schema": "csia.stress.campaign/1",
+  "seed": null,
+  "summary": {
+    "NOT_DETECTED_IS_NOT_A_PASS": "a profile that injected live faults and never tripped the failsafe is a finding, not a success. It is counted here and listed by id.",
+    "attribution": {
+      "runs_with_a_nameable_target_never_named": 7,
+      "runs_with_a_structurally_unnameable_target": 2
+    },
+    "detected": 10,
+    "detection_latency_s": {
+      "max": 6.2,
+      "min": 1.04,
+      "p50": 2.84,
+      "p95": 6.2
+    },
+    "not_detected": 0,
+    "not_detected_ids": [],
+    "peak_level_counts": {
+      "CAUTION": 4,
+      "CRITICAL": 5,
+      "EMERGENCY": 1
+    },
+    "recovered": 10,
+    "recovery_status_counts": {
+      "RECOVERED": 10
+    },
+    "recovery_time_s": {
+      "max": 12.0,
+      "min": 1.24,
+      "p50": 6.76,
+      "p95": 12.0
+    },
+    "runs": 10
+  },
+  "unmodelled": [
+    {
+      "id": "rf_jamming_as_rf",
+      "nearest_available": "dropout on gps (loss of fix)",
+      "why_not": "The frozen sensor models have no RF front-end, no carrier-to-noise-density channel and no interference model. KNOWN_KINDS has six kinds and none of them is RF.",
+      "why_the_nearest_is_not_it": "Dropout is the OBSERVABLE CONSEQUENCE of a jammer strong enough to deny the fix, and this repository does test that. It is not jamming: it omits the degraded-but-present regime a real jammer produces first -- rising noise, falling satellite count, a fix that is still reported and increasingly wrong. A layer that handles a clean dropout has NOT been shown to handle that."
+    },
+    {
+      "id": "urban_canyon_multipath",
+      "nearest_available": "gps_spoof (monotonic drift ramp)",
+      "why_not": "Multipath is a geometry-dependent, bounded, oscillatory position error driven by reflectors around the vehicle. The frozen GPS model has a Gauss-Markov error and two fault kinds; it carries no reflector geometry.",
+      "why_the_nearest_is_not_it": "A spoof drift is monotonic and unbounded; multipath is bounded and oscillatory, and correlates with heading and position rather than growing with time. Building a 'multipath' profile out of gps_spoof would test the drift detector and label the result multipath. THE DETECTOR THAT CATCHES ONE NEED NOT CATCH THE OTHER."
+    },
+    {
+      "id": "control_surface_flutter",
+      "nearest_available": "vibration_anomaly on the vibration node",
+      "why_not": "The frozen sensor suite is quad-tuned (eight nodes, no control-surface instrumentation) and the truth model has no aeroelastic state. Flutter is a structural-dynamic mode, not a sensor fault.",
+      "why_the_nearest_is_not_it": "vibration_anomaly is a prop/blade damage signature: amplitude growth plus a sub-harmonic. Flutter is a divergent oscillation at a structural mode frequency with a different spectral signature and a different time constant. The vibration profile below is labelled as the prop signature it is."
+    },
+    {
+      "id": "high_throttle_maneuvering",
+      "nearest_available": "fast_cruise (~55 m/s)",
+      "why_not": "The frozen truth model implements two flight profiles, hover_circle and fast_cruise. fast_cruise is a KINEMATIC high-speed envelope; its own catalog entry states that aerodynamic drag is NOT modelled.",
+      "why_the_nearest_is_not_it": "It is a high-SPEED profile, not a high-THROTTLE maneuvering one: there is no thrust model, no load factor and no control input. Profiles below that use it say 'fast_cruise', not 'high-throttle maneuver'. Inventing a maneuver profile would mean inventing flight dynamics this repository has not validated."
+    }
+  ],
+  "what_this_is_not": {
+    "hardware_in_the_loop": "NOT RUN. E2 is blocked on physical hardware the user must supply; see the E1 freeze manifest.",
+    "software_in_the_loop": "NOT RUN. No autopilot is executed. ArduPilot is not installed in the environment that produced this file and could not be fetched, so no SITL result is claimed.",
+    "why_it_still_matters": "the frozen core under test is the same code either way. This campaign exercises it against simulated degradation, which bounds its behaviour without establishing anything about a real airframe."
+  }
+}

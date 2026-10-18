@@ -1,0 +1,27 @@
+id,loophole,priority_in_shadow_register,status_after_revision,evidence,residual
+L1,correlated monitors (three detectors on one IMU),P0,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L2,shared model,P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L3,shared calibration,P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L4,stale configuration,P0,MITIGATED_UNDER_CONTRACT,"R-3: E1 9 stale ticks -> 0, 0 valid records lost; 14 adversarial variants (R3_CONFIGURATION_EPOCH.md)","needs the epoch context each tick, a monotonic key and composite epochs across restarts (L25)"
+L5,wrong profile,P0,NARROWED,PV9 added: a pacing input must be an existing dependency; 2.1.1 + r2 0 overconfident under the ten shadow mutations (PROFILE_VALIDATION_RESULTS.json),a wrong statement of architecture on a real edge is invisible to static rules (L24)
+L6,producer bug (valid-looking wrong evidence),P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L7,clock / timebase,P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L8,replay / duplication,P1,PARTLY_NARROWED,a replayed record stamped with an old configuration epoch is not admitted (R-3 test 6),an unstamped replay that replaces the current record is still admitted
+L9,model version drift,P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L10,unit / frame mismatch,P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L11,conditioning error,P0,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L12,false independence via a shared source (incl. a validity condition sharing a source with the evidence it gates),P0,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L13,common-cause failure of monitors,P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L14,adversarial / malformed producer,P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L15,confidence without identifiability,P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L16,effect visible before cause (sub-threshold cause exonerated),P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L17,scope closure used for starvation,P0,CLOSED,"R-2: starvation reads declared pacing inputs, never the closure; W7 under r2 and under r2+R5/R5a/R5b keeps starvation confirmed; permanent tests",depends on the pacing declaration (L24)
+L18,fault-created SUPPORTED (policy A),P0,CLOSED,"R-1: 168 -> 0 fault-created SUPPORTED on 68,640 injections; equal to the reference policy B",none measured
+L19,function table and 2.1 disagree on link effects (G-3),P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L20,missing true edge,P2,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L21,static dependency under a changing configuration,P1,OPEN_DOCUMENTED,"R-2's pacing declaration is static; ANY over all IMUs matches PX4 failover, but a pacing input that changes with the configuration is not followed","pacing per configuration epoch: a dependency of R-2 on R-3, not built (scope)"
+L22,short-window state estimate outside its calibration,P1,UNCHANGED,"not touched by R-1, R-2 or R-3",as in the shadow register
+L23,structural fault outside predicates,P2,UNCHANGED,a structural fault still raises out of reason(); shadow_fault in the shadow runner,as before
+L24,wrong or incomplete pacing declaration,new,NEW_RESIDUAL,PM2 (GNSS declared as pacing on the R5b edge) restores the wrong W7 answer; H1 (a real pacing input left undeclared) SUPPORTS process_stall where 2.1.0 + r1 said AMBIGUOUS,profile review must require the code that gates the output (r2 cites EKF2.cpp); not detectable statically
+L25,epoch integration contract broken,new,NEW_RESIDUAL,"no context: 111 valid record-ticks withheld, 5 symptom ticks missed; silent missed transition 9 stale ticks; counter-only restart 6; lane-id key 4; uint8 rollover 9 valid withheld (EPOCH_ADVERSARIAL_RESULTS.json)",integration requirements in R3_CONFIGURATION_EPOCH.md section 6; each broken clause reproduces at most the 2.1.0 behaviour
+L26,a symptom whose only evidence is not admitted is not raised,new,NEW_RESIDUAL,"E1 with no context or a malformed stamp: POSITION_UNAVAILABLE not raised on ticks 20-24; the admission report names the record, but no localization exists",a symptom-level 'not evaluated' flag would close the trace gap; not built (scope)

@@ -1,0 +1,21 @@
+{
+  "baro_min_trust_percentiles": {
+    "p00": 0.993,
+    "p01": 0.993,
+    "p05": 0.993,
+    "p50": 0.993,
+    "p95": 0.9931
+  },
+  "clean_flight_min_trust": 0.993,
+  "count_requested": 80,
+  "examples": [],
+  "false_alarm_rate": 0.0,
+  "measurement_window": "minimum baro trust AFTER arm_time, which is the only window the rule can fire in. StressRun.min_trust spans the whole run including warm-up from the 0.8 prior, and that whole-run minimum is 0.8182 (9/11) in EVERY campaign run whatever is faulted -- an early-flight artifact, not a fault response. Reading it as GPS starving baro of its only corroborating edge was a misreading, corrected here: runs faulting only battery and imu1, GPS healthy, report the identical 0.8182.",
+  "nothing_is_tuned_by_this_module": "whatever the rate, the threshold is not adjusted here. An unacceptable rate is reported and the rule withdrawn or re-scoped; moving the number until the answer looks right is the failure mode this programme exists to avoid.",
+  "runs_without_a_baro_fault": 58,
+  "schema": "csia.stress.low_trust_false_alarm/1",
+  "threshold": 0.75,
+  "threshold_borrowed_from": "nav_caution",
+  "worst_margin_above_threshold": 0.243,
+  "would_fire": 0
+}

@@ -1,0 +1,65 @@
+{
+ "$id": "csia.e2m.fault_event/1",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "physical"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "operator_annotation"
+    ]
+   }
+  }
+ ],
+ "properties": {
+  "derived_from_raw_log_sha256": {
+   "pattern": "^[0-9a-f]{64}$",
+   "type": "string"
+  },
+  "is_physical_measurement": {
+   "type": "boolean"
+  },
+  "kind": {
+   "enum": [
+    "derived",
+    "physical"
+   ]
+  },
+  "operator_annotation": {
+   "description": "required when kind is 'physical': what the operator physically did, e.g. 'disconnected SDA on channel 1'",
+   "type": "string"
+  },
+  "parameters": {
+   "type": "object"
+  },
+  "schema": {
+   "const": "csia.e2m.derived_stream/1"
+  },
+  "transform": {
+   "enum": [
+    "constant_bias",
+    "gradual_drift",
+    "freeze",
+    "dropout",
+    "delay",
+    "jitter",
+    "correlated_bias",
+    "correlated_drift"
+   ]
+  }
+ },
+ "required": [
+  "schema",
+  "kind",
+  "is_physical_measurement"
+ ],
+ "title": "A derived fault stream, or an annotated physical fault",
+ "type": "object"
+}

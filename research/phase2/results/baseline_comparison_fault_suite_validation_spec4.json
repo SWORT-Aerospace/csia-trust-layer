@@ -1,0 +1,584 @@
+{
+ "B0_native_autopilot": {
+  "criterion": "EKF variance above FS_EKF_THRESH on the family's channel, OR a failsafe mode change, OR a STATUSTEXT at severity <= 4",
+  "note": "this is MORE sensitive than ArduCopter's own failsafe, which requires two of three variances over threshold or velocity variance at twice threshold (ArduCopter/ekf_check.cpp:142-154). B0 is therefore generous to the autopilot, not a strawman.",
+  "of": 7,
+  "responds_on": 5
+ },
+ "B2": {
+  "floor": 0.1,
+  "grid": [
+   5,
+   10,
+   25,
+   50,
+   100
+  ],
+  "parameter": "k consecutive ticks at or below PHYS_FLOOR",
+  "per_trial": [
+   {
+    "alarms": {},
+    "arm": "nominal",
+    "counts_against_R10": 0,
+    "label": "B1_nominal_s4"
+   },
+   {
+    "alarming_nodes": [
+     "gps"
+    ],
+    "arm": "gps_spoof",
+    "autopilot_response": true,
+    "correct_diagnostic": true,
+    "label": "B1_gps_spoof_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 0.48,
+    "target_node": "gps",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "gps"
+    ],
+    "arm": "gps_dropout",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_gps_dropout_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 8.52,
+    "target_node": "gps",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "imu0_bias_drift",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_imu0_bias_drift_s4",
+    "pre_injection_alarms": [],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "imu0",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "mag_emi",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_mag_emi_s4",
+    "pre_injection_alarms": [],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "mag",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "power_sag",
+    "autopilot_response": false,
+    "correct_diagnostic": false,
+    "label": "B1_power_sag_s4",
+    "pre_injection_alarms": [],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "battery",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "vibration_anomaly",
+    "autopilot_response": false,
+    "correct_diagnostic": false,
+    "label": "B1_vibration_anomaly_s4",
+    "pre_injection_alarms": [],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "vibration",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "dual_imu_failure",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_dual_imu_failure_s4",
+    "pre_injection_alarms": [],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "imu0",
+    "wrong_isolation": false
+   }
+  ],
+  "search": [
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.179,
+    "k": 5,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 3,
+     "BOTH": 2,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": true
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.169,
+    "k": 10,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 3,
+     "BOTH": 2,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": true
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.176,
+    "k": 25,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 3,
+     "BOTH": 2,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": true
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.174,
+    "k": 50,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 5,
+     "BOTH": 0,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": true
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.185,
+    "k": 100,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 5,
+     "BOTH": 0,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 5,
+     "BOTH": 0,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": true
+   }
+  ],
+  "searched_on": "development spec only",
+  "selected": {
+   "R10_nominal_alarms": 0,
+   "cpu_us_per_tick": 0.179,
+   "k": 5,
+   "ledger_A": {
+    "AUTOPILOT_ONLY": 3,
+    "BOTH": 2,
+    "CSIA_ONLY": 0,
+    "JOINT_MISS": 2
+   },
+   "ledger_B": {
+    "AUTOPILOT_ONLY": 4,
+    "BOTH": 1,
+    "CSIA_ONLY": 0,
+    "JOINT_MISS": 2
+   },
+   "satisfies_R10": true
+  },
+  "selected_k": 5
+ },
+ "B4": {
+  "R10_nominal_alarms": 0,
+  "clean_stats": {
+   "baro": {
+    "mu0": 0.0,
+    "n": 1874,
+    "reason": "clean-flight residual has zero variance; no scale exists for a standardised detector",
+    "sigma0": 0.0,
+    "usable": false
+   },
+   "battery": {
+    "mu0": 0.00014136,
+    "n": 1874,
+    "reason": null,
+    "sigma0": 0.00057775,
+    "usable": true
+   },
+   "gps_eff": {
+    "mu0": 0.02047126,
+    "n": 1874,
+    "reason": null,
+    "sigma0": 0.01461148,
+    "usable": true
+   },
+   "mag": {
+    "mu0": 1.44e-06,
+    "n": 1874,
+    "reason": null,
+    "sigma0": 1.12e-06,
+    "usable": true
+   },
+   "vibration": {
+    "mu0": 0.5735228,
+    "n": 1874,
+    "reason": null,
+    "sigma0": 0.5287364,
+    "usable": true
+   }
+  },
+  "cpu_us_per_tick": 0.627,
+  "decision_h_rule": "smallest h from a fixed grid for which the CLEAN NOMINAL ARM produces zero alarms. Evaluated on the clean arm only, never on a fault outcome \u2014 the same constraint rule B2's k is chosen by.",
+  "decision_h_selected": 500.0,
+  "detector": "one-sided CUSUM on the standardised PRE-TRANSFORM residual (OnlineTrustLayer._lam, read-only)",
+  "drift_k": 0.5,
+  "drift_set_by": "design: half the one-sigma shift to detect (Page 1954; standard in model-based FDI)",
+  "grid": [
+   5.0,
+   10.0,
+   20.0,
+   50.0,
+   100.0,
+   200.0,
+   500.0,
+   1000.0
+  ],
+  "in_control_stats_from": "the clean nominal arm only",
+  "ledger_A": {
+   "AUTOPILOT_ONLY": 2,
+   "BOTH": 3,
+   "CSIA_ONLY": 2,
+   "JOINT_MISS": 0
+  },
+  "ledger_B": {
+   "AUTOPILOT_ONLY": 4,
+   "BOTH": 1,
+   "CSIA_ONLY": 2,
+   "JOINT_MISS": 0
+  },
+  "per_trial": [
+   {
+    "alarms": {},
+    "arm": "nominal",
+    "counts_against_R10": 0,
+    "label": "B1_nominal_s4"
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "gps_spoof",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_gps_spoof_s4",
+    "pre_injection_alarms": [
+     "gps"
+    ],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "gps",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "gps"
+    ],
+    "arm": "gps_dropout",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_gps_dropout_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 0.36,
+    "target_node": "gps",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [],
+    "arm": "imu0_bias_drift",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_imu0_bias_drift_s4",
+    "pre_injection_alarms": [
+     "gps"
+    ],
+    "response": false,
+    "response_time_s": null,
+    "target_node": "imu0",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "mag"
+    ],
+    "arm": "mag_emi",
+    "autopilot_response": true,
+    "correct_diagnostic": true,
+    "label": "B1_mag_emi_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 0.12,
+    "target_node": "mag",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "battery"
+    ],
+    "arm": "power_sag",
+    "autopilot_response": false,
+    "correct_diagnostic": true,
+    "label": "B1_power_sag_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 0.28,
+    "target_node": "battery",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "battery",
+     "vibration"
+    ],
+    "arm": "vibration_anomaly",
+    "autopilot_response": false,
+    "correct_diagnostic": true,
+    "label": "B1_vibration_anomaly_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 0.32,
+    "target_node": "vibration",
+    "wrong_isolation": false
+   },
+   {
+    "alarming_nodes": [
+     "vibration"
+    ],
+    "arm": "dual_imu_failure",
+    "autopilot_response": true,
+    "correct_diagnostic": false,
+    "label": "B1_dual_imu_failure_s4",
+    "pre_injection_alarms": [],
+    "response": true,
+    "response_time_s": 26.2,
+    "target_node": "imu0",
+    "wrong_isolation": true
+   }
+  ],
+  "satisfies_R10": true,
+  "search": [
+   {
+    "R10_nominal_alarms": 4,
+    "cpu_us_per_tick": 0.239,
+    "h": 5.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 4,
+    "cpu_us_per_tick": 0.253,
+    "h": 10.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 4,
+    "cpu_us_per_tick": 0.27,
+    "h": 20.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 4,
+    "cpu_us_per_tick": 0.309,
+    "h": 50.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 3,
+     "BOTH": 2,
+     "CSIA_ONLY": 1,
+     "JOINT_MISS": 1
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 3,
+    "cpu_us_per_tick": 0.356,
+    "h": 100.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 3,
+     "BOTH": 2,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 0,
+     "JOINT_MISS": 2
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 1,
+    "cpu_us_per_tick": 0.523,
+    "h": 200.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 1,
+     "JOINT_MISS": 1
+    },
+    "satisfies_R10": false
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.627,
+    "h": 500.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "satisfies_R10": true
+   },
+   {
+    "R10_nominal_alarms": 0,
+    "cpu_us_per_tick": 0.616,
+    "h": 1000.0,
+    "ledger_A": {
+     "AUTOPILOT_ONLY": 2,
+     "BOTH": 3,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "ledger_B": {
+     "AUTOPILOT_ONLY": 4,
+     "BOTH": 1,
+     "CSIA_ONLY": 2,
+     "JOINT_MISS": 0
+    },
+    "satisfies_R10": true
+   }
+  ],
+  "textbook_h_negative_result": {
+   "R10_nominal_alarms": 4,
+   "h": 5.0,
+   "ledger_A": {
+    "AUTOPILOT_ONLY": 2,
+    "BOTH": 3,
+    "CSIA_ONLY": 0,
+    "JOINT_MISS": 2
+   },
+   "why_it_failed": "h=5.0 pairs with k=0.5 for an in-control ARL of about 465 samples. The layer ticks at ~25 Hz, so a 100 s flight is ~2500 samples and this design point predicts about five false alarms per flight. The mis-specification was the analyst's, not the method's. Retained as a committed negative result."
+  }
+ },
+ "development_spec": 4,
+ "flown_candidates": {
+  "B1": {
+   "R10_nominal_transitions": 0,
+   "ledger_A": {
+    "AUTOPILOT_ONLY": 1,
+    "BOTH": 4,
+    "CSIA_ONLY": 1,
+    "JOINT_MISS": 1
+   },
+   "ledger_B": {
+    "AUTOPILOT_ONLY": 2,
+    "BOTH": 3,
+    "CSIA_ONLY": 0,
+    "JOINT_MISS": 2
+   },
+   "valid_fault_trials": 7,
+   "wrong_isolation": 2
+  }
+ },
+ "information_used_by_candidates": "B2 and B4 read the per-node physics-consistency sequence CSIA already computes. No new sensor input, no new message.",
+ "rig": "LEGACY_COMPAT_CONTROL",
+ "work_package": "P1 established-method challenge, B0-B4"
+}

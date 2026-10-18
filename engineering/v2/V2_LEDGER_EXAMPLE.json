@@ -1,0 +1,2383 @@
+{
+  "chain_note": "content_sha256 + previous_event_hash form a simple hash chain for detecting a missing or reordered event. NOT a blockchain, not distributed, not tamper-proof against rewriting the whole file.",
+  "context": {
+    "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+    "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+    "profile": "aircraft",
+    "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+    "v1_1_schema_version": "1.1.0"
+  },
+  "event_count": 19,
+  "events": [
+    {
+      "affected_functions": [],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": null,
+      "content_sha256": "9b0522f4b06464cc47d61e559a3e4dae2a1c517a5609ec6c185975662b9633a0",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [],
+      "domain": null,
+      "event_id": "7e69191302a0240b1fdda1e88b329861",
+      "event_type": "SYSTEM_STATE_CHANGED",
+      "limiting_domain": null,
+      "new_state": "DEGRADED",
+      "previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "previous_state": "NORMAL",
+      "reason_codes": [],
+      "sequence": 0,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "SYSTEM",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "AUTONOMOUS_MISSION",
+        "COARSE_NAVIGATION",
+        "GEOFENCE_SUPPORT",
+        "INERTIAL_CONTINUATION",
+        "LOGGING",
+        "POSITION_HOLD",
+        "PRECISION_NAVIGATION",
+        "PROPULSION",
+        "SENSING",
+        "TELEMETRY"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": null,
+      "content_sha256": "dee470ebd360b425d1cdd53914f14d7f49835ac83313a418019aaabd6cc4674f",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [],
+      "domain": "POWER",
+      "event_id": "1fcc37aeda77305f0156f8b6d60f4a2c",
+      "event_type": "DOMAIN_STATE_CHANGED",
+      "limiting_domain": null,
+      "new_state": "DEGRADED",
+      "previous_event_hash": "9b0522f4b06464cc47d61e559a3e4dae2a1c517a5609ec6c185975662b9633a0",
+      "previous_state": "NOMINAL",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 1,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "POWER",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "AUTONOMOUS_MISSION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "f7c5d2de26626be8aaf55346b63c66fdcfbdb8fd68d55a1f92ed2b429f58f10b",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "a5fd47c0462740a691f2eb0ebf5b1a3d",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "dee470ebd360b425d1cdd53914f14d7f49835ac83313a418019aaabd6cc4674f",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 2,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "AUTONOMOUS_MISSION",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "COARSE_NAVIGATION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "2b72cc3543ba994f2ccd265fee2d73eae78549c00d8d653dcaf6e6e7ad2b4981",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "b08c7f32a1e95b4fa484bce4c797e6d3",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "f7c5d2de26626be8aaf55346b63c66fdcfbdb8fd68d55a1f92ed2b429f58f10b",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 3,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "COARSE_NAVIGATION",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "GEOFENCE_SUPPORT"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "63a68aa358559e3720d6822736c81c5bdf5e5388f54c7bf8bbab2524099ca209",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "27ad8491d3a764530d3d27e11bb7b941",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "2b72cc3543ba994f2ccd265fee2d73eae78549c00d8d653dcaf6e6e7ad2b4981",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 4,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "GEOFENCE_SUPPORT",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "POSITION_HOLD"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "93b1db8d9edd12f14f35cc0c26e5755f03dfad582eb170265b38febc82b0b69f",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "27929d313cb2cad4b98f40d8f84e2023",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "63a68aa358559e3720d6822736c81c5bdf5e5388f54c7bf8bbab2524099ca209",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 5,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "POSITION_HOLD",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "f812fbd7932744462d1285862c2a83322c82e7c42b417994fc78f90ce2933f4d",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "11788cfa03a39fa9cd6b77f9e887415d",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "93b1db8d9edd12f14f35cc0c26e5755f03dfad582eb170265b38febc82b0b69f",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 6,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "PRECISION_NAVIGATION",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "3cc428495c5a0430b734ce97e0ae5fa60fdb096d00b9a3929477bda5ef25a0dd",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "f3f6d65719f89ada4b9cfcf8d198bf71",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "f812fbd7932744462d1285862c2a83322c82e7c42b417994fc78f90ce2933f4d",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 7,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "SENSING",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "461588154ac5f61cd55849f1149a1c05ce1d9bb75fd93cc56d96fa80b8b9d24c",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "834498b8e380df1989041fa4e76fc072",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "DEGRADED",
+      "previous_event_hash": "3cc428495c5a0430b734ce97e0ae5fa60fdb096d00b9a3929477bda5ef25a0dd",
+      "previous_state": "ELIGIBLE",
+      "reason_codes": [
+        "POWER_RAIL_MARGINAL",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 8,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "TELEMETRY",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": null,
+      "content_sha256": "af9ee6ec33da6c385cd1c37cfa035c7ad69a8b5e5d44a6dce86c4f0c6ab46d90",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [],
+      "domain": null,
+      "event_id": "05bc86dbb4135fdfbd15bb1223bfd18a",
+      "event_type": "ATTRIBUTION_CHANGED",
+      "limiting_domain": null,
+      "new_state": "UNIQUE",
+      "previous_event_hash": "461588154ac5f61cd55849f1149a1c05ce1d9bb75fd93cc56d96fa80b8b9d24c",
+      "previous_state": "NO_EVIDENCE",
+      "reason_codes": [],
+      "sequence": 9,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "DEGRADED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "DEGRADED",
+          "COARSE_NAVIGATION": "DEGRADED",
+          "GEOFENCE_SUPPORT": "DEGRADED",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "DEGRADED",
+          "PRECISION_NAVIGATION": "DEGRADED",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "DEGRADED",
+        "t": 4.15
+      },
+      "subject": "CAUSE_SUPPORT",
+      "timestamp": 4.15
+    },
+    {
+      "affected_functions": [],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": null,
+      "content_sha256": "d44839d3959071ef419f9e6d58049928e1f8a67397c8d4a0f12af243ed3b0b83",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [],
+      "domain": null,
+      "event_id": "e5ea4b10e240112998ab40b322c7a1dc",
+      "event_type": "SYSTEM_STATE_CHANGED",
+      "limiting_domain": null,
+      "new_state": "RESTRICTED",
+      "previous_event_hash": "af9ee6ec33da6c385cd1c37cfa035c7ad69a8b5e5d44a6dce86c4f0c6ab46d90",
+      "previous_state": "DEGRADED",
+      "reason_codes": [],
+      "sequence": 10,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "SYSTEM",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "AUTONOMOUS_MISSION",
+        "COARSE_NAVIGATION",
+        "GEOFENCE_SUPPORT",
+        "INERTIAL_CONTINUATION",
+        "LOGGING",
+        "POSITION_HOLD",
+        "PRECISION_NAVIGATION",
+        "PROPULSION",
+        "SENSING",
+        "TELEMETRY"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": null,
+      "content_sha256": "e513c27d7ff9de51ab09a93ccf72f99ff4fc0ac1391247cb14a2f68ba7261318",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [],
+      "domain": "POWER",
+      "event_id": "b974aff6a5fd8b7966330fd091d0bafd",
+      "event_type": "DOMAIN_STATE_CHANGED",
+      "limiting_domain": null,
+      "new_state": "VIOLATED",
+      "previous_event_hash": "d44839d3959071ef419f9e6d58049928e1f8a67397c8d4a0f12af243ed3b0b83",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 11,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "POWER",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "AUTONOMOUS_MISSION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "540b1b08629493af48540a8151e0d4ef0934d66e437b4a2dc99dff3a766b1245",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "c9ce98143c2097f2cc2cb0715ca859b4",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "e513c27d7ff9de51ab09a93ccf72f99ff4fc0ac1391247cb14a2f68ba7261318",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 12,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "AUTONOMOUS_MISSION",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "COARSE_NAVIGATION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "88943b330c95600a895ce916ac03e2dd48d3df9e43749055e0a9d10b02f501c4",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "f4fbc2537f40893245c1236498776c33",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "540b1b08629493af48540a8151e0d4ef0934d66e437b4a2dc99dff3a766b1245",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 13,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "COARSE_NAVIGATION",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "GEOFENCE_SUPPORT"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "e48907914bba7e81a93605cbc0b2b509dc8fb61b642f17a9d988125f3bd10df1",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "ccbcb5d271d2d8376e06e35bef0fa5ca",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "88943b330c95600a895ce916ac03e2dd48d3df9e43749055e0a9d10b02f501c4",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 14,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "GEOFENCE_SUPPORT",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "POSITION_HOLD"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "f91938098ec71bfe26df1ed7c2e667bd7ad4d41f5eb0b2b6df103d7c8b44a833",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "b4bfeef76f002dcf1194b309acbd62ea",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "e48907914bba7e81a93605cbc0b2b509dc8fb61b642f17a9d988125f3bd10df1",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 15,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "POSITION_HOLD",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "PRECISION_NAVIGATION"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "b194efe81aef466d44e69c2115ded91ad4751a915ef23e56f9ea7ba9f124f862",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "27bc35b95bf0b6edde0aef50512c21c1",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "f91938098ec71bfe26df1ed7c2e667bd7ad4d41f5eb0b2b6df103d7c8b44a833",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 16,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "PRECISION_NAVIGATION",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "SENSING"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "3214acb0ae01bcdd9c820a03abab043c26b69f38cafcda0fcdc2caa3b41e8966",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "6731a7854a98b464e2e607f96bb32488",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "b194efe81aef466d44e69c2115ded91ad4751a915ef23e56f9ea7ba9f124f862",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 17,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "SENSING",
+      "timestamp": 5.6
+    },
+    {
+      "affected_functions": [
+        "TELEMETRY"
+      ],
+      "attribution": {
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "discriminators": [
+          "ACTUATION/motor_0:actuation.command_path",
+          "ACTUATION/motor_0:actuation.electrical_response",
+          "ACTUATION/motor_0:actuation.mechanical_response",
+          "COMMUNICATION/esc_can:comm.integrity",
+          "COMMUNICATION/esc_can:comm.link_state",
+          "COMMUNICATION/esc_can:comm.loss",
+          "COMMUNICATION/esc_can:comm.ordering",
+          "COMMUNICATION/esc_can:comm.rate",
+          "COMMUNICATION/gnss_serial:comm.integrity",
+          "COMMUNICATION/gnss_serial:comm.link_state",
+          "COMMUNICATION/gnss_serial:comm.loss",
+          "COMMUNICATION/gnss_serial:comm.ordering",
+          "COMMUNICATION/gnss_serial:comm.queue",
+          "COMMUNICATION/gnss_serial:comm.rate",
+          "COMMUNICATION/telemetry_radio:comm.integrity",
+          "COMMUNICATION/telemetry_radio:comm.link_state",
+          "COMMUNICATION/telemetry_radio:comm.loss",
+          "COMMUNICATION/telemetry_radio:comm.ordering",
+          "COMMUNICATION/telemetry_radio:comm.queue",
+          "COMMUNICATION/telemetry_radio:comm.rate",
+          "COMPUTE/cpu:compute.resource_headroom",
+          "COMPUTE/csia:compute.deadline_met",
+          "COMPUTE/csia:compute.process_alive",
+          "COMPUTE/csia:compute.process_producing",
+          "COMPUTE/csia:compute.stability",
+          "COMPUTE/logger:compute.deadline_met",
+          "COMPUTE/logger:compute.process_alive",
+          "COMPUTE/logger:compute.process_producing",
+          "COMPUTE/logger:compute.stability",
+          "COMPUTE/state_estimator:compute.deadline_met",
+          "COMPUTE/state_estimator:compute.process_alive",
+          "COMPUTE/state_estimator:compute.process_producing",
+          "COMPUTE/state_estimator:compute.stability",
+          "SENSOR/source.baro:v1_1.source_health",
+          "SENSOR/source.battery:v1_1.source_health",
+          "SENSOR/source.gps:v1_1.source_health",
+          "SENSOR/source.imu0:v1_1.source_health",
+          "SENSOR/source.imu1:v1_1.source_health",
+          "SENSOR/source.mag:v1_1.source_health",
+          "SENSOR/source.motor_esc:v1_1.source_health",
+          "SENSOR/source.vibration:v1_1.source_health",
+          "TIMING/nav_solution.decision_delay:timing.segment_budget",
+          "TIMING/nav_solution.processing_delay:timing.segment_budget",
+          "TIMING/nav_solution.sensor_slow:timing.rate",
+          "TIMING/nav_solution.transport_delay:timing.segment_budget",
+          "TIMING/nav_solution:timing.clock_consistency",
+          "TIMING/nav_solution:timing.end_to_end",
+          "TIMING/nav_solution:timing.jitter",
+          "TIMING/telemetry_downlink.processing_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink.sensor_slow:timing.rate",
+          "TIMING/telemetry_downlink.transport_delay:timing.segment_budget",
+          "TIMING/telemetry_downlink:timing.clock_consistency",
+          "TIMING/telemetry_downlink:timing.end_to_end",
+          "TIMING/telemetry_downlink:timing.jitter"
+        ],
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ],
+        "verdict": "UNIQUE"
+      },
+      "component": "rail_5v",
+      "content_sha256": "148cc193cda4de04d09d8af2facc4593e0738cf40712aa58ff2b04b373f1a5b8",
+      "context": {
+        "configuration_hash": "9c27c121242b7055d559da081ee1244b",
+        "plugin_manifest_hash": "4bc53bce8b65cda5b294a153efb3f02043e05095e4a71ddb46a3b0127e09018e",
+        "profile": "aircraft",
+        "software_sha": "ecfb0cae5e29f1c6b243713dafa024bde2ccbcae",
+        "v1_1_schema_version": "1.1.0"
+      },
+      "dependencies": [
+        "POWER/battery"
+      ],
+      "domain": "POWER",
+      "event_id": "08b530450258d5bd1853102b997ec440",
+      "event_type": "FUNCTION_STATE_CHANGED",
+      "limiting_domain": "POWER",
+      "new_state": "INELIGIBLE",
+      "previous_event_hash": "3214acb0ae01bcdd9c820a03abab043c26b69f38cafcda0fcdc2caa3b41e8966",
+      "previous_state": "DEGRADED",
+      "reason_codes": [
+        "POWER_RAIL_OUT_OF_TOLERANCE",
+        "POWER_DISTRIBUTION_SUSPECT"
+      ],
+      "sequence": 18,
+      "snapshot": {
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "t": 5.6
+      },
+      "subject": "TELEMETRY",
+      "timestamp": 5.6
+    }
+  ],
+  "head": "148cc193cda4de04d09d8af2facc4593e0738cf40712aa58ff2b04b373f1a5b8",
+  "schema": "csia_v2_ledger"
+}

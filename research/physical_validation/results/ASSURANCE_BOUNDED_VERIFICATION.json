@@ -1,0 +1,148 @@
+{
+  "bounds": {
+    "max_evidence": 6,
+    "max_hypotheses": 4
+  },
+  "cross_check": {
+    "cases_checked": 4096,
+    "failures": [],
+    "note": "Enumerated concretely and run through the ACTUAL firewall, so the Z3 encoding is checked against the implementation rather than against a transcription of it. P1 and P2 live here because a ranking value and a prior do not appear in the encoding at all.",
+    "ranking_or_prior_sensitivities": 0,
+    "semantic_mismatches": 0
+  },
+  "properties": [
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "property": "P1_RANKING_INDEPENDENCE",
+      "result": "NOT_A_SOLVER_QUESTION",
+      "statement": "changing ranking values alone cannot create structural support",
+      "verdict": "STRUCTURAL_BY_CONSTRUCTION",
+      "why_not_encoded": "ranking values do not appear in D(a,b) = (LOW(a) XOR LOW(b)) AND ACTIVE. Encoding an absent variable would yield a vacuous unsat that reads as evidence. Checked instead by --cross-check, which varies the real field through the real firewall."
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "property": "P2_PRIOR_INDEPENDENCE",
+      "result": "NOT_A_SOLVER_QUESTION",
+      "statement": "changing prior values alone cannot create structural support",
+      "verdict": "STRUCTURAL_BY_CONSTRUCTION",
+      "why_not_encoded": "prior values do not appear in D(a,b) = (LOW(a) XOR LOW(b)) AND ACTIVE. Encoding an absent variable would yield a vacuous unsat that reads as evidence. Checked instead by --cross-check, which varies the real field through the real firewall."
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "licensed_statement": "No counterexample exists within the verified bounded domain.",
+      "not_licensed": "a general theorem; nothing here is proved for H or E beyond the stated bounds",
+      "property": "P3_SYMMETRY",
+      "result": "unsat",
+      "statement": "D(a,b) is non-empty iff D(b,a) is non-empty",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "licensed_statement": "No counterexample exists within the verified bounded domain.",
+      "not_licensed": "a general theorem; nothing here is proved for H or E beyond the stated bounds",
+      "property": "P4_IRRELEVANT_EVIDENCE_INDEPENDENCE",
+      "result": "unsat",
+      "statement": "removing a term that does not discriminate a,b cannot change D(a,b)",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "licensed_statement": "No counterexample exists within the verified bounded domain.",
+      "not_licensed": "a general theorem; nothing here is proved for H or E beyond the stated bounds",
+      "property": "P5_ADDITION_MONOTONICITY_PAIR_SPECIFIC",
+      "result": "unsat",
+      "statement": "activating further evidence cannot destroy a pair's existing distinguishability",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "licensed_statement": "No counterexample exists within the verified bounded domain.",
+      "not_licensed": "a general theorem; nothing here is proved for H or E beyond the stated bounds",
+      "property": "P6_SUPPORT_WITNESS_REQUIREMENT",
+      "result": "unsat",
+      "statement": "SUPPORTED_UNIQUE(h) implies an active discriminator against every modeled competitor",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "counterexample": {
+        "active": [
+          "e0",
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5"
+        ],
+        "low": {
+          "h0": [
+            "e0",
+            "e1",
+            "e2",
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "h1": [],
+          "h2": [],
+          "h3": []
+        }
+      },
+      "property": "P7_CONFIGURATION_INVALIDATION_HAZARD_EXISTS",
+      "result": "sat",
+      "statement": "a configuration change that removes a load-bearing discriminator CAN remove support. SAT here is the EXPECTED and desired result: it demonstrates the hazard is real, which is what makes the recomputation rule load-bearing rather than decorative. It is not a falsification of P7.",
+      "verdict": "COUNTEREXAMPLE_FOUND"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "evidence": {
+        "after_state": "NON_IDENTIFIABLE",
+        "before_state": "SUPPORTED_UNIQUE",
+        "certificate_still_current": false,
+        "load_bearing_discriminators": [
+          "e0",
+          "e1",
+          "e2",
+          "e3",
+          "e4",
+          "e5"
+        ],
+        "staleness_reason": "CONFIG_HASH_MISMATCH"
+      },
+      "note": "This row uses the SOLVER'S OWN hazard instance against the real firewall, so it is a statement about CSIA rather than about a formula.",
+      "property": "P7_CONFIGURATION_INVALIDATION",
+      "result": "EXERCISED_AGAINST_IMPLEMENTATION",
+      "statement": "a certificate does not survive a configuration change that removes a load-bearing discriminator",
+      "verdict": "HOLDS"
+    },
+    {
+      "bound_E": 6,
+      "bound_H": 4,
+      "licensed_statement": "No counterexample exists within the verified bounded domain.",
+      "not_licensed": "a general theorem; nothing here is proved for H or E beyond the stated bounds",
+      "property": "P8_EXPIRY",
+      "result": "unsat",
+      "statement": "a witness resting only on terms that have gone inactive cannot remain valid",
+      "verdict": "NO_COUNTEREXAMPLE_IN_BOUNDED_DOMAIN"
+    }
+  ],
+  "schema": "csia.assurance.bounded_verification/1",
+  "solver": "z3 5.1.0",
+  "summary": {
+    "checked_by_solver": 7,
+    "counterexamples": 1,
+    "no_counterexample_in_bounds": 5,
+    "structural_by_construction": 2,
+    "unknown_solver_results": 0
+  },
+  "what_unsat_does_not_license": "a general theorem. Nothing here is proved beyond the stated bounds, and no row may be quoted as one.",
+  "what_unsat_licenses": "No counterexample exists within the verified bounded domain."
+}

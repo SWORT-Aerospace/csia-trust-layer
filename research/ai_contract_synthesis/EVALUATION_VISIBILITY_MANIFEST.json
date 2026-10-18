@@ -1,0 +1,46 @@
+{
+  "artifact": "EVALUATION_VISIBILITY_MANIFEST",
+  "purpose": "Item 11. What each extraction condition was permitted to read, and what it was not.",
+  "honest_limitation": "This is an ORDERING discipline, not an information barrier. The miner is the same model that wrote the reference builder, the metrics and this file, running in one conversation. It cannot unread what is already in its context, and it carries MAVLink knowledge from training. What CAN be enforced, and is, is that candidate contracts were written and hashed before the reference for those cases was constructed, and that a clause with no resolvable citation is marked unsupported however confident the model was. Read every number in this package through that limitation.",
+  "conditions": {
+    "B0_HEURISTIC": {
+      "visible": ["csia adapter/decoder source (regex only)",
+                  "MAVLink message definition XML (attribute lookup only)"],
+      "forbidden": [],
+      "note": "mechanical; no model involved"
+    },
+    "B1_CODE_ONLY": {
+      "visible": ["csia/aircraft/adapters/*.py", "csia/runtime/plugins.py",
+                  "csia/runtime/ulog_source.py", "comments in those files"],
+      "forbidden": ["MAVLink message definition XML (any dialect)",
+                    "ArduPilot or PX4 producer source",
+                    "docs/simulation/CHANNEL_SEMANTICS.yaml",
+                    "SOURCE_AUDITED_REFERENCE/",
+                    "any results JSON from research/evidence_semantics"]
+    },
+    "B2_CODE_AND_DOCS": {
+      "visible": ["everything B1 may see", "MAVLink message definition XML"],
+      "forbidden": ["SOURCE_AUDITED_REFERENCE/"],
+      "CONFOUND": "FATAL FOR THE SENTINEL CLAUSE. The MAVLink schema carries a machine-readable `invalid=` attribute, and the reference for the sentinel clause is built from that same attribute. So B2 and the reference read the same bytes: B2's sentinel accuracy is a reading-comprehension score, not an extraction result, and is NOT reported as evidence of extraction ability. B2 is informative only for the clause kinds the schema is silent about (retention, freshness, merges, downstream consumer)."
+    },
+    "B3_VERIFIER_FEEDBACK": {
+      "visible": ["everything B1 may see",
+                  "the deterministic verifier's factual output on the B1 candidate: which citations failed to resolve, which claimed conditions no executable line tests, which fields no code reads"],
+      "forbidden": ["the reference", "the correct answer in any form"],
+      "revisions_allowed": 1,
+      "note": "Item 16. Exactly one revision. Both the initial and the revised candidate are preserved."
+    }
+  },
+  "leakage_audit": {
+    "enforced_mechanically": [
+      "candidate files are hashed in FREEZE.json and committed before build_reference.py is run",
+      "build_reference.py refuses to run unless FREEZE.json exists and every candidate hash matches",
+      "a test asserts the reference directory contains no file older than the freeze commit"
+    ],
+    "NOT_enforced_and_cannot_be": [
+      "the model's own prior knowledge of MAVLink",
+      "the model's memory of the previous packages in this same conversation",
+      "the fact that one model produced both the predictions and the reference"
+    ]
+  }
+}

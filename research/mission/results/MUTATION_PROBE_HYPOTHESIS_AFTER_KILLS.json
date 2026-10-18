@@ -1,0 +1,203 @@
+{
+  "by_file": {
+    "csia/diagnosis/causal.py": {
+      "killed": 7,
+      "score": 0.636,
+      "survived": 4
+    },
+    "csia/diagnosis/hypothesis.py": {
+      "killed": 13,
+      "score": 0.448,
+      "survived": 16
+    }
+  },
+  "by_kind": {
+    "BOOLEAN": {
+      "killed": 5,
+      "score": 0.833,
+      "survived": 1
+    },
+    "BOOL_OP": {
+      "killed": 7,
+      "score": 0.7,
+      "survived": 3
+    },
+    "COMPARISON": {
+      "killed": 8,
+      "score": 0.348,
+      "survived": 15
+    },
+    "STATE_CONSTANT": {
+      "killed": 0,
+      "score": 0.0,
+      "survived": 1
+    }
+  },
+  "evaluated": 40,
+  "frozen_core_untouched": "the target list contains only csia_mission paths, and the probe runs against a COPY of the tree",
+  "invalid": 0,
+  "killed": 20,
+  "mutation_score": 0.5,
+  "sampled": 40,
+  "schema": "csia.mission.mutation_probe/1",
+  "seed": 20260907,
+  "survived": 20,
+  "surviving_mutants": [
+    {
+      "detail": "Or -> And",
+      "file": "csia/diagnosis/causal.py",
+      "index": 13,
+      "kind": "BOOL_OP",
+      "line": 204
+    },
+    {
+      "detail": "In -> NotIn",
+      "file": "csia/diagnosis/causal.py",
+      "index": 14,
+      "kind": "COMPARISON",
+      "line": 205
+    },
+    {
+      "detail": "Lt -> LtE",
+      "file": "csia/diagnosis/causal.py",
+      "index": 21,
+      "kind": "COMPARISON",
+      "line": 210
+    },
+    {
+      "detail": "Gt -> GtE",
+      "file": "csia/diagnosis/causal.py",
+      "index": 29,
+      "kind": "COMPARISON",
+      "line": 274
+    },
+    {
+      "detail": "UNKNOWN -> NOT_EVALUABLE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 0,
+      "kind": "STATE_CONSTANT",
+      "line": 68
+    },
+    {
+      "detail": "True -> False",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 1,
+      "kind": "BOOLEAN",
+      "line": 98
+    },
+    {
+      "detail": "GtE -> Gt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 28,
+      "kind": "COMPARISON",
+      "line": 354
+    },
+    {
+      "detail": "Gt -> GtE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 29,
+      "kind": "COMPARISON",
+      "line": 356
+    },
+    {
+      "detail": "Lt -> LtE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 30,
+      "kind": "COMPARISON",
+      "line": 358
+    },
+    {
+      "detail": "GtE -> Gt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 32,
+      "kind": "COMPARISON",
+      "line": 365
+    },
+    {
+      "detail": "LtE -> Lt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 36,
+      "kind": "COMPARISON",
+      "line": 370
+    },
+    {
+      "detail": "GtE -> Gt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 44,
+      "kind": "COMPARISON",
+      "line": 422
+    },
+    {
+      "detail": "Lt -> LtE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 48,
+      "kind": "COMPARISON",
+      "line": 436
+    },
+    {
+      "detail": "GtE -> Gt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 52,
+      "kind": "COMPARISON",
+      "line": 448
+    },
+    {
+      "detail": "Eq -> NotEq",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 56,
+      "kind": "COMPARISON",
+      "line": 455
+    },
+    {
+      "detail": "GtE -> Gt",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 64,
+      "kind": "COMPARISON",
+      "line": 480
+    },
+    {
+      "detail": "And -> Or",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 66,
+      "kind": "BOOL_OP",
+      "line": 480
+    },
+    {
+      "detail": "Gt -> GtE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 72,
+      "kind": "COMPARISON",
+      "line": 541
+    },
+    {
+      "detail": "And -> Or",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 78,
+      "kind": "BOOL_OP",
+      "line": 545
+    },
+    {
+      "detail": "Gt -> GtE",
+      "file": "csia/diagnosis/hypothesis.py",
+      "index": 95,
+      "kind": "COMPARISON",
+      "line": 636
+    }
+  ],
+  "targets": [
+    "csia/diagnosis/hypothesis.py",
+    "csia/diagnosis/causal.py"
+  ],
+  "test_subset": [
+    "tests/test_hypothesis.py",
+    "tests/test_diagnosis.py",
+    "tests/test_diagnosis_input_guard.py",
+    "tests/test_v1_1_golden.py",
+    "tests/test_v1_1_support.py",
+    "tests/test_frozen_core_survivor_kills.py"
+  ],
+  "total_mutation_sites": 126,
+  "what_it_does_not_mean": "that the code is right. A well-tested wrong definition scores perfectly. This bounds test sensitivity, not correctness.",
+  "what_the_score_means": "the fraction of injected defects that at least one test noticed. A survivor is a line the tests EXECUTE and do not CONSTRAIN.",
+  "why_it_is_a_lower_bound": "EQUIVALENT MUTANTS ARE NOT DETECTED. Some survivors change no behaviour at all and cannot be killed by any test, so they count against the score without being real gaps."
+}

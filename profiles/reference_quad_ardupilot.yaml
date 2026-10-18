@@ -1,0 +1,91 @@
+%YAML 1.2
+---
+# Reference vehicle profile — ArduPilot quadrotor.
+#
+# This is the file a user copies to plug CSIA into an ArduPilot airframe. It
+# declares PLUMBING ONLY. Every rate below is transcribed from the frozen
+# channel contract (docs/simulation/CHANNEL_SEMANTICS.yaml, contract_version 2,
+# producer_ardupilot.rate_hz) rather than chosen here -- a profile that
+# invented its own rates would move the adapter's staleness limits, which is
+# a diagnostic effect wearing plumbing's clothes.
+#
+# A profile MAY NOT set a threshold, weight, prior, signature, gate
+# definition or smoothing constant. csia/aircraft/profile.py rejects those
+# keys by name at load time. See that module for why the rejection is
+# load-bearing rather than defensive.
+#
+# AIRFRAME GEOMETRY IS DELIBERATELY ABSENT from anything the core reads. The
+# `airframe` string below is a label for humans and trial manifests. The
+# diagnostic relations span SENSORS, not motors, so quad/hexa/octo/VTOL all
+# work as long as the declared channels arrive.
+
+vehicle_profile:
+  id: reference_quad_ardupilot
+  airframe: quad_x
+  description: >-
+    Reference ArduPilot multirotor with dual IMU, magnetometer, barometer,
+    GNSS, battery monitor and ESC telemetry. The channel set matches what the
+    ArduPilot adapter's semantic contract already qualifies; nothing here
+    asks for a channel the adapter cannot produce.
+
+autopilot:
+  family: ardupilot
+  # Left unpinned on purpose. The orchestrator records the version it
+  # actually observed into the trial manifest; asserting one here would let a
+  # profile disagree with the vehicle it is describing.
+  version_observed_at_runtime: true
+
+transport:
+  mavlink:
+    # Defaults for a companion computer on the telemetry port. Override per
+    # vehicle. `port` accepts a MAVLink connection string, not only a serial
+    # device, so UDP from a SITL instance works unchanged.
+    port: "udp:0.0.0.0:14550"
+    baud: 921600
+    sysid: 1
+    # READ-ONLY IS THE DEFAULT AND IS ENFORCED ELSEWHERE. The shadow runner
+    # denies the transmit surface structurally (csia/deploy/shadow.py); this
+    # flag documents intent and does not grant anything.
+    transmit: false
+
+streams:
+  imu0.accel:            {nominal_rate_hz: 25}
+  imu0.gyro:             {nominal_rate_hz: 25}
+  imu1.accel:            {nominal_rate_hz: 25}
+  imu1.gyro:             {nominal_rate_hz: 25}
+  mag.field_ut:          {nominal_rate_hz: 25}
+  baro.altitude:         {nominal_rate_hz: 10}
+  baro.temp_c:           {nominal_rate_hz: 10}
+  gnss.position:         {nominal_rate_hz: 5}
+  gnss.velocity:         {nominal_rate_hz: 5}
+  gnss.velocity_z:       {nominal_rate_hz: 5}
+  battery.voltage:       {nominal_rate_hz: 10}
+  battery.current:       {nominal_rate_hz: 10}
+  esc.rpm:               {nominal_rate_hz: 10}
+  esc.current:           {nominal_rate_hz: 10}
+  vibration.rms:         {nominal_rate_hz: 10}
+  vehicle_status.armed:  {nominal_rate_hz: 1}
+  estimator.variances:   {nominal_rate_hz: 5}
+  estimator.flight_mode: {nominal_rate_hz: 1}
+
+# What the vehicle is being asked to do. Advisory metadata for the trial
+# manifest and the eligibility report; the core derives function availability
+# from CHANNELS, not from this list, so a lie here cannot manufacture health.
+functions:
+  position_hold: expected
+  precision_navigation: expected
+  inertial_continuation: expected
+
+experiment:
+  fault_injector:
+    enabled: false
+    # When a physical rig is attached this becomes true and the block below
+    # names which physical channel maps to which canonical channel. Until
+    # then it stays false and the orchestrator refuses to arm.
+    channels: {}
+
+safety:
+  # Consumed by the flight-test preregistration checker, not by the core.
+  shadow_only: true
+  props_removed_for_bench: true
+  independent_pilot_authority_required: true

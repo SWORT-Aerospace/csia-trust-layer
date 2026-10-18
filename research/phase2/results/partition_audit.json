@@ -1,0 +1,239 @@
+{
+ "decision": {
+  "declared_before_any_candidate_tuning": true,
+  "development_domain_for_P1": {
+   "flight_spec": 0,
+   "rationale": "already thoroughly observed, so nothing is lost by tuning here. All B2/B3/B4 parameter search happens on this spec and nowhere else."
+  },
+  "held_out_validation_set_for_P1": {
+   "flight_spec": 3,
+   "home": "55.953251,-3.188267,47,180",
+   "rule": "touched exactly once, after parameters are frozen. No parameter may be changed after it is read.",
+   "status_at_declaration": "NEVER_FLOWN_ON_MODERN_TARGET"
+  },
+  "reserved_untouched": {
+   "flight_specs": [
+    1,
+    2,
+    4,
+    5
+   ],
+   "rule": "not used by P1 at all. Kept for E2 and for any later validation that needs a fresh set."
+  }
+ },
+ "declared_partition": {
+  "development": {
+   "description": "parameter and structure search happens ONLY here",
+   "flight_specs": [
+    0,
+    1,
+    2
+   ],
+   "slews_s": [
+    0,
+    4,
+    20
+   ]
+  },
+  "protected": {
+   "description": "Touched once, after parameters are frozen. Repeated optimisation against this partition is forbidden (section 9).",
+   "flight_specs": [
+    3,
+    4,
+    5
+   ],
+   "slews_s": [
+    0,
+    4,
+    20,
+    60,
+    120
+   ],
+   "status": "UNTOUCHED"
+  }
+ },
+ "declared_status_in_registry": "UNTOUCHED",
+ "findings": {
+  "development_slews_observed": [
+   20
+  ],
+  "flight_specs_flown_on_modern_target": [
+   0
+  ],
+  "flight_specs_never_flown_on_modern_target": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "partition_was_defined_for_a_different_rig": "The declared partition was written against ArduCopter 3.3. Every Phase-II flight is on 4.8, where two graph nodes are live that were dead on 3.3 and where the ESC channel is a stub. A partition defined on one rig does not transfer to another by assumption.",
+  "protected_partition_status_as_declared": "UNTOUCHED",
+  "protected_partition_status_as_measured": "CONTAMINATED_ON_THE_SLEW_AXIS",
+  "protected_slews_observed": [
+   60,
+   120
+  ],
+  "slews_flown_outside_the_declared_partition_entirely": [
+   240
+  ],
+  "wind_factor_evidence": "results/p1_wind_isolated.json: attitude lean 0.183 rad at SIM_WIND_SPD=0 rises to 0.471 rad at 15 m/s and 0.522 rad at 25 m/s, with altitude held at 18.4 m in every stage and the null stage returning to 0.189 rad. WP-C7 measured this factor as COSMETIC on ArduCopter 3.3, so the flight-spec partition carries a real second factor on the modern target that it did not carry on the legacy one.",
+  "wind_factor_status": "VERIFIED_ACTIVE_ON_4.8"
+ },
+ "flight_spec_cells": [
+  {
+   "classification": "ALREADY_OBSERVED",
+   "declared": "development",
+   "flight_spec": 0,
+   "flown_on_modern_target": true,
+   "home": "47.397742,8.545594,488,0",
+   "why": "every Phase-II flight to date used this home; results inspected repeatedly across E1 run 1, run 2, the V6 diagnosis, R10, P0.5 and P1 discovery"
+  },
+  {
+   "classification": "DEVELOPMENT",
+   "declared": "development",
+   "flight_spec": 1,
+   "flown_on_modern_target": false,
+   "home": "-35.363261,149.165230,584,0",
+   "why": "declared for search; not yet flown on the modern target"
+  },
+  {
+   "classification": "DEVELOPMENT",
+   "declared": "development",
+   "flight_spec": 2,
+   "flown_on_modern_target": false,
+   "home": "37.413360,-121.996500,10,90",
+   "why": "declared for search; not yet flown on the modern target"
+  },
+  {
+   "classification": "PROTECTED_UNTOUCHED",
+   "declared": "protected",
+   "flight_spec": 3,
+   "flown_on_modern_target": false,
+   "home": "55.953251,-3.188267,47,180",
+   "why": "never flown on the modern target, never inspected, no artifact references it"
+  },
+  {
+   "classification": "PROTECTED_UNTOUCHED",
+   "declared": "protected",
+   "flight_spec": 4,
+   "flown_on_modern_target": false,
+   "home": "-22.906847,-43.172896,15,270",
+   "why": "never flown on the modern target, never inspected, no artifact references it"
+  },
+  {
+   "classification": "PROTECTED_UNTOUCHED",
+   "declared": "protected",
+   "flight_spec": 5,
+   "flown_on_modern_target": false,
+   "home": "64.128288,-21.827774,61,45",
+   "why": "never flown on the modern target, never inspected, no artifact references it"
+  }
+ ],
+ "phase2_artifacts_and_the_spec_they_used": {
+  "E1 run 1": {
+   "artifact": "results/e1_modern_run1_defective_instrument.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "E1 run 2": {
+   "artifact": "results/e1_modern.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "P0.5 contract audit": {
+   "artifact": "results/power_thrust_contract.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "P1 injection discovery": {
+   "artifact": "results/p1_injection_discovery.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "P1 isolated wind check": {
+   "artifact": "results/p1_wind_isolated.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "P1 vibration/wind probe": {
+   "artifact": "results/p1_vib_wind_probe.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "R10 attribution intervention": {
+   "artifact": "results/r10_attribution.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "R10 investigation": {
+   "artifact": "results/r10_modern.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  },
+  "V6 instrument diagnosis": {
+   "artifact": "results/v6_diagnosis.json",
+   "flight_spec": 0,
+   "home": "47.397742,8.545594,488,0"
+  }
+ },
+ "purpose": "establish what has actually been inspected before any baseline is tuned",
+ "slew_cells": [
+  {
+   "classification": "DEVELOPMENT",
+   "declared": "development",
+   "observed": false,
+   "observed_in": [],
+   "slew_s": 0
+  },
+  {
+   "classification": "DEVELOPMENT",
+   "declared": "development",
+   "observed": false,
+   "observed_in": [],
+   "slew_s": 4
+  },
+  {
+   "classification": "ALREADY_OBSERVED",
+   "declared": "development",
+   "observed": true,
+   "observed_in": [
+    "results/e1_modern.json",
+    "results/e1_modern_run1_defective_instrument.json",
+    "results/v6_diagnosis.json"
+   ],
+   "slew_s": 20
+  },
+  {
+   "classification": "CONTAMINATED",
+   "declared": "protected",
+   "observed": true,
+   "observed_in": [
+    "results/e1_modern.json",
+    "results/e1_modern_run1_defective_instrument.json",
+    "results/v6_diagnosis.json"
+   ],
+   "slew_s": 60
+  },
+  {
+   "classification": "CONTAMINATED",
+   "declared": "protected",
+   "observed": true,
+   "observed_in": [
+    "results/e1_modern.json",
+    "results/e1_modern_run1_defective_instrument.json"
+   ],
+   "slew_s": 120
+  },
+  {
+   "classification": "ALREADY_OBSERVED",
+   "declared": "undeclared",
+   "observed": true,
+   "observed_in": [
+    "results/e1_modern.json",
+    "results/e1_modern_run1_defective_instrument.json"
+   ],
+   "slew_s": 240
+  }
+ ]
+}

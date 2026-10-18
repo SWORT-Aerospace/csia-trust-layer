@@ -1,0 +1,193 @@
+{
+ "NO_PROPERTY_WEAKENED": true,
+ "P5_prime": {
+  "P5_prime_holds": true,
+  "attribution_differs": 0,
+  "evaluated": 376,
+  "examples": [
+   [
+    "CHANNEL_LINK_NOMINAL",
+    "MS_A2_COMMUNICATION_DELAY",
+    "OUTPUT_STALE|nav_solution"
+   ],
+   [
+    "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "MS_A1_SENSOR_DELAY",
+    "POSITION_UNAVAILABLE|POSITION_HOLD"
+   ],
+   [
+    "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "MS_A1_SENSOR_DELAY",
+    "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
+   ],
+   [
+    "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "MS_A2_COMMUNICATION_DELAY",
+    "POSITION_UNAVAILABLE|POSITION_HOLD"
+   ],
+   [
+    "NO_TIMING_SEGMENT_OVER_BUDGET",
+    "MS_A2_COMMUNICATION_DELAY",
+    "POSITION_UNAVAILABLE|PRECISION_NAVIGATION"
+   ]
+  ],
+  "identical": 2335,
+  "injections": 1144,
+  "more_certain_than_none": 0,
+  "reported": 376,
+  "withheld_names_the_fault": 5,
+  "withheld_only": 5
+ },
+ "files": {
+  "tests/test_semantic_core_2_1.py": {
+   "as_is": {
+    "exit": 0,
+    "failed": [],
+    "passed": 50,
+    "summary": "50 passed in 19.47s"
+   },
+   "fail_only_under_revised": [
+    {
+     "expected": true,
+     "property_test": true,
+     "superseded_by_R1": true,
+     "test": "test_P5_every_injected_fault_is_reported_where_it_is_evaluated",
+     "why": "P5 has two clauses: (a) a fault is reported wherever the predicate is evaluated; (b) a fault decides exactly what a None return decides. R-1 is, by definition, the rule that a FAULTED refuter of the supported hypothesis withholds it while a merely UNMEASURED one does not, so (b) cannot hold as an equality. Replacement P5': (a) unchanged, and (b') a fault never decides anything MORE certain than a None return: every difference is a SUPPORTED withheld as WITHHELD_PREDICATE_FAULT with the same survivors, and attribution is identical"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_R9B_the_fault_is_observable_and_the_elimination_rule_is_unchanged",
+     "why": "pins 2.1.0's policy A (a faulted refuter leaves SUPPORTED standing); R-1 withholds it, which is the revision"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_the_versions_are_declared_and_2_0_0_is_the_historical_one",
+     "why": "pins Corrections().ids() to the six 2.1.0 corrections; under the plugin Corrections() carries the three revisions"
+    }
+   ],
+   "revised_default": {
+    "exit": 1,
+    "failed": [
+     "test_P5_every_injected_fault_is_reported_where_it_is_evaluated",
+     "test_R9B_the_fault_is_observable_and_the_elimination_rule_is_unchanged",
+     "test_the_versions_are_declared_and_2_0_0_is_the_historical_one"
+    ],
+    "passed": 47,
+    "summary": "3 failed, 47 passed in 17.35s"
+   }
+  },
+  "tests/test_semantic_core_2_1_revision.py": {
+   "as_is": {
+    "exit": 0,
+    "failed": [],
+    "passed": 75,
+    "summary": "75 passed in 9.68s"
+   },
+   "fail_only_under_revised": [
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_a_revised_result_says_it_is_2_1_1_and_a_default_one_2_1_0",
+     "why": "expects the default core to report 2.1.0"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_pacing_given_to_a_2_1_0_core_is_ignored",
+     "why": "builds a 'default' core and expects it to be 2.1.0"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_r1_a_failed_refuter_of_the_supported_hypothesis_withholds_it",
+     "why": "uses Corrections() as its 2.1.0 control"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_r1_a_material_refuter_failure_never_creates_a_supported",
+     "why": "uses Corrections() as its 2.1.0 control"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_r1_the_168_fault_created_supported_are_withheld_on_real_ticks",
+     "why": "uses Corrections() as its 2.1.0 control"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_r3_epochs_are_ignored_entirely_by_a_2_1_0_core",
+     "why": "uses Corrections() as its 2.1.0 control"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_the_revisions_are_off_by_default_and_2_1_0_is_unchanged",
+     "why": "pins that Corrections() is 2.1.0; the plugin changes exactly that"
+    }
+   ],
+   "revised_default": {
+    "exit": 1,
+    "failed": [
+     "test_a_revised_result_says_it_is_2_1_1_and_a_default_one_2_1_0",
+     "test_pacing_given_to_a_2_1_0_core_is_ignored",
+     "test_r1_a_failed_refuter_of_the_supported_hypothesis_withholds_it",
+     "test_r1_a_material_refuter_failure_never_creates_a_supported",
+     "test_r1_the_168_fault_created_supported_are_withheld_on_real_ticks",
+     "test_r3_epochs_are_ignored_entirely_by_a_2_1_0_core",
+     "test_the_revisions_are_off_by_default_and_2_1_0_is_unchanged"
+    ],
+    "passed": 67,
+    "summary": "8 failed, 67 passed in 10.54s"
+   }
+  },
+  "tests/test_semantic_core_2_1_shadow.py": {
+   "as_is": {
+    "exit": 0,
+    "failed": [],
+    "passed": 51,
+    "summary": "51 passed in 3.60s"
+   },
+   "fail_only_under_revised": [
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_g2_the_rejected_repairs_restore_the_wrong_process_stall",
+     "why": "pins that under 2.1.0 the GNSS repairs restore the wrong process_stall; under R-2 they cannot, which is the revision"
+    },
+    {
+     "expected": true,
+     "property_test": false,
+     "superseded_by_R1": false,
+     "test": "test_policy_b_withholds_the_supported_a_faulted_refuter_left_standing",
+     "why": "pins that 2.1.0 (policy A) leaves the fault-created SUPPORTED; R-1 withholds it"
+    }
+   ],
+   "revised_default": {
+    "exit": 1,
+    "failed": [
+     "test_g2_the_rejected_repairs_restore_the_wrong_process_stall",
+     "test_policy_b_withholds_the_supported_a_faulted_refuter_left_standing"
+    ],
+    "passed": 47,
+    "summary": "4 failed, 47 passed in 3.37s"
+   }
+  }
+ },
+ "harness": "semantic_core_2_1_revision_property_rerun",
+ "property_tests_weakened": [],
+ "unexpected_failures": []
+}

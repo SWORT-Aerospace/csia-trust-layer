@@ -1,0 +1,763 @@
+{
+ "R13": "FAIL: 6 ticks over budget",
+ "adapter_counters": {
+  "mapped": 160653,
+  "messages": 211868,
+  "rejected_sentinel": 0,
+  "time_reanchors": 0,
+  "unmapped": 136055
+ },
+ "command_authority": {
+  "checked": 21,
+  "mode": "SHADOW",
+  "probes": {
+   "arducopter_arm": "DENIED",
+   "arducopter_disarm": "DENIED",
+   "mav": "DENIED",
+   "mav.command_long_send": "DENIED",
+   "mav.manual_control_send": "DENIED",
+   "mav.param_set_send": "DENIED",
+   "mav.rc_channels_override_send": "DENIED",
+   "mav.set_actuator_control_target_send": "DENIED",
+   "mav.set_mode_send": "DENIED",
+   "motors_armed_wait": "DENIED",
+   "param_set_send": "DENIED",
+   "reboot_autopilot": "DENIED",
+   "send": "DENIED",
+   "send_mavlink": "DENIED",
+   "set_mode": "DENIED",
+   "set_mode_apm": "DENIED",
+   "set_mode_px4": "DENIED",
+   "set_relay": "DENIED",
+   "set_servo": "DENIED",
+   "waypoint_clear_all_send": "DENIED",
+   "write": "DENIED"
+  },
+  "result": "NO_COMMAND_PATH_REACHABLE",
+  "write_half_closed": true,
+  "write_half_state": "CLOSED_ENOTCONN"
+ },
+ "flight_id": "20260825T030440Z-2938c448",
+ "host_noise_control": {
+  "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+  "concurrent_with_measurement": false,
+  "iterations_per_tick": 18133,
+  "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+  "tail_is_measurable_on_this_host": true,
+  "target_us": 1043.86,
+  "trials": [
+   {
+    "budget_us": 2000.0,
+    "max_us": 1944.4,
+    "median_us": 1061.3,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1185.0,
+    "p99_us": 1660.6
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1818.1,
+    "median_us": 1066.9,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1203.5,
+    "p99_us": 1515.1
+   },
+   {
+    "budget_us": 2000.0,
+    "max_us": 1657.2,
+    "median_us": 1059.4,
+    "n": 1501,
+    "over_budget": 0,
+    "p95_us": 1169.7,
+    "p99_us": 1382.9
+   }
+  ],
+  "worst_trial": {
+   "budget_us": 2000.0,
+   "max_us": 1944.4,
+   "median_us": 1061.3,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 1185.0,
+   "p99_us": 1660.6
+  }
+ },
+ "injection": {
+  "arm": "RAMP",
+  "at_s": 20.0,
+  "before": 0.0,
+  "commanded_final": 0.0004496608029593653,
+  "confirmed": true,
+  "kind": "gps_glitch",
+  "metres": 50.0,
+  "metres_per_deg_lat": 111194.92664455873,
+  "param": "SIM_GPS1_GLTCH_X",
+  "param_type": "REAL32",
+  "prereg": "research/v1_1/CURRENT_STACK_REPLICATION.md",
+  "prereg_blob": "0e186117e2dcc014862872934768e06e0a195592",
+  "ramp_s": 20.0,
+  "readback": 0.00044966081622987986,
+  "rule": "RULE B -- the intermediate quantity is the reported gnss.position offset with fix type and satellite count unchanged and gvalid still 1, not the write",
+  "schedule": [
+   {
+    "metres": 0.5,
+    "param_value": 4.496608029593653e-06,
+    "t_rel": 22.1688
+   },
+   {
+    "metres": 1.0,
+    "param_value": 8.993216059187306e-06,
+    "t_rel": 22.3703
+   },
+   {
+    "metres": 1.5,
+    "param_value": 1.3489824088780959e-05,
+    "t_rel": 22.5688
+   },
+   {
+    "metres": 2.0,
+    "param_value": 1.798643211837461e-05,
+    "t_rel": 22.7689
+   },
+   {
+    "metres": 2.5,
+    "param_value": 2.2483040147968264e-05,
+    "t_rel": 22.9702
+   },
+   {
+    "metres": 3.0,
+    "param_value": 2.6979648177561917e-05,
+    "t_rel": 23.1689
+   },
+   {
+    "metres": 3.5,
+    "param_value": 3.147625620715557e-05,
+    "t_rel": 23.3689
+   },
+   {
+    "metres": 4.0,
+    "param_value": 3.597286423674922e-05,
+    "t_rel": 23.5688
+   },
+   {
+    "metres": 4.5,
+    "param_value": 4.0469472266342876e-05,
+    "t_rel": 23.7688
+   },
+   {
+    "metres": 5.0,
+    "param_value": 4.496608029593653e-05,
+    "t_rel": 23.9688
+   },
+   {
+    "metres": 5.5,
+    "param_value": 4.946268832553018e-05,
+    "t_rel": 24.1688
+   },
+   {
+    "metres": 6.0,
+    "param_value": 5.3959296355123834e-05,
+    "t_rel": 24.3689
+   },
+   {
+    "metres": 6.5,
+    "param_value": 5.845590438471749e-05,
+    "t_rel": 24.57
+   },
+   {
+    "metres": 7.0,
+    "param_value": 6.295251241431114e-05,
+    "t_rel": 24.7688
+   },
+   {
+    "metres": 7.5,
+    "param_value": 6.744912044390479e-05,
+    "t_rel": 24.9688
+   },
+   {
+    "metres": 8.0,
+    "param_value": 7.194572847349845e-05,
+    "t_rel": 25.1689
+   },
+   {
+    "metres": 8.5,
+    "param_value": 7.64423365030921e-05,
+    "t_rel": 25.3689
+   },
+   {
+    "metres": 9.0,
+    "param_value": 8.093894453268575e-05,
+    "t_rel": 25.5688
+   },
+   {
+    "metres": 9.5,
+    "param_value": 8.54355525622794e-05,
+    "t_rel": 25.7689
+   },
+   {
+    "metres": 10.0,
+    "param_value": 8.993216059187306e-05,
+    "t_rel": 25.9721
+   },
+   {
+    "metres": 10.5,
+    "param_value": 9.442876862146671e-05,
+    "t_rel": 26.1697
+   },
+   {
+    "metres": 11.0,
+    "param_value": 9.892537665106036e-05,
+    "t_rel": 26.3714
+   },
+   {
+    "metres": 11.5,
+    "param_value": 0.00010342198468065402,
+    "t_rel": 26.5689
+   },
+   {
+    "metres": 12.0,
+    "param_value": 0.00010791859271024767,
+    "t_rel": 26.7697
+   },
+   {
+    "metres": 12.5,
+    "param_value": 0.00011241520073984132,
+    "t_rel": 26.9689
+   },
+   {
+    "metres": 13.0,
+    "param_value": 0.00011691180876943497,
+    "t_rel": 27.1689
+   },
+   {
+    "metres": 13.5,
+    "param_value": 0.00012140841679902863,
+    "t_rel": 27.3689
+   },
+   {
+    "metres": 14.0,
+    "param_value": 0.00012590502482862228,
+    "t_rel": 27.569
+   },
+   {
+    "metres": 14.5,
+    "param_value": 0.00013040163285821593,
+    "t_rel": 27.7688
+   },
+   {
+    "metres": 15.0,
+    "param_value": 0.00013489824088780959,
+    "t_rel": 27.9688
+   },
+   {
+    "metres": 15.5,
+    "param_value": 0.00013939484891740324,
+    "t_rel": 28.1688
+   },
+   {
+    "metres": 16.0,
+    "param_value": 0.0001438914569469969,
+    "t_rel": 28.3688
+   },
+   {
+    "metres": 16.5,
+    "param_value": 0.00014838806497659054,
+    "t_rel": 28.5688
+   },
+   {
+    "metres": 17.0,
+    "param_value": 0.0001528846730061842,
+    "t_rel": 28.7698
+   },
+   {
+    "metres": 17.5,
+    "param_value": 0.00015738128103577785,
+    "t_rel": 28.9688
+   },
+   {
+    "metres": 18.0,
+    "param_value": 0.0001618778890653715,
+    "t_rel": 29.1688
+   },
+   {
+    "metres": 18.5,
+    "param_value": 0.00016637449709496516,
+    "t_rel": 29.3698
+   },
+   {
+    "metres": 19.0,
+    "param_value": 0.0001708711051245588,
+    "t_rel": 29.5689
+   },
+   {
+    "metres": 19.5,
+    "param_value": 0.00017536771315415246,
+    "t_rel": 29.7689
+   },
+   {
+    "metres": 20.0,
+    "param_value": 0.00017986432118374611,
+    "t_rel": 29.9689
+   },
+   {
+    "metres": 20.5,
+    "param_value": 0.00018436092921333977,
+    "t_rel": 30.1688
+   },
+   {
+    "metres": 21.0,
+    "param_value": 0.00018885753724293342,
+    "t_rel": 30.3688
+   },
+   {
+    "metres": 21.5,
+    "param_value": 0.00019335414527252707,
+    "t_rel": 30.5689
+   },
+   {
+    "metres": 22.0,
+    "param_value": 0.00019785075330212073,
+    "t_rel": 30.7689
+   },
+   {
+    "metres": 22.5,
+    "param_value": 0.00020234736133171438,
+    "t_rel": 30.9688
+   },
+   {
+    "metres": 23.0,
+    "param_value": 0.00020684396936130803,
+    "t_rel": 31.1688
+   },
+   {
+    "metres": 23.5,
+    "param_value": 0.00021134057739090168,
+    "t_rel": 31.3688
+   },
+   {
+    "metres": 24.0,
+    "param_value": 0.00021583718542049534,
+    "t_rel": 31.5688
+   },
+   {
+    "metres": 24.5,
+    "param_value": 0.000220333793450089,
+    "t_rel": 31.7688
+   },
+   {
+    "metres": 25.0,
+    "param_value": 0.00022483040147968264,
+    "t_rel": 31.9689
+   },
+   {
+    "metres": 25.5,
+    "param_value": 0.0002293270095092763,
+    "t_rel": 32.1689
+   },
+   {
+    "metres": 26.0,
+    "param_value": 0.00023382361753886995,
+    "t_rel": 32.3689
+   },
+   {
+    "metres": 26.5,
+    "param_value": 0.0002383202255684636,
+    "t_rel": 32.5689
+   },
+   {
+    "metres": 27.0,
+    "param_value": 0.00024281683359805725,
+    "t_rel": 32.7688
+   },
+   {
+    "metres": 27.5,
+    "param_value": 0.0002473134416276509,
+    "t_rel": 32.9688
+   },
+   {
+    "metres": 28.0,
+    "param_value": 0.00025181004965724456,
+    "t_rel": 33.1689
+   },
+   {
+    "metres": 28.5,
+    "param_value": 0.00025630665768683824,
+    "t_rel": 33.3689
+   },
+   {
+    "metres": 29.0,
+    "param_value": 0.00026080326571643187,
+    "t_rel": 33.5689
+   },
+   {
+    "metres": 29.5,
+    "param_value": 0.0002652998737460255,
+    "t_rel": 33.7698
+   },
+   {
+    "metres": 30.0,
+    "param_value": 0.00026979648177561917,
+    "t_rel": 33.9705
+   },
+   {
+    "metres": 30.5,
+    "param_value": 0.00027429308980521285,
+    "t_rel": 34.1688
+   },
+   {
+    "metres": 31.0,
+    "param_value": 0.0002787896978348065,
+    "t_rel": 34.3688
+   },
+   {
+    "metres": 31.5,
+    "param_value": 0.0002832863058644001,
+    "t_rel": 34.5689
+   },
+   {
+    "metres": 32.0,
+    "param_value": 0.0002877829138939938,
+    "t_rel": 34.7689
+   },
+   {
+    "metres": 32.5,
+    "param_value": 0.00029227952192358746,
+    "t_rel": 34.9688
+   },
+   {
+    "metres": 33.0,
+    "param_value": 0.0002967761299531811,
+    "t_rel": 35.1689
+   },
+   {
+    "metres": 33.5,
+    "param_value": 0.0003012727379827747,
+    "t_rel": 35.3689
+   },
+   {
+    "metres": 34.0,
+    "param_value": 0.0003057693460123684,
+    "t_rel": 35.5689
+   },
+   {
+    "metres": 34.5,
+    "param_value": 0.0003102659540419621,
+    "t_rel": 35.7689
+   },
+   {
+    "metres": 35.0,
+    "param_value": 0.0003147625620715557,
+    "t_rel": 35.9689
+   },
+   {
+    "metres": 35.5,
+    "param_value": 0.0003192591701011493,
+    "t_rel": 36.1688
+   },
+   {
+    "metres": 36.0,
+    "param_value": 0.000323755778130743,
+    "t_rel": 36.3698
+   },
+   {
+    "metres": 36.5,
+    "param_value": 0.0003282523861603367,
+    "t_rel": 36.5689
+   },
+   {
+    "metres": 37.0,
+    "param_value": 0.0003327489941899303,
+    "t_rel": 36.7689
+   },
+   {
+    "metres": 37.5,
+    "param_value": 0.00033724560221952394,
+    "t_rel": 36.9688
+   },
+   {
+    "metres": 38.0,
+    "param_value": 0.0003417422102491176,
+    "t_rel": 37.1697
+   },
+   {
+    "metres": 38.5,
+    "param_value": 0.0003462388182787113,
+    "t_rel": 37.3689
+   },
+   {
+    "metres": 39.0,
+    "param_value": 0.0003507354263083049,
+    "t_rel": 37.5689
+   },
+   {
+    "metres": 39.5,
+    "param_value": 0.00035523203433789855,
+    "t_rel": 37.7688
+   },
+   {
+    "metres": 40.0,
+    "param_value": 0.00035972864236749223,
+    "t_rel": 37.9689
+   },
+   {
+    "metres": 40.5,
+    "param_value": 0.0003642252503970859,
+    "t_rel": 38.1688
+   },
+   {
+    "metres": 41.0,
+    "param_value": 0.00036872185842667953,
+    "t_rel": 38.369
+   },
+   {
+    "metres": 41.5,
+    "param_value": 0.00037321846645627316,
+    "t_rel": 38.5688
+   },
+   {
+    "metres": 42.0,
+    "param_value": 0.00037771507448586684,
+    "t_rel": 38.769
+   },
+   {
+    "metres": 42.5,
+    "param_value": 0.0003822116825154605,
+    "t_rel": 38.9688
+   },
+   {
+    "metres": 43.0,
+    "param_value": 0.00038670829054505415,
+    "t_rel": 39.1705
+   },
+   {
+    "metres": 43.5,
+    "param_value": 0.00039120489857464777,
+    "t_rel": 39.3688
+   },
+   {
+    "metres": 44.0,
+    "param_value": 0.00039570150660424145,
+    "t_rel": 39.5689
+   },
+   {
+    "metres": 44.5,
+    "param_value": 0.00040019811463383513,
+    "t_rel": 39.7697
+   },
+   {
+    "metres": 45.0,
+    "param_value": 0.00040469472266342876,
+    "t_rel": 39.9688
+   },
+   {
+    "metres": 45.5,
+    "param_value": 0.0004091913306930224,
+    "t_rel": 40.1689
+   },
+   {
+    "metres": 46.0,
+    "param_value": 0.00041368793872261606,
+    "t_rel": 40.3689
+   },
+   {
+    "metres": 46.5,
+    "param_value": 0.00041818454675220974,
+    "t_rel": 40.5707
+   },
+   {
+    "metres": 47.0,
+    "param_value": 0.00042268115478180337,
+    "t_rel": 40.7689
+   },
+   {
+    "metres": 47.5,
+    "param_value": 0.000427177762811397,
+    "t_rel": 40.969
+   },
+   {
+    "metres": 48.0,
+    "param_value": 0.0004316743708409907,
+    "t_rel": 41.1688
+   },
+   {
+    "metres": 48.5,
+    "param_value": 0.00043617097887058435,
+    "t_rel": 41.3697
+   },
+   {
+    "metres": 49.0,
+    "param_value": 0.000440667586900178,
+    "t_rel": 41.5697
+   },
+   {
+    "metres": 49.5,
+    "param_value": 0.0004451641949297716,
+    "t_rel": 41.7689
+   },
+   {
+    "metres": 50.0,
+    "param_value": 0.0004496608029593653,
+    "t_rel": 41.9689
+   }
+  ],
+  "sent_by": "rig",
+  "wrote_at_rel_s": 22.1688
+ },
+ "latency": {
+  "budget_us": 2000.0,
+  "max_us": 9600.93,
+  "mean_us": 1083.92,
+  "median_us": 1043.86,
+  "min_us": 118.63,
+  "n": 1501,
+  "over_budget": 6,
+  "p95_us": 1325.45,
+  "p99_us": 1552.22,
+  "worst_headroom_x": 0.21
+ },
+ "latency_positive_control": {
+  "messages_ingested": 211868,
+  "rule": "a latency figure from an idle tick measures the loop, not the workload",
+  "satisfied": true,
+  "usable_channels_at_end": 12
+ },
+ "live_transmit_probe": [
+  "command_long_send: denied",
+  "set_mode_send: denied",
+  "rc_channels_override_send: denied"
+ ],
+ "log_dir": "logs/shadow-sitl-ardupilot",
+ "phases": {
+  "convert": {
+   "budget_us": 2000.0,
+   "max_us": 380.34,
+   "mean_us": 33.21,
+   "median_us": 31.02,
+   "min_us": 17.45,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 43.78,
+   "p99_us": 73.27,
+   "worst_headroom_x": 5.26
+  },
+  "core": {
+   "budget_us": 2000.0,
+   "max_us": 9419.05,
+   "mean_us": 930.47,
+   "median_us": 892.16,
+   "min_us": 0.68,
+   "n": 1501,
+   "over_budget": 6,
+   "p95_us": 1149.72,
+   "p99_us": 1361.28,
+   "worst_headroom_x": 0.21
+  },
+  "sample": {
+   "budget_us": 2000.0,
+   "max_us": 508.27,
+   "mean_us": 120.25,
+   "median_us": 115.6,
+   "min_us": 90.91,
+   "n": 1501,
+   "over_budget": 0,
+   "p95_us": 155.87,
+   "p99_us": 180.31,
+   "worst_headroom_x": 3.93
+  }
+ },
+ "platform": "ardupilot",
+ "rig_flight": {
+  "armed": true,
+  "climbed_m": 13.19,
+  "hold_mode": "ALT_HOLD",
+  "hold_mode_confirmed": true
+ },
+ "seconds": 60.0,
+ "stats": {
+  "max_latency_us": 9600.927999599662,
+  "messages": 211868,
+  "reconnects": 0,
+  "stale_ticks": 1,
+  "ticks": 1501,
+  "watchdog_trips": 0
+ },
+ "tee": {
+  "final_status": {
+   "by_type": {
+    "AHRS": 3697,
+    "AHRS2": 18483,
+    "ATTITUDE": 18483,
+    "BAD_DATA": 4,
+    "BATTERY_STATUS": 3697,
+    "EKF_STATUS_REPORT": 3691,
+    "ESC_TELEMETRY_1_TO_4": 18393,
+    "GLOBAL_POSITION_INT": 7393,
+    "GPS_GLOBAL_ORIGIN": 2,
+    "GPS_RAW_INT": 7393,
+    "HEARTBEAT": 744,
+    "HOME_POSITION": 2,
+    "LOCAL_POSITION_NED": 7001,
+    "MEMINFO": 7393,
+    "MISSION_CURRENT": 7393,
+    "NAV_CONTROLLER_OUTPUT": 7393,
+    "PARAM_VALUE": 360,
+    "POWER_STATUS": 7393,
+    "RAW_IMU": 18483,
+    "SCALED_IMU2": 18483,
+    "SCALED_IMU3": 18483,
+    "SCALED_PRESSURE": 18483,
+    "SCALED_PRESSURE2": 18483,
+    "SIMSTATE": 18483,
+    "STATUSTEXT": 23,
+    "SYSTEM_TIME": 3697,
+    "SYS_STATUS": 7393,
+    "TERRAIN_REPORT": 3697,
+    "TERRAIN_REQUEST": 388,
+    "TIMESYNC": 74,
+    "VFR_HUD": 7393,
+    "VIBRATION": 3697,
+    "WIND": 3501
+   },
+   "bytes": 9488651,
+   "errors": 0,
+   "forwarded": 259676,
+   "pid": 26385,
+   "t": 1787627144.661816
+  },
+  "mode": "process",
+  "out": "127.0.0.1:14561",
+  "profile": "full",
+  "shares_interpreter_with_csia": false,
+  "source": "tcp:127.0.0.1:5760",
+  "types_flowing_before_measurement": 25
+ },
+ "timing_caveat": "tee ran in a SEPARATE interpreter, so no GIL contention from it. Remaining contention is the host: this container also runs SITL, and run-to-run spread on the same command exceeds the tee effect. An R13 verdict from shared cloud infrastructure is a statement about the host as much as about CSIA.",
+ "trust_trace": "logs/mechanism_b_gps/ardupilot_RAMP_20S_0.trace.jsonl",
+ "trust_trace_steps": 1501,
+ "unmapped_types": {
+  "AHRS": 3008,
+  "AHRS2": 15044,
+  "ATTITUDE": 15043,
+  "GLOBAL_POSITION_INT": 6017,
+  "LOCAL_POSITION_NED": 6016,
+  "MEMINFO": 6017,
+  "MISSION_CURRENT": 6016,
+  "NAV_CONTROLLER_OUTPUT": 6016,
+  "PARAM_VALUE": 323,
+  "POWER_STATUS": 6017,
+  "SCALED_IMU3": 15043,
+  "SCALED_PRESSURE2": 15043,
+  "SIMSTATE": 15043,
+  "STATUSTEXT": 2,
+  "SYSTEM_TIME": 3008,
+  "SYS_STATUS": 6017,
+  "TERRAIN_REPORT": 3008,
+  "TERRAIN_REQUEST": 289,
+  "TIMESYNC": 60,
+  "VFR_HUD": 6017,
+  "WIND": 3008
+ },
+ "wall_s": 60.05
+}

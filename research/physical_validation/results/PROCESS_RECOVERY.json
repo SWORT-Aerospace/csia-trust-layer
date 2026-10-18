@@ -1,0 +1,86 @@
+{
+  "counts": {
+    "RECOMPUTED_IDENTICAL": 1,
+    "REFUSED": 5
+  },
+  "criteria_declared_before_runs": {
+    "acceptable": [
+      "REFUSED",
+      "DEGRADED",
+      "RECOMPUTED_IDENTICAL",
+      "NO_STATE_CARRIED"
+    ],
+    "forbidden_transitions": [
+      "exception -> nominal",
+      "exception -> previous certificate remains valid forever"
+    ],
+    "unacceptable": [
+      "SILENT_HEALTHY",
+      "STALE_CERTIFICATE_HONOURED",
+      "EXCEPTION_BECAME_NOMINAL",
+      "STATE_SURVIVED_KILL"
+    ]
+  },
+  "failures": [],
+  "not_tested_here": [
+    "whether a supervisor restarts the process. There is no service manager or restart policy in this repository, so the question is recorded as UNTESTED rather than answered from a unit file that does not exist.",
+    "recovery of the autopilot link itself, which is an adapter and E2 concern and needs real hardware to mean anything."
+  ],
+  "runs": [
+    {
+      "files_left_behind": [],
+      "first_verdict": "SUPPORTED_UNIQUE",
+      "killed_exit_signal": -9,
+      "outcome": "RECOMPUTED_IDENTICAL",
+      "restarted_verdict": "SUPPORTED_UNIQUE",
+      "scenario": "SIGKILL_MID_EVALUATION",
+      "state_carried_across_the_kill": false,
+      "verdict_recomputed_identically": true,
+      "what_was_killed": "the evaluator process, with SIGKILL (uncatchable)",
+      "why_it_matters": "A restarted evaluator that inherits a verdict it did not recompute is asserting support from a process that is gone."
+    },
+    {
+      "outcome": "REFUSED",
+      "prior_valid_until": 99.0,
+      "reason": "STALE_SUPPORT_CERTIFICATE",
+      "record_timestamp": 100.0,
+      "scenario": "RESTART_WITH_EXPIRED_CERTIFICATE",
+      "verdict": "NOT_EVALUABLE",
+      "why_it_matters": "'previous certificate remains valid forever' is one of the two transitions the programme forbids by name."
+    },
+    {
+      "outcome": "REFUSED",
+      "prior_config_hash": "BEFORE_RELOAD",
+      "reason": "CONFIG_HASH_MISMATCH",
+      "record_config_hash": "cfg-1",
+      "scenario": "CONFIG_RELOAD_BETWEEN_RECORDS",
+      "verdict": "NOT_EVALUABLE",
+      "why_it_matters": "A reloaded configuration makes the previous certificate a statement about a system that no longer exists."
+    },
+    {
+      "outcome": "REFUSED",
+      "reason": "CONFIG_HASH_MISMATCH",
+      "scenario": "SOFTWARE_UPGRADE_BETWEEN_RECORDS",
+      "verdict": "NOT_EVALUABLE",
+      "why_it_matters": "A rebuilt binary is a different evaluator, and a certificate issued by the previous one does not transfer to it."
+    },
+    {
+      "outcome": "REFUSED",
+      "reason": "MISSING_CANONICAL_SAMPLE",
+      "scenario": "TELEMETRY_SOURCE_DIES",
+      "verdict_after_source_dies": "NOT_EVALUABLE",
+      "verdict_while_live": "SUPPORTED_UNIQUE",
+      "why_it_matters": "Silence is the input that most easily reads as health. The layer must say it cannot evaluate, not repeat its last answer."
+    },
+    {
+      "exception_is_named_in_the_reason": true,
+      "outcome": "REFUSED",
+      "reason": "FIREWALL_INTERNAL_EXCEPTION: RuntimeError: adapter exploded mid-evaluation",
+      "scenario": "EVALUATION_RAISES",
+      "verdict": "NOT_EVALUABLE",
+      "why_it_matters": "'exception -> nominal' is the other transition the programme forbids by name."
+    }
+  ],
+  "schema": "csia.assurance.process_recovery/1",
+  "verdict": "NO_FORBIDDEN_TRANSITION"
+}

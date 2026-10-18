@@ -1,0 +1,13 @@
+field,protocol_message,kind,depends_on_navigation_solution_being_valid,admitted_as_operational_value,admitted_as_diagnostic_evidence_under_S2,admissibility_predicate,rationale
+gnss.position,GPS_RAW_INT.lat/lon/alt,VALUE,YES,NO under every propagating arm,NO,adapter deletes it on fix_type < 3,"a position derived from a solution the receiver disowns is not a degraded position, it is a fabricated one"
+gnss.velocity,GPS_RAW_INT.vel/cog,VALUE,YES,NO under every propagating arm,NO,adapter deletes it on fix_type < 3,same
+gnss.velocity_z,none (GPS_RAW_INT carries no vertical rate),VALUE,YES,NO,NO,contract marks it UNAVAILABLE,the third component is padding and vz_valid=False says so
+fix_type,GPS_RAW_INT.fix_type,STATUS,NO,n/a,YES,"a message arrived within MSG_FRESH_S = 0.5 s",the receiver's own report about itself; it is a statement even when the solution is not
+h_acc,GPS_RAW_INT.h_acc,STATUS,NO,n/a,YES,maer_hacc_transform.hacc_valid,"an accuracy estimate is about the receiver, not derived from the position value; rejected when it is the UINT32 unknown marker, zero, or accompanied by eph=UNKNOWN or zero satellites"
+satellites_visible,GPS_RAW_INT.satellites_visible,STATUS,NO,n/a,used only inside hacc_valid,part of hacc_valid,"a receiver reporting zero satellites cannot be making an accuracy statement"
+eph,GPS_RAW_INT.eph,STATUS,NO,n/a,used only inside hacc_valid,part of hacc_valid,the UINT16 unknown marker invalidates the accompanying h_acc
+message arrival,any GPS_RAW_INT,PROVENANCE,NO,n/a,YES (as the gate),"tau - t_last_message <= 0.5 s","this is what separates 'the receiver said no fix' from 'no message arrived'; without it the status feature would fire on transport starvation"
+v_acc,GPS_RAW_INT.v_acc,STATUS,NO,n/a,NO,not used,"available and unqualified; left out because nothing in this work package established its semantics"
+vel_acc,GPS_RAW_INT.vel_acc,STATUS,NO,n/a,NO,not used,same
+hdg_acc,GPS_RAW_INT.hdg_acc,STATUS,NO,n/a,NO,not used,same
+estimator.variances,EKF_STATUS_REPORT,STATUS,NO,n/a,NO,"contract: INFORMATIVE but csia_may_use = False","excluded by policy, not by this work package: an assurance layer cannot be independent of an estimator it consumes"

@@ -1,0 +1,392 @@
+%YAML 1.2
+---
+# PAPER IMPACT LEDGER — what new evidence would let the manuscripts say.
+#
+# APPEND-ONLY, and deliberately SEPARATE from the manuscripts.
+#
+# THE RULE THIS FILE ENFORCES
+# ---------------------------
+# A claim is NOT upgraded when a result arrives. It is upgraded when an
+# evidence TIER completes and a row here says `ready_to_integrate: true`. In
+# between, the result exists, is cited, and changes nothing the paper says.
+#
+# That separation is the whole reason the file exists. The alternative -- edit
+# the manuscript each time a trial comes back -- is how a paper ends up
+# claiming the union of every encouraging intermediate result, none of which
+# was ever complete.
+#
+# EVERY ROW MUST STATE ALL FOUR
+#   current_claim        what the paper says today, verbatim where possible
+#   new_evidence         what arrived, with its artifact
+#   supported_upgrade    what the evidence licenses
+#   unsupported_upgrade  what it does NOT license, named explicitly
+#
+# `unsupported_upgrade` is the load-bearing field. It is where "20/20 valid
+# trials" is stopped from becoming "the mechanism occurs in 20 of 20 flights
+# in the field".
+
+schema: csia.research.paper_impact_ledger/1
+program: CSIA PAPER EVIDENCE EXTENSION -- PHYSICAL VALIDATION V1
+append_only: true
+
+evidence_tiers:
+  E0: desktop simulation
+  E1: current-stack SITL/SIH
+  E2: real flight-controller hardware
+  E3: real sensor plus physical fault
+  E4: physical actuator/output path
+  E5: controlled physical flight
+
+# ---------------------------------------------------------------------------
+# BASELINE — where the paper stands before this program produced anything.
+# Recorded so every later row has something to be a delta against.
+# ---------------------------------------------------------------------------
+baseline:
+  measured_at_commit: caa2aa199761e6443583db07fceabce67d525b29
+  systems_paper_pages: 27
+  highest_tier_supporting_the_headline_claim: E1
+  headline_claim: >-
+    A deployed diagnostic layer emits health while holding no evidence it is
+    entitled to assert health from, because its gate skips an inapplicable
+    feature rather than marking it unassessable.
+  tier_evidence:
+    E0: >-
+      The bench-simulator campaigns behind Paper I. 200 consecutive
+      indistinguishable ticks under injected fix loss; 378,000/378,000
+      independent-checker agreement; all ArduCopter 3.3 SITL, a 2015 build.
+    E1: >-
+      mechanism_a_ardupilot.json and mechanism_a_px4.json. n=1 fault trial
+      plus one matched fix-preserving control per platform, RULE-B validated.
+      Plus the 20-trial fix-preserving negative control (15,595 ticks, zero
+      collapses) and the 20-trial Mechanism-B preregistered campaign.
+    E2: NOT_STARTED
+    E3: NOT_STARTED
+    E4: NOT_STARTED
+    E5: NOT_STARTED
+
+entries:
+  - id: PI-001
+    date: 2026-09-06
+    result: >-
+      A vehicle-adapter boundary with capability negotiation, a validated
+      vehicle-profile format, and a test that performs the whole
+      new-vehicle integration workflow and then proves the frozen core is
+      byte-identical to csia-v1.0-research-final.
+    evidence_tier: E0
+    artifact: >-
+      csia/aircraft/capability.py; csia/aircraft/profile.py;
+      profiles/*.yaml; tests/test_vehicle_profile_no_core_change.py;
+      tests/test_capability_negotiation.py; tests/test_vehicle_profile.py
+    old_limitation: >-
+      "unclear vehicle integration boundary" -- the paper could not say what
+      it would take to run the same core on a different airframe.
+    new_limitation: >-
+      The workflow is proven for PROFILE-COMPATIBLE vehicles: those whose
+      telemetry the existing ArduPilot or PX4 adapter already decodes. A
+      vehicle needing a NEW TRANSPORT (DroneCAN, ROS 2, a bespoke serial
+      frame) still needs a new adapter class. That is a smaller claim than
+      "any vehicle" and it is the claim the test supports.
+    claim_impact: >-
+      Licenses a Discussion sentence about the integration boundary. Licenses
+      NOTHING about the diagnostic results -- this is architecture, not
+      evidence, and no measurement changed.
+    supported_upgrade: >-
+      "A new airframe on a supported autopilot is integrated by writing a
+      profile; the frozen diagnostic core is unchanged, and a test performs
+      the integration and verifies the core byte-identical afterwards."
+    unsupported_upgrade: >-
+      "CSIA plugs into any vehicle." False: a new transport needs a new
+      adapter. Also unsupported: any implication that the architecture work
+      strengthens the EMPIRICAL claims. It does not touch them.
+    paper_section: Discussion; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      E0 architecture work alone does not complete an evidence tier. Hold
+      until the repeated current-stack campaign (P8) gives the section
+      something measured to sit beside.
+
+  - id: PI-002
+    date: 2026-09-06
+    result: >-
+      A THIRD structural implementation, written from the definition rather
+      than from either existing one, agrees with the independent checker and
+      with brute-force enumeration across 100,000 randomly generated
+      structures and 500,925 pair comparisons. Seven structural invariants
+      hold with zero counterexamples.
+    evidence_tier: E0
+    artifact: >-
+      research/physical_validation/cleanroom/structural_reference.py;
+      research/physical_validation/results/structural_property_campaign.json;
+      tests/test_structural_property_agreement.py;
+      tests/test_cleanroom_independence.py
+    old_limitation: >-
+      "the independent checker could share conceptual mistakes with
+      production" -- two implementations written by the same people from the
+      same understanding can agree perfectly on the wrong answer, and the
+      paper's 378,000/378,000 figure could not exclude that.
+    new_limitation: >-
+      WHAT WAS AND WAS NOT COMPARED, because the distinction decides what may
+      be said. Three STRUCTURAL implementations were compared on generated
+      structures: the clean-room reference, the independent checker, and
+      brute-force enumeration. PRODUCTION WAS NOT among them -- its
+      discriminating() needs a populated trust-data object, and constructing
+      one for a random structure would mean reimplementing production's input
+      format inside the test, where a mistake produces false disagreement and
+      a shared mistake produces false agreement. Production's agreement is
+      established where its numeric path is genuinely exercised: on real
+      ticks, 378,000 comparisons.
+      So the residual limitation is real and narrower than before: a
+      conceptual mistake shared by production AND the independent checker AND
+      the clean-room reference is not excluded, but it would now have to
+      survive an implementation written from the one-sentence definition, and
+      an explicit enumeration written differently again.
+    claim_impact: >-
+      Licenses a Verification subsection. Changes no measurement and no
+      empirical claim.
+    supported_upgrade: >-
+      "Three structural implementations -- production's checker, a clean-room
+      reference sharing no code with it, and brute-force enumeration -- agree
+      on 100,000 generated structures and 500,925 pair comparisons, with
+      seven structural invariants holding and no counterexample."
+    unsupported_upgrade: >-
+      "The production support engine was verified against two independent
+      implementations on random structures." FALSE -- production was not in
+      the random-structure comparison, for the reason above. Also
+      unsupported: any claim that the signature TABLE is correct. No amount
+      of structural agreement can test whether a relation behaves as its
+      LOW(h) entry says; that needs physical evidence (P17) and the paper
+      already says so.
+    paper_section: Verification; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      E0 tier. Hold until the repeated current-stack campaign (P8) completes,
+      so the Verification section gains its structural and its empirical half
+      in one edit rather than two.
+
+  - id: PI-003
+    date: 2026-09-06
+    result: >-
+      The Mechanism A intermediate quantity, repeated 20 times against 20
+      matched fix-preserving controls, on the SAME pinned ArduPilot build the
+      original n=1 trials used (ArduCopter V4.8.0-dev @ 01a504b, rebuilt from
+      source and verified by its own MAVLink version string). 40 of 40 trials
+      adjudicated VALID and the campaign arithmetic balances.
+      `gnss.position MISSING with NO_3D_FIX` occurred in 20 of 20 FAULT trials
+      and 0 of 20 CONTROL trials. The original's first_t of 12.043901 s falls
+      INSIDE the repeat's range (12.0399-12.0827, median 12.0432) and its 450
+      observed ticks is bracketed by the repeat's 449-450.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_repeat_ap/;
+      research/physical_validation/results/mechanism_a_repeat_ardupilot.json;
+      research/physical_validation/prereg/MECHANISM_A_REPEATED_CURRENT_STACK_PREREG.md
+    old_limitation: >-
+      "n = 1 fault trial plus one matched control per platform." Every latency
+      and tick count in the Mechanism A result was a single observation, and
+      the paper could not say whether the mechanism was reproducible or
+      whether that one trial was unusual.
+    new_limitation: >-
+      ARDUPILOT ONLY. PX4 SIH was NOT RUN -- not "no difference", NOT RUN --
+      because building it needs its own toolchain and that was not attempted.
+      The two platforms are analysed separately and never pooled, so this
+      strengthens the ArduPilot half and leaves the PX4 half at n=1.
+      Still E1. Repeating a simulation 20 times produces 20 simulator runs,
+      not evidence about hardware, and the evidence tier does not move.
+      NO TIMING CLAIM. The trials ran on a container shared with other work;
+      latency is recorded and deliberately NOT adjudicated.
+      TRUST WAS NOT CAPTURED (FL-014). The runner did not pass --trust-trace,
+      so this campaign says nothing about the trust coefficient.
+    claim_impact: >-
+      Licenses replacing "n=1 per platform" with "n=20 fault and n=20 matched
+      control on ArduPilot; n=1 on PX4" in the systems paper's evidence
+      description, and licenses the statement that the original single
+      observation is not an outlier with respect to this build.
+    supported_upgrade: >-
+      "On ArduPilot, the intermediate quantity was observed in 20 of 20 valid
+      fault trials and in 0 of 20 valid matched controls, on the same pinned
+      autopilot build as the original trial, whose value falls within the
+      repeated distribution."
+    unsupported_upgrade: >-
+      "The mechanism occurs in 20 of 20 flights." FALSE -- these are simulator
+      runs, not flights, and nothing about hardware follows from them.
+      "Confirmed on both platforms at n=20." FALSE -- PX4 was not run.
+      "The trust rise is reproducible." NOT SUPPORTED BY THIS CAMPAIGN --
+      trust was not captured at all (FL-014); that observation still rests on
+      n=1 per platform.
+      Any confidence interval or p-value over these 20 runs. They are runs of
+      a deterministic simulator differing in seed and timing jitter, not draws
+      from a population, and the preregistration forbids it in advance.
+    paper_section: Evidence; Limitations
+    ready_to_integrate: false
+    ready_reason: >-
+      The E1 tier is now materially stronger on ArduPilot and unchanged on
+      PX4, which is an asymmetric state that should not be written into a
+      manuscript one platform at a time. Hold until either the PX4 half runs
+      or a deliberate decision is taken to report the asymmetry. Integrating
+      now would produce a paper describing a 20-trial campaign and a 1-trial
+      campaign in the same sentence without flagging which is which.
+
+
+  - id: PI-004
+    date: 2026-09-06
+    result: >-
+      Campaign A2 recovered the trust measurement A1 omitted (FL-014). 20 FAULT
+      and 20 matched CONTROL trials, all 40 adjudicated VALID, all 40 with a
+      captured trust trace, on the same pinned ArduPilot build and the same
+      frozen core as A1.
+      FAULT   (n=20): trust 0.924816 -> 0.931823, delta median +0.007007,
+                      range [+0.006996, +0.007145], 20/20 POSITIVE.
+      CONTROL (n=20): trust 0.924813 -> 0.945407, delta median +0.020594,
+                      range [+0.020572, +0.020804].
+      The gate collapses 3.0 -> 0.0 in 20/20 FAULT and 0/20 CONTROL; failsafe
+      NORMAL -> CAUTION in 20/20 FAULT and NORMAL -> NORMAL in 20/20 CONTROL;
+      nominal stays rank 1 and gps_fault rank 2 in every arm, while the
+      gps_fault hypothesis WEIGHT moves 6.4e-05 -> 0.02272 on the fault arm and
+      not at all on the control.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_trust_completion_a2/;
+      research/physical_validation/results/mechanism_a_a2_trust_ardupilot.json;
+      research/physical_validation/results/ARDUPILOT_MECHANISM_A_REPEAT_TABLE.csv;
+      research/physical_validation/results/a2_traces_raw/ (raw, archived before
+      reduction, with SHA256SUMS);
+      research/physical_validation/ARDUPILOT_REPEAT_RECONCILIATION.md
+    old_limitation: >-
+      "The trust rise is NOT SUPPORTED BY THIS CAMPAIGN -- trust was not
+      captured at all (FL-014); that observation still rests on n=1 per
+      platform." (PI-003)
+    new_limitation: >-
+      THE CONTROL ARM RISES ABOUT THREE TIMES MORE THAN THE FAULT ARM, ranges
+      disjoint (FL-016). Trust rises in both arms as evidence accumulates; the
+      fault SUPPRESSES the rise rather than causing it.
+      THE ORIGINAL n=1 DELTA IS OUTSIDE THE REPEATED FAULT RANGE. +0.008656
+      against [+0.006996, +0.007145]. Root-caused (FL-017): the original ran a
+      0.5 s gps watchdog and the repeats a 1.0 s one, so the gate held twice as
+      long and trust accrued twice as long before freezing. Neither run is
+      wrong; they are different deployment configurations, and neither
+      preregistration pinned that field.
+      ARDUPILOT ONLY. The PX4 repeat is preregistered and NOT_RUN.
+      Still E1: 40 simulator runs are not evidence about hardware.
+      No p-values, no confidence intervals, no pooling across ORIGINAL/A1/A2,
+      no prevalence claim, no timing claim (shared host, latency recorded and
+      not adjudicated).
+    claim_impact: >-
+      Licenses replacing the n=1 trust observation with a repeated
+      distribution on ArduPilot, and REQUIRES that the claim be restated with
+      the control arm. Removes "0.9213 -> 0.9300" from use as a repeatable
+      value while leaving the frozen artifact that records it untouched.
+    supported_upgrade: >-
+      "On ArduPilot, across 20 fault trials and 20 matched fix-preserving
+      controls under a fixed preregistered reduction, the gps trust coefficient
+      ROSE in every trial of both arms. It rose by a median of +0.0070 under
+      fault and +0.0206 under control, with disjoint ranges: the gate closure
+      does not lower trust, it FREEZES it, and the resulting trajectory is
+      lower than the control's rather than higher than its own baseline alone."
+      "Every other Mechanism A quantity -- first_t, MISSING tick count, gate
+      collapse, hypothesis ranks, failsafe transition -- reproduces from n=1 to
+      n=20+20."
+    unsupported_upgrade: >-
+      "Trust rises across a gate collapse." TRUE BUT MISLEADING ALONE -- it
+      rises more without the fault. Do not state it without the control arm.
+      "The fault causes trust to increase." FALSE. It suppresses an increase
+      that happens anyway.
+      "0.9213 -> 0.9300 is reproducible." FALSE under the current runtime; it
+      is a faithful record of one trial under a superseded 0.5 s watchdog.
+      "The repeat confirms the original." PARTIALLY -- on 9 of 12 headline
+      quantities. Two disagree and one was never previously compared.
+      Any confidence interval, p-value, or pooled N across the three campaigns.
+    paper_section: Evidence; Limitations; Discussion (Mechanism A)
+    ready_to_integrate: false
+    ready_reason: >-
+      Same asymmetry as PI-003 and one more reason. ArduPilot now has 20+20
+      trust trials and PX4 has n=1; writing both into one sentence without
+      flagging which is which is the failure mode. And the control-arm finding
+      (FL-016) changes how the result must be WORDED in three places that
+      currently carry the old phrasing -- handoff/MASTER_SYSTEM_INPUT_PACKET.md
+      section G, standards/dea/DEA_PROFILE.md, docs/v1_1/
+      MECHANISM_A_MODERN_REPLICATION.md -- and those are edits for the writing
+      agents to make deliberately, not for the repository agent to slip in.
+
+  - id: PI-005
+    date: 2026-09-06
+    result: >-
+      Campaign P1 repeated Mechanism A on PX4 SIH: 20 FAULT and 20 matched
+      fix-preserving CONTROL trials on the reconstructed and rebuilt
+      environment (PX4 547e2ca, px4_sitl_default, SIH, sihsim_quadx, real-time
+      lockstep). 40 of 40 VALID, trust captured 40/40, arithmetic balanced.
+      Reduced by the SAME committed extractor and the SAME four preregistered
+      windows the ArduPilot A2 campaign uses.
+      FAULT   (n=20): trust 0.952172 -> 0.955534, delta median +0.003513,
+                      range [+0.002269, +0.003999], 20/20 POSITIVE.
+      CONTROL (n=20): trust 0.952244 -> 0.961753, delta median +0.009499,
+                      range [+0.009328, +0.010729].
+      The gate collapses 1.0 -> 0.0 in 20/20 FAULT and stays 1.0 in 20/20
+      CONTROL; nominal stays rank 1 in all 40; failsafe reaches CRITICAL in 19
+      of 20 FAULT trials and CAUTION in 1, and stays NORMAL in 20/20 CONTROL.
+      THE PREREGISTERED QUALIFICATION REPRODUCES: gps_gate_weight_sum is 1.0,
+      not 3.0, because only 1 of 4 GNSS-gated relations is live pre-fault on
+      the passive link. Measured 40/40 rather than argued from one trial.
+    evidence_tier: E1
+    artifact: >-
+      campaigns/physical_validation/mechanism_a_px4_repeat_p1/;
+      research/physical_validation/results/mechanism_a_p1_trust_px4.json;
+      research/physical_validation/results/PX4_MECHANISM_A_REPEAT_TABLE.csv;
+      research/physical_validation/results/p1_traces_raw/ (raw, archived before
+      reduction, with SHA256SUMS);
+      research/physical_validation/PX4_REPEAT_RECONCILIATION.md
+    old_limitation: >-
+      "ARDUPILOT ONLY. The PX4 repeat is preregistered and NOT_RUN." (PI-004)
+      "PX4 is NOT_RUN, not 'no difference'." (PI-003)
+    new_limitation: >-
+      THE ASYMMETRY THAT HELD PI-003 AND PI-004 BACK IS GONE. Both platforms now
+      have a repeated campaign, so the two can be written into one section
+      without one of them being n=1.
+      FL-018: the control arm rises ~2.7x more here too, ranges disjoint, and
+      the comparison was already possible from the frozen PX4 artifact and never
+      made.
+      FL-018: the original PX4 delta is OUTSIDE the repeated range, and PX4's
+      PRE-FAULT trust does not reproduce either (0.985624 against 0.952172) --
+      a symptom ArduPilot did not have. Attributed by controlled replay to the
+      0.5 s -> 1.0 s runtime watchdog: the same log under the two tables
+      reproduces both measured values.
+      FL-019 IS AN UNRESOLVED MECHANISM AND IS LABELLED ONE: why ArduPilot's
+      pre-fault trust was stable across the same change is not established, and
+      the replay that settles PX4 is not a valid instrument on ArduPilot.
+      Still E1. PX4's demonstration is NARROWER than ArduPilot's -- 1 of 4
+      relations live rather than 3 of 4 -- and that is a property of the passive
+      link configuration, not of PX4.
+      No pooling across platforms or campaigns, no p-values, no confidence
+      intervals, no prevalence claim, no timing claim (real-time lockstep on a
+      shared host makes PX4's latency figures even less comparable).
+    claim_impact: >-
+      Licenses replacing "n=20+20 on ArduPilot, n=1 on PX4" with a repeated
+      campaign on BOTH platforms, and requires that the trust claim be stated
+      with the control arm on both. Removes 0.9856 -> 0.9875 from use as a
+      repeatable value while leaving the frozen artifact that records it
+      untouched.
+    supported_upgrade: >-
+      "On both current-stack platforms, across 20 fault trials and 20 matched
+      fix-preserving controls each, under preregistrations frozen before the
+      first trial: the GNSS-incident gate weight collapsed to zero in every
+      fault trial and in no control trial, the nominal hypothesis remained
+      rank 1 throughout, and the gps trust coefficient ROSE in every trial of
+      every arm -- by less under fault than under control, on both platforms."
+      "The PX4 demonstration is narrower than the ArduPilot one because only 1
+      of 4 GNSS-gated relations was live pre-fault on the passive link, which is
+      preregistered, measured 40/40, and a property of the link configuration."
+    unsupported_upgrade: >-
+      "Confirmed on both platforms" WITHOUT the narrowness qualification. The
+      PX4 arm removes 1.0 units of gate weight, not 3.0.
+      "The mechanism occurs in 40 of 40 flights." FALSE -- simulator runs.
+      "0.9856 -> 0.9875 is reproducible." FALSE under the current runtime.
+      "The trust rise is caused by the fault." FALSE on both platforms.
+      Any pooled N across ArduPilot and PX4, or across ORIGINAL and P1.
+      Any statement about a driven-link PX4 configuration. Not tested.
+    paper_section: Evidence; Limitations; Discussion (Mechanism A)
+    ready_to_integrate: false
+    ready_reason: >-
+      The E1 asymmetry is resolved, so the reason PI-003 and PI-004 gave is
+      spent. What remains is that FL-016's control-arm finding changes how the
+      result must be WORDED, and those edits belong to the writing agents,
+      deliberately, not to the repository agent. The evidence is ready; the
+      prose decision is not the repository agent's to make.

@@ -1,0 +1,59 @@
+{
+  "criterion": "at least two matched sets where multiple domains could explain the symptom initially and evidence reduced each member to a DIFFERENT supported hypothesis, with no ground-truth access. 'Each' is read strictly: the member -> hypothesis map must be injective over the whole set.",
+  "non_qualifying_sets": [
+    {
+      "answers": {},
+      "distinct_answers": 0,
+      "members": 5,
+      "reduced": 0,
+      "set": "B_ACTUATOR_RESPONSE",
+      "why": "not every member reduced to a supported hypothesis"
+    },
+    {
+      "answers": {},
+      "distinct_answers": 0,
+      "members": 4,
+      "reduced": 0,
+      "set": "C_MULTI_SENSOR",
+      "why": "not every member reduced to a supported hypothesis"
+    },
+    {
+      "answers": {
+        "MS_D1_NAV_SOURCE": "SENSOR/navigation_source_invalid",
+        "MS_D2_ESTIMATOR_STALE": "COMPUTE/estimator_stale",
+        "MS_D3_COMM_STARVATION": "COMMUNICATION/starvation",
+        "MS_D4_COMPUTE_DEADLINE": "COMPUTE/estimator_stale"
+      },
+      "distinct_answers": 3,
+      "members": 4,
+      "reduced": 4,
+      "set": "D_POSITION_FUNCTION",
+      "why": "two members reduced to the SAME hypothesis, so those two were not discriminated"
+    }
+  ],
+  "qualifying_sets": [
+    {
+      "answers": {
+        "MS_A1_SENSOR_DELAY": "SENSOR/source_slow",
+        "MS_A2_COMMUNICATION_DELAY": "COMMUNICATION/transport_delay",
+        "MS_A3_COMPUTE_DELAY": "COMPUTE/processing_delay",
+        "MS_A4_PROCESS_STALL": "COMPUTE/process_stall"
+      },
+      "distinct_answers": 4,
+      "members": 4,
+      "reduced": 4,
+      "set": "A_STALE_OUTPUT"
+    },
+    {
+      "answers": {
+        "MS_TS_B4_MECHANICAL": "ACTUATION/mechanical",
+        "MS_TS_B5_RESPONSE_SENSOR": "SENSOR/response_sensor"
+      },
+      "distinct_answers": 2,
+      "members": 2,
+      "reduced": 2,
+      "set": "B_ACTUATOR_RESPONSE_BENCH"
+    }
+  ],
+  "verdict": "CROSS_DOMAIN_ASSURANCE_FUNCTIONAL"
+}

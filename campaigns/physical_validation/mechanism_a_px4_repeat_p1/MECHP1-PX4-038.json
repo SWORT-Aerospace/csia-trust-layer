@@ -1,0 +1,272 @@
+{
+  "adjudication": {
+    "evaluations": [
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the trial was planned and never run",
+        "state": "NOT_ATTEMPTED"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the trial as run differs from the preregistration",
+        "state": "PREREG_VIOLATION"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "a human stopped the run",
+        "state": "ABORTED_BY_OPERATOR"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the rig itself faulted, as distinct from the vehicle",
+        "state": "HARDWARE_FAULT"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "RULE A: a null control moved, so no arm may be read",
+        "state": "INSTRUMENT_DEAD"
+      },
+      {
+        "holds": false,
+        "missing": [],
+        "reason": "the evidence chain broke; the intervention is unproven",
+        "state": "INVALID_SCENARIO"
+      },
+      {
+        "holds": null,
+        "missing": [],
+        "reason": "the timing budget cannot support the metric claimed",
+        "state": "TIMING_INSUFFICIENT"
+      }
+    ],
+    "fired_predicate": null,
+    "scorable": true,
+    "state": "VALID",
+    "undecidable": [
+      {
+        "holds": null,
+        "missing": [],
+        "reason": "the timing budget cannot support the metric claimed",
+        "state": "TIMING_INSUFFICIENT"
+      }
+    ]
+  },
+  "campaign": "MECHP1-PX4",
+  "manifest_sha256": "f62f63eaff76c0d96db32f9e26345355e4735680f67fe02e76972cc4d85dae18",
+  "notes": [],
+  "prereg_path": "research/physical_validation/prereg/MECHANISM_A_PX4_REPEATED_PREREG.md",
+  "prereg_sha256": "78d023175a58681378a38ac5b8b0630d22c074eb67887abfd9f3e942c9151f93",
+  "provenance": {
+    "adapter": null,
+    "deployment_config_hash": null,
+    "deployment_path": null,
+    "dirty": true,
+    "frozen_core_diff_empty": true,
+    "frozen_core_tag": "csia-v1.0-research-final",
+    "frozen_core_tag_resolves": true,
+    "head": "c5ea4d21367dba39e5dcdc49f9101ab93b911a9a",
+    "profile_path": null,
+    "profile_sha256": null
+  },
+  "record": {
+    "admissible_as_evidence": true,
+    "arm": "CONTROL",
+    "attempted": true,
+    "backend": "px4_sitl",
+    "effective_speedup": 1,
+    "evidence_tier": "E1",
+    "first_break": null,
+    "flight_seconds": 50.9,
+    "latency_note": "Measured on a contended host shared with other work in the same container. NO LATENCY OR TIMING CLAIM MAY BE MADE FROM THIS CAMPAIGN.",
+    "latency_recorded_not_adjudicated": {
+      "budget_us": 2000.0,
+      "max_us": 8616.7,
+      "mean_us": 809.15,
+      "median_us": 783.17,
+      "min_us": 98.65,
+      "n": 751,
+      "over_budget": 1,
+      "p95_us": 1022.85,
+      "p99_us": 1174.88,
+      "worst_headroom_x": 0.23
+    },
+    "measured_R13": "FAIL: 1 ticks over budget",
+    "measured_command_authority": {
+      "checked": 21,
+      "mode": "SHADOW",
+      "probes": {
+        "arducopter_arm": "DENIED",
+        "arducopter_disarm": "DENIED",
+        "mav": "DENIED",
+        "mav.command_long_send": "DENIED",
+        "mav.manual_control_send": "DENIED",
+        "mav.param_set_send": "DENIED",
+        "mav.rc_channels_override_send": "DENIED",
+        "mav.set_actuator_control_target_send": "DENIED",
+        "mav.set_mode_send": "DENIED",
+        "motors_armed_wait": "DENIED",
+        "param_set_send": "DENIED",
+        "reboot_autopilot": "DENIED",
+        "send": "DENIED",
+        "send_mavlink": "DENIED",
+        "set_mode": "DENIED",
+        "set_mode_apm": "DENIED",
+        "set_mode_px4": "DENIED",
+        "set_relay": "DENIED",
+        "set_servo": "DENIED",
+        "waypoint_clear_all_send": "DENIED",
+        "write": "DENIED"
+      },
+      "result": "NO_COMMAND_PATH_REACHABLE",
+      "write_half_closed": true,
+      "write_half_state": "CLOSED_ENOTCONN"
+    },
+    "measured_flight_id": "20260906T213209Z-629fe89a",
+    "measured_host_noise_control": {
+      "asymmetry": "a control that goes over budget proves the host cannot resolve it; a clean control proves nothing, because it may have run during a quiet stretch",
+      "concurrent_with_measurement": false,
+      "iterations_per_tick": 15114,
+      "rule": "constant work, same process, same tick count. If THIS goes over budget, no over-budget count from the same process is attributable to the software under test.",
+      "tail_is_measurable_on_this_host": true,
+      "target_us": 783.17,
+      "trials": [
+        {
+          "budget_us": 2000.0,
+          "max_us": 1921.5,
+          "median_us": 823.8,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 1053.9,
+          "p99_us": 1124.9
+        },
+        {
+          "budget_us": 2000.0,
+          "max_us": 1546.0,
+          "median_us": 824.6,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 1065.7,
+          "p99_us": 1170.0
+        },
+        {
+          "budget_us": 2000.0,
+          "max_us": 1305.1,
+          "median_us": 804.3,
+          "n": 751,
+          "over_budget": 0,
+          "p95_us": 1047.3,
+          "p99_us": 1110.2
+        }
+      ],
+      "worst_trial": {
+        "budget_us": 2000.0,
+        "max_us": 1921.5,
+        "median_us": 823.8,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 1053.9,
+        "p99_us": 1124.9
+      }
+    },
+    "measured_injection": {
+      "kind": null,
+      "role": "CONTROL: fix preserved"
+    },
+    "measured_live_transmit_probe": [
+      "command_long_send: denied",
+      "set_mode_send: denied",
+      "rc_channels_override_send: denied"
+    ],
+    "measured_phases": {
+      "convert": {
+        "budget_us": 2000.0,
+        "max_us": 83.55,
+        "mean_us": 23.7,
+        "median_us": 22.26,
+        "min_us": 15.72,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 33.16,
+        "p99_us": 54.31,
+        "worst_headroom_x": 23.94
+      },
+      "core": {
+        "budget_us": 2000.0,
+        "max_us": 8492.3,
+        "mean_us": 658.11,
+        "median_us": 632.02,
+        "min_us": 0.77,
+        "n": 751,
+        "over_budget": 1,
+        "p95_us": 824.58,
+        "p99_us": 974.18,
+        "worst_headroom_x": 0.24
+      },
+      "sample": {
+        "budget_us": 2000.0,
+        "max_us": 332.67,
+        "mean_us": 127.35,
+        "median_us": 120.92,
+        "min_us": 81.99,
+        "n": 751,
+        "over_budget": 0,
+        "p95_us": 175.08,
+        "p99_us": 238.03,
+        "worst_headroom_x": 6.01
+      }
+    },
+    "measured_rig_flight": {
+      "armed": true,
+      "climbed_m": 1.51,
+      "takeoff_alt_confirmed": true,
+      "takeoff_alt_param": 25.0,
+      "warnings": [
+        "no STATUSTEXT, but 15 EVENT/CURRENT_EVENT_SEQUENCE frames arrived: PX4 publishes diagnostics over the events interface, so STATUSTEXT silence carries no information. Read px4_console.log."
+      ]
+    },
+    "measured_stats": {
+      "max_latency_us": 8616.699000413064,
+      "messages": 13103,
+      "reconnects": 0,
+      "stale_ticks": 1,
+      "ticks": 751,
+      "watchdog_trips": 0
+    },
+    "null_controls": [
+      {
+        "basis": "a control flight must write no injection parameter; `kind` is null and no `param` key is present when none was written",
+        "measured": 0.0,
+        "name": "no_parameter_written",
+        "observed_injection_block": {
+          "kind": null,
+          "role": "CONTROL: fix preserved"
+        },
+        "quiet": true,
+        "tolerance": 0.0
+      }
+    ],
+    "operator_abort": false,
+    "platform": "px4",
+    "prereg": "research/physical_validation/prereg/MECHANISM_A_PX4_REPEATED_PREREG.md",
+    "prereg_deviations": [],
+    "px4_commit": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+    "r13_verdict_recorded_not_adjudicated": "FAIL: 1 ticks over budget",
+    "requested_speedup": 1,
+    "rig_faults": [],
+    "stages": {
+      "driver_returncode": 1
+    },
+    "support_state": "NOT_RECORDED",
+    "trust_trace_path": "/tmp/claude-0/-home-user-csia-trust-layer/ab56b472-a5da-593c-9bcf-a89a2e957dcf/scratchpad/p1/trace/MECHP1-PX4-038_CONTROL.trace.jsonl",
+    "trust_trace_rows": 753,
+    "trust_trajectory": "CAPTURED"
+  },
+  "scenario": "gps_fix_loss",
+  "schema": "csia.research.trial_manifest/1",
+  "trial_id": "MECHP1-PX4-038"
+}

@@ -1,0 +1,1875 @@
+{
+  "artifact": "V2_SCENARIO_RESULTS",
+  "generation_command": "python engineering/v2/run_v2.py",
+  "note": "SYNTHETIC. Every injected value was chosen to exercise a declared threshold. None is a measurement, and none supports a claim about how any real hardware behaves.",
+  "scenarios": {
+    "ACTUATOR_NO_RESPONSE": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 88,
+        "UNIQUE": 112
+      },
+      "description": "motor commanded and transmitted; current collapses",
+      "expectation_written_before_the_run": "ACT_NO_ELECTRICAL_RESPONSE; ESC, power path and wiring named as inseparable candidates",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "VIOLATED",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "ELIGIBLE",
+          "PRECISION_NAVIGATION": "ELIGIBLE",
+          "PROPULSION": "INELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "ACTUATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "POWER/battery"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 22,
+          "ELIGIBLE": 88,
+          "INELIGIBLE": 90
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "DEGRADED": 22,
+          "ELIGIBLE": 88,
+          "INELIGIBLE": 90
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 9,
+        "head": "aa7ccd8a250f64a2c4e7ccd0d76feab9bb94246a82a9564427be4115cc5ed009",
+        "problems": []
+      },
+      "limiting_domains": {
+        "ACTUATION": 112
+      },
+      "reason_codes": {
+        "ACT_NO_ELECTRICAL_RESPONSE": 180,
+        "ACT_RESPONSE_LOW": 224
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 22,
+        "NORMAL": 88,
+        "RESTRICTED": 90
+      },
+      "tags": [
+        "actuation"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "CLOCK_DRIFT": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 71,
+        "UNIQUE": 129
+      },
+      "description": "validity stamps run ahead of arrival stamps",
+      "expectation_written_before_the_run": "TIMING_CLOCK_INCONSISTENT, VIOLATED; no latency is published from stamps shown to be inconsistent",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "TIMING/nav_solution"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "VIOLATED"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "TIMING"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "COMPUTE/cpu",
+          "COMPUTE/state_estimator"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 6,
+        "head": "116715d6bde037dee07d5ce80e95153cd7b97d50e4fdfa9913125437833b42b6",
+        "problems": []
+      },
+      "limiting_domains": {
+        "TIMING": 129
+      },
+      "reason_codes": {
+        "TIMING_CLOCK_INCONSISTENT": 387
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "NORMAL": 71,
+        "RESTRICTED": 129
+      },
+      "tags": [
+        "timing"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "CPU_OVERLOAD": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 93,
+        "NO_EVIDENCE": 95,
+        "UNIQUE": 12
+      },
+      "description": "CPU load rises; estimator runtime and latency follow",
+      "expectation_written_before_the_run": "COMPUTE degrades then violates; TIMING follows; functions with a no-degradation TIMING requirement stop first",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "COMPUTE/cpu",
+          "COMPUTE/state_estimator",
+          "TIMING/nav_solution",
+          "TIMING/nav_solution.processing_delay"
+        ],
+        "common_cause": "COMPUTE/cpu",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "VIOLATED",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "VIOLATED"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "INELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "DEGRADED",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMPUTE"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": []
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 12,
+          "ELIGIBLE": 95,
+          "INELIGIBLE": 93
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 164,
+          "INELIGIBLE": 7
+        },
+        "POSITION_HOLD": {
+          "DEGRADED": 12,
+          "ELIGIBLE": 95,
+          "INELIGIBLE": 93
+        },
+        "PRECISION_NAVIGATION": {
+          "DEGRADED": 12,
+          "ELIGIBLE": 95,
+          "INELIGIBLE": 93
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "DEGRADED": 36,
+          "ELIGIBLE": 164
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 25,
+        "head": "0b329503fece387347d96d82ef9d12790236bfbea7ac0b395dbb3a9f22ec68b1",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMPUTE": 99,
+        "TIMING": 6
+      },
+      "reason_codes": {
+        "COMPUTE_CPU_SATURATED": 180,
+        "COMPUTE_DEADLINE_MARGINAL": 54,
+        "COMPUTE_DEADLINE_MISSED": 261,
+        "TIMING_DEADLINE_MARGINAL": 27,
+        "TIMING_SEGMENT_MARGINAL": 57,
+        "TIMING_SEGMENT_OVER_BUDGET": 222
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 12,
+        "NORMAL": 95,
+        "RESTRICTED": 93
+      },
+      "tags": [
+        "compute",
+        "timing"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "ESTIMATOR_LATE": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 110,
+        "NO_EVIDENCE": 90
+      },
+      "description": "sources fresh; estimator runtime exceeds its deadline",
+      "expectation_written_before_the_run": "COMPUTE/TIMING limitation; SENSOR domain remains exactly what v1.1 said it was",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "COMPUTE/state_estimator",
+          "TIMING/nav_solution",
+          "TIMING/nav_solution.processing_delay"
+        ],
+        "common_cause": "COMPUTE/state_estimator",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "VIOLATED",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "VIOLATED"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMPUTE"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "COMPUTE/cpu"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 110
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 110
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 110
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 13,
+        "head": "ec65b84b7ac9fc4f2ab11e0bc921c55255646103de2a391f3ef3a8d196fad150",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMPUTE": 95,
+        "TIMING": 15
+      },
+      "reason_codes": {
+        "COMPUTE_DEADLINE_MARGINAL": 45,
+        "COMPUTE_DEADLINE_MISSED": 285,
+        "TIMING_DEADLINE_MARGINAL": 114,
+        "TIMING_DEADLINE_MISSED": 12,
+        "TIMING_SEGMENT_MARGINAL": 45,
+        "TIMING_SEGMENT_OVER_BUDGET": 285
+      },
+      "section": "28D",
+      "system": "aircraft",
+      "system_states": {
+        "NORMAL": 90,
+        "RESTRICTED": 110
+      },
+      "tags": [
+        "compute",
+        "timing",
+        "scenario_d"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "NETWORK_LATENCY": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 109,
+        "NO_EVIDENCE": 86,
+        "UNIQUE": 5
+      },
+      "description": "telemetry transport delay and queue delay rise",
+      "expectation_written_before_the_run": "COMMUNICATION and TIMING degrade; SENSOR stays source-valid; TELEMETRY is limited, navigation is not",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "COMMUNICATION/telemetry_radio",
+          "TIMING/telemetry_downlink",
+          "TIMING/telemetry_downlink.transport_delay"
+        ],
+        "common_cause": "COMMUNICATION/telemetry_radio",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "VIOLATED",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "VIOLATED"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "ELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "ELIGIBLE",
+          "PRECISION_NAVIGATION": "ELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMMUNICATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "COMMUNICATION/gnss_serial",
+          "COMPUTE/cpu",
+          "COMPUTE/state_estimator"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 200
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "DEGRADED": 72,
+          "ELIGIBLE": 86,
+          "INELIGIBLE": 42
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 11,
+        "head": "bd95530b1693f9c4e2c93b200d2d0c03e172fbc06750262a5e2944033ebdb78d",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMMUNICATION": 114
+      },
+      "reason_codes": {
+        "COMM_QUEUE_DELAY": 114,
+        "TIMING_DEADLINE_MARGINAL": 22,
+        "TIMING_DEADLINE_MISSED": 46,
+        "TIMING_SEGMENT_MARGINAL": 11,
+        "TIMING_SEGMENT_OVER_BUDGET": 98
+      },
+      "section": "27,28A",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 72,
+        "NORMAL": 86,
+        "RESTRICTED": 42
+      },
+      "tags": [
+        "comm",
+        "timing",
+        "scenario_a"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "NOMINAL": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 200
+      },
+      "description": "every declared signal inside every declared threshold",
+      "expectation_written_before_the_run": "SYSTEM NORMAL; no adverse evidence; attribution NO_EVIDENCE",
+      "final": {
+        "attribution": "NO_EVIDENCE",
+        "candidates": [],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "ELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "ELIGIBLE",
+          "PRECISION_NAVIGATION": "ELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [],
+        "system": "NORMAL",
+        "unsupported": []
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 200
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 0,
+        "head": "0000000000000000000000000000000000000000000000000000000000000000",
+        "problems": []
+      },
+      "limiting_domains": {},
+      "reason_codes": {},
+      "section": "baseline",
+      "system": "aircraft",
+      "system_states": {
+        "NORMAL": 200
+      },
+      "tags": [],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "PACKET_LOSS": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 68,
+        "UNIQUE": 132
+      },
+      "description": "GNSS serial link loses messages and falls below rate",
+      "expectation_written_before_the_run": "COMMUNICATION is the candidate; the link failure is NOT reported as a sensor failure",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "COMMUNICATION/gnss_serial"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "VIOLATED",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "ELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "ELIGIBLE",
+          "PRECISION_NAVIGATION": "ELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMMUNICATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": []
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 200
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "DEGRADED": 32,
+          "ELIGIBLE": 68,
+          "INELIGIBLE": 100
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 7,
+        "head": "e3b07417b7e9d35bf4e078afea8efeb82ce9a518f0775dfdfa516363739d960c",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMMUNICATION": 132
+      },
+      "reason_codes": {
+        "COMM_PACKET_LOSS": 132,
+        "COMM_RATE_MARGINAL": 60
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 32,
+        "NORMAL": 68,
+        "RESTRICTED": 100
+      },
+      "tags": [
+        "comm"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "POWER_SAG": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 50,
+        "NO_EVIDENCE": 79,
+        "UNIQUE": 71
+      },
+      "description": "battery terminal voltage collapses under unchanged load",
+      "expectation_written_before_the_run": "POWER limits functions; the BATTERY is the candidate and the rails follow it, so the source is NOT exonerated",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "POWER/battery",
+          "POWER/rail_3v3",
+          "POWER/rail_5v"
+        ],
+        "common_cause": "POWER/battery",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "INELIGIBLE",
+          "LOGGING": "INELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "INELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "UNAVAILABLE",
+        "unsupported": [
+          "ACTUATION/motor_0"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "COARSE_NAVIGATION": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "GEOFENCE_SUPPORT": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "INERTIAL_CONTINUATION": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "LOGGING": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "POSITION_HOLD": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "PRECISION_NAVIGATION": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "PROPULSION": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "SENSING": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        },
+        "TELEMETRY": {
+          "DEGRADED": 19,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 102
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 27,
+        "head": "e94024559b8c5df8ca645a68a937b1c1b91fd9b9e7ea5bbd5861c2d966fb2abf",
+        "problems": []
+      },
+      "limiting_domains": {
+        "POWER": 121
+      },
+      "reason_codes": {
+        "POWER_EXCESS_DROOP": 1210,
+        "POWER_RAIL_MARGINAL": 186,
+        "POWER_RAIL_OUT_OF_TOLERANCE": 229
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 19,
+        "NORMAL": 79,
+        "UNAVAILABLE": 102
+      },
+      "tags": [
+        "power"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "PROCESS_STALL": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 71,
+        "UNIQUE": 129
+      },
+      "description": "estimator heartbeat and output age grow without bound",
+      "expectation_written_before_the_run": "process_alive VIOLATED; the functions that need it become INELIGIBLE; the sensor domain is untouched",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "COMPUTE/state_estimator"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "VIOLATED",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMPUTE"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "COMPUTE/cpu"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 71,
+          "INELIGIBLE": 129
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 6,
+        "head": "1588f0bcc6994599b9e4377ea619efe1eaf9a9f48dd088bf74eb86adbc1ecf0e",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMPUTE": 129
+      },
+      "reason_codes": {
+        "COMPUTE_HEARTBEAT_STALE": 387,
+        "COMPUTE_NO_OUTPUT": 387,
+        "COMPUTE_QUEUE_BACKLOG": 333
+      },
+      "section": "27",
+      "system": "aircraft",
+      "system_states": {
+        "NORMAL": 71,
+        "RESTRICTED": 129
+      },
+      "tags": [
+        "compute"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "REGULATOR_FAILURE": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 83,
+        "UNIQUE": 117
+      },
+      "description": "5 V rail leaves tolerance; battery untouched",
+      "expectation_written_before_the_run": "distribution/regulator candidate; battery affirmatively nominal and named as exonerated",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "COARSE_NAVIGATION": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "GEOFENCE_SUPPORT": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "PRECISION_NAVIGATION": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        },
+        "TELEMETRY": {
+          "DEGRADED": 29,
+          "ELIGIBLE": 83,
+          "INELIGIBLE": 88
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 19,
+        "head": "148cc193cda4de04d09d8af2facc4593e0738cf40712aa58ff2b04b373f1a5b8",
+        "problems": []
+      },
+      "limiting_domains": {
+        "POWER": 117
+      },
+      "reason_codes": {
+        "POWER_DISTRIBUTION_SUSPECT": 819,
+        "POWER_RAIL_MARGINAL": 203,
+        "POWER_RAIL_OUT_OF_TOLERANCE": 616
+      },
+      "section": "27,28B",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 29,
+        "NORMAL": 83,
+        "RESTRICTED": 88
+      },
+      "tags": [
+        "power",
+        "scenario_b"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "SHARED_RAIL": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 104,
+        "UNIQUE": 96
+      },
+      "description": "one rail out of tolerance with several dependants",
+      "expectation_written_before_the_run": "AMBIGUOUS with the rail retained as a common-cause alternative, NOT adopted as the answer",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "COMMUNICATION/gnss_serial",
+          "COMMUNICATION/telemetry_radio",
+          "POWER/rail_3v3",
+          "POWER/rail_5v",
+          "SENSOR/source.gps"
+        ],
+        "common_cause": "POWER/rail_5v",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "VIOLATED",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "VIOLATED",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "INELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "ELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMMUNICATION",
+          "POWER",
+          "SENSOR"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "POWER/battery"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "INELIGIBLE": 200
+        },
+        "COARSE_NAVIGATION": {
+          "INELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "INELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "DEGRADED": 55,
+          "ELIGIBLE": 97,
+          "INELIGIBLE": 48
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "INELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "INELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "ELIGIBLE": 200
+        },
+        "SENSING": {
+          "INELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "DEGRADED": 44,
+          "ELIGIBLE": 96,
+          "INELIGIBLE": 60
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 14,
+        "head": "413d420aa47ab7e43a3953a16a70e3a0078cc82c661fc8f0ca74763e16c37c6b",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMMUNICATION": 80,
+        "POWER": 104,
+        "SENSOR": 200
+      },
+      "reason_codes": {
+        "COMM_RATE_LOW": 80,
+        "COMM_RATE_MARGINAL": 120,
+        "POWER_DISTRIBUTION_SUSPECT": 831,
+        "POWER_RAIL_MARGINAL": 435,
+        "POWER_RAIL_OUT_OF_TOLERANCE": 468,
+        "REQUIRED_RELATION_NOT_APPLICABLE": 800,
+        "REQUIRED_SOURCE_NOT_FRESH": 800,
+        "SOURCE_NOT_FRESH": 400,
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION": 800
+      },
+      "section": "28E",
+      "system": "aircraft",
+      "system_states": {
+        "RESTRICTED": 200
+      },
+      "tags": [
+        "power",
+        "scenario_e"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "fixloss"
+    },
+    "SHARED_SOURCE": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 200
+      },
+      "description": "battery droops past its declared limit while the REAL v1.1 payload has two sources alarming on that same node",
+      "expectation_written_before_the_run": "AMBIGUOUS with POWER/battery retained as the common cause of two SENSOR candidates; v1.1's own function verdicts are unchanged, because a sequential alarm is not a cause",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "POWER/battery",
+          "SENSOR/source.battery",
+          "SENSOR/source.motor_esc"
+        ],
+        "common_cause": "POWER/battery",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "SENSOR": "DEGRADED",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "INELIGIBLE",
+          "GEOFENCE_SUPPORT": "INELIGIBLE",
+          "INERTIAL_CONTINUATION": "INELIGIBLE",
+          "LOGGING": "INELIGIBLE",
+          "POSITION_HOLD": "INELIGIBLE",
+          "PRECISION_NAVIGATION": "INELIGIBLE",
+          "PROPULSION": "INELIGIBLE",
+          "SENSING": "INELIGIBLE",
+          "TELEMETRY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "UNAVAILABLE",
+        "unsupported": [
+          "ACTUATION/motor_0",
+          "COMMUNICATION/gnss_serial",
+          "POWER/rail_5v"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 153,
+          "INELIGIBLE": 47
+        },
+        "COARSE_NAVIGATION": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "GEOFENCE_SUPPORT": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "INERTIAL_CONTINUATION": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "LOGGING": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "POSITION_HOLD": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "PRECISION_NAVIGATION": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "PROPULSION": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        },
+        "SENSING": {
+          "DEGRADED": 153,
+          "INELIGIBLE": 47
+        },
+        "TELEMETRY": {
+          "DEGRADED": 46,
+          "ELIGIBLE": 107,
+          "INELIGIBLE": 47
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 24,
+        "head": "a3196490a6d7a9e28067ff95f73c4cc0ff3d93311c33521ddbe3fdc408e694f5",
+        "problems": []
+      },
+      "limiting_domains": {
+        "POWER": 93,
+        "SENSOR": 153
+      },
+      "reason_codes": {
+        "POWER_EXCESS_DROOP": 930,
+        "SEQUENTIAL_ALARM": 400
+      },
+      "section": "28E",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 153,
+        "UNAVAILABLE": 47
+      },
+      "tags": [
+        "power",
+        "scenario_e"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "shared_source"
+    },
+    "STALLED_ACTUATOR": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 90,
+        "UNIQUE": 110
+      },
+      "description": "command sent, ESC receives, current rises, RPM does not",
+      "expectation_written_before_the_run": "ACT_STALLED: a mechanical/load candidate, distinct from the no-current signature",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "ACTUATION/motor_0"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "VIOLATED",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "SENSOR": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "AUTONOMOUS_MISSION": "INELIGIBLE",
+          "COARSE_NAVIGATION": "ELIGIBLE",
+          "GEOFENCE_SUPPORT": "ELIGIBLE",
+          "INERTIAL_CONTINUATION": "ELIGIBLE",
+          "LOGGING": "ELIGIBLE",
+          "POSITION_HOLD": "ELIGIBLE",
+          "PRECISION_NAVIGATION": "ELIGIBLE",
+          "PROPULSION": "INELIGIBLE",
+          "SENSING": "ELIGIBLE",
+          "TELEMETRY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "ACTUATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "POWER/battery"
+        ]
+      },
+      "function_states": {
+        "AUTONOMOUS_MISSION": {
+          "DEGRADED": 74,
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 36
+        },
+        "COARSE_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "GEOFENCE_SUPPORT": {
+          "ELIGIBLE": 200
+        },
+        "INERTIAL_CONTINUATION": {
+          "ELIGIBLE": 200
+        },
+        "LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "POSITION_HOLD": {
+          "ELIGIBLE": 200
+        },
+        "PRECISION_NAVIGATION": {
+          "ELIGIBLE": 200
+        },
+        "PROPULSION": {
+          "DEGRADED": 74,
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 36
+        },
+        "SENSING": {
+          "ELIGIBLE": 200
+        },
+        "TELEMETRY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 9,
+        "head": "05a1fea010fc94720962bb7e103181977b9ce4808ad603c1fe940e833b5b82af",
+        "problems": []
+      },
+      "limiting_domains": {
+        "ACTUATION": 110
+      },
+      "reason_codes": {
+        "ACT_OVERCURRENT": 86,
+        "ACT_RESPONSE_LOW": 148,
+        "ACT_STALLED": 72
+      },
+      "section": "28C",
+      "system": "aircraft",
+      "system_states": {
+        "DEGRADED": 74,
+        "NORMAL": 90,
+        "RESTRICTED": 36
+      },
+      "tags": [
+        "actuation",
+        "scenario_c"
+      ],
+      "ticks": 200,
+      "v1_1_variant": "clean"
+    },
+    "TS_CPU_OVERLOAD": {
+      "attribution_verdicts": {
+        "AMBIGUOUS": 105,
+        "NO_EVIDENCE": 87,
+        "UNIQUE": 8
+      },
+      "description": "controller loop saturates",
+      "expectation_written_before_the_run": "COMPUTE and TIMING limit TEST_SEQUENCE_EXECUTION",
+      "final": {
+        "attribution": "AMBIGUOUS",
+        "candidates": [
+          "COMPUTE/controller",
+          "COMPUTE/cpu",
+          "TIMING/encoder",
+          "TIMING/encoder.processing_delay"
+        ],
+        "common_cause": "COMPUTE/cpu",
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "VIOLATED",
+          "POWER": "NOMINAL",
+          "TIMING": "VIOLATED"
+        },
+        "functions": {
+          "DATA_LOGGING": "INELIGIBLE",
+          "SPEED_MEASUREMENT": "INELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "INELIGIBLE",
+          "TORQUE_DELIVERY": "DEGRADED"
+        },
+        "limiting_domains": [
+          "COMPUTE",
+          "TIMING"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": []
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "DEGRADED": 26,
+          "ELIGIBLE": 169,
+          "INELIGIBLE": 5
+        },
+        "SPEED_MEASUREMENT": {
+          "DEGRADED": 16,
+          "ELIGIBLE": 87,
+          "INELIGIBLE": 97
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "ELIGIBLE": 87,
+          "INELIGIBLE": 113
+        },
+        "TORQUE_DELIVERY": {
+          "DEGRADED": 105,
+          "ELIGIBLE": 95
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 16,
+        "head": "4bd0e503314cdb0f5d02236ff164352ec3701e8428410a80b6f6625b6213eae2",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMPUTE": 105,
+        "TIMING": 113
+      },
+      "reason_codes": {
+        "COMPUTE_CPU_SATURATED": 93,
+        "COMPUTE_DEADLINE_MARGINAL": 34,
+        "COMPUTE_DEADLINE_MISSED": 176,
+        "TIMING_DEADLINE_MARGINAL": 78,
+        "TIMING_DEADLINE_MISSED": 24,
+        "TIMING_SEGMENT_MARGINAL": 32,
+        "TIMING_SEGMENT_OVER_BUDGET": 194
+      },
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "NORMAL": 87,
+        "RESTRICTED": 113
+      },
+      "tags": [
+        "compute",
+        "timing"
+      ],
+      "ticks": 200,
+      "v1_1_variant": null
+    },
+    "TS_ENCODER_LOSS": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 62,
+        "UNIQUE": 138
+      },
+      "description": "encoder bus loses messages",
+      "expectation_written_before_the_run": "SPEED_MEASUREMENT limited by COMMUNICATION",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "COMMUNICATION/encoder_bus"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "VIOLATED",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "DATA_LOGGING": "ELIGIBLE",
+          "SPEED_MEASUREMENT": "INELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "INELIGIBLE",
+          "TORQUE_DELIVERY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "COMMUNICATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": []
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "SPEED_MEASUREMENT": {
+          "DEGRADED": 16,
+          "ELIGIBLE": 62,
+          "INELIGIBLE": 122
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "DEGRADED": 16,
+          "ELIGIBLE": 62,
+          "INELIGIBLE": 122
+        },
+        "TORQUE_DELIVERY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 9,
+        "head": "251c4f1ae2829e10e90e3772a891846357910495227d768500ef114db31e09ca",
+        "problems": []
+      },
+      "limiting_domains": {
+        "COMMUNICATION": 138
+      },
+      "reason_codes": {
+        "COMM_PACKET_LOSS": 276
+      },
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "DEGRADED": 16,
+        "NORMAL": 62,
+        "RESTRICTED": 122
+      },
+      "tags": [
+        "comm"
+      ],
+      "ticks": 200,
+      "v1_1_variant": null
+    },
+    "TS_NOMINAL": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 200
+      },
+      "description": "bench at its run point",
+      "expectation_written_before_the_run": "SYSTEM NORMAL",
+      "final": {
+        "attribution": "NO_EVIDENCE",
+        "candidates": [],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "DATA_LOGGING": "ELIGIBLE",
+          "SPEED_MEASUREMENT": "ELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "ELIGIBLE",
+          "TORQUE_DELIVERY": "ELIGIBLE"
+        },
+        "limiting_domains": [],
+        "system": "NORMAL",
+        "unsupported": []
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "SPEED_MEASUREMENT": {
+          "ELIGIBLE": 200
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "ELIGIBLE": 200
+        },
+        "TORQUE_DELIVERY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 0,
+        "head": "0000000000000000000000000000000000000000000000000000000000000000",
+        "problems": []
+      },
+      "limiting_domains": {},
+      "reason_codes": {},
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "NORMAL": 200
+      },
+      "tags": [],
+      "ticks": 200,
+      "v1_1_variant": null
+    },
+    "TS_REGULATOR_FAILURE": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 79,
+        "UNIQUE": 121
+      },
+      "description": "5 V logic rail fails; supply healthy",
+      "expectation_written_before_the_run": "same exoneration as the aircraft profile, with no aviation code involved",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "POWER/rail_5v"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "DATA_LOGGING": "ELIGIBLE",
+          "SPEED_MEASUREMENT": "ELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "INELIGIBLE",
+          "TORQUE_DELIVERY": "ELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "ACTUATION/dyno_motor",
+          "POWER/dc_supply"
+        ]
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "SPEED_MEASUREMENT": {
+          "ELIGIBLE": 200
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "DEGRADED": 26,
+          "ELIGIBLE": 79,
+          "INELIGIBLE": 95
+        },
+        "TORQUE_DELIVERY": {
+          "ELIGIBLE": 200
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 7,
+        "head": "d158a73aa18095c1c7d8e3417ec4d42bc195ed1f1c07ec77a4fe4aad78050a3d",
+        "problems": []
+      },
+      "limiting_domains": {
+        "POWER": 121
+      },
+      "reason_codes": {
+        "POWER_DISTRIBUTION_SUSPECT": 121,
+        "POWER_RAIL_MARGINAL": 26,
+        "POWER_RAIL_OUT_OF_TOLERANCE": 95
+      },
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "DEGRADED": 26,
+        "NORMAL": 79,
+        "RESTRICTED": 95
+      },
+      "tags": [
+        "power"
+      ],
+      "ticks": 200,
+      "v1_1_variant": null
+    },
+    "TS_STALLED": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 90,
+        "UNIQUE": 110
+      },
+      "description": "drive current rises, shaft does not turn, torque falls",
+      "expectation_written_before_the_run": "ACT_STALLED plus a physical-response finding",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "ACTUATION/dyno_motor"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "VIOLATED",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "NOMINAL",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "DATA_LOGGING": "ELIGIBLE",
+          "SPEED_MEASUREMENT": "INELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "INELIGIBLE",
+          "TORQUE_DELIVERY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "ACTUATION"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "POWER/dc_supply"
+        ]
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "SPEED_MEASUREMENT": {
+          "DEGRADED": 23,
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 87
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "DEGRADED": 23,
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 87
+        },
+        "TORQUE_DELIVERY": {
+          "DEGRADED": 23,
+          "ELIGIBLE": 90,
+          "INELIGIBLE": 87
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 11,
+        "head": "b01f4f7c621febd82e4610fa4762f7107df07627e3fdb0a56b15897d25844ac1",
+        "problems": []
+      },
+      "limiting_domains": {
+        "ACTUATION": 110
+      },
+      "reason_codes": {
+        "ACT_NO_PHYSICAL_RESPONSE": 261,
+        "ACT_OVERCURRENT": 132,
+        "ACT_RESPONSE_LOW": 219,
+        "ACT_STALLED": 111
+      },
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "DEGRADED": 23,
+        "NORMAL": 90,
+        "RESTRICTED": 87
+      },
+      "tags": [
+        "actuation"
+      ],
+      "ticks": 200,
+      "v1_1_variant": null
+    },
+    "TS_SUPPLY_SAG": {
+      "attribution_verdicts": {
+        "NO_EVIDENCE": 88,
+        "UNIQUE": 112
+      },
+      "description": "DC supply droops under load",
+      "expectation_written_before_the_run": "POWER limits TORQUE_DELIVERY and the sequence function",
+      "final": {
+        "attribution": "UNIQUE",
+        "candidates": [
+          "POWER/dc_supply"
+        ],
+        "common_cause": null,
+        "domains": {
+          "ACTUATION": "NOMINAL",
+          "COMMUNICATION": "NOMINAL",
+          "COMPUTE": "NOMINAL",
+          "POWER": "VIOLATED",
+          "TIMING": "NOMINAL"
+        },
+        "functions": {
+          "DATA_LOGGING": "ELIGIBLE",
+          "SPEED_MEASUREMENT": "ELIGIBLE",
+          "TEST_SEQUENCE_EXECUTION": "INELIGIBLE",
+          "TORQUE_DELIVERY": "INELIGIBLE"
+        },
+        "limiting_domains": [
+          "POWER"
+        ],
+        "system": "RESTRICTED",
+        "unsupported": [
+          "ACTUATION/dyno_motor"
+        ]
+      },
+      "function_states": {
+        "DATA_LOGGING": {
+          "ELIGIBLE": 200
+        },
+        "SPEED_MEASUREMENT": {
+          "ELIGIBLE": 200
+        },
+        "TEST_SEQUENCE_EXECUTION": {
+          "DEGRADED": 56,
+          "ELIGIBLE": 88,
+          "INELIGIBLE": 56
+        },
+        "TORQUE_DELIVERY": {
+          "DEGRADED": 56,
+          "ELIGIBLE": 88,
+          "INELIGIBLE": 56
+        }
+      },
+      "ledger": {
+        "chain_ok": true,
+        "events": 9,
+        "head": "cc7185c225819169fb0f5792a727bffbe59cd0a64096604f732c1dbca70fcaf0",
+        "problems": []
+      },
+      "limiting_domains": {
+        "POWER": 112
+      },
+      "reason_codes": {
+        "POWER_EXCESS_DROOP": 224
+      },
+      "section": "37",
+      "system": "test_stand",
+      "system_states": {
+        "DEGRADED": 56,
+        "NORMAL": 88,
+        "RESTRICTED": 56
+      },
+      "tags": [
+        "power"
+      ],
+      "ticks": 200,
+      "v1_1_variant": null
+    }
+  },
+  "ticks_per_scenario": 200
+}

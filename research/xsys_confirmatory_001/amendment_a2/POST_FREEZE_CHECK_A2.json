@@ -1,0 +1,154 @@
+{
+ "label": "XSYS-001-A2 POST-FREEZE VALIDATION - NO CONFIRMATORY FLIGHT",
+ "a2_manifest_sha256": "d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f",
+ "decision": "C1 C2 C3 C4-A2 C5 ALL PASS (guard tests still required)",
+ "checks": {
+  "01_xsys001_unchanged": {
+   "pass": true,
+   "verify": "{\"manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 31, \"violations\": []}",
+   "test": "..                                                                       [100%]"
+  },
+  "02_a1_unchanged": {
+   "pass": true,
+   "verify": "{\"amendment_manifest_sha256\": \"55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b\", \"parent_manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 59, \"violations\": []}",
+   "test": "...                                                                      [100%]"
+  },
+  "03_a2_frozen": {
+   "pass": true,
+   "verify": "{\"a2_manifest_sha256\": \"d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f\", \"a1_manifest_sha256\": \"55d72d390059449c01d12b4a9007db155a3add1df6a25f26dd9000142825dd3b\", \"xsys001_manifest_sha256\": \"868880182a8c242abef9fb5dca2d250f2af9f9f83abbe703979c0eb7b300407b\", \"frozen_files\": 74, \"violations\": []}",
+   "test": "...                                                                      [100%]"
+  },
+  "04_original_manifest_unchanged": {
+   "pass": true
+  },
+  "05_a1_manifest_unchanged": {
+   "pass": true
+  },
+  "06_C1_unchanged": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "07_C2_unchanged": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "08_C3_unchanged": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "09_C5_unchanged": {
+   "pass": true,
+   "test": ".                                                                        [100%]"
+  },
+  "10_confirmatory_matrix_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    ".                                                                        [100%]"
+   ]
+  },
+  "11_confirmatory_order_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    ".                                                                        [100%]"
+   ]
+  },
+  "12_eta_levels_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "13_thresholds_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "14_windows_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "15_hypotheses_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "16_primary_endpoint_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "17_zero_wrong_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "18_v2_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "19_px4_patch_unchanged": {
+   "pass": true,
+   "test": [
+    ".                                                                        [100%]",
+    "..                                                                       [100%]"
+   ]
+  },
+  "20_confirmatory_flights_zero": {
+   "pass": true,
+   "campaigns": [],
+   "confirmatory_logs_or_records": [],
+   "count": 0
+  },
+  "21_confirmatory_analysis_trials_zero": {
+   "pass": true,
+   "stage_outputs": [],
+   "count": 0
+  },
+  "22_executor_dry_run_lists_a1_order": {
+   "pass": true,
+   "summary": {
+    "flights_in_order": 66,
+    "manifest_sha256": "d86e857d000d54502ec66bcbc83dbf679c55903aaf8ffe5e557e4514b1dded8f",
+    "px4_sha256": "4073466f1b3e42ed073b88d45bda4e4d1168a35730eb23f470ae5a0744dfc085",
+    "source_verified": true,
+    "dry_run": true,
+    "accepted_for_execution": true,
+    "binary_equals_reference_build": true
+   }
+  },
+  "23_executor_gate_matches_decision": {
+   "pass": true,
+   "decision": "C1 C2 C3 C4-A2 C5 ALL PASS (guard tests still required)",
+   "refusal": "PX4 source: git rev-parse HEAD^ failed: fatal: cannot change to '<scratch>/no_px4_tree': No such file or directory"
+  },
+  "24_tamper_detected": {
+   "pass": true,
+   "guard_test_failed": true,
+   "freeze_a2_verify_failed": true,
+   "executor_refused": true,
+   "restored_and_verified": true
+  },
+  "25_all_guard_tests": {
+   "pass": true,
+   "summary": "...................................                                      [100%]"
+  }
+ },
+ "all_pass": true
+}

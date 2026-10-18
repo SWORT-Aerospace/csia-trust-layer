@@ -1,0 +1,74 @@
+%YAML 1.2
+---
+# Minimal ArduPilot airframe — a single-IMU board with no ESC telemetry.
+#
+# THIS PROFILE EXISTS TO BE HONEST ABOUT A LIMITATION, not to demonstrate
+# breadth. It is the case where capability negotiation has to say something
+# uncomfortable before the vehicle flies:
+#
+#   redundant_imu        INAPPLICABLE  -- the board has one IMU
+#   accel_esc_rpm        NOT_CONFIGURED
+#   power_thrust         NOT_CONFIGURED
+#   vibration_prop_freq  NOT_CONFIGURED
+#
+# Four of the eleven relations in the frozen trust graph cannot be fed. A
+# layer that reported this vehicle "healthy" on the strength of the remaining
+# seven would be committing exactly the error the systems paper measures:
+# treating absence of applicable evidence as evidence of health.
+#
+# The two statuses are different and both are non-faults:
+#   `status: inapplicable`  the airframe structurally cannot provide it
+#   omitted entirely        not wired up on this build
+# Collapsing them would lose the distinction between "this board has one IMU"
+# and "somebody forgot the cable".
+
+vehicle_profile:
+  id: minimal_single_imu_ardupilot
+  airframe: quad_x
+  description: >-
+    Single-IMU flight controller, no ESC telemetry bus, no current sensor.
+    Included as a reference for what CSIA reports when the airframe cannot
+    feed most of the relation graph.
+
+autopilot:
+  family: ardupilot
+  version_observed_at_runtime: true
+
+transport:
+  mavlink:
+    port: "udp:0.0.0.0:14550"
+    baud: 921600
+    sysid: 1
+    transmit: false
+
+streams:
+  imu0.accel:            {nominal_rate_hz: 25}
+  imu0.gyro:             {nominal_rate_hz: 25}
+  # Structurally absent: this board has one IMU. Not a fault, and it must not
+  # be reported as one.
+  imu1.accel:            {status: inapplicable}
+  imu1.gyro:             {status: inapplicable}
+  mag.field_ut:          {nominal_rate_hz: 25}
+  baro.altitude:         {nominal_rate_hz: 10}
+  gnss.position:         {nominal_rate_hz: 5}
+  gnss.velocity:         {nominal_rate_hz: 5}
+  battery.voltage:       {nominal_rate_hz: 10}
+  vehicle_status.armed:  {nominal_rate_hz: 1}
+  # battery.current, esc.rpm, esc.current and vibration.rms are OMITTED, not
+  # marked inapplicable: this build has no current sensor and no ESC
+  # telemetry bus, but the airframe could carry them.
+
+functions:
+  position_hold: expected
+  precision_navigation: expected
+  inertial_continuation: degraded_no_redundant_imu
+
+experiment:
+  fault_injector:
+    enabled: false
+    channels: {}
+
+safety:
+  shadow_only: true
+  props_removed_for_bench: true
+  independent_pilot_authority_required: true

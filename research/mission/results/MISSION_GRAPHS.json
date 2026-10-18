@@ -1,0 +1,243 @@
+{
+  "CAPABILITY_GRAPH": {
+    "nodes": [
+      "RGB_capture",
+      "absolute_navigation",
+      "airspeed_regulation",
+      "altitude_hold",
+      "attitude_hold",
+      "controlled_glide",
+      "global_mapping",
+      "local_mapping",
+      "relative_navigation",
+      "stable_flight",
+      "telemetry_downlink",
+      "thermal_capture",
+      "timing"
+    ],
+    "requires_capabilities": {
+      "RGB_capture": [
+        "timing"
+      ],
+      "absolute_navigation": [
+        "attitude_hold",
+        "timing"
+      ],
+      "airspeed_regulation": [
+        "attitude_hold"
+      ],
+      "altitude_hold": [
+        "attitude_hold"
+      ],
+      "attitude_hold": [
+        "timing"
+      ],
+      "controlled_glide": [
+        "attitude_hold"
+      ],
+      "global_mapping": [
+        "RGB_capture",
+        "absolute_navigation"
+      ],
+      "local_mapping": [
+        "RGB_capture",
+        "relative_navigation"
+      ],
+      "relative_navigation": [
+        "attitude_hold",
+        "timing"
+      ],
+      "stable_flight": [
+        "altitude_hold",
+        "attitude_hold"
+      ],
+      "telemetry_downlink": [],
+      "thermal_capture": [
+        "timing"
+      ],
+      "timing": []
+    },
+    "requires_evidence": {
+      "RGB_capture": [
+        "camera.rgb.available"
+      ],
+      "absolute_navigation": [
+        "gnss.position.supported"
+      ],
+      "airspeed_regulation": [
+        "airspeed.supported"
+      ],
+      "altitude_hold": [
+        "baro.altitude.supported"
+      ],
+      "attitude_hold": [
+        "attitude.supported",
+        "imu.primary.supported",
+        "imu.reference.supported"
+      ],
+      "controlled_glide": [],
+      "global_mapping": [],
+      "local_mapping": [],
+      "relative_navigation": [
+        "imu.reference.supported",
+        "visual_odometry.supported"
+      ],
+      "stable_flight": [],
+      "telemetry_downlink": [
+        "comms.telemetry_link.supported"
+      ],
+      "thermal_capture": [
+        "camera.thermal.available"
+      ],
+      "timing": [
+        "timebase.supported"
+      ]
+    }
+  },
+  "EVIDENCE_GRAPH": {
+    "nodes": [
+      "airspeed.supported",
+      "attitude.supported",
+      "baro.altitude.supported",
+      "camera.rgb.available",
+      "camera.rgb.calibration_valid",
+      "camera.thermal.available",
+      "camera.thermal.calibration_valid",
+      "camera_navigation_timing.supported",
+      "comms.telemetry_link.supported",
+      "gnss.position.supported",
+      "gnss.velocity.supported",
+      "imu.primary.supported",
+      "imu.reference.supported",
+      "timebase.supported",
+      "visual_odometry.supported"
+    ],
+    "sources": {}
+  },
+  "MISSION_PRODUCT_GRAPH": {
+    "nodes": [
+      "bridge_rgb_inspection",
+      "bridge_thermal_inspection",
+      "global_rgb_orthomosaic",
+      "raw_evidence_package",
+      "relative_reconstruction"
+    ],
+    "property_edges": {
+      "bridge_rgb_inspection": {
+        "absolute_geolocation": {
+          "capabilities": [
+            "absolute_navigation"
+          ],
+          "evidence": []
+        },
+        "imagery_quality": {
+          "capabilities": [
+            "RGB_capture"
+          ],
+          "evidence": [
+            "camera.rgb.calibration_valid"
+          ]
+        },
+        "relative_geometry": {
+          "capabilities": [
+            "relative_navigation"
+          ],
+          "evidence": []
+        }
+      },
+      "bridge_thermal_inspection": {
+        "imagery_quality": {
+          "capabilities": [],
+          "evidence": [
+            "camera.thermal.available"
+          ]
+        },
+        "radiometric_calibration": {
+          "capabilities": [],
+          "evidence": [
+            "camera.thermal.calibration_valid"
+          ]
+        },
+        "thermal_alignment": {
+          "capabilities": [
+            "relative_navigation"
+          ],
+          "evidence": [
+            "camera_navigation_timing.supported"
+          ]
+        }
+      },
+      "global_rgb_orthomosaic": {
+        "absolute_geolocation": {
+          "capabilities": [
+            "absolute_navigation"
+          ],
+          "evidence": []
+        },
+        "survey_grade": {
+          "capabilities": [
+            "absolute_navigation"
+          ],
+          "evidence": [
+            "gnss.velocity.supported"
+          ]
+        }
+      },
+      "raw_evidence_package": {
+        "temporal_consistency": {
+          "capabilities": [
+            "timing"
+          ],
+          "evidence": []
+        }
+      },
+      "relative_reconstruction": {
+        "relative_geometry": {
+          "capabilities": [
+            "local_mapping"
+          ],
+          "evidence": []
+        },
+        "temporal_consistency": {
+          "capabilities": [
+            "timing"
+          ],
+          "evidence": []
+        }
+      }
+    },
+    "requires_capabilities": {
+      "bridge_rgb_inspection": [
+        "RGB_capture"
+      ],
+      "bridge_thermal_inspection": [
+        "thermal_capture"
+      ],
+      "global_rgb_orthomosaic": [
+        "global_mapping"
+      ],
+      "raw_evidence_package": [],
+      "relative_reconstruction": [
+        "local_mapping"
+      ]
+    },
+    "requires_evidence": {
+      "bridge_rgb_inspection": [],
+      "bridge_thermal_inspection": [],
+      "global_rgb_orthomosaic": [
+        "camera.rgb.calibration_valid",
+        "camera_navigation_timing.supported"
+      ],
+      "raw_evidence_package": [],
+      "relative_reconstruction": []
+    }
+  },
+  "edge_direction": "downward only; see PERMITTED_EDGE_DIRECTIONS",
+  "levels": [
+    "EVIDENCE_GRAPH",
+    "CAPABILITY_GRAPH",
+    "MISSION_PRODUCT_GRAPH"
+  ],
+  "schema": "csia.mission.graphs/1",
+  "why_three": "An evidence failure may remove one product while preserving another. In one flat graph both hang off the same subtree and the natural implementation removes both."
+}

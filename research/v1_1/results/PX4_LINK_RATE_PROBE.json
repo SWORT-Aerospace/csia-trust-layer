@@ -1,0 +1,214 @@
+{
+ "airframe": {
+  "PX4_SIM_MODEL": "sihsim_quadx",
+  "PX4_SYS_AUTOSTART": "10040"
+ },
+ "arms": {
+  "passive": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3918,
+      "hz": 97.945
+     },
+     "BATTERY_STATUS": {
+      "count": 20,
+      "hz": 0.5
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1959,
+      "hz": 48.973
+     },
+     "GPS_RAW_INT": {
+      "count": 314,
+      "hz": 7.85
+     },
+     "SCALED_PRESSURE": {
+      "count": 40,
+      "hz": 1.0
+     },
+     "VIBRATION": {
+      "count": 20,
+      "hz": 0.5
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1960,
+      "hz": 48.998
+     },
+     "BATTERY_STATUS": {
+      "count": 20,
+      "hz": 0.5
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1959,
+      "hz": 48.973
+     },
+     "GPS_RAW_INT": {
+      "count": 196,
+      "hz": 4.9
+     },
+     "SCALED_PRESSURE": {
+      "count": 40,
+      "hz": 1.0
+     },
+     "VIBRATION": {
+      "count": 4,
+      "hz": 0.1
+     }
+    }
+   },
+   "seconds": 40.002
+  },
+  "request": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3903,
+      "hz": 97.573
+     },
+     "BATTERY_STATUS": {
+      "count": 20,
+      "hz": 0.5
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1951,
+      "hz": 48.774
+     },
+     "GPS_RAW_INT": {
+      "count": 312,
+      "hz": 7.8
+     },
+     "SCALED_PRESSURE": {
+      "count": 40,
+      "hz": 1.0
+     },
+     "VIBRATION": {
+      "count": 20,
+      "hz": 0.5
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1952,
+      "hz": 48.799
+     },
+     "BATTERY_STATUS": {
+      "count": 390,
+      "hz": 9.75
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 391,
+      "hz": 9.775
+     },
+     "GPS_RAW_INT": {
+      "count": 195,
+      "hz": 4.875
+     },
+     "SCALED_PRESSURE": {
+      "count": 390,
+      "hz": 9.75
+     },
+     "VIBRATION": {
+      "count": 390,
+      "hz": 9.75
+     }
+    }
+   },
+   "seconds": 40.001
+  },
+  "request_onboard": {
+   "links": {
+    "14540": {
+     "ATTITUDE": {
+      "count": 3908,
+      "hz": 97.696
+     },
+     "BATTERY_STATUS": {
+      "count": 391,
+      "hz": 9.775
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1953,
+      "hz": 48.823
+     },
+     "GPS_RAW_INT": {
+      "count": 313,
+      "hz": 7.825
+     },
+     "SCALED_PRESSURE": {
+      "count": 391,
+      "hz": 9.775
+     },
+     "VIBRATION": {
+      "count": 391,
+      "hz": 9.775
+     }
+    },
+    "14550": {
+     "ATTITUDE": {
+      "count": 1954,
+      "hz": 48.848
+     },
+     "BATTERY_STATUS": {
+      "count": 19,
+      "hz": 0.475
+     },
+     "GLOBAL_POSITION_INT": {
+      "count": 1954,
+      "hz": 48.848
+     },
+     "GPS_RAW_INT": {
+      "count": 195,
+      "hz": 4.875
+     },
+     "SCALED_PRESSURE": {
+      "count": 39,
+      "hz": 0.975
+     },
+     "VIBRATION": {
+      "count": 4,
+      "hz": 0.1
+     }
+    }
+   },
+   "seconds": 40.002
+  }
+ },
+ "channels_in_dispute": {
+  "ATTITUDE": "control (not requested by any arm)",
+  "BATTERY_STATUS": "battery.voltage, battery.current",
+  "GLOBAL_POSITION_INT": "control (requested by connect(), msg 33)",
+  "GPS_RAW_INT": "control (requested by connect(), msg 24)",
+  "SCALED_PRESSURE": "baro.altitude, baro.temp_c",
+  "VIBRATION": "vibration.rms"
+ },
+ "consequence": "CHANNEL_SEMANTICS.yaml declares one rate per (channel, platform) and MAX_AGE_MARGIN derives max_age from it, so a declaration measured on a REQUESTING link starves a channel on a PASSIVE one",
+ "csia_link": "udpin:127.0.0.1:14540 -- passive, never transmits, so nothing ever raises its rates",
+ "finding": "the stream rate is a property of the LINK, set by whoever last transmitted SET_MESSAGE_INTERVAL on it, not a property of the platform or of the mavlink instance",
+ "onboard_requests": [
+  {
+   "hz": 10,
+   "msgid": 29
+  },
+  {
+   "hz": 10,
+   "msgid": 147
+  },
+  {
+   "hz": 10,
+   "msgid": 241
+  }
+ ],
+ "seconds_per_arm": 40.0,
+ "settle_discarded_s": 3.0,
+ "simulator_provenance": {
+  "firmware": "PX4-Autopilot",
+  "platform": "px4",
+  "root": "/home/user/px4",
+  "sha": "547e2caa9883bc1609325f02b4914b4e2482fe62",
+  "sha_short": "547e2ca"
+ },
+ "what_this_resolves": "qualification_px4.json and the shadow flight logs disagree by 10x about the same PX4 channel; both are correct"
+}

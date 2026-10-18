@@ -1,0 +1,207 @@
+{
+  "package": "research/ai_contract_synthesis",
+  "stage": "STAGE 0/1 -- prior-art kill test, blind-ordered contract extraction, deterministic verification, hallucination containment",
+  "base_commit": "2036a2a",
+  "freeze_commit": "bc9c85f",
+  "final_verdict": "HEURISTICS_SUFFICIENT",
+  "novelty": "NOT ESTABLISHED",
+  "claims": [
+    {
+      "id": "A1",
+      "claim": "The integrated architecture -- docs/source -> LLM-generated specification -> independent deterministic verification -> counterexample localisation, with explicit separation of hallucination from implementation bug -- is published prior art.",
+      "evidence": "PRIOR_ART_MATRIX.md. 'Validating Network Protocol Parsers with Traceable RFC Document Interpretation', ISSTA 2025 / PACMSE: LLM translates RFC documents into formal message specifications, treats them as a quasi-oracle that may contain hallucinations, validates C/Python/Go parsers against them, and traces each inconsistency back to the RFC section to decide whether it is an LLM hallucination or a parser bug. 69 bugs, 36 confirmed.",
+      "status": "KNOWN/SUBSUMED",
+      "assumptions": "Snippet-level reading only; full-text retrieval was blocked by the environment's egress policy for every scholarly host tried.",
+      "strongest_allowed_wording": "The architecture proposed in this brief is already published, on network protocols rather than autonomy interfaces.",
+      "forbidden_stronger_wording": "Anything implying the AI-proposes / verifier-disposes architecture, the quasi-oracle framing, or the hallucination-versus-bug separation originates here.",
+      "next_falsification_test": "Read the ISSTA paper in full and check whether its traceability step really separates specification error from implementation error, or only reports both."
+    },
+    {
+      "id": "A2",
+      "claim": "Item 5's kill condition does not fire on its literal terms: no single work was found doing this on autonomous/cyber-physical interfaces with evidence/status semantics.",
+      "evidence": "PRIOR_ART_MATRIX.md item-4 columns: column C (data/status/provenance semantics rather than functional invariants) and column H (diagnostic consequence) are the only two unoccupied cells of ten.",
+      "status": "PROVISIONAL",
+      "assumptions": "Absence of evidence from a snippet-level search.",
+      "strongest_allowed_wording": "The exact conjunction was not found; the architecture is subsumed and what remains is a domain instantiation.",
+      "forbidden_stronger_wording": "'This has never been done.' Two unoccupied columns out of ten, found by a search that could not read the papers, is not that.",
+      "next_falsification_test": "Search the MAVLink/DDS tooling communities and the DO-178C tool-qualification literature, neither of which was searched."
+    },
+    {
+      "id": "A3",
+      "claim": "The MAVLink protocol schema carries a machine-readable `invalid=` attribute, so the sentinel semantics of every field can be extracted exactly, with an authoritative citation, by an XML attribute lookup.",
+      "evidence": "message_definitions/v1.0/common.xml, e.g. <field type=\"int16_t\" name=\"current_battery\" units=\"cA\" invalid=\"-1\">. baselines/b0_heuristic.py B0b reads it. Over the 106-field universe it reports YES for 15 fields; the reference, derived from the same attribute, records 15.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "None. It is an attribute lookup over a committed file.",
+      "strongest_allowed_wording": "For this protocol the sentinel clause is already machine-readable and needs no model.",
+      "forbidden_stronger_wording": "That this generalises to protocols without such an attribute. uORB has none.",
+      "next_falsification_test": "Check whether the attribute is populated consistently across dialects, and how many fields have a sentinel described in prose but no attribute."
+    },
+    {
+      "id": "A4",
+      "claim": "On the frozen held-out pilot the mechanical schema baseline B0b scores perfectly, and the AI reading only implementation source does not beat it.",
+      "evidence": "results/AI_VS_HEURISTIC_RESULTS.csv. 14 pilot cases: B0b 0 abstentions, TP 2, FP 0, TN 12, FN 0, conditional accuracy 1.000, unsupported-assertion rate 0.000. B1 8 abstentions (0.571), TP 1, FP 0, TN 5, FN 0, conditional accuracy 1.000, unsupported-assertion rate 0.091. B0a, the regex over consumer source that item 15 describes, TP 0, FN 2, accuracy 0.857.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "14 cases is a pilot, not a benchmark. The reference for the sentinel clause is mechanical; for other clause kinds it is model judgement.",
+      "strongest_allowed_wording": "On this pilot, for the sentinel clause, an XML attribute lookup matched or beat every AI condition and did it with authoritative citations.",
+      "forbidden_stronger_wording": "'LLMs cannot extract sentinel semantics.' The model produced the right answer for GPS_RAW_INT.epv; it could not ground it under B1's evidence restriction.",
+      "next_falsification_test": "Run the same pilot on PX4 uORB, where no `invalid=` attribute exists and B0b is unavailable."
+    },
+    {
+      "id": "A5",
+      "claim": "B1's only correct positive detection was an ungrounded recall, and the deterministic layer correctly refused it.",
+      "evidence": "candidates/B1_CODE_ONLY.json, GPS_RAW_INT.epv: the clause states `== 65535`, which the schema confirms as UINT16_MAX, with support: [] and contract_status UNSUPPORTED_INFERENCE. results/GROUNDING_RESULTS.json marks it the single ungrounded clause of 11 and the single high-confidence-unsupported one.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The candidate was written before the reference was built and is hashed in FREEZE.json.",
+      "strongest_allowed_wording": "The model knew the answer and could not support it from the evidence it was allowed to see; the grounding layer treated a correct-but-uncited claim exactly as it treats a wrong one.",
+      "forbidden_stronger_wording": "That the grounding layer 'caught an error'. It caught an unsupported assertion that happened to be true, which is the behaviour the design intends and also its cost.",
+      "next_falsification_test": "Give B1 access to the producer source and see whether the same clause becomes groundable at tier 2."
+    },
+    {
+      "id": "A6",
+      "claim": "One round of verifier feedback drove the unsupported-assertion rate to zero and the true-positive count to zero at the same time.",
+      "evidence": "results/AI_VS_HEURISTIC_RESULTS.csv: B1 unsupported 0.091 with TP 1; B3 unsupported 0.000 with TP 0 and abstentions rising from 8 to 9. candidates/B3_VERIFIER_FEEDBACK.json records the single revision, WITHDRAWN_AFTER_FEEDBACK on GPS_RAW_INT.epv.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "One revision, one case. A single withdrawal is not a rate.",
+      "strongest_allowed_wording": "On this pilot the verifier loop made the miner strictly safer and strictly less useful, in the same step.",
+      "forbidden_stronger_wording": "That verifier feedback is harmful, or that the trade is quantified. n=1.",
+      "next_falsification_test": "A pilot with enough groundable positives to see whether feedback ever converts an abstention into a supported answer, rather than only the reverse."
+    },
+    {
+      "id": "A7",
+      "claim": "Zero implementation defects were promoted from any held-out contract.",
+      "evidence": "results/DEFECT_DISCOVERY_RESULTS.csv: 42 candidate evaluations across B1/B2/B3, 0 promoted, 19 INCONCLUSIVE, 10 reaching Phase 2. Every cell of the item-42 defect taxonomy is empty.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "The pilot is 14 fields drawn mechanically from a universe that is 86% negative.",
+      "strongest_allowed_wording": "HELD_OUT_AI_DISCOVERED_DEFECT: none. Item 45's strong result did not occur.",
+      "forbidden_stronger_wording": "That the method cannot find defects. It was not given a case where one was reachable.",
+      "next_falsification_test": "Draw a pilot restricted to fields the adapter actually reads AND that carry a schema sentinel; there are few, and that is the point."
+    },
+    {
+      "id": "A8",
+      "claim": "The one genuinely correct held-out sentinel is unreachable: no committed decoder reads GPS_RAW_INT.epv, so no trace can exercise the rule and no conformance question is answerable.",
+      "evidence": "results/DEFECT_DISCOVERY_RESULTS.csv, B2 row for GPS_RAW_INT.epv: phase1 SOURCE_SUPPORTED, field_read_by_any_decoder empty, final_state INCONCLUSIVE. Check C4 in verification/containment.py.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Reachability is decided by a mechanical scan of four committed decoder files.",
+      "strongest_allowed_wording": "A correct, source-supported, held-out contract still yielded no finding, for a structural reason: the code does not read the field. Correct extraction is necessary and nowhere near sufficient.",
+      "forbidden_stronger_wording": "Presenting the unreachable case as a near-miss defect.",
+      "next_falsification_test": "None needed; the reachability check is a grep and can be re-run."
+    },
+    {
+      "id": "A9",
+      "claim": "All six deliberately wrong contracts were stopped at Phase 1 and none reached the checker.",
+      "evidence": "results/HALLUCINATION_CONTAINMENT.json: 6 fixtures, 6 contained, 6 stopped before Phase 2, every one SOURCE_AMBIGUOUS.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "FATAL FOR GENERALISATION: the same author wrote the fixtures, the wrong contracts and the checks, and iterated the checks until they caught the fixtures. Two of six passed the first run.",
+      "strongest_allowed_wording": "Checks of this kind can be written, and one of them (C2, precedence) catches the dangerous case where a hallucination is faithfully cited to a stale comment.",
+      "forbidden_stronger_wording": "'Containment rate 100%' as a property of the method. It is a fitted result on six self-authored fixtures and is not an estimate of anything.",
+      "next_falsification_test": "Wrong contracts authored by someone other than the checker's author, and contracts constructed adversarially to satisfy C2-C6 while still being false."
+    },
+    {
+      "id": "A10",
+      "claim": "The containment checks were fooled twice before being corrected, by the fixtures they exist to catch.",
+      "evidence": "verification/containment.py comments and FREEZE_AMENDMENTS.json. (1) `FLOW_QUALITY_UNKNOWN = 255`, a constant DEFINITION, was accepted as evidence that a branch tested 255, so F4 passed Phase 1. (2) The `0` inside the float `0.25` matched a claimed comparison against zero, so F1 passed Phase 1.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "A checker its own author had to correct twice, against tests that author wrote, is not evidence of robustness on unseen input.",
+      "forbidden_stronger_wording": "Omitting this. A self-audit that reports only its successes is not a self-audit.",
+      "next_falsification_test": "Mutation-test the Phase-1 checks: perturb each fixture and see how many perturbations slip through."
+    },
+    {
+      "id": "A11",
+      "claim": "Containment depends on the availability of a machine-readable authority, not on the architecture.",
+      "evidence": "C3 is the only Phase-1 check that can REFUTE rather than fail to corroborate, and it works by comparing a claimed sentinel to the schema's `invalid=` attribute. C2, C4, C5, C6 can only return 'not corroborated'.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "Follows from what each check computes; it is a property of the code, not a measurement.",
+      "strongest_allowed_wording": "Where an authority exists the AI is largely redundant; where none exists containment weakens at exactly the point the AI would be most useful. That tension is the central result.",
+      "forbidden_stronger_wording": "That containment is impossible without a schema. Producer source is a tier-2 authority and was not tested here.",
+      "next_falsification_test": "Run the PX4 uORB experiment in CROSS_PROJECT_CONFIRMATORY_PLAN.md, where C3 is unavailable and the publisher source is the only authority."
+    },
+    {
+      "id": "A12",
+      "claim": "The protocol schema is silent about every clause kind that the previous package identified as the actual bottleneck.",
+      "evidence": "`invalid=` encodes a sentinel condition and nothing else. Retention, freshness, allowed merges, forbidden merges and the downstream consumer requiring each appear in no schema attribute. Six of the twelve item-41 error codes were never exercised in this pilot for exactly that reason.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Based on the MAVLink dialects searched.",
+      "strongest_allowed_wording": "The clause the schema settles is the clause nobody needed help with; the clauses that need help are the ones no authority carries.",
+      "forbidden_stronger_wording": "That an AI would do well on those clauses. This pilot could not score them, because the reference for them is model judgement.",
+      "next_falsification_test": "The human-annotation study in FUTURE_HUMAN_ANNOTATION_PROTOCOL.md, restricted to those four clause kinds."
+    },
+    {
+      "id": "A13",
+      "claim": "This evaluation is blind-ordered, not blind, and not independent.",
+      "evidence": "EVALUATION_VISIBILITY_MANIFEST.json -> honest_limitation. FREEZE.json hashes the candidates before the reference was built and build_reference.py refuses to run unless they match, so the ORDER is enforced. One model wrote the miner output, the reference builder, the metrics and this ledger, in one conversation.",
+      "status": "PROVISIONAL",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "The ordering guarantee is real and mechanically enforced. The independence is not, and no number here should be read as a capability estimate.",
+      "forbidden_stronger_wording": "'Held-out evaluation', 'blind evaluation', 'ground truth', 'gold standard'.",
+      "next_falsification_test": "Independent human annotators, or blinded separate agents with adjudication."
+    },
+    {
+      "id": "A14",
+      "claim": "The repeatability measurement item 38 asks for cannot be performed in this environment.",
+      "evidence": "results/REPEATABILITY_RESULTS.csv, status NOT_RUN. Three extraction attempts by one model in one conversation are not independent: the second is conditioned on the first, which is in its context.",
+      "status": "REFUTED",
+      "assumptions": "None.",
+      "strongest_allowed_wording": "Not run, and reported as not run.",
+      "forbidden_stronger_wording": "Any agreement or variance figure. Fabricating three runs and reporting their agreement is the failure item 39 warns about, one step earlier.",
+      "next_falsification_test": "Separate API sessions with no shared context, and a recorded temperature setting."
+    },
+    {
+      "id": "A15",
+      "claim": "The case universe and the pilot were selected mechanically, with no judgement about interest.",
+      "evidence": "enumerate_universe.py: every field of every message in the adapter's HANDLED_TYPES, 106 fields. select_pilot.py: SHA-256 under a committed salt, stratified on consumed/not-consumed, capped at two fields per message. The resulting pilot is dominated by IMU axes, which is what an unbiased draw from this universe looks like.",
+      "status": "PROVED - NOVELTY NOT ESTABLISHED",
+      "assumptions": "The `consumed_by_csia` flag is a plain string match and has known false positives (ESC_TELEMETRY_1_TO_4.voltage matched the BATTERY_STATUS branch; SCALED_IMU2.temperature matched the SCALED_PRESSURE branch). Left uncorrected because the split was frozen before the pilot was drawn.",
+      "strongest_allowed_wording": "No case was chosen for being interesting, and the two known stratification errors are recorded rather than fixed after the fact.",
+      "forbidden_stronger_wording": "That the stratification is accurate. It is a grep.",
+      "next_falsification_test": "Re-derive the consumed flag from an AST walk and check how many strata change."
+    },
+    {
+      "id": "A16",
+      "claim": "A frozen verifier was amended after the reference was built, and the amendment is recorded rather than re-frozen away.",
+      "evidence": "FREEZE_AMENDMENTS.json. verification/containment.py `_file_of` tested `locator.endswith('.xml')`, which is always false for a schema locator of the form `common.xml:MESSAGE.field`, so the verifier treated `common.xml` as a source path and crashed on the first B2 candidate. FREEZE.json is left byte-for-byte as committed; `freeze.py --check` reports the drift and the amendments file explains it.",
+      "status": "EMPIRICAL ONLY",
+      "assumptions": "Containment was re-run after the fix and every fixture produced an identical verdict, because the fixtures cite only source files and never schema locators.",
+      "strongest_allowed_wording": "A verifier was fixed after the freeze; no prediction file was touched, and no previously measured number changed.",
+      "forbidden_stronger_wording": "That the freeze is intact. It is not, for one file, and the check reports so.",
+      "next_falsification_test": "Re-run freeze.py --check; it exits 3 and names the file."
+    },
+    {
+      "id": "A17",
+      "claim": "AI-assisted evidence-semantic contract synthesis is a novel research contribution.",
+      "evidence": "A1 through A16.",
+      "status": "REFUTED",
+      "assumptions": "Snippet-level prior-art search.",
+      "strongest_allowed_wording": "Not established, and the architecture is subsumed.",
+      "forbidden_stronger_wording": "novel, first, unprecedented, new framework, new theorem.",
+      "next_falsification_test": "None proposed. Item 46's HEURISTICS_SUFFICIENT condition is met on the evidence available."
+    }
+  ],
+  "refuted_predictions": [
+    {
+      "prediction": "The AI miner would beat a simple heuristic on sentinel extraction, because item 15 frames B0 as a naive regex.",
+      "outcome": "REFUTED. The strong baseline is not a regex over source at all -- it is an attribute lookup in the protocol schema, which the brief did not anticipate and which scores 14/14 on the pilot.",
+      "kept": true
+    },
+    {
+      "prediction": "The hallucination fixtures would be caught by the first version of the Phase-1 checks.",
+      "outcome": "REFUTED. Two of six passed, via a constant definition and a decimal literal. Recorded in the source with the reason.",
+      "kept": true
+    },
+    {
+      "prediction": "A correct held-out contract would produce a defect finding.",
+      "outcome": "REFUTED. GPS_RAW_INT.epv was correct and source-supported, and yielded INCONCLUSIVE because no decoder reads the field.",
+      "kept": true
+    }
+  ],
+  "not_done": [
+    "No paper (item 60).",
+    "No production agent (item 60).",
+    "No modification to CSIA production semantics (item 60); FROZEN_PATHS untouched.",
+    "No physical flights (item 60).",
+    "No repeatability measurement (item 38) -- cannot be made independent here.",
+    "No human review (items 32, 33) -- no reviewers exist.",
+    "No cross-project run (items 35, 36) -- designed only; ArduPilot and PX4 trees are both present locally so it is feasible.",
+    "No scoring of retention / freshness / merge / consumer clauses -- the reference for those is model judgement, so a number would measure agreement with itself."
+  ]
+}

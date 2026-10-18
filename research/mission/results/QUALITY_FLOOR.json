@@ -1,0 +1,83 @@
+{
+  "coverage": {
+    "total_percent": 86.86
+  },
+  "mutation_assurance_baseline": {
+    "evaluated": 80,
+    "killed": 49,
+    "score": 0.6125,
+    "subset_fingerprint": "8f554a68fb66c12d",
+    "targets": [
+      "csia_assurance/firewall.py",
+      "csia_assurance/witness.py",
+      "csia_assurance/config_gate.py"
+    ],
+    "targets_digest": "ae0809ce5471f4d9",
+    "targets_digest_basis": "FLOOR_RECORDED_AT_UPDATE",
+    "test_subset": [
+      "tests/test_assurance_firewall.py",
+      "tests/test_assurance_vectors.py",
+      "tests/test_assurance_metamorphic.py"
+    ]
+  },
+  "mutation_frozen_core": {
+    "evaluated": 120,
+    "killed": 67,
+    "score": 0.5583,
+    "subset_fingerprint": "4586baabcb7bbdfe",
+    "targets": [
+      "csia/trust_engine/engine.py",
+      "csia/diagnosis/bayes.py",
+      "csia/diagnosis/causal.py",
+      "csia/diagnosis/hypothesis.py",
+      "csia/runtime/online.py",
+      "csia/runtime/failsafe.py",
+      "csia/scenarios.py",
+      "csia/profiles.py"
+    ],
+    "targets_digest": "fddc11ec8e701386",
+    "targets_digest_basis": "FLOOR_RECORDED_AT_UPDATE",
+    "test_subset": [
+      "tests/test_determinism.py",
+      "tests/test_diagnosis.py",
+      "tests/test_diagnosis_input_guard.py",
+      "tests/test_v1_1_golden.py",
+      "tests/test_v1_1_trust_mode.py",
+      "tests/test_v1_1_staleness.py",
+      "tests/test_v1_1_support.py",
+      "tests/test_v1_1_monitor.py",
+      "tests/test_shadow_mode.py",
+      "tests/test_hypothesis.py",
+      "tests/test_frozen_core_survivor_kills.py",
+      "tests/test_runtime.py",
+      "tests/test_online_survivor_kills.py"
+    ]
+  },
+  "mutation_mission": {
+    "evaluated": 223,
+    "killed": 150,
+    "score": 0.6726,
+    "subset_fingerprint": "14c9e60a766ed5e5",
+    "targets": [
+      "csia_mission/capability.py",
+      "csia_mission/product.py",
+      "csia_mission/planner.py",
+      "csia_mission/recovery.py",
+      "csia_mission/reconfiguration.py",
+      "csia_mission/graphs.py",
+      "csia_mission/compute.py",
+      "csia_mission/forge_seed.py"
+    ],
+    "targets_digest": "224c0ae29a033ec4",
+    "targets_digest_basis": "FLOOR_RECORDED_AT_UPDATE",
+    "test_subset": [
+      "tests/test_mission_assurance.py",
+      "tests/test_mission_untested_modules.py",
+      "tests/test_mission_boundaries.py",
+      "tests/test_mission_survivor_kills.py",
+      "tests/test_bad_product_references.py"
+    ]
+  },
+  "note": "A MEASUREMENT, not an aspiration. Written by tools/xr/quality_ratchet.py --update, and only ever upward WITHIN ONE SUBSET. Each mutation entry records the targets and test subset it was measured over: a score earned under a different subset is a different measurement, not a better or worse one. See MX-015 in research/physical_validation/FAILURE_LEDGER.yaml. Each entry also records targets_digest -- the contents of the target files the score was taken over. Nothing regenerates the mutation artifacts automatically, so this digest is what stops a stored score from reading green about code that has since changed. See MX-020.",
+  "schema": "csia.mission.quality_floor/2"
+}

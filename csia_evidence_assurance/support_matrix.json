@@ -1,0 +1,78 @@
+{
+ "schema": "csia.support_matrix/1",
+ "matrix_version": "prime-1",
+ "label": "What CSIA Flight Assurance supports, from measured evidence only. Do not claim generic PX4 support.",
+ "product_boundary": {
+  "kind": "offboard analysis of PX4 ULogs (SITL, HIL, flight test, incident replay)",
+  "not": ["onboard use", "control authority", "automatic recovery", "FORGE", "flight-critical decisions"]
+ },
+ "vehicle": {
+  "supported": [{"type": "multirotor quadrotor, X configuration", "checks": {"vehicle_status.vehicle_type": 1, "CA_ROTOR_COUNT": 4, "is_vtol": false}, "profile": "multirotor-quad r1", "evidence": "2.3 validation flights V1-V13; RB-001 flights; XSYS-001 (all SITL, SIH quad X)"}],
+  "unsupported": [
+   {"type": "rover or boat (vehicle_type 3; airframes 50000-59999)", "evidence": "real FMUv5 boat log, PRIME RR-09: analysed as a quadrotor without saying so before PRIME"},
+   {"type": "fixed wing (vehicle_type 2)", "evidence": "no profile"},
+   {"type": "VTOL (is_vtol, airframes 13000-13999)", "evidence": "real CubeOrange VTOL log accepted by the profile gate (RB-001); no VTOL profile"},
+   {"type": "hexa-, octo-, tri- or coaxial multirotors (CA_ROTOR_COUNT != 4)", "evidence": "profile r1 is a quadrotor; 2.3 SCALE.md tested the reasoning only"},
+   {"type": "ArduPilot logs", "evidence": "not ULog"}
+  ]
+ },
+ "px4": {
+  "tested": [
+   {"version": "PX4 547e2ca (SITL, SIH)", "level": "full analysis", "evidence": "2.3, RB-001, XSYS-001"},
+   {"version": "PX4 1.6 to 1.14-era real and SITL logs (pyulog test corpus; a real FMUv5 boat log)", "level": "no crash; coverage stated", "evidence": "RB-001 RB0; PRIME REAL_LOG_RESULTS.json"}
+  ],
+  "propulsion_evidence_requires": "control allocation (actuator_motors, control_allocator_status) and ESC telemetry with RPM (esc_status)",
+  "partial": [
+   {"case": "PX4 before control allocation (actuator_controls_0 / actuator_outputs only), e.g. RflyMAD's real flights", "effect": "no propulsion evidence; PX4 monitor events and battery context only", "evidence": "RB-001 RR-02; PRIME RR-11 (RflyMAD descriptor)"},
+   {"case": "estimator_status schema other than 547e2ca's", "effect": "the EKF2 estimator producer is not run; stated as a coverage notice", "evidence": "RB-001 RR-01"}
+  ]
+ },
+ "topics": {
+  "required_for_propulsion": ["actuator_motors", "esc_status", "control_allocator_status", "vehicle_angular_velocity", "vehicle_status", "vehicle_land_detected"],
+  "optional": {
+   "battery_status": "battery context; current needed for power records (power.source_health, droop_vs_current)",
+   "failure_detector_status": "PX4 failure-detector triggers",
+   "estimator_status": "EKF2 innovation evidence and configuration epochs",
+   "rate_ctrl_status": "context",
+   "cpuload": "not evidence (no deadline to pair it with)",
+   "logged messages": "PX4 warning triggers"
+  }
+ },
+ "logging": {
+  "rule": "a topic gap longer than 3 x the PX4 547e2ca default interval refuses that topic's evidence over the gap (2.3 log completeness)",
+  "default_interval_ms": {"actuator_motors": 100, "esc_status": 100, "control_allocator_status": 200, "battery_status": 200, "vehicle_angular_velocity": 20, "failure_detector_status": 100, "rate_ctrl_status": 200},
+  "max_gap_ms": {"actuator_motors": 300, "esc_status": 300, "control_allocator_status": 600, "battery_status": 600, "vehicle_angular_velocity": 60},
+  "envelope": "propulsion topics at >= 5 Hz with no gap over 300 ms keep every confirmation in the stress envelope; at an effective 300 ms interval confirmations are lost (PRIME STRESS_ENVELOPE.md)",
+  "known_margins": {"esc_status at 248 ms in newer PX4 defaults": "inside the gap rule by 52 ms (RB-001 RR-05)", "failure_detector_status at about 500 ms on real FMUv5": "the gap rule would refuse every window; no current output reads it through the rule (PRIME)"}
+ },
+ "conditions_checked_per_log": {
+  "gyro_bias_at_rest_rad_s_max": 0.05,
+  "gyro_bias_note": "above it the compensation is refused as NOT_STEADY_FLIGHT and real losses go unconfirmed (stress envelope; a real CubeOrange carried 0.067 rad/s)",
+  "logger_dropouts": "reported; windows over a dropout are refused"
+ },
+ "producers": {
+  "px4:esc.telemetry_response": {"needs": ["actuator_motors", "esc_status (RPM)", "CA_ROTOR_COUNT >= 2"], "role": "context (no symptom reads it; finding SB-1)"},
+  "px4:allocator.compensation": {"needs": ["actuator_motors", "control_allocator_status", "steady flight in both windows (body rate <= 0.0989 rad/s)"], "role": "the physical-response witness"},
+  "px4:vehicle.rate_transient": {"needs": ["vehicle_angular_velocity"], "role": "context"},
+  "px4:allocator.status": {"needs": ["control_allocator_status"], "role": "authority"},
+  "px4:battery.status": {"needs": ["battery_status"], "role": "power context; current measured for source health"},
+  "px4:ekf2.estimator_status": {"needs": ["estimator_status with the 547e2ca schema"], "role": "estimator integrity, configuration epochs"}
+ },
+ "diagnosable": [
+  {"fault": "a motor losing effectiveness in hover or a hold", "result": "COMMAND_NO_RESPONSE on the right motor, AMBIGUOUS among 4 explanations; the sensor explanation eliminated", "evidence": "SITL only: 2.3 V1-V4, V12; RB-001 EH1"},
+  {"fault": "ESC telemetry corruption on a healthy motor (offline or ESC OFF/WRONG)", "result": "telemetry deficit as context; no motor symptom", "evidence": "SITL only: 2.3 V9, V10; XSYS-001 case B; PRIME B_telemetry stress base"},
+  {"fault": "GPS loss, battery fault", "result": "PX4 monitor events as context; no propulsion diagnosis", "evidence": "SITL only: 2.3 V7, V8"}
+ ],
+ "partial_coverage": [
+  {"case": "a motor losing effectiveness during continuous maneuvering", "result": "telemetry deficit reported; physical response refused (NOT_STEADY_FLIGHT); the loss is NOT confirmed", "evidence": "2.3 V13; RB-001 EF1-EF6"},
+  {"case": "maneuvering flights", "result": "many dismissed candidate events (about 300 per hour in SITL)", "evidence": "2.3 FALSE_POSITIVES.md; RB-001; PRIME EVENT_DISCOVERY_STUDY.md"}
+ ],
+ "not_diagnosable": [
+  "compute or timing faults (no stock topic pairs load with deadlines)",
+  "command delivery to the ESC (no stock topic shows delivery)",
+  "ESC current faults and the stall check, when esc_status carries no current",
+  "power-path faults without measured battery current",
+  "propeller damage (no vibration evidence producer)",
+  "any fault on real hardware: no real propulsion validation exists yet"
+ ]
+}

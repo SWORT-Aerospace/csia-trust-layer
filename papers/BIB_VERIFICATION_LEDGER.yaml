@@ -1,0 +1,409 @@
+%YAML 1.2
+---
+# BIBLIOGRAPHY VERIFICATION LEDGER
+#
+# THE HOLE THIS CLOSES
+# --------------------
+# `tools/publication/bib_guard.py` fails while a marker exists. It cannot fail
+# when a marker is DELETED, and deleting one is the single easiest way to make
+# the build green without doing any verification. The guard's own docstring
+# says "Deleting a marker without doing that check is falsification, not a
+# fix" -- and until now nothing enforced that sentence.
+#
+# THE RULE, ENFORCED BY tests/test_bib_verification_ledger.py
+# -----------------------------------------------------------
+#   A bibliography entry that carries NO marker MUST have a row here with
+#   status VERIFIED, an accepted route, a named checker, a date, and the
+#   record consulted.
+#
+# So the two states are:
+#
+#   marker present  +  status UNVERIFIED   ->  honest, and blocks submission
+#   marker absent   +  status VERIFIED     ->  honest, and does not
+#   marker absent   +  status UNVERIFIED   ->  FAILS. A marker was retired
+#                                              without a verification record.
+#   marker present  +  status VERIFIED     ->  FAILS. Contradictory.
+#
+# WHAT COUNTS AS VERIFICATION
+# ---------------------------
+# accepted_routes below are records produced by the publisher. A web search
+# result is NOT one, and `rejected_routes` names it explicitly so that
+# recording it is a deliberate, visible act rather than an oversight. This is
+# the rule papers/csia_systems/refs.bib already states in its own header; the
+# ledger makes it checkable.
+#
+# HOW TO VERIFY AN ENTRY
+# ----------------------
+#   1. From a host whose egress permits it, run `make bib-verify`, or open the
+#      publisher's own record for the DOI.
+#   2. Compare EVERY field: authors, title, venue, volume, number, pages,
+#      year, DOI.
+#   3. Fix any field that differs. Then, and only then, delete the marker from
+#      refs.bib AND set this row to VERIFIED with route, checked_by,
+#      checked_on and record filled in.
+#
+# Both edits in the same commit. The guard fails if only the first is made.
+
+schema: csia.publication.bib_verification_ledger/1
+
+accepted_routes:
+  - CROSSREF_DEPOSIT      # api.crossref.org, the publisher's own deposit
+  - PUBLISHER_PAGE        # the publisher's landing page for the DOI
+  - PUBLISHED_PDF         # the version of record itself
+
+rejected_routes:
+  - WEB_SEARCH            # a second unverified source, not a publisher record
+  - SECONDARY_INDEX       # dblp, Semantic Scholar, Google Scholar, a mirror
+  - BRIEF                 # supplied to this project by an upstream document
+  - MEMORY                # recalled rather than looked up
+
+# ---------------------------------------------------------------------------
+# A THIRD STATE, ADDED 2026-09-04, BECAUSE THE EVIDENCE MOVED AND THE ROUTE
+# DID NOT.
+#
+# Web SEARCH became available to this environment; web FETCH of any publisher
+# host did not. Every accepted route is still refused:
+#
+#   api.crossref.org, doi.org, dblp.org        CONNECT -> 403
+#   www.impan.pl, projecteuclid.org            EGRESS_BLOCKED
+#   ieeexplore.ieee.org, arxiv.org             EGRESS_BLOCKED
+#
+# So four entries can now be corroborated in detail from multiple independent
+# search indices agreeing on every field -- which is real evidence, and is
+# NOT a publisher record. Marking them VERIFIED would retire a marker on a
+# route this file already lists as rejected, which is the exact failure the
+# ledger exists to prevent.
+#
+#   CORROBORATED_NO_PUBLISHER_RECORD
+#       every bibliographic field independently reproduced by two or more
+#       search indices, no field in dispute, and NO accepted route reachable.
+#       The marker STAYS. bib-guard STAYS RED. This is a strictly better
+#       state than UNVERIFIED and a strictly worse one than VERIFIED, and it
+#       exists so the difference is visible rather than argued.
+#
+# A human with publisher access converts these to VERIFIED in one sitting;
+# the DOIs to check are recorded on each row.
+# ---------------------------------------------------------------------------
+corroboration_only_routes:
+  - SEARCH_INDEX_CONSENSUS
+
+# Why everything below is UNVERIFIED, re-measured 2026-09-04. SIX routes were
+# tried, not three: the first three are the accepted ones, and the last three
+# were tried only to establish that no fallback exists either. All six fail at
+# the proxy's CONNECT, so the failure is the egress policy rather than any
+# one service being down.
+#
+#   api.crossref.org:443       CONNECT -> 403   (organisation egress policy)
+#   doi.org:443                CONNECT -> 403
+#   dblp.org:443               CONNECT -> 403
+#   api.openalex.org:443       CONNECT -> 403   (would be SECONDARY_INDEX)
+#   api.semanticscholar.org:443 CONNECT -> 403  (would be SECONDARY_INDEX)
+#   export.arxiv.org:443       CONNECT -> 403   (would be SECONDARY_INDEX)
+#
+# The last three are listed for completeness ONLY. Each is a `rejected_route`,
+# so even a successful lookup there could not have retired a marker: an index
+# entry is a second unverified source, not a publisher record. They were
+# checked so that "no route exists" is a measurement rather than an assumption.
+#
+# Every publisher route is denied from the authoring environment, so
+# `make bib-verify` exits 2 and clears nothing. That is the correct outcome
+# and no marker was retired.
+
+entries:
+
+  # ================================================== papers/csia_systems
+  - paper: csia_systems
+    key: dong2024statedependent
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Dong, W., Yin, X. and Li, S., "A Uniform Framework for Diagnosis of
+      Discrete-Event Systems with Unreliable Sensors using Linear Temporal
+      Logic", IEEE Transactions on Automatic Control 69(1), p.145, January
+      2024. DOI 10.1109/TAC.2023.3266021. arXiv preprint 2204.13057.
+    note: >-
+      TITLE CORRECTED 2026-09-04, AND THE CORRECTION MATTERS MORE THAN THE
+      METADATA. The WP-C6 brief supplied the title "Verification of
+      diagnosability for discrete-event systems under state-dependent
+      observations". Two independent searches place this DOI, volume, issue,
+      page and year on a DIFFERENT title, by the same three authors (with
+      "Wei" corrected to "Weijie"), whose subject is unreliable sensors whose
+      behaviour is described by an LTL formula. The bibliography entry now
+      carries the corroborated title.
+      THE OPEN QUESTION IS THE REASON FOR CITING IT. This repository has been
+      attributing to it "the general mechanism of fault-state-dependent
+      observation loss: a state-dependent observation map O: Q x Sigma ->
+      2^(Delta u {eps})". That is not obviously the subject of the corroborated
+      title, and it cannot be settled without reading the paper. The concession
+      itself (SC-11) does not depend on this citation -- it is a disclaimer and
+      the Carvalho rows carry it independently -- but the attribution does.
+      A human must read this before submission. See the bibliography external
+      verification packet, item B-1.
+
+  - paper: csia_systems
+    key: carvalho2012intermittent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete except that no DOI was supplied, so bib-verify cannot key on one.
+
+  - paper: csia_systems
+    key: carvalho2013permanent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete with a DOI; needs confirmation only.
+
+  - paper: csia_systems
+    key: takai2021diagnosability
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Takai, S., "A general framework for diagnosis of discrete event
+      systems subject to sensor failures", Automatica 129, article 109669,
+      2021. DOI 10.1016/j.automatica.2021.109669.
+    note: >-
+      TITLE ADDED 2026-09-04. The brief supplied no title and this copy
+      carried a VERIFY placeholder while the gate_conditioning copy carried a
+      search-derived candidate -- two files disagreeing about the same work.
+      The candidate is now corroborated on the DOI and both copies carry it.
+      NOT READ. The publisher host is blocked, so this stays a corroboration.
+
+  - paper: csia_systems
+    key: yin_phidiagnosability
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      THE WEAKEST ENTRY IN EITHER FILE, and now searched TWICE without a
+      match -- once for the reconstructed title, once for uniform
+      phi-diagnosability attributed to Yin, Gao and Li under state-dependent
+      observation. An unsuccessful search is not evidence the work does not
+      exist; it is evidence that a referee with the same tools will not find
+      it either, which for a citation is the operative problem. Either locate
+      it or drop the citation AND the sentence depending on it.
+
+  - paper: csia_systems
+    key: krysander2024multimode
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Krysander, M. and Hashemniya, F., "Test Selection for Diagnosing
+      Multimode Systems (Short Paper)", 35th International Conference on
+      Principles of Diagnosis and Resilient Systems (DX 2024), OASIcs vol.
+      125, pp. 28:1-28:14, Schloss Dagstuhl. DOI 10.4230/OASIcs.DX.2024.28.
+    note: >-
+      TITLE, VOLUME, PAGES AND PUBLISHER ADDED 2026-09-04 from search-index
+      consensus on the DOI; the author order the brief supplied matches.
+      NOT READ.
+
+  - paper: csia_systems
+    key: krysander2008sensorplacement
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Complete with a DOI; needs confirmation only.
+
+  - paper: csia_systems
+    key: hurdle2007faulttree
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      APPEARS TO CONFLATE TWO DIFFERENT PAPERS, and unlike kang2024gnss this
+      one IS cited by main.tex. The title matches a 2009 Reliability
+      Engineering & System Safety paper; the journal, volume, pages, year and
+      DOI prefix all match a 2007 Proc. IMechE Part O paper by the same
+      authors with a different title. Decide which paper the argument needs
+      BEFORE verifying -- swapping only the title would leave four fields
+      belonging to the other work. BIB_VERIFICATION_CANDIDATES.md section 1.
+
+  - paper: csia_systems
+    key: reeves2019sensorselection
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Reeves, J., Remenyte-Prescott, R. and Andrews, J., "Sensor selection
+      for fault diagnostics using performance metric", Proc. IMechE Part O:
+      J. Risk and Reliability 233(4), 537-552, 2019.
+      DOI 10.1177/1748006X18804690.
+    note: >-
+      TITLE ADDED 2026-09-04 from search-index consensus on the DOI. THE
+      FIRST AUTHOR'S GIVEN NAME IS DISPUTED: the brief supplied Adam, the
+      sources give the initial J and one names Jessica Reeves. The bib entry
+      now carries a VERIFY on that field rather than a silent replacement --
+      corroboration is enough to raise a doubt about a name and not enough to
+      settle one. NOT READ.
+
+  - paper: csia_systems
+    key: kang2024gnss
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      THE SUBJECT IS WRONG, FOUND 2026-09-04. Search-index consensus
+      places DOI 10.3390/s24144445 on "Sensor Network Attack Synthesis
+      against Fault Diagnosis of Discrete Event Systems", Sensors
+      24(14):4445, 2024 -- a discrete-event security paper. This entry
+      sits under a GNSS INTEGRITY MONITORING heading and its key is named
+      gnss. One of the two is wrong and it cannot be settled from here.
+      Status stays UNVERIFIED because the author fields are still
+      placeholders and nothing was corroborated about the entry AS
+      WRITTEN -- only about the DOI it points at.
+      NOTHING IN EITHER PAPER DEPENDS ON IT: the entry is UNCITED by
+      main.tex. The recommendation is to drop it, or to replace it with a
+      real GNSS-integrity reference if that section wants one. Do not
+      cite it under the current heading.
+
+  - paper: csia_systems
+    key: blanke2003ftc
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: >-
+      Reconstructed. TWO later editions exist, not one: 1st 2003 (Springer
+      Berlin, 571 pp), 2nd 2006, 3rd 2015 (DOI 10.1007/978-3-662-47943-8).
+      year = 2003 is a real 1st-edition year; the publisher location and the
+      edition number are the missing fields. Decide which edition the
+      related-work claim is drawn from -- page numbering and DOI differ.
+      BIB_VERIFICATION_CANDIDATES.md section 6.
+
+  # ============================================== papers/gate_conditioning
+  - paper: gate_conditioning
+    key: rukhin1997bounded
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Rukhin, A. L., "Information-type divergence when the likelihood ratios
+      are bounded", Applicationes Mathematicae 24(4), 415-423, 1997.
+      DOI 10.4064/am-24-4-415-423.
+    note: >-
+      ADDED 2026-09-04. The prior-art matrix carried this as
+      NOT_FOUND_NEEDS_HUMAN, which was a factual error about the world:
+      multiple independent sources reproduce the metadata and describe
+      Theorem 2.1 (a likelihood-ratio bound implies upper bounds on
+      f-divergences for bowl-shaped f with a minimum at 1). Publisher hosts
+      impan.pl, doi.org and crossref are all blocked from this environment, so
+      the marker stays and bib-guard stays red.
+      SCOPE OF THE CITATION, deliberately narrow: the manuscript cites this
+      ONLY to say that bounded-likelihood-ratio divergence bounds are an
+      established subject. The attainment witness for the TV bound is OUR OWN
+      elementary two-point construction, verified symbolically and numerically
+      (P6c), and is NOT attributed to Rukhin. THE THEOREM HAS NOT BEEN READ,
+      so no statement may be made about how our specialization relates to it.
+  - paper: gate_conditioning
+    key: speekenbrink2025statedep
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Speekenbrink, M. and Visser, I., "State-Dependent Missingness in Hidden
+      Markov Models, with an Application to Drop-Out in a Clinical Trial",
+      Psychometrika 90(2), 476-507, 2025. DOI 10.1017/psy.2024.3.
+    note: >-
+      ADDED 2026-09-04 by the prior-art deep audit. Two independent search
+      queries returned the same volume, issue, page range, year and DOI; the
+      journal is now published by Cambridge University Press, which is why the
+      DOI prefix is 10.1017 rather than the older Springer prefix. The
+      publisher host was not reachable and THE PAPER HAS NOT BEEN READ.
+      SCOPE OF THE CITATION: this is the closest prior art found for the
+      paper's FRAMING and it NARROWS the paper. It is cited to concede that
+      hypothesis-dependent observation loss is an examined setting, and to
+      state the one difference we can state from the abstract-level record --
+      their missingness is a STOCHASTIC submodel ESTIMATED from data, ours is
+      a DETERMINISTIC gate read from the diagnostic system's own
+      configuration. No claim may be made that their model cannot represent
+      CSIA; that has not been checked and cannot be from here.
+  - paper: gate_conditioning
+    key: heitjan1991car
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Heitjan, D. F. and Rubin, D. B., "Ignorability and Coarse Data", The Annals of Statistics 19(4), 2244-2253, 1991. DOI 10.1214/aos/1176348396.
+    note: >-
+      Project Euclid landing URL and two further indices agree on volume, issue, page range, year and DOI, and reproduce the abstract's CAR-plus-distinctness condition. THE CRITICAL ENTRY: it is what makes the ignorability proposition KNOWN rather than a contribution. The specialization to a BINARY per-feature gate must still be stated as ours, not attributed to them.
+
+  - paper: gate_conditioning
+    key: dong2024statedependent
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Dong, W., Yin, X. and Li, S., "A Uniform Framework for Diagnosis of
+      Discrete-Event Systems with Unreliable Sensors using Linear Temporal
+      Logic", IEEE Transactions on Automatic Control 69(1), p.145, January
+      2024. DOI 10.1109/TAC.2023.3266021. arXiv preprint 2204.13057.
+    note: >-
+      Carried over from the systems paper's bibliography, including the
+      2026-09-04 title correction and the open question about why it is cited.
+      See that row.
+
+  - paper: gate_conditioning
+    key: carvalho2012intermittent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.
+
+  - paper: gate_conditioning
+    key: carvalho2013permanent
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.
+
+  - paper: gate_conditioning
+    key: takai2021diagnosability
+    status: CORROBORATED_NO_PUBLISHER_RECORD
+    route: SEARCH_INDEX_CONSENSUS
+    checked_by: claude-code evidence agent
+    checked_on: 2026-09-04
+    record: >-
+      Takai, S., "A general framework for diagnosis of discrete event
+      systems subject to sensor failures", Automatica 129, article 109669,
+      2021. DOI 10.1016/j.automatica.2021.109669.
+    note: >-
+      The search-derived candidate title this copy already carried is now
+      corroborated on the DOI, and the systems paper copy has been brought
+      into line. NOT READ.
+
+  - paper: gate_conditioning
+    key: krysander2008sensorplacement
+    status: UNVERIFIED
+    route: null
+    checked_by: null
+    checked_on: null
+    record: null
+    note: Carried over from the systems paper's bibliography with its status.

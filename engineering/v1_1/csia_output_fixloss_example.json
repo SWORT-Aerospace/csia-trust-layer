@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.1.0",
+  "timestamp": 26.0,
+  "platform": "ardupilot-derived deterministic simulator",
+  "assurance": {
+    "level": "CAUTION",
+    "level_value": 1,
+    "armed": true,
+    "transition_time": 26.0
+  },
+  "trust": {
+    "mode": "FLAT_V1_1",
+    "nodes": {
+      "baro": 0.995701425,
+      "battery": 0.994501985,
+      "gps": 0.987273596,
+      "imu0": 0.984703304,
+      "imu1": 0.998168457,
+      "mag": 0.964524019,
+      "motor_esc": 0.993855167,
+      "vibration": 0.998519308
+    }
+  },
+  "sequential": {
+    "k": 0.5,
+    "h": 500.0,
+    "covered_nodes": [
+      "battery",
+      "gps",
+      "mag",
+      "motor_esc",
+      "vibration"
+    ],
+    "nodes_without_residual": {
+      "baro": "clean-arm sigma0 is degenerate (0.0 over 1500 ticks)",
+      "imu0": "no per-IMU physics chi-square exists in this construction",
+      "imu1": "no per-IMU physics chi-square exists in this construction"
+    },
+    "alarming": [],
+    "S": {}
+  },
+  "diagnosis": {
+    "leader": "nominal",
+    "posterior": 0.992496432,
+    "runner_up": "gps_fault",
+    "score_margin": 4.893388051,
+    "active_evidence_count": 16,
+    "discriminating_evidence_count": 0,
+    "identifiable": false,
+    "ambiguity": "AMBIGUOUS",
+    "prior_sensitive": false,
+    "support_state": "NON_IDENTIFIABLE",
+    "unknown_fault_model": "NOT_IMPLEMENTED",
+    "non_identifiable_against": [
+      "gps_fault"
+    ]
+  },
+  "support": {
+    "state": "NON_IDENTIFIABLE",
+    "leader_identifiable": false,
+    "non_identifiable_against": [
+      "gps_fault"
+    ],
+    "discriminating_evidence": {
+      "gps_fault": 0,
+      "imu0_bias_drift": 3,
+      "imu1_bias_drift": 2,
+      "mag_interference": 3,
+      "power_fault": 5,
+      "unexpected_maneuver": 1,
+      "vibration_anomaly": 3
+    }
+  },
+  "ambiguity": "AMBIGUOUS",
+  "evidence": {
+    "fresh": {
+      "baro": true,
+      "battery": true,
+      "gps": false,
+      "imu0": true,
+      "imu1": true,
+      "mag": true,
+      "motor_esc": true,
+      "vibration": true
+    },
+    "missing_reason": {},
+    "current_valid": null,
+    "active_relations": [
+      "accel_esc_rpm",
+      "accel_motor_current",
+      "attitude_gravity_mag",
+      "power_thrust",
+      "redundant_imu",
+      "temp_bias_drift",
+      "vibration_prop_freq"
+    ],
+    "suppressed_relations": [
+      "altitude_baro",
+      "heading_course",
+      "velocity_gps_doppler"
+    ],
+    "suppression_reasons": {
+      "altitude_baro": "ENDPOINT_NOT_FRESH:gps",
+      "heading_course": "ENDPOINT_NOT_FRESH:gps",
+      "velocity_gps_doppler": "ENDPOINT_NOT_FRESH:gps"
+    },
+    "active_evidence_count": 16
+  },
+  "function_eligibility": {
+    "COARSE_NAVIGATION": {
+      "state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "required_inputs_available": false,
+      "support_sufficient": false,
+      "transition_time": 26.0
+    },
+    "GEOFENCE_SUPPORT": {
+      "state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "required_inputs_available": false,
+      "support_sufficient": false,
+      "transition_time": 26.0
+    },
+    "INERTIAL_CONTINUATION": {
+      "state": "ELIGIBLE",
+      "reason_codes": [
+        "ALL_REQUIREMENTS_MET"
+      ],
+      "required_inputs_available": true,
+      "support_sufficient": true,
+      "transition_time": null
+    },
+    "POSITION_HOLD": {
+      "state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "required_inputs_available": false,
+      "support_sufficient": false,
+      "transition_time": 26.0
+    },
+    "PRECISION_NAVIGATION": {
+      "state": "INELIGIBLE",
+      "reason_codes": [
+        "REQUIRED_SOURCE_NOT_FRESH",
+        "REQUIRED_RELATION_NOT_APPLICABLE",
+        "SUPPORT_LOST_FOR_REQUIRED_INFORMATION"
+      ],
+      "required_inputs_available": false,
+      "support_sufficient": false,
+      "transition_time": 26.0
+    }
+  },
+  "recommendations": [
+    "RESTRICT_PRECISION_NAV",
+    "INHIBIT_GPS_MODES",
+    "SWITCH_NAV_INERTIAL"
+  ],
+  "provenance_summary": {
+    "software_sha": "bf6a19eaa0f04014150e95acc7c1b8353716cbe5",
+    "configuration_hash": "47c62639d672ba660b5afcf7c92b3317737a99d9d25fe08765c2d09630f08b4c",
+    "input_trace_hash": "80edd87b76b5c816ab03523d3cf49f25fa786dcf50b99632ce33b507b62b2d5c",
+    "trust_mode": "FLAT_V1_1",
+    "frozen_core_tag": "csia-v1.0-research-final",
+    "authority": "READ_ONLY"
+  },
+  "ledger_event": {
+    "event_id": "41b623f6a0da629f00c93e7044f73f22",
+    "event_type": "ASSURANCE_STATE_CHANGED",
+    "subject": "assurance",
+    "previous_state": "NORMAL",
+    "new_state": "CAUTION",
+    "reason_codes": [],
+    "content_sha256": "eae411c7a0051693d6857d126647e564c538133314383b5a4bc040b622cd8512",
+    "previous_event_hash": "d9bdfa5d2731116a8729ccd3c8f2881d32af637809be039991f3ea16c9f0f7c5"
+  }
+}

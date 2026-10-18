@@ -1,0 +1,152 @@
+CSIA FLIGHT ASSURANCE ANALYZER (offboard; no flight-control authority)
+analyzer 2.2.1, semantics 2.1.1
+
+INPUTS
+  design_sha256: f84f8e5acbf9d581632286469ef32d038081000a36001e2b9d6d510edbc77c75
+  kind: e1_transition
+
+PROFILE  aircraft-successor (ACCEPTED)
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN GEOFENCE_SUPPORT:COMPUTE: GEOFENCE_SUPPORT declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN PROPULSION:COMPUTE: PROPULSION declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV2_DEAD_SUPPORTING_DOMAIN TELEMETRY:COMPUTE: TELEMETRY declares COMPUTE a supporting/optional domain, but no COMPUTE record names it, so the declaration can never act
+  WARNING PV3_UNWATCHED_DECLARATION COMMUNICATION/esc_can -> PROPULSION: COMMUNICATION is not a domain PROPULSION watches, so the function graph ignores this declaration; comm.link_state is a serving relation, so 2.1's subject scope does use it
+
+TIMELINE  60 ticks in 4 intervals
+  0.000s .. 0.950s (20 ticks): no symptom; attribution NO_EVIDENCE; 68 used, 0 rejected; changed: start
+  1.000s .. 1.200s (5 ticks): POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED: COMPUTE/estimator_stale; POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED: COMPUTE/estimator_stale; PROCESS_OUTPUT_LATE|state_estimator NO_CONSISTENT_HYPOTHESIS: no explanation remains; attribution AMBIGUOUS; 68 used, 0 rejected; changed: abnormal, candidates, localizations, verdict
+  1.250s .. 1.650s (9 ticks): no symptom; attribution UNIQUE; 67 used, 1 rejected; changed: abnormal, admissibility, candidates, epochs, localizations, verdict
+      configuration: ekf2.selector.instance_changed_count 0 -> 1 (estimator_selector_status.instance_changed_count 0 -> 1 at tick 25: primary EKF instance changed after SENSOR/source.imu0 failed)
+  1.700s .. 2.950s (26 ticks): no symptom; attribution UNIQUE; 68 used, 0 rejected; changed: admissibility
+
+KEY MOMENTS (in time order)
+  1.000s  FIRST ABNORMAL: POSITION_UNAVAILABLE|COARSE_NAVIGATION, POSITION_UNAVAILABLE|POSITION_HOLD, POSITION_UNAVAILABLE|PRECISION_NAVIGATION, PROCESS_OUTPUT_LATE|state_estimator; observed by v2-domain:compute, v2-domain:sensor
+  1.000s  first adverse output from v2-domain:compute
+  1.000s  first adverse output from v2-domain:sensor
+  1.000s  adverse: COMPUTE/state_estimator:compute.deadline_met [v2-domain:compute]
+  1.000s  adverse: COMPUTE/state_estimator:compute.stability [v2-domain:compute]
+  1.000s  adverse: SENSOR/source.imu0:v1_1.source_health [v2-domain:sensor]
+  1.000s  CERTAIN: POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED COMPUTE/estimator_stale
+  1.000s  CERTAIN: POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED COMPUTE/estimator_stale
+  1.000s  CERTAIN: POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED COMPUTE/estimator_stale
+  1.000s  POSITION_UNAVAILABLE|COARSE_NAVIGATION: none -> SUPPORTED [COMPUTE/estimator_stale]
+  1.000s  POSITION_UNAVAILABLE|POSITION_HOLD: none -> SUPPORTED [COMPUTE/estimator_stale]
+  1.000s  POSITION_UNAVAILABLE|PRECISION_NAVIGATION: none -> SUPPORTED [COMPUTE/estimator_stale]
+  1.000s  PROCESS_OUTPUT_LATE|state_estimator: none -> NO_CONSISTENT_HYPOTHESIS [no candidate]
+  1.000s  attribution: NO_EVIDENCE [no candidate] -> AMBIGUOUS [COMPUTE/state_estimator, SENSOR/source.imu0]
+  1.250s  no longer adverse: COMPUTE/state_estimator:compute.deadline_met [v2-domain:compute]
+  1.250s  no longer adverse: COMPUTE/state_estimator:compute.stability [v2-domain:compute]
+  1.250s  CERTAIN: attribution UNIQUE SENSOR/source.imu0
+  1.250s  CERTAINTY LOST: POSITION_UNAVAILABLE|COARSE_NAVIGATION SUPPORTED COMPUTE/estimator_stale
+  1.250s  CERTAINTY LOST: POSITION_UNAVAILABLE|POSITION_HOLD SUPPORTED COMPUTE/estimator_stale
+  1.250s  CERTAINTY LOST: POSITION_UNAVAILABLE|PRECISION_NAVIGATION SUPPORTED COMPUTE/estimator_stale
+  1.250s  POSITION_UNAVAILABLE|COARSE_NAVIGATION: SUPPORTED [COMPUTE/estimator_stale] -> none
+  1.250s  POSITION_UNAVAILABLE|POSITION_HOLD: SUPPORTED [COMPUTE/estimator_stale] -> none
+  1.250s  POSITION_UNAVAILABLE|PRECISION_NAVIGATION: SUPPORTED [COMPUTE/estimator_stale] -> none
+  1.250s  PROCESS_OUTPUT_LATE|state_estimator: NO_CONSISTENT_HYPOTHESIS [no candidate] -> none
+  1.250s  attribution: AMBIGUOUS [COMPUTE/state_estimator, SENSOR/source.imu0] -> UNIQUE [SENSOR/source.imu0]
+  1.250s  first CONFIGURATION_MISMATCH: COMPUTE/state_estimator:compute.deadline_met [v2-domain:compute] (R3:STALE_CONFIGURATION_EPOCH:ekf2.selector.instance_changed_count:evidence=[0]:current=[1])
+  1.250s  configuration: estimator_selector_status.instance_changed_count 0 -> 1 at tick 25: primary EKF instance changed after SENSOR/source.imu0 failed
+
+FINAL STATE at 2.950s: no symptom; attribution UNIQUE
+  what appears abnormal: no symptom detected
+  adverse evidence: SENSOR/source.imu0:v1_1.source_health@2.95s [v2-domain:sensor]
+  attribution: UNIQUE -> SENSOR/source.imu0; candidates SENSOR/source.imu0 (EVERY_DECLARED_ALTERNATIVE_AFFIRMATIVELY_NOMINAL)
+
+EVIDENCE REJECTED (not reasoned with)
+  none
+
+PRODUCERS
+  v2-domain:actuation: health VALID; 3 of 3 admitted
+  v2-domain:communication: health VALID; 17 of 17 admitted
+  v2-domain:compute: health VALID; 13 of 13 admitted
+  v2-domain:power: health VALID; 6 of 6 admitted
+  v2-domain:sensor: health VALID; 15 of 15 admitted
+  v2-domain:timing: health VALID; 14 of 14 admitted
+
+COVERAGE OVER THE RUN (ticks in each state; NO_ANOMALY is a silent detector, not an observation of health)
+  v2-domain:actuation: ACTUATION/motor_0:actuation.command_path [actuation.command_path]: NOMINAL 60
+  v2-domain:actuation: ACTUATION/motor_0:actuation.electrical_response [actuation.electrical_response]: NOMINAL 60
+  v2-domain:actuation: ACTUATION/motor_0:actuation.mechanical_response [actuation.mechanical_response]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/esc_can:comm.integrity [comm.integrity]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.integrity [comm.integrity]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.integrity [comm.integrity]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/esc_can:comm.link_state [comm.link_state]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.link_state [comm.link_state]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.link_state [comm.link_state]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/esc_can:comm.loss [comm.loss]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.loss [comm.loss]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.loss [comm.loss]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/esc_can:comm.ordering [comm.ordering]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.ordering [comm.ordering]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.ordering [comm.ordering]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.queue [comm.queue]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.queue [comm.queue]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/esc_can:comm.rate [comm.rate]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/gnss_serial:comm.rate [comm.rate]: NOMINAL 60
+  v2-domain:communication: COMMUNICATION/telemetry_radio:comm.rate [comm.rate]: NOMINAL 60
+  v2-domain:compute: COMPUTE/csia:compute.deadline_met [compute.deadline_met]: NOMINAL 60
+  v2-domain:compute: COMPUTE/logger:compute.deadline_met [compute.deadline_met]: NOMINAL 60
+  v2-domain:compute: COMPUTE/state_estimator:compute.deadline_met [compute.deadline_met@state_estimator]: ANOMALY 5, NOMINAL 46, REJECTED:CONFIGURATION_MISMATCH 9
+  v2-domain:compute: COMPUTE/csia:compute.process_alive [compute.process_alive]: NOMINAL 60
+  v2-domain:compute: COMPUTE/logger:compute.process_alive [compute.process_alive]: NOMINAL 60
+  v2-domain:compute: COMPUTE/state_estimator:compute.process_alive [compute.process_alive]: NOMINAL 60
+  v2-domain:compute: COMPUTE/csia:compute.process_producing [compute.process_producing]: NOMINAL 60
+  v2-domain:compute: COMPUTE/logger:compute.process_producing [compute.process_producing]: NOMINAL 60
+  v2-domain:compute: COMPUTE/state_estimator:compute.process_producing [compute.process_producing]: NOMINAL 60
+  v2-domain:compute: COMPUTE/cpu:compute.resource_headroom [compute.resource_headroom]: NOMINAL 60
+  v2-domain:compute: COMPUTE/csia:compute.stability [compute.stability]: NOMINAL 60
+  v2-domain:compute: COMPUTE/logger:compute.stability [compute.stability]: NOMINAL 60
+  v2-domain:compute: COMPUTE/state_estimator:compute.stability [compute.stability@state_estimator]: ANOMALY 5, NOMINAL 55
+  v2-domain:power: POWER/battery:power.cell_balance [power.cell_balance]: NOMINAL 60
+  v2-domain:power: POWER/battery:power.droop_vs_current [power.droop_vs_current]: NOMINAL 60
+  v2-domain:power: POWER/battery:power.p_equals_vi [power.p_equals_vi]: NOMINAL 60
+  v2-domain:power: POWER/rail_3v3:power.rail_tolerance [power.rail_tolerance]: NOMINAL 60
+  v2-domain:power: POWER/rail_5v:power.rail_tolerance [power.rail_tolerance]: NOMINAL 60
+  v2-domain:power: POWER/battery:power.source_health [power.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/sensor.aggregate:sensor.aggregate [sensor.aggregate]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.COARSE_NAVIGATION:v1_1.function_eligibility [v1_1.function_eligibility]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.GEOFENCE_SUPPORT:v1_1.function_eligibility [v1_1.function_eligibility]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.INERTIAL_CONTINUATION:v1_1.function_eligibility [v1_1.function_eligibility]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.POSITION_HOLD:v1_1.function_eligibility [v1_1.function_eligibility]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.PRECISION_NAVIGATION:v1_1.function_eligibility [v1_1.function_eligibility]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.baro:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.battery:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.gps:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.imu0:v1_1.source_health [v1_1.source_health]: ANOMALY 40, NOMINAL 20
+  v2-domain:sensor: SENSOR/source.imu1:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.mag:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.motor_esc:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/source.vibration:v1_1.source_health [v1_1.source_health]: NOMINAL 60
+  v2-domain:sensor: SENSOR/v1_1.diagnosis:v1_1.support [v1_1.support]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution:timing.clock_consistency [timing.clock_consistency]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink:timing.clock_consistency [timing.clock_consistency]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution:timing.end_to_end [timing.end_to_end]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink:timing.end_to_end [timing.end_to_end]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution:timing.jitter [timing.jitter]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink:timing.jitter [timing.jitter]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution.sensor_slow:timing.rate [timing.rate]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink.sensor_slow:timing.rate [timing.rate]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution.decision_delay:timing.segment_budget [timing.segment_budget]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution.processing_delay:timing.segment_budget [timing.segment_budget]: NOMINAL 60
+  v2-domain:timing: TIMING/nav_solution.transport_delay:timing.segment_budget [timing.segment_budget]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink.decision_delay:timing.segment_budget [timing.segment_budget]: NOT_APPLICABLE 60
+  v2-domain:timing: TIMING/telemetry_downlink.processing_delay:timing.segment_budget [timing.segment_budget]: NOMINAL 60
+  v2-domain:timing: TIMING/telemetry_downlink.transport_delay:timing.segment_budget [timing.segment_budget]: NOMINAL 60
+
+PROFILE COVERAGE (the records the profile defines; unobserved is not healthy)
+  observed (admitted at least once): 68 of 68
+    ACTUATION/motor_0 (3), COMMUNICATION/esc_can (5), COMMUNICATION/gnss_serial (6), COMMUNICATION/telemetry_radio (6), COMPUTE/cpu (1), COMPUTE/csia (4), COMPUTE/logger (4), COMPUTE/state_estimator (4), POWER/battery (4), POWER/rail_3v3 (1), POWER/rail_5v (1), SENSOR/sensor.aggregate (1), SENSOR/source.baro (1), SENSOR/source.battery (1), SENSOR/source.gps (1), SENSOR/source.imu0 (1), SENSOR/source.imu1 (1), SENSOR/source.mag (1), SENSOR/source.motor_esc (1), SENSOR/source.vibration (1), SENSOR/v1_1.COARSE_NAVIGATION (1), SENSOR/v1_1.GEOFENCE_SUPPORT (1), SENSOR/v1_1.INERTIAL_CONTINUATION (1), SENSOR/v1_1.POSITION_HOLD (1), SENSOR/v1_1.PRECISION_NAVIGATION (1), SENSOR/v1_1.diagnosis (1), TIMING/nav_solution (3), TIMING/nav_solution.decision_delay (1), TIMING/nav_solution.processing_delay (1), TIMING/nav_solution.sensor_slow (1), TIMING/nav_solution.transport_delay (1), TIMING/telemetry_downlink (3), TIMING/telemetry_downlink.decision_delay (1), TIMING/telemetry_downlink.processing_delay (1), TIMING/telemetry_downlink.sensor_slow (1), TIMING/telemetry_downlink.transport_delay (1)
+
+DEPENDENCE (adverse evidence, by lineage)
+  all adverse evidence: 1 outputs in 1 lineage group(s), 1 independent line(s)
+  SENSOR/source.imu0: 1 adverse outputs from 1 producer(s), 1 independent line(s)
+
+CONFIGURATION
+  epochs: ekf2.selector.instance_changed_count=1
+  transition: estimator_selector_status.instance_changed_count 0 -> 1 at tick 25: primary EKF instance changed after SENSOR/source.imu0 failed
+
+PROFILE WARNINGS
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:GEOFENCE_SUPPORT:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:PROPULSION:COMPUTE
+  WARNING:PV2_DEAD_SUPPORTING_DOMAIN:TELEMETRY:COMPUTE
+  WARNING:PV3_UNWATCHED_DECLARATION:COMMUNICATION/esc_can -> PROPULSION

@@ -1,0 +1,379 @@
+{
+  "artifact": "GROUNDING_RESULTS",
+  "by_condition": {
+    "B1_CODE_ONLY": [
+      {
+        "best_support_kind": 3,
+        "case_id": "GPS_RAW_INT.lat",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "if lat is None or lon is None or alt is None:",
+                "locator": "csia/aircraft/adapters/ardupilot.py:238",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "VALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          },
+          {
+            "citations": [
+              {
+                "found": "if fix is None or fix < 3:",
+                "locator": "csia/aircraft/adapters/ardupilot.py:228",
+                "ok": true,
+                "reason": ""
+              },
+              {
+                "found": "lat, lon, alt = g(\"lat\", None), g(\"lon\", None), g(\"alt\", None)",
+                "locator": "csia/aircraft/adapters/ardupilot.py:237",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "INVALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 2,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.7,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "SOURCE_SUPPORTED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "RAW_IMU.id",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 3,
+        "case_id": "SCALED_PRESSURE.press_abs",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "if p is not None and finite(p) and p > 0:",
+                "locator": "csia/aircraft/adapters/ardupilot.py:156",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "VALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          },
+          {
+            "citations": [
+              {
+                "found": "p = g(\"press_abs\", None)",
+                "locator": "csia/aircraft/adapters/ardupilot.py:155",
+                "ok": true,
+                "reason": ""
+              },
+              {
+                "found": "if p is not None and finite(p) and p > 0:",
+                "locator": "csia/aircraft/adapters/ardupilot.py:156",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "RETENTION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 2,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.5,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "CONTRACT_AMBIGUOUS",
+        "validator_status": "CONTRACT_AMBIGUOUS"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "GPS_RAW_INT.epv",
+        "clauses": [
+          {
+            "grounded": false,
+            "kind": "SENTINEL_CONDITION",
+            "reason": "no citation given",
+            "support_kind": "NONE"
+          }
+        ],
+        "clauses_total": 1,
+        "clauses_unsupported": 1,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.85,
+        "high_confidence_unsupported": true,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "UNSUPPORTED_INFERENCE",
+        "validator_status": "UNSUPPORTED_INFERENCE"
+      },
+      {
+        "best_support_kind": 3,
+        "case_id": "SCALED_IMU2.xacc",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]",
+                "locator": "csia/aircraft/adapters/ardupilot.py:130",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "VALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          },
+          {
+            "citations": [
+              {
+                "found": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]",
+                "locator": "csia/aircraft/adapters/ardupilot.py:130",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "PROVENANCE",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 2,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.75,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "SOURCE_SUPPORTED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "ESC_TELEMETRY_1_TO_4.voltage",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 3,
+        "case_id": "SCALED_IMU.zacc",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]",
+                "locator": "csia/aircraft/adapters/ardupilot.py:130",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "VALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 1,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.75,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "SOURCE_SUPPORTED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "ESC_TELEMETRY_1_TO_4.count",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 3,
+        "case_id": "RAW_IMU.xacc",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "if k in (\"RAW_IMU\", \"SCALED_IMU\", \"SCALED_IMU2\", \"SCALED_IMU3\"):",
+                "locator": "csia/aircraft/adapters/ardupilot.py:124",
+                "ok": true,
+                "reason": ""
+              },
+              {
+                "found": "acc = [g(\"xacc\", 0), g(\"yacc\", 0), g(\"zacc\", 0)]",
+                "locator": "csia/aircraft/adapters/ardupilot.py:130",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "VALID_CONDITION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          },
+          {
+            "citations": [
+              {
+                "found": "if k in (\"RAW_IMU\", \"SCALED_IMU\", \"SCALED_IMU2\", \"SCALED_IMU3\"):",
+                "locator": "csia/aircraft/adapters/ardupilot.py:124",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "SEMANTIC_STATE",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 2,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.7,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "SOURCE_SUPPORTED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "HEARTBEAT.autopilot",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 3,
+        "case_id": "SCALED_IMU3.yacc",
+        "clauses": [
+          {
+            "citations": [
+              {
+                "found": "if node == \"imu2\":",
+                "locator": "csia/aircraft/adapters/ardupilot.py:127",
+                "ok": true,
+                "reason": ""
+              },
+              {
+                "found": "self._note_unmapped(k) # third IMU is not a CSIA node",
+                "locator": "csia/aircraft/adapters/ardupilot.py:128",
+                "ok": true,
+                "reason": ""
+              }
+            ],
+            "grounded": true,
+            "kind": "RETENTION",
+            "reason": "",
+            "support_kind": "CONSUMER_SOURCE"
+          }
+        ],
+        "clauses_total": 1,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.9,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "SOURCE_SUPPORTED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "VIBRATION.clipping_0",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "SCALED_IMU2.temperature",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      },
+      {
+        "best_support_kind": 99,
+        "case_id": "VIBRATION.clipping_2",
+        "clauses": [],
+        "clauses_total": 0,
+        "clauses_unsupported": 0,
+        "condition": "B1_CODE_ONLY",
+        "confidence": 0.0,
+        "high_confidence_unsupported": false,
+        "self_report_agrees_with_validator": true,
+        "self_reported_status": "AI_INFERRED",
+        "validator_status": "ABSTAINED"
+      }
+    ]
+  },
+  "candidate_files": [
+    "B1_CODE_ONLY.json"
+  ],
+  "precedence": {
+    "COMMENT": 6,
+    "CONSUMER_SOURCE": 3,
+    "INTERNAL_SPEC": 5,
+    "NONE": 99,
+    "PRODUCER_SOURCE": 2,
+    "PROSE_DOC": 7,
+    "PROTOCOL_SCHEMA": 1,
+    "TEST": 4
+  }
+}

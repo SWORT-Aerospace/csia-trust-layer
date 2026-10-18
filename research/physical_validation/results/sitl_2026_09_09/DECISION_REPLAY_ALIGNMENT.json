@@ -1,0 +1,241 @@
+{
+  "answer": "AN ARTIFACT OF THE PAIRING.",
+  "controlled_comparison": {
+    "design": "ONE log, ONE reconstruction, ONE comparator, two alignments. Nothing else differs, so the difference is the alignment.",
+    "runs": [
+      {
+        "alignment": "NEAREST_WALL_CLOCK_WITHIN_HALF_TICK",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 439,
+        "decisions_compared": 1980,
+        "divergence_examples": [
+          {
+            "recorded_live": [
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "replay_live": [],
+            "t": 0.04
+          },
+          {
+            "recorded_live": [
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "replay_live": [
+              "altitude_baro",
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "t": 1.04
+          },
+          {
+            "recorded_live": [
+              "altitude_baro",
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "replay_live": [
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "t": 1.56
+          },
+          {
+            "recorded_live": [
+              "altitude_baro",
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "replay_live": [
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "t": 2.56
+          },
+          {
+            "recorded_live": [
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "replay_live": [
+              "altitude_baro",
+              "attitude_gravity_mag",
+              "velocity_gps_doppler_0"
+            ],
+            "t": 3.04
+          }
+        ],
+        "divergent": 119,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T052355Z-d8a85c69",
+        "log": "px4-run/logs2/20260909T052355Z-d8a85c69.part000.jsonl",
+        "log_csia_commit": "660523adb72b1eae28dfe4285e5cc36883dbb580",
+        "node": "gps",
+        "numerically_equivalent": 0,
+        "platform": "px4",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 271,
+        "semantically_equivalent_only": 1422,
+        "ticks_carrying_tick_tau": 2251,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "DIVERGENT",
+        "worst_relative_difference": 0.01824046558873945
+      },
+      {
+        "alignment": "EXACT_LAYER_TICK_INDEX",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 2250,
+        "decisions_compared": 2250,
+        "divergence_examples": [],
+        "divergent": 0,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T052355Z-d8a85c69",
+        "log": "px4-run/logs2/20260909T052355Z-d8a85c69.part000.jsonl",
+        "log_csia_commit": "660523adb72b1eae28dfe4285e5cc36883dbb580",
+        "node": "gps",
+        "numerically_equivalent": 0,
+        "platform": "px4",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 1,
+        "semantically_equivalent_only": 0,
+        "ticks_carrying_tick_tau": 2251,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "BIT_IDENTICAL",
+        "worst_relative_difference": 0.0
+      }
+    ],
+    "tick_tau_provenance": "DERIVED, not logged. This run predates the tick_tau field, so the tick index was reconstructed as floor(t_mono/dt_tick)*dt_tick. That identity was checked against a run that DOES log the field: 2242 rows, 2242 agreements, 0 disagreements. It is still a derivation and is labelled as one."
+  },
+  "fresh_runs_both_platforms": {
+    "note": "Both logs were recorded today with the tick boundary LOGGED rather than derived, and both carry the run's staleness configuration.",
+    "runs": [
+      {
+        "alignment": "NEAREST_WALL_CLOCK_WITHIN_HALF_TICK",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 22,
+        "decisions_compared": 2243,
+        "divergence_examples": [],
+        "divergent": 0,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T132406Z-a8bb841c",
+        "log": "logs/shadow-sitl-ardupilot/20260909T132406Z-a8bb841c.part000.jsonl",
+        "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
+        "node": "gps",
+        "numerically_equivalent": 0,
+        "platform": "ardupilot",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 8,
+        "semantically_equivalent_only": 2221,
+        "ticks_carrying_tick_tau": 2248,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "SEMANTICALLY_EQUIVALENT",
+        "worst_relative_difference": 0.00013802868971215374
+      },
+      {
+        "alignment": "EXACT_LAYER_TICK_INDEX",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 22,
+        "decisions_compared": 2248,
+        "divergence_examples": [],
+        "divergent": 0,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T132406Z-a8bb841c",
+        "log": "logs/shadow-sitl-ardupilot/20260909T132406Z-a8bb841c.part000.jsonl",
+        "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
+        "node": "gps",
+        "numerically_equivalent": 0,
+        "platform": "ardupilot",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 3,
+        "semantically_equivalent_only": 2226,
+        "ticks_carrying_tick_tau": 2248,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "SEMANTICALLY_EQUIVALENT",
+        "worst_relative_difference": 1.800345966983583e-05
+      },
+      {
+        "alignment": "NEAREST_WALL_CLOCK_WITHIN_HALF_TICK",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 51,
+        "decisions_compared": 2223,
+        "divergence_examples": [],
+        "divergent": 0,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T131511Z-687f2511",
+        "log": "logs/shadow-sitl-px4/20260909T131511Z-687f2511.part000.jsonl",
+        "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
+        "node": "gps",
+        "numerically_equivalent": 946,
+        "platform": "px4",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 28,
+        "semantically_equivalent_only": 1226,
+        "ticks_carrying_tick_tau": 2242,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "SEMANTICALLY_EQUIVALENT",
+        "worst_relative_difference": 2.6856763506961398e-05
+      },
+      {
+        "alignment": "EXACT_LAYER_TICK_INDEX",
+        "alignment_note": "EXACT_LAYER_TICK_INDEX joins on the live layer's own tick boundary, so a compared pair is the same tick by construction. NEAREST_WALL_CLOCK_WITHIN_HALF_TICK matches on wall time, which advances at ~0.0407 s per tick against the layer's 0.0400 s, so the pair need not be the same tick. Results obtained under the two alignments are NOT comparable.",
+        "bit_identical": 51,
+        "decisions_compared": 2242,
+        "divergence_examples": [],
+        "divergent": 0,
+        "fidelity_note": "The hand-off reconstruction now keys on channel ARRIVAL TIME, which is what the live adapter's freshness gate does. The earlier reconstruction compared VALUES and so missed 58.8% of hand-offs on a committed log, because two identical consecutive readings looked like no new reading (HF-010). That removed most of the ArduPilot divergence -- 511 categorical differences fell to 13 -- and left PX4 unchanged at 144, so what remains on PX4 has a DIFFERENT cause. HF-014 has now attributed the MECHANISM and not the root cause: all 144 are the replay seeing MORE live edges than the recording (never fewer), 122 of them exactly `altitude_baro`, and every affected edge is one whose weight is a product of per-sensor FRESHNESS terms while the residual values agree. A single differing staleness timeout was tested as the explanation and RULED OUT. HF-017 THEN FOUND THE CAUSE, AND IT WAS THIS TOOL. The divergence was an artifact of pairing a replayed state with the recorded row NEAREST IN WALL TIME: the replay carries the layer's exact tick grid, the recording was shifted by its first row's t_mono, and on the log in question that shift was 0.59 of a tick. Joining on the layer's own tick index instead gives 0 divergent and 2250 of 2250 bit-identical on the same log, with ArduPilot unchanged at 0. WHAT THAT DOES NOT MEAN. It does not close HF-004: two SITL runs replaying without a categorical divergence is not a general property of the instrument, and the software-hardening gate must not read it as one. A numeric residual also remains, accumulating through the alpha/beta recursion to 6.7e-10, which is above the declared 1e-12 tolerance; the tolerance has not been changed to accommodate it.",
+        "flight_id": "20260909T131511Z-687f2511",
+        "log": "logs/shadow-sitl-px4/20260909T131511Z-687f2511.part000.jsonl",
+        "log_csia_commit": "ec04fb100978dca98204399052a44e54b143927a",
+        "node": "gps",
+        "numerically_equivalent": 980,
+        "platform": "px4",
+        "reconstruction_gate": "arrival",
+        "replayed_states_unmatched": 9,
+        "semantically_equivalent_only": 1211,
+        "ticks_carrying_tick_tau": 2242,
+        "ticks_in_log": 2251,
+        "tolerance": 1e-12,
+        "verdict": "SEMANTICALLY_EQUIVALENT",
+        "worst_relative_difference": 6.73651088260143e-10
+      }
+    ]
+  },
+  "instrument_controls": {
+    "controls": [
+      {
+        "basis": "a relative difference of 0.5 against a tolerance of 1e-12 is arithmetic; and an edge whose weight is 0.0 is not carrying weight, which is the definition the gate semantics give, not one this tool supplies",
+        "control": "a numeric difference exceeds tolerance AND a dead edge reads as a different decision",
+        "kind": "POSITIVE",
+        "observed": "{'rel': 0.5, 'cat_differs': True}",
+        "status": "PASS"
+      },
+      {
+        "basis": "a value equals itself and a set equals itself; both follow from the definitions of equality, not from this tool",
+        "control": "identical values differ by zero AND identical gate maps read as the same decision",
+        "kind": "NEGATIVE",
+        "observed": "{'rel': 0.0, 'cat_differs': False}",
+        "status": "PASS"
+      }
+    ],
+    "does_not_establish": "that the instrument's other measurements are correct. A control pair shows it still responds to a known stimulus and stays silent on a null one -- it is a liveness and discrimination check, not a calibration.",
+    "failed": [],
+    "instrument": "tools.assurance.decision_replay",
+    "schema": "csia.assurance.instrument_controls/1",
+    "verdict": "PASS"
+  },
+  "question": "Are the 119 residual PX4 decision-replay divergences a semantic disagreement between the replay and the live run, or an artifact of how the two were paired for comparison?",
+  "schema": "csia.assurance.decision_replay_alignment/1",
+  "the_falsification_that_was_preregistered": "FUTURE_DIRECTIONS_2026_09 section 1 stated: 'If the residual persists with the tick grid aligned, the phase-offset hypothesis is wrong and the cause is elsewhere.' The residual did not persist. It went to zero, and every compared decision became bit-identical.",
+  "what_this_does_not_establish": [
+    "It does not close HF-004. Decision replay now agrees on these logs; that is two SITL runs on two platforms, not a general property.",
+    "It does not make the replay a certified verification instrument.",
+    "The residual numeric difference on the PX4 run is real: it appears at tick 52 at 1.7e-14 and accumulates through the alpha/beta recursion to 6.7e-10 by tick 2250. That is six orders below any decision threshold and three orders ABOVE the declared 1e-12 portability tolerance. The tolerance has not been changed to accommodate it.",
+    "The 144-divergence figure from the 2026-08-25 PX4 log is NOT explained by alignment -- that log has t0 = 0.000097 s, so both alignments give the same answer. It is now reported NOT_COMPARABLE because the log carries no staleness configuration, which means the 144 was never evidence of a divergence and never evidence of agreement either."
+  ]
+}

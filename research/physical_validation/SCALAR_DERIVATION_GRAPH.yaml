@@ -1,0 +1,373 @@
+%YAML 1.2
+---
+# SCALAR DERIVATION GRAPH -- where every headline number actually comes from.
+#
+# THE PRINCIPLE
+# -------------
+# For every scientific scalar, ask: can this be regenerated from a more
+# primitive frozen artifact?
+#
+#   PREFERRED:   RAW -> DETERMINISTIC EXTRACTION -> DERIVED SCALAR -> PAPER
+#   AVOIDED:     PAPER SCALAR -> TEST EXPECTS THE SAME PAPER SCALAR
+#
+# The second shape is not a check. It is a copy of the number in a second
+# place, and mutation testing found exactly that: alpha0 could be changed 100x
+# and every test stayed green, BECAUSE the stored artifact still held the old
+# value (EVIDENCE-05).
+#
+# HOW TO READ `provenance`
+#   RAW_REDERIVABLE      a raw trace or campaign, plus a committed
+#                        deterministic extractor, reproduces it
+#   SOURCE_REDERIVABLE   the frozen source alone reproduces it. Weaker than
+#                        RAW (no measurement is involved) and much stronger
+#                        than an artifact lookup
+#   ARTIFACT_SUMMARY_ONLY  the number exists only as a stored summary; nothing
+#                        re-derives it. THIS IS THE CATEGORY TO SHRINK
+#   MEASURED_NOT_DERIVED a direct observation with no derivation chain -- a
+#                        count, a version string. Re-derivation is meaningless
+#
+# `oracle_test` names the test that CLOSES the loop. A scalar with a
+# provenance of RAW_REDERIVABLE or SOURCE_REDERIVABLE and NO oracle_test is
+# re-derivABLE and not re-derivED, which is a plan rather than a check.
+
+schema: csia.research.scalar_derivation_graph/1
+generated_by_hand: true
+generated_note: >-
+  Compiled by inspection, not by a script. A generated graph would be better
+  and does not exist; this is the honest state, and building the generator is
+  named as an open item rather than implied.
+
+scalars:
+
+  # =========================================================================
+  - id: S_0
+    value: 475.6775
+    what: >-
+      Beta mass alpha+beta of the gps node after 1500 healthy steps of the
+      frozen recursion under a synthetic evidence sequence.
+    used_by: >-
+      systems paper mass term S_0 * (T_0 - T*) = 118.82
+    provenance: SOURCE_REDERIVABLE
+    chain:
+      - frozen EngineConfig (alpha0=8.0, beta0=2.0, rho_max=0.998)
+      - frozen TrustCore recursion
+      - settling procedure, 1500 steps, one neighbour edge
+      - S_0
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::test_s0_rederives_from_the_frozen_engine
+    extractor: research/physical_validation/derivation/rederive_s0.py
+    was_previously: ARTIFACT_SUMMARY_ONLY
+    closed_by: >-
+      This session. Before it, the only check read
+      research/wp_c8/results/escalation_algebra.json and could not see a 100x
+      change in alpha0.
+    caveat: >-
+      NOT a flight observable -- no trial measures it. And the field is named
+      settled_mass_S0 while the mass is still climbing at n=1500 (475.68 ->
+      498.79 by n=3000, cap 500). S_0 is a function of the horizon and must be
+      quoted with n_steps. The TRUST is settled by then; the mass is not.
+
+  # =========================================================================
+  - id: T_0
+    value: 0.999791
+    what: settled trust of the gps node at the same horizon
+    used_by: the same mass term
+    provenance: SOURCE_REDERIVABLE
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::test_t0_rederives_from_the_frozen_engine
+    extractor: research/physical_validation/derivation/rederive_s0.py
+    caveat: >-
+      It is NOT 1.0 and it is NOT 0.98764. The latter appears nowhere in this
+      repository and was a back-solve that reproduces 118.82 by coincidence.
+
+  # =========================================================================
+  - id: mass_term_118_82
+    value: 118.82
+    what: S_0 * (T_0 - T*) with T* = 0.75
+    used_by: systems paper, the dominant term in N*
+    provenance: SOURCE_REDERIVABLE
+    chain: [S_0, T_0, "T* = 0.75 from FailsafeConfig.nav_caution", product]
+    oracle_test: >-
+      tests/test_scalar_rederivation.py::
+      test_the_mass_term_rederives_to_the_published_118_82
+    caveat: >-
+      125 is a DOCSTRING ILLUSTRATION using the theoretical cap 500, not a
+      result. It was transcribed into the manuscript once as if it were one.
+
+  # =========================================================================
+  - id: shared_power_baseline_verdicts
+    what: >-
+      fault_detected, affected_sources, shared_vs_independent and
+      root_cause_supported for all five systems over 110 scenarios
+    used_by: the systems paper's baseline comparison
+    provenance: RAW_REDERIVABLE
+    chain:
+      - campaigns/shared_power_generalization_v1.json (frozen, hash-pinned)
+      - frozen csia/diagnosis/baselines.py + run_shadow
+      - tools/run_shared_power_baseline.py
+      - campaigns/results/shared_power_baseline_v1.json
+    oracle_test: >-
+      tests/test_baseline_rederivation.py::
+      test_the_baseline_verdicts_rederive_from_the_frozen_campaign
+    measured: >-
+      Full 110-scenario re-derivation (64 s) matched the committed artifact on
+      EVERY verdict field. 723 differences were tick_cost_us; 6 were
+      A_LEGACY_SINGLE_SOURCE.t_first_detection in the NEGATIVE_INDEPENDENT
+      dual-IMU family, where the verdicts are identical.
+    was_previously: ARTIFACT_SUMMARY_ONLY
+    caveat: >-
+      Neither excluded field class is load-bearing: no test and no manuscript
+      binding references t_first_detection, or this artifact at all.
+
+  # =========================================================================
+  - id: mechanism_a_first_t_ardupilot
+    value: 12.043901
+    what: >-
+      first tick at which gnss.position goes MISSING with NO_3D_FIX, original
+      n=1 ArduPilot trial
+    used_by: systems paper, Mechanism A
+    provenance: RAW_REDERIVABLE
+    chain:
+      - the trial's flight log (per-tick canonical channels)
+      - tools/csia_experiment/extract_mechanism_a.py
+      - first_t
+    oracle_test: >-
+      tests/test_ardupilot_repeat_reconciliation.py::
+      test_the_original_first_t_rederives_from_its_own_log
+    was_previously: >-
+      RAW_REDERIVABLE with NO oracle against the ORIGINAL trial's own log --
+      re-derivABLE and not re-derivED.
+    closed_by: >-
+      This session. extract_mechanism_a.py run against
+      logs/shadow-sitl-ardupilot/20260825T005244Z-8c32ffe5.part000.jsonl gives
+      12.043819 against the published 12.043901. The 82 us is a t0 CONVENTION,
+      not noise: the artifact measured from CSIA process start, the extractor
+      from the first tick, and the first tick is at t_mono = 8.2e-05.
+      12.043901 - 0.000082 = 12.043819 exactly, and the test asserts the
+      convention rather than a tolerance. The MISSING tick count (450), the
+      gate collapse (3.0 -> 0.0) and both rank sets re-derive exactly.
+    caveat: >-
+      The original trial's log records autopilot_version "ardupilot" -- a
+      platform name, not a build. That trial cannot be shown FROM ITS OWN
+      RECORD to have run the pinned commit (FL-017).
+
+  # =========================================================================
+  - id: gps_gate_weight_sum_ardupilot
+    value: "3.0 -> 0.0"
+    what: sum of gate weights over the four GNSS-incident edges
+    provenance: RAW_REDERIVABLE
+    oracle_test: >-
+      research/physical_validation/results/mechanism_a_repeat_ardupilot.json,
+      20/20 FAULT and 0/20 CONTROL, via extract_mechanism_a.py
+    caveat: >-
+      The edge set is DERIVED from the frozen trust graph, not listed -- every
+      edge with gps as an endpoint, under the runtime's own identifiers.
+
+  # =========================================================================
+  - id: trust_rise_ardupilot
+    value: "0.9213 -> 0.9300"
+    what: gps trust coefficient across the fault, original n=1
+    used_by: >-
+      master packet section G; the DEA profile's justification for NOT
+      standardising "gate closure shall lower trust"
+    provenance: RAW_REDERIVABLE
+    status_this_session: >-
+      SUPERSEDED AS A QUOTABLE VALUE, and re-derivable as a record. Campaign A2
+      ran 20+20 with the trace on and produces the repeated distribution:
+      FAULT 0.924816 -> 0.931823 (delta median +0.007007, 20/20 positive),
+      CONTROL 0.924813 -> 0.945407 (delta median +0.020594).
+    chain:
+      - research/physical_validation/results/a2_traces_raw/ (40 raw traces)
+      - tools/csia_experiment/extract_trust_a2.py, four frozen windows
+      - ARDUPILOT_MECHANISM_A_REPEAT_TABLE.csv
+    oracle_test: >-
+      tests/test_ardupilot_repeat_reconciliation.py::
+      test_the_control_arm_rises_more_than_the_fault_arm;
+      ::test_the_original_delta_is_outside_the_repeated_fault_range
+    caveat: >-
+      THE VALUE 0.9213 -> 0.9300 MUST NOT BE QUOTED AS REPEATABLE. Its delta
+      (+0.008656) is OUTSIDE the repeated FAULT range, root-caused in FL-017:
+      the original ran a 0.5 s gps watchdog and the repeats a 1.0 s one, so the
+      gate held twice as long and trust accrued twice as long before freezing.
+      Both runs are correct records of different deployment configurations.
+      And the CONTROL arm rises ~3x MORE than the fault arm (FL-016), which
+      was already visible in the frozen n=1 artifact and never compared. The
+      fault SUPPRESSES a rise that happens anyway.
+      Campaign A1 did NOT capture trust (FL-014). NOT_CAPTURED is not FAIL,
+      ZERO or UNCHANGED.
+
+  # =========================================================================
+  - id: gps_gate_dwell_ardupilot
+    value: "0.4788 s original / 0.9997 s repeated"
+    what: >-
+      seconds from `gnss.position` going MISSING to the four GNSS-incident
+      gate weights reaching zero
+    used_by: >-
+      nothing yet. It is here because it is the quantity that explains why the
+      original n=1 trust delta is outside the repeated range (FL-017), and a
+      number that carries an explanation must be re-derivable.
+    provenance: RAW_REDERIVABLE
+    chain:
+      - the trials' own flight logs, per tick
+      - the gps-incident edge set, DERIVED from the frozen trust graph
+      - "csia/runtime/online.py:STALE_TIMEOUT_S['gps'] = 0.5 (original)"
+      - "csia/v1_1/staleness.py:build_runtime_stale_timeouts('ardupilot')['gps']
+         = MAX_AGE_MARGIN 5.0 / declared 5.0 Hz = 1.0 (A1, A2)"
+    oracle_test: >-
+      tests/test_ardupilot_repeat_reconciliation.py::
+      test_the_original_dwell_matches_the_frozen_watchdog;
+      ::test_the_a2_dwells_match_the_derived_watchdog;
+      ::test_the_two_watchdogs_that_explain_the_discrepancy
+    caveat: >-
+      Each dwell matches its own watchdog only to within one tick period
+      (0.04 s at 25 Hz), because it is observed on tick boundaries. That is a
+      resolution limit, not a tolerance chosen to make the check pass.
+      NO CLAIM IS MADE FROM THIS SCALAR. It is a deployment-configuration
+      property, and quoting it without naming the watchdog would repeat the
+      error it documents.
+
+  # =========================================================================
+  - id: trust_rise_px4
+    value: "0.9856 -> 0.9875"
+    provenance: RAW_REDERIVABLE
+    status_this_session: >-
+      SUPERSEDED AS A QUOTABLE VALUE, and re-derivable as a record. Campaign P1
+      ran 20+20 on the reconstructed environment with the trace on:
+      FAULT 0.952172 -> 0.955534 (delta median +0.003513, 20/20 positive),
+      CONTROL 0.952244 -> 0.961753 (delta median +0.009499).
+    chain:
+      - research/physical_validation/results/p1_traces_raw/ (40 raw traces)
+      - tools/csia_experiment/extract_trust_a2.py --campaign-key p1, the SAME
+        four frozen windows the ArduPilot campaign uses
+      - PX4_MECHANISM_A_REPEAT_TABLE.csv
+    oracle_test: >-
+      tests/test_px4_repeat_reconciliation.py::
+      test_the_control_arm_rises_more_on_px4_too;
+      ::test_the_original_px4_delta_is_outside_the_repeated_fault_range;
+      ::test_the_watchdog_replay_reproduces_both_px4_values_from_one_log
+    was_previously: ARTIFACT_SUMMARY_ONLY
+    caveat: >-
+      DO NOT QUOTE 0.9856 -> 0.9875 AS REPEATABLE. Its delta (+0.001884) is
+      outside the repeated FAULT range, AND the PRE-fault value does not
+      reproduce either (0.985624 against 0.952172) -- a symptom ArduPilot did
+      not have. Attributed by controlled replay (FL-018): the SAME log under the
+      0.5 s and 1.0 s watchdog tables gives 0.986420 and 0.952526, recovering
+      both measured values.
+      The control arm rises ~2.7x more than the fault arm here too (FL-016),
+      and that comparison was already possible from the frozen PX4 artifact.
+      PX4's demonstration is NARROWER than ArduPilot's -- 1 of 4 relations live
+      pre-fault, not 3 of 4 -- which is preregistered and is a property of the
+      passive link, not of PX4.
+
+  # =========================================================================
+  - id: px4_pre_fault_trust_watchdog_sensitivity
+    value: "0.986420 (0.5 s) / 0.952526 (1.0 s)"
+    what: >-
+      gps trust over the preregistered PRE window from ONE flight log, driven
+      through the frozen core twice under the two runtime stale-timeout tables
+    used_by: >-
+      nothing directly. It is the CONTROLLED EXPERIMENT that attributes the PX4
+      pre-fault discrepancy, and an attribution has to be re-derivable.
+    provenance: RAW_REDERIVABLE
+    chain:
+      - a committed PX4 flight log
+      - "csia/runtime/online.py:STALE_TIMEOUT_S (frozen, gps 0.5)"
+      - "csia/v1_1/staleness.py:build_runtime_stale_timeouts('px4') (gps 1.0)"
+      - tools/csia_experiment/watchdog_replay.py
+    oracle_test: >-
+      tests/test_px4_repeat_reconciliation.py::
+      test_the_watchdog_replay_reproduces_both_px4_values_from_one_log
+    caveat: >-
+      THE INSTRUMENT IS PLATFORM-LIMITED AND THE LIMIT IS PINNED. It reproduces
+      PX4's measured values to ~0.003 and does NOT reproduce ArduPilot's (0.9794
+      and 0.9413 against measured 0.9246 and 0.9248), because the hand-off
+      reconstruction under-counts when consecutive readings repeat, which bites
+      harder at ArduPilot's channel rates. So it says nothing about why
+      ArduPilot's pre-fault trust was stable -- FL-019, an UNRESOLVED mechanism,
+      labelled rather than filled in by analogy. A second test asserts the
+      replay still FAILS on ArduPilot, so the limit cannot lapse silently.
+
+  # =========================================================================
+  - id: independent_checker_agreement
+    value: "378000/378000"
+    what: production vs independent checker agreement on real ticks
+    provenance: ARTIFACT_SUMMARY_ONLY
+    oracle_test: none
+    caveat: >-
+      Re-deriving it means re-running the campaign that produced the ticks.
+      Feasibility not assessed this session.
+
+  # =========================================================================
+  - id: cusum_latencies
+    value: "2.96 / 1.16 / 0.72 s"
+    what: CUSUM detection latency per arm, detector-alone
+    provenance: RAW_REDERIVABLE
+    chain:
+      - research/systems-paper/results/mechanism_b.json (frozen traces)
+      - the CUSUM parameters frozen at commit b9fc5d6
+      - CUSUM_FAIRNESS_TABLE.csv
+    oracle_test: none
+    caveat: >-
+      n=1 per arm, four arms, one flight profile, one node. The forbidden
+      comparison -- detector+dwell against detector-alone -- is recorded in
+      CUSUM_FAIRNESS.yaml so it cannot recur silently.
+
+  # =========================================================================
+  - id: frozen_core_hashes
+    what: per-file SHA-256 of the six FROZEN_PATHS
+    provenance: MEASURED_NOT_DERIVED
+    oracle_test: >-
+      tests/test_v1_frozen.py::test_diagnostic_core_matches_its_recorded_hashes
+    caveat: >-
+      A hash is not a behavioural check. It fires identically on a reformatted
+      comment, which is exactly why the mutation campaign separates
+      KILLED from KILLED_BY_INTEGRITY_ONLY.
+
+# ---------------------------------------------------------------------------
+summary:
+  total_scalars: 13
+  raw_rederivable: 8
+  source_rederivable: 3
+  artifact_summary_only: 1
+  measured_not_derived: 1
+  with_oracle_test: 11
+  without_oracle_test: 2
+  closed_this_session:
+    - S_0
+    - T_0
+    - mass_term_118_82
+    - shared_power_baseline_verdicts
+    - mechanism_a_first_t_ardupilot
+    - trust_rise_ardupilot
+    - trust_rise_px4
+  added_this_session:
+    - gps_gate_dwell_ardupilot
+    - px4_pre_fault_trust_watchdog_sensitivity
+  still_without_an_oracle:
+    - independent_checker_agreement
+    - cusum_latencies
+  at_session_start:
+    total_scalars: 11
+    artifact_summary_only: 3
+    with_oracle_test: 6
+
+open_items:
+  - >-
+    THIS FILE IS HAND-COMPILED. A generator that walks the artifact maps and
+    prose bindings and emits this graph would be better and does not exist.
+    This is the LARGEST remaining defect in this file and it did not shrink
+    this session.
+  - >-
+    independent_checker_agreement is the last ARTIFACT_SUMMARY_ONLY scalar.
+    Re-deriving it means re-running the campaign that produced the 378000
+    ticks; feasibility still not assessed.
+  - >-
+    cusum_latencies is RAW_REDERIVABLE and has no oracle written. The frozen
+    traces and the frozen CUSUM parameters are both committed, so this is a
+    plan rather than a check -- which is the exact shape this file exists to
+    flag.
+  - >-
+    FL-019 is open and is a mechanism, not a scalar: why ArduPilot's PRE-fault
+    trust was stable across the 0.5 s -> 1.0 s watchdog change while PX4's
+    moved by -0.033. Settling it needs an instrument that reproduces
+    ArduPilot's measured values, and none exists.

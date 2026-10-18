@@ -1,6 +1,6 @@
 # WP-C6 — Test the Containment Correction, and the Gate Trace
 
-**Date:** 2026-08-23 · **Branch:** `research/wp-e1` · **PR #13**
+**Date:** 2026-08-23 · **Branch:** `research/wp_e1` · **PR #13**
 **Suite: 482 → 482, all passing.** No production changes. No repair implemented.
 **Deliverables:** `papers/csia_systems/` (revised), `research/wp_c6/`,
 `docs/audit/WP_C6_REPORT.md`, three figures.
@@ -227,7 +227,7 @@ What is needed, in order:
 It would yield per-flight occupancy, closure-run counts and the across-flight
 distribution, **unconditional only**. It would not yield `q_gvalid | h`.
 
-### 4.2 SITL: the campaign the user asked for, and it ran
+### 4.2 SITL: the specified campaign, and it ran
 
 `research/wp_c6/q_gvalid_campaign.py`
 

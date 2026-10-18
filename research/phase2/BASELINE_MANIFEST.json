@@ -1,0 +1,458 @@
+{
+ "autopilot": {
+  "baseline_build": {
+   "binary_date": "2015-10-22",
+   "flavour": "ArduCopter SITL",
+   "provenance": "dronekit-assets.s3.amazonaws.com sitl-linux-copter-3.3.tar.gz",
+   "vendored_in_repo": false,
+   "version": "3.3",
+   "why_this_one": "the only autopilot binary reachable from the Phase-I session's network policy"
+  },
+  "modern_target": {
+   "status": "see research/phase2/results/modern_replication.json"
+  }
+ },
+ "baseline_is_valid": true,
+ "baseline_metrics": {
+  "F1_exposure_four_quantities": {
+   "glitch_T_SOFH_s": 0.0,
+   "per_arm": {
+    "denial": {
+     "T_NA_s": 24.56,
+     "channels": {
+      "abstaining": {
+       "T_FH_s": 0.4,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "attribution": {
+       "T_FH_s": 24.373,
+       "T_SOFH_s": 23.973,
+       "T_UH_s": 23.973
+      },
+      "status": {
+       "T_FH_s": 1.44,
+       "T_SOFH_s": 1.04,
+       "T_UH_s": 1.04
+      }
+     },
+     "flights": 3,
+     "ground_truth_F": true
+    },
+    "denial_recovered": {
+     "T_NA_s": 15.2,
+     "channels": {
+      "abstaining": {
+       "T_FH_s": 0.4,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "attribution": {
+       "T_FH_s": 14.373,
+       "T_SOFH_s": 13.973,
+       "T_UH_s": 14.613
+      },
+      "status": {
+       "T_FH_s": 1.44,
+       "T_SOFH_s": 1.04,
+       "T_UH_s": 1.04
+      }
+     },
+     "flights": 3,
+     "ground_truth_F": true
+    },
+    "glitch": {
+     "T_NA_s": 0.0,
+     "channels": {
+      "abstaining": {
+       "T_FH_s": 24.64,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "attribution": {
+       "T_FH_s": 24.64,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "status": {
+       "T_FH_s": 24.64,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      }
+     },
+     "flights": 3,
+     "ground_truth_F": true
+    },
+    "link_loss": {
+     "T_NA_s": 24.48,
+     "channels": {
+      "abstaining": {
+       "T_FH_s": 0.48,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "attribution": {
+       "T_FH_s": 24.96,
+       "T_SOFH_s": 24.48,
+       "T_UH_s": 24.48
+      },
+      "status": {
+       "T_FH_s": 1.52,
+       "T_SOFH_s": 1.04,
+       "T_UH_s": 1.04
+      }
+     },
+     "flights": 3,
+     "ground_truth_F": true
+    },
+    "nominal": {
+     "T_NA_s": 0.0,
+     "channels": {
+      "abstaining": {
+       "T_FH_s": 0.0,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "attribution": {
+       "T_FH_s": 0.0,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      },
+      "status": {
+       "T_FH_s": 0.0,
+       "T_SOFH_s": 0.0,
+       "T_UH_s": 0.0
+      }
+     },
+     "flights": 3,
+     "ground_truth_F": false
+    }
+   },
+   "source": "research/wp_c8/results/four_quantity_metrics.json",
+   "window_s": [
+    60.0,
+    85.0
+   ]
+  },
+  "F1_q_gvalid": {
+   "by_arm": {
+    "degraded": 0.980769,
+    "denial": 0.983974,
+    "glitch": 0.0,
+    "nominal": 0.0
+   },
+   "cell_counts": {
+    "degraded": {
+     "closed": 3672,
+     "flights": 6,
+     "monitored": 3744
+    },
+    "denial": {
+     "closed": 3684,
+     "flights": 6,
+     "monitored": 3744
+    },
+    "glitch": {
+     "closed": 0,
+     "flights": 6,
+     "monitored": 3744
+    },
+    "nominal": {
+     "closed": 0,
+     "flights": 6,
+     "monitored": 3744
+    }
+   },
+   "source": "research/wp_c6/results/q_gvalid_campaign.json"
+  },
+  "F2_algebra": {
+   "closed_form_matches_shipping_code": true,
+   "evidence_asymptote_e_f": 0.7,
+   "max_abs_error_vs_closed_form": 0.0,
+   "seconds_required": 3.732,
+   "settled_mass_S0": 475.6775,
+   "source": "research/wp_c8/results/escalation_algebra.json",
+   "ticks_required_N_star": 93.31
+  },
+  "F2_escalation_boundary": {
+   "N_star_ticks": 93.31,
+   "boundary_ticks": 118.31,
+   "failsafe_dwell_ticks": 25,
+   "grid_classification": "19/21",
+   "misclassified": 2,
+   "source": "research/wp_c8/results/response_surface.json"
+  },
+  "F2_magnitude_sweep": {
+   "largest_tested_error_m": 5566.0,
+   "no_step_magnitude_alarms": true,
+   "ramp_versus_step": [
+    {
+     "alarmed": true,
+     "floor_ticks": 104,
+     "label": "C_ramp_5s_0.002deg",
+     "min_phys": 0.0,
+     "min_trust": 0.71813,
+     "ramp_s": 5
+    },
+    {
+     "alarmed": true,
+     "floor_ticks": 168,
+     "label": "C_ramp_20s_0.002deg",
+     "min_phys": 0.0,
+     "min_trust": 0.71686,
+     "ramp_s": 20
+    },
+    {
+     "alarmed": true,
+     "floor_ticks": 139,
+     "label": "C_ramp_60s_0.002deg",
+     "min_phys": 2e-06,
+     "min_trust": 0.72273,
+     "ramp_s": 60
+    }
+   ],
+   "source": "research/wp_c7/results/glitch_mechanism.json",
+   "sweep": [
+    {
+     "alarmed": false,
+     "floor_ticks": 26,
+     "fused_minus_truth_m": 5.61,
+     "gps_minus_truth_m": 7.06,
+     "magnitude_m": 5.6,
+     "min_phys": 0.0,
+     "min_trust": 0.92371
+    },
+    {
+     "alarmed": false,
+     "floor_ticks": 32,
+     "fused_minus_truth_m": 22.34,
+     "gps_minus_truth_m": 23.79,
+     "magnitude_m": 22.3,
+     "min_phys": 0.0,
+     "min_trust": 0.90893
+    },
+    {
+     "alarmed": false,
+     "floor_ticks": 33,
+     "fused_minus_truth_m": 48.49,
+     "gps_minus_truth_m": 57.54,
+     "magnitude_m": 55.7,
+     "min_phys": 0.0,
+     "min_trust": 0.90632
+    },
+    {
+     "alarmed": false,
+     "floor_ticks": 33,
+     "fused_minus_truth_m": 215.43,
+     "gps_minus_truth_m": 224.5,
+     "magnitude_m": 222.6,
+     "min_phys": 0.0,
+     "min_trust": 0.90609
+    },
+    {
+     "alarmed": false,
+     "floor_ticks": 33,
+     "fused_minus_truth_m": 1106.01,
+     "gps_minus_truth_m": 1115.05,
+     "magnitude_m": 1113.2,
+     "min_phys": 0.0,
+     "min_trust": 0.90609
+    },
+    {
+     "alarmed": false,
+     "floor_ticks": 40,
+     "fused_minus_truth_m": 5558.92,
+     "gps_minus_truth_m": 5567.89,
+     "magnitude_m": 5566.0,
+     "min_phys": 0.0,
+     "min_trust": 0.88805
+    }
+   ]
+  },
+  "F3_joint_blind_region": {
+   "amplitudes_in_blind_region_m": [
+    0.5,
+    2.0,
+    5.6,
+    22.3
+   ],
+   "coverage_by_detection": {
+    "both": 12,
+    "layer_only": 1,
+    "neither": 8
+   },
+   "coverage_by_escalation": {
+    "both": 3,
+    "ekf_only": 9,
+    "neither": 9
+   },
+   "grid_cells": 21,
+   "neither_detected_cells": 8,
+   "neither_detected_fraction": 0.381,
+   "neither_escalated_cells": 9,
+   "neither_escalated_fraction": 0.4286,
+   "source": "research/wp_c8/results/response_surface.json"
+  },
+  "bench_reference": {
+   "present": true,
+   "source": "campaigns/bench.json"
+  },
+  "experiment_validity": {
+   "between_over_within_spec_spread": 215.78,
+   "source": "research/wp_c7/results/variance_investigation.json",
+   "verdict": "PARTLY_REAL_WIND_IS_COSMETIC",
+   "wind_reaches_physics": false
+  }
+ },
+ "branch": "main",
+ "commit": "848f5563a528ae5ca3c2d3883c86d7287d6a4585",
+ "commit_date": "2026-08-23T12:38:53-04:00",
+ "commit_short": "848f556",
+ "data_provenance": {
+  "all_phase1_sitl_data": {
+   "generator": "ArduCopter 3.3 SITL",
+   "ground_truth": "injection schedule",
+   "real_world_validation": "none"
+  },
+  "real_flight_logs": {
+   "annotated": false,
+   "committed": false,
+   "consequence": "F_h does not exist in this corpus, so T_FH and T_SOFH are permanently unmeasurable from it; only T_NA and T_UH are estimable",
+   "count_referenced": 26,
+   "reachable_in_environment": false,
+   "source_of_record": "data/real_logs_report.json"
+  }
+ },
+ "derived_not_typed": true,
+ "experimental_harness": {
+  "documented_shims": [
+   "RAW_IMU relabelled as SCALED_IMU (same units in ArduPilot)",
+   "GPS_RAW_INT.time_usec suppressed (it is last-fix time, and freezes on fix loss)"
+  ],
+  "entry_points": [
+   "research/wp_c6/q_gvalid_campaign.py",
+   "research/wp_c7/campaign_expanded.py",
+   "research/wp_c7/glitch_mechanism.py",
+   "research/wp_c7/false_healthy.py",
+   "research/wp_c7/variance_investigation.py",
+   "research/wp_c8/response_surface.py",
+   "research/wp_c8/four_quantity_metrics.py"
+  ],
+  "ingestion_path": "production csia.runtime.plugins.map_mavlink",
+  "release_status": "prepared, NOT published (research/wp_c8/HARNESS_RELEASE.md)",
+  "version": "wp_c6..wp_c8 campaign harness"
+ },
+ "false_alert_budget": {
+  "budget_for_phase2": 0,
+  "budget_units": "failsafe transitions on clean nominal scenarios",
+  "derived_from": "docs/REQUIREMENTS.md R10",
+  "measured_baseline": "50 flights / 0.8 h, 0 events, 0.0/hr, Poisson 95% [0.0, 4.4]",
+  "note": "This is a pre-existing requirement, not a number chosen after seeing candidate results. It is fixed for the duration of Phase II.",
+  "requirement": "Clean nominal flight shall produce zero failsafe transitions",
+  "verified_by": [
+   "test_failsafe_clean_no_false_alarms",
+   "campaigns/bench.json"
+  ]
+ },
+ "fixes_already_shipped": [
+  {
+   "change": "attitude_gravity_mag added to imu0_bias_drift signature",
+   "commit": "081cca3",
+   "effect": {
+    "irreducible_critical_exposure": [
+     0.0741,
+     0.037
+    ],
+    "kappa_max": [
+     0.2857,
+     0.1429
+    ],
+    "new_collisions_across_1232_configs": 0
+   },
+   "measured_before_promotion": true
+  },
+  {
+   "change": "DiagnosisCore input guard rejecting out-of-domain consistency",
+   "commit": "244e3eb",
+   "effect": "none; verified identical to 6 decimals, bench bit-identical",
+   "measured_before_promotion": true
+  }
+ ],
+ "fixes_intentionally_not_shipped": [
+  {
+   "evidence": "research/wp_c8/results/escalation_algebra.json",
+   "id": "escalation-delay",
+   "what": "reduce the concentration cap so N* falls",
+   "why_not": "characterised only; belongs in its own authorised change with before/after evidence"
+  },
+  {
+   "evidence": "research/wp_c6/results/minimum_repair.json",
+   "id": "gps-integrity-relation",
+   "what": "plumb satellites_used / noise_per_ms / DOP and add an ungated GPS relation",
+   "why_not": "requires ingestion-path change; recommended, not authorised"
+  },
+  {
+   "evidence": "research/wp_c7/results/false_healthy.json",
+   "id": "abstaining-policy",
+   "what": "emit NOT_APPLICABLE when a hypothesis support is entirely silenced",
+   "why_not": "research code only; 3 flights per arm against one simulator is not a basis for a production change"
+  }
+ ],
+ "generated_by": "research/phase2/build_manifest.py",
+ "known_failures": [
+  {
+   "evidence": "Monte Carlo 150 runs, TPR 0.00, 95% CI [0.00, 0.30] on n=9",
+   "id": "R16",
+   "note": "claim withdrawn in-repo; tracked issue #1",
+   "source": "docs/REQUIREMENTS.md",
+   "statement": "Field configuration shall detect slow IMU bias drift",
+   "status": "NOT MET"
+  },
+  {
+   "evidence": "needs hardware",
+   "id": "R17",
+   "statement": "WCET on target hardware characterized",
+   "status": "UNVERIFIED"
+  },
+  {
+   "evidence": "security backlog",
+   "id": "R18",
+   "statement": "MAVLink command path authenticated",
+   "status": "UNVERIFIED"
+  },
+  {
+   "evidence": "q_gvalid|denial = 0.984, T_SOFH = 23.97 s of 25",
+   "id": "F1",
+   "statement": "fix-loss self-occlusion",
+   "status": "MEASURED, unrepaired"
+  },
+  {
+   "evidence": "no step magnitude alarms up to 5566 m",
+   "id": "F2",
+   "statement": "duration-limited escalation",
+   "status": "MEASURED, characterised, unrepaired"
+  },
+  {
+   "evidence": "8/21 cells undetected, 9/21 unescalated",
+   "id": "F3",
+   "statement": "dual-monitor blind region",
+   "status": "MEASURED, unaddressed"
+  },
+  {
+   "id": "failsafe.py:106",
+   "statement": "fail-open on attitude",
+   "status": "UNANALYSED since WP1"
+  }
+ ],
+ "phase1_negative_findings_preserved": {
+  "count_recorded": 28,
+  "policy": "Phase II does not rewrite or remove these.",
+  "where": "docs/audit/WP_*_REPORT.md and the artifact JSONs"
+ },
+ "purpose": "Frozen Phase-I reference baseline. Phase-II candidates are measured against this and it is not rewritten.",
+ "schema": "csia.phase2.baseline_manifest/1",
+ "test_count": 482,
+ "test_suite_status": "all passing at this commit",
+ "tracked_files_modified": false,
+ "untracked_paths_present": true
+}

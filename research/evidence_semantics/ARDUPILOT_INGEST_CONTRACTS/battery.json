@@ -1,0 +1,58 @@
+{
+  "id": "battery.mavlink.battery_status.v0",
+  "family": "battery",
+  "source": "MAVLink BATTERY_STATUS",
+  "accepted_input_states": [
+    {"state": "V", "raw_condition": "current_battery >= 0 and finite",
+     "citation": "csia/aircraft/adapters/ardupilot.py:176-179"},
+    {"state": "X", "raw_condition": "current_battery == -1, the documented MAVLink 'current not measured' sentinel: the producer arrived and declared it has no measurement",
+     "citation": "csia/aircraft/adapters/ardupilot.py:176-181 (CURRENT_NOT_MEASURED)"},
+    {"state": "N", "raw_condition": "no BATTERY_STATUS within 1.5x the nominal refresh period",
+     "citation": "research/evidence_semantics/probe.py:t1_protocol"}
+  ],
+  "emitted_states_required": ["V", "X"],
+  "allowed_merges": [
+    {"states": ["N", "S"],
+     "reason": "as for GNSS: past max_age, 'never arrived' and 'arrived too long ago' both mean no current measurement, and no declared downstream property separates them."}
+  ],
+  "forbidden_merges": [
+    {"id": "BATT-F1",
+     "states": ["X", "V"],
+     "needed_by": "FailsafePolicy raises power_fault at CRITICAL from T['battery'] < power_critical and fresh['battery'] (csia/runtime/failsafe.py:155). If a disowned current is served as a valid one, the physics check scores a reading the vehicle has stopped reporting and CRITICAL can be raised on it. csia/aircraft/sample.py:53 states the requirement directly: 'Never collapse these to None.'",
+     "witness_words": {"X": "X", "V": "V"}},
+    {"id": "BATT-F2",
+     "states": ["X", "N"],
+     "needed_by": "the reason the enum exists: a producer that arrived and declared no measurement proves the stream is wired and the hardware is not, which a silent link does not (csia/aircraft/adapters/base.py:200-205).",
+     "witness_words": {"X": "X", "N": "N"}}
+  ],
+  "freshness": {
+    "max_age_s": 0.5,
+    "rule": "a channel older than max_age is unusable and reported STALE",
+    "citation": "csia/aircraft/adapters/base.py:220-227; csia/runtime/online.py:48 STALE_TIMEOUT_S['battery']=0.5"
+  },
+  "retention": {
+    "rule": "on an explicit not-measured report the retained current must be discarded, mirroring the GNSS path",
+    "on_invalid": "DISCARD",
+    "citation": "REQUIRED BY THIS CONTRACT; the committed adapter does NOT do it -- ardupilot.py:181 calls _reject_sentinel without popping _latest. See BATTERY_SEMANTIC_TRACE.md."
+  },
+  "sentinel_handling": {
+    "rule": "the sentinel must be DELIVERED, not merely counted",
+    "must_deliver_reason": true,
+    "citation": "csia/aircraft/adapters/base.py:151-171 (_reject_sentinel docstring)"
+  },
+  "diagnostic_visibility": {
+    "rule": "the reason a channel is unusable must reach a consumer that can act on it differently from any other reason",
+    "citation": "csia/aircraft/sample.py:53"
+  },
+  "stage_sites": {
+    "T1_protocol": "MAVLink BATTERY_STATUS.current_battery",
+    "T2_decode": "csia/aircraft/adapters/ardupilot.py:170-182",
+    "T3_ingest": "csia/aircraft/adapters/base.py:140-177 (_put / _reject_sentinel)",
+    "T4_channel": "csia/aircraft/adapters/base.py:198-229 (_channel_value)",
+    "T5_core_bridge": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+    "T6_slot": "csia/runtime/online.py:312-316 (_apply)",
+    "T7_admissible": "csia/runtime/online.py:603-605 (fresh)",
+    "T8_evidence": "csia/trust_engine/engine.py:146 (update gated on fresh)",
+    "T9_assurance": "csia/runtime/failsafe.py:155-160 (power_fault)"
+  }
+}

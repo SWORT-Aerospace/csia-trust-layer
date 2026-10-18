@@ -1,0 +1,369 @@
+%YAML 1.2
+---
+# EVERY HEADLINE NUMBER IN PROSE, BOUND TO THE ARTIFACT IT CAME FROM.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# The documents written for the two papers quote numbers that were copied by
+# hand out of JSON artifacts: 378,000 agreements, 76 ticks, 15,595 ticks,
+# 2,721 instances, 22,130 microseconds. Nothing checked them. A regeneration on
+# a different host, a rerun after a code change, or a simple typo would leave
+# the prose confidently stating a number the artifact no longer contains, and
+# the first person to notice would be a referee.
+#
+# `papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml` already does this for the
+# systems manuscript. This file does it for the research prose around it,
+# which had no equivalent. `tests/test_prose_numeric_bindings.py` enforces it
+# and checks BOTH directions:
+#
+#   1. the bound value equals what the artifact says today
+#   2. the rendered form actually appears in every document that cites it
+#
+# Direction 2 is the one that catches drift. A binding whose value is correct
+# but whose document says something else is exactly the failure this prevents,
+# and a binding that names no document is rejected as vacuous.
+#
+# HOW TO ADD A ROW
+# ----------------
+# Give the artifact, a JSON pointer, the documents that quote it, and every
+# rendering the prose uses (thousands separators, rounding, units). If a
+# rendering is not derivable from the value, that is a transcription error and
+# the test says so rather than the row being widened to accept it.
+
+schema: csia.research.prose_numeric_bindings/1
+
+bindings:
+
+  # ---------------------------------------------------------------- checker
+  - id: PB-01
+    what: tick-by-pair comparisons between the independent checker and production
+    artifact: research/systems-paper/results/checker_agreement.json
+    pointer: /totals/agree
+    renderings: ["378,000", "378 000", "378000", "$378{,}000$"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+      - docs/CURRENT_PROGRAM_STATE.md
+      - papers/gate_conditioning/main.tex
+
+  - id: PB-02
+    what: real disagreements between the checker and production
+    artifact: research/systems-paper/results/checker_agreement.json
+    pointer: /totals/real_disagreements
+    renderings: ["0"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+
+  - id: PB-03
+    what: occurrences of the one known disagreement class (c == 0.5)
+    artifact: research/systems-paper/results/checker_agreement.json
+    pointer: /totals/degenerate_only
+    renderings: ["0"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+
+  # ------------------------------------------------------- mechanism A windows
+  - id: PB-04
+    what: >-
+      ticks per scenario in which nominal|gps_fault is not distinguishable,
+      CLEAN arm. The startup window, present in every scenario including
+      fault-free flight.
+    artifact: research/systems-paper/results/checker_verdicts.json
+    pointer: /scenarios/CLEAN/ticks_target_pair_not_distinguishable
+    renderings: ["76"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+      - papers/gate_conditioning/main.tex
+
+  - id: PB-05
+    what: the same quantity under injected GNSS fix loss
+    artifact: research/systems-paper/results/checker_verdicts.json
+    pointer: /scenarios/GNSS_FIX_LOSS/ticks_target_pair_not_distinguishable
+    renderings: ["276"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+
+  # ------------------------------------------------- current-stack control
+  - id: PB-06
+    what: real ArduPilot 4.8 SITL ticks the structural predicate was run over
+    artifact: research/systems-paper/results/current_stack_structural.json
+    pointer: /ticks
+    renderings: ["15,595", "15595", "$15{,}595$"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+      - docs/CURRENT_PROGRAM_STATE.md
+      - papers/gate_conditioning/main.tex
+
+  - id: PB-07
+    what: collapses of the target pair on those fix-preserving trials
+    artifact: research/systems-paper/results/current_stack_structural.json
+    pointer: /pair_not_distinguishable_ticks
+    renderings: ["0"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - papers/gate_conditioning/main.tex
+
+  - id: PB-08
+    what: ticks in the CLEAN condition of the current-stack control
+    artifact: research/systems-paper/results/current_stack_structural.json
+    pointer: /per_condition/CLEAN/ticks
+    renderings: ["5,100", "5100"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-09
+    what: ticks in the RAMP condition of the current-stack control
+    artifact: research/systems-paper/results/current_stack_structural.json
+    pointer: /per_condition/RAMP/ticks
+    renderings: ["887"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-10
+    what: ticks in the STEP condition of the current-stack control
+    artifact: research/systems-paper/results/current_stack_structural.json
+    pointer: /per_condition/STEP/ticks
+    renderings: ["9,608", "9608"]
+    documents:
+      - research/systems-paper/MECHANISM_A.md
+      - research/systems-paper/CLAIMS.csv
+
+  # ----------------------------------------------------------- mechanism B
+  - id: PB-11
+    what: >-
+      instantaneous-lambda threshold crossings in the pre-onset window. The
+      baseline the smoothed count is compared against.
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/clean/false_alarms_in_clean_window/instantaneous_lambda_over_threshold
+    renderings: ["36"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-12
+    what: smoothed-lambda crossings over the same window
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/clean/false_alarms_in_clean_window/smoothed_lambda_over_threshold
+    renderings: ["9"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-13
+    what: ticks in the pre-onset window
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/clean/false_alarms_in_clean_window/ticks_in_window
+    renderings: ["374"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-14
+    what: CUSUM alarm latency after onset, 1 m/s ramp
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/crossing/cusum_latency_s
+    renderings: ["2.96"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-15
+    what: trust-threshold crossing latency after onset, 1 m/s ramp
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/crossing/trust_latency_s
+    renderings: ["8.72"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-16
+    what: CUSUM alarm latency after onset, 6 m/s ramp
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/fast_ramp/crossing/cusum_latency_s
+    renderings: ["0.72"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/CLAIMS.csv
+
+  # ------------------------------------------------------------ proof audit
+  - id: PB-17
+    what: >-
+      instances of 20000 in which P4's sufficient condition Delta > R held.
+      The argmax agreed in every one.
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/P4/condition_Delta_gt_R_met
+    renderings: ["2,721", "2 721", "2721", "$2{,}721$"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - papers/gate_conditioning/main.tex
+
+  - id: PB-18
+    what: >-
+      instances where the argmax moved while the condition did NOT hold.
+      Reported so P4 is not read as a characterisation.
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/P4/argmax_moved_when_condition_violated
+    renderings: ["6,877", "6 877", "6877", "$6{,}877$"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - papers/gate_conditioning/main.tex
+      - docs/CURRENT_PROGRAM_STATE.md
+
+  - id: PB-19
+    what: random instances per proposition in the numeric pass
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/trials
+    renderings: ["20,000", "20 000", "20000", "$20{,}000$"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - papers/gate_conditioning/main.tex
+      - docs/CURRENT_PROGRAM_STATE.md
+
+  # ------------------------------------------------ the interface measurement
+  - id: PB-20
+    what: >-
+      Phase B's uncached jsonschema.validate cost per tick. The defect, not
+      the cost of validating.
+    artifact: engineering/v2/V2_PHASEC_COMPUTE.json
+    pointer: /ingest_us_per_tick/phase_b_uncached_jsonschema_validate_us
+    renderings: ["22,130.0", "22130.0", "22130"]
+    documents:
+      - engineering/v2/V2_PHASEC_FREEZE.md
+      - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+      - engineering/v2/V2_PHASEC_REVIEW_REPORT.md
+
+  - id: PB-21
+    what: internal typed ingest cost per tick
+    artifact: engineering/v2/V2_PHASEC_COMPUTE.json
+    pointer: /ingest_us_per_tick/internal_typed_ingest_us
+    renderings: ["9.2"]
+    documents:
+      - engineering/v2/V2_PHASEC_FREEZE.md
+      - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+      - engineering/v2/V2_PHASEC_REVIEW_REPORT.md
+      - engineering/v2/CONTROLLER_INTEGRATION_SPEC.md
+
+  - id: PB-22
+    what: cached-validator cost per tick, doing the same full validation
+    artifact: engineering/v2/V2_PHASEC_COMPUTE.json
+    pointer: /ingest_us_per_tick/cached_validator_validate_us
+    renderings: ["673.6"]
+    documents:
+      - engineering/v2/V2_PHASEC_FREEZE.md
+      - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+      - engineering/v2/V2_PHASEC_REVIEW_REPORT.md
+
+  # -------------------------------------------- the preregistered replication
+  - id: PB-23
+    what: valid ArduPilot 4.8 trials in the preregistered Mechanism B campaign
+    artifact: research/v1_1/results/current_stack_replication.json
+    pointer: /platforms/ardupilot/trials_valid
+    renderings: ["20"]
+    documents:
+      - research/systems-paper/CURRENT_STACK_BLOCKERS.md
+      - research/systems-paper/MECHANISM_B.md
+      - docs/CURRENT_PROGRAM_STATE.md
+
+  # ------------------------------------------------------- equivalence result
+  - id: PB-24
+    what: payloads compared across the internal and external interfaces
+    artifact: engineering/v2/INTERNAL_EXTERNAL_EQUIVALENCE.json
+    pointer: /checked
+    renderings: ["13,500", "13500"]
+    documents:
+      - engineering/v2/V2_PHASEC_FREEZE.md
+      - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+      - engineering/v2/V2_PHASEC_REVIEW_REPORT.md
+
+  - id: PB-25
+    what: mismatches in that comparison
+    artifact: engineering/v2/INTERNAL_EXTERNAL_EQUIVALENCE.json
+    pointer: /mismatches
+    renderings: ["0"]
+    documents:
+      - engineering/v2/V2_PHASEC_FREEZE.md
+      - engineering/v2/INTERNAL_INTERFACE_SPEC.md
+
+  # --------------------------------------- mechanism B, the 2.3 correction
+  - id: PB-26
+    what: >-
+      the failsafe policy dwell. Red-team objection 2.3: the trust latency
+      includes it and the CUSUM latency does not, so the raw comparison
+      flatters the CUSUM by exactly this much.
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/policy_dwell/dwell_up_s
+    renderings: ["1.0"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+
+  - id: PB-27
+    what: >-
+      trust-path latency NET of policy dwell, 1 m/s ramp. The figure to quote
+      against the CUSUM's 2.96.
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/slow_ramp/policy_dwell/trust_detector_only_latency_s
+    renderings: ["7.72"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-28
+    what: trust-path latency net of dwell, 3 m/s spoof
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/spoof_3ms/policy_dwell/trust_detector_only_latency_s
+    renderings: ["2.36"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv
+
+  - id: PB-29
+    what: trust-path latency net of dwell, 6 m/s ramp
+    artifact: research/systems-paper/results/mechanism_b.json
+    pointer: /arms/fast_ramp/policy_dwell/trust_detector_only_latency_s
+    renderings: ["2.24"]
+    documents:
+      - research/systems-paper/MECHANISM_B.md
+      - research/systems-paper/REVIEWER_RED_TEAM.md
+      - research/systems-paper/CLAIMS.csv
+
+  # ------------------------------- the math-paper red team pass (P7, P8)
+  - id: PB-30
+    what: >-
+      sampled instances in which a PINNED pair with equal prior mass was the
+      top two under q. P8's denominator: without it, "0 violations" would be
+      compatible with the proposition never having been evaluated.
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/P8/pinned_pairs_that_were_the_top_two_under_q
+    renderings: ["2,282", "2 282", "2282", "$2{,}282$"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - papers/gate_conditioning/main.tex
+      - research/math-paper/REVIEWER_RED_TEAM_MATH.md
+
+  - id: PB-31
+    what: >-
+      instances in which P4's condition fired on a pinned pair ANYWAY, once
+      the equal-prior hypothesis is dropped. P8's escape, reported so it is
+      not dismissed as a technicality.
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/P8_escape/P4_condition_fired_anyway
+    renderings: ["1,224", "1 224", "1224"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - research/math-paper/REVIEWER_RED_TEAM_MATH.md
+
+  - id: PB-32
+    what: the denominator for PB-31
+    artifact: research/math-paper/results/proof_audit.json
+    pointer: /numeric/P8_escape/pinned_pairs_that_were_the_top_two_under_q
+    renderings: ["20,130", "20 130", "20130"]
+    documents:
+      - research/math-paper/FORMAL_CORE.md
+      - research/math-paper/REVIEWER_RED_TEAM_MATH.md

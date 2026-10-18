@@ -1,0 +1,49 @@
+{
+ "claim_register": "research/csia_2_3_stock_bridge/CLAIMS.json#ALLOCATOR_COMPENSATION",
+ "claims": {
+  "PHYSICAL_EFFECT": {
+   "attributable": true,
+   "domain": "ACTUATION",
+   "meaning": "the closed loop commands motor m more than the other motors after the event than before it (VIOLATED: the motor lost physical effect), or, where the motor's telemetry reports a deficit large enough to be tested, does not (NOMINAL). NOT_APPLICABLE with nothing to test; UNAVAILABLE when not measurable or saturated. Cannot say which stage of the propulsion chain failed",
+   "relation": "actuation.physical_response"
+  }
+ },
+ "configuration_assumptions": [
+  "IMU_GYRO_DNF_EN without the ESC-RPM bit",
+  "constant payload",
+  "no saturation"
+ ],
+ "contract_version": "stock-1",
+ "expected_inputs": [
+  "a PX4 ULog with the stock topics (stock_log.py)",
+  "a discovered event (events.py)"
+ ],
+ "fault_behavior": "a statistic that cannot be computed is UNAVAILABLE (INPUTS_MISSING), never NOMINAL",
+ "health_reporting": "IN_PROCESS",
+ "lineage": "PER_OUTPUT",
+ "lineage_rule": [
+  "channel:motor_command.motor_<all>",
+  "sensor:imu.<device>",
+  "model:ekf2",
+  "model:px4_rate_controller",
+  "model:px4_control_allocator"
+ ],
+ "producer_id": "px4:allocator.compensation",
+ "producer_version": "csia-2.3-stock-r1",
+ "profile_compatibility": [
+  "csia_evidence_assurance/profiles/multirotor_quad.py"
+ ],
+ "schema": "csia.evidence_contract/1",
+ "update": {
+  "mode": "SAMPLE_AND_HOLD",
+  "period_s": null
+ },
+ "validity": {
+  "event_window_s": [
+   10.0,
+   15.0
+  ],
+  "relative_to": "stock.event"
+ },
+ "validity_rule": "XSYS-001's validated T3 window for the same statistic (CTRL_T3)"
+}

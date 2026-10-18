@@ -1,0 +1,816 @@
+{
+ "R21": {
+  "2_1_0": {
+   "R17_unreported_shared_nodes_support_independent_faults": {
+    "2_1": {
+     "rejected": [],
+     "supported": [],
+     "unresolved": [
+      "COMMUNICATION/shared_link",
+      "COMPUTE/shared_process",
+      "POWER/shared_node",
+      "SENSOR/independent_faults"
+     ],
+     "verdict": "AMBIGUOUS"
+    },
+    "fixed": true,
+    "outcome": "AMBIGUOUS"
+   },
+   "R1_unrelated_nominal_creates_UNIQUE": {
+    "2_1": "AMBIGUOUS",
+    "fixed": true,
+    "frozen": "UNIQUE",
+    "reason": [
+     "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL"
+    ]
+   },
+   "R6_order_dependence": {
+    "2_1_A": [
+     {
+      "rejected": [
+       "COMMUNICATION/transport_delay",
+       "COMPUTE/process_stall",
+       "COMPUTE/processing_delay",
+       "SENSOR/source_slow"
+      ],
+      "supported": [],
+      "unresolved": [
+       "TIMING/clock_inconsistent"
+      ],
+      "verdict": "UNSUPPORTED"
+     }
+    ],
+    "2_1_B": [
+     {
+      "rejected": [
+       "COMMUNICATION/transport_delay",
+       "COMPUTE/process_stall",
+       "COMPUTE/processing_delay",
+       "SENSOR/source_slow"
+      ],
+      "supported": [],
+      "unresolved": [
+       "TIMING/clock_inconsistent"
+      ],
+      "verdict": "UNSUPPORTED"
+     }
+    ],
+    "conflicts": [
+     "nav_solution:timing.clock_consistency"
+    ],
+    "fixed": true
+   },
+   "R7_duplicate_induced_symptom": {
+    "2_1_duplicated": [
+     "VOLTAGE_RAIL_LOW|rail_5v"
+    ],
+    "2_1_single": [
+     "VOLTAGE_RAIL_LOW|rail_5v"
+    ],
+    "duplicates_collapsed": {
+     "SENSOR/source.gps:v1_1.source_health": 1
+    },
+    "fixed": true
+   },
+   "R8B_unavailable_link_refutes_true_cause": {
+    "2_1": {
+     "rejected": [
+      "COMPUTE/process_stall",
+      "COMPUTE/processing_delay",
+      "SENSOR/source_slow",
+      "TIMING/clock_inconsistent"
+     ],
+     "supported": [
+      "COMMUNICATION/transport_delay"
+     ],
+     "unresolved": [],
+     "verdict": "SUPPORTED"
+    },
+    "fixed": true,
+    "outcome": "SUPPORTED"
+   },
+   "R8E_unavailable_process_gives_wrong_SUPPORTED": {
+    "2_1": {
+     "rejected": [
+      "COMMUNICATION/transport_delay",
+      "SENSOR/source_slow",
+      "TIMING/clock_inconsistent"
+     ],
+     "supported": [
+      "COMPUTE/processing_delay"
+     ],
+     "unresolved": [
+      "COMPUTE/process_stall"
+     ],
+     "verdict": "AMBIGUOUS"
+    },
+    "fixed": true,
+    "outcome": "AMBIGUOUS"
+   },
+   "R8G_unavailable_battery_gives_UNIQUE": {
+    "2_1": "AMBIGUOUS",
+    "fixed": true,
+    "reason": [
+     "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL",
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "R9B_raising_refuter_creates_SUPPORTED": {
+    "2_1": {
+     "rejected": [
+      "D2/h2"
+     ],
+     "supported": [
+      "D1/h1"
+     ],
+     "unresolved": [],
+     "verdict": "SUPPORTED"
+    },
+    "evaluation": "PREDICATE_FAULT",
+    "fault_now_observable": true,
+    "fixed": "PARTLY: the fault is observable; withholding SUPPORTED is governance option G5, not approved",
+    "predicate_errors": [
+     {
+      "context": {
+       "hypotheses": [
+        "D1/h1"
+       ],
+       "symptom": "S"
+      },
+      "error_class": "RAISED:KeyError",
+      "evaluated_as": [
+       "Q"
+      ],
+      "predicate": "Q",
+      "subject": "x"
+     }
+    ],
+    "verdict_still_SUPPORTED": true
+   },
+   "R9_exception_silently_unmeasurable": {
+    "2_1": {
+     "rejected": [],
+     "supported": [
+      "D1/h1",
+      "D2/h2"
+     ],
+     "unresolved": [],
+     "verdict": "AMBIGUOUS"
+    },
+    "evaluation": "PREDICATE_FAULT",
+    "evidence_unavailable": [],
+    "fixed": true,
+    "predicate_errors": [
+     {
+      "context": {
+       "hypotheses": [
+        "D1/h1"
+       ],
+       "symptom": "S"
+      },
+      "error_class": "RAISED:KeyError",
+      "evaluated_as": [
+       "Q"
+      ],
+      "predicate": "Q",
+      "subject": "x"
+     }
+    ]
+   },
+   "all_fixed_or_made_observable": true
+  },
+  "2_1_1": {
+   "R17_unreported_shared_nodes_support_independent_faults": {
+    "2_1": {
+     "rejected": [],
+     "supported": [],
+     "unresolved": [
+      "COMMUNICATION/shared_link",
+      "COMPUTE/shared_process",
+      "POWER/shared_node",
+      "SENSOR/independent_faults"
+     ],
+     "verdict": "AMBIGUOUS"
+    },
+    "fixed": true,
+    "outcome": "AMBIGUOUS"
+   },
+   "R1_unrelated_nominal_creates_UNIQUE": {
+    "2_1": "AMBIGUOUS",
+    "fixed": true,
+    "frozen": "UNIQUE",
+    "reason": [
+     "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL"
+    ]
+   },
+   "R6_order_dependence": {
+    "2_1_A": [
+     {
+      "rejected": [
+       "COMMUNICATION/transport_delay",
+       "COMPUTE/process_stall",
+       "COMPUTE/processing_delay",
+       "SENSOR/source_slow"
+      ],
+      "supported": [],
+      "unresolved": [
+       "TIMING/clock_inconsistent"
+      ],
+      "verdict": "UNSUPPORTED"
+     }
+    ],
+    "2_1_B": [
+     {
+      "rejected": [
+       "COMMUNICATION/transport_delay",
+       "COMPUTE/process_stall",
+       "COMPUTE/processing_delay",
+       "SENSOR/source_slow"
+      ],
+      "supported": [],
+      "unresolved": [
+       "TIMING/clock_inconsistent"
+      ],
+      "verdict": "UNSUPPORTED"
+     }
+    ],
+    "conflicts": [
+     "nav_solution:timing.clock_consistency"
+    ],
+    "fixed": true
+   },
+   "R7_duplicate_induced_symptom": {
+    "2_1_duplicated": [
+     "VOLTAGE_RAIL_LOW|rail_5v"
+    ],
+    "2_1_single": [
+     "VOLTAGE_RAIL_LOW|rail_5v"
+    ],
+    "duplicates_collapsed": {
+     "SENSOR/source.gps:v1_1.source_health": 1
+    },
+    "fixed": true
+   },
+   "R8B_unavailable_link_refutes_true_cause": {
+    "2_1": {
+     "rejected": [
+      "COMPUTE/process_stall",
+      "COMPUTE/processing_delay",
+      "SENSOR/source_slow",
+      "TIMING/clock_inconsistent"
+     ],
+     "supported": [
+      "COMMUNICATION/transport_delay"
+     ],
+     "unresolved": [],
+     "verdict": "SUPPORTED"
+    },
+    "fixed": true,
+    "outcome": "SUPPORTED"
+   },
+   "R8E_unavailable_process_gives_wrong_SUPPORTED": {
+    "2_1": {
+     "rejected": [
+      "COMMUNICATION/transport_delay",
+      "SENSOR/source_slow",
+      "TIMING/clock_inconsistent"
+     ],
+     "supported": [
+      "COMPUTE/processing_delay"
+     ],
+     "unresolved": [
+      "COMPUTE/process_stall"
+     ],
+     "verdict": "AMBIGUOUS"
+    },
+    "fixed": true,
+    "outcome": "AMBIGUOUS"
+   },
+   "R8G_unavailable_battery_gives_UNIQUE": {
+    "2_1": "AMBIGUOUS",
+    "fixed": true,
+    "reason": [
+     "DECLARED_ALTERNATIVE_NOT_AFFIRMATIVELY_NOMINAL",
+     "SAME_TICK_LOCALIZATION_RETAINS_ANOTHER_DOMAIN"
+    ]
+   },
+   "R9B_raising_refuter_creates_SUPPORTED": {
+    "2_1": {
+     "rejected": [
+      "D2/h2"
+     ],
+     "supported": [
+      "D1/h1"
+     ],
+     "unresolved": [],
+     "verdict": "SUPPORTED"
+    },
+    "evaluation": "PREDICATE_FAULT",
+    "fault_now_observable": true,
+    "fixed": "PARTLY: the fault is observable; withholding SUPPORTED is governance option G5, not approved",
+    "predicate_errors": [
+     {
+      "context": {
+       "hypotheses": [
+        "D1/h1"
+       ],
+       "symptom": "S"
+      },
+      "error_class": "RAISED:KeyError",
+      "evaluated_as": [
+       "Q"
+      ],
+      "predicate": "Q",
+      "subject": "x"
+     }
+    ],
+    "verdict_still_SUPPORTED": true
+   },
+   "R9_exception_silently_unmeasurable": {
+    "2_1": {
+     "rejected": [],
+     "supported": [
+      "D1/h1",
+      "D2/h2"
+     ],
+     "unresolved": [],
+     "verdict": "AMBIGUOUS"
+    },
+    "evaluation": "PREDICATE_FAULT",
+    "evidence_unavailable": [],
+    "fixed": true,
+    "predicate_errors": [
+     {
+      "context": {
+       "hypotheses": [
+        "D1/h1"
+       ],
+       "symptom": "S"
+      },
+      "error_class": "RAISED:KeyError",
+      "evaluated_as": [
+       "Q"
+      ],
+      "predicate": "Q",
+      "subject": "x"
+     }
+    ]
+   },
+   "all_fixed_or_made_observable": true
+  }
+ },
+ "R9B": {
+  "2_1_0": {
+   "evaluation": "PREDICATE_FAULT",
+   "fault_impact": [],
+   "outcome": "SUPPORTED",
+   "supported_left_standing": true,
+   "verdict_2_0_view": "SUPPORTED"
+  },
+  "2_1_1": {
+   "evaluation": "PREDICATE_FAULT",
+   "fault_impact": [
+    {
+     "action": "SUPPORTED_WITHHELD",
+     "dependency": "MATERIAL",
+     "evaluated_as": "Q",
+     "hypothesis": "D1/h1",
+     "predicate": "Q",
+     "predicate_fault": true,
+     "role": "REFUTER",
+     "why": "HAD_IT_BEEN_TRUE_IT_WOULD_HAVE_REJECTED_THE_SUPPORTED_HYPOTHESIS"
+    }
+   ],
+   "outcome": "WITHHELD_PREDICATE_FAULT",
+   "supported_left_standing": false,
+   "verdict_2_0_view": "AMBIGUOUS"
+  }
+ },
+ "SH_differing_paths": {
+  "2_1_0": [],
+  "2_1_1": [
+   "/ALL_TICKS/by_fix/C1/ticks_with_localization_change",
+   "/ALL_TICKS/by_fix/C2/ticks_with_localization_change",
+   "/ALL_TICKS/by_fix/C4/ticks_with_localization_change",
+   "/ALL_TICKS/by_fix/C6/ticks_with_localization_change",
+   "/ALL_TICKS/by_fix/F2/ticks_with_attribution_change",
+   "/ALL_TICKS/by_fix/F2/ticks_with_localization_change",
+   "/C1/changes/MS_A4_PROCESS_STALL",
+   "/C1/changes/MS_D2_ESTIMATOR_STALE",
+   "/C1/changes/PROCESS_STALL",
+   "/C1/scenarios_changed",
+   "/C2/changes/MS_A4_PROCESS_STALL",
+   "/C2/changes/MS_D2_ESTIMATOR_STALE",
+   "/C2/changes/PROCESS_STALL",
+   "/C2/scenarios_changed",
+   "/C4/changes/MS_A4_PROCESS_STALL",
+   "/C4/changes/MS_D2_ESTIMATOR_STALE",
+   "/C4/changes/PROCESS_STALL",
+   "/C4/scenarios_changed",
+   "/C6/changes/MS_A4_PROCESS_STALL",
+   "/C6/changes/MS_D2_ESTIMATOR_STALE",
+   "/C6/changes/PROCESS_STALL",
+   "/C6/scenarios_changed",
+   "/F2/changes/MS_A4_PROCESS_STALL",
+   "/F2/changes/MS_D2_ESTIMATOR_STALE",
+   "/F2/changes/PROCESS_STALL",
+   "/F2/scenarios_changed",
+   "/IDENTITY_CHECK/mismatches_with_no_fix"
+  ]
+ },
+ "SH_scenarios_named": {
+  "2_1_0": [],
+  "2_1_1": [
+   "MS_A4_PROCESS_STALL",
+   "MS_D2_ESTIMATOR_STALE",
+   "PROCESS_STALL"
+  ]
+ },
+ "audit_differing_paths": {
+  "2_1_0": {
+   "R": [
+    "/R11A/shadow_predicate_errors[0]",
+    "/R11A/shadow_predicate_errors[1]"
+   ]
+  },
+  "2_1_1": {
+   "R": [
+    "/R11A/shadow_predicate_errors[0]",
+    "/R11A/shadow_predicate_errors[1]"
+   ],
+   "SH": [
+    "/ALL_TICKS/by_fix/C1/ticks_with_localization_change",
+    "/ALL_TICKS/by_fix/C2/ticks_with_localization_change",
+    "/ALL_TICKS/by_fix/C4/ticks_with_localization_change",
+    "/ALL_TICKS/by_fix/C6/ticks_with_localization_change",
+    "/ALL_TICKS/by_fix/F2/ticks_with_attribution_change",
+    "/ALL_TICKS/by_fix/F2/ticks_with_localization_change",
+    "/C1/changes/MS_A4_PROCESS_STALL",
+    "/C1/changes/MS_D2_ESTIMATOR_STALE",
+    "/C1/changes/PROCESS_STALL",
+    "/C1/scenarios_changed",
+    "/C2/changes/MS_A4_PROCESS_STALL",
+    "/C2/changes/MS_D2_ESTIMATOR_STALE"
+   ]
+  }
+ },
+ "audit_sections_identical_to_audit": {
+  "2_1_0": {
+   "E": true,
+   "N": true,
+   "P": true,
+   "R": false,
+   "SH": true,
+   "X": true
+  },
+  "2_1_1": {
+   "E": true,
+   "N": true,
+   "P": true,
+   "R": false,
+   "SH": false,
+   "X": true
+  }
+ },
+ "change_counts": {
+  "UNCHANGED": 29
+ },
+ "classification_counts": {
+  "2_1_0": {
+   "FIXED": 18,
+   "INTENTIONALLY_DEFERRED": 5,
+   "NOT_APPLICABLE": 10
+  },
+  "2_1_1": {
+   "FIXED": 18,
+   "INTENTIONALLY_DEFERRED": 5,
+   "NOT_APPLICABLE": 10
+  }
+ },
+ "deferred": [
+  {
+   "classification": "INTENTIONALLY_DEFERRED",
+   "id": "P17",
+   "measure": "uniform exception handling across stages",
+   "note": "predicate faults are reported (C4). Attribution, detectors and a missing table id still raise, as in 2.0.0; intake validation (G5) is not approved",
+   "status_2_1_1": "STILL_DEFERRED (outside R-1/R-2/R-3)"
+  },
+  {
+   "classification": "INTENTIONALLY_DEFERRED",
+   "id": "P18",
+   "measure": "source-identity awareness (SC-14)",
+   "note": "correlated evidence is outside the approved scope",
+   "status_2_1_1": "STILL_DEFERRED (outside R-1/R-2/R-3)"
+  },
+  {
+   "classification": "INTENTIONALLY_DEFERRED",
+   "id": "P20",
+   "measure": "predicate subject correctness (SC-15, C8)",
+   "note": "rail source lookup (C8) is not approved",
+   "status_2_1_1": "STILL_DEFERRED (outside R-1/R-2/R-3)"
+  },
+  {
+   "classification": "INTENTIONALLY_DEFERRED",
+   "id": "R9B",
+   "measure": "a raising refuter creates SUPPORTED",
+   "note": "the fault is now reported (evaluation PREDICATE_FAULT); withholding the SUPPORTED verdict is governance option G5, not approved",
+   "status_2_1_1": "FIXED: the raising refuter no longer leaves a SUPPORTED standing"
+  }
+ ],
+ "harness": "semantic_core_2_1_revision_enumeration_three_way",
+ "measures": [
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 6,
+   "id": "N2.irrelevant",
+   "measure": "P1/P19 irrelevant NOMINAL creates UNIQUE (N2)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 21,
+   "id": "N2.unique",
+   "measure": "P19 UNIQUE configurations of 125 (N2); 4 remain, each with its declared alternative NOMINAL",
+   "semantic_core_2_1_0": 4,
+   "semantic_core_2_1_1": 4
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N2.unavailable",
+   "measure": "UNAVAILABLE creates UNIQUE (N2)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N2.duplicate",
+   "measure": "P15 duplicate changes an attribution decision (N2)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N2.order",
+   "measure": "P3 order changes anything (N2)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 1208,
+   "id": "N3.unknown_refutes",
+   "measure": "P6 unknown record refutes (N3 COMMAND_NO_RESPONSE)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 211,
+   "id": "N3.unknown_supported",
+   "measure": "P6 SUPPORTED resting on an unknown (N3)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N3.order",
+   "measure": "P3 order (N3)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N3.duplicate",
+   "measure": "P4 duplicate (N3)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 486,
+   "id": "N4.unknown_refutes",
+   "measure": "P6 unknown record refutes (N4 OUTPUT_STALE)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 38,
+   "id": "N4.unknown_supported",
+   "measure": "P6 SUPPORTED resting on an unknown (N4)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N4.order",
+   "measure": "P3 order (N4)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N4.duplicate",
+   "measure": "P4 duplicate (N4)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 94,
+   "id": "N5.irrelevant",
+   "measure": "P1 irrelevant evidence changes a POSITION result (N5)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 224,
+   "id": "N6.unknown_refutes",
+   "measure": "P6 unreported shared node refutes (N6)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 80,
+   "id": "N6.unknown_confirms",
+   "measure": "P6 unreported shared node confirms (N6)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 176,
+   "id": "N6.unknown_supported",
+   "measure": "P6 SUPPORTED resting on an unreported node (N6)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "N1.monotone",
+   "measure": "P14 monotone information (N1, both shapes)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 142,
+   "id": "P1",
+   "measure": "P1 irrelevant addition changes another subject's localization (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 6,
+   "id": "P2",
+   "measure": "P2 irrelevant removal changes a decision (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 17,
+   "id": "P2.unknown",
+   "measure": "P2 removal whose relevance the declared scope cannot settle",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "P3",
+   "measure": "P3 order (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 3,
+   "id": "P4",
+   "measure": "P4 duplicate changes a decision (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 259,
+   "id": "P5",
+   "measure": "P5 injected predicate faults NOT visible (corpus evaluations)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 382,
+   "id": "P6",
+   "measure": "P6 Kleene violations under UNAVAILABLE (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "NOT_APPLICABLE",
+   "classification_2_1_1": "NOT_APPLICABLE",
+   "frozen_v2": 0,
+   "id": "P7",
+   "measure": "P7 attribution candidates lost (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 281,
+   "id": "P9",
+   "measure": "P9 UNIQUE contradicting its own tick's localization (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "FIXED",
+   "classification_2_1_1": "FIXED",
+   "frozen_v2": 15,
+   "id": "P12",
+   "measure": "P12 predicates inconsistent under UNAVAILABLE (corpus)",
+   "semantic_core_2_1_0": 0,
+   "semantic_core_2_1_1": 0
+  },
+  {
+   "change_2_1_0_to_2_1_1": "UNCHANGED",
+   "classification_2_1_0": "INTENTIONALLY_DEFERRED",
+   "classification_2_1_1": "INTENTIONALLY_DEFERRED",
+   "frozen_v2": 838,
+   "id": "P16",
+   "measure": "P16 POSITION_UNAVAILABLE on a function the graph calls ELIGIBLE",
+   "semantic_core_2_1_0": 168,
+   "semantic_core_2_1_1": 168
+  }
+ ],
+ "pre_identical_to_accepted_section_D": true,
+ "revised_differing_paths_vs_accepted": [],
+ "revised_identical_to_accepted_section_D": true
+}

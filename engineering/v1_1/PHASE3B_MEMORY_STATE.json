@@ -1,0 +1,21 @@
+{
+  "artifact": "PHASE3B_MEMORY_STATE",
+  "bytes_at_8_per_float": {
+    "diagnosis_smoothing": 64,
+    "propagation_only": 64,
+    "sequential": 40,
+    "trust_recursion_alpha_beta": 128
+  },
+  "mutable_runtime_state_floats": {
+    "diagnosis_smoothed_per_hypothesis": 8,
+    "sequential_cusum_S_per_covered_node": 5,
+    "trust_carried_between_ticks_for_propagation": 8,
+    "trust_recursion_alpha_beta": 16
+  },
+  "planned_c_structs_phase5": {
+    "csia_cusum_t": "float S[N_SEQ_NODES];",
+    "csia_diag_t": "float smoothed[N_HYP];",
+    "csia_trust_t": "float alpha[N_NODES]; float beta[N_NODES]; float trust[N_NODES];",
+    "note": "propagation removal deletes only the inter-node read of trust[] inside the neighbour weight; trust[] itself is still reported and still needed."
+  }
+}

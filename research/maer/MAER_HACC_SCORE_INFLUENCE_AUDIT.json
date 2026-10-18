@@ -1,0 +1,51 @@
+{
+ "after_smoothing_and_tempering": {
+  "smoothing_effect": "EWMA converges to its input, so a sustained saturated relation reaches the full value; SMOOTH_ALPHA sets only how fast",
+  "steady_state_target_minus_nominal": 5.897738,
+  "ticks_to_90_percent": 37.2
+ },
+ "consistency_range": {
+  "max": 1.0,
+  "min": 0.0
+ },
+ "decisive_question": {
+  "answer": true,
+  "net_margin": 2.136538,
+  "question": "does ONE saturated h_acc relation alone put gps_fault above nominal?",
+  "reading": "YES -- a single sustained saturated relation in a cause's low-set overcomes the nominal prior on its own, with no other evidence"
+ },
+ "frozen_constants": {
+  "EPS": 0.02,
+  "EVIDENCE_MULT": 1.5,
+  "PRIOR_NOMINAL": 0.86,
+  "SMOOTH_ALPHA": 0.06,
+  "n_causes": 8,
+  "prior_other": 0.02
+ },
+ "per_tick_pairwise_log_correction_gate_1": {
+  "bounded_by": "EPS -- log((1+EPS)/EPS) = 3.931826",
+  "note": "this bound is IDENTICAL for every existing relation; h_acc is not privileged by its units",
+  "target_minus_nominal_at_c_0": 3.931826,
+  "target_minus_nominal_at_c_1": -3.931826
+ },
+ "prior_barrier": {
+  "barrier_nominal_over_target": 3.7612,
+  "log_prior_nominal": -0.150823,
+  "log_prior_target": -3.912023
+ },
+ "retracted_claim": {
+  "text": "consistency is bounded in (0,1], therefore the new relation cannot dominate diagnosis by unit choice",
+  "why_wrong": "bounding the INPUT to the likelihood mapping does not bound the pairwise log-score correction, which is what decides ranking. The correction is bounded by EPS, not by the consistency range"
+ },
+ "saturation_arithmetic": {
+  "CORRECTION": "an earlier report stated 2.8x nominal for the 0.01 threshold. That was wrong: 2748 mm is the absolute threshold and was mistakenly written as a ratio. The ratio is 9.16x",
+  "consistency_0.01_at_lambda": 10.21034037,
+  "consistency_0.50_at_lambda": 2.386294,
+  "derivation": "consistency = exp(-0.5(lam-1)) = 0.01 => lam = 1 + 2 ln 100",
+  "h_acc_mm_at_h0_300": 2748.0,
+  "h_acc_over_h0_at_half": 2.9176,
+  "h_acc_over_h0_at_that_lambda": 9.1601
+ },
+ "verdict": "DETECTOR_DOMINANT_BUT_DECLARED",
+ "verdict_rationale": "One saturated relation in a single-feature cause overcomes the nominal prior by itself. This is NOT a property of the h_acc transform: the per-relation bound log((1+EPS)/EPS) is the same for every relation in the layer, and gps_fault's evidence set already had exactly one member. It is a property of the frozen diagnosis design -- a single-feature cause plus an EPS floor -- and it is declared here rather than discovered after scoring. The consequence for the experiment is that H1's DIRECTION is close to structurally implied once the relation is live and degraded, so the informative content sits in H2's crossover and in magnitude/timing, not in the sign of H1."
+}

@@ -1,0 +1,52 @@
+  - id: PI-006
+    date: 2026-10-18
+    result: >-
+      Correction of a supporting figure, not new evidence: the Mechanism-B
+      CUSUM-versus-trust comparison (SC-09). The raw trust crossings 8.72 /
+      3.36 / 3.24 s are already detector-only; the "detector only" figures
+      7.72 / 2.36 / 2.24 s subtracted a 1.0 s failsafe dwell the raw series
+      never contained (FL-053). The SC-09 statement is unchanged and holds by a
+      wider margin.
+    evidence_tier: E0
+    artifact: >-
+      research/physical_validation/corrections/FL-053_SC09/CORRECTION_RECORD.yaml;
+      research/physical_validation/corrections/FL-053_SC09/verification/policy_alerts.json;
+      research/systems-paper/results/mechanism_b.json (unchanged)
+    current_claim: >-
+      "The CUSUM alarms earlier than the trust threshold in every faulted arm
+      and never in the clean window", supported in the historical record by
+      "detector-to-detector: 2.96 vs 7.72, 1.16 vs 2.36 and 0.72 vs 2.24".
+    new_evidence: >-
+      FL-053 and its successor record: source and AST checks that the trust
+      latency is a raw-series crossing with no policy applied; a clean-archive
+      re-run reproducing mechanism_b.json exactly; the shipped FailsafePolicy
+      escalating exactly 1.00 s after the crossing on each faulted arm.
+    old_limitation: >-
+      The comparison was stated net of a dwell that was never in the series,
+      and red-team objection 2.3 was recorded as closed by that subtraction.
+    new_limitation: >-
+      Unchanged in scope: bench simulator, one node, one profile, one arm per
+      drift rate, CUSUM h chosen on the same simulator's clean arm, no IMU
+      coverage for the CUSUM bank.
+    claim_impact: >-
+      Replaces the supporting figures, not the claim. The CUSUM lead becomes
+      5.76 / 2.20 / 2.52 s instead of 4.76 / 1.20 / 1.52 s. Adds one entry
+      (FL-053) to the corrections the paper may report.
+    supported_upgrade: >-
+      "Against the trust path's first crossing of 0.75, the CUSUM alarms 5.76 s
+      earlier on the 1 m/s ramp (2.96 s against 8.72 s), 2.20 s earlier on the
+      3 m/s spoof and 2.52 s earlier on the 6 m/s ramp, and never in the clean
+      window; both figures are detector-only."
+    unsupported_upgrade: >-
+      "The CUSUM is faster in general" or "on real flights": FALSE, bench only.
+      "The trust path is 1 s slower than previously reported because of the
+      dwell": FALSE, the dwell was never in the reported figure. Any use of
+      7.72 / 2.36 / 2.24 s as detector-only latencies. Any detector-plus-policy
+      comparison: the policy alert times in the successor record are
+      verification, and no CUSUM-with-dwell arm exists.
+    paper_section: Mechanism B; Table 9 (CUSUM against trust); corrections
+    ready_to_integrate: false
+    ready_reason: >-
+      DRAFT. adopt.py --apply sets this to true when it appends the row on an
+      owner decision, and not before. The figures are committed, re-derived
+      and verified; the wording is the writing agents'.

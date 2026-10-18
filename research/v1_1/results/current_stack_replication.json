@@ -1,0 +1,1335 @@
+{
+ "node": "gps",
+ "permitted_sentences_by_outcome": {
+  "CAMPAIGN_INCOMPLETE": [
+   "NO SENTENCE IS PERMITTED. The campaign has not run to the preregistered repetitions, which is not one of the five section 6 classifications and must not be reported as any of them."
+  ],
+  "INAPPLICABLE": [
+   "The fix-preserving GNSS position offset required to exercise the history-dominated threshold-crossing mechanism cannot be applied on this platform, so the mechanism was not tested there.",
+   "No substitute intervention was run, because substituting one would test a different fault."
+  ],
+  "INCONCLUSIVE": [
+   "The Mechanism B campaign ran on this platform but its validity controls failed, so no claim is made about the history-dominated threshold-crossing mechanism there."
+  ],
+  "NOT_REPLICATED": [
+   "On ArduPilot 4.8 the source recursion does not reproduce the runtime trust trajectory within the preregistered tolerance, so the history-dominated threshold-crossing mechanism does not replicate on the current stack.",
+   "This is an external-validity finding about a mechanism derived from a single 2015-era autopilot."
+  ],
+  "PARTIALLY_REPLICATED": [
+   "On ArduPilot 4.8 the source recursion reproduces the runtime trust trajectory to within the preregistered tolerance, but the crossing outcomes do not match the predeclared expectation for every condition.",
+   "The recursion is therefore confirmed as the mechanism governing the trajectory; the conditions under which it reaches a threshold are not fully characterised on this platform."
+  ],
+  "REPLICATED": [
+   "The history-dominated threshold-crossing mechanism replicates on ArduPilot 4.8: given the platform's own measured banked state and its measured per-tick evidence and forgetting factor, the source recursion reproduces the runtime trust trajectory and predicts the observed threshold crossing.",
+   "The crossing tick differs from the 2015 ArduCopter 3.3 figure because the banked state differs; the mechanism, not the number, is what replicates."
+  ]
+ },
+ "permitted_sentences_in_force": {
+  "ardupilot": [
+   "The history-dominated threshold-crossing mechanism replicates on ArduPilot 4.8: given the platform's own measured banked state and its measured per-tick evidence and forgetting factor, the source recursion reproduces the runtime trust trajectory and predicts the observed threshold crossing.",
+   "The crossing tick differs from the 2015 ArduCopter 3.3 figure because the banked state differs; the mechanism, not the number, is what replicates."
+  ],
+  "px4": [
+   "The fix-preserving GNSS position offset required to exercise the history-dominated threshold-crossing mechanism cannot be applied on this platform, so the mechanism was not tested there.",
+   "No substitute intervention was run, because substituting one would test a different fault."
+  ]
+ },
+ "platforms": {
+  "ardupilot": {
+   "S0_measured_by_condition": {
+    "CLEAN": [
+     120.50058068173091,
+     120.46637833083729,
+     120.51028009930097,
+     120.47790597675986,
+     120.46159753962172
+    ],
+    "RAMP_20S": [
+     133.34849854716495,
+     134.19023898686464,
+     134.46844252986264,
+     136.47424865984874,
+     135.3182151839716
+    ],
+    "STEP_LARGE": [
+     135.2000383991519,
+     133.26015015404838,
+     135.28150269333688,
+     135.19959789034627,
+     133.69806014001983
+    ],
+    "STEP_SMALL": [
+     135.2561408838991,
+     134.45321023910915,
+     133.69347345703517,
+     135.19454395540234,
+     133.98840986892384
+    ]
+   },
+   "crossing_error_tolerance": 2,
+   "crossing_errors_ticks": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "crossings": {
+    "CLEAN": "0 of 5",
+    "RAMP_20S": "5 of 5",
+    "STEP_LARGE": "0 of 5",
+    "STEP_SMALL": "0 of 5"
+   },
+   "expectations_met": {
+    "CLEAN": true,
+    "RAMP_20S": true,
+    "STEP_LARGE": true,
+    "STEP_SMALL": true
+   },
+   "max_reconstruction_error": 1.9984e-15,
+   "platform": "ardupilot",
+   "reason": "valid injection with readback, matched control, gate open for the whole window, recursion reproduced the trajectory within tolerance, and predicted and observed crossings agree",
+   "trajectory_within_tolerance_on_all_valid": true,
+   "trials_total": 20,
+   "trials_valid": 20,
+   "verdict": "REPLICATED"
+  },
+  "px4": {
+   "evidence": {
+    "SENS_GPS0_OFF{X,Y,Z}": "antenna lever arm passed through as antenna_offset_* metadata; lat/lon never modified (VehicleGPSPosition.cpp:173,197-200)",
+    "SENS_GPS1_OFFX/OFFY": "publishes a SECOND offset receiver instance; the primary is published unmodified (SensorGpsSim.cpp:201-217)",
+    "SIM_GPS_USED": "satellite count -- fix loss, which is Mechanism A (SensorGpsSim.cpp:155-167)",
+    "failure_injection GNSS": "Off and Wrong close the validity gate; Stuck is a frozen-position fault, a different family"
+   },
+   "platform": "px4",
+   "reason": "no fix-preserving GNSS position offset exists on PX4 SIH; four candidate routes were read out of source at 547e2ca and all four fail (section 2.1). Section 3 forbids substituting another intervention, so no trials were run.",
+   "trials_total": 0,
+   "verdict": "INAPPLICABLE"
+  }
+ },
+ "preregistration": "research/v1_1/CURRENT_STACK_REPLICATION.md",
+ "preregistration_blob_sha1": "0e186117e2dcc014862872934768e06e0a195592",
+ "threshold": 0.75,
+ "trials": [
+  {
+   "S0_measured": 120.50058068173091,
+   "T0_measured": 0.9541406875010269,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "CLEAN",
+   "crossing": {
+    "T_min_after_onset": 0.954141,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 0.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 0.0
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T024512Z-4c3b63f9",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 20.0,
+   "onset_tick": 501,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.66533e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.66533e-15,
+     "rho_assumed_max": 0.00382783,
+     "rho_assumed_min": 0.0121561,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 1000,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_CLEAN_0.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_CLEAN_0",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": null,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": null,
+    "readback_confirmed": null,
+    "writes": 0
+   }
+  },
+  {
+   "S0_measured": 120.46637833083729,
+   "T0_measured": 0.9541050378597444,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "CLEAN",
+   "crossing": {
+    "T_min_after_onset": 0.954105,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 0.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 0.0
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T024630Z-2d7e9027",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 20.0,
+   "onset_tick": 501,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.9984e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.9984e-15,
+     "rho_assumed_max": 0.00382844,
+     "rho_assumed_min": 0.012157,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 1000,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_CLEAN_1.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_CLEAN_1",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": null,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": null,
+    "readback_confirmed": null,
+    "writes": 0
+   }
+  },
+  {
+   "S0_measured": 120.51028009930097,
+   "T0_measured": 0.9541497973745349,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "CLEAN",
+   "crossing": {
+    "T_min_after_onset": 0.95415,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 0.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 0.0
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T024748Z-0f5e50a6",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 20.0,
+   "onset_tick": 501,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.22125e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.22125e-15,
+     "rho_assumed_max": 0.00382735,
+     "rho_assumed_min": 0.0121556,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 1000,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_CLEAN_2.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_CLEAN_2",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": null,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": null,
+    "readback_confirmed": null,
+    "writes": 0
+   }
+  },
+  {
+   "S0_measured": 120.47790597675986,
+   "T0_measured": 0.9541212913768062,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "CLEAN",
+   "crossing": {
+    "T_min_after_onset": 0.954121,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 0.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 0.0
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T024906Z-6d671235",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 20.0,
+   "onset_tick": 501,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.22125e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.22125e-15,
+     "rho_assumed_max": 0.00382851,
+     "rho_assumed_min": 0.0121569,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 1000,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_CLEAN_3.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_CLEAN_3",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": null,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": null,
+    "readback_confirmed": null,
+    "writes": 0
+   }
+  },
+  {
+   "S0_measured": 120.46159753962172,
+   "T0_measured": 0.9541025403081655,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "CLEAN",
+   "crossing": {
+    "T_min_after_onset": 0.954103,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 0.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 0.0
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025024Z-e971f365",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 20.0,
+   "onset_tick": 501,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.44329e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.44329e-15,
+     "rho_assumed_max": 0.00388892,
+     "rho_assumed_min": 0.0121834,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 1000,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_CLEAN_4.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_CLEAN_4",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": null,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": null,
+    "readback_confirmed": null,
+    "writes": 0
+   }
+  },
+  {
+   "S0_measured": 135.2561408838991,
+   "T0_measured": 0.960723271316461,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_SMALL",
+   "crossing": {
+    "T_min_after_onset": 0.869698,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 5.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 4.998
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025142Z-339b6174",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.4866,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.11022e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.11022e-15,
+     "rho_assumed_max": 0.0401508,
+     "rho_assumed_min": 0.0363285,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_SMALL_0.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_SMALL_0",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 4.496608029593653e-05,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 4.496608016779646e-05,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 134.45321023910915,
+   "T0_measured": 0.9603890824160994,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_SMALL",
+   "crossing": {
+    "T_min_after_onset": 0.868116,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 5.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 4.998
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025259Z-f5ff4bb0",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.3736,
+   "onset_tick": 560,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.33227e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.33227e-15,
+     "rho_assumed_max": 0.0408251,
+     "rho_assumed_min": 0.0365252,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 941,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_SMALL_1.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_SMALL_1",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 4.496608029593653e-05,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 4.496608016779646e-05,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 133.69347345703517,
+   "T0_measured": 0.9600751870282724,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_SMALL",
+   "crossing": {
+    "T_min_after_onset": 0.862311,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 5.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 5.009
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025417Z-ffb0935f",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.2744,
+   "onset_tick": 557,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.22125e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.22125e-15,
+     "rho_assumed_max": 0.0444836,
+     "rho_assumed_min": 0.037548,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 944,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_SMALL_2.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_SMALL_2",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 4.496608029593653e-05,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 4.496608016779646e-05,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 135.19454395540234,
+   "T0_measured": 0.9606825117297543,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_SMALL",
+   "crossing": {
+    "T_min_after_onset": 0.869498,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 5.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 4.998
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025535Z-bcfdd648",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.4916,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.33227e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.33227e-15,
+     "rho_assumed_max": 0.0402401,
+     "rho_assumed_min": 0.0363681,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_SMALL_3.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_SMALL_3",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 4.496608029593653e-05,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 4.496608016779646e-05,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 133.98840986892384,
+   "T0_measured": 0.9602112044721639,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_SMALL",
+   "crossing": {
+    "T_min_after_onset": 0.868203,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 5.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 5.009
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025653Z-1b017a00",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.3105,
+   "onset_tick": 558,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.33227e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.33227e-15,
+     "rho_assumed_max": 0.0405773,
+     "rho_assumed_min": 0.036456,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 943,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_SMALL_4.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_SMALL_4",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 4.496608029593653e-05,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 4.496608016779646e-05,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 135.2000383991519,
+   "T0_measured": 0.9606819744419166,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_LARGE",
+   "crossing": {
+    "T_min_after_onset": 0.854343,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 50.061
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025811Z-34c24357",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.487,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.33227e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.33227e-15,
+     "rho_assumed_max": 0.0499755,
+     "rho_assumed_min": 0.0390468,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_LARGE_0.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_LARGE_0",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 133.26015015404838,
+   "T0_measured": 0.9599175792210506,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_LARGE",
+   "crossing": {
+    "T_min_after_onset": 0.852689,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 50.061
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T025928Z-b2916d62",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.1856,
+   "onset_tick": 555,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 9.99201e-16,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 9.99201e-16,
+     "rho_assumed_max": 0.050219,
+     "rho_assumed_min": 0.0390897,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 946,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_LARGE_1.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_LARGE_1",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 135.28150269333688,
+   "T0_measured": 0.9607349818156117,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_LARGE",
+   "crossing": {
+    "T_min_after_onset": 0.85441,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 50.049
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T030046Z-da118da4",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.4889,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 9.99201e-16,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 9.99201e-16,
+     "rho_assumed_max": 0.0499765,
+     "rho_assumed_min": 0.0390337,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_LARGE_2.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_LARGE_2",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 135.19959789034627,
+   "T0_measured": 0.9606807893234185,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_LARGE",
+   "crossing": {
+    "T_min_after_onset": 0.854342,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 50.049
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T030204Z-fcd51a90",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.4918,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.66533e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.66533e-15,
+     "rho_assumed_max": 0.0499754,
+     "rho_assumed_min": 0.0390474,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_LARGE_3.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_LARGE_3",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 133.69806014001983,
+   "T0_measured": 0.9600767273842442,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "STEP_LARGE",
+   "crossing": {
+    "T_min_after_onset": 0.853066,
+    "agree_on_occurrence": true,
+    "error_ticks": null,
+    "observed": false,
+    "observed_tick": null,
+    "predicted": false,
+    "predicted_tick": null,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 50.049
+   },
+   "expectation": "no crossing",
+   "flight_id": "20260825T030322Z-cbb9c56f",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.2742,
+   "onset_tick": 557,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.11022e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.11022e-15,
+     "rho_assumed_max": 0.0501562,
+     "rho_assumed_min": 0.0390875,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 944,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_STEP_LARGE_4.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_STEP_LARGE_4",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 1
+   }
+  },
+  {
+   "S0_measured": 133.34849854716495,
+   "T0_measured": 0.9599601619088747,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "RAMP_20S",
+   "crossing": {
+    "T_min_after_onset": 0.719922,
+    "agree_on_occurrence": true,
+    "error_ticks": 0,
+    "observed": true,
+    "observed_tick": 95,
+    "predicted": true,
+    "predicted_tick": 95,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 47.046
+   },
+   "expectation": "crossing",
+   "flight_id": "20260825T030440Z-2938c448",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.1688,
+   "onset_tick": 555,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.22125e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.22125e-15,
+     "rho_assumed_max": 0.123686,
+     "rho_assumed_min": 0.0493786,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 946,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_RAMP_20S_0.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_RAMP_20S_0",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 100
+   }
+  },
+  {
+   "S0_measured": 134.19023898686464,
+   "T0_measured": 0.9602766337068379,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "RAMP_20S",
+   "crossing": {
+    "T_min_after_onset": 0.725083,
+    "agree_on_occurrence": true,
+    "error_ticks": 0,
+    "observed": true,
+    "observed_tick": 99,
+    "predicted": true,
+    "predicted_tick": 99,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 47.056
+   },
+   "expectation": "crossing",
+   "flight_id": "20260825T030558Z-78036940",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.3313,
+   "onset_tick": 559,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 9.99201e-16,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 9.99201e-16,
+     "rho_assumed_max": 0.122201,
+     "rho_assumed_min": 0.0490337,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 942,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_RAMP_20S_1.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_RAMP_20S_1",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 100
+   }
+  },
+  {
+   "S0_measured": 134.46844252986264,
+   "T0_measured": 0.9604033424919548,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "RAMP_20S",
+   "crossing": {
+    "T_min_after_onset": 0.72371,
+    "agree_on_occurrence": true,
+    "error_ticks": 0,
+    "observed": true,
+    "observed_tick": 96,
+    "predicted": true,
+    "predicted_tick": 96,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 47.047
+   },
+   "expectation": "crossing",
+   "flight_id": "20260825T030716Z-3099391f",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.371,
+   "onset_tick": 560,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.22125e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.22125e-15,
+     "rho_assumed_max": 0.122754,
+     "rho_assumed_min": 0.0477517,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 941,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_RAMP_20S_2.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_RAMP_20S_2",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 100
+   }
+  },
+  {
+   "S0_measured": 136.47424865984874,
+   "T0_measured": 0.9611923801423785,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "RAMP_20S",
+   "crossing": {
+    "T_min_after_onset": 0.724227,
+    "agree_on_occurrence": true,
+    "error_ticks": 0,
+    "observed": true,
+    "observed_tick": 94,
+    "predicted": true,
+    "predicted_tick": 94,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 47.047
+   },
+   "expectation": "crossing",
+   "flight_id": "20260825T030834Z-9873f4ec",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.6836,
+   "onset_tick": 568,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 1.88738e-15,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 1.88738e-15,
+     "rho_assumed_max": 0.126174,
+     "rho_assumed_min": 0.0468524,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 933,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_RAMP_20S_3.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_RAMP_20S_3",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 100
+   }
+  },
+  {
+   "S0_measured": 135.3182151839716,
+   "T0_measured": 0.9607520550198011,
+   "command_authority": "NO_COMMAND_PATH_REACHABLE",
+   "condition": "RAMP_20S",
+   "crossing": {
+    "T_min_after_onset": 0.711812,
+    "agree_on_occurrence": true,
+    "error_ticks": 0,
+    "observed": true,
+    "observed_tick": 98,
+    "predicted": true,
+    "predicted_tick": 98,
+    "threshold": 0.75
+   },
+   "downstream_observable": {
+    "expected_m": 50.0,
+    "fix_type_note": "no gnss.fix_type channel exists; a fix-type drop would show as gnss.position MISSING/NO_3D_FIX, so 0 such ticks IS 'fix type unchanged from the control'",
+    "name": "reported gnss.position north offset, 15-25 s after onset",
+    "no_3d_fix_ticks": 0,
+    "observed_m": 46.997
+   },
+   "expectation": "crossing",
+   "flight_id": "20260825T030952Z-011c3922",
+   "hold_mode": "ALT_HOLD",
+   "hold_mode_confirmed": true,
+   "invalid_reason": null,
+   "onset_s": 22.4828,
+   "onset_tick": 563,
+   "reconstruction": {
+    "closed_form_note": "constant-rho closed form deliberately NOT used -- preregistration section 5, correction 9",
+    "closed_form_used": false,
+    "fitted_parameters": 0,
+    "from": "measured S0, T0 at onset; measured e_k; rho_k re-derived from component scores by the source formula",
+    "max_abs_delta": 9.99201e-16,
+    "null_controls": {
+     "gate_closed_ticks_in_window": 0,
+     "gate_ignored": 9.99201e-16,
+     "rho_assumed_max": 0.132642,
+     "rho_assumed_min": 0.0492395,
+     "rule": "RULE A on the instrument: agreement is only evidence if breaking an input breaks the agreement"
+    },
+    "ticks_compared": 938,
+    "tolerance": 1e-06,
+    "within_tolerance": true
+   },
+   "tick_log": "research/v1_1/results/mechanism_b_gps/ticks/ardupilot_RAMP_20S_4.ticks.csv",
+   "ticks": 1501,
+   "trial": "ardupilot_RAMP_20S_4",
+   "valid": true,
+   "validity_evidence": {
+    "commanded_final": 0.0004496608029593653,
+    "fault_truth_source": "the injection schedule executed by the rig",
+    "gate_applicable_min": 1.0,
+    "gate_closed_ticks": 0,
+    "parameter": "SIM_GPS1_GLTCH_X",
+    "readback": 0.00044966081622987986,
+    "readback_confirmed": true,
+    "writes": 100
+   }
+  }
+ ]
+}

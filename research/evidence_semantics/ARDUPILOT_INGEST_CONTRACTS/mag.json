@@ -1,0 +1,58 @@
+{
+  "id": "mag.mavlink.scaled_imu.v0",
+  "family": "mag",
+  "source": "MAVLink SCALED_IMU (xmag/ymag/zmag)",
+  "accepted_input_states": [
+    {"state": "V", "raw_condition": "at least one of xmag/ymag/zmag is non-zero and all are finite",
+     "citation": "csia/aircraft/adapters/ardupilot.py:143-148"},
+    {"state": "X", "raw_condition": "xmag == ymag == zmag == 0. NOTE: this is NOT a documented MAVLink sentinel. It is treated as one by BOTH committed decoders, and the adapter says so in its own comment -- 'An all-zero triple is ABSENT, not a zero field. A real magnetometer never reads exactly zero on all three axes.' The contract records the decoders' reading, not a protocol guarantee.",
+     "citation": "csia/aircraft/adapters/ardupilot.py:141-143; csia/runtime/plugins.py:140"},
+    {"state": "N", "raw_condition": "no SCALED_IMU within 1.5x the nominal refresh period",
+     "citation": "research/evidence_semantics/probe.py:t1_protocol"}
+  ],
+  "emitted_states_required": ["V", "X"],
+  "allowed_merges": [
+    {"states": ["N", "S"],
+     "reason": "as for the other families: past max_age both mean no current measurement."}
+  ],
+  "forbidden_merges": [
+    {"id": "MAG-F1",
+     "states": ["X", "N"],
+     "needed_by": "the heading_caution rule reasons over T['mag'] and fresh['mag'] (csia/runtime/failsafe.py). 'The autopilot is publishing SCALED_IMU and reporting no magnetometer' and 'the SCALED_IMU stream has stopped' are different vehicle conditions with different remedies, and both currently reach the core as the same silence.",
+     "witness_words": {"X": "Z", "N": "N"}},
+    {"id": "MAG-F2",
+     "states": ["X", "V"],
+     "needed_by": "a zero field vector must never be usable as a heading reference.",
+     "witness_words": {"X": "Z", "V": "V"}}
+  ],
+  "freshness": {
+    "max_age_s": 0.5,
+    "rule": "a channel older than max_age is unusable and reported STALE",
+    "citation": "csia/aircraft/adapters/base.py:220-227"
+  },
+  "retention": {
+    "rule": "on an explicit absence report the retained field vector must be discarded",
+    "on_invalid": "DISCARD",
+    "citation": "REQUIRED BY THIS CONTRACT; the committed adapter simply does not call _put, so the previous vector is retained and ages out."
+  },
+  "sentinel_handling": {
+    "rule": "the absence report must be delivered with a reason",
+    "must_deliver_reason": true,
+    "citation": "REQUIRED BY THIS CONTRACT; ardupilot.py:143 has NO _reject_sentinel call on the else branch -- unlike GNSS and battery, this family records nothing at all."
+  },
+  "diagnostic_visibility": {
+    "rule": "the reason a channel is unusable must reach a consumer that can act on it differently from any other reason",
+    "citation": "csia/aircraft/sample.py:53"
+  },
+  "stage_sites": {
+    "T1_protocol": "MAVLink SCALED_IMU.xmag/ymag/zmag",
+    "T2_decode": "csia/aircraft/adapters/ardupilot.py:141-148",
+    "T3_ingest": "csia/aircraft/adapters/base.py:140-177 (_put / _reject_sentinel)",
+    "T4_channel": "csia/aircraft/adapters/base.py:198-229 (_channel_value)",
+    "T5_core_bridge": "csia/aircraft/adapters/base.py:306-337 (to_core_samples)",
+    "T6_slot": "csia/runtime/online.py:312-316 (_apply)",
+    "T7_admissible": "csia/runtime/online.py:603-605 (fresh)",
+    "T8_evidence": "csia/trust_engine/engine.py:146 (update gated on fresh)",
+    "T9_assurance": "csia/runtime/failsafe.py (heading_caution)"
+  }
+}

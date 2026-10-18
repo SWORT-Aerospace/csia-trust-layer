@@ -1,7 +1,7 @@
 # README claim audit — WP1
 
 Audited commit: `bc3ed977e14d6eb6c5dc3a8b771b2349337de91a`
-Audit branch: `research/wp1-formalization`
+Audit branch: `research/formalization`
 Method: every claim resolved against source or a committed artifact and, where
 measurable, re-measured. No claim is marked VERIFIED because the README asserts it.
 

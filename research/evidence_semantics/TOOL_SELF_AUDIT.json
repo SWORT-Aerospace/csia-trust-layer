@@ -1,0 +1,122 @@
+{
+  "all_four_detected": true,
+  "artifact": "TOOL_SELF_AUDIT",
+  "baseline": {
+    "battery_T4_tokens_for_X": [
+      "R",
+      "S"
+    ],
+    "battery_first_collapse_X_vs_V": "T5_core_bridge",
+    "gnss_A_close_delay_after_I": 0.32,
+    "gnss_T4_stale_onset_for_N": 12.84,
+    "gnss_T4_tokens_for_I": [
+      "I",
+      "N"
+    ],
+    "gnss_T4_tokens_for_N": [
+      "S",
+      "V"
+    ],
+    "gnss_first_collapse_I_vs_N": "T5_core_bridge"
+  },
+  "fixtures": [
+    {
+      "baseline": {
+        "gnss_A_close_delay_after_I": 0.32
+      },
+      "detected": true,
+      "detection_rule": "at least one published quantity moves",
+      "fixture": "D1_one_message_phase_shift",
+      "predicted_target": [
+        "gnss_A_close_delay_after_I"
+      ],
+      "prediction": "a one-period shift moves when the previous fix ages out, so the measured admissibility delay must change",
+      "prediction_held": false,
+      "prediction_note": "PREDICTION REFUTED, AND KEPT. The delay does NOT move, because on this path the no-fix report has no effect on admissibility at all -- A closes when the PREVIOUS fix ages out, whichever tick the report lands on. That the shift is invisible in this quantity is a second, independent confirmation of the GNSS-F1 collapse. The defect is still detected: the T4 token set moves, because before the shifted report arrives the adapter is still serving the retained fix.",
+      "quantities_that_moved": [
+        "battery_T4_tokens_for_X",
+        "gnss_T4_tokens_for_I"
+      ],
+      "with_defect": {
+        "gnss_A_close_delay_after_I": 0.32
+      }
+    },
+    {
+      "baseline": {
+        "gnss_T4_stale_onset_for_N": 12.84
+      },
+      "detected": true,
+      "detection_rule": "at least one published quantity moves",
+      "fixture": "D2_wrong_freshness_event",
+      "predicted_target": [
+        "gnss_T4_stale_onset_for_N"
+      ],
+      "prediction": "ageing a channel against the wrong tick moves the STALE onset by exactly one tick",
+      "prediction_held": true,
+      "prediction_note": "",
+      "quantities_that_moved": [
+        "gnss_T4_stale_onset_for_N"
+      ],
+      "with_defect": {
+        "gnss_T4_stale_onset_for_N": 12.88
+      }
+    },
+    {
+      "baseline": {
+        "battery_T4_tokens_for_X": [
+          "R",
+          "S"
+        ]
+      },
+      "detected": true,
+      "detection_rule": "at least one published quantity moves",
+      "fixture": "D3_sentinel_converted_to_stale",
+      "predicted_target": [
+        "battery_T4_tokens_for_X"
+      ],
+      "prediction": "the battery channel must stop reporting the retained-after-sentinel state, which is the whole content of the F3 finding",
+      "prediction_held": true,
+      "prediction_note": "",
+      "quantities_that_moved": [
+        "battery_T4_tokens_for_X"
+      ],
+      "with_defect": {
+        "battery_T4_tokens_for_X": [
+          "S"
+        ]
+      }
+    },
+    {
+      "baseline": {
+        "gnss_T4_tokens_for_I": [
+          "I",
+          "N"
+        ]
+      },
+      "detected": true,
+      "detection_rule": "at least one published quantity moves",
+      "fixture": "D4_invalid_converted_to_no_observation",
+      "predicted_target": [
+        "gnss_T4_tokens_for_I"
+      ],
+      "prediction": "an explicit no-fix report recorded as absence would move the blame off `to_core_samples` and onto the adapter",
+      "prediction_held": true,
+      "prediction_note": "",
+      "quantities_that_moved": [
+        "gnss_T4_tokens_for_I"
+      ],
+      "with_defect": {
+        "gnss_T4_tokens_for_I": [
+          "N"
+        ]
+      }
+    }
+  ],
+  "instrument_restored_exactly": true,
+  "patched_module_is_the_one_the_checker_uses": true,
+  "predictions_held": 3,
+  "predictions_refuted": [
+    "D1_one_message_phase_shift"
+  ],
+  "status": "TOOL VALIDATION FIXTURES -- NOT SCIENTIFIC RESULTS"
+}

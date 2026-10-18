@@ -1,0 +1,44 @@
+{
+  "artifact": "CURRENT_STACK_STRUCTURAL",
+  "campaign_verdicts": {
+    "ardupilot": "REPLICATED",
+    "px4": "INAPPLICABLE"
+  },
+  "commit": "ab05d637f7f98dea3add937205ef30372e38790c",
+  "consistent_with_the_structural_account": true,
+  "falsifying_ticks": [],
+  "gate_closed_ticks": 0,
+  "gate_eps": 1e-09,
+  "generation_command": "python research/systems-paper/current_stack_structural.py",
+  "is_a_replication_of_self_occlusion": false,
+  "pair_not_distinguishable_ticks": 0,
+  "per_condition": {
+    "CLEAN": {
+      "gate_closed_ticks": 0,
+      "pair_not_distinguishable_ticks": 0,
+      "ticks": 5100,
+      "trials": 5
+    },
+    "RAMP": {
+      "gate_closed_ticks": 0,
+      "pair_not_distinguishable_ticks": 0,
+      "ticks": 887,
+      "trials": 5
+    },
+    "STEP": {
+      "gate_closed_ticks": 0,
+      "pair_not_distinguishable_ticks": 0,
+      "ticks": 9608,
+      "trials": 10
+    }
+  },
+  "platform": "ArduPilot 4.8 SITL",
+  "predeclared_test": "on a fix-preserving trial the structural predicate must report the pair DISTINGUISHABLE at every tick. A single collapse would falsify the account in MECHANISM_A.md.",
+  "source_campaign": "research/v1_1/results/current_stack_replication.json",
+  "source_ticks": "research/v1_1/results/mechanism_b_gps/ticks",
+  "structural_rule": "D(nominal, gps_fault) = (LOW(nominal) sym-diff LOW(gps_fault)) intersect ACTIVE = {phys_gps} intersect ACTIVE",
+  "ticks": 15595,
+  "trials": 20,
+  "what_this_does_not_show": "that self-occlusion occurs on ArduPilot 4.8. No fix-loss arm exists on that platform in this repository, and none was constructed.",
+  "why_not": "self-occlusion requires a fault that REMOVES the GNSS fix. These 20 trials are fix-PRESERVING by their own validity criterion, so they cannot exhibit it. This is a negative control, not a replication."
+}
