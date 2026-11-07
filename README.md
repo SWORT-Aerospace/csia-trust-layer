@@ -542,6 +542,9 @@ Limits of the evidence, detailed under [Validation evidence](#validation-evidenc
 
 ```
 csia/                  installable package (pip install -e .)
+  runtime/             real-time runtime: source plugins, online trust layer, failsafe, actuators
+  native/              ctypes bindings for the native C core (csia_core.c)
+  profiles.py          vehicle and platform profiles
   sensors/             synthetic sensor models + fault injection
   trust_graph/         Dynamic Trust Graph structure
   prediction/          three-predictor comparator, attitude, residuals
@@ -549,10 +552,16 @@ csia/                  installable package (pip install -e .)
   diagnosis/           Bayesian causal diagnosis
   dashboard/           replay export, matplotlib dashboard, web app + server
   scenarios.py         canonical scenario catalog + pipeline assembly
-  cli.py               csia build | serve | report | info
+  validation.py        validation campaigns
+  contracts/           Trust Contract v0.1 conformance validator
+  metrics/, datasets/, experiments/, evidence/, data/, seeker/
+                       measurement, provenance and research layers (not on the runtime path)
+  cli.py               csia build | serve | report | info | run | service | analyze-logs | bench | mc
+deploy/                systemd unit and install scripts for the companion computer
+tools/                 SITL validation, soak, benchmarks, log fetchers, campaign runners
 tests/                 unit tests + tests/scenarios/ fault harness
-data/replay/           scenario replay JSONs (generated)
-data/sample_logs/      generated figures
+data/replay/           scenario replay JSONs (generated, not tracked)
+data/sample_logs/      generated figures (not tracked)
 phase1..3_*.py         phased demo scripts (thin wrappers over the package)
 ```
 
