@@ -1,0 +1,443 @@
+schema: csia.publication.artifact_map/1
+paper: CSIA Systems Paper I
+short_name: csia_systems
+manuscript: main.tex
+phase: 1
+frozen_baseline:
+  commit: 848f556
+  meaning: The Phase-I frozen baseline. Every result below was produced by the pipeline
+    as it stood at or before this commit. Reproducing the paper means checking out
+    this commit, not HEAD.
+  benchmark_artifact: campaigns/bench.json
+  benchmark_gate: CI asserts campaigns/bench.json regenerates bit-identically; that
+    is the reproducibility anchor for the frozen layer.
+  commit_full: 848f5563a528ae5ca3c2d3883c86d7287d6a4585
+environment:
+  python: 3.12 and 3.13, both gated in CI
+  determinism: Every scenario in csia/scenarios.py fixes its seeds (make_sensors
+    uses seeds 1-8). SITL campaigns fix the home site and the injection schedule.
+    docs/REQUIREMENTS.md R3 requires identical inputs to give identical outputs
+    and tests enforce it.
+  sitl_target: 'ArduCopter 3.3 SITL, dronekit-assets prebuilt, 2015-10-22. This
+    is the ONLY autopilot behind any number in this paper. The ArduCopter 4.8 work
+    is Phase II and is excluded by the `phase: 1` guard above.'
+regeneration:
+  all_results: Each script below writes its own results/*.json. They are independent
+    and can be run in any order.
+  all_figures: 'PYTHONPATH=. python research/wp_c4/figures.py
+
+    PYTHONPATH=. python research/wp_c6/figures.py
+
+    PYTHONPATH=. python research/wp_c7/figures.py
+
+    PYTHONPATH=. python research/wp_c8/figures.py
+
+    python tools/publication/sync_paper_figures.py
+
+    '
+  manuscript: make paper-systems
+  note: figures.py writes to the repository-root figures/ directory. The copies
+    under papers/csia_systems/figures/ exist so the submission bundle is self-contained;
+    sync_paper_figures.py refreshes them and artifact_map_check.py fails if they
+    drift.
+figures:
+- id: F01
+  file: figures/wp_c4_self_occlusion.png
+  caption_starts: 'Left: share of post-onset ticks by leading hypothesis'
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/self_occlusion_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: F02
+  file: figures/wp_c4_sparsity_probe.png
+  caption_starts: The density sweep
+  artifact: research/wp_c4/results/sparsity_probe.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/sparsity_probe.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: cb5e8469c8583354294f80389c50a128f395a6a8510d6412f804700cec8117e8
+  artifact_commit_full: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+- id: F03
+  file: figures/wp_c6_gap_surface.png
+  caption_starts: The interior of the containment sweep
+  artifact: research/wp_c6/results/partial_containment_sweep.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/partial_containment_sweep.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: 5b65708542a175c8fe21b841ffa6f319cd09e10302842c2056ef31ac47e629d3
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: F04
+  file: figures/wp_c6_field_set_universe.png
+  caption_starts: 'Left: the six GPS-spanning relations'
+  artifact: research/wp_c6/results/field_set_universe.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/field_set_universe.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: 61a7b544829410920f1fa6f0c19eac3b4d9b1c340b50075b13e6f3613160497c
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: F05
+  file: figures/wp_c6_q_gvalid_campaign.png
+  caption_starts: 'Left: per-flight closure rate by arm'
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/figures.py
+  inputs: research/wp_c6/q_gvalid_campaign.py
+  regenerate: PYTHONPATH=. python research/wp_c6/figures.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: F06
+  file: figures/wp_c7_satellite_ladder.png
+  caption_starts: 'Left: gate closure against commanded satellite count'
+  artifact: research/wp_c7/results/campaign_expanded.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/campaign_expanded.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: ca57edb0cc109a67a3d74a0fb228b16ee84e999bb1c72297253e406f9a57b01c
+  artifact_commit_full: 192057c0e146d41aa31aeaa1bb0e73d10c5fbc53
+- id: F07
+  file: figures/wp_c8_escalation_boundary.png
+  caption_starts: 'Left: escalation against time at the floor'
+  artifact: research/wp_c8/results/escalation_algebra.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/escalation_algebra.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 89c0324517c0cbd26e80bccdcb56350aeeef5b19b82a5f355b8239457e22b1de
+  artifact_commit_full: 83b7f62708567bb58029a67e359c613a50e2c997
+- id: F08
+  file: figures/wp_c8_coverage_map.png
+  caption_starts: Two-detector coverage by detection and by escalation
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/response_surface.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: F09
+  file: figures/wp_c7_glitch_mechanism.png
+  caption_starts: 'Left: the residual detector floors at every magnitude'
+  artifact: research/wp_c7/results/glitch_mechanism.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/glitch_mechanism.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: 69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3
+  artifact_commit_full: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+- id: F10
+  file: figures/wp_c8_four_quantities.png
+  caption_starts: 'Left: the four quantities by arm'
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/figures.py
+  inputs: research/wp_c8/four_quantity_metrics.py
+  regenerate: PYTHONPATH=. python research/wp_c8/figures.py
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: F11
+  file: figures/wp_c7_false_healthy.png
+  caption_starts: 'Left: false-healthy exposure by channel and policy'
+  artifact: research/wp_c7/results/false_healthy.json
+  script: research/wp_c7/figures.py
+  inputs: research/wp_c7/false_healthy.py
+  regenerate: PYTHONPATH=. python research/wp_c7/figures.py
+  artifact_sha256: 74b0dd344ad85c49e73325efaf270e3c98194372c6295b6dc6a6f56553bc3d47
+  artifact_commit_full: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+- id: F12
+  file: figures/wp_c4_chatter_resonance.png
+  caption_starts: Top-label changes against gate closure duration
+  artifact: research/wp_c4/results/adversarial_search.json
+  script: research/wp_c4/figures.py
+  inputs: research/wp_c4/adversarial_search.py
+  regenerate: PYTHONPATH=. python research/wp_c4/figures.py
+  artifact_sha256: 9c72b96083f9abd1a68d48ae7cc8629d103e61204cf77743d20e0a28e8a48dde
+  artifact_commit_full: d95aab40212879b306eda01ff75f7799de0174de
+tables:
+- id: T01
+  label: tab:taxonomy
+  what: fault taxonomy and the applicability column
+  artifact: csia/scenarios.py
+  script: csia/scenarios.py
+  derivation: read from the frozen scenario catalogue; not a measurement
+  artifact_sha256: 043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557
+  artifact_commit_full: 576142a023c62dbba24033d0196497ee22c61404
+- id: T02
+  label: eq:seff
+  what: the four actuating gates and their closure attribution
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  regenerate: PYTHONPATH=. python research/wp_c3/effective_signature.py
+  artifact_sha256: 8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667
+  artifact_commit_full: 8464417e9e377d8a2886fe405e85a0ee27998569
+- id: T03
+  label: tab:signatures
+  what: S and S_eff side by side
+  artifact: research/wp_c3/results/effective_signature.json
+  script: research/wp_c3/effective_signature.py
+  regenerate: PYTHONPATH=. python research/wp_c3/effective_signature.py
+  artifact_sha256: 8a38a4e21f10007ab92d5892af3a74b103674a1c88218631eb880d6f51c55667
+  artifact_commit_full: 8464417e9e377d8a2886fe405e85a0ee27998569
+- id: T04
+  label: tab:arms
+  what: self-occlusion measured on the deployed pipeline, arms A and B
+  artifact: research/wp_c4/results/self_occlusion.json
+  script: research/wp_c4/self_occlusion_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c4/self_occlusion_experiment.py
+  values:
+  - 0.9767
+  - 1.44
+  - 13.4
+  - 40.0
+  - 0.85
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: T05
+  label: tab:density
+  what: the kappa gap against signature density
+  artifact: research/wp_c4/results/sparsity_probe.json
+  script: research/wp_c4/sparsity_probe.py
+  regenerate: PYTHONPATH=. python research/wp_c4/sparsity_probe.py
+  artifact_sha256: cb5e8469c8583354294f80389c50a128f395a6a8510d6412f804700cec8117e8
+  artifact_commit_full: 9b9fdc558c48f0d6458b8d417fb7a5ad8ba513cf
+- id: T06
+  label: tab:fieldset
+  what: GPS-spanning relations over the ingested field set
+  artifact: research/wp_c6/results/field_set_universe.json
+  script: research/wp_c6/field_set_universe.py
+  regenerate: PYTHONPATH=. python research/wp_c6/field_set_universe.py
+  artifact_sha256: 61a7b544829410920f1fa6f0c19eac3b4d9b1c340b50075b13e6f3613160497c
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: T07
+  label: tab:qgvalid
+  what: gate closure by fault class, 6 flights per arm
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/q_gvalid_campaign.py
+  regenerate: PYTHONPATH=. python research/wp_c6/q_gvalid_campaign.py
+  values:
+  - 3744
+  - 0.984
+  - 0.0
+  - 9.93
+  - 3.05
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: T08
+  label: tab:glitchsweep
+  what: the residual detector floors at every magnitude
+  artifact: research/wp_c7/results/glitch_mechanism.json
+  script: research/wp_c7/glitch_mechanism.py
+  regenerate: PYTHONPATH=. python research/wp_c7/glitch_mechanism.py
+  values:
+  - 5.6
+  - 5566
+  artifact_sha256: 69e650f5f7c4abe11fadb95477fe4f96103eec21c7f0158515f21e02c42f2ef3
+  artifact_commit_full: 57c7c13daa5fa7899f183319c2ce95ad6ad8a955
+- id: T09
+  label: tab:coverage
+  what: two-detector coverage over the amplitude-slew grid
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/response_surface.py
+  regenerate: PYTHONPATH=. python research/wp_c8/response_surface.py
+  values:
+  - 21
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: T10
+  label: tab:fourstate
+  what: the four states and what this system emits for each
+  artifact: csia/runtime/online.py
+  script: csia/runtime/online.py
+  derivation: read from source; the two absent states are the finding, not a measurement
+  artifact_sha256: d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa
+  artifact_commit_full: c13889fb87b4d29af3ff22337a55352ff86f9bff
+- id: T11
+  label: tab:fourq
+  what: measured exposure, seconds in a 25 s window
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  script: research/wp_c8/four_quantity_metrics.py
+  regenerate: PYTHONPATH=. python research/wp_c8/four_quantity_metrics.py
+  values:
+  - 24.64
+  - 23.97
+  - 1.44
+  - 24.48
+  - 24.56
+  - 24.96
+  - 24.37
+  - 1.52
+  - 0.48
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: T12
+  label: sec:limits
+  what: the repair, and the cut-set analysis that follows
+  artifact: research/wp_c2/results/repair_experiment.json
+  script: research/wp_c2/repair_experiment.py
+  regenerate: PYTHONPATH=. python research/wp_c2/repair_experiment.py
+  artifact_sha256: f97b201887ebecc854a0c49ae12f28fe2d351eebc76e6533feb2f361d5417c43
+  artifact_commit_full: cf58075e46cfda421e738cd0a0e1e69aec0a0bbe
+scalars:
+- id: S01
+  value: '0.9767'
+  statement: GPS trust coefficient during sustained GNSS denial, while the diagnosis
+    reports nominal for the entire fault window
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.B_denial_only.gps_trust_min_after_onset
+  script: research/wp_c4/self_occlusion_experiment.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S02
+  value: '1.44'
+  statement: seconds to the first correct gps_fault lead in the spoof arm; the denial
+    arm never produces one
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.A_spoof_only.time_to_first_gps_fault_lead_s
+  script: research/wp_c4/self_occlusion_experiment.py
+  also_appears_as: T_FH on the status channel of the denial arm in research/wp_c8/results/four_quantity_metrics.json
+    (.per_arm.denial.channels.status.T_FH_s), numerically equal by coincidence of
+    the same onset
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S03
+  value: '13.4'
+  statement: seconds with nominal on top while faulted, spoof arm
+  artifact: research/wp_c4/results/self_occlusion.json
+  json_pointer: .results.A_spoof_only.seconds_nominal_on_top_while_faulted
+  script: research/wp_c4/self_occlusion_experiment.py
+  artifact_sha256: f5fd3def036a2b81bf64b5b3ea51daba7421e48f4ea17a3d6112f7e5c7417160
+  artifact_commit_full: 3f41e5558468b181caa1c4d94238815b1ed5cc14
+- id: S04
+  value: '24.64'
+  statement: false-healthy exposure T_FH in seconds, glitch arm, abstaining channel
+  artifact: research/wp_c8/results/four_quantity_metrics.json
+  json_pointer: .per_arm.glitch.channels.abstaining.T_FH_s
+  script: research/wp_c8/four_quantity_metrics.py
+  artifact_sha256: 2f6bee8950ec34ef151f7a8fba2c87f719e7dbae33b05faf25c30ab2d5fe5e39
+  artifact_commit_full: 3597f18c953e52111978f09af17c9432c6b794c9
+- id: S05
+  value: '23.97'
+  statement: false-healthy exposure, denial arm
+  artifact: research/wp_c7/results/false_healthy.json
+  script: research/wp_c7/false_healthy.py
+  artifact_sha256: 74b0dd344ad85c49e73325efaf270e3c98194372c6295b6dc6a6f56553bc3d47
+  artifact_commit_full: 9daa084926dbee1e76179cbc7d8e60f34bb7ac0a
+- id: S06
+  value: '3744'
+  statement: monitored ticks per arm in the q_gvalid campaign
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .cell_counts.denial.monitored_ticks
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S07
+  value: '0.984'
+  statement: q_gvalid, the gate-closure rate under GNSS denial
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .cell_counts.denial.per_flight_p[0]
+  stored_precision: 0.983974
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S08
+  value: '9.93'
+  statement: mean satellites before injection, denial arm
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  json_pointer: .per_flight[0].injection_effect.mean_satellites_pre
+  script: research/wp_c6/q_gvalid_campaign.py
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S09
+  value: '0.1429'
+  statement: the containment gap kappa(S_eff) - kappa(S) at its plateau in the density
+    sweep
+  artifact: research/wp_c6/results/partial_containment_sweep.json
+  json_pointer: .grid[9].mean_gap
+  stored_precision: 0.142857
+  script: research/wp_c6/partial_containment_sweep.py
+  artifact_sha256: 5b65708542a175c8fe21b841ffa6f319cd09e10302842c2056ef31ac47e629d3
+  artifact_commit_full: 1ee0662acffb84472aad3f19f49b6b259c855747
+- id: S10
+  value: '5.6'
+  statement: the smallest injected position error in the magnitude sweep; the residual
+    detector floors at every magnitude from here to 5.6 km
+  artifact: research/wp_c8/results/response_surface.json
+  script: research/wp_c8/response_surface.py
+  artifact_sha256: 510274c9113ec903e56a4d0987bb3c8b877806b34080a7763c74f4061afc42e8
+  artifact_commit_full: 1ad2513d071830a906555193829cf2b8dbcf5980
+- id: S11
+  value: '0.44'
+  statement: seconds from injection to first gate closure, deterministic across
+    every denial flight
+  artifact: research/wp_c6/results/q_gvalid_campaign.json
+  script: research/wp_c6/q_gvalid_campaign.py
+  note: reported in the manuscript as a derived latency; the per-flight closure
+    onsets are in the artifact, the subtraction is in the prose
+  artifact_sha256: f3aefdc2c00612b43b348c6800749f3b7422c1e0a6de60feba6f0f0b2ffc5a87
+  artifact_commit_full: 7409fa51def3757d3ad2b25844fc136017139f67
+- id: S12
+  value: '0.998'
+  statement: rho_max, the upper adaptive-forgetting bound
+  artifact: csia/trust_engine/engine.py
+  script: csia/trust_engine/engine.py
+  note: a source constant, not a measurement
+  artifact_sha256: 4bd01311ab07fd0d508f10be6f9c25f751f9c167e2ecfed88226238b2436f2b6
+  artifact_commit_full: 8b94b09de010dcfdad4096be1a4943e3fe821b5d
+non_empirical:
+- 0\.[0-9]{2}
+- 0\.[0-9]
+- '1'
+- '[2-9]'
+- 1[0-9]
+- '[2-9][0-9]'
+- 19[0-9]{2}|20[0-9]{2}
+- '[0-9]{3,4}'
+open_items:
+- id: OI-1
+  what: refs.bib carries 37 unresolved provenance markers (12 VERIFY, 20 FROM-BRIEF-UNVERIFIED,
+    5 RECONSTRUCTED). No entry is marked verified.
+  blocker: true
+  owner: human
+  resolution: each entry checked against the publisher record, marker removed only
+    after verification. tools/publication/bib_guard.py fails until then. Fabricating
+    a citation to clear this is not an acceptable resolution.
+- id: OI-2
+  what: S11 (0.44 s) is derived in prose from per-flight closure onsets rather than
+    stored as a single field in the artifact.
+  blocker: false
+  owner: manuscript author
+  resolution: either emit the derived latency into q_gvalid_campaign.json or cite
+    the per-flight fields explicitly in the caption.
+derived_from: papers/csia_systems/PAPER1_ARTIFACT_MAP.yaml
+completed_by: publication/system_paper_i/build_evidence_export.py
+unrecoverable_register:
+- item: per-run RNG seed for the self-occlusion arms
+  status: UNRECOVERABLE
+  why: never emitted into the artifact. Determinism rests on csia/scenarios.py:make_sensors()
+    fixing seeds 1-8 and on docs/REQUIREMENTS.md R3.
+- item: ArduCopter 3.3 binary checksum
+  status: UNRECOVERABLE
+  why: the prebuilt binary is not committed and no checksum was recorded at campaign
+    time. Identified by provenance and date (dronekit-assets, 2015-10-22) only.
+- item: commanded versus realized displacement, step sweep
+  status: UNRECOVERABLE
+  why: one position_error_m field per row; the two were not stored separately.
+- item: alert-episode merging rule for the real-log corpus
+  status: UNRECOVERABLE
+  why: 3 raw transitions become 2 episodes, and the rule is prose in docs/audit/,
+    not a machine-readable field.
+- item: the figure 4096 for naive channel configurations
+  status: UNRECOVERABLE
+  why: 1232 reachable is committed in two artifacts; 4096 appears in none. Derive
+    and state the basis, or cite 1232 alone.
+- item: one-in-seven effective collision, as a separate field
+  status: UNRECOVERABLE
+  why: no artifact contains such a field. It equals kappa_S_eff = 0.142857 to four
+    places; derive it explicitly or drop it.
+- item: per-stream unit and rate schema for the harness
+  status: UNRECOVERABLE
+  why: not emitted as one machine-readable file; recoverable by reading csia/runtime/plugins.py
+    MAVLINK_MESSAGE_MAP.
+- item: runtime behaviour of the six GPS repair candidates
+  status: UNRECOVERABLE
+  why: implements_nothing = true by design; the table is computed over the declared
+    structure only.
+- item: per-run interpreter version for historical campaigns
+  status: UNRECOVERABLE
+  why: not recorded per run. CI gates 3.12 and 3.13.

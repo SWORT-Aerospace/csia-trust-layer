@@ -1,0 +1,301 @@
+# Public release allowlist — CSIA Systems Paper I
+#
+# THIS FILE IS THE ONLY WAY INTO A PUBLIC ARCHIVE.
+#
+# tools/publication/build_public_release.py copies exactly the paths listed
+# under `packages:` and nothing else. There is no "copy the repository and
+# then remove the sensitive files" path anywhere in the tooling, because that
+# construction fails silently the moment a new sensitive file is added
+# (decision H-3).
+#
+# Adding a path here is a release decision. It is not a build fix.
+#
+# Authority: human decisions H-1 .. H-5, recorded in HARNESS_RELEASE_AUDIT.md
+# and screened in docs/compliance/EXPORT_CONTROL_REVIEW.md.
+
+manifest_version: 1
+paper: CSIA Systems Paper I
+authority:
+  H-1: KEEP PROPRIETARY. No harness, no CSIA core, no proprietary research
+       infrastructure enters any package built from this manifest.
+  H-3: Packaging is an allowlist. Anything absent from this file does not
+       enter the release.
+  H-4: Every entry here is screened in docs/compliance/EXPORT_CONTROL_REVIEW.md.
+       Nothing classified HOLD, COUNSEL_REQUIRED or NO appears below.
+  H-5: FULL HARNESS RELEASE = NO. The measurement contract is exposed through
+       the evidence export; the injection tooling is not shipped.
+
+# --------------------------------------------------------------------------
+# Hard exclusions. These are stated so a reader can see they were considered,
+# NOT because the packager consults them: the packager never sees a file that
+# is not in `packages:`. If one of these ever appears in a built archive the
+# sanitizer fails the release.
+# --------------------------------------------------------------------------
+never_released:
+  - class: commercialization_and_org_strategy
+    paths: [docs/COMMERCIALIZATION.md, docs/ORG_BLUEPRINT.md,
+            "docs/strategy/**", deliverables/HANDOFF_WHITEPAPER.md, HANDOFF.md]
+    reason: business and programme strategy; H-3, H-4 PUBLIC_RELEASE = NO
+  - class: customer_and_programme_material
+    paths: ["**/customer/**", "**/nda/**"]
+    reason: >-
+      H-3 PUBLIC_RELEASE = NO. No file of this class is currently tracked; the
+      class is declared so the sanitizer has something to assert against.
+  - class: defence_domain_runbooks
+    paths: [docs/runbooks/UAV_SEAD_MAC_ACQUISITION.md]
+    reason: SEAD runbook; H-4 PUBLIC_RELEASE = HOLD / COUNSEL_REQUIRED
+  - class: interceptor_tooling
+    paths: [tools/interceptor_montecarlo.py, tools/interceptor_plots.py,
+            deliverables/montecarlo_results.json,
+            deliverables/montecarlo_results.md]
+    reason: interceptor tooling and its outputs; H-4 HOLD / COUNSEL_REQUIRED
+  - class: csia_core_implementation
+    paths: ["csia/**"]
+    reason: proprietary core; H-1 PUBLIC_RELEASE = NO
+  - class: injection_harness
+    paths: [research/wp_c6/q_gvalid_campaign.py, "research/wp_c7/*.py",
+            research/wp_c8/response_surface.py,
+            research/wp_c8/four_quantity_metrics.py,
+            research/wp_c4/self_occlusion_experiment.py,
+            research/wp_c8/HARNESS_RELEASE.md]
+    reason: >-
+      the SITL fault-injection harness and the bench scenario driver.
+      H-1/H-5 PUBLIC_RELEASE = NO. Their RESULTS are released; the tooling
+      that produces them is not.
+  - class: phase_ii
+    paths: ["research/phase2/**"]
+    reason: >-
+      Phase II runs on ArduCopter 4.8 and is out of scope for Paper I
+      entirely. The single permitted Phase-II item is the SIM_GPS_* parameter
+      rename, which appears inside 07_HARNESS_CONTRACT.md as a labelled
+      later-work reproduction warning and carries no Phase-I number.
+  - class: version_control_metadata
+    paths: [".git/**"]
+    reason: >-
+      no history travels with a public archive. Commit identity is carried by
+      15_REPOSITORY_STATE.json instead.
+
+# --------------------------------------------------------------------------
+# Packages
+# --------------------------------------------------------------------------
+packages:
+
+  # ------------------------------------------------------------------------
+  # A. The writing agent's package. This is the file to hand to an agent that
+  #    has no repository access. Sixteen files, all of them derived documents.
+  # ------------------------------------------------------------------------
+  evidence_export:
+    archive: publication/system_paper_i/PAPER1_EVIDENCE_EXPORT.tar.gz
+    root: evidence_export
+    purpose: >-
+      everything needed to write Systems Paper I without inventing a
+      definition, number, equation or commit.
+    export_control: REVIEW          # paper-specific sanitized results, H-4
+    strip_prefix: publication/system_paper_i/evidence_export/
+    files:
+      - publication/system_paper_i/evidence_export/00_README.md
+      - publication/system_paper_i/evidence_export/01_PHASE1_SCOPE.md
+      - publication/system_paper_i/evidence_export/02_FROZEN_DEFINITIONS.md
+      - publication/system_paper_i/evidence_export/03_SELF_OCCLUSION_RESULT.md
+      - publication/system_paper_i/evidence_export/04_REPAIR_EXPERIMENT.md
+      - publication/system_paper_i/evidence_export/05_ESCALATION_RESULT.md
+      - publication/system_paper_i/evidence_export/06_EXPOSURE_RESULTS.md
+      - publication/system_paper_i/evidence_export/07_HARNESS_CONTRACT.md
+      - publication/system_paper_i/evidence_export/08_REAL_LOG_RESULTS.md
+      - publication/system_paper_i/evidence_export/09_STRUCTURAL_RESULTS.md
+      - publication/system_paper_i/evidence_export/10_CORRECTIONS_LEDGER.md
+      - publication/system_paper_i/evidence_export/11_CLAIM_LEDGER.yaml
+      - publication/system_paper_i/evidence_export/12_ARTIFACT_MAP.yaml
+      - publication/system_paper_i/evidence_export/13_REFERENCE_AUDIT.md
+      - publication/system_paper_i/evidence_export/14_REPRODUCTION_COMMANDS.md
+      - publication/system_paper_i/evidence_export/15_REPOSITORY_STATE.json
+
+  # ------------------------------------------------------------------------
+  # B. The sanitized publication package (H-1). What a scientific reviewer
+  #    needs in order to check the numbers: the evidence export, plus the
+  #    underlying result JSON, the figures, the manifests and schemas, the
+  #    environment lock, and the figure generators.
+  #
+  #    It does NOT contain the injection harness, the CSIA core, or any
+  #    script that would have to import them to run. That is a real
+  #    reproducibility limit and it is stated in the package README rather
+  #    than papered over.
+  # ------------------------------------------------------------------------
+  sanitized_publication_package:
+    archive: publication/system_paper_i/PAPER1_SANITIZED_PACKAGE.tar.gz
+    root: csia_paper1_sanitized
+    purpose: >-
+      evidence and artifacts sufficient for scientific review, with no
+      proprietary implementation.
+    export_control: REVIEW          # paper-specific sanitized results, H-4
+    includes_package: evidence_export
+    strip_prefix: publication/system_paper_i/
+    files:
+      # Lands at <root>/SANITIZED_PACKAGE_README.md. States the H-5
+      # reproducibility boundary: what a reviewer can and cannot do with this
+      # package, and what is absent by decision rather than by oversight.
+      - publication/system_paper_i/SANITIZED_PACKAGE_README.md
+    groups:
+
+      licence:
+        why: the package stays proprietary; the notice travels with it
+        files: [LICENSE]
+
+      result_json_phase1:
+        why: >-
+          every scalar the paper reports is in one of these. They are numeric
+          outputs, not implementation.
+        files:
+          - reports/wp_a2/e1_inert_gates.json
+          - reports/wp_a2/e2_channel_coverage.json
+          - reports/wp_a2/e3_detection_floor.json
+          - reports/wp_a2/e4_regression_headroom.json
+          - reports/wp_a2/e5_armtime_exposure.json
+          - research/wp_c1/results/certificate.json
+          - research/wp_c1/results/design_inverse.json
+          - research/wp_c1/results/joint_lattice.json
+          - research/wp_c2/results/criticality.json
+          - research/wp_c2/results/repair_experiment.json
+          - research/wp_c3/results/design_rule_audit.json
+          - research/wp_c3/results/effective_signature.json
+          - research/wp_c3/results/reliability_structure.json
+          - research/wp_c4/results/adversarial_search.json
+          - research/wp_c4/results/boundary_inputs.json
+          - research/wp_c4/results/cutsets_post_promotion.json
+          - research/wp_c4/results/self_occlusion.json
+          - research/wp_c4/results/sparsity_probe.json
+          - research/wp_c6/results/field_set_universe.json
+          - research/wp_c6/results/gvalid_unconditional.json
+          - research/wp_c6/results/minimum_repair.json
+          - research/wp_c6/results/partial_containment_sweep.json
+          - research/wp_c6/results/q_gvalid_campaign.json
+          - research/wp_c7/results/campaign_expanded.json
+          - research/wp_c7/results/false_healthy.json
+          - research/wp_c7/results/glitch_mechanism.json
+          - research/wp_c7/results/variance_investigation.json
+          - research/wp_c8/results/escalation_algebra.json
+          - research/wp_c8/results/four_quantity_metrics.json
+          - research/wp_c8/results/response_surface.json
+
+      figures:
+        why: the paper's figures, as published
+        files:
+          - figures/wp_c1_certificate_curve.png
+          - figures/wp_c1_channel_value.png
+          - figures/wp_c1_pair_matrix.png
+          - figures/wp_c2_certificate_before_after.png
+          - figures/wp_c2_cwe_mechanisms.png
+          - figures/wp_c3_birnbaum_ranking.png
+          - figures/wp_c3_effective_signature.png
+          - figures/wp_c4_chatter_resonance.png
+          - figures/wp_c4_self_occlusion.png
+          - figures/wp_c4_sparsity_probe.png
+          - figures/wp_c6_field_set_universe.png
+          - figures/wp_c6_gap_surface.png
+          - figures/wp_c6_q_gvalid_campaign.png
+          - figures/wp_c7_false_healthy.png
+          - figures/wp_c7_glitch_mechanism.png
+          - figures/wp_c7_satellite_ladder.png
+          - figures/wp_c8_coverage_map.png
+          - figures/wp_c8_escalation_boundary.png
+          - figures/wp_c8_four_quantities.png
+
+      figure_generators:
+        why: >-
+          these read committed result JSON and write the figures above. None
+          of them imports the CSIA core, so each one runs against this package
+          with matplotlib and numpy alone. research/wp_c1/figures.py is NOT
+          here: it imports research.wp_c1.certificate, which carries the
+          declared structure, so shipping it would ship model internals. The
+          three wp_c1 figures are therefore shipped as PNGs only.
+        files:
+          - research/wp_a2/e_figures.py
+          - research/wp_c2/figures.py
+          - research/wp_c3/figures.py
+          - research/wp_c4/figures.py
+          - research/wp_c6/figures.py
+          - research/wp_c7/figures.py
+          - research/wp_c8/figures.py
+
+      manifests_and_schemas:
+        why: dataset identity and result-schema validation for the real-log lane
+        files:
+          - datasets/manifests/px4_public_v1.json
+          - datasets/schemas/dataset_manifest_v1.schema.json
+          - datasets/schemas/result_v1.schema.json
+          - datasets/schemas/unified_flight_schema_v1.json
+          - datasets/registry/public_datasets_v1.yaml
+
+      environment_and_provenance:
+        why: what the numbers were produced on
+        files:
+          - datasets/registry/environment_lock_v1.json
+          - datasets/registry/requirements-data.lock
+
+      real_log_results:
+        why: the exposure artifact the real-log section reports
+        files:
+          - datasets/reports/exposure_v2.json
+          - datasets/reports/acquisition_backlog.json
+          - datasets/reports/data_quality_v1.json
+          - datasets/reports/deduplication_report.json
+
+# --------------------------------------------------------------------------
+# Sanitization. Run against the FINAL archive, after packing, by unpacking it
+# to a temporary directory. A hit fails the release; it does not warn.
+# --------------------------------------------------------------------------
+sanitization:
+  forbidden_patterns:
+    private_username:      'ZINTRAX'
+    mac_home_path:         '/Users/'
+    windows_home_path:     'C:\\Users'
+    linux_home_path:       '/home/[a-z][a-z0-9_-]*'
+    aws_access_key:        'AKIA[0-9A-Z]{16}'
+    github_token:          'gh[pousr]_[A-Za-z0-9]{36,}'
+    openai_key:            '\bsk-[A-Za-z0-9]{32,}'
+    slack_token:           'xox[baprs]-[A-Za-z0-9-]{10,}'
+    google_api_key:        'AIza[0-9A-Za-z\-_]{35}'
+    private_key_block:     '-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----'
+    bearer_header:         '(?i)authorization\s*:\s*bearer\s+[A-Za-z0-9._\-]{20,}'
+    secret_assignment:     '(?i)\b(?:api[_-]?key|secret[_-]?key|auth[_-]?token|access[_-]?token|passwd|password)\s*[:=]\s*[''"][^''"\s]{12,}[''"]'
+    private_ipv4:          '\b(?:10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)\b'
+    # Case-SENSITIVE and extension-anchored: the tripwire is for a strategy
+    # document's filename travelling into a release, not for the English word
+    # "commercialization" appearing in a sentence that explains what was left
+    # out. A regex cannot detect strategy content by meaning — the allowlist
+    # is what prevents that — so this pattern is scoped to what it can
+    # actually decide.
+    strategy_document:     '\b(?:COMMERCIALIZATION|ORG_BLUEPRINT|HANDOFF_WHITEPAPER)\.md\b'
+    interceptor_tooling:   '(?i)interceptor_(?:montecarlo|plots)'
+  forbidden_path_fragments: ['.git/', 'docs/strategy/', 'research/phase2/',
+                             'csia/', 'interceptor_']
+  # An email is allowed only where it is the copyright holder's own contact
+  # address inside the licence notice. Anywhere else it fails.
+  email_allowed_in: [LICENSE]
+  # Phase-II leakage. A Phase-II identifier is permitted ONLY in a file whose
+  # job is to say what is excluded, to carry the one approved later-work
+  # reproduction warning, or to record provenance. Anywhere else — in a
+  # result, a definition, a claim or a ledger — it fails the release.
+  #
+  # This is what stops Phase-II science from entering the Phase-I baseline
+  # while still allowing 01 to name the things it is ruling out.
+  #
+  # `power_thrust` is deliberately NOT on this list. It is the name of a
+  # Phase-I CSIA relation and appears in Phase-I artifacts that predate
+  # Phase II; the P0.5 investigation happened to be about that relation, which
+  # does not make the relation a Phase-II identifier. The tokens below name
+  # Phase-II *results and apparatus*, which is the thing being kept out.
+  phase_ii_context_tokens: ['Phase-II', 'Phase II', 'phase2', 'SIM_GPS1',
+                            'ArduCopter 4.8', 'ArduPilot 4.', 'CUSUM',
+                            'P0.5', 'slow-slew',
+                            'LEGACY_COMPAT', 'SIMULATOR_ARTIFACT']
+  phase_ii_context_allowed_in:
+    # Same justification as 01 below: this file's job is to say what the
+    # package excludes and why, which cannot be done without naming Phase II.
+    - SANITIZED_PACKAGE_README.md
+    - evidence_export/00_README.md
+    - evidence_export/01_PHASE1_SCOPE.md          # states the exclusion
+    - evidence_export/07_HARNESS_CONTRACT.md      # the approved rename note
+    - evidence_export/12_ARTIFACT_MAP.yaml        # the phase:1 guard comment
+    - evidence_export/14_REPRODUCTION_COMMANDS.md
+    - evidence_export/15_REPOSITORY_STATE.json    # commit provenance
