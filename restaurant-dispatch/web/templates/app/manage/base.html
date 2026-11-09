@@ -1,0 +1,9 @@
+{% extends "app/base.html" %}
+{% block title %}Manage · {{ location.restaurant.name }}{% endblock %}
+{% block main %}
+<h1 class="screen-title">Manage {{ location.display_name }}</h1>
+<nav class="subtabs mt-12" aria-label="Manage sections">
+  {% for name, label in tabs %}<a href="{% url 'web:'|add:name staff.pk %}{{ embed_qs }}"{% if name == tab %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+</nav>
+{% block manage %}{% endblock %}
+{% endblock %}

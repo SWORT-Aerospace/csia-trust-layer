@@ -1,0 +1,14 @@
+{% extends "setup/base.html" %}{% load dispatch_ui %}
+{% block wizard %}
+<h1 class="screen-title">Pair phones and the pass tablet</h1>
+<p class="muted">On each device, open <span class="mono">{{ pair_url }}</span> and type the code. Codes work once and expire after 15 minutes. You can do this later from Manage → Staff.</p>
+<div class="stack">
+  {% for m in staff %}
+  <div class="card row-between">
+    <span><b>{{ m.display_name }}</b> · {{ m.roles_display }}</span>
+    {% with c=codes|get:m.pk %}{% if c %}<span class="code-box">{{ c.code }}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="staff" value="{{ m.pk }}"><button class="btn btn-small" type="submit">Create code</button></form>{% endif %}{% endwith %}
+  </div>
+  {% empty %}<p class="empty">No crew yet.</p>{% endfor %}
+</div>
+<form method="post" class="mt-24">{% csrf_token %}<input type="hidden" name="op" value="continue"><button class="btn btn-primary btn-big" type="submit">Continue to the practice run</button></form>
+{% endblock %}

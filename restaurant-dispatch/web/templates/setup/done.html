@@ -1,0 +1,11 @@
+{% extends "setup/base.html" %}{% load dispatch_ui %}
+{% block wizard %}
+<h1 class="screen-title">✓ {{ manager.location.display_name }} is ready</h1>
+<p class="lede">Setup took <b>{{ setup.duration_seconds|duration }}</b>.</p>
+<div class="cta-row">
+  <a class="btn btn-primary" href="{% url 'web:manage_now' manager.pk %}">Open Manage</a>
+  <a class="btn" href="{% url 'web:manage_staff' manager.pk %}">Pair more devices</a>
+  <a class="btn btn-quiet" href="{% url 'web:screen' manager.pk 'tables' %}">See the floor</a>
+</div>
+<p class="small muted mt-24">Start the timer worker on the server (<span class="mono">python manage.py run_dispatch_worker</span>) so missed offers move to backup on their own.</p>
+{% endblock %}

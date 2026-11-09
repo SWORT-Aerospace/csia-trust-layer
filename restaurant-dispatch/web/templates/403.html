@@ -1,0 +1,9 @@
+{% extends "site/base.html" %}
+{% block title %}Not allowed — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="narrow">
+  <h1 class="screen-title">▲ Your role can't open this</h1>
+  <p class="muted">{{ reason|default:"This screen belongs to another role. If you think you should have access, ask your manager." }}</p>
+  {% if staff %}<a class="btn btn-primary" href="{% url 'web:staff_home' staff.pk %}">Back to my screen</a>{% else %}<a class="btn btn-primary" href="{% url 'web:home' %}">Home</a>{% endif %}
+</div>
+{% endblock %}

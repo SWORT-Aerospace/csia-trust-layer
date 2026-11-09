@@ -1,0 +1,4 @@
+<h2 class="section-title">Courses waiting for a pairing <span class="count">{{ board.pending|length }}</span></h2>
+{% for task in board.pending %}{% include "components/task_card.html" with view="sommelier" %}{% empty %}<p class="empty">No courses waiting on you. When expo stages a course it shows up here.</p>{% endfor %}
+{% if board.resolved %}<h2 class="section-title">Recently resolved</h2>
+{% for task in board.resolved %}{% include "components/task_card.html" with view="pass" %}{% endfor %}{% endif %}

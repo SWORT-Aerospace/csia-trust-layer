@@ -1,0 +1,12 @@
+{% extends "setup/base.html" %}
+{% block wizard %}
+<h1 class="screen-title">How does your floor serve?</h1>
+<p class="muted">You can change this later in Manage → Rules.</p>
+<form method="post" class="panel">{% csrf_token %}
+  <div class="choice-grid">
+    <label class="choice"><input type="radio" name="profile" value="regular"{% if current == 'regular' %} checked{% endif %}><span class="edition__tag">Regular Service</span><b>{{ regular.name }}</b><span class="muted">{{ regular.summary }}</span></label>
+    {% for p in presets %}<label class="choice"><input type="radio" name="profile" value="{{ p.key }}"{% if current == p.key %} checked{% endif %}><span class="edition__tag">Fine Dining</span><b>{{ p.name }}</b><span class="muted">{{ p.summary }}</span></label>{% endfor %}
+  </div>
+  <button class="btn btn-primary btn-big mt-24" type="submit">Continue</button>
+</form>
+{% endblock %}

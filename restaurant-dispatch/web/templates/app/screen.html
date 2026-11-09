@@ -1,0 +1,8 @@
+{% extends "app/base.html" %}
+{% block main %}
+<h1 class="screen-title visually-hidden">{{ screen_title }}</h1>
+{% if composer_template %}
+<div data-live="{{ live_url }}?part=composer" data-hold-when-dirty>{% include composer_template %}</div>
+{% endif %}
+<div data-live="{{ live_url }}">{% include body_template %}</div>
+{% endblock %}

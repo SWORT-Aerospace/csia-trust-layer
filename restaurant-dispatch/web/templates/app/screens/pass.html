@@ -1,0 +1,4 @@
+{% include "app/screens/_status.html" %}
+<h2 class="section-title">On the pass <span class="count">{{ board.open|length }}</span></h2>
+{% for task in board.open %}{% include "components/task_card.html" with view="pass" %}{% empty %}<p class="empty">Nothing waiting at the pass.</p>{% endfor %}
+{% if board.done %}<h2 class="section-title">Recently delivered</h2>{% for task in board.done %}{% include "components/task_card.html" with view="pass" %}{% endfor %}{% endif %}

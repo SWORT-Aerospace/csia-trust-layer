@@ -1,0 +1,7 @@
+{% include "app/screens/_status.html" %}
+<h2 class="section-title">Needs an owner <span class="count">{{ board.escalated|length }}</span></h2>
+{% for task in board.escalated %}{% include "components/task_card.html" with view="lead" %}{% empty %}<p class="empty">Nothing escalated. Missed offers land here after backup.</p>{% endfor %}
+<h2 class="section-title">Offered, waiting for a claim <span class="count">{{ board.offered|length }}</span></h2>
+{% for task in board.offered %}{% include "components/task_card.html" with view="lead" %}{% empty %}<p class="empty">No open offers.</p>{% endfor %}
+<h2 class="section-title">Claimed, in progress <span class="count">{{ board.claimed|length }}</span></h2>
+{% for task in board.claimed %}{% include "components/task_card.html" with view="lead" %}{% empty %}<p class="empty">Nobody is carrying anything right now.</p>{% endfor %}

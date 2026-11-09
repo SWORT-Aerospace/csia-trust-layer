@@ -1,0 +1,37 @@
+{% load dispatch_ui %}{% comment %}Actions for the floor lead (Regular) or captain (Fine Dining).{% endcomment %}
+{% if task.state == 'staged' %}
+  {% with blockers=task|release_blockers:profile %}
+  {% if blockers %}
+  <div class="blockers" role="note">▲ Can't release yet<ul>{% for b in blockers %}<li>{{ b }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  <div class="task__actions">
+    {% if profile.requires_pairing and task.pairing_status == 'pending' and can.course_no_pairing %}{% include "components/act.html" with action="no_pairing" label="No pairing for this course" %}{% endif %}
+    {% if profile.requires_team_ready and not task.team_ready_at and can.course_team_ready %}{% include "components/act.html" with action="team_ready" label="Service team is ready" %}{% endif %}
+  </div>
+  {% if can.course_release %}
+    {% include "components/pick.html" with action="release_course" label="Release" cls="btn-primary" optional=True placeholder="Section runner" disabled=blockers %}
+  {% endif %}
+  {% endwith %}
+{% elif task.state == 'escalated' %}
+  {% if profile.is_fine and task.kind == 'course' %}
+    {% include "components/pick.html" with action="offer_to" label="Offer to" cls="btn-primary" %}
+    <div class="task__actions">
+      {% include "components/act.html" with action="hold" label="Put back on hold" %}
+      {% include "components/act.html" with action="claim" label="I'll take it" %}
+    </div>
+  {% else %}
+    {% include "components/pick.html" with action="assign" label="Assign to" cls="btn-primary" %}
+    <div class="task__actions">{% include "components/act.html" with action="claim" label="I'll take it" %}</div>
+  {% endif %}
+{% elif task.state == 'offered' %}
+  <div class="task__actions">
+    {% if task.kind == 'course' and can.course_hold %}{% include "components/act.html" with action="hold" label="Put back on hold" %}{% endif %}
+    {% include "components/act.html" with action="claim" label="Take it over" %}
+  </div>
+{% elif task.state == 'claimed' %}
+  {% include "components/pick.html" with action="assign" label="Reassign to" %}
+  <div class="task__actions">
+    {% include "components/act.html" with action="release" label="Release" %}
+    {% include "components/act.html" with action="complete" label="Mark done for them" %}
+  </div>
+{% endif %}

@@ -1,0 +1,17 @@
+{% extends "setup/base.html" %}
+{% block wizard %}
+<h1 class="screen-title">Paste your table labels</h1>
+<form method="post" class="panel">{% csrf_token %}<input type="hidden" name="op" value="add">
+  <div class="field"><label for="labels">Table labels</label>
+    <textarea id="labels" name="labels" placeholder="Main: 1-12&#10;Patio: P1-P6&#10;Bar: B1, B2, B3"></textarea>
+    <p class="hint">One section per line as <span class="mono">Section: labels</span>. Ranges like <span class="mono">1-12</span> work. Lines without a section go to “Main”.</p></div>
+  <button class="btn" type="submit">Add tables</button>
+</form>
+{% if sections %}
+<div class="panel mt-24">
+  <h2 class="section-title">Your floor</h2>
+  {% for s in sections %}<p><b>{{ s.name }}</b>: {% for t in s.tables.all %}{{ t.label }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endfor %}
+</div>
+{% endif %}
+<form method="post" class="mt-24">{% csrf_token %}<input type="hidden" name="op" value="continue"><button class="btn btn-primary btn-big" type="submit">Continue</button></form>
+{% endblock %}

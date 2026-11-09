@@ -1,0 +1,19 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<p class="intro muted">This release runs on manual events from expo and the floor. POS adapters will start in <b>shadow mode</b>: events are recorded with what dispatch would have done, and nothing on the floor changes until your site confirms that the event means what service needs (for example, that the full course is physically at the pass).</p>
+<div class="features">
+  {% for a in planned %}<div class="feature disabled-card" aria-disabled="true"><h3>{{ a.name }}</h3><p><span class="chip chip--muted"><span class="chip__glyph" aria-hidden="true">○</span>{{ a.status }}</span></p><p class="mt-12">{{ a.detail }}</p><button class="btn btn-small mt-12" type="button" disabled aria-disabled="true">Connect (not available yet)</button></div>{% endfor %}
+</div>
+<form method="post" action="{% url 'web:manage_integrations_test' staff.pk %}" class="panel mt-24">{% csrf_token %}
+  <h2 class="section-title">Test adapter — no vendor connection</h2>
+  <p class="small muted">Feed one sample event through the built-in fake adapter to see how shadow mode records it.</p>
+  <div class="row">
+    <div class="field grow"><label for="kind">Event</label><select id="kind" name="kind"><option value="check_closed">Check closed (payment)</option><option value="item_ready">Item ready</option><option value="course_fired">Course fired</option></select></div>
+    <div class="field grow"><label for="tbl">Table</label><select id="tbl" name="table">{% for t in tables %}<option value="{{ t.pk }}">{{ t.label }} — {{ t.get_state_display }}</option>{% endfor %}</select></div>
+  </div>
+  <button class="btn" type="submit">Record shadow event</button>
+</form>
+<h2 class="section-title">Shadow log</h2>
+<div class="table-scroll"><table class="grid-table"><thead><tr><th scope="col">Received</th><th scope="col">Source</th><th scope="col">Event</th><th scope="col">Table</th><th scope="col">What dispatch would do</th><th scope="col">Applied</th></tr></thead>
+<tbody>{% for e in events %}<tr><td class="mono small">{{ e.received_at|date:"g:i:s A" }}</td><td>{{ e.provider }}</td><td>{{ e.kind }}</td><td>{{ e.table_label }}</td><td>{{ e.would_do }}</td><td>{% if e.applied %}Yes{% else %}No (shadow){% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="muted">No events recorded.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

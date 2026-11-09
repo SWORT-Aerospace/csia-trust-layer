@@ -1,0 +1,38 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}Restaurant Service Dispatch{% endblock %}</title>
+<meta name="description" content="{% block description %}Assign food runs, coordinate courses, and close every handoff from one live floor.{% endblock %}">
+<meta name="theme-color" content="#12321f">
+<link rel="icon" href="{% static 'web/icon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'web/app.css' %}">
+{% block head %}{% endblock %}
+</head>
+<body class="{% block bodyclass %}site{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="{% url 'web:home' %}">{% include "components/logo.html" %}<span>Restaurant Service Dispatch</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="navlink" href="{% url 'web:home' %}#editions">Editions</a>
+      <a class="navlink" href="{% url 'web:home' %}#how">How it works</a>
+      {% if SETUP_OPEN %}<a class="navlink" href="{% url 'web:setup' %}">Set up a location</a>{% endif %}
+      <a class="btn btn-quiet" href="{% url 'web:signin' %}">Staff sign in</a>
+      {% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try the demo</a>{% endif %}
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Restaurant Service Dispatch is an independent product. It is not affiliated with, or endorsed by, any restaurant guide or rating organization.</span>
+    <span><a href="{% url 'web:signin' %}">Staff sign in</a> · <a href="{% url 'web:pair' %}">Pair a device</a></span>
+  </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

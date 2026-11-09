@@ -1,0 +1,1 @@
+{% load dispatch_ui %}<form method="post" action="{% act_url action %}" data-act data-label="{{ label }} — {{ task.title }}">{% csrf_token %}<input type="hidden" name="task" value="{{ task.pk }}"><input type="hidden" name="next" value="{{ next_url }}"><button class="btn {{ cls|default:'btn-quiet' }}" type="submit">{{ label }}</button></form>

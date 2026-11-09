@@ -1,0 +1,4 @@
+{% load dispatch_ui %}<form method="post" action="{% act_url action %}" data-act data-label="{{ label }} — {{ task.title }}" class="task__assign">{% csrf_token %}<input type="hidden" name="task" value="{{ task.pk }}"><input type="hidden" name="next" value="{{ next_url }}">
+<label class="visually-hidden" for="{{ action }}-{{ task.pk }}">{{ label }}</label>
+<select id="{{ action }}-{{ task.pk }}" name="staff"{% if not optional %} required{% endif %}>{% if optional %}<option value="">{{ placeholder|default:"Next runner up" }}</option>{% else %}<option value="">{{ placeholder|default:label }}…</option>{% endif %}{% for w in workers %}{% if w.pk != task.owner_id %}<option value="{{ w.pk }}">{{ w.display_name }}</option>{% endif %}{% endfor %}</select>
+<button class="btn {{ cls|default:'' }}" type="submit"{% if disabled %} disabled aria-disabled="true"{% endif %}>{{ label }}</button></form>

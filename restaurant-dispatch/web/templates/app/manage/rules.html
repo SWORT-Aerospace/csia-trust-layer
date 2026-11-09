@@ -1,0 +1,26 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<form method="post" class="panel">{% csrf_token %}
+  <fieldset class="fieldset-plain">
+    <legend class="section-title">Edition and preset</legend>
+    <div class="choice-grid">
+      {% for p in profiles %}
+      <label class="choice"><input type="radio" name="profile" value="{{ p.key }}"{% if p.key == location.profile_key %} checked{% endif %}>
+        <span class="edition__tag">{{ p.edition_name }}</span><b>{{ p.name }}</b><span class="muted">{{ p.summary }}</span></label>
+      {% endfor %}
+    </div>
+    <p class="hint">Presets within Fine Dining can change mid-service; readiness checks apply to courses released after the change. Switching edition requires an empty pass.</p>
+  </fieldset>
+  <fieldset class="fieldset-plain">
+    <legend class="section-title">Timing</legend>
+    <div class="row">
+      <div class="field grow"><label for="ot">First offer (seconds)</label><input type="number" id="ot" name="offer_timeout" min="10" max="600" value="{{ location.offer_timeout_seconds }}"></div>
+      <div class="field grow"><label for="bt">Backup offer (seconds)</label><input type="number" id="bt" name="backup_timeout" min="10" max="600" value="{{ location.backup_timeout_seconds }}"></div>
+      <div class="field grow"><label for="sm">Flag claimed work as stalled after (minutes)</label><input type="number" id="sm" name="stall_minutes" min="1" max="120" value="{{ location.stall_minutes }}"></div>
+    </div>
+    {% if profile.is_fine %}<p class="hint">Fine Dining: a released course is offered to the chosen runner for the first-offer time, then returns to the captain.</p>{% else %}<p class="hint">Regular Service: section runner → backup runner → floor lead.</p>{% endif %}
+  </fieldset>
+  <div class="field"><label for="tz">Time zone</label><select id="tz" name="time_zone">{% for z in zones %}<option value="{{ z }}"{% if z == location.time_zone %} selected{% endif %}>{{ z }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary btn-big" type="submit">Save rules</button>
+</form>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "site/base.html" %}
+{% block title %}Demo floor — {{ location.restaurant.name }}{% endblock %}
+{% block main %}
+<div class="wrap floor-head">
+  {% include "components/messages.html" %}
+  <div class="row-between">
+    <div>
+      <span class="eyebrow">Demo sandbox · sample data</span>
+      <h1 class="screen-title">{{ location.restaurant.name }} — {% if profile.is_fine %}Fine Dining · {{ profile.name }}{% else %}Regular Service{% endif %}</h1>
+      <p class="muted">Each pane is a real staff screen signed in as one person. Their permissions are enforced by the server. Offers expire after {{ location.offer_timeout_seconds }} seconds, driven by the timer worker — not by this page.</p>
+    </div>
+    <div class="row">
+      {% if profile.is_fine %}
+      <form method="post" action="{% url 'web:demo_preset' %}" class="row">{% csrf_token %}
+        <label for="preset" class="visually-hidden">Preset</label>
+        <select id="preset" name="profile">{% for p in presets %}<option value="{{ p.key }}"{% if p.key == profile.key %} selected{% endif %}>{{ p.name }}</option>{% endfor %}</select>
+        <button class="btn btn-small" type="submit">Switch preset</button>
+      </form>
+      {% endif %}
+      <a class="btn btn-quiet btn-small" href="{% url 'web:demo' %}">New demo</a>
+      <form method="post" action="{% url 'web:signout' %}" class="inline">{% csrf_token %}<button class="btn btn-quiet btn-small" type="submit">Leave demo</button></form>
+    </div>
+  </div>
+
+  <div class="mt-24 stack">
+    <section class="panel floor-intro">
+      <div>
+      <h2 class="section-title">Try this</h2>
+      {% if profile.is_fine %}
+      <ol class="script">
+        <li><b>Noor (Expo)</b>: pick table 3 and tap <i>Stage course</i>. Mateo can't see it.</li>
+        {% if profile.requires_pairing %}<li><b>Elise (Captain)</b>: try <i>Release</i> — it's refused until <b>Jordan (Sommelier)</b> taps <i>Pairing ready</i>, or Elise marks <i>No pairing</i>.</li>{% endif %}
+        {% if profile.requires_team_ready %}<li><b>Elise</b>: confirm <i>Service team is ready</i>. Release stays locked until she does.</li>{% endif %}
+        <li><b>Elise</b>: release the course. It's offered to one runner.</li>
+        <li><b>Mateo (Runner)</b>: <i>Claim</i>, then <i>Delivered</i>. Or let it time out — it comes back to Elise.</li>
+        <li><b>Ana (Host)</b>: mark a party as left; <b>Lee (Busser)</b> resets it; Ana seats the next party.</li>
+      </ol>
+      {% else %}
+      <ol class="script">
+        <li><b>Sam (Expo)</b>: pick table 4 and tap <i>Food ready</i>.</li>
+        <li><b>Maria (Runner)</b>: it's offered to her. <i>Claim</i> it, then tap <i>Delivered</i>.</li>
+        <li>Do it again, but let Maria's offer run out: it moves to <b>Dev (backup)</b>, then to <b>Rae (Floor lead)</b>.</li>
+        <li><b>Ana (Host)</b>: on table 1, tap <i>Party has left</i>. <b>Lee (Busser)</b> claims and finishes the reset.</li>
+        <li><b>Ana</b>: table 1 now reads <i>Ready to seat</i> — seat the next party.</li>
+        <li><b>Kim (Manager)</b>: see stalled work and the timestamped activity log.</li>
+      </ol>
+      {% endif %}
+      </div>
+      <div>
+      <h2 class="section-title">Open any person full-screen</h2>
+      <div class="persona-grid">
+        {% for p in personas %}<a class="persona" href="{% url 'web:staff_home' p.pk %}"><b>{{ p.display_name }}</b><span>{{ p.roles_display }}</span></a>{% endfor %}
+      </div>
+      </div>
+    </section>
+    <section>
+      <div class="panes">
+        {% for p in panes %}
+        <div class="pane">
+          <div class="pane__head"><b>{{ p.display_name }} · {{ p.roles_display }}</b><a class="small" href="{% url 'web:staff_home' p.pk %}">Open</a></div>
+          <iframe src="{% url 'web:staff_home' p.pk %}?embed=1" title="{{ p.display_name }}, {{ p.roles_display }}" loading="lazy"></iframe>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="small muted mt-12">On a phone, open one person at a time from the list. Use the switcher at the top of any screen to change person.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "site/base.html" %}{% load static %}
+{% block title %}Restaurant Service Dispatch — get food off the pass, get tables back to the host{% endblock %}
+{% block main %}
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div>
+      <span class="eyebrow">Live floor dispatch for restaurants</span>
+      <h1>Get food off the pass. <em>Get tables back to the host.</em></h1>
+      <p class="lede">Assign food runs, coordinate courses, and close every handoff from one live floor.</p>
+      <div class="cta-row">
+        {% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try the demo</a>{% endif %}
+        <a class="btn" href="{% url 'web:signin' %}">Staff sign in</a>
+      </div>
+      <p class="hero__note">The demo is a private sandbox with sample data. No sign-up.</p>
+    </div>
+    <div>
+      <div class="device" role="group" aria-label="Example: a runner's screen">
+        <div class="device__screen">
+          <div class="device__bar"><span>Maria · Runner</span><span class="conn" data-state="live">Live</span></div>
+          <div class="device__body" data-walkthrough>
+            <h2 class="section-title">Offered to you <span class="count">1</span></h2>
+            <article class="card task task--mine-offer" data-wt-card>
+              <div class="task__head">
+                <h3 class="task__title">Table 12 · 3 plates</h3>
+                <span data-wt-chip><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to you</span></span>
+              </div>
+              <p class="task__meta" data-wt-meta>Main room · from expo · <span class="timer" data-wt-timer>0:32</span> to claim, then it goes to backup.</p>
+              <div class="task__actions" data-wt-actions>
+                <button class="btn btn-primary" type="button" data-wt="claim">Claim</button>
+                <button class="btn btn-quiet" type="button" data-wt="decline">Decline</button>
+              </div>
+            </article>
+            <h2 class="section-title">Your runs <span class="count" data-wt-count>0</span></h2>
+            <p class="empty" data-wt-empty>Nothing in your hands. Offers appear above.</p>
+          </div>
+        </div>
+      </div>
+      <p class="device__caption">Same components as the staff app, with sample data. Tap Claim, Decline or wait.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band band--deep" id="editions">
+  <div class="wrap">
+    <h2>Two editions. One dispatch engine.</h2>
+    <p class="intro">Pick the service model that fits your floor. Both share the same task rules underneath: one owner per handoff, backup coverage when an offer is missed, and work that's only done when it's physically done.</p>
+    <div class="editions">
+      <article class="edition" aria-labelledby="ed-regular">
+        <span class="edition__tag">Regular Service</span>
+        <h3 id="ed-regular">Food moves from expo to a runner, fast.</h3>
+        <p class="muted">Each run is offered to one runner at a time. If nobody claims it, it goes to backup, then to the floor lead.</p>
+        <ol class="flow">
+          <li><div><b>Expo taps “Food ready” for table 12</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Maria</span></div></li>
+          <li><div><b>Maria misses it — backup gets it</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Dev (backup)</span></div></li>
+          <li><div><b>Still unclaimed — the floor lead steps in</b><span class="chip chip--alert"><span class="chip__glyph" aria-hidden="true">▲</span>With floor lead</span></div></li>
+          <li><div><b>Runner confirms the plates are on the table</b><span class="chip chip--done"><span class="chip__glyph" aria-hidden="true">✓</span>Delivered</span></div></li>
+        </ol>
+        <h4>Table resets</h4>
+        <ol class="flow">
+          <li><div><b>Server or host confirms the party has left</b><span class="chip chip--alert"><span class="chip__glyph" aria-hidden="true">▲</span>Needs reset</span></div></li>
+          <li><div><b>Busser claims the reset</b><span class="chip chip--working"><span class="chip__glyph" aria-hidden="true">↻</span>Being reset</span></div></li>
+          <li><div><b>Host sees it and seats the next party</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Ready to seat</span></div></li>
+        </ol>
+        <p class="small muted">Paying the check never marks a table vacant. Only someone confirming the guests have physically left does.</p>
+      </article>
+
+      <article class="edition" aria-labelledby="ed-fine">
+        <span class="edition__tag">Fine Dining</span>
+        <h3 id="ed-fine">Courses wait at the pass until the captain releases them.</h3>
+        <p class="muted">Runners never see a staged course. Missed offers go back to the captain, not to whoever happens to be free.</p>
+        <div class="preset-tabs" role="tablist" aria-label="Fine Dining presets">
+          {% for p in presets %}<button type="button" role="tab" id="tab-{{ p.key }}" aria-controls="panel-{{ p.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-preset-tab="{{ p.key }}">{{ p.name }}</button>{% endfor %}
+        </div>
+        {% for p in presets %}
+        <div class="preset-panel" id="panel-{{ p.key }}" role="tabpanel" aria-labelledby="tab-{{ p.key }}" data-preset-panel="{{ p.key }}">
+          <p><b>{{ p.name }}.</b> {{ p.summary }}</p>
+          <ol class="flow">
+            <li><div><b>Expo stages course 3 for table 2</b><span class="chip chip--held"><span class="chip__glyph" aria-hidden="true">‖</span>Held at pass</span></div></li>
+            {% if p.requires_pairing %}<li><div><b>Sommelier confirms the pairing — or the captain marks “No pairing”</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Pairing ready · Jordan</span></div></li>{% endif %}
+            {% if p.requires_team_ready %}<li><div><b>Captain confirms the service team is ready</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Team ready · Elise</span></div></li>{% endif %}
+            <li><div><b>Captain releases it to one runner</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Mateo</span></div></li>
+            <li><div><b>Runner delivers — or a missed offer returns to the captain</b><span class="chip chip--done"><span class="chip__glyph" aria-hidden="true">✓</span>Delivered</span></div></li>
+          </ol>
+          {% if p.requires_pairing or p.requires_team_ready %}<p class="small muted">Release is refused until every check for this preset is resolved, and the log records who resolved each one.</p>{% else %}<p class="small muted">The captain can release, reassign, or put an unclaimed course back on hold.</p>{% endif %}
+        </div>
+        {% endfor %}
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <h2>Built for the middle of a shift.</h2>
+    <p class="intro">Staff screens put the task that needs attention first. Big tap targets, plain-language labels, and status you can read without relying on color.</p>
+    <div class="features">
+      <div class="feature"><span class="ico" aria-hidden="true">●</span><h3>One owner per handoff</h3><p>A claimed run stays with its owner until it's delivered, given back, or reassigned by a lead. Two people tapping at once still produces one owner.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">→</span><h3>Backup coverage that runs itself</h3><p>Offers advance on a timer that runs on the server, not in someone's browser. Close every tab and the run still moves to backup.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">✓</span><h3>Done means physically done</h3><p>Runs close when the food is on the table. Tables free up when a busser confirms the reset — and a late reset from the last party can't release a newly seated table.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">▲</span><h3>Honest when the connection drops</h3><p>If a tap doesn't reach the server, the screen says it's unconfirmed and re-checks the floor before anyone retries.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">‖</span><h3>Roles that are actually enforced</h3><p>Runners can't release courses, servers can't change the floor plan, and nobody sees another location's work. Allergy decisions, refunds and guest recovery stay with authorized staff.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">↻</span><h3>Set up from a browser</h3><p>Create a location, choose your edition, paste table labels, assign roles, pair phones, and run a practice ticket. No hardware to install.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--deep">
+  <div class="wrap">
+    <h2>What's in the first release</h2>
+    <p class="intro">Dispatch runs on manual events from expo and the floor. Read-only POS integrations are planned; they'll start in shadow mode and only drive the floor once your site confirms their events mean what service needs. We store only what dispatch needs: no guest names, payment details, payroll, or staff location tracking.</p>
+    <div class="cta-row">
+      {% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try the demo</a>{% endif %}
+      <a class="btn" href="{% url 'web:signin' %}">Staff sign in</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'web/site.js' %}" defer></script>{% endblock %}

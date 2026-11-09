@@ -1,0 +1,23 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<div class="stat-row">
+  <div class="stat"><span class="muted small">Timer worker</span><b>{% if worker.online %}● Running{% else %}▲ Offline{% endif %}</b><span class="small muted">{% if worker.beat %}last beat {{ worker.age }}s ago{% else %}never started{% endif %}</span></div>
+  {% for key, label in states %}{% if key in 'staged,offered,escalated,claimed' %}<div class="stat"><span class="muted small">{{ label }}</span><b>{{ counts|get:key|default:0 }}</b></div>{% endif %}{% endfor %}
+  <div class="stat"><span class="muted small">Setup time</span><b>{% if setup %}{{ setup.duration_seconds|duration }}{% else %}—{% endif %}</b><span class="small muted">{% if setup %}finished {{ setup.finished_at|date:"M j, g:i A" }}{% else %}wizard not finished here{% endif %}</span></div>
+</div>
+{% if not worker.online %}<div class="notice notice--error mt-24" role="alert">▲ Offers won't move to backup or escalate until the timer worker runs: <span class="mono">python manage.py run_dispatch_worker</span></div>{% endif %}
+
+<h2 class="section-title">Stalled — needs attention <span class="count">{{ stalled|length }}</span></h2>
+{% for reason, task in stalled %}
+<article class="card task task--{{ task.state }}">
+  <div class="task__head"><h3 class="task__title">{{ task.title }}</h3>{% task_chip task %}</div>
+  <p class="task__meta"><b>{{ reason }}.</b> {% if task.owner %}Owner: {{ task.owner }}. {% endif %}Ready {{ task.ready_at|since }} ago.</p>
+</article>
+{% empty %}<p class="empty">Nothing stalled. Escalated, overdue, long-claimed and long-held work shows up here.</p>{% endfor %}
+
+<h2 class="section-title">On shift</h2>
+<div class="row">{% for m in on_shift %}<span class="chip chip--claimed"><span class="chip__glyph" aria-hidden="true">●</span>{{ m.display_name }} · {{ m.roles_display }}</span>{% empty %}<p class="empty">Nobody is on shift.</p>{% endfor %}</div>
+
+<h2 class="section-title">Latest activity <a class="small" href="{% url 'web:manage_activity' staff.pk %}">Full log</a></h2>
+{% include "app/manage/_log.html" with events=recent %}
+{% endblock %}

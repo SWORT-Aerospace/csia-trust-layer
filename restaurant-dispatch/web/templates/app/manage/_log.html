@@ -1,0 +1,1 @@
+{% load dispatch_ui %}<ul class="log">{% for e in events %}<li><time datetime="{{ e.at|date:'c' }}">{{ e.at|clock }}</time><div><span class="who">{{ e.actor_name }}</span> — {{ e.summary }} <span class="verb">{{ e.verb }}</span></div></li>{% empty %}<li><span></span><span class="muted">No activity yet.</span></li>{% endfor %}</ul>

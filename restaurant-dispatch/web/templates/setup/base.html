@@ -1,0 +1,12 @@
+{% extends "site/base.html" %}{% load dispatch_ui %}
+{% block title %}Set up a location — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="narrow narrow--wide">
+  <ol class="wizard-steps" aria-label="Setup steps">
+    {% for key, label in steps %}<li class="{% if key == step %}is-current{% elif setup and key in setup.steps %}is-done{% endif %}"{% if key == step %} aria-current="step"{% endif %}>{{ forloop.counter }}. {{ label }}</li>{% endfor %}
+  </ol>
+  {% if elapsed is not None %}<p class="small muted">Setup time so far: <b>{{ elapsed|duration }}</b> · design target under 10 minutes</p>{% endif %}
+  {% include "components/messages.html" %}
+  {% block wizard %}{% endblock %}
+</div>
+{% endblock %}

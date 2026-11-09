@@ -1,0 +1,17 @@
+{% extends "setup/base.html" %}
+{% block wizard %}
+<h1 class="screen-title">Create your location</h1>
+<p class="muted">Everything runs in the browser. You'll pick a service model, paste your tables, add your crew, pair phones and run one practice ticket.</p>
+<form method="post" class="panel" novalidate>{% csrf_token %}
+  {% if errors %}<div class="errors" role="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+  <div class="field"><label for="restaurant">Restaurant name</label><input type="text" id="restaurant" name="restaurant" maxlength="120" required value="{{ values.restaurant|default:'' }}"></div>
+  <div class="field"><label for="location">Location name <span class="hint">(optional)</span></label><input type="text" id="location" name="location" maxlength="120" placeholder="e.g. Downtown" value="{{ values.location|default:'' }}"></div>
+  <div class="field"><label for="your_name">Your name, as staff will see it</label><input type="text" id="your_name" name="your_name" maxlength="60" required value="{{ values.your_name|default:'' }}"></div>
+  {% if not signed_in %}
+  <div class="field"><label for="username">Username for signing in</label><input type="text" id="username" name="username" autocomplete="username" autocapitalize="none" required value="{{ values.username|default:'' }}"></div>
+  <div class="field"><label for="password">Password</label><input type="password" id="password" name="password" autocomplete="new-password" required><p class="hint">At least 10 characters.</p></div>
+  <div class="field"><label for="password2">Password again</label><input type="password" id="password2" name="password2" autocomplete="new-password" required></div>
+  {% endif %}
+  <button class="btn btn-primary btn-big" type="submit">Create location</button>
+</form>
+{% endblock %}

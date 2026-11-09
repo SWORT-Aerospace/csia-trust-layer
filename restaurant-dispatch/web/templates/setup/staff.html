@@ -1,0 +1,29 @@
+{% extends "setup/base.html" %}{% load dispatch_ui %}
+{% block wizard %}
+<h1 class="screen-title">Add your crew and coverage</h1>
+<form method="post" class="panel">{% csrf_token %}<input type="hidden" name="op" value="people">
+  <div class="field"><label for="people">One person per line: name, then roles</label>
+    <textarea id="people" name="people" placeholder="Maria: runner&#10;Dev: runner&#10;Lee: busser&#10;Ana: host&#10;Sam: expo&#10;Rae: floor lead"></textarea>
+    <p class="hint">Roles: {% for key, label in roles %}{{ label|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}. No guest names or payroll details are needed.</p></div>
+  <button class="btn" type="submit">Add people</button>
+</form>
+{% if staff %}
+<div class="panel mt-24">
+  <h2 class="section-title">Crew</h2>
+  <p>{% for m in staff %}<b>{{ m.display_name }}</b> ({{ m.roles_display }}){% if not forloop.last %} · {% endif %}{% endfor %}</p>
+</div>
+{% endif %}
+<form method="post" class="panel mt-24">{% csrf_token %}<input type="hidden" name="op" value="coverage">
+  <h2 class="section-title">Who covers each section</h2>
+  <p class="small muted">First offer goes to the first runner, then backup. Leave blank to offer to whoever is least busy.</p>
+  {% for s in sections %}
+  <h3>{{ s.name }}</h3>
+  <div class="row">
+    {% coverage_rows s runners bussers as rows %}{% for field, label, pool, current in rows %}
+    <div class="field grow"><label for="{{ s.pk }}-{{ field }}">{{ label }}</label><select id="{{ s.pk }}-{{ field }}" name="{{ s.pk }}-{{ field }}"><option value="">Anyone on shift</option>{% for m in pool %}<option value="{{ m.pk }}"{% if current and m.pk == current.pk %} selected{% endif %}>{{ m.display_name }}</option>{% endfor %}</select></div>
+    {% endfor %}
+  </div>
+  {% empty %}<p class="empty">Add tables first.</p>{% endfor %}
+  <button class="btn btn-primary btn-big" type="submit">Save and continue</button>
+</form>
+{% endblock %}

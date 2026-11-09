@@ -1,0 +1,40 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<div class="layout-2">
+  <section class="stack">
+    <form method="post" class="panel">{% csrf_token %}<input type="hidden" name="op" value="add_tables">
+      <h2 class="section-title">Add tables</h2>
+      <div class="field"><label for="labels">Paste table labels</label>
+        <textarea id="labels" name="labels" placeholder="Main: 1-12&#10;Patio: P1-P6&#10;Bar 1, Bar 2"></textarea>
+        <p class="hint">One section per line as <span class="mono">Section: labels</span>. Ranges like <span class="mono">1-12</span> or <span class="mono">P1-P6</span> work. Lines without a section go to “Main”.</p></div>
+      <button class="btn btn-primary" type="submit">Add tables</button>
+    </form>
+    <form method="post" class="panel">{% csrf_token %}<input type="hidden" name="op" value="section">
+      <h2 class="section-title">Add a section</h2>
+      <div class="field"><label for="sname">Section name</label><input type="text" id="sname" name="name" maxlength="40" required></div>
+      <button class="btn" type="submit">Add section</button>
+    </form>
+    <div class="panel"><h2 class="section-title">Sections</h2>
+      {% for s in sections %}
+      <form method="post" class="task__assign">{% csrf_token %}<input type="hidden" name="op" value="section"><input type="hidden" name="section" value="{{ s.pk }}">
+        <label class="visually-hidden" for="sec-{{ s.pk }}">Rename {{ s.name }}</label><input type="text" id="sec-{{ s.pk }}" name="name" value="{{ s.name }}" maxlength="40"><button class="btn btn-small" type="submit">Rename</button></form>
+      <p class="small muted">{{ s.n }} table(s)</p>
+      {% empty %}<p class="empty">No sections yet.</p>{% endfor %}
+    </div>
+  </section>
+  <section>
+    <h2 class="section-title">Tables <span class="count">{{ tables|length }}</span></h2>
+    <div class="table-scroll"><table class="grid-table">
+      <thead><tr><th scope="col">Table</th><th scope="col">Section</th><th scope="col">State</th><th scope="col">Active</th></tr></thead>
+      <tbody>{% for t in tables %}<tr>
+        <td><b>{{ t.label }}</b></td>
+        <td><form method="post" class="task__assign">{% csrf_token %}<input type="hidden" name="op" value="table"><input type="hidden" name="table" value="{{ t.pk }}">
+          <label class="visually-hidden" for="ts-{{ t.pk }}">Section for {{ t.label }}</label>
+          <select id="ts-{{ t.pk }}" name="section"><option value="none">No section</option>{% for s in sections %}<option value="{{ s.pk }}"{% if s.pk == t.section_id %} selected{% endif %}>{{ s.name }}</option>{% endfor %}</select><button class="btn btn-small" type="submit">Move</button></form></td>
+        <td>{{ t.get_state_display }}</td>
+        <td><form method="post">{% csrf_token %}<input type="hidden" name="op" value="table"><input type="hidden" name="table" value="{{ t.pk }}"><input type="hidden" name="section" value="{{ t.section_id|default:'none' }}"><input type="hidden" name="active" value="{% if t.is_active %}0{% else %}1{% endif %}"><button class="btn btn-small btn-quiet" type="submit">{% if t.is_active %}Remove{% else %}Restore{% endif %}</button></form></td>
+      </tr>{% empty %}<tr><td colspan="4" class="muted">No tables yet.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+</div>
+{% endblock %}

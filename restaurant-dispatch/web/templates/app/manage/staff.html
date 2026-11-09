@@ -1,0 +1,51 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+{% if pairing %}
+<div class="panel mt-12" role="status">
+  <h2 class="section-title">Pairing code for {{ pairing.staff }}</h2>
+  <p>On their phone or the pass tablet, open <span class="mono">/pair/</span> and enter:</p>
+  <p class="code-box">{{ pairing.code }}</p>
+  <p class="small muted">Single use. Expires at {{ pairing.expires|date:"g:i A" }}. It won't be shown again.</p>
+</div>
+{% endif %}
+<h2 class="section-title">Backup coverage</h2>
+<p class="small muted">Offers go to the section's first runner (or busser), then to backup, then {% if profile.is_fine %}back to the captain{% else %}to the floor lead{% endif %}. If someone isn't on shift, the least-busy person on shift is offered instead.</p>
+<div class="features">
+{% for s in sections %}
+  <form method="post" class="panel">{% csrf_token %}<input type="hidden" name="op" value="coverage"><input type="hidden" name="section" value="{{ s.pk }}">
+    <h3>{{ s.name }}</h3>
+    {% coverage_rows s all_runners bussers as rows %}{% for field, label, pool, current in rows %}
+    <div class="field"><label for="{{ field }}-{{ s.pk }}">{{ label }}</label><select id="{{ field }}-{{ s.pk }}" name="{{ field }}"><option value="">Anyone on shift</option>{% for m in pool %}<option value="{{ m.pk }}"{% if current and m.pk == current.pk %} selected{% endif %}>{{ m.display_name }}{% if not m.on_shift %} (off shift){% endif %}</option>{% endfor %}</select></div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Save coverage</button>
+  </form>
+{% empty %}<p class="empty">Add sections on the Floor tab first.</p>{% endfor %}
+</div>
+
+<h2 class="section-title">Staff <span class="count">{{ members|length }}</span></h2>
+<div class="stack">
+{% for m in members %}
+  <details class="card">
+    <summary class="row-between"><span><b>{{ m.display_name }}</b> · {{ m.roles_display }}{% if not m.is_active %} · <i>inactive</i>{% endif %}</span><span class="chip {% if m.on_shift %}chip--claimed{% else %}chip--muted{% endif %}"><span class="chip__glyph" aria-hidden="true">{% if m.on_shift %}●{% else %}○{% endif %}</span>{% if m.on_shift %}On shift{% else %}Off shift{% endif %}</span></summary>
+    <form method="post" class="mt-12">{% csrf_token %}<input type="hidden" name="op" value="staff"><input type="hidden" name="staff" value="{{ m.pk }}">
+      <div class="field"><label for="n-{{ m.pk }}">Name</label><input type="text" id="n-{{ m.pk }}" name="name" value="{{ m.display_name }}" maxlength="60"></div>
+      <fieldset class="fieldset-plain"><legend class="small"><b>Roles</b></legend><div class="chips-input">{% for key, label in roles %}<label class="pill-check"><input type="checkbox" name="roles" value="{{ key }}"{% if key in m.role_set %} checked{% endif %}>{{ label }}</label>{% endfor %}</div></fieldset>
+      <fieldset class="fieldset-plain"><legend class="small"><b>Server sections</b> <span class="hint">(servers see only these tables)</span></legend><div class="chips-input">{% for s in sections %}<label class="pill-check"><input type="checkbox" name="sections" value="{{ s.pk }}"{% if s in m.sections.all %} checked{% endif %}>{{ s.name }}</label>{% endfor %}</div></fieldset>
+      <input type="hidden" name="active" value="{% if m.is_active %}1{% else %}0{% endif %}">
+      <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+    <div class="row mt-12">
+      <form method="post">{% csrf_token %}<input type="hidden" name="op" value="shift"><input type="hidden" name="staff" value="{{ m.pk }}"><input type="hidden" name="on" value="{% if m.on_shift %}0{% else %}1{% endif %}"><button class="btn btn-quiet btn-small" type="submit">{% if m.on_shift %}End shift{% else %}Start shift{% endif %}</button></form>
+      {% if m.pk != staff.pk %}<form method="post">{% csrf_token %}<input type="hidden" name="op" value="pair"><input type="hidden" name="staff" value="{{ m.pk }}"><button class="btn btn-quiet btn-small" type="submit"{% if is_sandbox %} disabled aria-disabled="true" title="Not available in the demo"{% endif %}>Pair a device</button></form>{% endif %}
+    </div>
+  </details>
+{% endfor %}
+</div>
+
+<form method="post" class="panel mt-24">{% csrf_token %}<input type="hidden" name="op" value="staff">
+  <h2 class="section-title">Add a person</h2>
+  <div class="field"><label for="new-name">Name staff will see</label><input type="text" id="new-name" name="name" maxlength="60" required></div>
+  <fieldset class="fieldset-plain"><legend class="small"><b>Roles</b></legend><div class="chips-input">{% for key, label in roles %}<label class="pill-check"><input type="checkbox" name="roles" value="{{ key }}">{{ label }}</label>{% endfor %}</div></fieldset>
+  <button class="btn btn-primary" type="submit">Add person</button>
+</form>
+{% endblock %}

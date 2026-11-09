@@ -1,0 +1,8 @@
+{% include "app/screens/_status.html" %}
+{% if board.returned %}<h2 class="section-title">Missed offers — back with you <span class="count">{{ board.returned|length }}</span></h2>
+{% for task in board.returned %}{% include "components/task_card.html" with view="captain" %}{% endfor %}{% endif %}
+<h2 class="section-title">Held at the pass <span class="count">{{ board.staged|length }}</span></h2>
+{% for task in board.staged %}{% include "components/task_card.html" with view="captain" %}{% empty %}<p class="empty">No courses staged. Expo stages courses from the Pass screen.</p>{% endfor %}
+<h2 class="section-title">Released <span class="count">{{ board.in_flight|length }}</span></h2>
+{% for task in board.in_flight %}{% include "components/task_card.html" with view="captain" %}{% empty %}<p class="empty">Nothing on its way to a table.</p>{% endfor %}
+{% if board.done %}<h2 class="section-title">Recently delivered</h2>{% for task in board.done %}{% include "components/task_card.html" with view="pass" %}{% endfor %}{% endif %}

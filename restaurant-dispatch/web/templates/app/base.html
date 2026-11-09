@@ -1,0 +1,55 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="theme-color" content="#12321f">
+<title>{% block title %}{{ screen_title|default:"Manage" }} · {{ location.restaurant.name }}{% endblock %}</title>
+<link rel="icon" href="{% static 'web/icon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'web/app.css' %}">
+</head>
+<body class="app-body{% if embed %} embed{% endif %}">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="unconfirmed banner" data-unconfirmed role="alert"><div class="unconfirmed__inner" data-unconfirmed-text>Not confirmed.</div></div>
+{% if is_sandbox %}
+<div class="demo-strip"><div class="demo-strip__inner">
+  <span>Demo sandbox · sample data</span>
+  <form method="get" action="{% url 'web:app_home' %}" class="row" data-persona-form>
+    <label for="persona" class="visually-hidden">Switch person</label>
+    <select id="persona" data-persona-switch>
+      {% for p in personas %}<option value="{% url 'web:staff_home' p.pk %}"{% if p.pk == staff.pk %} selected{% endif %}>{{ p.display_name }} — {{ p.roles_display }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn btn-small" type="submit">Go</button></noscript>
+  </form>
+  <a href="{% url 'web:demo_floor' %}">Whole floor view</a>
+</div></div>
+{% endif %}
+<header class="appbar">
+  <div class="appbar__inner">
+    <div class="appbar__who">{{ staff.display_name }} · {{ staff.roles_display }}<small>{{ location.display_name }} · {% if profile.is_fine %}Fine Dining — {% endif %}{{ profile.name }}</small></div>
+    <div class="appbar__right">
+      <span class="conn" data-conn data-state="live">Live</span>
+      {% if other_memberships %}<a class="btn" href="{% url 'web:app_home' %}">Switch</a>{% endif %}
+      <form method="post" action="{% url 'web:signout' %}" class="inline">{% csrf_token %}<button class="btn btn-signout" type="submit">{% if is_sandbox %}Leave demo{% else %}Sign out{% endif %}</button></form>
+    </div>
+  </div>
+</header>
+{% if nav|length > 1 %}
+<nav class="tabs tabs--screens" aria-label="Screens"><div class="tabs__inner">
+  {% for key, label in nav %}<a href="{% if key == 'manage' %}{% url 'web:manage_now' staff.pk %}{% else %}{% url 'web:screen' staff.pk key %}{% endif %}{{ embed_qs }}"{% if key == active %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+</div></nav>
+{% endif %}
+<main class="main" id="main">
+  {% include "components/messages.html" %}
+  {% block main %}{% endblock %}
+</main>
+{% if nav|length > 1 %}
+<nav class="bottomnav" aria-label="Screens">
+  {% for key, label in nav %}<a href="{% if key == 'manage' %}{% url 'web:manage_now' staff.pk %}{% else %}{% url 'web:screen' staff.pk key %}{% endif %}{{ embed_qs }}"{% if key == active %} aria-current="page"{% endif %}><span class="ico" aria-hidden="true">{% if key == 'pass' %}▤{% elif key == 'runs' %}➜{% elif key == 'resets' %}↺{% elif key == 'captain' %}‖{% elif key == 'sommelier' %}◇{% elif key == 'lead' %}▲{% elif key == 'tables' %}▦{% else %}⚙{% endif %}</span>{{ label }}</a>{% endfor %}
+</nav>
+{% endif %}
+<div class="toast-zone" data-toasts aria-live="assertive"></div>
+<script src="{% static 'web/app.js' %}" defer></script>
+</body>
+</html>

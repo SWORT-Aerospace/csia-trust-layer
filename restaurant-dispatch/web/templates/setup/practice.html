@@ -1,0 +1,19 @@
+{% extends "setup/base.html" %}{% load dispatch_ui %}
+{% block wizard %}
+<h1 class="screen-title">Run one practice ticket</h1>
+<p class="muted">This uses the real dispatch rules for {% if profile.is_fine %}Fine Dining — {{ profile.name }}{% else %}Regular Service{% endif %}. You take every step yourself as manager; on a shift each step happens on a different phone. Practice tickets are labeled and left out of stalled-work counts.</p>
+<ol class="practice-steps">
+  {% for s in state.steps %}
+  <li class="{% if s.done %}is-done{% elif s == state.current %}is-current{% endif %}">
+    <span class="mark" aria-hidden="true">{% if s.done %}✓{% elif s == state.current %}➜{% else %}○{% endif %}</span>
+    <div><b>{{ s.label }}</b>{% if s.done %}<span class="visually-hidden"> (done)</span>{% endif %}<div class="small muted">{{ s.hint }}</div>
+      {% if s == state.current %}<form method="post" class="mt-12">{% csrf_token %}<input type="hidden" name="op" value="{{ s.key }}"><button class="btn btn-primary" type="submit">{{ s.label }}</button></form>{% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ol>
+<div class="row mt-24">
+  <form method="post">{% csrf_token %}<input type="hidden" name="op" value="finish"><button class="btn btn-primary btn-big" type="submit"{% if state.current %} disabled aria-disabled="true"{% endif %}>Finish setup</button></form>
+  <form method="post">{% csrf_token %}<input type="hidden" name="op" value="skip"><button class="btn btn-quiet" type="submit">Skip practice</button></form>
+</div>
+{% endblock %}

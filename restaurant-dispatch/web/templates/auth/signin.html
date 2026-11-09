@@ -1,0 +1,19 @@
+{% extends "site/base.html" %}
+{% block title %}Staff sign in — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="narrow">
+  <h1 class="screen-title">Staff sign in</h1>
+  <p class="muted">Managers and leads sign in with a username and password. Floor staff usually pair their phone with a one-time code instead.</p>
+  <form method="post" class="panel" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="errors" role="alert">{% for e in form.non_field_errors %}<p>▲ {{ e }}</p>{% endfor %}</div>{% endif %}
+    <div class="field"><label for="id_username">Username</label><input type="text" name="username" id="id_username" autocomplete="username" autocapitalize="none" required value="{{ form.username.value|default:'' }}"></div>
+    <div class="field"><label for="id_password">Password</label><input type="password" name="password" id="id_password" autocomplete="current-password" required></div>
+    <button class="btn btn-primary btn-big" type="submit">Sign in</button>
+  </form>
+  <p class="mt-24"><a class="btn btn-quiet" href="{% url 'web:pair' %}">I have a pairing code</a></p>
+  {% if demo_logins %}
+  <div class="notice notice--warn mt-24">Local development: seeded sample accounts are enabled (for example <span class="mono">jp-kim</span> or <span class="mono">mr-elise</span>). Run <span class="mono">python manage.py seed_demo</span> to see them all. These are refused when demo logins are switched off.</div>
+  {% endif %}
+</div>
+{% endblock %}

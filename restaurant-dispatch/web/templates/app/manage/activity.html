@@ -1,0 +1,11 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<form method="get" class="row">
+  <label for="type" class="visually-hidden">Filter</label>
+  <select id="type" name="type">{% for key, label in filters %}<option value="{{ key }}"{% if key == verb %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+  {% if embed %}<input type="hidden" name="embed" value="1">{% endif %}
+  <button class="btn btn-small" type="submit">Filter</button>
+</form>
+<p class="small muted mt-12">Times are {{ location.time_zone }}. Newest first. Every claim, offer, expiry, release, readiness check and configuration change is recorded with who did it.</p>
+{% include "app/manage/_log.html" %}
+{% endblock %}

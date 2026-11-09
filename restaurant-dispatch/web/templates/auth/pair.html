@@ -1,0 +1,14 @@
+{% extends "site/base.html" %}
+{% block title %}Pair this device — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="narrow">
+  <h1 class="screen-title">Pair this phone or tablet</h1>
+  <p class="muted">Ask your manager for a pairing code. It works once and expires after 15 minutes.</p>
+  <form method="post" class="panel">
+    {% csrf_token %}
+    {% if error %}<div class="errors" role="alert">▲ {{ error }}</div>{% endif %}
+    <div class="field"><label for="code">Pairing code</label><input type="text" id="code" name="code" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" placeholder="ABCD-EFGH" required class="mono"></div>
+    <button class="btn btn-primary btn-big" type="submit">Pair device</button>
+  </form>
+</div>
+{% endblock %}

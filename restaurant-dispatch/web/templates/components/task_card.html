@@ -1,0 +1,55 @@
+{% load dispatch_ui %}{% comment %}
+One run, course or reset. `view` decides which actions this screen offers:
+worker (runner/busser), pass (expo, read-only), lead, captain, sommelier.
+Buttons are only a convenience: the engine re-checks every permission.
+{% endcomment %}
+<article class="card task task--{{ task.state }}{% if task.state == 'offered' and task.offered_to_id == staff.pk %} task--mine-offer{% endif %}" data-task="{{ task.pk }}">
+  <div class="task__head">
+    <h3 class="task__title">{{ task.title }}</h3>
+    {% task_chip task staff %}
+  </div>
+  <p class="task__meta">
+    {% if task.table.section %}{{ task.table.section.name }} · {% endif %}
+    {% if task.kind == 'reset' %}Party left {{ task.ready_at|since }} ago{% elif task.kind == 'course' and task.state == 'staged' %}Staged {{ task.staged_at|since }} ago{% else %}Ready {{ task.ready_at|since }} ago{% endif %}
+    {% if task.state == 'offered' %} · <span class="timer" data-expires="{{ task.offer_expires_at|epoch_ms }}">{{ task.seconds_left|mmss }}</span> to claim{% if task.offer_stage == 'primary' and profile.uses_backup_offer or task.offer_stage == 'primary' and task.kind == 'reset' %}, then backup{% elif task.offer_stage == 'backup' %}, then {% if profile.escalation_role == 'captain' %}the captain{% else %}the floor lead{% endif %}{% elif task.offer_stage == 'assigned' and profile.is_fine %}, then back to the captain{% endif %}{% endif %}
+    {% if task.state == 'claimed' %} · claimed {{ task.claimed_at|since }} ago{% if task.assigned_by %} · assigned by {{ task.assigned_by }}{% endif %}{% endif %}
+    {% if task.state == 'completed' %} · {{ task.completed_at|clock }} by {{ task.completed_by }}{% endif %}
+    {% if task.state == 'cancelled' %} · {{ task.cancel_reason }}{% endif %}
+  </p>
+  {% if task.note %}<p class="task__meta">“{{ task.note }}”</p>{% endif %}
+  {% if task.allergy_alert %}<div class="allergy" role="note"><span aria-hidden="true">⚠</span> Allergy alert — confirm with the {% if profile.is_fine %}captain{% else %}server{% endif %} before placing</div>{% endif %}
+  {% if task.is_practice %}<p class="small muted">Practice ticket from setup</p>{% endif %}
+
+  {% if task.kind == 'course' and task.state in 'staged,escalated' and view in 'captain,sommelier,pass' %}
+    {% if profile.requires_pairing or profile.requires_team_ready %}
+    <ul class="task__checks" aria-label="Readiness checks">
+      {% if profile.requires_pairing %}<li>{% pairing_chip task %}</li>{% endif %}
+      {% if profile.requires_team_ready %}<li>{% team_chip task %}</li>{% endif %}
+    </ul>
+    {% endif %}
+  {% endif %}
+
+  {% if view == 'worker' %}
+    {% if task.state == 'offered' and task.offered_to_id == staff.pk %}
+      <div class="task__actions">
+        {% include "components/act.html" with action="claim" label="Claim" cls="btn-primary btn-big" %}
+        {% include "components/act.html" with action="decline" label="Decline" %}
+      </div>
+    {% elif task.state == 'claimed' and task.owner_id == staff.pk %}
+      <div class="task__actions">
+        {% if task.kind == 'reset' %}{% include "components/act.html" with action="complete" label="Table reset done" cls="btn-primary btn-big" %}{% else %}{% include "components/act.html" with action="complete" label="Delivered" cls="btn-primary btn-big" %}{% endif %}
+        {% include "components/act.html" with action="release" label="Give back" %}
+      </div>
+    {% elif task.state == 'escalated' and profile.open_claim_when_escalated %}
+      <div class="task__actions">{% include "components/act.html" with action="claim" label="Claim it" cls="btn-primary" %}</div>
+    {% endif %}
+
+  {% elif view == 'sommelier' %}
+    {% if task.pairing_status == 'pending' %}
+      <div class="task__actions">{% include "components/act.html" with action="pairing_ready" label="Pairing ready" cls="btn-primary btn-big" %}</div>
+    {% endif %}
+
+  {% elif view == 'captain' or view == 'lead' %}
+    {% if task.kind == 'reset' %}{% with workers=board.bussers %}{% include "components/task_lead_actions.html" %}{% endwith %}{% else %}{% with workers=board.runners %}{% include "components/task_lead_actions.html" %}{% endwith %}{% endif %}
+  {% endif %}
+</article>

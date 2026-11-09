@@ -1,0 +1,28 @@
+{% extends "site/base.html" %}
+{% block title %}Try the demo — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="wrap">
+  <div class="narrow narrow--wide">
+    {% include "components/messages.html" %}
+    <span class="eyebrow">Interactive demo</span>
+    <h1 class="screen-title">Run a shift with sample data</h1>
+    <p class="lede">You get a private sandbox restaurant with a sample crew. Switch between expo, runners, bussers, host, captain and manager — each sees only what their role allows, enforced by the server. The sandbox is deleted after a few hours.</p>
+    <form method="post" action="{% url 'web:demo_start' %}" class="panel">
+      {% csrf_token %}
+      <fieldset class="choice-grid fieldset-plain">
+        <legend class="section-title">Choose a service model</legend>
+        <label class="choice"><input type="radio" name="profile" value="regular" checked>
+          <span class="edition__tag">Regular Service</span><b>Juniper &amp; Pine</b>
+          <span class="muted">Food ready → runner → backup → floor lead. Table resets back to the host.</span></label>
+        {% for p in presets %}
+        <label class="choice"><input type="radio" name="profile" value="{{ p.key }}">
+          <span class="edition__tag">Fine Dining · {{ p.name }}</span><b>Marrow Room</b>
+          <span class="muted">{{ p.summary }}</span></label>
+        {% endfor %}
+      </fieldset>
+      <button class="btn btn-primary btn-big" type="submit">Start the demo</button>
+      <p class="small muted mt-12">Sample data only. Offers expire after 30 seconds in the demo so you can watch backup coverage and escalation happen.</p>
+    </form>
+  </div>
+</div>
+{% endblock %}

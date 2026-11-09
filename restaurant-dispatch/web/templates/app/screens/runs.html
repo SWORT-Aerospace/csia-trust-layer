@@ -1,0 +1,7 @@
+<h2 class="section-title">Offered to you <span class="count">{{ board.offers|length }}</span></h2>
+{% for task in board.offers %}{% include "components/task_card.html" with view="worker" %}{% empty %}<p class="empty">No offers right now. New runs appear here — claim before the timer runs out.</p>{% endfor %}
+<h2 class="section-title">Your runs <span class="count">{{ board.mine|length }}</span></h2>
+{% for task in board.mine %}{% include "components/task_card.html" with view="worker" %}{% empty %}<p class="empty">Nothing in your hands.</p>{% endfor %}
+{% if board.open_pool %}<h2 class="section-title">Needs a runner — floor lead notified <span class="count">{{ board.open_pool|length }}</span></h2>
+{% for task in board.open_pool %}{% include "components/task_card.html" with view="worker" %}{% endfor %}{% endif %}
+{% if board.done %}<h2 class="section-title">You delivered</h2>{% for task in board.done %}{% include "components/task_card.html" with view="worker" %}{% endfor %}{% endif %}

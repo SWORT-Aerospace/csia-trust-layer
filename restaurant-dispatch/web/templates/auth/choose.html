@@ -1,0 +1,15 @@
+{% extends "site/base.html" %}
+{% block title %}Choose a location — Restaurant Service Dispatch{% endblock %}
+{% block main %}
+<div class="narrow">
+  <h1 class="screen-title">Where are you working?</h1>
+  {% if memberships %}
+  <div class="stack mt-24">
+    {% for m in memberships %}<a class="persona" href="{% url 'web:staff_home' m.pk %}"><b>{{ m.location.display_name }}</b><span>{{ m.display_name }} · {{ m.roles_display }}</span></a>{% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">This account isn't linked to a restaurant yet. <a href="{% url 'web:setup' %}">Set up a location</a>.</p>
+  {% endif %}
+  <form method="post" action="{% url 'web:signout' %}" class="mt-24">{% csrf_token %}<button class="btn btn-quiet" type="submit">Sign out</button></form>
+</div>
+{% endblock %}
