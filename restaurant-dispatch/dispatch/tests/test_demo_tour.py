@@ -36,6 +36,9 @@ class RegularTourTests(TestCase):
         current = state(c)["steps"][state(c)["current"]]
         self.assertEqual((current["key"], current["waiting"], current["action"]), ("expire", True, None))
         self.assertEqual(do(c, "expire").status_code, 409)  # only the timer worker moves it on
+        upcoming = state(c)["steps"]
+        self.assertTrue(upcoming[2]["title"].startswith("Dev claims"), upcoming[2]["title"])  # backup, not Maria
+        self.assertNotIn("table the table", upcoming[-1]["title"])
         engine.expire_due_offers(now=later(DEMO_OFFER_SECONDS + 1))  # what the worker does
         s = state(c)
         self.assertEqual(s["steps"][s["current"]]["key"], "backup_claim")

@@ -124,7 +124,9 @@ class Tour:
         if skipped:
             s.note = "Someone acted before the offer expired, so there was nothing to route."
         steps.append(s)
-        claimer = (run.offered_to if run and run.state == TaskState.OFFERED else None) or self.person("Dev")
+        # Until the first offer expires, the person who will claim is the backup (Dev).
+        moved_on = run is not None and run.state == TaskState.OFFERED and run.offer_stage != OfferStage.PRIMARY
+        claimer = (run.offered_to if moved_on else None) or self.person("Dev")
         steps.append(self._step("backup_claim", f"{claimer.display_name} claims the run.", claimer, action=f"Claim as {claimer.display_name}",
                                 done=run is not None and run.state in (TaskState.CLAIMED, TaskState.COMPLETED)))
         owner = (run.owner if run and run.owner else None) or claimer
@@ -139,8 +141,8 @@ class Tour:
         steps.append(self._step("reset_done", f"{cleaner.display_name} finishes the reset.", cleaner, action="Mark reset done",
                                 done=reset is not None and reset.state == TaskState.COMPLETED))
         reset_done = reset is not None and reset.state == TaskState.COMPLETED
-        label = reset.table.label if reset else "the table"
-        steps.append(self._step("host_sees", f"Ana's board shows table {label} ready to seat. Open her screen to see it.", "Ana",
+        where = f"table {reset.table.label}" if reset else "the table"
+        steps.append(self._step("host_sees", f"Ana's board shows {where} ready to seat. Open her screen to see it.", "Ana",
                                 action="Got it", done=reset_done and bool(self.data.get("seen"))))
         return steps
 
