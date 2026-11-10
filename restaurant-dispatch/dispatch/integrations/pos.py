@@ -16,8 +16,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Protocol
 
-from ..models import IntegrationEvent, Table
-from ..states import TableState
+from django.db import IntegrityError, transaction
+
+from ..models import IntegrationEvent, Table, Task
+from ..states import TableState, TaskKind, TaskState
 
 
 @dataclass(frozen=True)
@@ -25,6 +27,9 @@ class POSEvent:
     kind: str  # "item_ready" | "course_fired" | "check_closed" | "order_opened"
     table_label: str
     external_ref: str = ""
+    event_id: str = ""  # vendor's unique id: retries of the same event share it
+    location_ref: str = ""  # vendor's id for the venue; must match Location.pos_ref
+    course_number: int | None = None
 
 
 class POSAdapter(Protocol):
@@ -40,7 +45,15 @@ class FakePOSAdapter:
 
     def parse(self, payload: dict) -> Iterable[POSEvent]:
         for raw in payload.get("events", []):
-            yield POSEvent(kind=str(raw["kind"]), table_label=str(raw["table"]), external_ref=str(raw.get("ref", "")))
+            course = raw.get("course")
+            yield POSEvent(
+                kind=str(raw["kind"]),
+                table_label=str(raw["table"]),
+                external_ref=str(raw.get("ref", "")),
+                event_id=str(raw.get("id", "")),
+                location_ref=str(raw.get("location", "")),
+                course_number=int(course) if course not in (None, "") else None,
+            )
 
 
 PLANNED_ADAPTERS = [
@@ -57,6 +70,30 @@ PLANNED_ADAPTERS = [
         "detail": "Not connected. No credentials are requested by this release.",
     },
 ]
+
+
+def identity_check(location, event: POSEvent) -> str:
+    """Would this event identify the right venue, table and course? A future
+    live adapter may act only on "match"; shadow mode just records the result."""
+    if not location.pos_ref:
+        return "location_not_mapped"
+    if event.location_ref != location.pos_ref:
+        return "wrong_location"
+    table = Table.objects.filter(location=location, label=event.table_label, is_active=True).select_related("current_visit").first()
+    if table is None:
+        return "unknown_table"
+    if event.kind == "item_ready" and location.profile.holds_at_pass and event.course_number is not None:
+        visit = table.current_visit
+        if visit is None or table.state != TableState.OCCUPIED:
+            return "table_not_seated"
+        on_pass = Task.objects.filter(
+            visit=visit, kind=TaskKind.COURSE, course_number=event.course_number
+        ).exclude(state=TaskState.CANCELLED)
+        if on_pass.exists():
+            return "course_already_on_pass"
+        if event.course_number != visit.next_course:
+            return "course_mismatch"
+    return "match"
 
 
 def interpret(location, event: POSEvent) -> str:
@@ -78,19 +115,34 @@ def interpret(location, event: POSEvent) -> str:
 
 
 def ingest(location, adapter: POSAdapter, payload: dict) -> list[IntegrationEvent]:
-    """Record events in shadow mode. Never creates tasks or changes tables."""
+    """Record events in shadow mode and return the newly recorded ones.
+
+    Never creates tasks, changes tables, writes to the staff activity log or
+    alerts anyone. A vendor retry carrying an already-seen event id is
+    recorded once (unique per location, provider and event id)."""
     recorded = []
     for event in adapter.parse(payload):
-        recorded.append(
-            IntegrationEvent.objects.create(
-                location=location,
-                provider=adapter.provider,
-                mode="shadow",
-                kind=event.kind[:30],
-                external_ref=event.external_ref[:80],
-                table_label=event.table_label[:20],
-                would_do=interpret(location, event)[:200],
-                applied=False,
-            )
-        )
+        check = identity_check(location, event)
+        would = interpret(location, event) if check == "match" else f"Would ignore: identity check failed ({check})."
+        if event.kind == "check_closed":
+            would = interpret(location, event)  # always states that payment never frees a table
+        try:
+            with transaction.atomic():
+                recorded.append(
+                    IntegrationEvent.objects.create(
+                        location=location,
+                        provider=adapter.provider,
+                        mode="shadow",
+                        kind=event.kind[:30],
+                        external_ref=event.external_ref[:80],
+                        external_event_id=event.event_id[:120],
+                        table_label=event.table_label[:20],
+                        course_number=event.course_number,
+                        identity_check=check,
+                        would_do=would[:200],
+                        applied=False,
+                    )
+                )
+        except IntegrityError:
+            continue  # duplicate delivery of an event we already recorded
     return recorded

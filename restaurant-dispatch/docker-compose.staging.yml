@@ -1,4 +1,4 @@
-# Staging stack: PostgreSQL + one-shot migration + web + timer worker.
+# Syncora staging stack: PostgreSQL + Redis + one-shot migration + web (x2) + timer worker.
 #   cp deploy/staging.env.example deploy/staging.env   # then edit it
 #   docker compose -f docker-compose.staging.yml up --build
 # Put an HTTPS-terminating proxy in front of port 8000 for anything public.
@@ -9,6 +9,14 @@ services:
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       retries: 10
 
@@ -25,9 +33,19 @@ services:
     ports: ["8000:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
       interval: 15s
+
+  # A second web process on another port: proves limits are shared, not per process.
+  web2:
+    build: .
+    env_file: deploy/staging.env
+    ports: ["8001:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
 
   worker:
     build: .
@@ -36,6 +54,9 @@ services:
     depends_on:
       migrate: { condition: service_completed_successfully }
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "manage.py", "check_worker", "--max-age", "30"]
+      interval: 30s
 
 volumes:
   pgdata:

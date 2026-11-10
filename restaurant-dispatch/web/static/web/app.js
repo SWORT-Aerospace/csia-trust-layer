@@ -1,4 +1,4 @@
-/* Restaurant Service Dispatch — staff screen runtime.
+/* Syncora — staff screen runtime.
  *
  * - Short polling keeps every [data-live] region current.
  * - Action forms ([data-act]) post with fetch. If a request fails or the

@@ -184,12 +184,30 @@ def _hash_code(code: str) -> str:
     return hmac.new(settings.SECRET_KEY.encode(), normalized.encode(), hashlib.sha256).hexdigest()
 
 
+def pairing_block_reason(member) -> str | None:
+    """Pairing codes are for floor-staff devices only. A code must never hand
+    out an account that can reach more than this one membership: no
+    managers, no password or admin accounts, no account linked elsewhere."""
+    if "manager" in member.role_set:
+        return f"{member} is a manager and signs in with a password."
+    user = member.user
+    if user is None:
+        return None
+    if user.is_superuser or user.is_staff or user.has_usable_password():
+        return f"{member} already signs in with a password."
+    if StaffMember.objects.filter(user=user, is_active=True).exclude(pk=member.pk).exists():
+        return f"{member}'s account is linked to another location, so it can't be paired here."
+    return None
+
+
 @transaction.atomic
 def create_pairing_code(actor, staff_id) -> tuple[str, PairingCode]:
     _require(actor, "staff.pair", "Only a manager can pair devices.")
     member = _staff(actor, staff_id)
     if member.is_demo_account and member.location.restaurant.demo_owner_id:
         raise Forbidden("Demo sandbox personas can't be paired to devices.")
+    if reason := pairing_block_reason(member):
+        raise Forbidden(reason)
     if member.user is None:
         User = get_user_model()
         user = User.objects.create(username=f"staff_{secrets.token_hex(6)}")
@@ -217,7 +235,13 @@ def redeem_pairing_code(raw: str) -> StaffMember | None:
     code = PairingCode.objects.select_related("staff__location", "staff__user").filter(pk=pk).first() if pk else None
     if code is None or not code.staff.is_active or code.staff.user is None:
         return None
-    code.used_at = timezone.now()
-    code.save(update_fields=["used_at"])
+    # Single use, enforced by a conditional update rather than by the read.
+    if not PairingCode.objects.filter(pk=code.pk, used_at__isnull=True).update(used_at=timezone.now()):
+        return None
+    if reason := pairing_block_reason(code.staff):
+        # The account changed after the code was issued (e.g. got a password
+        # or a second location): burn the code and refuse.
+        audit(code.staff.location, None, "staff.pair_refused", f"Pairing code for {code.staff} refused: {reason}")
+        return None
     audit(code.staff.location, code.staff, "staff.paired", f"{code.staff} paired a device")
     return code.staff

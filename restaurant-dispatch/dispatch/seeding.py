@@ -16,6 +16,9 @@ from . import engine
 from .models import Location, Restaurant, Section, StaffMember, Table
 from .profiles import get_profile
 
+DEMO_OFFER_SECONDS = 15
+DEMO_BACKUP_SECONDS = 25
+
 REGULAR_SAMPLE = {
     "restaurant": "Juniper & Pine",
     "location": "Main Street",
@@ -93,14 +96,20 @@ def build_sample(
         demo_owner=demo_user,
         demo_expires_at=timezone.now() + timedelta(hours=demo_ttl_hours) if demo_ttl_hours else None,
     )
-    default_timeout = 30 if demo_user is not None else (60 if profile.is_fine else 45)
-    timeout = offer_timeout or default_timeout
+    if demo_user is not None:
+        # Sandbox only: short windows so a visitor sees backup routing within the
+        # one-minute tour. Real locations keep their own configured windows.
+        primary, backup = DEMO_OFFER_SECONDS, DEMO_BACKUP_SECONDS
+    else:
+        primary = backup = 60 if profile.is_fine else 45
+    if offer_timeout:
+        primary = backup = offer_timeout
     location = Location.objects.create(
         restaurant=restaurant,
         name=spec["location"],
         profile_key=profile_key,
-        offer_timeout_seconds=timeout,
-        backup_timeout_seconds=timeout,
+        offer_timeout_seconds=primary,
+        backup_timeout_seconds=backup,
     )
     sections, tables = {}, {}
     for s_index, (section_name, labels) in enumerate(spec["sections"]):

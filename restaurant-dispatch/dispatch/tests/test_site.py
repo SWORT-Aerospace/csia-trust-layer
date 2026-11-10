@@ -1,5 +1,7 @@
 """Public site, demo isolation, sign-in rules, device pairing, setup wizard."""
 
+import re
+
 from django.core.management import call_command
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -12,16 +14,30 @@ from .helpers import later, sample
 
 
 class PublicSiteTests(TestCase):
-    def test_homepage_leads_with_copy_and_demo_action(self):
+    def test_homepage_leads_with_syncora_copy_and_demo_action(self):
         response = self.client.get("/")
-        self.assertContains(response, "Get food off the pass.")
-        self.assertContains(response, "Assign food runs, coordinate courses, and close every handoff from one live floor.")
+        self.assertContains(response, "<title>Syncora")
+        self.assertContains(response, "Keep the kitchen and <em>dining room in sync.</em>")
+        self.assertContains(
+            response,
+            "Assign food runs, time course releases, and tell the host when a table is ready. "
+            "Everyone sees who owns the next step.",
+        )
         self.assertContains(response, 'href="/demo/">Try the demo</a>')
         self.assertContains(response, "Staff sign in")
-        for preset in ("Captain Release", "Pairing Coordination", "Coordinated Service"):
-            self.assertContains(response, preset)
-        for forbidden in ("Michelin", "star", "testimonial", "pricing", "$"):
-            self.assertNotIn(forbidden.lower(), response.content.decode().lower().replace("start", ""), forbidden)
+        for name in ("Regular Service", "Fine Dining", "Captain Release", "Pairing Coordination", "Coordinated Service"):
+            self.assertContains(response, name)
+        html = response.content.decode()
+        # Storyboards are real staff components, labelled as demo data and inert.
+        self.assertGreaterEqual(html.count('class="screen" inert'), 6)
+        self.assertIn("Offered to you (backup)", html)  # expired run went to backup
+        self.assertIn("Ready to seat", html)  # completed reset reached the host
+        self.assertIn("Pairing: waiting for sommelier", html)
+        self.assertNotIn("Restaurant Service Dispatch", html)
+        lowered = html.lower()
+        for forbidden in ("michelin", "testimonial", "pricing", "$", "trusted by", "% faster", "integrates with toast"):
+            self.assertNotIn(forbidden, lowered, forbidden)
+        self.assertIsNone(re.search(r"\bstars?\b|\bone-star|\btwo-star|\bthree-star", lowered))
 
     @override_settings(DISPATCH_DEMO_ENABLED=False)
     def test_demo_can_be_switched_off(self):

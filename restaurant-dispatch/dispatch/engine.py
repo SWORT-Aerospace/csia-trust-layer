@@ -23,7 +23,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
-from .models import AuditEvent, StaffMember, Table, Task, Visit
+from .models import AuditEvent, Location, StaffMember, Table, Task, Visit
 from .permissions import can, claim_capability_for, worker_role_for
 from .states import OfferStage, PairingStatus, TableState, TaskKind, TaskState, VisitState
 
@@ -295,7 +295,7 @@ def _next_fields(task: Task, now, restart: bool = False) -> dict:
     return _escalation_fields(task, now)
 
 
-def _audit_routing(task: Task, actor, system="Dispatch") -> None:
+def _audit_routing(task: Task, actor, system="Dispatch", **extra) -> None:
     if task.state == TaskState.OFFERED:
         window = int((task.offer_expires_at - task.offered_at).total_seconds())
         audit(
@@ -308,6 +308,7 @@ def _audit_routing(task: Task, actor, system="Dispatch") -> None:
             system=system,
             stage=task.offer_stage,
             to=task.offered_to_id,
+            **extra,
         )
     elif task.state == TaskState.ESCALATED:
         audit(
@@ -480,7 +481,12 @@ def claim(actor, task_id) -> Result:
     if task.kind == TaskKind.RESET:
         _set_table(task.table_id, task.visit_id, (TableState.NEEDS_RESET,), now, state=TableState.RESETTING)
     extra = f" (took over from {took_over_from})" if took_over_from else ""
-    audit(task.location, actor, "task.claimed", f"{actor} claimed {task.title}{extra}", task=task)
+    # A lead/captain/manager taking work outside normal routing is a manual intervention.
+    intervened = took_over_from is not None or not worker
+    audit(
+        task.location, actor, "task.claimed", f"{actor} claimed {task.title}{extra}", task=task,
+        **({"intervention": "takeover"} if intervened else {}),
+    )
     return Result(f"Claimed: {task.title}.", task=task)
 
 
@@ -517,7 +523,10 @@ def complete(actor, task_id) -> Result:
     _apply(task, (TaskState.CLAIMED,), state=TaskState.COMPLETED, completed_at=now, completed_by=actor)
     verb = "Reset done" if task.kind == TaskKind.RESET else "Delivered"
     note = f" on behalf of {owner}" if on_behalf else ""
-    audit(task.location, actor, "task.completed", f"{verb}: {task.title}{note}", task=task)
+    audit(
+        task.location, actor, "task.completed", f"{verb}: {task.title}{note}", task=task,
+        **({"intervention": "completed_for_owner"} if on_behalf else {}),
+    )
     if task.kind == TaskKind.RESET:
         freed = _set_table(
             task.table_id,
@@ -561,7 +570,11 @@ def release_claim(actor, task_id) -> Result:
     if task.kind == TaskKind.RESET:
         _set_table(task.table_id, task.visit_id, (TableState.RESETTING,), now, state=TableState.NEEDS_RESET)
     who = "gave back" if previous and previous.pk == actor.pk else f"released from {previous}"
-    audit(task.location, actor, "task.released", f"{task.title} {who}", task=task)
+    by_other = not (previous and previous.pk == actor.pk)
+    audit(
+        task.location, actor, "task.released", f"{task.title} {who}", task=task,
+        **({"intervention": "released_from_owner"} if by_other else {}),
+    )
     _audit_routing(task, None)
     return Result(f"Released {task.title}.", task=task)
 
@@ -597,7 +610,10 @@ def assign(actor, task_id, staff_id) -> Result:
     if task.kind == TaskKind.RESET:
         _set_table(task.table_id, task.visit_id, (TableState.NEEDS_RESET,), now, state=TableState.RESETTING)
     from_note = f" (was {previous})" if previous and previous.pk != target.pk else ""
-    audit(task.location, actor, "task.assigned", f"{actor} assigned {task.title} to {target}{from_note}", task=task)
+    audit(
+        task.location, actor, "task.assigned", f"{actor} assigned {task.title} to {target}{from_note}", task=task,
+        intervention="reassigned" if previous else "assigned",
+    )
     return Result(f"Assigned {task.title} to {target}.", task=task)
 
 
@@ -611,7 +627,7 @@ def offer_to(actor, task_id, staff_id) -> Result:
     target = _get_worker(actor, staff_id, task.kind)
     now = timezone.now()
     _apply(task, (task.state,), **_offer_fields(task, target, OfferStage.ASSIGNED, now))
-    _audit_routing(task, actor)
+    _audit_routing(task, actor, intervention="reoffered")
     return Result(f"Offered {task.title} to {target}.", task=task)
 
 
@@ -770,6 +786,7 @@ def mark_departed(actor, table_id, client_token=None) -> Result:
     for course in held:
         _apply(course, (TaskState.STAGED,), state=TaskState.CANCELLED, cancelled_at=now, cancel_reason="Party left")
         audit(actor.location, actor, "task.cancelled", f"{course.title} cancelled: party left", task=course)
+    waiting = Location.objects.filter(pk=actor.location_id).values_list("waitlist_active", flat=True).first()
     reset = Task(
         location=actor.location,
         kind=TaskKind.RESET,
@@ -780,6 +797,7 @@ def mark_departed(actor, table_id, client_token=None) -> Result:
         created_at=now,
         ready_at=now,
         offered_history=[],
+        waitlist_active=bool(waiting),  # context for the shift report
     )
     for key, value in _next_fields(reset, now).items():
         setattr(reset, key, value)
@@ -860,8 +878,24 @@ def seat_override(actor, table_id, party_size=2, client_token=None) -> Result:
         "table.override",
         f"{actor} seated {visit.party_size} at table {table.label} before its reset was confirmed",
         table=table,
+        intervention="seated_before_reset",
     )
     return Result(f"Seated {visit.party_size} at table {table.label} (override).", visit=visit, table=table, created=True)
+
+
+@engine_action
+def set_waitlist(actor, active: bool) -> Result:
+    """Host context: are guests waiting for a table right now?"""
+    _require(actor, "table.seat", "Only the host or a lead can change the waitlist status.")
+    active = bool(active)
+    changed = Location.objects.filter(pk=actor.location_id).exclude(waitlist_active=active).update(
+        waitlist_active=active, waitlist_changed_at=timezone.now()
+    )
+    actor.location.waitlist_active = active
+    if changed:
+        audit(actor.location, actor, "waitlist.on" if active else "waitlist.off",
+              "Guests are waiting for tables" if active else "No guests waiting for tables")
+    return Result("Guests waiting: recorded." if active else "No one waiting: recorded.")
 
 
 # --------------------------------------------------------------------------- staff

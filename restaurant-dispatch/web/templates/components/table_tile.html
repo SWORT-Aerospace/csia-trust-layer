@@ -1,0 +1,33 @@
+{% load dispatch_ui %}  <section class="tile tile--{{ table.state }}" aria-label="Table {{ table.label }}" data-table="{{ table.label }}">
+    <div class="tile__label">{{ table.label }}{% if table.section %}<small>{{ table.section.name }}</small>{% endif %}</div>
+    {% table_chip table %}
+    <div class="tile__info">
+      {% if table.state == 'occupied' and table.current_visit %}Party of {{ table.current_visit.party_size }} · {{ table.current_visit.seated_at|since }}{% endif %}
+      {% if table.reset_task %}{% with r=table.reset_task %}{% if r.state == 'offered' %}Offered to {{ r.offered_to }} · <span class="timer" data-expires="{{ r.offer_expires_at|epoch_ms }}">{{ r.seconds_left|mmss }}</span>{% elif r.state == 'claimed' %}{{ r.owner }} is resetting{% elif r.state == 'escalated' %}No busser yet — {{ profile.escalation_label|lower }}{% endif %}{% endwith %}{% endif %}
+      {% if table.state == 'ready' %}Free {{ table.state_changed_at|since }}{% endif %}
+    </div>
+    <div class="tile__actions">
+      {% if table.state == 'ready' and can.table_seat %}
+      <details><summary class="btn btn-primary">Seat party</summary>
+        <form method="post" action="{% act_url 'seat' %}" data-act data-label="Seat table {{ table.label }}">{% csrf_token %}<input type="hidden" name="table" value="{{ table.pk }}"><input type="hidden" name="client_token" value="{% token %}"><input type="hidden" name="next" value="{{ next_url }}">
+          <p class="small muted mt-12">Party size</p>
+          <div class="party-sizes">{% for n in "12345678" %}<button class="btn btn-quiet" type="submit" name="party" value="{{ n }}">{{ n }}</button>{% endfor %}</div>
+        </form>
+      </details>
+      {% elif table.state == 'occupied' and can.table_depart %}
+      <details><summary class="btn">Party has left</summary>
+        <div class="confirm-box"><p>Confirm the guests have physically left the table. A paid check doesn't count.</p>
+          <form method="post" action="{% act_url 'depart' %}" data-act data-label="Party left table {{ table.label }}">{% csrf_token %}<input type="hidden" name="table" value="{{ table.pk }}"><input type="hidden" name="client_token" value="{% token %}"><input type="hidden" name="next" value="{{ next_url }}"><button class="btn btn-warn" type="submit">Yes, they've left</button></form>
+        </div>
+      </details>
+      {% elif table.state in 'needs_reset,resetting' and can.table_override %}
+      <details><summary class="btn btn-quiet btn-small">Seat before reset…</summary>
+        <div class="confirm-box"><p>Override: seat this table before the reset is confirmed. The open reset will be cancelled.</p>
+          <form method="post" action="{% act_url 'seat_override' %}" data-act data-label="Override seat table {{ table.label }}">{% csrf_token %}<input type="hidden" name="table" value="{{ table.pk }}"><input type="hidden" name="client_token" value="{% token %}"><input type="hidden" name="next" value="{{ next_url }}">
+            <div class="party-sizes">{% for n in "12345678" %}<button class="btn btn-quiet" type="submit" name="party" value="{{ n }}">{{ n }}</button>{% endfor %}</div>
+          </form>
+        </div>
+      </details>
+      {% endif %}
+    </div>
+  </section>

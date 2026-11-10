@@ -68,6 +68,7 @@ ACTIONS = {
     "seat": lambda s, p: engine.seat_party(s, p.get("table"), p.get("party"), p.get("client_token")),
     "seat_override": lambda s, p: engine.seat_override(s, p.get("table"), p.get("party"), p.get("client_token")),
     "shift": lambda s, p: engine.set_on_shift(s, p.get("staff") or s.pk, _post_bool(p, "on")),
+    "waitlist": lambda s, p: engine.set_waitlist(s, _post_bool(p, "on")),
 }
 
 

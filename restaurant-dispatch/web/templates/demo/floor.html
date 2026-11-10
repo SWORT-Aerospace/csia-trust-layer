@@ -1,4 +1,5 @@
-{% extends "site/base.html" %}
+{% extends "site/base.html" %}{% load static %}
+{% block head %}<meta name="csrf-token" content="{{ csrf_token }}">{% endblock %}
 {% block title %}Demo floor — {{ location.restaurant.name }}{% endblock %}
 {% block main %}
 <div class="wrap floor-head">
@@ -7,7 +8,7 @@
     <div>
       <span class="eyebrow">Demo sandbox · sample data</span>
       <h1 class="screen-title">{{ location.restaurant.name }} — {% if profile.is_fine %}Fine Dining · {{ profile.name }}{% else %}Regular Service{% endif %}</h1>
-      <p class="muted">Each pane is a real staff screen signed in as one person. Their permissions are enforced by the server. Offers expire after {{ location.offer_timeout_seconds }} seconds, driven by the timer worker — not by this page.</p>
+      <p class="muted">Each pane is a real Syncora staff screen signed in as one person, with permissions enforced by the server. In this demo, offers expire after {{ location.offer_timeout_seconds }}s (backup: {{ location.backup_timeout_seconds }}s), driven by the timer worker, not by this page. Real locations set their own windows.</p>
     </div>
     <div class="row">
       {% if profile.is_fine %}
@@ -24,39 +25,25 @@
 
   <div class="mt-24 stack">
     <section class="panel floor-intro">
-      <div>
-      <h2 class="section-title">Try this</h2>
-      {% if profile.is_fine %}
-      <ol class="script">
-        <li><b>Noor (Expo)</b>: pick table 3 and tap <i>Stage course</i>. Mateo can't see it.</li>
-        {% if profile.requires_pairing %}<li><b>Elise (Captain)</b>: try <i>Release</i> — it's refused until <b>Jordan (Sommelier)</b> taps <i>Pairing ready</i>, or Elise marks <i>No pairing</i>.</li>{% endif %}
-        {% if profile.requires_team_ready %}<li><b>Elise</b>: confirm <i>Service team is ready</i>. Release stays locked until she does.</li>{% endif %}
-        <li><b>Elise</b>: release the course. It's offered to one runner.</li>
-        <li><b>Mateo (Runner)</b>: <i>Claim</i>, then <i>Delivered</i>. Or let it time out — it comes back to Elise.</li>
-        <li><b>Ana (Host)</b>: mark a party as left; <b>Lee (Busser)</b> resets it; Ana seats the next party.</li>
-      </ol>
-      {% else %}
-      <ol class="script">
-        <li><b>Sam (Expo)</b>: pick table 4 and tap <i>Food ready</i>.</li>
-        <li><b>Maria (Runner)</b>: it's offered to her. <i>Claim</i> it, then tap <i>Delivered</i>.</li>
-        <li>Do it again, but let Maria's offer run out: it moves to <b>Dev (backup)</b>, then to <b>Rae (Floor lead)</b>.</li>
-        <li><b>Ana (Host)</b>: on table 1, tap <i>Party has left</i>. <b>Lee (Busser)</b> claims and finishes the reset.</li>
-        <li><b>Ana</b>: table 1 now reads <i>Ready to seat</i> — seat the next party.</li>
-        <li><b>Kim (Manager)</b>: see stalled work and the timestamped activity log.</li>
-      </ol>
-      {% endif %}
+      <div class="tour" data-tour data-tour-url="{% url 'web:tour_state' %}" data-tour-do="{% url 'web:tour_do' %}" data-tour-restart="{% url 'web:tour_restart' %}">
+        <div class="row-between"><h2 class="section-title">Guided tour · about a minute</h2><button type="button" class="btn btn-quiet btn-small" data-tour-restart-btn>Restart tour</button></div>
+        <div class="tour__now" data-tour-now aria-live="polite"><p class="tour__note">Loading the tour…</p></div>
+        <p class="tour__msg" data-tour-msg role="status"></p>
+        <ol class="tour__steps" data-tour-steps></ol>
+        <noscript><p class="notice notice--warn">The guided tour needs JavaScript. Every staff screen still works: open a person below.</p></noscript>
       </div>
       <div>
-      <h2 class="section-title">Open any person full-screen</h2>
+      <h2 class="section-title">Switch person</h2>
+      <p class="small muted">Each person sees only what their role allows. The person the tour needs next is marked.</p>
       <div class="persona-grid">
-        {% for p in personas %}<a class="persona" href="{% url 'web:staff_home' p.pk %}"><b>{{ p.display_name }}</b><span>{{ p.roles_display }}</span></a>{% endfor %}
+        {% for p in personas %}<a class="persona" href="{% url 'web:staff_home' p.pk %}" data-persona-sid="{{ p.pk }}"><b>{{ p.display_name }}</b><span>{{ p.roles_display }}</span><span class="persona__next">Next step</span></a>{% endfor %}
       </div>
       </div>
     </section>
     <section>
       <div class="panes">
         {% for p in panes %}
-        <div class="pane">
+        <div class="pane" data-pane-sid="{{ p.pk }}">
           <div class="pane__head"><b>{{ p.display_name }} · {{ p.roles_display }}</b><a class="small" href="{% url 'web:staff_home' p.pk %}">Open</a></div>
           <iframe src="{% url 'web:staff_home' p.pk %}?embed=1" title="{{ p.display_name }}, {{ p.roles_display }}" loading="lazy"></iframe>
         </div>
@@ -67,3 +54,4 @@
   </div>
 </div>
 {% endblock %}
+{% block scripts %}<script src="{% static 'web/tour.js' %}" defer></script>{% endblock %}

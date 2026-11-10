@@ -1,0 +1,93 @@
+{% extends "app/manage/base.html" %}{% load dispatch_ui %}
+{% block manage %}
+<form method="get" class="panel report-filters" aria-label="Shift filter">
+  {% if embed %}<input type="hidden" name="embed" value="1">{% endif %}
+  <div class="row">
+    <div class="field grow"><label for="rf-from">From (service date)</label><input type="date" id="rf-from" name="from" value="{{ r.shift.date_from|date:'Y-m-d' }}"></div>
+    <div class="field grow"><label for="rf-to">To</label><input type="date" id="rf-to" name="to" value="{{ r.shift.date_to|date:'Y-m-d' }}"></div>
+    <div class="field grow"><label for="rf-shift">Shift</label><select id="rf-shift" name="shift">{% for key, label in presets %}<option value="{{ key }}"{% if key == r.shift.key %} selected{% endif %}>{{ label }}</option>{% endfor %}<option value="custom"{% if r.shift.key == 'custom' %} selected{% endif %}>Custom times…</option></select></div>
+    <div class="field"><label for="rf-start">Custom start</label><input type="time" id="rf-start" name="start" value="{{ r.shift.start|time:'H:i' }}"></div>
+    <div class="field"><label for="rf-end">Custom end</label><input type="time" id="rf-end" name="end" value="{{ r.shift.end|time:'H:i' }}"></div>
+    <div class="field grow"><label for="rf-wait">Resets</label><select id="rf-wait" name="waitlist">{% for key, label in waitlist_filters %}<option value="{{ key }}"{% if key == r.waitlist %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  </div>
+  <div class="row"><button class="btn btn-primary" type="submit">Show shift</button><a class="btn" href="{% url 'web:manage_report_csv' staff.pk %}?{{ query }}" download>Export CSV</a>
+  {% for m in other_locations %}<a class="btn btn-quiet btn-small" href="{% url 'web:manage_report' m.pk %}?{{ query }}">{{ m.location.display_name }}</a>{% endfor %}</div>
+</form>
+
+<div class="notice {% if r.is_demo %}notice--warn{% else %}notice--ok{% endif %} mt-12" role="note">
+  {% if r.is_demo %}▲ Demo data. This location is a demo or sample restaurant, so nothing here can count as pilot evidence.{% else %}● Syncora event data for <b>{{ location.display_name }}</b>, measured from what staff did in Syncora.{% endif %}
+  <span class="small">{{ r.shift.label }}, {{ r.shift.date_from|date:"M j, Y" }}{% if r.shift.date_to != r.shift.date_from %} to {{ r.shift.date_to|date:"M j, Y" }}{% endif %}. Times are {{ location.time_zone }}{% if r.shift.crosses_midnight %}; each window runs past midnight into the next day{% endif %}. A task belongs to the shift it started in. Practice tickets are excluded.</span>
+</div>
+
+<h2 class="section-title">Handoff times · completed tasks only</h2>
+<div class="stat-row">
+  {% if profile.is_fine %}
+    {% include "app/manage/_stat.html" with label="Course staged → delivered (total)" stat=r.courses_total noun="courses" small=r.small_sample %}
+    {% include "app/manage/_stat.html" with label="Held at the pass, by choice" stat=r.courses_held noun="courses" small=r.small_sample hint="From staging until the captain released it." %}
+    {% include "app/manage/_stat.html" with label="Released → delivered" stat=r.courses_release noun="courses" small=r.small_sample hint="Includes any time a missed offer spent back with the captain." %}
+  {% else %}
+    {% include "app/manage/_stat.html" with label="Food ready → delivered" stat=r.runs noun="runs" small=r.small_sample %}
+  {% endif %}
+  {% include "app/manage/_stat.html" with label="Party left → reset done" stat=r.resets noun="resets" small=r.small_sample %}
+</div>
+<p class="small muted mt-12">Reset filter: {% for key, label in waitlist_filters %}{% if key == r.waitlist %}{{ label }}{% endif %}{% endfor %}. Waitlist context recorded on {{ r.reset_waitlist_known }} reset(s): the host sets “Guests waiting for a table?” on the Tables screen.{% if r.stale_resets %} {{ r.stale_resets }} late reset(s) for an earlier party are excluded: they didn't free a table.{% endif %}</p>
+
+<h2 class="section-title">Completed and unresolved</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Completed and unresolved work"><table class="grid-table">
+  <thead><tr><th scope="col">Work</th><th scope="col">✓ Completed</th><th scope="col">→ Still open</th><th scope="col">✕ Cancelled</th></tr></thead>
+  <tbody>
+    {% if profile.is_fine %}{% with o=r.outcomes.course %}<tr><td>Courses</td><td>{{ o.completed }}</td><td>{{ o.open }}</td><td>{{ o.cancelled }}</td></tr>{% endwith %}{% endif %}
+    {% with o=r.outcomes.run %}{% if not profile.is_fine or o.completed or o.open or o.cancelled %}<tr><td>Food runs</td><td>{{ o.completed }}</td><td>{{ o.open }}</td><td>{{ o.cancelled }}</td></tr>{% endif %}{% endwith %}
+    {% with o=r.outcomes.reset %}<tr><td>Table resets</td><td>{{ o.completed }}</td><td>{{ o.open }}</td><td>{{ o.cancelled }}</td></tr>{% endwith %}
+  </tbody>
+</table></div>
+<p class="small muted mt-12">Open and cancelled tasks never count as deliveries or resets and are left out of every handoff time.</p>
+
+<h2 class="section-title">Routing and interventions</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Routing and interventions"><table class="grid-table">
+  <thead><tr><th scope="col">Count</th><th scope="col">This shift</th><th scope="col">What it means</th></tr></thead>
+  <tbody>{% for key, label, meaning in r.definitions %}<tr><td><b>{{ label }}</b></td><td class="mono">{{ r.counts|get:key }}</td><td class="small">{{ meaning }}</td></tr>{% endfor %}</tbody>
+</table></div>
+<div class="stat-row mt-12">
+  <div class="stat"><span class="muted small">Covers seated in Syncora</span><b>{{ r.covers }}</b><span class="small muted">{{ r.parties }} parties (host seatings)</span></div>
+  <div class="stat"><span class="muted small">Interventions per 100 covers</span><b>{% if r.interventions_per_100 is not None %}{{ r.interventions_per_100 }}{% else %}—{% endif %}</b><span class="small muted">From Syncora seatings</span></div>
+  <div class="stat"><span class="muted small">Setup duration</span><b>{% if r.setup_seconds is not None %}{{ r.setup_seconds|duration }}{% else %}—{% endif %}</b><span class="small muted">{% if r.setup %}Wizard start to finish{% else %}Wizard not completed for this location{% endif %}</span></div>
+</div>
+
+{% if unresolved %}
+<h2 class="section-title">Unresolved tasks <span class="count">{{ unresolved|length }}</span></h2>
+<ul class="log">{% for row in unresolved %}<li><time>{{ row.task.ready_at|clock }}</time><div><b>{{ row.task.title }}</b> — {% if row.outcome == 'open' %}still open ({{ row.task.get_state_display|lower }}){% else %}cancelled{% if row.task.cancel_reason %}: {{ row.task.cancel_reason }}{% endif %}{% endif %}</div></li>{% endfor %}</ul>
+{% endif %}
+
+<section class="manual-zone mt-24" aria-labelledby="manual-h">
+  <h2 class="section-title" id="manual-h">Manually recorded pilot observations — not Syncora event data</h2>
+  <p class="small">Covers, waitlist, staffing, order accuracy and complaints come from the venue's own tools and an observer. Baseline handoff times are timed by hand on a shift without Syncora. See <span class="mono">docs/pilot-runbook.md</span>.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Manually recorded observations"><table class="grid-table">
+    <thead><tr><th scope="col">Source</th><th scope="col">Shift</th><th scope="col">Covers</th><th scope="col">Waitlist</th><th scope="col">Staff</th><th scope="col">Order errors</th><th scope="col">Complaints</th><th scope="col">Interventions</th><th scope="col">Food p90</th><th scope="col">Reset p90</th></tr></thead>
+    <tbody>{% for o in observations %}<tr>
+      <td><span class="chip {% if o.source == 'baseline' %}chip--held{% else %}chip--claimed{% endif %}"><span class="chip__glyph" aria-hidden="true">{% if o.source == 'baseline' %}✎{% else %}●{% endif %}</span>{% if o.source == 'baseline' %}Baseline (manual){% else %}Syncora shift{% endif %}</span></td>
+      <td>{{ o.service_date|date:"M j" }} · {{ o.shift_label }}</td><td>{{ o.covers }}</td><td>{{ o.get_waitlist_display }}{% if o.waitlist_peak_parties %} (peak {{ o.waitlist_peak_parties }}){% endif %}</td>
+      <td>{{ o.staffing_total }}</td><td>{{ o.order_errors }}</td><td>{{ o.guest_complaints }}</td>
+      <td>{% if o.manager_interventions is not None %}{{ o.manager_interventions }}{% else %}—{% endif %}</td>
+      <td>{% if o.food_handoff_p90_seconds %}{{ o.food_handoff_p90_seconds|secs }} (n={{ o.food_handoff_samples|default:0 }}){% else %}—{% endif %}</td>
+      <td>{% if o.reset_p90_seconds %}{{ o.reset_p90_seconds|secs }} (n={{ o.reset_samples|default:0 }}){% else %}—{% endif %}</td>
+    </tr>{% empty %}<tr><td colspan="10" class="muted">Nothing recorded for these dates.</td></tr>{% endfor %}</tbody>
+  </table></div>
+
+  <h3 class="section-title">Proposed pilot targets</h3>
+  <p class="small">Proposed, not achieved: 20% faster handoffs at the 90th percentile, and 25% fewer manager interventions per 100 covers. A result needs a measured baseline and a comparable Syncora shift, with at least {{ r.small_sample }} timed handoffs and 100 covers on each side.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Proposed pilot targets"><table class="grid-table">
+    <thead><tr><th scope="col">Metric</th><th scope="col">Baseline (manual)</th><th scope="col">Syncora (event data)</th><th scope="col">Change</th><th scope="col">Proposed target</th><th scope="col">Status</th></tr></thead>
+    <tbody>{% for c in comparison %}<tr><td>{{ c.metric }}</td><td>{{ c.baseline }}</td><td>{{ c.syncora }}</td><td class="mono">{{ c.change|signed }}</td><td class="mono">{{ c.target|signed }}</td><td><b>{{ c.verdict }}</b></td></tr>{% endfor %}</tbody>
+  </table></div>
+
+  <details class="panel mt-24"{% if form.errors %} open{% endif %}>
+    <summary class="btn btn-quiet">Record an observation</summary>
+    <form method="post" class="mt-12" novalidate>{% csrf_token %}
+      {% if form.non_field_errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="obs-grid">{% for field in form %}<div class="field{% if field.name == 'notes' or field.name == 'method' %} obs-wide{% endif %}">{{ field.label_tag }}{{ field }}{% if field.help_text %}<p class="hint">{{ field.help_text }}</p>{% endif %}{% for e in field.errors %}<p class="errors">{{ e }}</p>{% endfor %}</div>{% endfor %}</div>
+      <button class="btn btn-primary" type="submit">Save observation</button>
+    </form>
+  </details>
+</section>
+{% endblock %}

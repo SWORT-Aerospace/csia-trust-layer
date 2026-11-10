@@ -41,6 +41,11 @@ class Location(models.Model):
     )
     stall_minutes = models.PositiveIntegerField(default=8, help_text="Claimed work older than this is flagged as stalled.")
     time_zone = models.CharField(max_length=64, default=settings.TIME_ZONE)
+    # Host-set context for the shift report: are guests waiting for a table?
+    waitlist_active = models.BooleanField(default=False)
+    waitlist_changed_at = models.DateTimeField(null=True, blank=True)
+    # Identifier a future POS adapter must present for this location (shadow mode only).
+    pos_ref = models.CharField(max_length=80, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -197,6 +202,9 @@ class Task(models.Model):
     note = models.CharField(max_length=140, blank=True)
     allergy_alert = models.BooleanField(default=False)
     is_practice = models.BooleanField(default=False)
+    # Resets only: were guests waiting for a table when the party left?
+    # Null = not recorded (tasks created before the host toggle existed).
+    waitlist_active = models.BooleanField(null=True, blank=True)
 
     offered_to = models.ForeignKey(StaffMember, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     offer_stage = models.CharField(max_length=10, choices=OfferStage.CHOICES, blank=True, default="")
@@ -320,10 +328,23 @@ class IntegrationEvent(models.Model):
     mode = models.CharField(max_length=10, default="shadow")
     kind = models.CharField(max_length=30)
     external_ref = models.CharField(max_length=80, blank=True)
+    external_event_id = models.CharField(max_length=120, blank=True)
     table_label = models.CharField(max_length=20, blank=True)
+    course_number = models.PositiveSmallIntegerField(null=True, blank=True)
+    identity_check = models.CharField(max_length=40, blank=True)  # "match" or why it failed
     received_at = models.DateTimeField(default=timezone.now)
     would_do = models.CharField(max_length=200)
     applied = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            # A vendor retrying the same event is recorded once.
+            models.UniqueConstraint(
+                fields=["location", "provider", "external_event_id"],
+                condition=~Q(external_event_id=""),
+                name="uniq_integration_event",
+            )
+        ]
 
 
 class WorkerHeartbeat(models.Model):
@@ -332,3 +353,51 @@ class WorkerHeartbeat(models.Model):
     pid = models.PositiveIntegerField(default=0)
     sweeps = models.PositiveBigIntegerField(default=0)
     actions = models.PositiveBigIntegerField(default=0)
+
+
+class ShiftObservation(models.Model):
+    """A manually recorded pilot observation (baseline or Syncora shift).
+
+    Deliberately separate from Syncora's event data: these numbers come from a
+    person with a stopwatch, the POS or the venue's own tools, and the report
+    never mixes them into event-derived metrics."""
+
+    BASELINE = "baseline"
+    SYNCORA = "syncora"
+    SOURCES = [(BASELINE, "Baseline shift (without Syncora)"), (SYNCORA, "Syncora shift")]
+    WAITLIST = [("none", "No wait"), ("some", "Some waiting"), ("heavy", "Heavy wait")]
+
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="observations")
+    source = models.CharField(max_length=10, choices=SOURCES)
+    service_date = models.DateField()
+    shift_label = models.CharField(max_length=40)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    covers = models.PositiveIntegerField(help_text="From the POS or host stand, not from Syncora.")
+    waitlist = models.CharField(max_length=10, choices=WAITLIST, default="none")
+    waitlist_peak_parties = models.PositiveIntegerField(default=0)
+    staff_runners = models.PositiveSmallIntegerField(default=0)
+    staff_bussers = models.PositiveSmallIntegerField(default=0)
+    staff_servers = models.PositiveSmallIntegerField(default=0)
+    staff_hosts = models.PositiveSmallIntegerField(default=0)
+    staff_managers = models.PositiveSmallIntegerField(default=0)
+    order_errors = models.PositiveIntegerField(default=0, help_text="Wrong or missing items reaching a table.")
+    guest_complaints = models.PositiveIntegerField(default=0)
+    manager_interventions = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Baseline only: tallied by the observer."
+    )
+    food_handoff_p90_seconds = models.PositiveIntegerField(null=True, blank=True, help_text="Baseline only: measured manually.")
+    food_handoff_samples = models.PositiveIntegerField(null=True, blank=True)
+    reset_p90_seconds = models.PositiveIntegerField(null=True, blank=True, help_text="Baseline only: measured manually.")
+    reset_samples = models.PositiveIntegerField(null=True, blank=True)
+    method = models.CharField(max_length=200, blank=True, help_text="Native tools and how times were taken.")
+    notes = models.TextField(blank=True, max_length=2000)
+    recorded_by = models.ForeignKey(StaffMember, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-service_date", "-created_at"]
+
+    @property
+    def staffing_total(self) -> int:
+        return self.staff_runners + self.staff_bussers + self.staff_servers + self.staff_hosts + self.staff_managers

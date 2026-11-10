@@ -142,3 +142,23 @@ def coverage_rows(section, runners, bussers):
         ("primary_busser", "First busser", bussers, section.primary_busser),
         ("backup_busser", "Backup busser", bussers, section.backup_busser),
     ]
+
+
+@register.filter
+def secs(value):
+    """Seconds as a short duration: 48s, 2m 05s, 1h 04m."""
+    if value is None:
+        return "—"
+    value = int(round(value))
+    if value < 60:
+        return f"{value}s"
+    if value < 3600:
+        return f"{value // 60}m {value % 60:02d}s"
+    return f"{value // 3600}h {value % 3600 // 60:02d}m"
+
+
+@register.filter
+def signed(value):
+    if value is None:
+        return "—"
+    return f"{value:+.1f}%"

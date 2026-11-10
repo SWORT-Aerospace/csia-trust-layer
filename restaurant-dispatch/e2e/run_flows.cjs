@@ -7,7 +7,7 @@
  */
 const path = require("path");
 const fs = require("fs");
-const { chromium } = require("playwright");
+const { chromium, devices } = require("playwright");
 
 const BASE = process.argv[2] || process.env.E2E_BASE_URL || "http://127.0.0.1:8000";
 const OUT = path.join(__dirname, "artifacts");
@@ -59,6 +59,35 @@ async function open(ctx, personas, who, viewport) {
   await page.goto(BASE + personas[who]);
   return page;
 }
+async function setTimeouts(page, sid, primary, backup) {
+  await page.goto(`${BASE}/app/${sid}/manage/rules/`);
+  await page.fill("#ot", String(primary));
+  await page.fill("#bt", String(backup));
+  await page.getByRole("button", { name: "Save rules" }).click();
+  await page.locator(".notice", { hasText: "Saved" }).waitFor();
+}
+async function driveTour(page, { paceMs = 0, onStep } = {}) {
+  const started = Date.now();
+  let sawActing = false;
+  for (let i = 0; i < 120; i++) {
+    const st = await page.evaluate(() => window.__tourState);
+    if (st && st.complete) return { seconds: Math.round((Date.now() - started) / 1000), sawActing };
+    if (await page.locator(".pane.is-acting").count()) sawActing = true;
+    const step = st && st.steps[st.current];
+    const button = page.locator("[data-tour-now] button");
+    if (step && !step.waiting && (await button.count())) {
+      if (paceMs) await page.waitForTimeout(paceMs); // a person reading the step
+      await page.$eval("[data-tour-msg]", (el) => { el.textContent = ""; });
+      await button.first().click();
+      await page.locator("[data-tour-msg]").filter({ hasText: /\S/ }).waitFor({ timeout: T });
+      if (onStep) await onStep(step, (await page.locator("[data-tour-msg]").textContent()) || "");
+      await page.waitForTimeout(400);
+    } else {
+      await page.waitForTimeout(800);
+    }
+  }
+  throw new Error("tour did not complete");
+}
 async function csrfPost(page, url, form) {
   return page.evaluate(async ({ url, form }) => {
     const token = document.querySelector('meta[name="csrf-token"]').content;
@@ -82,7 +111,12 @@ async function csrfPost(page, url, form) {
       page.on("pageerror", (e) => errors.push(String(e)));
       page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
       await page.goto(BASE + "/");
-      await page.getByRole("heading", { level: 1 }).filter({ hasText: "Get food off the pass." }).waitFor();
+      await page.getByRole("heading", { level: 1 }).filter({ hasText: "Keep the kitchen and dining room in sync." }).waitFor();
+      if (!(await page.title()).startsWith("Syncora")) throw new Error("title is not Syncora");
+      const screens = await page.locator(".screen[inert]").count();
+      if (screens < 6) throw new Error(`only ${screens} product storyboards`);
+      await page.locator(".screen", { hasText: "Offered to you (backup)" }).first().waitFor();
+      await page.locator(".screen", { hasText: "Ready to seat" }).first().waitFor();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       if (overflow > 0) throw new Error(`horizontal overflow ${overflow}px`);
       await page.screenshot({ path: path.join(OUT, `home-${name}.png`), fullPage: name === "desktop" });
@@ -115,7 +149,7 @@ async function csrfPost(page, url, form) {
   await check("regular: Expo → Runner → Delivered", async () => {
     await pickTable(sam, "4");
     await sam.fill("#items", "3");
-    await sam.getByRole("button", { name: "Food ready" }).click();
+    await sam.getByRole("button", { name: "Food ready", exact: true }).click();
     await toast(sam, "Food ready: Table 4 · 3 plates");
     const offer = card(maria, "Table 4 · 3 plates");
     await offer.locator(".chip", { hasText: "Offered to you" }).waitFor({ timeout: T });
@@ -157,9 +191,15 @@ async function csrfPost(page, url, form) {
     return "403 page and 403 JSON";
   });
 
+  const kim = await open(reg.ctx, P, "Kim");
+  const kimSid = P["Kim"].split("/")[2];
+  // Demo sandboxes default to 15s offers; give the offline check room to breathe.
+  await setTimeouts(kim, kimSid, 60, 60);
+
   await check("unconfirmed action is flagged and reconciled after reconnect", async () => {
+    await sam.reload();
     await pickTable(sam, "5");
-    await sam.getByRole("button", { name: "Food ready" }).click();
+    await sam.getByRole("button", { name: "Food ready", exact: true }).click();
     await toast(sam, "Table 5");
     const offline = await reg.ctx.browser().newContext({ viewport: phone, storageState: await reg.ctx.storageState() });
     const m2 = await offline.newPage();
@@ -182,16 +222,11 @@ async function csrfPost(page, url, form) {
   });
 
   await check("offer expiration progresses with every browser tab closed", async () => {
-    const kim = await open(reg.ctx, P, "Kim");
-    const sid = P["Kim"].split("/")[2];
-    await kim.goto(`${BASE}/app/${sid}/manage/rules/`);
-    await kim.fill("#ot", "10");
-    await kim.fill("#bt", "10");
-    await kim.getByRole("button", { name: "Save rules" }).click();
-    await kim.locator(".notice", { hasText: "Saved" }).waitFor();
+    const sid = kimSid;
+    await setTimeouts(kim, sid, 10, 10);
     await sam.reload();
     await pickTable(sam, "6");
-    await sam.getByRole("button", { name: "Food ready" }).click();
+    await sam.getByRole("button", { name: "Food ready", exact: true }).click();
     await toast(sam, "Table 6");
     const state = await reg.ctx.storageState();
     await reg.ctx.close(); // every tab of this session is gone
@@ -226,7 +261,7 @@ async function csrfPost(page, url, form) {
 
   await check("fine dining: course held, invisible to runner, pairing blocks release", async () => {
     await pickTable(noor, "3");
-    await noor.getByRole("button", { name: "Stage course" }).click();
+    await noor.getByRole("button", { name: "Stage course", exact: true }).click();
     await toast(noor, "Staged Table 3 · Course 1");
     const staged = card(elise, "Table 3 · Course 1");
     await staged.locator(".blockers", { hasText: "Can't release yet" }).waitFor({ timeout: T });
@@ -263,7 +298,7 @@ async function csrfPost(page, url, form) {
     await fine.floor.locator(".notice", { hasText: "Coordinated Service" }).waitFor();
     await noor.reload();
     await pickTable(noor, "5");
-    await noor.getByRole("button", { name: "Stage course" }).click();
+    await noor.getByRole("button", { name: "Stage course", exact: true }).click();
     await toast(noor, "Staged Table 5");
     await elise.reload();
     const staged = card(elise, "Table 5 · Course 1");
@@ -278,6 +313,102 @@ async function csrfPost(page, url, form) {
   });
 
   await fine.ctx.close();
+
+  // ------------------------------------------------------------ guided tours (Syncora demo)
+  const tourCtx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  let tourPersonas = null;
+  await check("guided tour, Regular Service (desktop): expired run → backup → reset reaches host", async () => {
+    const page = await tourCtx.newPage();
+    await page.goto(BASE + "/demo/");
+    await page.click("text=Start the demo");
+    await page.waitForURL("**/demo/floor/");
+    tourPersonas = Object.fromEntries(await page.$$eval(".persona", (as) => as.map((a) => [a.querySelector("b").textContent, a.getAttribute("href")])));
+    const result = await driveTour(page, { paceMs: 2500 });
+    await page.screenshot({ path: path.join(OUT, "tour-regular-desktop.png") });
+    const st = await page.evaluate(() => window.__tourState);
+    const label = /table (\S+) ready/.exec(st.steps[st.steps.length - 1].title)[1];
+    const ana = await tourCtx.newPage();
+    await ana.goto(BASE + tourPersonas["Ana"]);
+    await ana.locator(`[data-table="${label}"] .chip`, { hasText: "Ready to seat" }).waitFor({ timeout: T });
+    if (!result.sawActing) throw new Error("no pane was highlighted for the next person");
+    if (result.seconds > 75) throw new Error(`tour took ${result.seconds}s`);
+    return `${result.seconds}s at a reading pace of 2.5s per step, table ${label} back with the host`;
+  });
+
+  await check("host waitlist toggle is recorded", async () => {
+    const ana = await tourCtx.newPage();
+    await ana.goto(BASE + tourPersonas["Ana"]);
+    await ana.getByRole("button", { name: "Yes, a wait" }).click();
+    await toast(ana, "Guests waiting");
+    await ana.locator('.waitlist-toggle button[aria-pressed="true"]', { hasText: "Yes, a wait" }).waitFor({ timeout: T });
+    return "Tables screen shows the wait and new resets snapshot it";
+  });
+
+  await check("shift report shows measured handoffs; CSV export is manager-only", async () => {
+    const page = await tourCtx.newPage();
+    const kimSid2 = tourPersonas["Kim"].split("/")[2];
+    await page.goto(`${BASE}/app/${kimSid2}/manage/report/`);
+    await page.locator(".stat", { hasText: "Food ready → delivered" }).locator(".mono", { hasText: "n=1" }).waitFor();
+    await page.locator(".stat", { hasText: "Party left → reset done" }).locator(".mono", { hasText: /n=\d/ }).waitFor();
+    await page.locator(".notice", { hasText: "Demo data" }).waitFor();
+    await page.screenshot({ path: path.join(OUT, "shift-report-desktop.png"), fullPage: true });
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Export CSV" }).click()]);
+    const file = path.join(OUT, "shift-report.csv");
+    await download.saveAs(file);
+    const lines = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "").trim().split(/\r?\n/);
+    if (!lines[0].startsWith("data_source,location,task_id")) throw new Error("unexpected CSV header");
+    if (lines.length < 3 || !lines.slice(1).every((l) => l.startsWith("demo,"))) throw new Error("CSV rows missing or not flagged demo");
+    const runnerSid = tourPersonas["Maria"].split("/")[2];
+    const status = await page.evaluate(async (u) => (await fetch(u)).status, `${BASE}/app/${runnerSid}/manage/report.csv`);
+    if (status !== 403) throw new Error(`runner got ${status} for the CSV`);
+    return `${lines.length - 1} task rows exported, runner refused (403)`;
+  });
+  await tourCtx.close();
+
+  const iphone = devices["iPhone 13"];
+  await check("guided tour, Fine Dining · Pairing Coordination (iPhone 13): held until the captain clears it", async () => {
+    const ctx = await browser.newContext({ ...iphone });
+    const page = await ctx.newPage();
+    await page.goto(BASE + "/demo/");
+    await page.check("input[name=profile][value=pairing_coordination]");
+    await page.click("text=Start the demo");
+    await page.waitForURL("**/demo/floor/");
+    let refusal = "";
+    const result = await driveTour(page, { onStep: (step, msg) => { if (step.key === "try_release") refusal = msg; } });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    await page.screenshot({ path: path.join(OUT, "tour-fine-iphone.png"), fullPage: true });
+    await ctx.close();
+    if (!/Refused by the server: Can't release yet/.test(refusal)) throw new Error(`refusal was: ${refusal}`);
+    if (overflow > 0) throw new Error(`horizontal overflow ${overflow}px`);
+    return `completed in ${result.seconds}s; early release refused by the server`;
+  });
+
+  await check("mobile (iPhone 13): role switching is obvious and the next action stays visible", async () => {
+    const ctx = await browser.newContext({ ...iphone });
+    const page = await ctx.newPage();
+    await page.goto(BASE + "/demo/");
+    await page.click("text=Start the demo");
+    await page.waitForURL("**/demo/floor/");
+    await page.locator(".persona-grid a.is-next").click();
+    const bar = page.locator(".tour-bar");
+    await bar.locator("button", { hasText: "Do it" }).waitFor({ timeout: T });
+    const box = await bar.boundingBox();
+    if (!box || box.y > 300) throw new Error("tour bar not near the top of the screen");
+    await bar.locator("button", { hasText: "Do it" }).click();
+    await page.locator(".tour-bar", { hasText: "Step 2" }).waitFor({ timeout: T });
+    await page.locator(".persona-switch summary").click();
+    const next = page.locator(".persona-switch a.is-next");
+    await next.waitFor({ timeout: T });
+    const widths = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    await page.screenshot({ path: path.join(OUT, "mobile-switch-iphone.png") });
+    await next.click();
+    await page.locator(".tour-bar", { hasText: "Timer worker moves it" }).waitFor({ timeout: T });
+    const after = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    await ctx.close();
+    if (widths > 0 || after > 0) throw new Error(`horizontal overflow ${widths}/${after}px`);
+    return "switcher wraps, next person marked, tour bar in view, no horizontal scroll";
+  });
+
   await browser.close();
   fs.writeFileSync(path.join(OUT, "report.json"), JSON.stringify({ base: BASE, at: new Date().toISOString(), results }, null, 2));
   const failed = results.filter((r) => !r.ok).length;

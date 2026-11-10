@@ -1,4 +1,4 @@
-"""Django settings for Restaurant Service Dispatch.
+"""Django settings for Syncora (restaurant service dispatch).
 
 All secrets and deployment switches come from environment variables (or a
 local, uncommitted ``.env`` file). See ``.env.example`` for the full list.
@@ -42,6 +42,9 @@ def env_list(name: str, default: str = "") -> list[str]:
 
 
 DEBUG = env_bool("DJANGO_DEBUG", True)
+# The deployment's configured mode. Django's test runner flips DEBUG to False at
+# runtime, so deployment checks read this instead.
+DISPATCH_CONFIGURED_DEBUG = DEBUG
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY or SECRET_KEY.startswith("replace-me"):
@@ -165,7 +168,37 @@ STORAGES = {
     },
 }
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+# --- Shared cache / rate limits --------------------------------------------
+# Hosted deployments run several web processes; pairing and demo-start limits
+# must be shared and atomic, so a non-debug deployment refuses to start
+# without Redis. Local development falls back to an in-process counter.
+DISPATCH_REDIS_URL = os.environ.get("DISPATCH_REDIS_URL", "").strip()
+if DISPATCH_REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": DISPATCH_REDIS_URL,
+            "KEY_PREFIX": "syncora",
+            "OPTIONS": {"socket_connect_timeout": 0.5, "socket_timeout": 0.5},
+        }
+    }
+elif not DEBUG:
+    raise ImproperlyConfigured(
+        "DISPATCH_REDIS_URL must point to a shared Redis when DJANGO_DEBUG is false: "
+        "pairing and demo-start limits have to be shared across every web process."
+    )
+else:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+
+# Number of reverse proxies in front of the app that append to X-Forwarded-For
+# (0 = trust only the socket address). Rate limits key on the client address.
+DISPATCH_TRUSTED_PROXY_COUNT = int(os.environ.get("DISPATCH_TRUSTED_PROXY_COUNT", "0") or 0)
+# Public endpoint limits (per client address unless noted; windows in seconds).
+DISPATCH_PAIR_ATTEMPT_LIMIT = int(os.environ.get("DISPATCH_PAIR_ATTEMPT_LIMIT", "10") or 10)
+DISPATCH_DEMO_PER_CLIENT_LIMIT = int(os.environ.get("DISPATCH_DEMO_PER_CLIENT_LIMIT", "30") or 30)
+DISPATCH_DEMO_GLOBAL_LIMIT = int(os.environ.get("DISPATCH_DEMO_GLOBAL_LIMIT", "600") or 600)  # all clients, per hour
+# Bearer token for /healthz/worker (operator monitoring). Unset = endpoint disabled.
+DISPATCH_HEALTH_TOKEN = os.environ.get("DISPATCH_HEALTH_TOKEN", "")
 
 # --- Sessions / CSRF / transport security ----------------------------------
 SESSION_COOKIE_HTTPONLY = True

@@ -1,0 +1,9 @@
+{% load dispatch_ui %}<div class="stat stat--handoff">
+  <span class="muted small">{{ label }}</span>
+  {% if stat.n %}
+  <b>{{ stat.p90|secs }} <span class="small muted">90th pct</span></b>
+  <span>Median {{ stat.median|secs }} · <span class="mono">n={{ stat.n }}</span></span>
+  {% if stat.small %}<span class="chip chip--waiting mt-12"><span class="chip__glyph" aria-hidden="true">○</span>Small sample (under {{ small }}): directional only</span>{% endif %}
+  {% else %}<b>—</b><span class="small muted">No completed {{ noun }} in this shift</span>{% endif %}
+  {% if hint %}<span class="small muted mt-12">{{ hint }}</span>{% endif %}
+</div>

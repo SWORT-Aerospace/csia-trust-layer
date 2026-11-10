@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start Restaurant Service Dispatch locally: web server + timer worker.
+# Start Syncora locally: web server + timer worker.
 # Usage: scripts/dev.sh [port]     (default port 8000)
 set -euo pipefail
 cd "$(dirname "$0")/.."

@@ -1,20 +1,20 @@
 {% extends "site/base.html" %}{% load static %}
-{% block title %}Restaurant Service Dispatch — get food off the pass, get tables back to the host{% endblock %}
+{% block title %}Syncora — keep the kitchen and dining room in sync{% endblock %}
 {% block main %}
 <section class="hero">
   <div class="wrap hero__grid">
     <div>
-      <span class="eyebrow">Live floor dispatch for restaurants</span>
-      <h1>Get food off the pass. <em>Get tables back to the host.</em></h1>
-      <p class="lede">Assign food runs, coordinate courses, and close every handoff from one live floor.</p>
+      <span class="eyebrow">Service dispatch for restaurants</span>
+      <h1>Keep the kitchen and <em>dining room in sync.</em></h1>
+      <p class="lede">Assign food runs, time course releases, and tell the host when a table is ready. Everyone sees who owns the next step.</p>
       <div class="cta-row">
         {% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try the demo</a>{% endif %}
         <a class="btn" href="{% url 'web:signin' %}">Staff sign in</a>
       </div>
-      <p class="hero__note">The demo is a private sandbox with sample data. No sign-up.</p>
+      <p class="hero__note">The demo is a private sandbox with demo data and a one-minute guided tour. No sign-up.</p>
     </div>
     <div>
-      <div class="device" role="group" aria-label="Example: a runner's screen">
+      <div class="device" role="group" aria-label="Example: a runner's screen (demo data)">
         <div class="device__screen">
           <div class="device__bar"><span>Maria · Runner</span><span class="conn" data-state="live">Live</span></div>
           <div class="device__body" data-walkthrough>
@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <p class="device__caption">Same components as the staff app, with sample data. Tap Claim, Decline or wait.</p>
+      <p class="device__caption">Demo data, real Syncora components. Tap Claim, Decline, or wait.</p>
     </div>
   </div>
 </section>
@@ -43,49 +43,87 @@
 <section class="band band--deep" id="editions">
   <div class="wrap">
     <h2>Two editions. One dispatch engine.</h2>
-    <p class="intro">Pick the service model that fits your floor. Both share the same task rules underneath: one owner per handoff, backup coverage when an offer is missed, and work that's only done when it's physically done.</p>
+    <p class="intro">Pick the service model that fits your floor. Both run the same rules underneath: one owner per handoff, backup coverage when an offer is missed, and work that's only done when it's physically done. These are Syncora's own staff screens, shown with demo data.</p>
     <div class="editions">
       <article class="edition" aria-labelledby="ed-regular">
         <span class="edition__tag">Regular Service</span>
-        <h3 id="ed-regular">Food moves from expo to a runner, fast.</h3>
-        <p class="muted">Each run is offered to one runner at a time. If nobody claims it, it goes to backup, then to the floor lead.</p>
-        <ol class="flow">
-          <li><div><b>Expo taps “Food ready” for table 12</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Maria</span></div></li>
-          <li><div><b>Maria misses it — backup gets it</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Dev (backup)</span></div></li>
-          <li><div><b>Still unclaimed — the floor lead steps in</b><span class="chip chip--alert"><span class="chip__glyph" aria-hidden="true">▲</span>With floor lead</span></div></li>
-          <li><div><b>Runner confirms the plates are on the table</b><span class="chip chip--done"><span class="chip__glyph" aria-hidden="true">✓</span>Delivered</span></div></li>
+        <h3 id="ed-regular">Food leaves the pass with an owner.</h3>
+        <p class="muted">Each run is offered to one runner at a time. If nobody claims it, it moves to backup, then to the floor lead. Resets go back to the host the moment the busser is done.</p>
+        <ol class="story">
+          <li class="frame">
+            <p class="frame__caption"><b>The offer expires.</b> Maria didn't claim table 4 in time, so the timer moved it to Dev, her backup.</p>
+            <div class="screen" inert>
+              <div class="screen__bar"><span>{{ story_regular.runner.who }}</span><span class="screen__tag">Demo data</span></div>
+              <div class="screen__body">
+                <div class="activity-mini">{% include "app/manage/_log.html" with events=story_regular.runner.events %}</div>
+                <h4 class="section-title">Offered to you <span class="count">1</span></h4>
+                {% with task=story_regular.runner.task staff=story_regular.runner.staff profile=story_regular.profile can=no_caps view="worker" next_url="/" %}{% include "components/task_card.html" %}{% endwith %}
+              </div>
+            </div>
+          </li>
+          <li class="frame">
+            <p class="frame__caption"><b>The reset reaches the host.</b> Lee finished table 3, and Ana's board shows it ready to seat.</p>
+            <div class="screen" inert>
+              <div class="screen__bar"><span>{{ story_regular.host.who }}</span><span class="screen__tag">Demo data</span></div>
+              <div class="screen__body">
+                <div class="activity-mini">{% include "app/manage/_log.html" with events=story_regular.host.events %}</div>
+                <div class="tiles tiles--compact">
+                  {% with profile=story_regular.profile can=host_caps next_url="/" staff=story_regular.host.staff %}{% for table in story_regular.host.tables %}{% include "components/table_tile.html" %}{% endfor %}{% endwith %}
+                </div>
+              </div>
+            </div>
+          </li>
         </ol>
-        <h4>Table resets</h4>
-        <ol class="flow">
-          <li><div><b>Server or host confirms the party has left</b><span class="chip chip--alert"><span class="chip__glyph" aria-hidden="true">▲</span>Needs reset</span></div></li>
-          <li><div><b>Busser claims the reset</b><span class="chip chip--working"><span class="chip__glyph" aria-hidden="true">↻</span>Being reset</span></div></li>
-          <li><div><b>Host sees it and seats the next party</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Ready to seat</span></div></li>
-        </ol>
-        <p class="small muted">Paying the check never marks a table vacant. Only someone confirming the guests have physically left does.</p>
       </article>
 
       <article class="edition" aria-labelledby="ed-fine">
         <span class="edition__tag">Fine Dining</span>
-        <h3 id="ed-fine">Courses wait at the pass until the captain releases them.</h3>
-        <p class="muted">Runners never see a staged course. Missed offers go back to the captain, not to whoever happens to be free.</p>
+        <h3 id="ed-fine">Courses wait at the pass until the captain clears them.</h3>
+        <p class="muted">Runners never see a staged course. Missed offers go back to the captain, not to whoever happens to be free. Pick a preset:</p>
         <div class="preset-tabs" role="tablist" aria-label="Fine Dining presets">
-          {% for p in presets %}<button type="button" role="tab" id="tab-{{ p.key }}" aria-controls="panel-{{ p.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-preset-tab="{{ p.key }}">{{ p.name }}</button>{% endfor %}
+          {% for story in story_fine %}<button type="button" role="tab" id="tab-{{ story.preset.key }}" aria-controls="panel-{{ story.preset.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-preset-tab="{{ story.preset.key }}">{{ story.preset.name }}</button>{% endfor %}
         </div>
-        {% for p in presets %}
-        <div class="preset-panel" id="panel-{{ p.key }}" role="tabpanel" aria-labelledby="tab-{{ p.key }}" data-preset-panel="{{ p.key }}">
-          <p><b>{{ p.name }}.</b> {{ p.summary }}</p>
-          <ol class="flow">
-            <li><div><b>Expo stages course 3 for table 2</b><span class="chip chip--held"><span class="chip__glyph" aria-hidden="true">‖</span>Held at pass</span></div></li>
-            {% if p.requires_pairing %}<li><div><b>Sommelier confirms the pairing — or the captain marks “No pairing”</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Pairing ready · Jordan</span></div></li>{% endif %}
-            {% if p.requires_team_ready %}<li><div><b>Captain confirms the service team is ready</b><span class="chip chip--ready"><span class="chip__glyph" aria-hidden="true">✓</span>Team ready · Elise</span></div></li>{% endif %}
-            <li><div><b>Captain releases it to one runner</b><span class="chip chip--offered"><span class="chip__glyph" aria-hidden="true">→</span>Offered to Mateo</span></div></li>
-            <li><div><b>Runner delivers — or a missed offer returns to the captain</b><span class="chip chip--done"><span class="chip__glyph" aria-hidden="true">✓</span>Delivered</span></div></li>
+        {% for story in story_fine %}
+        <div class="preset-panel" id="panel-{{ story.preset.key }}" role="tabpanel" aria-labelledby="tab-{{ story.preset.key }}" data-preset-panel="{{ story.preset.key }}">
+          <p><b>{{ story.preset.name }}.</b> {{ story.preset.summary }}</p>
+          <ol class="story">
+            <li class="frame">
+              <p class="frame__caption"><b>Held at the pass.</b> {% if story.preset.requires_pairing %}Release stays locked until the pairing check is resolved{% if story.preset.requires_team_ready %} and the team is ready{% endif %}.{% else %}Only the captain can release it. Runners can't see it yet.{% endif %}</p>
+              <div class="screen" inert>
+                <div class="screen__bar"><span>{{ story.captain.who }}</span><span class="screen__tag">Demo data</span></div>
+                <div class="screen__body">
+                  <h4 class="section-title">Held at the pass <span class="count">1</span></h4>
+                  {% with task=story.captain.held staff=story.captain.staff profile=story.preset can=captain_caps view="captain" board=story.board next_url="/" %}{% include "components/task_card.html" %}{% endwith %}
+                </div>
+              </div>
+            </li>
+            {% if story.preset.requires_pairing %}
+            <li class="frame">
+              <p class="frame__caption"><b>Cleared.</b> Jordan confirmed the pairing{% if story.preset.requires_team_ready %} and Elise confirmed the team is ready{% endif %}. The log records who did it, and Release unlocks.</p>
+              <div class="screen" inert>
+                <div class="screen__bar"><span>{{ story.captain.who }}</span><span class="screen__tag">Demo data</span></div>
+                <div class="screen__body">
+                  {% with task=story.captain.cleared staff=story.captain.staff profile=story.preset can=captain_caps view="captain" board=story.board next_url="/" %}{% include "components/task_card.html" %}{% endwith %}
+                </div>
+              </div>
+            </li>
+            {% endif %}
+            <li class="frame">
+              <p class="frame__caption"><b>Released to one runner.</b> If Mateo misses it, it goes back to the captain.</p>
+              <div class="screen" inert>
+                <div class="screen__bar"><span>{{ story.runner.who }}</span><span class="screen__tag">Demo data</span></div>
+                <div class="screen__body">
+                  <h4 class="section-title">Offered to you <span class="count">1</span></h4>
+                  {% with task=story.runner.task staff=story.runner.staff profile=story.preset can=no_caps view="worker" next_url="/" %}{% include "components/task_card.html" %}{% endwith %}
+                </div>
+              </div>
+            </li>
           </ol>
-          {% if p.requires_pairing or p.requires_team_ready %}<p class="small muted">Release is refused until every check for this preset is resolved, and the log records who resolved each one.</p>{% else %}<p class="small muted">The captain can release, reassign, or put an unclaimed course back on hold.</p>{% endif %}
         </div>
         {% endfor %}
       </article>
     </div>
+    <div class="cta-row mt-24">{% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try both editions in the demo</a>{% endif %}</div>
   </div>
 </section>
 
@@ -96,10 +134,10 @@
     <div class="features">
       <div class="feature"><span class="ico" aria-hidden="true">●</span><h3>One owner per handoff</h3><p>A claimed run stays with its owner until it's delivered, given back, or reassigned by a lead. Two people tapping at once still produces one owner.</p></div>
       <div class="feature"><span class="ico" aria-hidden="true">→</span><h3>Backup coverage that runs itself</h3><p>Offers advance on a timer that runs on the server, not in someone's browser. Close every tab and the run still moves to backup.</p></div>
-      <div class="feature"><span class="ico" aria-hidden="true">✓</span><h3>Done means physically done</h3><p>Runs close when the food is on the table. Tables free up when a busser confirms the reset — and a late reset from the last party can't release a newly seated table.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">✓</span><h3>Done means physically done</h3><p>Runs close when the food is on the table. Tables free up when a busser confirms the reset, and a late reset from the last party can't release a newly seated table.</p></div>
       <div class="feature"><span class="ico" aria-hidden="true">▲</span><h3>Honest when the connection drops</h3><p>If a tap doesn't reach the server, the screen says it's unconfirmed and re-checks the floor before anyone retries.</p></div>
       <div class="feature"><span class="ico" aria-hidden="true">‖</span><h3>Roles that are actually enforced</h3><p>Runners can't release courses, servers can't change the floor plan, and nobody sees another location's work. Allergy decisions, refunds and guest recovery stay with authorized staff.</p></div>
-      <div class="feature"><span class="ico" aria-hidden="true">↻</span><h3>Set up from a browser</h3><p>Create a location, choose your edition, paste table labels, assign roles, pair phones, and run a practice ticket. No hardware to install.</p></div>
+      <div class="feature"><span class="ico" aria-hidden="true">↻</span><h3>A shift report you can check</h3><p>Managers see handoff times, missed offers, escalations and interventions for each shift, measured from the actions staff take in Syncora.</p></div>
     </div>
   </div>
 </section>
@@ -107,7 +145,7 @@
 <section class="band band--deep">
   <div class="wrap">
     <h2>What's in the first release</h2>
-    <p class="intro">Dispatch runs on manual events from expo and the floor. Read-only POS integrations are planned; they'll start in shadow mode and only drive the floor once your site confirms their events mean what service needs. We store only what dispatch needs: no guest names, payment details, payroll, or staff location tracking.</p>
+    <p class="intro">Syncora runs on manual events from expo and the floor. Read-only POS integrations are planned; they'll start in shadow mode and only drive the floor once your site confirms their events mean what service needs. Syncora stores only what dispatch needs: no guest names, payment details, payroll, or staff location tracking.</p>
     <div class="cta-row">
       {% if DEMO_ENABLED %}<a class="btn btn-primary" href="{% url 'web:demo' %}">Try the demo</a>{% endif %}
       <a class="btn" href="{% url 'web:signin' %}">Staff sign in</a>
