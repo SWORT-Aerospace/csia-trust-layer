@@ -203,21 +203,21 @@ is also `tables/all_numbers.csv`.
 | D2 | rate_per_raw_hour | 3.018 | `tab_d2_alert_rate_checkpoint.py` | `fce875955d2e` |
 | D2 | garwood_95_lower_raw_basis | 0.365 | `tab_d2_alert_rate_checkpoint.py` | `fce875955d2e` |
 | D2 | garwood_95_upper_raw_basis | 10.901 | `tab_d2_alert_rate_checkpoint.py` | `fce875955d2e` |
-| D3 | gps_spoof time_to_trust_threshold_0_85 | 25/25 runs; median 2.984 s; p95 9.105 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | gps_spoof time_to_alert_event | 18/25 runs; median 5.164 s; p95 6.759 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | gps_spoof time_to_correct_isolation | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | mag_emi time_to_trust_threshold_0_85 | 25/25 runs; median 1.943 s; p95 2.53 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | mag_emi time_to_alert_event | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | mag_emi time_to_correct_isolation | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | power_sag time_to_trust_threshold_0_85 | 18/18 runs; median 1.693 s; p95 2.58 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | power_sag time_to_alert_event | 13/18 runs; median 3.915 s; p95 7.708 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | power_sag time_to_correct_isolation | 0/18 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | vibration time_to_trust_threshold_0_85 | 23/23 runs; median 2.021 s; p95 2.511 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | vibration time_to_alert_event | 23/23 runs; median 5.249 s; p95 5.752 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | vibration time_to_correct_isolation | 23/23 runs; median 0.751 s; p95 1.047 s | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | imu_bias time_to_trust_threshold_0_85 | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | imu_bias time_to_alert_event | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
-| D3 | imu_bias time_to_correct_isolation | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `UNCOMMITTED` |
+| D3 | gps_spoof time_to_trust_threshold_0_85 | 25/25 runs; median 2.984 s; p95 9.105 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | gps_spoof time_to_alert_event | 18/25 runs; median 5.164 s; p95 6.759 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | gps_spoof time_to_correct_isolation | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | mag_emi time_to_trust_threshold_0_85 | 25/25 runs; median 1.943 s; p95 2.53 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | mag_emi time_to_alert_event | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | mag_emi time_to_correct_isolation | 0/25 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | power_sag time_to_trust_threshold_0_85 | 18/18 runs; median 1.693 s; p95 2.58 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | power_sag time_to_alert_event | 13/18 runs; median 3.915 s; p95 7.708 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | power_sag time_to_correct_isolation | 0/18 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | vibration time_to_trust_threshold_0_85 | 23/23 runs; median 2.021 s; p95 2.511 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | vibration time_to_alert_event | 23/23 runs; median 5.249 s; p95 5.752 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | vibration time_to_correct_isolation | 23/23 runs; median 0.751 s; p95 1.047 s | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | imu_bias time_to_trust_threshold_0_85 | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | imu_bias time_to_alert_event | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
+| D3 | imu_bias time_to_correct_isolation | 0/9 runs reached it | `fig_d3_latency_ecdf.py` | `ac5c2cfa20d7` |
 | D4 | ticks | 277500 | `fig_d4_soak.py` | `fce875955d2e` |
 | D4 | passes | 185 | `fig_d4_soak.py` | `fce875955d2e` |
 | D4 | contained_errors | 0 | `fig_d4_soak.py` | `fce875955d2e` |
