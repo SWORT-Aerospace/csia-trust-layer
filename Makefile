@@ -38,6 +38,7 @@ help:
 	@echo "  make manuscript-rules  csia_systems hard style rules"
 	@echo "  make secrets-scan    credential and local-path scan"
 	@echo "  make release-check   scratch-build + sanitize the public archives"
+	@echo "  make evidence-v2     regenerate publication/evidence_v2 bit-for-bit and verify"
 	@echo "  make check           every guard above"
 	@echo "Referee-facing verification (no network, no simulator):"
 	@echo "  make verify-systems-paper-public  evidence capsule, systems paper"
@@ -842,3 +843,35 @@ mission-tests:
 	    tests/test_mission_registries_and_schemas.py \
 	    tests/test_bad_product_references.py \
 	    tests/test_paper_i_scope_guard.py -q
+
+# ---------------------------------------------------------------------------
+# Evidence v2 (publication/evidence_v2/EVIDENCE_V2_REPORT.md). Analysis and
+# plotting only: no engine logic, threshold or sigma changes, and nothing on
+# the interceptor_seeker profile.
+#
+# `evidence-v2` regenerates every figure, table and stamp from committed
+# inputs and then fails unless every byte matches MANIFEST.sha256. It replays
+# the seeded UAV Monte Carlo (about 4 minutes).
+#
+# `evidence-v2-measure` re-takes the two host- and wall-clock-dependent
+# measurements (the 277,500-tick soak; ArduPilot SITL at AP_ROOT). Those can
+# never be bit-for-bit, so they are not part of `evidence-v2`; their committed
+# outputs are what `evidence-v2` plots.
+# ---------------------------------------------------------------------------
+EV2 := publication/evidence_v2
+
+.PHONY: evidence-v2
+evidence-v2:
+	$(PY) $(EV2)/tab_d2_alert_rate_checkpoint.py
+	$(PY) $(EV2)/run_d3_mc_latency.py > /dev/null
+	$(PY) $(EV2)/fig_d3_latency_ecdf.py
+	$(PY) $(EV2)/fig_d4_soak.py
+	$(PY) $(EV2)/tab_d5_sitl_before_after.py
+	$(PY) $(EV2)/fig_d6_flat_monitor.py
+	$(PY) $(EV2)/build_numbers_table.py
+	$(PY) $(EV2)/check_stamps.py
+
+.PHONY: evidence-v2-measure
+evidence-v2-measure:
+	$(PY) $(EV2)/measure_soak.py
+	$(PY) $(EV2)/measure_d5_sitl_ardupilot.py --ap-root $(AP_ROOT)
