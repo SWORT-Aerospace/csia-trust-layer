@@ -1,0 +1,79 @@
+{
+ "configs": [
+  {
+   "path": "csia/validation.py",
+   "role": "harness: FAULTS, _run_one, _detection",
+   "sha256": "15ae930ef7dfab1fee3d7fb8d6d73f585cad1e06645f00efd9c72bdb6bb4bc4c"
+  },
+  {
+   "path": "csia/metrics/latency.py",
+   "role": "latency stage definitions",
+   "sha256": "1f9ebc0517962c53d6194a6691ab319348b09a5f00f3cda617b4dec753ce37d3"
+  },
+  {
+   "path": "csia/metrics/events.py",
+   "role": "alert episodes, merge_s",
+   "sha256": "1c879550e7b21520e432b2318d173d4485020954d535185a36f61f4841a21bc7"
+  },
+  {
+   "path": "csia/runtime/failsafe.py",
+   "role": "FailsafeConfig defaults",
+   "sha256": "0a8d1f5fc8b29ab4b1fb89ffb09eca614fd6d3c183bbb4616f16147606acf2ef"
+  },
+  {
+   "path": "csia/scenarios.py",
+   "role": "sensor seeds, gps_dropout scenario",
+   "sha256": "043fe45e18fc268f913d09e0dfb4b7ad0e75a3f0f86e652ed40d480cc7939557"
+  }
+ ],
+ "datasets": {
+  "dataset_id": "synthetic UAV fault harness (csia.validation.monte_carlo)",
+  "trajectory": "csia.sensors.generate_flight() default"
+ },
+ "definitions": [
+  {
+   "metric": "latency stages",
+   "section": "3.2-3.7",
+   "source": "docs/validation/METRIC_DEFINITIONS.md"
+  }
+ ],
+ "git_commit": "fce875955d2eced28beb572b8a2191ac2ee65bcd",
+ "git_commit_basis": "last commit that changed the script, _common.py or any listed input or config; UNCOMMITTED if any of them differs from it",
+ "inputs": [
+  {
+   "path": "campaigns/monte_carlo.json",
+   "sha256": "6eb88d888cf951965e1f7fbc6cea3455a65525cf4db17556ef62d029bea39240"
+  }
+ ],
+ "measured_at_utc": null,
+ "notes": [
+  "checkpoint vs campaigns/monte_carlo.json: IDENTICAL"
+ ],
+ "output": "publication/evidence_v2/data/d3_mc_runs.json",
+ "output_sha256": "9f030e0b59c522dfab7723e33a125e9628cee6ed7f648bbf4f97ce0432d9fdcd",
+ "run_timestamp_basis": "committer time of git_commit (SOURCE_DATE_EPOCH convention), so regeneration is bit-for-bit",
+ "run_timestamp_utc": "2026-11-18T22:45:14Z",
+ "schema": "csia.evidence_v2.stamp/1",
+ "script": "publication/evidence_v2/run_d3_mc_latency.py",
+ "script_sha256": "0b27981cf4413bcc71648a288fac5cdd7677e9fb78a0d240065091e74696fc74",
+ "seeds": {
+  "numpy_default_rng": 0,
+  "sensor_seeds": {
+   "baro": 3,
+   "battery": 7,
+   "gps": 5,
+   "imu0": 1,
+   "imu1": 2,
+   "mag": 4,
+   "motor_esc": 6,
+   "vibration": 8
+  }
+ },
+ "shared_library_sha256": "c3f395f0d1dfcd2eb2cb8a3d31f13b1a3fa82ed3a5831f407f552bce352199ba",
+ "software": {
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "python": "3.12.3",
+  "scipy": "1.18.1"
+ }
+}

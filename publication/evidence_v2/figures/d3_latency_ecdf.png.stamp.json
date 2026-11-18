@@ -1,0 +1,55 @@
+{
+ "configs": [],
+ "datasets": {
+  "dataset_id": "synthetic UAV fault harness, campaigns/monte_carlo.json replay"
+ },
+ "definitions": [
+  {
+   "metric": "time_to_trust_threshold_0_85",
+   "section": "3.2",
+   "source": "docs/validation/METRIC_DEFINITIONS.md"
+  },
+  {
+   "metric": "time_to_alert_event",
+   "section": "3.3",
+   "source": "docs/validation/METRIC_DEFINITIONS.md"
+  },
+  {
+   "metric": "time_to_correct_isolation",
+   "section": "3.6",
+   "source": "docs/validation/METRIC_DEFINITIONS.md"
+  }
+ ],
+ "git_commit": "UNCOMMITTED",
+ "git_commit_basis": "last commit that changed the script, _common.py or any listed input or config; UNCOMMITTED if any of them differs from it",
+ "inputs": [
+  {
+   "path": "publication/evidence_v2/data/d3_mc_runs.json",
+   "sha256": "9f030e0b59c522dfab7723e33a125e9628cee6ed7f648bbf4f97ce0432d9fdcd"
+  }
+ ],
+ "measured_at_utc": null,
+ "notes": [
+  "one trajectory and one noise realization for all runs; amplitude, onset and class vary",
+  "median/p95: numpy quantile method inverted_cdf over runs reaching the stage",
+  "GPS dropout has no harness class: see data/d3_mc_runs.json catalogue_gps_dropout_single_run"
+ ],
+ "output": "publication/evidence_v2/figures/d3_latency_ecdf.png",
+ "output_sha256": "5e1961d8d4a7c455e75ff3de1ebb319a3f822aa37797baf675e4bce1168d7522",
+ "run_timestamp_basis": "committer time of git_commit (SOURCE_DATE_EPOCH convention), so regeneration is bit-for-bit",
+ "run_timestamp_utc": null,
+ "schema": "csia.evidence_v2.stamp/1",
+ "script": "publication/evidence_v2/fig_d3_latency_ecdf.py",
+ "script_sha256": "e8b44a46974af73cac5c2523256be6b300c07b4f8ec641c53a56b0e797725a74",
+ "seeds": {
+  "numpy_default_rng": 0,
+  "sensor_seeds": "1-8 fixed (csia/scenarios.make_sensors)"
+ },
+ "shared_library_sha256": "c3f395f0d1dfcd2eb2cb8a3d31f13b1a3fa82ed3a5831f407f552bce352199ba",
+ "software": {
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "python": "3.12.3",
+  "scipy": "1.18.1"
+ }
+}

@@ -1,0 +1,69 @@
+{
+ "configs": [
+  {
+   "path": "csia/runtime/online.py",
+   "role": "latency_us measurement point",
+   "sha256": "d7a5be6cf4a0434578c518a4766e868ef9c2e15dc7aa26975d3556d408bb78fa"
+  },
+  {
+   "path": "tools/soak.py",
+   "role": "soak loop and pass criteria",
+   "sha256": "bb5aa2ce14d0d451a4129b51dee928a492cb2c055f1914d7cc90af5d911f97e4"
+  }
+ ],
+ "datasets": {
+  "dataset_id": "synthetic: csia scenario 'clean', looped 185 passes",
+  "measurement_git_head": "66ec3e9f574fcb88458207affe0d4f47c6027319"
+ },
+ "definitions": [
+  {
+   "metric": "per-tick execution time",
+   "section": "OnlineState.latency_us",
+   "source": "csia/runtime/online.py"
+  },
+  {
+   "metric": "soak pass criteria",
+   "section": "docstring",
+   "source": "tools/soak.py"
+  }
+ ],
+ "git_commit": "fce875955d2eced28beb572b8a2191ac2ee65bcd",
+ "git_commit_basis": "last commit that changed the script, _common.py or any listed input or config; UNCOMMITTED if any of them differs from it",
+ "inputs": [
+  {
+   "path": "publication/evidence_v2/data/soak_ticks.csv.gz",
+   "sha256": "af0c7c559375f8363cd8268c55c402559f74a9d1fd70a297016ab050f3f372c9"
+  },
+  {
+   "path": "publication/evidence_v2/data/soak_passes.csv",
+   "sha256": "b0e90c2561590212b3270d622e20517be9d0dcdea0d834dd673c1d6a8f855713"
+  },
+  {
+   "path": "publication/evidence_v2/data/soak_measurement.json",
+   "sha256": "bdb6261c74f52a6ba4fe86e62c9213a26e9df58ae5a908a3ae94b208dafb5c76"
+  }
+ ],
+ "measured_at_utc": "2026-11-18T22:22:01Z",
+ "notes": [
+  "host-dependent; desktop-class container, not on-target",
+  "ru_maxrss is updated lazily by the kernel and can read slightly below the current RSS from /proc/self/statm",
+  "measurement buffers preallocated so the instrument does not grow RSS"
+ ],
+ "output": "publication/evidence_v2/tables/d4_soak_summary.csv",
+ "output_sha256": "e70f64ac0302dba8b8cca3052ee35f6433b45722222e7a0cf0a37a345d6e0a9a",
+ "run_timestamp_basis": "committer time of git_commit (SOURCE_DATE_EPOCH convention), so regeneration is bit-for-bit",
+ "run_timestamp_utc": "2026-11-18T22:45:14Z",
+ "schema": "csia.evidence_v2.stamp/1",
+ "script": "publication/evidence_v2/fig_d4_soak.py",
+ "script_sha256": "21cbd4ffe631cdc33c06325074b0556efe7879e0d1b4c4f171408cf2233906aa",
+ "seeds": {
+  "sensor_seeds": "1-8 fixed (csia/scenarios.make_sensors)"
+ },
+ "shared_library_sha256": "c3f395f0d1dfcd2eb2cb8a3d31f13b1a3fa82ed3a5831f407f552bce352199ba",
+ "software": {
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "python": "3.12.3",
+  "scipy": "1.18.1"
+ }
+}

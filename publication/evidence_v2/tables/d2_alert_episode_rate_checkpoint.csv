@@ -1,0 +1,11 @@
+quantity,recomputed,artifact_value,checkpoint_value,how
+logs,26,26,,data/real_logs_report.json flights; exposure_v2 logs
+alert_episodes,2,2,,"exposure_v2 UNANNOTATED.alert_episodes (input, not recomputed)"
+raw_hours,0.6628,0.6627,,sum of duration_s / 3600
+monitored_hours,0.5183,0.5183,,"sum of max(0, duration_s - 20.0) / 3600"
+rate_per_monitored_hour,3.859,3.859,3.859,k / monitored hours
+garwood_95_lower,0.467,0.467,0.467,"chi2.ppf(0.025, 2k) / 2T"
+garwood_95_upper,13.939,13.939,13.939,"chi2.ppf(0.975, 2k + 2) / 2T"
+rate_per_raw_hour,3.018,,,k / raw hours; the basis METRIC_DEFINITIONS.md 1.2 still quotes
+garwood_95_lower_raw_basis,0.365,,,raw-hours basis
+garwood_95_upper_raw_basis,10.901,,,raw-hours basis

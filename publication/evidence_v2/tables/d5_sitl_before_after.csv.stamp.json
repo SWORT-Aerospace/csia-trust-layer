@@ -1,0 +1,57 @@
+{
+ "configs": [
+  {
+   "path": "tools/sitl_validate.py",
+   "role": "mission, injection, verdict rule",
+   "sha256": "699b6e3b720c04c9d749a3746ba23f2f497e6b02fadec2c74aaed008a39541f7"
+  }
+ ],
+ "datasets": {
+  "arducopter_binary_sha256": "f3f6fac78b0f18655caa9e6b6701f4352a44a6db52bfa64270b26540d6b8a408",
+  "ardupilot_commit": "01a504b472259602e13df4cf07df7c0cdbb35993",
+  "autopilot": "ArduCopter V4.8.0-dev",
+  "before_sources": [
+   "README.md validation table, v0.6.0 at f2786f6",
+   "README.md validation table, v0.7.0 at 758f4ae"
+  ],
+  "copter_parm_sha256": "5e01345b45d1c6190b28bece5638bbdd4cf1cce35e05bbbf480ab24d2b51aa0e",
+  "measurement_git_head": "66ec3e9f574fcb88458207affe0d4f47c6027319"
+ },
+ "definitions": [
+  {
+   "metric": "verdict",
+   "section": "verdict block",
+   "source": "tools/sitl_validate.py"
+  }
+ ],
+ "git_commit": "fce875955d2eced28beb572b8a2191ac2ee65bcd",
+ "git_commit_basis": "last commit that changed the script, _common.py or any listed input or config; UNCOMMITTED if any of them differs from it",
+ "inputs": [
+  {
+   "path": "publication/evidence_v2/data/d5_sitl_ardupilot.json",
+   "sha256": "e003868210733f274fe2686a6a3a8aef139caa2dd69da204991dfc7ce70a502f"
+  }
+ ],
+ "measured_at_utc": "2026-11-18T22:32:26Z",
+ "notes": [
+  "before values are README prose with no artifact (WP_A2 row A9); not measurements",
+  "PX4 SIH: INAPPLICABLE, no GPS-glitch parameter (research/v1_1/CURRENT_STACK_REPLICATION.md)"
+ ],
+ "output": "publication/evidence_v2/tables/d5_sitl_before_after.csv",
+ "output_sha256": "19f441c50f296a3623cfded4ffc838096d481dab7de7fe5c0a8330fe1e759087",
+ "run_timestamp_basis": "committer time of git_commit (SOURCE_DATE_EPOCH convention), so regeneration is bit-for-bit",
+ "run_timestamp_utc": "2026-11-18T22:45:14Z",
+ "schema": "csia.evidence_v2.stamp/1",
+ "script": "publication/evidence_v2/tab_d5_sitl_before_after.py",
+ "script_sha256": "aef25a88ed41d70f09806a520b98eada517ff1d04765d92315f2398a24c9d7de",
+ "seeds": {
+  "note": "SITL runs on the wall clock with no seed; three repetitions per mode"
+ },
+ "shared_library_sha256": "c3f395f0d1dfcd2eb2cb8a3d31f13b1a3fa82ed3a5831f407f552bce352199ba",
+ "software": {
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "python": "3.12.3",
+  "scipy": "1.18.1"
+ }
+}
