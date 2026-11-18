@@ -148,7 +148,7 @@ Setup:
 | row | before (README prose, no artifact) | after, 3 of 3 runs at HEAD `66ec3e9` |
 |---|---|---|
 | C12 mission | PASS: 6 sensors, min trust 0.78, zero false alarms, landed (`f2786f6`) | PASS: 7 sensors, min trust 0.74 (battery), 0 non-NORMAL transitions, landed |
-| C13 GPS glitch + fix-kill | PASS: both faults detected from the raw stream, GPS trust 0.99 to 0.70, nav CAUTION (`758f4ae`) | tool verdict PASS, but minimum GPS trust stayed **0.99**. The only alert is CAUTION "GPS data invalid (diagnosis nominal p=0.52)", raised when the fix was killed 12 s after the glitch. Every per-sensor minimum equals the no-injection runs. |
+| C13 GPS glitch + fix-kill | PASS: both faults detected from the raw stream, GPS trust 0.99 to 0.70, nav CAUTION (`758f4ae`) | tool verdict PASS, but minimum GPS trust stayed **0.99**. The only alert is one CAUTION, "GPS data invalid (diagnosis nominal p=0.52)": the signature of the fix-kill, which the tool applies 12 s of wall time (about 48 s simulated at speedup 4) after the glitch. Every per-sensor minimum equals the no-injection runs. |
 
 So at HEAD the **fix-kill** is caught, from freshness, and the **55 m glitch
 is not reflected in any trust value**. The tool's verdict rule ("any non-NORMAL
