@@ -100,7 +100,7 @@ The 50 clean runs raised 0 alert episodes in 0.83 h (Poisson 95-percent upper
 bound 4.43 per hour, as committed).
 
 **Conditioning.** Every run flies the same trajectory and the same sensor
-noise: `csia/scenarios.make_sensors` fixes seeds 1 to 8. What varies is fault
+noise: `make_sensors` in `csia/scenarios.py` fixes seeds 1 to 8. What varies is fault
 class, amplitude scale in [0.5, 2.0), onset in [15, 35) s, and the
 clean/faulted split. The distributions describe that variation and nothing
 else.
@@ -322,7 +322,7 @@ Against the README:
    and `latency_*`. METRIC_DEFINITIONS.md section 3.2 forbids presenting that
    stage as detection.
 5. The `csia/validation.py:11` docstring says the campaign varies "noise
-   seeds". Sensor noise seeds are fixed (`csia/scenarios.py` `make_sensors`), so
+   seeds". Sensor noise seeds are fixed (`make_sensors` in `csia/scenarios.py`), so
    it does not.
 6. The pre-hardening SITL rows C12 and C13 (`docs/evidence/evidence_matrix.md`,
    README at `f2786f6` and `758f4ae`) have no artifact (WP-A2 row A9). C13's
